@@ -1204,7 +1204,28 @@ function salvarEstado(){
         c1:$('b-c1-t').value,c2:$('b-c2-t').value,c3:$('b-c3-t').value,
         facholarg:$('b-facholarg').value,listra:$('b-listra').value,vel:$('b-vel').value,
         halo:radio('b-halo'),haloraio:$('b-haloraio').value,haloop:$('b-haloop').value,
-        txt:radio('b-txt'),c4:$('b-c4-t').value,pad:$('b-pad').value}
+        txt:radio('b-txt'),c4:$('b-c4-t').value,pad:$('b-pad').value},
+      cmsgs:cMsgs,
+      c:{modo:radio('c-modo'),dias:$('c-dias').value,horas:$('c-horas').value,mins:$('c-mins').value,
+        alvo:$('c-alvo').value,cod:$('c-cod').value,
+        und:$('c-un-d').checked,unh:$('c-un-h').checked,unm:$('c-un-m').checked,uns:$('c-un-s').checked,
+        diaszero:radio('c-diaszero'),fim:radio('c-fim'),fimtxt:$('c-fimtxt').value,
+        cfundo:$('c-cfundo-t').value,ctexto:$('c-ctexto-t').value,cdestaque:$('c-cdestaque-t').value,
+        fonte:radio('c-fonte'),tam:$('c-tam').value,peso:radio('c-peso'),
+        formato:radio('c-formato'),rd:$('c-rd').value,rh:$('c-rh').value,rm:$('c-rm').value,rs:$('c-rs').value,
+        pad:$('c-pad').value,largmax:$('c-largmax').value,alinha:radio('c-alinha'),
+        borda:radio('c-borda'),cborda:$('c-cborda-t').value,mob:$('c-mob').value,
+        fixa:radio('c-fixa'),empurrar:radio('c-empurrar'),z:$('c-z').value,
+        cta:radio('c-cta'),ctatxt:$('c-ctatxt').value,ctaurl:$('c-ctaurl').value,
+        ctafundo:$('c-ctafundo-t').value,ctatexto:$('c-ctatexto-t').value,
+        fechar:radio('c-fechar'),prog:radio('c-prog'),cprog:$('c-cprog-t').value,
+        coruja:radio('c-coruja'),corujaalt:$('c-corujaalt').value,corujagap:$('c-corujagap').value,
+        corujacorpo:$('c-corujacorpo-t').value,corujadet:$('c-corujadet-t').value,corujamob:radio('c-corujamob'),
+        mov:radio('c-mov'),vel:$('c-vel').value,alt:$('c-alt').value,
+        efpulsar:$('c-ef-pulsar').checked,efbrilho:$('c-ef-brilho').checked,efdegrade:$('c-ef-degrade').checked,
+        efpiscar:$('c-ef-piscar').checked,eftremor:$('c-ef-tremor').checked,
+        urg:radio('c-urg'),urglim:$('c-urglim').value,curg:$('c-curg-t').value,urgpulsar:radio('c-urgpulsar'),
+        dig:radio('c-dig'),entrada:radio('c-entrada'),entradapx:$('c-entradapx').value}
     };
     localStorage.setItem('fcConstrutores',JSON.stringify(st));
   }catch(e){}
@@ -1263,6 +1284,32 @@ function restaurarEstado(){
       $('b-haloraio').value=B.haloraio;$('b-haloop').value=B.haloop;
       $('b-c4-t').value=B.c4;$('b-c4').value=corValida(B.c4)?B.c4:'#F7EFDF';
       $('b-pad').value=B.pad;
+    }
+    if(st.cmsgs){cMsgs=st.cmsgs;cMsgRender();}
+    if(st.c){var C=st.c;
+      setRadio('c-modo',C.modo);setRadio('c-diaszero',C.diaszero);setRadio('c-fim',C.fim);
+      $('c-dias').value=C.dias;$('c-horas').value=C.horas;$('c-mins').value=C.mins;
+      $('c-alvo').value=C.alvo||'';$('c-cod').value=C.cod||'';$('c-fimtxt').value=C.fimtxt;
+      $('c-un-d').checked=!!C.und;$('c-un-h').checked=!!C.unh;$('c-un-m').checked=!!C.unm;$('c-un-s').checked=!!C.uns;
+      setRadio('c-fonte',C.fonte);setRadio('c-peso',C.peso);setRadio('c-formato',C.formato);
+      setRadio('c-alinha',C.alinha);setRadio('c-borda',C.borda);setRadio('c-fixa',C.fixa);
+      setRadio('c-empurrar',C.empurrar);setRadio('c-cta',C.cta);setRadio('c-fechar',C.fechar);
+      setRadio('c-prog',C.prog);setRadio('c-coruja',C.coruja);setRadio('c-corujamob',C.corujamob);
+      setRadio('c-mov',C.mov);setRadio('c-urg',C.urg);setRadio('c-urgpulsar',C.urgpulsar);
+      setRadio('c-dig',C.dig);setRadio('c-entrada',C.entrada);
+      $('c-tam').value=C.tam;$('c-pad').value=C.pad;$('c-largmax').value=C.largmax;$('c-mob').value=C.mob;
+      $('c-z').value=C.z;$('c-rd').value=C.rd;$('c-rh').value=C.rh;$('c-rm').value=C.rm;$('c-rs').value=C.rs;
+      $('c-ctatxt').value=C.ctatxt;$('c-ctaurl').value=C.ctaurl;
+      $('c-corujaalt').value=C.corujaalt;$('c-corujagap').value=C.corujagap;
+      $('c-vel').value=C.vel;$('c-alt').value=C.alt;$('c-urglim').value=C.urglim;$('c-entradapx').value=C.entradapx;
+      $('c-ef-pulsar').checked=!!C.efpulsar;$('c-ef-brilho').checked=!!C.efbrilho;$('c-ef-degrade').checked=!!C.efdegrade;
+      $('c-ef-piscar').checked=!!C.efpiscar;$('c-ef-tremor').checked=!!C.eftremor;
+      [['c-cfundo',C.cfundo,'#0F3A30'],['c-ctexto',C.ctexto,'#FDFBF6'],['c-cdestaque',C.cdestaque,'#FFC94A'],
+       ['c-cborda',C.cborda,'#FFC94A'],['c-ctafundo',C.ctafundo,'#FFC94A'],['c-ctatexto',C.ctatexto,'#23281F'],
+       ['c-cprog',C.cprog,'#FFC94A'],['c-corujacorpo',C.corujacorpo,'#FDFBF6'],['c-corujadet',C.corujadet,'#FFC94A'],
+       ['c-curg',C.curg,'#8C1D18']].forEach(function(p){
+        $(p[0]+'-t').value=p[1];$(p[0]).value=corValida(p[1])?p[1]:p[2];
+      });
     }
   }catch(e){}
 }
