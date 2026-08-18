@@ -1,0 +1,275 @@
+<!-- ============================================================
+     FOTO CERTA - PAGINA HOSPEDEIRA (ex: /natal-2026)
+     ONDE COLAR: campo Tag Body da pagina (substituir todo o conteudo)
+     Contem 3 blocos: captacao de leads + ancora inteligente + plano B
+     ATENCAO: NUMERO_WHATSAPP vai vazio neste arquivo de proposito (repositorio
+     publico). Preencher antes de colar no Prosite, senao o botao nao abre a conversa.
+     Pre-requisitos no Prosite:
+       - Botao do hero com URL = #reserva
+       - Coluna do componente do iframe com ID Html = reserva (aba Avancado)
+     ============================================================ -->
+
+<!-- Captacao de leads WhatsApp -->
+<style>
+.fcw-botao{position:fixed;right:22px;bottom:92px;z-index:99990;width:60px;height:60px;border:none;background:var(--fcw-cor-botao,#25D366);cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center;transition:transform .2s,box-shadow .2s}
+.fcw-botao.fcw-circulo{border-radius:50%}
+.fcw-botao.fcw-quadrado{border-radius:14px}
+.fcw-botao:hover{transform:scale(1.08)}
+.fcw-botao svg{width:32px;height:32px}
+.fcw-botao.fcw-pulsando{animation:fcwPulso 1.1s ease}
+@keyframes fcwPulso{
+0%{transform:scale(1);box-shadow:0 4px 14px rgba(0,0,0,.3)}
+35%{transform:scale(1.14);box-shadow:0 0 0 12px rgba(37,211,102,.25),0 4px 14px rgba(0,0,0,.3)}
+70%{transform:scale(1);box-shadow:0 0 0 22px rgba(37,211,102,0),0 4px 14px rgba(0,0,0,.3)}
+100%{transform:scale(1);box-shadow:0 4px 14px rgba(0,0,0,.3)}
+}
+.fcw-botao.fcw-tremendo{animation:fcwTremor .7s ease}
+@keyframes fcwTremor{
+0%,100%{transform:rotate(0)}
+15%{transform:rotate(-12deg)}
+30%{transform:rotate(10deg)}
+45%{transform:rotate(-8deg)}
+60%{transform:rotate(6deg)}
+75%{transform:rotate(-3deg)}
+}
+.fcw-overlay{position:fixed;inset:0;z-index:99991;background:rgba(0,0,0,.45);display:none;align-items:flex-end;justify-content:flex-end;padding:20px}
+.fcw-overlay.fcw-aberto{display:flex}
+.fcw-card{width:100%;max-width:340px;background:var(--fcw-cor-fundo,#fff);border-radius:16px;box-shadow:0 10px 40px rgba(0,0,0,.3);overflow:hidden}
+.fcw-topo{background:var(--fcw-cor-topo,#075E54);color:#fff;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;font-size:15px;font-weight:600}
+.fcw-titulo{display:inline-flex;align-items:center;gap:8px}
+.fcw-titulo svg{width:20px;height:24px;flex-shrink:0}
+.fcw-fechar{border:none;background:none;color:#fff;font-size:20px;line-height:1;cursor:pointer;padding:2px 6px}
+.fcw-corpo{padding:16px 18px 18px}
+.fcw-corpo label{display:block;font-size:13px;font-weight:600;color:var(--fcw-cor-texto,#333);margin:10px 0 4px}
+.fcw-corpo input,.fcw-corpo textarea{width:100%;box-sizing:border-box;border:1px solid #ccc;border-radius:8px;padding:10px 12px;font-size:14px;font-family:inherit;outline:none;background:#fff}
+.fcw-corpo input:focus,.fcw-corpo textarea:focus{border-color:var(--fcw-cor-acao,#25D366)}
+.fcw-corpo textarea{resize:vertical;min-height:80px}
+.fcw-erro{color:#c0392b;font-size:12px;margin-top:6px;display:none}
+.fcw-enviar{margin-top:14px;width:100%;border:none;border-radius:8px;background:var(--fcw-cor-acao,#25D366);color:#fff;font-size:15px;font-weight:600;padding:12px;cursor:pointer}
+.fcw-enviar:hover{filter:brightness(.92)}
+@media (max-width:480px){.fcw-overlay{padding:12px;align-items:center;justify-content:center}.fcw-botao{right:16px;bottom:84px}}
+</style>
+
+<script>
+(function(){
+/* ===== ESSENCIAIS ===== */
+var NUMERO_WHATSAPP='';               /* WhatsApp de destino: DDI+DDD+numero, so digitos (ex.: 5527999999999) */
+var CODIGO='NATAL26';                 /* codigo desta pagina p/ automatizar o atendimento */
+var NOME_PAGINA='';                   /* '' = usa o titulo da pagina | ou escreva um nome fixo */
+
+/* ===== MODO DE EXIBICAO ===== */
+var MODO='botao';                     /* 'botao' = abre so no clique | 'automatico' = pop-up abre sozinho */
+var SEGUNDOS_AUTO=8;                  /* segundos ate abrir sozinho (so no modo 'automatico') */
+
+/* ===== EFEITO DE CHAMAR ATENCAO NO BOTAO ===== */
+var EFEITO='normal';                  /* 'normal' = sem efeito | 'pulsar' | 'tremer' */
+var SEGUNDOS_EFEITO=10;               /* intervalo em segundos entre cada repeticao do efeito */
+
+/* ===== ESTILO DO BOTAO FLUTUANTE ===== */
+var ICONE_BOTAO='identidade';         /* 'whatsapp' | 'recado' (balao neutro) | 'identidade' (coruja) */
+var FORMATO_BOTAO='circulo';          /* 'circulo' | 'quadrado' (cantos arredondados) */
+var COR_BOTAO_FLUTUANTE='#25D366';    /* cor de fundo do botao (a coruja usa nos detalhes) */
+
+/* ===== TRECHOS DA MENSAGEM ENVIADA NO WHATSAPP ===== */
+var MSG_SAUDACAO='Ola Foto Certa';           /* saudacao inicial */
+var MSG_MEU_NOME='meu nome e';               /* antecede o nome informado */
+var MSG_PAGINA='Estava olhando a pagina';    /* antecede o nome da pagina */
+var MSG_PEDIDO='Tenho um pedido para voce';  /* antecede o (cod: ...) */
+
+/* ===== TEXTOS DO POP-UP ===== */
+var POP_IDENTIDADE='';                             /* emoji antes do titulo (so se coruja SVG = false) */
+var POP_USAR_CORUJA_SVG=true;                      /* true = coruja no titulo | false = emoji acima */
+var POP_TITULO='Fale com a Foto Certa';            /* titulo do cabecalho */
+var POP_LABEL_NOME='Seu nome';                     /* rotulo do campo nome */
+var POP_DICA_NOME='Como podemos te chamar?';       /* texto dentro do campo nome */
+var POP_LABEL_RECADO='Seu recado';                 /* rotulo do campo recado */
+var POP_DICA_RECADO='Escreva sua mensagem...';     /* texto dentro do campo recado */
+var POP_BOTAO_ENVIAR='Enviar pelo WhatsApp';       /* texto do botao de envio */
+var POP_MSG_ERRO='Preencha seu nome e o recado para continuar.';  /* aviso de campos vazios */
+
+/* ===== PALETA DE CORES DO POP-UP ===== */
+var COR_TOPO_POPUP='#075E54';         /* fundo do cabecalho (a coruja do titulo usa nos detalhes) */
+var COR_FUNDO_POPUP='#ffffff';        /* fundo do card */
+var COR_BOTAO_POPUP='#25D366';        /* botao enviar + borda dos campos em foco */
+var COR_TEXTO_POPUP='#333333';        /* cor dos rotulos do formulario */
+
+/* ============================================================
+   Daqui para baixo nao precisa mexer
+   ============================================================ */
+
+function svgCoruja(c){
+return '<svg viewBox="0 0 32 38" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">'+
+'<ellipse cx="16" cy="25" rx="8.5" ry="11" fill="#fff"/>'+
+'<path fill="none" stroke="'+c+'" stroke-width="1.2" d="M9 22 Q11 30 14 35 M23 22 Q21 30 18 35"/>'+
+'<path fill="#fff" d="M16 3.8 C13.7 1.6 8 2.3 7.6 8 C7.3 12.9 11 18 16 21 C21 18 24.7 12.9 24.4 8 C24 2.3 18.3 1.6 16 3.8 Z"/>'+
+'<circle cx="12.6" cy="9.6" r="1.6" fill="'+c+'"/>'+
+'<circle cx="19.4" cy="9.6" r="1.6" fill="'+c+'"/>'+
+'<path fill="'+c+'" d="M16 11 L15.2 14.4 Q16 15.5 16.8 14.4 Z"/>'+
+'<path stroke="'+c+'" stroke-width="1.4" stroke-linecap="round" fill="none" d="M13 35.5 L13 37.2 M16 36 L16 37.8 M19 35.5 L19 37.2"/>'+
+'</svg>';
+}
+
+function iconeBotao(){
+if(ICONE_BOTAO==='identidade')return svgCoruja(COR_BOTAO_FLUTUANTE);
+if(ICONE_BOTAO==='recado')return '<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" fill="#fff" aria-hidden="true"><path d="M16 4C9.37 4 4 8.7 4 14.5c0 3.28 1.73 6.2 4.44 8.12-.15 1.42-.65 3.06-1.9 4.38-.25.27-.06.71.31.68 2.6-.2 4.63-1.22 6-2.28 1 .2 2.05.3 3.15.3 6.63 0 12-4.7 12-10.5S22.63 4 16 4zm-5.5 12.25c-.97 0-1.75-.78-1.75-1.75s.78-1.75 1.75-1.75 1.75.78 1.75 1.75-.78 1.75-1.75 1.75zm5.5 0c-.97 0-1.75-.78-1.75-1.75s.78-1.75 1.75-1.75 1.75.78 1.75 1.75-.78 1.75-1.75 1.75zm5.5 0c-.97 0-1.75-.78-1.75-1.75s.78-1.75 1.75-1.75 1.75.78 1.75 1.75-.78 1.75-1.75 1.75z"/></svg>';
+return '<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" fill="#fff" aria-hidden="true"><path d="M16.04 3C9.4 3 4 8.36 4 14.96c0 2.64.87 5.08 2.34 7.06L4.8 27.2l5.34-1.5a12.1 12.1 0 0 0 5.9 1.52c6.63 0 12.03-5.36 12.03-11.96S22.67 3 16.04 3zm0 21.87c-1.9 0-3.67-.55-5.16-1.5l-.37-.23-3.17.9.92-3.05-.24-.38a9.62 9.62 0 0 1-1.66-5.65c0-5.33 4.4-9.66 9.68-9.66 5.29 0 9.68 4.33 9.68 9.66s-4.4 9.9-9.68 9.9zm5.3-7.4c-.29-.15-1.71-.84-1.98-.93-.26-.1-.46-.15-.65.14-.19.29-.74.93-.9 1.12-.17.2-.34.22-.63.08-.29-.15-1.22-.45-2.33-1.43-.86-.77-1.44-1.71-1.61-2-.17-.29-.02-.45.13-.6.13-.13.29-.34.43-.5.15-.17.19-.3.29-.49.1-.2.05-.37-.02-.51-.08-.15-.65-1.57-.9-2.15-.23-.56-.47-.48-.65-.49h-.55c-.19 0-.5.07-.77.36-.26.29-1 .98-1 2.4 0 1.41 1.03 2.78 1.17 2.97.15.19 2.03 3.1 4.92 4.35.69.3 1.22.47 1.64.61.69.22 1.31.19 1.81.11.55-.08 1.71-.7 1.95-1.37.24-.68.24-1.26.17-1.38-.07-.12-.26-.2-.55-.34z"/></svg>';
+}
+
+function jaViu(){
+try{return sessionStorage.getItem('fcwAutoVisto')==='1';}catch(e){return false;}
+}
+function marcarVisto(){
+try{sessionStorage.setItem('fcwAutoVisto','1');}catch(e){}
+}
+
+function montar(){
+var nomePagina=NOME_PAGINA||document.title||'seu site';
+var formato=(FORMATO_BOTAO==='quadrado')?'fcw-quadrado':'fcw-circulo';
+var timerAuto=null;
+var timerEfeito=null;
+
+var html='<button type="button" class="fcw-botao '+formato+'" aria-label="Enviar mensagem">'+iconeBotao()+'</button>'+
+'<div class="fcw-overlay"><div class="fcw-card">'+
+'<div class="fcw-topo"><span class="fcw-titulo"></span> <button type="button" class="fcw-fechar" aria-label="Fechar">&times;</button></div>'+
+'<div class="fcw-corpo">'+
+'<label for="fcw-nome" class="fcw-lbl-nome"></label><input id="fcw-nome" type="text" maxlength="60">'+
+'<label for="fcw-recado" class="fcw-lbl-recado"></label><textarea id="fcw-recado" maxlength="500"></textarea>'+
+'<div class="fcw-erro"></div><button type="button" class="fcw-enviar"></button>'+
+'</div></div></div>';
+
+var wrap=document.createElement('div');
+wrap.innerHTML=html;
+wrap.style.setProperty('--fcw-cor-botao',COR_BOTAO_FLUTUANTE);
+wrap.style.setProperty('--fcw-cor-topo',COR_TOPO_POPUP);
+wrap.style.setProperty('--fcw-cor-fundo',COR_FUNDO_POPUP);
+wrap.style.setProperty('--fcw-cor-acao',COR_BOTAO_POPUP);
+wrap.style.setProperty('--fcw-cor-texto',COR_TEXTO_POPUP);
+document.body.appendChild(wrap);
+
+var elTitulo=wrap.querySelector('.fcw-titulo');
+if(POP_USAR_CORUJA_SVG){
+elTitulo.innerHTML=svgCoruja(COR_TOPO_POPUP);
+var spanTxt=document.createElement('span');
+spanTxt.textContent=POP_TITULO;
+elTitulo.appendChild(spanTxt);
+}else{
+elTitulo.textContent=POP_IDENTIDADE?(POP_IDENTIDADE+' '+POP_TITULO):POP_TITULO;
+}
+
+wrap.querySelector('.fcw-lbl-nome').textContent=POP_LABEL_NOME;
+wrap.querySelector('.fcw-lbl-recado').textContent=POP_LABEL_RECADO;
+wrap.querySelector('#fcw-nome').placeholder=POP_DICA_NOME;
+wrap.querySelector('#fcw-recado').placeholder=POP_DICA_RECADO;
+wrap.querySelector('.fcw-enviar').textContent=POP_BOTAO_ENVIAR;
+wrap.querySelector('.fcw-erro').textContent=POP_MSG_ERRO;
+
+var botao=wrap.querySelector('.fcw-botao');
+var overlay=wrap.querySelector('.fcw-overlay');
+var fechar=wrap.querySelector('.fcw-fechar');
+var enviar=wrap.querySelector('.fcw-enviar');
+var campoNome=wrap.querySelector('#fcw-nome');
+var campoRecado=wrap.querySelector('#fcw-recado');
+var erro=wrap.querySelector('.fcw-erro');
+
+var classeEfeito=(EFEITO==='pulsar')?'fcw-pulsando':(EFEITO==='tremer')?'fcw-tremendo':'';
+function dispararEfeito(){
+if(!classeEfeito)return;
+if(overlay.classList.contains('fcw-aberto'))return;
+botao.classList.remove(classeEfeito);
+void botao.offsetWidth;
+botao.classList.add(classeEfeito);
+}
+if(classeEfeito){
+botao.addEventListener('animationend',function(){botao.classList.remove(classeEfeito);});
+timerEfeito=setInterval(dispararEfeito,SEGUNDOS_EFEITO*1000);
+}
+
+function abrir(automatico){
+overlay.classList.add('fcw-aberto');
+if(!automatico){setTimeout(function(){campoNome.focus();},100);}
+}
+function fecharPopup(){
+overlay.classList.remove('fcw-aberto');
+marcarVisto();
+if(timerAuto){clearTimeout(timerAuto);timerAuto=null;}
+}
+
+botao.addEventListener('click',function(){
+if(timerAuto){clearTimeout(timerAuto);timerAuto=null;}
+abrir(false);
+});
+fechar.addEventListener('click',fecharPopup);
+overlay.addEventListener('click',function(e){if(e.target===overlay)fecharPopup();});
+
+enviar.addEventListener('click',function(){
+var nome=campoNome.value.trim();
+var recado=campoRecado.value.trim();
+if(!nome||!recado){erro.style.display='block';return;}
+erro.style.display='none';
+var mensagem=MSG_SAUDACAO+', '+MSG_MEU_NOME+' *'+nome+'*.\n'+MSG_PAGINA+' *'+nomePagina+'*.\n'+MSG_PEDIDO+' (cod: *'+CODIGO+'*)\n'+recado;
+var url='https://wa.me/'+NUMERO_WHATSAPP+'?text='+encodeURIComponent(mensagem);
+window.open(url,'_blank');
+fecharPopup();
+campoNome.value='';
+campoRecado.value='';
+});
+
+campoNome.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();campoRecado.focus();}});
+
+if(MODO==='automatico'&&!jaViu()){
+timerAuto=setTimeout(function(){
+timerAuto=null;
+abrir(true);
+},SEGUNDOS_AUTO*1000);
+}
+}
+
+if(document.body)montar();
+else document.addEventListener('DOMContentLoaded',montar);
+})();
+</script>
+
+<!-- Ancora inteligente p/ calendario no iframe -->
+<script>
+(function(){
+  var ANCORA='#reserva';      /* href do botao/link que aciona a rolagem (deve comecar com #) */
+  var RESPIRO=24;             /* px de folga acima do calendario ao chegar nele */
+
+  function alvoY(){
+    var frames=document.querySelectorAll('iframe');
+    for(var i=0;i<frames.length;i++){
+      var f=frames[i];
+      try{
+        var doc=f.contentDocument;
+        if(!doc)continue;
+        var cal=doc.querySelector('.tidycal-embed');
+        if(!cal)continue;
+        var topoIframe=f.getBoundingClientRect().top+window.pageYOffset;
+        var dentroIframe=cal.getBoundingClientRect().top;
+        return topoIframe+dentroIframe-RESPIRO;
+      }catch(e){/* iframe de outro dominio: ignora */}
+    }
+    return null;
+  }
+
+  document.addEventListener('click',function(e){
+    var el=e.target;
+    while(el&&el.tagName!=='A'){el=el.parentElement;}
+    if(!el)return;
+    var href=el.getAttribute('href')||'';
+    if(href!==ANCORA)return;
+    var y=alvoY();
+    if(y===null)return;         /* nao achou o calendario: deixa a ancora nativa agir */
+    e.preventDefault();
+    window.scrollTo({top:y,behavior:'smooth'});
+  });
+})();
+</script>
+
+<!-- Rolagem suave + respiro da ancora nativa (plano B) -->
+<style>
+/* scroll-behavior: rolagem suave em toda ancora nativa da pagina */
+/* scroll-margin-top: folga em px quando a ancora nativa cai no #reserva */
+html { scroll-behavior: smooth; }
+#reserva { scroll-margin-top: 24px; }
+</style>
