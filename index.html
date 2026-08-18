@@ -2829,6 +2829,7 @@ function cToggles(){
   el=$('c-alt-campo');if(el)el.style.display=(mov==='altfade'||mov==='altdesliza')?'block':'none';
   el=$('c-entrada-campo');if(el)el.style.display=(radio('c-entrada')==='aposrolar')?'block':'none';
   el=$('c-urg-campos');if(el)el.style.display=(radio('c-urg')==='sim')?'block':'none';
+  cTitulo();
 }
 document.addEventListener('change',function(e){
   if(e.target&&/^c-/.test(e.target.name||e.target.id||'')){cToggles();cPreview();}
@@ -2947,6 +2948,160 @@ function cFormatarHTML(p,cfg){
   return '<span class="fcb-rel">'+h+'</span>';
 }
 
+function cGerar(){
+  var cfg=cCfg();
+  if(cfg.modo==='data'&&!$('c-alvo').value){alert('Informe a data e hora do encerramento.');return;}
+  if(cfg.modo==='abertura'&&cfg.duracaoMs<=0){alert('Informe uma duracao maior que zero.');return;}
+  var c='';
+  c+='<!-- ============================================================\n';
+  c+='     FOTO CERTA - BARRA DE CONTAGEM REGRESSIVA\n';
+  c+='     ONDE COLAR: '+(cfg.fixa?'campo Tag Body da pagina':'componente HTML no topo da pagina')+'\n';
+  c+='     Gerado pela ferramenta em construtores.fotocerta.com.br\n';
+  c+='     ============================================================ -->\n\n';
+  c+='<sty'+'le>\n'+cCssBase(cfg)+'</sty'+'le>\n\n';
+  c+='<div class="fcb-barra" id="fcb-barra"></div>\n\n';
+  c+='<scr'+'ipt>\n(function () {\n'+cJsBase(cfg)+'})();\n</scr'+'ipt>\n';
+  $('c-out1').value=c;
+  cTitulo();
+}
+function cTitulo(){
+  var t=$('c-out-titulo');if(!t)return;
+  var fixa=radio('c-fixa')==='fixa';
+  var nome=fixa?'Código para a Tag Body da página':'Código para o componente HTML';
+  t.childNodes[0].nodeValue=nome+' ';
+}
+function cCssBase(cfg){
+  var fontes={neutra:'-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Ubuntu,sans-serif',
+    humanista:'"Helvetica Neue",Helvetica,Arial,sans-serif',
+    condensada:'"Roboto Condensed","Arial Narrow",Arial,sans-serif',
+    mono:'ui-monospace,SFMono-Regular,Menlo,Consolas,monospace'};
+  var s='';
+  s+='.fcb-barra{'+(cfg.fixa?'position:fixed;top:0;left:0;right:0;z-index:'+cfg.z+';':'position:relative;')+
+     'box-sizing:border-box;width:100%;background:'+cfg.cores.fundo+';color:'+cfg.cores.texto+';'+
+     'font-family:'+fontes[cfg.fonte]+';font-size:'+cfg.tam+'px;font-weight:'+cfg.peso+';'+
+     'padding:'+cfg.pad+'px 16px;line-height:1.3;font-variant-numeric:tabular-nums;'+
+     'transition:background-color .4s ease;'+
+     (cfg.borda?'border-bottom:2px solid '+cfg.cores.borda+';':'')+'}\n';
+  s+='.fcb-interno{display:flex;align-items:center;gap:'+cfg.coruja.gap+'px;max-width:'+cfg.largmax+'px;margin:0 auto;'+
+     'justify-content:'+(cfg.alinha==='centro'?'center':'flex-start')+'}\n';
+  s+='.fcb-conteudo{flex:1 1 auto;min-width:0;overflow:hidden;text-align:'+(cfg.alinha==='centro'?'center':'left')+'}\n';
+  s+='.fcb-num{font-weight:700;color:'+cfg.cores.destaque+'}\n';
+  s+='.fcb-sep,.fcb-suf{opacity:.65;margin:0 1px}\n';
+  s+='.fcb-rel{white-space:nowrap}\n';
+  if(cfg.formato==='blocos'){
+    s+='.fcb-bloco{display:inline-block;text-align:center;margin:0 5px}\n';
+    s+='.fcb-bloco .fcb-num{display:block;font-size:1.3em;line-height:1.1}\n';
+    s+='.fcb-bloco .fcb-rot{display:block;font-size:.62em;opacity:.75;text-transform:uppercase;letter-spacing:.04em}\n';
+  }
+  s+='.fcb-curta{display:none}\n';
+  s+='@media (max-width:'+cfg.mob+'px){.fcb-longa{display:none}.fcb-curta{display:inline}}\n';
+  return s;
+}
+function cJsBase(cfg){
+  var j='';
+  j+='  /* ===== CONFIGURACAO ===== */\n';
+  j+="  var MODO='"+cfg.modo+"';                 /* 'abertura' = prazo por visitante | 'data' = ate um instante fixo */\n";
+  j+='  var DURACAO_MS='+cfg.duracaoMs+';        /* usado so no modo abertura */\n';
+  j+="  var ALVO_ISO='"+esc(cfg.alvoIso)+"';     /* usado so no modo data, com fuso -03:00 */\n";
+  j+="  var CODIGO='"+esc(cfg.cod)+"';           /* trocar este codigo zera a contagem de todos os visitantes */\n";
+  j+="  var AO_ZERAR='"+cfg.fim+"';              /* 'esconder' | 'mensagem' | 'zerado' | 'reiniciar' */\n";
+  j+="  var MSG_FINAL='"+esc(cfg.fimtxt)+"';\n";
+  j+='  var MENSAGENS=[\n';
+  cfg.msgs.forEach(function(m,i){
+    j+="    {texto:'"+esc(m.texto)+"',curta:'"+esc(m.curta||'')+"'}"+(i<cfg.msgs.length-1?',':'')+'\n';
+  });
+  j+='  ];\n';
+  j+='  var UNIDADES={d:'+cfg.unidades.d+',h:'+cfg.unidades.h+',m:'+cfg.unidades.m+',s:'+cfg.unidades.s+'};\n';
+  j+="  var ROTULOS={d:'"+esc(cfg.rotulos.d)+"',h:'"+esc(cfg.rotulos.h)+"',m:'"+esc(cfg.rotulos.m)+"',s:'"+esc(cfg.rotulos.s)+"'};\n";
+  j+='  var ESCONDE_DIAS_ZERADOS='+cfg.diaszero+';\n';
+  j+="  var FORMATO='"+cfg.formato+"';           /* 'compacto' | 'blocos' */\n";
+  j+='  var EMPURRA_CONTEUDO='+(cfg.fixa&&cfg.empurrar)+';\n';
+  j+='\n  /* Daqui para baixo nao precisa mexer */\n\n';
+  j+='  var raiz=document.getElementById(\'fcb-barra\');\n  if(!raiz)return;\n\n';
+  j+='  function guardar(k,v){try{localStorage.setItem(k,v);}catch(e){}}\n';
+  j+='  function ler(k){try{return localStorage.getItem(k);}catch(e){return null;}}\n\n';
+  j+="  var CHAVE='fcbar:'+CODIGO;\n";
+  j+='  var agora=(new Date()).getTime();\n';
+  j+='  var inicio=parseInt(ler(CHAVE),10);\n';
+  j+='  if(!inicio||isNaN(inicio)){inicio=agora;guardar(CHAVE,String(inicio));}\n\n';
+  j+="  function alvoMs(){\n";
+  j+="    if(MODO==='data'){var v=Date.parse(ALVO_ISO);return isNaN(v)?inicio:v;}\n";
+  j+='    return inicio+DURACAO_MS;\n  }\n';
+  j+='  var alvo=alvoMs();\n\n';
+  j+='  function dois(n){return (n<10?\'0\':\'\')+n;}\n';
+  j+='  function partes(ms){\n';
+  j+='    if(ms<0)ms=0;\n    var t=Math.floor(ms/1000);\n';
+  j+='    return {d:Math.floor(t/86400),h:Math.floor(t%86400/3600),m:Math.floor(t%3600/60),s:t%60};\n  }\n\n';
+  j+='  function relogio(p){\n';
+  j+='    var itens=[],h=\'\',i;\n';
+  j+='    if(UNIDADES.d&&!(ESCONDE_DIAS_ZERADOS&&p.d===0))itens.push([dois(p.d),ROTULOS.d,\'d\']);\n';
+  j+='    if(UNIDADES.h)itens.push([dois(p.h),ROTULOS.h,\'h\']);\n';
+  j+='    if(UNIDADES.m)itens.push([dois(p.m),ROTULOS.m,\'m\']);\n';
+  j+='    if(UNIDADES.s)itens.push([dois(p.s),ROTULOS.s,\'s\']);\n';
+  j+='    if(!itens.length)return \'\';\n';
+  j+="    if(FORMATO==='blocos'){\n";
+  j+='      for(i=0;i<itens.length;i++)h+=\'<span class="fcb-bloco"><span class="fcb-num">\'+itens[i][0]+\'</span><span class="fcb-rot">\'+itens[i][1]+\'</span></span>\';\n';
+  j+='    }else{\n';
+  j+='      for(i=0;i<itens.length;i++){\n';
+  j+='        if(i)h+=\'<span class="fcb-sep">:</span>\';\n';
+  j+='        h+=\'<span class="fcb-num">\'+itens[i][0]+\'</span><span class="fcb-suf">\'+itens[i][2]+\'</span>\';\n';
+  j+='      }\n    }\n';
+  j+="    return '<span class=\"fcb-rel\">'+h+'</span>';\n  }\n\n";
+  j+='  /* O relogio NAO e reescrito junto com a mensagem: a mensagem entra uma vez,\n';
+  j+='     com marcadores [data-fcb-rel] vazios, e o tick de cada segundo preenche\n';
+  j+='     apenas esses marcadores. Reescrever o innerHTML inteiro reiniciaria a\n';
+  j+='     animacao CSS da rolagem a cada segundo. */\n';
+  j+="  var MARCA='<span data-fcb-rel></span>';\n";
+  j+='  function comMarca(t){\n';
+  j+="    if(t.indexOf('{contador}')<0)return t+' '+MARCA;\n";
+  j+="    return t.split('{contador}').join(MARCA);\n  }\n";
+  j+='  function textoCom(msg){\n';
+  j+='    var longa=comMarca(msg.texto);\n';
+  j+='    if(!msg.curta)return longa;\n';
+  j+="    return '<span class=\"fcb-longa\">'+longa+'</span><span class=\"fcb-curta\">'+comMarca(msg.curta)+'</span>';\n  }\n\n";
+  j+='  raiz.innerHTML=\'<div class="fcb-interno"><div class="fcb-conteudo"></div></div>\';\n';
+  j+="  var conteudo=raiz.querySelector('.fcb-conteudo');\n";
+  j+='  var msgAtual=0;\n\n';
+  j+='  function espaco(){\n';
+  j+='    if(!EMPURRA_CONTEUDO)return;\n';
+  j+="    document.body.style.paddingTop=raiz.offsetHeight+'px';\n  }\n";
+  j+='  function liberarEspaco(){\n';
+  j+="    if(EMPURRA_CONTEUDO)document.body.style.paddingTop='';\n  }\n\n";
+  j+='  var timer=null;\n';
+  j+='  function encerrar(){\n';
+  j+='    if(timer){clearInterval(timer);timer=null;}\n';
+  j+="    if(AO_ZERAR==='esconder'){raiz.style.display='none';liberarEspaco();return;}\n";
+  j+="    if(AO_ZERAR==='mensagem'){conteudo.textContent=MSG_FINAL;espaco();return;}\n";
+  j+='  }\n\n';
+  j+='  /* pintarMensagem roda so na montagem e na troca de mensagem */\n';
+  j+='  function pintarMensagem(){\n';
+  j+='    conteudo.innerHTML=textoCom(MENSAGENS[msgAtual%MENSAGENS.length]);\n';
+  j+='  }\n';
+  j+='  /* atualizarRelogio roda a cada segundo e toca so nos marcadores */\n';
+  j+='  function atualizarRelogio(restante){\n';
+  j+="    var els=conteudo.querySelectorAll('[data-fcb-rel]'),h=relogio(partes(restante)),i;\n";
+  j+='    for(i=0;i<els.length;i++)els[i].innerHTML=h;\n';
+  j+='  }\n\n';
+  j+='  function tick(){\n';
+  j+='    var restante=alvo-(new Date()).getTime();\n';
+  j+='    if(restante<=0){\n';
+  j+="      if(AO_ZERAR==='reiniciar'&&MODO==='abertura'){\n";
+  j+='        inicio=(new Date()).getTime();guardar(CHAVE,String(inicio));alvo=alvoMs();\n';
+  j+='        restante=alvo-inicio;\n';
+  j+="      }else if(AO_ZERAR==='zerado'){restante=0;}\n";
+  j+='      else{encerrar();return;}\n';
+  j+='    }\n';
+  j+='    atualizarRelogio(restante);\n';
+  j+='  }\n\n';
+  j+='  pintarMensagem();\n';
+  j+='  tick();\n';
+  j+='  timer=setInterval(tick,1000);\n';
+  j+='  espaco();\n';
+  j+="  window.addEventListener('resize',espaco);\n";
+  j+='  if(window.ResizeObserver)new ResizeObserver(espaco).observe(raiz);\n';
+  return j;
+}
+
 var cPvTimer=null,cPvAltTimer=null,cPvInicio=null,cPvSig=null,cPvMsg=0;
 function cPreview(reiniciar){
   var box=$('c-pv-box');if(!box)return;
@@ -3029,6 +3184,7 @@ liga('b-copy1',function(){copiar('b-out1','b-cop1');});
 liga('b-copy2',function(){copiar('b-out2','b-cop2');});
 liga('c-msg-add',cMsgAdd);
 liga('c-atualizar',function(){cPreview(true);});
+liga('c-gerar',cGerar);
 liga('c-copy1',function(){copiar('c-out1','c-cop1');});
 parearCor('l-corbtn');parearCor('l-c1');parearCor('l-c2');parearCor('l-c3');parearCor('l-c4');
 parearCor('u-c1');parearCor('u-c2');parearCor('u-c3');
