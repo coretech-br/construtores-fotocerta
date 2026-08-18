@@ -9,3 +9,6 @@
 # temporarios
 *.log
 *.tmp
+
+# workspace de execucao de planos (scratch, nao versionado)
+.superpowers/
