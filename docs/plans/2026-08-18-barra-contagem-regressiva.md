@@ -256,6 +256,7 @@ cToggles();
 T('radio modo tem valor', R('c-modo') === 'abertura');
 T('radio fim tem valor', R('c-fim') === 'esconder');
 T('codigo nasce vazio', V('c-cod') === '');
+T('duracao horas tem valor padrao 48', V('c-horas') === '48');
 T('campos de duracao visiveis', $$('c-abertura-campos').style.display === 'block');
 T('campo de data escondido', $$('c-data-campos').style.display === 'none');
 T('mensagem final escondida', $$('c-fimtxt-campo').style.display === 'none');
@@ -268,7 +269,7 @@ document.querySelector('input[name="c-fim"][value="mensagem"]').click();
 T('mensagem final aparece', $$('c-fimtxt-campo').style.display === 'block');
 ```
 
-Esperado: 19 × PASS.
+Esperado: 20 × PASS.
 
 - [ ] **Passo 7: Commit**
 
