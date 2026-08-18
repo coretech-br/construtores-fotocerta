@@ -759,6 +759,20 @@ parearCor('c-curg');
 ```js
 ['c-vel','c-alt','c-ef-pulsar','c-ef-brilho','c-ef-degrade','c-ef-piscar','c-ef-tremor','c-urglim','c-curg','c-entradapx']
   .forEach(function(id){ T('campo ' + id, !!$$(id)); });
+// valores padrao — a mutacao de um default passou despercebida nas Tasks 2 e 4
+T('vel padrao 18', V('c-vel') === '18');
+T('alt padrao 5', V('c-alt') === '5');
+T('urglim padrao 60', V('c-urglim') === '60');
+T('entradapx padrao 300', V('c-entradapx') === '300');
+T('curg padrao', V('c-curg-t') === '#8C1D18');
+T('mov comeca estatico', R('c-mov') === 'estatico');
+T('dig comeca nenhuma', R('c-dig') === 'nenhuma');
+T('entrada comeca imediata', R('c-entrada') === 'imediata');
+T('urg comeca desligada', R('c-urg') === 'nao');
+T('nenhum efeito marcado por padrao',
+  ['c-ef-pulsar','c-ef-brilho','c-ef-degrade','c-ef-piscar','c-ef-tremor']
+    .every(function(id){ return $$(id).checked === false; }));
+// comportamento dos toggles
 T('velocidade escondida no estatico', $$('c-vel-campo').style.display === 'none');
 document.querySelector('input[name="c-mov"][value="rolaesq"]').click();
 T('rolagem mostra velocidade', $$('c-vel-campo').style.display === 'block');
@@ -771,7 +785,7 @@ document.querySelector('input[name="c-entrada"][value="aposrolar"]').click();
 T('entrada apos rolar mostra px', $$('c-entrada-campo').style.display === 'block');
 ```
 
-Esperado: 16 × PASS.
+Esperado: 26 × PASS.
 
 - [ ] **Passo 7: Commit**
 
