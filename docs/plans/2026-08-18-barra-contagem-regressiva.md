@@ -335,14 +335,14 @@ function cMsgAdd(){
   if(!t){alert('Escreva o texto da mensagem.');return;}
   cMsgs.push({texto:t,curta:$('c-msgcurta').value.trim()});
   $('c-msg').value='';$('c-msgcurta').value='';
-  cMsgRender();salvarEstado();cPreview();
+  cMsgRender();salvarEstado();
 }
 function cMsgMove(i,d){
   var j=i+d;if(j<0||j>=cMsgs.length)return;
   var t=cMsgs[i];cMsgs[i]=cMsgs[j];cMsgs[j]=t;
-  cMsgRender();salvarEstado();cPreview();
+  cMsgRender();salvarEstado();
 }
-function cMsgDel(i){cMsgs.splice(i,1);cMsgRender();salvarEstado();cPreview();}
+function cMsgDel(i){cMsgs.splice(i,1);cMsgRender();salvarEstado();}
 function cMsgRender(){
   var ul=$('c-msg-lista');if(!ul)return;
   ul.innerHTML='';
@@ -365,13 +365,7 @@ function cMsgRender(){
 }
 ```
 
-**Nota:** `cPreview()` só existe a partir da Task 7. Até lá, adicione um stub no topo do bloco da aba para não quebrar:
-
-```js
-function cPreview(){}
-```
-
-Remova o stub na Task 7, ao implementar a versão real.
+**Nota:** o CRUD ainda não chama a prévia — `cPreview()` só nasce na Task 7, que acrescenta as chamadas a estas três funções. Não crie stub vazio: nesta tarefa a lista funciona sem prévia, e é assim que ela deve ser revisada.
 
 - [ ] **Passo 5: Ligar e chamar no bootstrap**
 
@@ -1076,15 +1070,16 @@ Adicione o CSS da prévia junto às demais regras no `<style>` do topo do arquiv
 - [ ] **Passo 6: Ligar botões, `parearCor` e bootstrap**
 
 ```js
-liga('c-gerar',cGerar);
 liga('c-atualizar',cPreview);
 liga('c-copy1',function(){copiar('c-out1','c-cop1');});
 ```
 
-`cGerar` só existe na Task 8; até lá `liga` não quebra (ele checa o elemento, não a função — mas a referência a `cGerar` sim). **Portanto adicione um stub agora** e substitua na Task 8:
+O botão `c-gerar` fica sem ligação nesta tarefa — `cGerar` nasce na Task 8, que acrescenta o `liga('c-gerar',cGerar);`. Não crie stub vazio: referenciar uma função inexistente aqui quebraria o carregamento do arquivo inteiro.
+
+Acrescente também as chamadas de prévia ao CRUD da Task 3, agora que `cPreview` existe — ao final de `cMsgAdd`, `cMsgMove` e `cMsgDel`:
 
 ```js
-function cGerar(){}
+  cPreview();
 ```
 
 Em `parearCor`, troque o corpo para chamar também a prévia da contagem:
@@ -1157,7 +1152,7 @@ Esperado: 2 × FAIL (o stub não escreve nada).
 
 - [ ] **Passo 3: Implementar `cGerar`**
 
-Substitua `function cGerar(){}` por:
+Acrescente junto às demais funções da aba, e ligue o botão no bloco de `liga(...)` com `liga('c-gerar',cGerar);`:
 
 ```js
 function cGerar(){
