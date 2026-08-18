@@ -908,7 +908,7 @@ T('caixa de previa existe', !!$$('c-pv-box'));
 
 - [ ] **Passo 2: Rodar e confirmar que falha**
 
-Esperado: 3 × FAIL (`cPreview` existe como stub vazio da Task 3 — será substituído).
+Esperado: 3 × FAIL.
 
 - [ ] **Passo 3: Adicionar a seção 5**
 
@@ -938,7 +938,7 @@ Esperado: 3 × FAIL (`cPreview` existe como stub vazio da Task 3 — será subst
 
 - [ ] **Passo 4: Implementar o motor**
 
-Substitua o stub `function cPreview(){}` por:
+Acrescente junto às demais funções da aba:
 
 ```js
 function cNum(id,def){var v=parseInt($(id).value,10);return isNaN(v)?def:v;}
@@ -1130,7 +1130,7 @@ git add index.html && git commit -m "feat(contagem): motor de contagem e previa 
 ### Task 8: Gerador — bloco base
 
 **Arquivos:**
-- Modificar: `index.html` — função `cGerar` (substitui o stub da Task 7)
+- Modificar: `index.html` — função `cGerar` nova, mais a ligação do botão `c-gerar`
 
 **Interfaces:**
 - Consome: `cCfg()`, `esc(s)`, `escHtml(s)`.
@@ -1148,7 +1148,7 @@ T('titulo diz Tag Body', $$('c-out-titulo').textContent.indexOf('Tag Body') >= 0
 
 - [ ] **Passo 2: Rodar e confirmar que falha**
 
-Esperado: 2 × FAIL (o stub não escreve nada).
+Esperado: 2 × FAIL (o botão ainda não tem função ligada).
 
 - [ ] **Passo 3: Implementar `cGerar`**
 
