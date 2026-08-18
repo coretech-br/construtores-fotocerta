@@ -1072,6 +1072,81 @@
       </fieldset>
     </div>
   </div>
+  <div class="secao"><span class="secao-n">4</span> Efeitos e movimento</div>
+  <div class="grade">
+    <div>
+      <fieldset>
+      <legend>Movimento do conteúdo</legend>
+      <div class="radios">
+      <label><input type="radio" name="c-mov" value="estatico" checked><span>Estático</span></label>
+      <label><input type="radio" name="c-mov" value="rolaesq"><span>Rolagem para a esquerda</span></label>
+      <label><input type="radio" name="c-mov" value="roladir"><span>Rolagem para a direita</span></label>
+      <label><input type="radio" name="c-mov" value="altfade"><span>Alternância com fade</span></label>
+      <label><input type="radio" name="c-mov" value="altdesliza"><span>Alternância deslizando</span></label>
+      </div>
+      <div id="c-vel-campo">
+      <label for="c-vel">Duração do ciclo de rolagem <small>(segundos — maior = mais lento)</small></label>
+      <input type="number" id="c-vel" value="18" min="2" max="60" step="1">
+      </div>
+      <div id="c-alt-campo">
+      <label for="c-alt">Intervalo entre mensagens <small>(segundos)</small></label>
+      <input type="number" id="c-alt" value="5" min="2" max="30" step="1">
+      <p class="ajuda">A alternância precisa de <b>duas ou mais</b> mensagens na seção 2. Com uma só, o código gerado cai para estático.</p>
+      </div>
+      </fieldset>
+      <fieldset>
+      <legend>Virada dos dígitos</legend>
+      <div class="radios">
+      <label><input type="radio" name="c-dig" value="nenhuma" checked><span>Nenhuma</span></label>
+      <label><input type="radio" name="c-dig" value="fade"><span>Fade</span></label>
+      <label><input type="radio" name="c-dig" value="flip"><span>Flip</span></label>
+      </div>
+      </fieldset>
+      <fieldset>
+      <legend>Entrada da barra</legend>
+      <div class="radios">
+      <label><input type="radio" name="c-entrada" value="imediata" checked><span>Imediata</span></label>
+      <label><input type="radio" name="c-entrada" value="deslizar"><span>Deslizando do topo</span></label>
+      <label><input type="radio" name="c-entrada" value="aposrolar"><span>Depois de rolar</span></label>
+      </div>
+      <div id="c-entrada-campo">
+      <label for="c-entradapx">Aparecer depois de rolar <small>(px)</small></label>
+      <input type="number" id="c-entradapx" value="300" min="50" max="3000" step="50">
+      </div>
+      </fieldset>
+    </div>
+    <div>
+      <fieldset>
+      <legend>Destaque contínuo <small>(pode combinar)</small></legend>
+      <div class="radios">
+      <label><input type="checkbox" id="c-ef-pulsar"><span>Pulsar</span></label>
+      <label><input type="checkbox" id="c-ef-brilho"><span>Brilho passante</span></label>
+      <label><input type="checkbox" id="c-ef-degrade"><span>Degradê animado</span></label>
+      <label><input type="checkbox" id="c-ef-piscar"><span>Separador piscando</span></label>
+      <label><input type="checkbox" id="c-ef-tremor"><span>Tremor</span></label>
+      </div>
+      <p class="ajuda">O <b>separador piscando</b> só aparece no formato compacto (é o <code>:</code> entre os números). Efeitos contínuos chamam atenção o tempo todo e cansam — na dúvida, prefira a urgência progressiva ao lado, que só age quando o prazo aperta.</p>
+      </fieldset>
+      <fieldset>
+      <legend>Urgência progressiva</legend>
+      <div class="radios">
+      <label><input type="radio" name="c-urg" value="nao" checked><span>Não usar</span></label>
+      <label><input type="radio" name="c-urg" value="sim"><span>Usar</span></label>
+      </div>
+      <div id="c-urg-campos">
+      <label for="c-urglim">Entrar em urgência faltando <small>(minutos)</small></label>
+      <input type="number" id="c-urglim" value="60" min="1" max="10080" step="1">
+      <label>Cor de urgência <small>(substitui o fundo da barra)</small></label>
+      <div class="cor-linha"><input type="color" id="c-curg" value="#8C1D18"><input type="text" id="c-curg-t" value="#8C1D18"></div>
+      <label>Pulsar ao entrar na urgência?</label>
+      <div class="radios">
+      <label><input type="radio" name="c-urgpulsar" value="sim" checked><span>Sim</span></label>
+      <label><input type="radio" name="c-urgpulsar" value="nao"><span>Não</span></label>
+      </div>
+      </div>
+      </fieldset>
+    </div>
+  </div>
 </div>
 
 <p class="rodape">Ferramenta interna Foto Certa. Novos construtores podem ser adicionados como novas abas.</p>
@@ -2673,6 +2748,11 @@ function cToggles(){
   el=$('c-cta-campos');if(el)el.style.display=(radio('c-cta')==='sim')?'block':'none';
   el=$('c-prog-campo');if(el)el.style.display=(radio('c-prog')==='sim')?'block':'none';
   el=$('c-coruja-campos');if(el)el.style.display=(radio('c-coruja')==='sim')?'block':'none';
+  var mov=radio('c-mov');
+  el=$('c-vel-campo');if(el)el.style.display=(mov==='rolaesq'||mov==='roladir')?'block':'none';
+  el=$('c-alt-campo');if(el)el.style.display=(mov==='altfade'||mov==='altdesliza')?'block':'none';
+  el=$('c-entrada-campo');if(el)el.style.display=(radio('c-entrada')==='aposrolar')?'block':'none';
+  el=$('c-urg-campos');if(el)el.style.display=(radio('c-urg')==='sim')?'block':'none';
 }
 document.addEventListener('change',function(e){
   if(e.target&&/^c-/.test(e.target.name||e.target.id||''))cToggles();
@@ -2749,6 +2829,7 @@ parearCor('b-f1');parearCor('b-f2');parearCor('b-c1');parearCor('b-c2');parearCo
 parearCor('c-cfundo');parearCor('c-ctexto');parearCor('c-cdestaque');parearCor('c-cborda');
 parearCor('c-ctafundo');parearCor('c-ctatexto');parearCor('c-cprog');
 parearCor('c-corujacorpo');parearCor('c-corujadet');
+parearCor('c-curg');
 restaurarEstado();
 lBtnPreview();
 lPopPreview();
