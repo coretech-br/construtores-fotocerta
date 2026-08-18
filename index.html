@@ -157,6 +157,7 @@
   <button class="aba" id="aba-tidy" role="tab" aria-selected="false">Agendamento TidyCal</button>
   <button class="aba" id="aba-uni" role="tab" aria-selected="false">Checkout</button>
   <button class="aba" id="aba-bor" role="tab" aria-selected="false">Bordas com efeito</button>
+  <button class="aba" id="aba-cnt" role="tab" aria-selected="false">Contagem regressiva</button>
 </div>
 
 <!-- ==================== CONSTRUTOR: SLIDESHOW ==================== -->
@@ -856,6 +857,10 @@
   </div>
 </div>
 
+<div class="painel" id="painel-cnt" role="tabpanel">
+  <p class="descricao"><b>Contagem regressiva</b> — gera a barra de urgência para o topo de uma landing page, com mensagem, contador em dias/horas/minutos/segundos e efeitos. A contagem não reinicia quando o visitante recarrega a página: o momento da primeira visita fica guardado no navegador dele. Pode contar um prazo a partir da primeira abertura ou até uma data marcada. O código sai pronto para a <b>Tag Body</b> (barra fixa no topo) ou para um <b>componente HTML</b> (barra que rola com a página).</p>
+</div>
+
 <p class="rodape">Ferramenta interna Foto Certa. Novos construtores podem ser adicionados como novas abas.</p>
 
 <script>
@@ -875,7 +880,7 @@ function copiar(idOut,idAviso){
   var av=$(idAviso);av.classList.add('mostra');setTimeout(function(){av.classList.remove('mostra');},1800);
 }
 function trocarAba(qual){
-  ['slide','leads','tidy','uni','bor'].forEach(function(n){
+  ['slide','leads','tidy','uni','bor','cnt'].forEach(function(n){
     var p=$('painel-'+n),a=$('aba-'+n);
     if(p)p.classList.toggle('ativo',n===qual);
     if(a){a.classList.toggle('ativa',n===qual);a.setAttribute('aria-selected',n===qual?'true':'false');}
@@ -2455,6 +2460,7 @@ liga('t-copy2',function(){copiar('t-out2','t-cop2');});
 liga('t-copy3',function(){copiar('t-out3','t-cop3');});
 liga('aba-uni',function(){trocarAba('uni');});
 liga('aba-bor',function(){trocarAba('bor');});
+liga('aba-cnt',function(){trocarAba('cnt');});
 liga('u-op-add',uOpAdd);
 liga('u-prod-salvar',uProdSalvar);
 liga('u-prod-cancelar',uProdLimpar);
