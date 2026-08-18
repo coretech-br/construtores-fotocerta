@@ -859,6 +859,65 @@
 
 <div class="painel" id="painel-cnt" role="tabpanel">
   <p class="descricao"><b>Contagem regressiva</b> — gera a barra de urgência para o topo de uma landing page, com mensagem, contador em dias/horas/minutos/segundos e efeitos. A contagem não reinicia quando o visitante recarrega a página: o momento da primeira visita fica guardado no navegador dele. Pode contar um prazo a partir da primeira abertura ou até uma data marcada. O código sai pronto para a <b>Tag Body</b> (barra fixa no topo) ou para um <b>componente HTML</b> (barra que rola com a página).</p>
+  <div class="secao primeira"><span class="secao-n">1</span> Contagem e encerramento</div>
+  <div class="grade">
+    <div>
+      <fieldset>
+      <legend>Como contar</legend>
+      <div class="radios">
+      <label><input type="radio" name="c-modo" value="abertura" checked><span>A partir da primeira abertura</span></label>
+      <label><input type="radio" name="c-modo" value="data"><span>Até uma data marcada</span></label>
+      </div>
+      <div id="c-abertura-campos">
+      <label for="c-dias">Duração — dias</label>
+      <input type="number" id="c-dias" value="0" min="0" max="365" step="1">
+      <label for="c-horas">Duração — horas</label>
+      <input type="number" id="c-horas" value="48" min="0" max="23" step="1">
+      <label for="c-mins">Duração — minutos</label>
+      <input type="number" id="c-mins" value="0" min="0" max="59" step="1">
+      <p class="ajuda">Cada visitante tem o próprio prazo, contado da primeira vez que abriu a página naquele navegador.</p>
+      </div>
+      <div id="c-data-campos">
+      <label for="c-alvo">Data e hora do encerramento</label>
+      <input type="datetime-local" id="c-alvo" value="">
+      <p class="ajuda">O instante é gravado no código com o fuso de Brasília (<b>−03:00</b>) fixo, para que todo visitante conte até o mesmo momento, esteja onde estiver.</p>
+      </div>
+      <label for="c-cod">Código da campanha <small>(identifica esta contagem no navegador do visitante)</small></label>
+      <input type="text" id="c-cod" value="" placeholder="ex.: CAMPANHA26">
+      <p class="ajuda"><b>Trocar este código zera a contagem de todos os visitantes.</b> É o jeito de recomeçar uma campanha. Duas campanhas com códigos diferentes convivem no mesmo site sem se atrapalhar.</p>
+      </fieldset>
+    </div>
+    <div>
+      <fieldset>
+      <legend>Unidades exibidas</legend>
+      <div class="radios">
+      <label><input type="checkbox" id="c-un-d" checked><span>Dias</span></label>
+      <label><input type="checkbox" id="c-un-h" checked><span>Horas</span></label>
+      <label><input type="checkbox" id="c-un-m" checked><span>Minutos</span></label>
+      <label><input type="checkbox" id="c-un-s" checked><span>Segundos</span></label>
+      </div>
+      <label>Esconder os dias quando chegarem a zero?</label>
+      <div class="radios">
+      <label><input type="radio" name="c-diaszero" value="sim" checked><span>Sim</span></label>
+      <label><input type="radio" name="c-diaszero" value="nao"><span>Não</span></label>
+      </div>
+      </fieldset>
+      <fieldset>
+      <legend>Quando a contagem zerar</legend>
+      <div class="radios">
+      <label><input type="radio" name="c-fim" value="esconder" checked><span>Esconder a barra</span></label>
+      <label><input type="radio" name="c-fim" value="mensagem"><span>Mostrar mensagem final</span></label>
+      <label><input type="radio" name="c-fim" value="zerado"><span>Manter em 00:00:00</span></label>
+      <label><input type="radio" name="c-fim" value="reiniciar"><span>Reiniciar o ciclo</span></label>
+      </div>
+      <div id="c-fimtxt-campo">
+      <label for="c-fimtxt">Mensagem final</label>
+      <input type="text" id="c-fimtxt" value="Promoção encerrada">
+      </div>
+      <p class="ajuda" id="c-reiniciar-aviso"><b>Reiniciar o ciclo</b> só funciona no modo "a partir da primeira abertura": ao zerar, começa outro prazo do mesmo tamanho. Cria urgência permanente que não corresponde a um prazo real — use com consciência.</p>
+      </fieldset>
+    </div>
+  </div>
 </div>
 
 <p class="rodape">Ferramenta interna Foto Certa. Novos construtores podem ser adicionados como novas abas.</p>
@@ -2441,6 +2500,25 @@ function bGerar(){
   $('b-out2').value=m.props;
 }
 
+/* ============================================================
+   CONTAGEM REGRESSIVA
+   ============================================================ */
+function cToggles(){
+  var modo=radio('c-modo'),fim=radio('c-fim'),el;
+  el=$('c-abertura-campos');if(el)el.style.display=(modo==='abertura')?'block':'none';
+  el=$('c-data-campos');if(el)el.style.display=(modo==='data')?'block':'none';
+  el=$('c-fimtxt-campo');if(el)el.style.display=(fim==='mensagem')?'block':'none';
+  el=$('c-reiniciar-aviso');if(el)el.style.display=(modo==='abertura')?'block':'none';
+  var rr=document.querySelector('input[name="c-fim"][value="reiniciar"]');
+  if(rr){
+    rr.disabled=(modo!=='abertura');
+    if(rr.disabled&&rr.checked)setRadio('c-fim','esconder');
+  }
+}
+document.addEventListener('change',function(e){
+  if(e.target&&/^c-/.test(e.target.name||e.target.id||''))cToggles();
+});
+
 /* ============ inicialização ============ */
 function liga(id,fn){var el=$(id);if(el)el.addEventListener('click',fn);}
 liga('aba-slide',function(){trocarAba('slide');});
@@ -2484,6 +2562,7 @@ uToggles();
 uPreview();
 bToggles();
 bPreview();
+cToggles();
 })();
 </script>
 </body>
