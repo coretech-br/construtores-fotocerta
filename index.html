@@ -939,6 +939,139 @@
       </fieldset>
     </div>
   </div>
+  <div class="secao"><span class="secao-n">3</span> Aparência, posição e extras</div>
+  <div class="grade">
+    <div>
+      <fieldset>
+      <legend>Cores e tipografia</legend>
+      <label>Cor de fundo da barra</label>
+      <div class="cor-linha"><input type="color" id="c-cfundo" value="#0F3A30"><input type="text" id="c-cfundo-t" value="#0F3A30"></div>
+      <label>Cor do texto</label>
+      <div class="cor-linha"><input type="color" id="c-ctexto" value="#FDFBF6"><input type="text" id="c-ctexto-t" value="#FDFBF6"></div>
+      <label>Cor de destaque dos números</label>
+      <div class="cor-linha"><input type="color" id="c-cdestaque" value="#FFC94A"><input type="text" id="c-cdestaque-t" value="#FFC94A"></div>
+      <label>Pilha de fonte <small>(sem serifa, todas do sistema — sem download)</small></label>
+      <div class="radios">
+      <label><input type="radio" name="c-fonte" value="neutra" checked><span>Neutra</span></label>
+      <label><input type="radio" name="c-fonte" value="humanista"><span>Humanista</span></label>
+      <label><input type="radio" name="c-fonte" value="condensada"><span>Condensada</span></label>
+      <label><input type="radio" name="c-fonte" value="mono"><span>Dígitos monoespaçados</span></label>
+      </div>
+      <label for="c-tam">Tamanho da fonte <small>(px)</small></label>
+      <input type="number" id="c-tam" value="15" min="10" max="32" step="1">
+      <label>Espessura</label>
+      <div class="radios">
+      <label><input type="radio" name="c-peso" value="400"><span>Normal</span></label>
+      <label><input type="radio" name="c-peso" value="600" checked><span>Semi-negrito</span></label>
+      <label><input type="radio" name="c-peso" value="700"><span>Negrito</span></label>
+      </div>
+      </fieldset>
+      <fieldset>
+      <legend>Formato e espaço</legend>
+      <label>Formato do contador</label>
+      <div class="radios">
+      <label><input type="radio" name="c-formato" value="compacto" checked><span>Compacto <small>(02d 14h 33m 12s)</small></span></label>
+      <label><input type="radio" name="c-formato" value="blocos"><span>Blocos com rótulo</span></label>
+      </div>
+      <label for="c-rd">Rótulos das unidades <small>(usados por extenso no formato blocos)</small></label>
+      <input type="text" id="c-rd" value="dias">
+      <input type="text" id="c-rh" value="horas">
+      <input type="text" id="c-rm" value="min">
+      <input type="text" id="c-rs" value="seg">
+      <label for="c-pad">Espaçamento interno vertical <small>(px)</small></label>
+      <input type="number" id="c-pad" value="10" min="0" max="40" step="1">
+      <label for="c-largmax">Largura máxima do conteúdo <small>(px)</small></label>
+      <input type="number" id="c-largmax" value="1100" min="320" max="1920" step="10">
+      <label>Alinhamento</label>
+      <div class="radios">
+      <label><input type="radio" name="c-alinha" value="centro" checked><span>Centro</span></label>
+      <label><input type="radio" name="c-alinha" value="esquerda"><span>Esquerda</span></label>
+      </div>
+      <label>Linha divisória inferior</label>
+      <div class="radios">
+      <label><input type="radio" name="c-borda" value="nao" checked><span>Não</span></label>
+      <label><input type="radio" name="c-borda" value="sim"><span>Sim</span></label>
+      </div>
+      <div id="c-borda-campo">
+      <div class="cor-linha"><input type="color" id="c-cborda" value="#FFC94A"><input type="text" id="c-cborda-t" value="#FFC94A"></div>
+      </div>
+      <label for="c-mob">Largura de corte do celular <small>(px — abaixo disso usa a versão curta e esconde a coruja)</small></label>
+      <input type="number" id="c-mob" value="640" min="320" max="1024" step="10">
+      </fieldset>
+    </div>
+    <div>
+      <fieldset>
+      <legend>Posição</legend>
+      <div class="radios">
+      <label><input type="radio" name="c-fixa" value="fixa" checked><span>Fixa no topo</span></label>
+      <label><input type="radio" name="c-fixa" value="fluxo"><span>Rola com a página</span></label>
+      </div>
+      <p class="ajuda">A escolha define <b>onde colar o código</b>: fixa vai na <b>Tag Body</b> da página; rolando com a página vai num <b>componente HTML</b> posicionado no topo pelo editor. O título da saída na seção 5 avisa qual dos dois.</p>
+      <div id="c-fixa-campos">
+      <label>Espaço para a barra</label>
+      <div class="radios">
+      <label><input type="radio" name="c-empurrar" value="empurrar" checked><span>Empurrar o conteúdo</span></label>
+      <label><input type="radio" name="c-empurrar" value="sobrepor"><span>Sobrepor</span></label>
+      </div>
+      <label for="c-z">z-index</label>
+      <input type="number" id="c-z" value="99980" min="1" max="2147483647" step="10">
+      <p class="ajuda">Se o menu do tema também for fixo, os dois disputam o topo. Comece com <b>empurrar</b>; se o menu sumir atrás da barra, aumente o z-index ou troque para sobrepor. Só dá para conferir na página publicada.</p>
+      </div>
+      </fieldset>
+      <fieldset>
+      <legend>Extras da barra</legend>
+      <label>Botão de ação (CTA)</label>
+      <div class="radios">
+      <label><input type="radio" name="c-cta" value="nao" checked><span>Não ter</span></label>
+      <label><input type="radio" name="c-cta" value="sim"><span>Incluir</span></label>
+      </div>
+      <div id="c-cta-campos">
+      <label for="c-ctatxt">Texto do botão</label>
+      <input type="text" id="c-ctatxt" value="Quero garantir">
+      <label for="c-ctaurl">Link ou âncora</label>
+      <input type="text" id="c-ctaurl" value="#reserva">
+      <label>Cor do botão / do texto do botão</label>
+      <div class="cor-linha"><input type="color" id="c-ctafundo" value="#FFC94A"><input type="text" id="c-ctafundo-t" value="#FFC94A"></div>
+      <div class="cor-linha"><input type="color" id="c-ctatexto" value="#23281F"><input type="text" id="c-ctatexto-t" value="#23281F"></div>
+      <p class="ajuda">Se o link for uma âncora como <code>#reserva</code>, a coluna de destino precisa ter esse valor no campo <b>ID Html</b> (aba Avançado do componente).</p>
+      </div>
+      <label>Botão de fechar</label>
+      <div class="radios">
+      <label><input type="radio" name="c-fechar" value="nao" checked><span>Não ter</span></label>
+      <label><input type="radio" name="c-fechar" value="sessao"><span>Fecha pela sessão</span></label>
+      <label><input type="radio" name="c-fechar" value="sempre"><span>Fecha de vez</span></label>
+      </div>
+      <label>Barra de progresso do tempo decorrido</label>
+      <div class="radios">
+      <label><input type="radio" name="c-prog" value="nao" checked><span>Não ter</span></label>
+      <label><input type="radio" name="c-prog" value="sim"><span>Incluir</span></label>
+      </div>
+      <div id="c-prog-campo">
+      <div class="cor-linha"><input type="color" id="c-cprog" value="#FFC94A"><input type="text" id="c-cprog-t" value="#FFC94A"></div>
+      </div>
+      <label>Coruja da identidade nas pontas</label>
+      <div class="radios">
+      <label><input type="radio" name="c-coruja" value="nao" checked><span>Não usar</span></label>
+      <label><input type="radio" name="c-coruja" value="sim"><span>Usar</span></label>
+      </div>
+      <div id="c-coruja-campos">
+      <label for="c-corujaalt">Altura <small>(px)</small></label>
+      <input type="number" id="c-corujaalt" value="26" min="14" max="60" step="1">
+      <label for="c-corujagap">Espaçamento até o conteúdo <small>(px)</small></label>
+      <input type="number" id="c-corujagap" value="16" min="0" max="60" step="1">
+      <label>Cor do corpo / dos detalhes</label>
+      <div class="cor-linha"><input type="color" id="c-corujacorpo" value="#FDFBF6"><input type="text" id="c-corujacorpo-t" value="#FDFBF6"></div>
+      <div class="cor-linha"><input type="color" id="c-corujadet" value="#FFC94A"><input type="text" id="c-corujadet-t" value="#FFC94A"></div>
+      <label>Esconder no celular?</label>
+      <div class="radios">
+      <label><input type="radio" name="c-corujamob" value="sim" checked><span>Sim</span></label>
+      <label><input type="radio" name="c-corujamob" value="nao"><span>Não</span></label>
+      </div>
+      <p class="ajuda">A coruja aparece nas duas pontas, ancorada fora da área que rola — ela emoldura a barra em vez de passar junto com o texto.</p>
+      </div>
+      </fieldset>
+    </div>
+  </div>
 </div>
 
 <p class="rodape">Ferramenta interna Foto Certa. Novos construtores podem ser adicionados como novas abas.</p>
@@ -2535,6 +2668,11 @@ function cToggles(){
     rr.disabled=(modo!=='abertura');
     if(rr.disabled&&rr.checked)setRadio('c-fim','esconder');
   }
+  el=$('c-fixa-campos');if(el)el.style.display=(radio('c-fixa')==='fixa')?'block':'none';
+  el=$('c-borda-campo');if(el)el.style.display=(radio('c-borda')==='sim')?'block':'none';
+  el=$('c-cta-campos');if(el)el.style.display=(radio('c-cta')==='sim')?'block':'none';
+  el=$('c-prog-campo');if(el)el.style.display=(radio('c-prog')==='sim')?'block':'none';
+  el=$('c-coruja-campos');if(el)el.style.display=(radio('c-coruja')==='sim')?'block':'none';
 }
 document.addEventListener('change',function(e){
   if(e.target&&/^c-/.test(e.target.name||e.target.id||''))cToggles();
@@ -2608,6 +2746,9 @@ liga('c-msg-add',cMsgAdd);
 parearCor('l-corbtn');parearCor('l-c1');parearCor('l-c2');parearCor('l-c3');parearCor('l-c4');
 parearCor('u-c1');parearCor('u-c2');parearCor('u-c3');
 parearCor('b-f1');parearCor('b-f2');parearCor('b-c1');parearCor('b-c2');parearCor('b-c3');parearCor('b-c4');
+parearCor('c-cfundo');parearCor('c-ctexto');parearCor('c-cdestaque');parearCor('c-cborda');
+parearCor('c-ctafundo');parearCor('c-ctatexto');parearCor('c-cprog');
+parearCor('c-corujacorpo');parearCor('c-corujadet');
 restaurarEstado();
 lBtnPreview();
 lPopPreview();
