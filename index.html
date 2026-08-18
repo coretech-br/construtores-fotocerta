@@ -918,6 +918,27 @@
       </fieldset>
     </div>
   </div>
+  <div class="secao"><span class="secao-n">2</span> Mensagens</div>
+  <div class="grade">
+    <div>
+      <fieldset>
+      <legend>Adicionar mensagem</legend>
+      <label for="c-msg">Texto <small>(use <code>{contador}</code> para marcar onde o relógio entra)</small></label>
+      <input type="text" id="c-msg" value="" placeholder="Oferta de Natal termina em {contador}">
+      <label for="c-msgcurta">Versão curta para o celular <small>(opcional)</small></label>
+      <input type="text" id="c-msgcurta" value="" placeholder="Termina em {contador}">
+      <div class="acoes"><button class="botao" id="c-msg-add">Adicionar mensagem</button></div>
+      <p class="ajuda">Sem o marcador <code>{contador}</code>, o relógio aparece depois do texto. Com <b>duas ou mais</b> mensagens, os efeitos de alternância da seção 4 passam a fazer sentido; com uma só, a barra fica estática ou rolando.</p>
+      </fieldset>
+    </div>
+    <div>
+      <fieldset>
+      <legend>Mensagens da barra</legend>
+      <p class="vazio" id="c-msg-vazio">Nenhuma mensagem ainda. Sem nenhuma, o código usa "Oferta por tempo limitado {contador}".</p>
+      <ul class="lista-imgs" id="c-msg-lista"></ul>
+      </fieldset>
+    </div>
+  </div>
 </div>
 
 <p class="rodape">Ferramenta interna Foto Certa. Novos construtores podem ser adicionados como novas abas.</p>
@@ -2519,6 +2540,41 @@ document.addEventListener('change',function(e){
   if(e.target&&/^c-/.test(e.target.name||e.target.id||''))cToggles();
 });
 
+var cMsgs=[];
+function cMsgAdd(){
+  var t=$('c-msg').value.trim();
+  if(!t){alert('Escreva o texto da mensagem.');return;}
+  cMsgs.push({texto:t,curta:$('c-msgcurta').value.trim()});
+  $('c-msg').value='';$('c-msgcurta').value='';
+  cMsgRender();salvarEstado();
+}
+function cMsgMove(i,d){
+  var j=i+d;if(j<0||j>=cMsgs.length)return;
+  var t=cMsgs[i];cMsgs[i]=cMsgs[j];cMsgs[j]=t;
+  cMsgRender();salvarEstado();
+}
+function cMsgDel(i){cMsgs.splice(i,1);cMsgRender();salvarEstado();}
+function cMsgRender(){
+  var ul=$('c-msg-lista');if(!ul)return;
+  ul.innerHTML='';
+  $('c-msg-vazio').style.display=cMsgs.length?'none':'block';
+  cMsgs.forEach(function(m,i){
+    var li=document.createElement('li');
+    var info=document.createElement('div');info.className='info';
+    var tx=document.createElement('div');tx.className='url';tx.textContent=m.texto;tx.title=m.texto;
+    info.appendChild(tx);
+    if(m.curta){
+      var cu=document.createElement('div');cu.className='url';cu.textContent='celular: '+m.curta;cu.title=m.curta;
+      info.appendChild(cu);
+    }
+    var ctrl=document.createElement('div');ctrl.className='ctrl';
+    [['\u2191',function(){cMsgMove(i,-1);},'Subir'],['\u2193',function(){cMsgMove(i,1);},'Descer'],['\u2715',function(){cMsgDel(i);},'Remover']]
+      .forEach(function(b){var bt=document.createElement('button');bt.textContent=b[0];bt.title=b[2];bt.setAttribute('aria-label',b[2]);bt.addEventListener('click',b[1]);ctrl.appendChild(bt);});
+    li.appendChild(info);li.appendChild(ctrl);
+    ul.appendChild(li);
+  });
+}
+
 /* ============ inicialização ============ */
 function liga(id,fn){var el=$(id);if(el)el.addEventListener('click',fn);}
 liga('aba-slide',function(){trocarAba('slide');});
@@ -2548,6 +2604,7 @@ liga('u-copy',function(){copiar('u-out','u-cop');});
 liga('b-gerar',bGerar);
 liga('b-copy1',function(){copiar('b-out1','b-cop1');});
 liga('b-copy2',function(){copiar('b-out2','b-cop2');});
+liga('c-msg-add',cMsgAdd);
 parearCor('l-corbtn');parearCor('l-c1');parearCor('l-c2');parearCor('l-c3');parearCor('l-c4');
 parearCor('u-c1');parearCor('u-c2');parearCor('u-c3');
 parearCor('b-f1');parearCor('b-f2');parearCor('b-c1');parearCor('b-c2');parearCor('b-c3');parearCor('b-c4');
@@ -2563,6 +2620,7 @@ uPreview();
 bToggles();
 bPreview();
 cToggles();
+cMsgRender();
 })();
 </script>
 </body>
