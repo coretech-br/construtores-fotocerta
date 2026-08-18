@@ -2873,12 +2873,23 @@ function cMsgRender(){
 
 function cNum(id,def){var v=parseInt($(id).value,10);return isNaN(v)?def:v;}
 function cCor(id,def){var v=$(id+'-t').value;return corValida(v)?v:def;}
+function cAlvoIso(){
+  var v=$('c-alvo').value;
+  if(!v)return '';
+  var partes=v.split('T');
+  if(partes.length<2)return '';
+  /* -03:00 fixo (horario de Brasilia; sem horario de verao desde 2019). O campo nao tem
+     "step", entao o navegador so devolve HH:MM, mas montamos o ISO a partir dos componentes
+     (nunca com cirurgia de string no valor bruto) para nao quebrar se algum dia vier com
+     segundos. */
+  return partes[0]+'T'+partes[1].slice(0,5)+':00-03:00';
+}
 function cCfg(){
   var dias=cNum('c-dias',0),horas=cNum('c-horas',0),mins=cNum('c-mins',0);
   return {
     modo:radio('c-modo'),
     duracaoMs:((dias*24+horas)*60+mins)*60000,
-    alvoIso:$('c-alvo').value?($('c-alvo').value+':00-03:00').replace(/(T\d\d:\d\d):00:00/,'$1:00'):'',
+    alvoIso:cAlvoIso(),
     cod:$('c-cod').value.trim()||'padrao',
     unidades:{d:$('c-un-d').checked,h:$('c-un-h').checked,m:$('c-un-m').checked,s:$('c-un-s').checked},
     diaszero:radio('c-diaszero')==='sim',
@@ -2896,7 +2907,7 @@ function cCfg(){
     cta:{ativo:radio('c-cta')==='sim',txt:$('c-ctatxt').value,url:$('c-ctaurl').value},
     fechar:radio('c-fechar'),prog:radio('c-prog')==='sim',
     coruja:{ativo:radio('c-coruja')==='sim',alt:cNum('c-corujaalt',26),gap:cNum('c-corujagap',16),mob:radio('c-corujamob')==='sim'},
-    mov:radio('c-mov'),vel:cNum('c-vel',18),alt:cNum('c-alt',5),
+    mov:radio('c-mov'),vel:cNum('c-vel',18),alt:Math.max(2,cNum('c-alt',5)),
     efeitos:{pulsar:$('c-ef-pulsar').checked,brilho:$('c-ef-brilho').checked,degrade:$('c-ef-degrade').checked,
       piscar:$('c-ef-piscar').checked,tremor:$('c-ef-tremor').checked},
     urg:{ativo:radio('c-urg')==='sim',lim:cNum('c-urglim',60),pulsar:radio('c-urgpulsar')==='sim'},
@@ -2936,12 +2947,18 @@ function cFormatarHTML(p,cfg){
   return '<span class="fcb-rel">'+h+'</span>';
 }
 
-var cPvTimer=null,cPvInicio=null,cPvMsg=0;
+var cPvTimer=null,cPvAltTimer=null,cPvInicio=null,cPvSig=null,cPvMsg=0;
 function cPreview(){
   var box=$('c-pv-box');if(!box)return;
   if(cPvTimer){clearInterval(cPvTimer);cPvTimer=null;}
+  if(cPvAltTimer){clearInterval(cPvAltTimer);cPvAltTimer=null;}
   var cfg=cCfg();
-  if(cPvInicio===null)cPvInicio=(new Date()).getTime();
+  /* o ponto de partida da previa so e reiniciado quando o que determina o alvo (modo/duracao/
+     data) muda desde o ultimo desenho -- assim ajustar cor ou clicar "Atualizar previa" sem
+     mudar a duracao nao reinicia a contagem (mesmo principio do codigo gerado: nao reinicia
+     a toa), mas mudar a duracao/data sempre reflete o prazo novo a partir de agora. */
+  var sig=cfg.modo+'|'+cfg.duracaoMs+'|'+cfg.alvoIso;
+  if(cPvInicio===null||sig!==cPvSig){cPvInicio=(new Date()).getTime();cPvSig=sig;}
   var alvo=cAlvoMs(cfg,cPvInicio);
   var fontes={neutra:'-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Ubuntu,sans-serif',
     humanista:'"Helvetica Neue",Helvetica,Arial,sans-serif',
@@ -2975,7 +2992,7 @@ function cPreview(){
   pinta();
   cPvTimer=setInterval(pinta,1000);
   if((cfg.mov==='altfade'||cfg.mov==='altdesliza')&&cfg.msgs.length>1){
-    setInterval(function(){cPvMsg++;},cfg.alt*1000);
+    cPvAltTimer=setInterval(function(){cPvMsg++;},cfg.alt*1000);
   }
 }
 
