@@ -3008,11 +3008,11 @@ function cJsBase(cfg){
   j+="  var MSG_FINAL='"+esc(cfg.fimtxt)+"';\n";
   j+='  var MENSAGENS=[\n';
   cfg.msgs.forEach(function(m,i){
-    j+="    {texto:'"+esc(m.texto)+"',curta:'"+esc(m.curta||'')+"'}"+(i<cfg.msgs.length-1?',':'')+'\n';
+    j+="    {texto:'"+esc(escHtml(m.texto))+"',curta:'"+esc(escHtml(m.curta||''))+"'}"+(i<cfg.msgs.length-1?',':'')+'\n';
   });
   j+='  ];\n';
   j+='  var UNIDADES={d:'+cfg.unidades.d+',h:'+cfg.unidades.h+',m:'+cfg.unidades.m+',s:'+cfg.unidades.s+'};\n';
-  j+="  var ROTULOS={d:'"+esc(cfg.rotulos.d)+"',h:'"+esc(cfg.rotulos.h)+"',m:'"+esc(cfg.rotulos.m)+"',s:'"+esc(cfg.rotulos.s)+"'};\n";
+  j+="  var ROTULOS={d:'"+esc(escHtml(cfg.rotulos.d))+"',h:'"+esc(escHtml(cfg.rotulos.h))+"',m:'"+esc(escHtml(cfg.rotulos.m))+"',s:'"+esc(escHtml(cfg.rotulos.s))+"'};\n";
   j+='  var ESCONDE_DIAS_ZERADOS='+cfg.diaszero+';\n';
   j+="  var FORMATO='"+cfg.formato+"';           /* 'compacto' | 'blocos' */\n";
   j+='  var EMPURRA_CONTEUDO='+(cfg.fixa&&cfg.empurrar)+';\n';
