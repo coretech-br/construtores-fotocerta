@@ -1427,8 +1427,7 @@ $$('c-gerar').click();
 var out = V('c-out1');
 T('gerou codigo', out.length > 500);
 T('titulo diz Tag Body', $$('c-out-titulo').textContent.indexOf('Tag Body') >= 0);
-T('script blindado', out.indexOf('<scr' + 'ipt>') >= 0 && out.indexOf('<script>') < 0);
-T('style blindado', out.indexOf('<sty' + 'le>') >= 0 && out.indexOf('<style>') < 0);
+T('saida traz as tags de verdade', out.indexOf('<scr'+'ipt>') >= 0 && out.indexOf('<sty'+'le>') >= 0);
 T('esta em IIFE', out.indexOf('(function () {') >= 0 && out.indexOf('})();') >= 0);
 T('sem tag semantica', !/<(section|header|nav|footer|article|aside)[\s>]/.test(out));
 T('sem evento inline', !/\son(click|load|change)\s*=/.test(out));
@@ -1443,7 +1442,14 @@ T('titulo muda para componente', $$('c-out-titulo').textContent.indexOf('compone
 T('sem position fixed no fluxo', V('c-out1').indexOf('position:fixed') < 0);
 ```
 
-Esperado: 12 × PASS.
+Esperado: 13 × PASS.
+
+**A blindagem não se verifica na saída — verifica-se no código-fonte.** `'<scr'+'ipt>'` e `'<script>'` são a mesma string em tempo de execução, então nenhuma asserção sobre `out` distingue as duas: a saída **precisa** conter as tags de verdade, é isso que o usuário cola. O que a regra 2 do manual do Prosite exige é que o **fonte do `index.html`** não traga essas sequências inteiras — senão o parser HTML encerra o bloco `<script>` da própria ferramenta no meio. Verifique no terminal:
+
+```bash
+grep -c "'<scr'+'ipt>'\|'</scr'+'ipt>'\|'<sty'+'le>'" index.html   # deve ser > 0
+grep -n "c+='</script>'\|c+='<script>'\|c+='<style>'" index.html    # deve sair vazio
+```
 
 **Verificação funcional adicional:** copie a saída para um arquivo `/tmp/teste-barra.html` envolto em `<!doctype html><html><body>` + código + `</body></html>`, abra no navegador e confirme que a barra aparece, conta, e que ao recarregar **não reinicia**.
 
