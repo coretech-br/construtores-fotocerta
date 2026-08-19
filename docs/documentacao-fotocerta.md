@@ -36,7 +36,11 @@ Os códigos completos estão nos arquivos anexos do projeto e podem ser regenera
 
 1. **Remove `onclick`/eventos inline** → sempre `addEventListener`.
 2. **Corrompe strings contendo** `<script`, `</script>`, `<style`, `<iframe` dentro de JS (na publicação) → blindar com concatenação: `'<scr'+'ipt>'`, `'</scr'+'ipt>'`, `'<sty'+'le>'`, `'</sty'+'le>'`, `'<ifr'+'ame'`.
-2b. **O parser HTML fecha o `<script>` no primeiro `</script` do texto bruto** — inclusive dentro de uma string JS. A blindagem por concatenação do item 2 resolve as tags que o gerador escreve; **texto digitado pelo operador que vai parar dentro do script gerado precisa de tratamento próprio**. Onde o valor é consumido como HTML, `escHtml` já basta (escapa o `<`). Onde o valor precisa chegar cru ao runtime — porque vai para `textContent` ou vira chave de `localStorage` —, usar `escJs` (em `index.html`), que é `esc()` mais `replace(/<\//g,'<\\/')`: a barra invertida o parser HTML vê, e o interpretador JS descarta.
+2b. **Duas sequências tiram o parser HTML do estado normal de `<script>`, inclusive dentro de uma string JS** — e a blindagem por concatenação do item 2 só cobre as tags que o gerador escreve, não o texto digitado pelo operador que vai parar dentro do script gerado:
+    - `</` — fecha o elemento no primeiro `</script` do texto bruto;
+    - `<!--` — leva ao estado *script-data-escaped* e, se vier um `<script` depois, ao *double-escaped*; dali o `</script>` legítimo do próprio bloco **deixa de fechar o elemento**, e o que vem depois dele na página é engolido junto.
+
+    Onde o valor é consumido como HTML, `escHtml` já basta (escapa o `<`, o que neutraliza as duas). Onde o valor precisa chegar cru ao runtime — porque vai para `textContent` ou vira chave de `localStorage` —, usar `escJs` (em `index.html`), que é `esc()` mais `replace(/<\//g,'<\\/')` e `replace(/<!--/g,'<\\!--')`: **essas duas sequências e nada mais** — a barra invertida o parser HTML vê, e o interpretador JS descarta.
 3. **Remove tags semânticas HTML5** (`<section>`, `<header>`, `<nav>`) mantendo o conteúdo solto → usar só `<div>`.
 4. **A página publicada carrega jQuery da Alboom que sobrescreve `$` global** → embrulhar todo script em IIFE `(function(){...})()`.
 5. **Editor ≠ publicado**: sempre publicar para testar. Console do Safari (Cmd+Option+C) é a ferramenta de diagnóstico.

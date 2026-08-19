@@ -3182,13 +3182,16 @@ function cCssEfeitos(cfg){
    previas das outras abas. */
 function escAttr(s){return escHtml(s).replace(/"/g,'&quot;');}
 /* esc() protege a string JS (barra invertida e apostrofo), mas nao protege a fatia de HTML
-   em volta: o parser fecha o <scr'+'ipt> no primeiro "</scr'+'ipt" do texto bruto, mesmo
-   dentro de uma string JS. MENSAGENS e ROTULOS ja passam por escHtml, que come o "<".
-   MSG_FINAL e CODIGO nao podem passar por escHtml -- MSG_FINAL vai para textContent (o
-   visitante veria "&amp;" cru) e CODIGO vira chave de localStorage -- entao aqui so a
-   sequencia de fechamento e neutralizada, com uma barra invertida que o parser HTML ve
-   mas o interpretador JS descarta. */
-function escJs(s){return esc(s).replace(/<\//g,'<\\/');}
+   em volta. MENSAGENS, ROTULOS e o CTA ja passam por escHtml, que come o "<". MSG_FINAL e
+   CODIGO nao podem passar por escHtml -- MSG_FINAL vai para textContent (o visitante veria
+   "&amp;" cru) e CODIGO vira chave de localStorage -- entao sao estes dois que precisam de
+   tratamento proprio. Duas sequencias tiram o parser do estado normal de script:
+     "</"    fecha o elemento no primeiro "</scr'+'ipt" do texto bruto;
+     "<!--"  leva ao estado escapado e, se vier um "<scr'+'ipt" depois, ao duplamente
+             escapado -- dali o "</scr'+'ipt>" legitimo do proprio bloco deixa de fechar o
+             elemento, e a barra some junto com tudo que vier depois dela na pagina.
+   As duas ganham uma barra invertida que o parser HTML ve e o interpretador JS descarta. */
+function escJs(s){return esc(s).replace(/<\//g,'<\\/').replace(/<!--/g,'<\\!--');}
 function cJsBase(cfg){
   var j='';
   j+='  /* ===== CONFIGURACAO ===== */\n';
