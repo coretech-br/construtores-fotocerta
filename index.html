@@ -387,7 +387,7 @@
       <label><input type="radio" name="l-ancora" value="nao"><span>Não incluir</span></label>
       </div>
       <div id="l-anc-campos">
-      <label for="l-anc">Âncora do botão <small>(deve começar com #)</small></label>
+      <label for="l-anc">Âncora do botão <small>(# seguido de letra e depois letras, números, hífen ou sublinhado — ex.: #reserva, #secao-2)</small></label>
       <input type="text" id="l-anc" value="#reserva">
       <label for="l-resp">Respiro ao chegar no calendário <small>(pixels de folga acima dele)</small></label>
       <input type="number" id="l-resp" value="24" min="0" step="4">
@@ -547,7 +547,7 @@
     <div>
       <fieldset id="u-pix-campos">
         <legend>Dados do recebedor (Pix)</legend>
-        <label for="u-chave">Chave Pix <small>(máx. 77 caracteres; espaços das pontas e caracteres invisíveis do copiar-e-colar são removidos ao sair do campo)</small></label>
+        <label for="u-chave">Chave Pix <small>(máx. 77 caracteres; espaços e caracteres invisíveis das pontas são removidos ao sair do campo — no meio da chave eles impedem a geração, com aviso)</small></label>
         <input type="text" id="u-chave" value="" placeholder="e-mail, telefone, CPF/CNPJ ou chave aleatoria">
         <label for="u-nomer">Nome do recebedor <small>(máx. 25 caracteres, acentos removidos no código Pix)</small></label>
         <input type="text" id="u-nomer" value="" maxlength="25" placeholder="nome que aparece no Pix">
@@ -1684,6 +1684,20 @@ document.addEventListener('change',function(e){
   if(e.target.name==='l-icone'||e.target.name==='l-formato')lBtnPreview();
 });
 
+/* A ancora tem DOIS destinos no bloco entregue: uma string JS (var ANCORA, ja protegida por
+   escJs) e um SELETOR CSS na regra do plano B. Dentro de <style> o parser esta em RAWTEXT:
+   ele ignora "</" generico e "<!--", e so reage a "</style" -- por isso escJs nao serve ali,
+   e por isso tambem o campo continuava exploravel depois da correcao de escape. Verificado:
+   "reserva</sty'+'le><img src=x onerror=...>" fecha o <style> cedo, executa comando arbitrario
+   e derrama o resto do CSS como texto visivel na landing; "reserva{}*{display:none}#x" fecha a
+   regra sozinho e a seguinte esconde a pagina inteira.
+   O tratamento certo para o destino CSS e validar o SELETOR, nao escapar: aceitamos apenas o
+   formato de ancora que o Prosite usa (o campo ID Html gera um id simples). Fora disso e erro
+   de digitacao, e a geracao e recusada com aviso -- mesmo criterio da chave Pix: o que o
+   operador consegue ver na tela, ele conserta; a ferramenta nao reescreve calada.
+   Caso realista e igualmente mudo que isto tambem passa a barrar: ancora com espaco ou acento
+   gerava seletor invalido e o plano B simplesmente nao funcionava, sem nenhum aviso. */
+function lAncOk(v){return /^#[A-Za-z][A-Za-z0-9_-]*$/.test(v);}
 function lAncToggle(){
   var el=$('l-anc-campos');
   if(el)el.style.display=(radio('l-ancora')==='sim')?'block':'none';
@@ -1704,6 +1718,19 @@ function lGerar(){
      textContent/placeholder --, entao escHtml/escAttr aqui produziriam "&amp;" e "&quot;"
      visiveis para o visitante. As cores passam por corSegura: sao hexadecimais validados, nao
      precisam de escape nenhum depois disso. */
+  /* Ancora resolvida e validada ANTES de montar qualquer coisa: recusar no fim deixaria a
+     textarea com o bloco anterior enquanto o alerta diz que nao gerou. */
+  var comAnc=(radio('l-ancora')==='sim'),anc='',resp=24;
+  if(comAnc){
+    anc=$('l-anc').value.trim();
+    if(anc&&anc.charAt(0)!=='#')anc='#'+anc;
+    if(!anc)anc='#reserva';
+    if(!lAncOk(anc)){
+      alert('A ancora precisa ser # seguido de uma letra e depois so letras, numeros, hifen ou sublinhado (ex.: #reserva, #secao-2). O valor digitado vira seletor no CSS do plano B: com espaco ou acento a regra nasce invalida e o plano B nao funciona, sem nenhum aviso na pagina; com chave, chaveta ou tag, o CSS gerado deixa de ser CSS.');
+      return;
+    }
+    resp=parseInt($('l-resp').value,10);if(isNaN(resp)||resp<0)resp=24;
+  }
   var v={
     num:num,cod:escJs($('l-cod').value),pag:escJs($('l-pag').value),
     modo:radio('l-modo'),segauto:parseInt($('l-segauto').value,10)||8,
@@ -1844,16 +1871,12 @@ function lGerar(){
   c+="if(MODO==='automatico'&&!jaViu()){\ntimerAuto=setTimeout(function(){\ntimerAuto=null;\nabrir(true);\n},SEGUNDOS_AUTO*1000);\n}\n}\n\n";
   c+="if(document.body)montar();\nelse document.addEventListener('DOMContentLoaded',montar);\n})();\n</scr"+"ipt>";
 
-  if(radio('l-ancora')==='sim'){
-    var anc=$('l-anc').value.trim();
-    if(anc&&anc.charAt(0)!=='#')anc='#'+anc;
-    if(!anc)anc='#reserva';
-    var resp=parseInt($('l-resp').value,10);if(isNaN(resp)||resp<0)resp=24;
+  if(comAnc){
     c+='\n\n<!-- Ancora inteligente p/ calendario no iframe -->\n';
     c+='<scr'+'ipt>\n(function(){\n';
-    /* mesma regra: ANCORA e string JS. (O uso da ancora no CSS do plano B, mais abaixo, tem
-       outro destino e outro tratamento pendente -- ver A3 da auditoria; escJs ali produziria
-       "<\/" dentro de um seletor CSS, que e escapar para o destino errado.) */
+    /* Destino string JS: escJs. O outro destino da mesma ancora -- o seletor da regra CSS do
+       plano B, mais abaixo -- e protegido por lAncOk la em cima (validacao de seletor), nao
+       por escape: dentro de <style> o parser ignora "</" e "<!--" e escJs seria inerte. */
     c+="  var ANCORA='"+escJs(anc)+"';      /* href do botao/link que aciona a rolagem (deve comecar com #) */\n";
     c+='  var RESPIRO='+resp+';             /* px de folga acima do calendario ao chegar nele */\n\n';
     c+='  function alvoY(){\n';
@@ -2233,20 +2256,25 @@ document.addEventListener('change',function(e){
    cabe em 77 caracteres: uma chave maior desestrutura o TLV (o leitor le "01102aaa..." como
    comprimento 10) enquanto o CRC continua sendo calculado sobre o payload torto -- o QR
    PARECE valido e so um banco de verdade recusa.
-   Divisao adotada: o que o operador NAO tem como ver (invisiveis, zero-width, controle) e
-   removido e devolvido ao campo; o que ele PODE ver (espaco no meio, tamanho, campo vazio)
-   vira recusa com aviso, porque corrigir calado o que esta na tela troca defeito visivel por
-   invisivel -- a regra que este projeto ja aplicou no c-mob. Nao ha regra de formato aqui de
-   proposito: o padrao aceita e-mail, telefone, CPF/CNPJ e chave aleatoria, com formatos
-   diferentes. O limite de caracteres imprimiveis ASCII nao e estetico: tlv() conta com
-   v.length e crc16() com charCodeAt, ambos em unidades UTF-16, enquanto o banco conta bytes
-   UTF-8 -- qualquer caractere fora dessa faixa faz comprimento e CRC discordarem. */
+   Divisao adotada, por POSICAO e nao por tipo de caractere: nas PONTAS tudo que e espaco ou
+   invisivel e removido e devolvido ao campo (ninguem digita isso de proposito, e um espaco a
+   mais no fim nao muda a chave que o operador leu); NO MEIO nada e removido -- espaco comum,
+   TAB, NBSP e zero-width caem todos na mesma recusa com aviso. A primeira versao desta
+   correcao removia NBSP e TAB do meio calada e recusava o espaco comum na mesma posicao: duas
+   entradas visualmente identicas com tratamentos opostos, e a silenciosa reescrevendo no meio
+   de uma credencial de pagamento. Uma regra so, e o aviso menciona a possibilidade de
+   caractere invisivel justamente porque o operador pode nao estar vendo o que esta errado.
+   Tambem recusam: tamanho acima do limite e campo que ficou vazio depois da limpeza.
+   Nao ha regra de formato aqui de proposito: o padrao aceita e-mail, telefone, CPF/CNPJ e
+   chave aleatoria, com formatos diferentes. O limite de caracteres imprimiveis ASCII nao e
+   estetico: tlv() conta com v.length e crc16() com charCodeAt, ambos em unidades UTF-16,
+   enquanto o banco conta bytes UTF-8 -- qualquer caractere fora dessa faixa faz comprimento e
+   CRC discordarem. */
 var PIX_CHAVE_MAX=77;
 function pixLimpar(t){
   return String(t||'')
-    .replace(/[\u0000-\u001F\u007F-\u009F\u00AD\u200B-\u200F\u2028\u2029\u2060\uFEFF]/g,'')
-    .replace(/[\u00A0\u1680\u2000-\u200A\u202F\u205F\u3000]/g,'')
-    .replace(/^\s+|\s+$/g,'');
+    .replace(/^[\u0000-\u0020\u007F-\u00A0\u00AD\u1680\u2000-\u200F\u2028\u2029\u202F\u205F\u2060\u3000\uFEFF]+/,'')
+    .replace(/[\u0000-\u0020\u007F-\u00A0\u00AD\u1680\u2000-\u200F\u2028\u2029\u202F\u205F\u2060\u3000\uFEFF]+$/,'');
 }
 /* Correcao a vista, no padrao do c-mob: o campo passa a mostrar exatamente a chave que vai
    para o codigo. So em 'change'/'blur', nunca em 'input'. */
@@ -2260,10 +2288,13 @@ function uChaveAjustar(){
 /* 'bruta' e o valor antes da limpeza: chave que so tinha invisiveis merece aviso proprio
    (senao o operador leria "preencha a chave" com o campo aparentemente preenchido); campo
    nunca preenchido cai no aviso geral de campos obrigatorios, que ja existia. */
+/* Charset ANTES do tamanho: uma chave de 80 caracteres com emoji reportaria "tem 80
+   caracteres" quando o problema e o emoji -- o operador cortaria a chave certa e continuaria
+   sem QR valido. O defeito mais especifico e o que deve ser nomeado. */
 function uChaveErro(chave,bruta){
-  if(!chave)return String(bruta||'').length?'A chave Pix so tinha caracteres invisiveis (vindos de copiar-e-colar) e ficou vazia depois da limpeza. Digite a chave novamente.':'';
+  if(!chave)return String(bruta||'').length?'A chave Pix so tinha espacos ou caracteres invisiveis (vindos de copiar-e-colar) e ficou vazia depois da limpeza das pontas. Digite a chave novamente.':'';
+  if(!/^[!-~]+$/.test(chave))return 'A chave Pix tem, no meio, um espaco ou um caractere fora do padrao -- pode ser um caractere invisivel que veio junto do copiar-e-colar do app do banco e que voce nao esta vendo. O codigo do QR conta os caracteres em bytes, e qualquer um fora da faixa comum (letras, numeros e sinais, sem espacos) faz o banco recusar o pagamento sem explicacao. Apague o campo e digite a chave de novo.';
   if(chave.length>PIX_CHAVE_MAX)return 'A chave Pix tem '+chave.length+' caracteres e o padrao do Banco Central aceita no maximo '+PIX_CHAVE_MAX+' no campo da chave. Uma chave maior desmonta o codigo do QR sem que ele pareca invalido: confira se nao colou algo a mais.';
-  if(!/^[!-~]+$/.test(chave))return 'A chave Pix tem espaco no meio ou caractere fora do padrao. O codigo do QR conta os caracteres em bytes, e qualquer um fora da faixa comum (letras, numeros e sinais, sem espacos) faz o banco recusar o pagamento sem explicacao. Corrija a chave e gere de novo.';
   return '';
 }
 
