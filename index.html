@@ -802,10 +802,11 @@
     <div>
       <fieldset>
       <legend>Halo externo</legend>
-      <div class="radios">
+      <div class="radios" id="b-halo-radios">
       <label><input type="radio" name="b-halo" value="sim" checked><span>Com halo</span></label>
       <label><input type="radio" name="b-halo" value="nao"><span>Sem halo</span></label>
       </div>
+      <p class="ajuda" id="b-halo-aviso" style="display:none">No <b>halo pulsante</b>, o halo <b>é</b> o efeito — não há como desligá-lo sem desligar o efeito inteiro, então a escolha "com/sem halo" não aparece aqui. Os dois campos abaixo controlam a onda que pulsa. Se você quer uma moldura <b>sem</b> halo, escolha o efeito <b>borda fixa</b>.</p>
       <div id="b-halo-campos">
       <label for="b-haloraio">Alcance do halo <small>(px)</small></label>
       <input type="number" id="b-haloraio" value="26" min="0" max="80" step="2">
@@ -823,7 +824,7 @@
       <div id="b-txt-campo">
       <div class="cor-linha"><input type="color" id="b-c4" value="#F7EFDF"><input type="text" id="b-c4-t" value="#F7EFDF"></div>
       </div>
-      <label for="b-pad">Espaçamento interno <small>(ex.: 40px 32px — vazio = não mexer)</small></label>
+      <label for="b-pad">Espaçamento interno <small>(apenas um valor de padding: de 1 a 4 números com unidade, ex.: <b>40px 32px</b> — vazio = não mexer)</small></label>
       <input type="text" id="b-pad" value="40px 32px" placeholder="40px 32px">
       </fieldset>
     </div>
@@ -858,6 +859,7 @@
   <div class="instrucoes">
   <h3>Instrução de uso do código gerado</h3>
   <p class="ajuda"><b>Onde colar o código 1 (global):</b> em <b>Configurações → Códigos personalizados → campo do cabeçalho (head)</b> do site, com a tag style inclusa. Cola-se <b>uma única vez</b>: ele define a animação e vale para o site inteiro. Se usar efeitos diferentes em componentes diferentes, cole os blocos de cada efeito no mesmo campo (cada um tem nome próprio e não conflita).</p>
+  <p class="ajuda"><b>A regra de acessibilidade que vem junto:</b> ela desliga <b>apenas esta animação</b> para quem escolheu "reduzir movimento" no sistema — redefinindo a própria animação com um único quadro. A borda para de se mexer e continua visível (o degradê fica parado, o halo vira um anel estático). Nada mais do site é afetado: a versão anterior deste código usava <code>*</code> e apagava a animação de todas as páginas, inclusive as do tema. Se o efeito escolhido for <b>borda fixa</b>, não há animação nenhuma e o código 1 não existe.</p>
   <p class="ajuda"><b>Onde colar o código 2 (componente):</b> no campo <b>CSS Customizado</b> do próprio componente, no editor. São propriedades soltas, sem seletor — o Prosite as aplica direto no elemento do componente, então <b>não é preciso ID Html nem classe</b>. Se em algum componente o campo não aceitar propriedades soltas, inspecione o elemento publicado, pegue a classe que a Alboom gera e envolva tudo em <code>.classe { ... }</code> — nesse caso, coloque a regra completa no head.</p>
   <p class="ajuda"><b>Regra de ouro:</b> at-rules (<code>@keyframes</code>, <code>@media</code>) <b>só funcionam no head</b>; o campo do componente aceita apenas propriedades. Se a borda aparecer parada, é quase sempre porque o código 1 não foi colado no head — ou porque o nome da animação foi alterado em um dos dois lugares.</p>
   <p class="ajuda"><b>Depois de colar:</b> salve, <b>publique</b> e confira em <b>aba anônima</b> (evita cache). Verifique se a borda aparece e se está se movendo, e teste no celular. Cores mudam de percepção conforme o contexto da página — vale calibrar na página real, não só na prévia.</p>
@@ -3105,19 +3107,55 @@ function bRestaura(st){
   $('b-pad').value=B.pad;
 }
 
-function bHexRgb(h){
-  h=String(h||'').trim().replace('#','');
-  if(h.length===3)h=h[0]+h[0]+h[1]+h[1]+h[2]+h[2];
-  var n=parseInt(h,16);
-  if(isNaN(n))return '255, 201, 74';
-  return ((n>>16)&255)+', '+((n>>8)&255)+', '+(n&255);
-}
-function bNum(id,def,min,max){
+/* Faixa declarada de cada campo numerico da aba: [id, padrao, min, max, inteiro].
+   Uma lista so serve aos DOIS lados -- bMontar (o que sai no codigo) e bAjustar (o que fica
+   na tela) --, entao nao ha como a saida ser presa numa faixa e o campo em outra. */
+var B_NUMS=[
+  ['b-esp',4,0,20,true],['b-raio',14,0,60,true],['b-fang',150,0,360,true],
+  ['b-facholarg',5,2,25,false],['b-listra',10,3,40,true],['b-vel',4,0.5,30,false],
+  ['b-haloraio',26,0,80,true],['b-haloop',0.35,0,1,false]
+];
+function bFaixa(id){var i;for(i=0;i<B_NUMS.length;i++){if(B_NUMS[i][0]===id)return B_NUMS[i];}return null;}
+function bNum(id,def,min,max,inteiro){
   var v=parseFloat(String($(id).value).replace(',','.'));
-  if(isNaN(v))return def;
+  if(isNaN(v))v=def;
   if(min!=null&&v<min)v=min;
   if(max!=null&&v>max)v=max;
-  return v;
+  return inteiro?Math.round(v):v;
+}
+function bPreso(id){var f=bFaixa(id);return bNum(f[0],f[1],f[2],f[3],f[4]);}
+/* Correcao a vista, no padrao do c-mob da Contagem. Antes, bNum prendia o valor na faixa e nao
+   devolvia nada para o campo: o operador digitava 50 na espessura, continuava lendo 50 na tela
+   e copiava um CSS com 20px -- oito campos com o mesmo defeito. Agora o proprio campo se
+   corrige, e tela e codigo mostram sempre o MESMO numero.
+   So em 'change'/'blur', nunca em 'input': corrigir a cada tecla impediria digitar "26",
+   porque o "2" viraria o minimo antes do resto chegar. */
+function bAjustar(id){
+  var el=$(id);if(!el)return false;
+  var preso=String(bPreso(id));
+  if(preso===String(el.value))return false;
+  el.value=preso;
+  return true;
+}
+function bAjustarTodos(){
+  var i,mudou=false;
+  for(i=0;i<B_NUMS.length;i++){if(bAjustar(B_NUMS[i][0]))mudou=true;}
+  return mudou;
+}
+/* O espacamento interno e o unico texto livre desta aba e o destino dele e o CSS do
+   componente, concatenado como 'padding: '+pad+';'. Sem validacao, um ponto e virgula
+   digitado por engano ("10px; background:red") acrescenta uma segunda propriedade DEPOIS do
+   shorthand em camadas -- e o background solto apaga de uma vez o fundo interno e a moldura
+   animada, exatamente a colisao de shorthand que o CLAUDE.md descreve, aqui alcancavel pela
+   digitacao do operador. Nao ha valor "certo" a assumir no lugar do que ele escreveu, entao a
+   geracao e recusada com aviso, como na chave Pix e no limiar de urgencia. */
+function bPadOk(v){
+  var partes=String(v).split(/\s+/),i;
+  if(partes.length<1||partes.length>4)return false;
+  for(i=0;i<partes.length;i++){
+    if(!/^(0|[0-9]+(\.[0-9]+)?(px|em|rem|%|vw|vh|ch))$/.test(partes[i]))return false;
+  }
+  return true;
 }
 function bCor(id,def){var v=$(id+'-t').value;return corValida(v)?v:def;}
 
@@ -3130,7 +3168,16 @@ function bToggles(){
   el=$('b-nucleo-campo');if(el)el.style.display=(ef==='brilho')?'block':'none';
   el=$('b-listra-campo');if(el)el.style.display=(ef==='listras')?'block':'none';
   el=$('b-vel-campo');if(el)el.style.display=(ef==='fixa')?'none':'block';
-  el=$('b-halo-campos');if(el)el.style.display=(radio('b-halo')==='sim')?'block':'none';
+  /* No efeito "halo pulsante" o halo E o efeito: nao existe pulso sem halo. O radio
+     "com/sem halo" ficava visivel ali e nao desligava nada -- marcado em "sem halo", o
+     gerador so trocava os campos por 18px/0.5 fixos, os campos de alcance e intensidade
+     sumiam da tela, e o halo continuava pulsando. O rotulo mentia. Agora o radio some
+     nesse efeito, um aviso explica por que, e os campos ficam sempre a vista, porque sao
+     eles que controlam a onda. */
+  var pulso=(ef==='pulso');
+  el=$('b-halo-radios');if(el)el.style.display=pulso?'none':'flex';
+  el=$('b-halo-aviso');if(el)el.style.display=pulso?'block':'none';
+  el=$('b-halo-campos');if(el)el.style.display=(pulso||radio('b-halo')==='sim')?'block':'none';
   el=$('b-txt-campo');if(el)el.style.display=(radio('b-txt')==='sim')?'block':'none';
 }
 document.addEventListener('change',function(e){
@@ -3157,20 +3204,22 @@ function bStops(base,facho,nucleo,L){
 function bMontar(){
   var ef=radio('b-efeito');
   var fu=radio('b-fundo');
-  var esp=Math.round(bNum('b-esp',4,0,20));
-  var raio=Math.round(bNum('b-raio',14,0,60));
+  /* Todos os numeros vem de bPreso, que le a MESMA faixa que bAjustar devolve ao campo. */
+  var esp=bPreso('b-esp');
+  var raio=bPreso('b-raio');
   var c1=bCor('b-c1','#9C5638');
   var c2=bCor('b-c2','#FFC94A');
   var c3=bCor('b-c3','#FFF6D8');
-  var L=bNum('b-facholarg',5,2,25);
-  var listra=Math.round(bNum('b-listra',10,3,40));
-  var vel=bNum('b-vel',4,0.5,30);
-  var halo=(radio('b-halo')==='sim');
-  var haloraio=Math.round(bNum('b-haloraio',26,0,80));
-  var haloop=bNum('b-haloop',0.35,0,1);
+  var L=bPreso('b-facholarg');
+  var listra=bPreso('b-listra');
+  var vel=bPreso('b-vel');
+  /* No efeito "pulso" o halo e o proprio efeito: os campos valem sempre, sem o radio. */
+  var halo=(ef==='pulso')||(radio('b-halo')==='sim');
+  var haloraio=bPreso('b-haloraio');
+  var haloop=bPreso('b-haloop');
   var f1=bCor('b-f1','#8A4A32');
   var f2=bCor('b-f2','#B5674A');
-  var fang=Math.round(bNum('b-fang',150,0,360));
+  var fang=bPreso('b-fang');
   var fallback=(radio('b-fallback')==='sim');
   var comTexto=(radio('b-txt')==='sim');
   var corTexto=bCor('b-c4','#F7EFDF');
@@ -3180,12 +3229,15 @@ function bMontar(){
   if(camadas&&fu==='manter'){
     return {erro:'Para este efeito, o fundo interno precisa ser cor solida ou degrade: a tecnica de borda animada pinta o miolo do componente. Dica: capture a cor atual do componente com o conta-gotas e use como cor solida.'};
   }
+  if(pad&&!bPadOk(pad)){
+    return {erro:'O espacamento interno aceita apenas um valor de padding CSS: de um a quatro numeros com unidade, separados por espaco (ex.: 40px, "40px 32px", "12px 20px 16px 20px"). Unidades aceitas: px, em, rem, %, vw, vh, ch -- e "0" sozinho. O valor digitado ("'+pad+'") entra direto no CSS do componente, entao um ponto e virgula ali acrescenta uma segunda propriedade: um "background" colado no meio apaga de uma vez o fundo interno E a moldura animada, sem nenhum aviso. Deixe o campo vazio para nao mexer no espacamento.'};
+  }
 
   var interna='';
   if(fu==='solido')interna='linear-gradient('+f1+', '+f1+')';
   else if(fu==='degrade')interna='linear-gradient('+fang+'deg, '+f1+', '+f2+')';
 
-  var props=[],anim='',keys='';
+  var props=[],anim='',keys='',keysRm='';
 
   if(camadas){
     var bordaGrad='',size='';
@@ -3194,17 +3246,20 @@ function bMontar(){
       bordaGrad='linear-gradient(120deg,\n    '+bStops(c1,c2,c3,L)+')';
       size='100% 100%, 300% 300%';
       keys='@keyframes fc-borda-brilho {\n  0%   { background-position: 0 0, 0% 0%; }\n  100% { background-position: 0 0, 100% 100%; }\n}';
+      keysRm='  @keyframes fc-borda-brilho {\n    0%, 100% { background-position: 0 0, 0% 0%; }\n  }';
     }else if(ef==='gradiente'){
       anim='fc-borda-gradiente';
       bordaGrad='linear-gradient(90deg, '+c1+', '+c2+', '+c1+')';
       size='100% 100%, 300% 100%';
       keys='@keyframes fc-borda-gradiente {\n  0%   { background-position: 0 0, 0% 0; }\n  100% { background-position: 0 0, 100% 0; }\n}';
+      keysRm='  @keyframes fc-borda-gradiente {\n    0%, 100% { background-position: 0 0, 0% 0; }\n  }';
     }else{
       anim='fc-borda-listras';
       bordaGrad='repeating-linear-gradient(45deg, '+c1+' 0 '+listra+'px, '+c2+' '+listra+'px '+(listra*2)+'px)';
       size='100% 100%, 100% 100%';
       var desl=(listra*2*1.41421).toFixed(2);
       keys='@keyframes fc-borda-listras {\n  0%   { background-position: 0 0, 0 0; }\n  100% { background-position: 0 0, '+desl+'px 0; }\n}';
+      keysRm='  @keyframes fc-borda-listras {\n    0%, 100% { background-position: 0 0, 0 0; }\n  }';
     }
     props.push('border: '+esp+'px solid transparent;');
     props.push('border-radius: '+raio+'px;');
@@ -3215,9 +3270,17 @@ function bMontar(){
     props.push('animation: '+anim+' '+vel+'s linear infinite;');
   }else if(ef==='pulso'){
     anim='fc-borda-pulso';
-    var pr=halo?haloraio:18;
-    var po=halo?haloop:0.5;
+    /* pr/po vinham de um ternario sobre "halo": marcar "sem halo" nao apagava o pulso, so
+       trocava os valores por 18px/0.5 fixos com os campos escondidos. Agora os campos valem
+       sempre neste efeito (ver bMontar/bToggles) e o ternario sumiu. */
+    var pr=haloraio;
+    var po=haloop;
     keys='@keyframes fc-borda-pulso {\n  0%   { box-shadow: 0 0 0 0 rgba('+bHexRgb(c2)+', '+po+'); }\n  70%  { box-shadow: 0 0 0 '+pr+'px rgba('+bHexRgb(c2)+', 0); }\n  100% { box-shadow: 0 0 0 0 rgba('+bHexRgb(c2)+', 0); }\n}';
+    /* Congelar o pulso no quadro 100% apagaria o halo por inteiro -- ele e "0 0 0 0
+       rgba(cor, 0)" --, e o componente perderia todo o destaque justamente para quem pediu
+       menos movimento. O quadro estatico e um anel de meio alcance na opacidade de partida:
+       parado, mas visivel. */
+    keysRm='  @keyframes fc-borda-pulso {\n    0%, 100% { box-shadow: 0 0 0 '+Math.round(pr/2)+'px rgba('+bHexRgb(c2)+', '+po+'); }\n  }';
     if(esp>0)props.push('border: '+esp+'px solid '+c1+';');
     props.push('border-radius: '+raio+'px;');
     if(fu==='solido'){if(fallback)props.push('background: '+f1+';');else props.push('background: '+f1+';');}
@@ -3234,7 +3297,7 @@ function bMontar(){
   if(comTexto)props.push('color: '+corTexto+';');
   if(pad)props.push('padding: '+pad+';');
 
-  return {anim:anim,keys:keys,props:props.join('\n'),efeito:ef};
+  return {anim:anim,keys:keys,keysRm:keysRm,props:props.join('\n'),efeito:ef};
 }
 
 function bPreview(){
@@ -3261,17 +3324,38 @@ document.addEventListener('change',function(e){
 });
 
 function bGerar(){
+  if(bAjustarTodos())salvarEstado();
   var m=bMontar();
   if(m.erro){alert(m.erro);return;}
   var c1='';
-  if(m.efeito==='fixa'){
-    c1='/* O efeito "borda fixa" nao usa animacao: nao e preciso colar nada no head. */\n';
-    c1+='/* Se quiser manter a regra de acessibilidade do site, use o bloco abaixo. */\n';
+  if(!m.keys){
+    /* Sem animacao, sem bloco: o codigo 1 antes trazia um <style> so com a regra de
+       acessibilidade, ou seja, um bloco para colar no head que nao dizia respeito a este
+       efeito. Aqui ele vira so a explicacao. */
+    c1='/* O efeito "borda fixa" nao usa animacao: nao ha nada para colar no head do site. */\n';
+    c1+='/* Cole apenas o codigo 2 no campo CSS Customizado do componente. */';
+    $('b-out1').value=c1;
+    $('b-out2').value=m.props;
+    return;
   }
   c1+='<sty'+'le>\n';
-  if(m.keys)c1+='/* Animacao da borda com efeito - cole uma vez no head do site */\n'+m.keys+'\n';
-  c1+='/* Acessibilidade: reduz o movimento para quem prefere menos animacao */\n';
-  c1+='@media (prefers-reduced-motion: reduce) {\n  * { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }\n}\n';
+  c1+='/* Animacao da borda com efeito - cole uma vez no head do site */\n'+m.keys+'\n';
+  /* Acessibilidade ESCOPADA. O bloco antigo era "* { animation-duration: 0.01ms !important;
+     animation-iteration-count: 1 !important; }": como este codigo vai para o head do SITE,
+     ele matava toda animacao de todas as paginas para quem tem movimento reduzido --
+     inclusive as do tema Alboom, o botao de captacao de leads, o slideshow e a barra de
+     contagem regressiva, que ja traz o proprio bloco escopado. E, no halo pulsante, congelar
+     em uma iteracao de 0,01 ms parava a animacao no quadro 100%, que e halo nenhum: o
+     componente perdia o destaque por completo em vez de ganhar uma versao estatica.
+     A regra agora redefine A PROPRIA animacao com um unico quadro. Duas consequencias: so as
+     animacoes fc-borda-* param (nada mais do site e tocado) e o efeito congela num estado
+     legivel -- o degrade continua a vista, o halo vira um anel parado. E, como cada bloco so
+     redefine a animacao que ele mesmo declarou, colar varios efeitos no mesmo campo do head
+     nao gera regras concorrentes. */
+  c1+='/* Acessibilidade: para quem pediu menos movimento no sistema, a MESMA animacao e\n';
+  c1+='   redefinida com um unico quadro -- a borda para de se mexer e continua visivel.\n';
+  c1+='   Vale so para esta animacao; o resto do site nao e afetado. */\n';
+  c1+='@media (prefers-reduced-motion: reduce) {\n'+m.keysRm+'\n}\n';
   c1+='</sty'+'le>';
   $('b-out1').value=c1;
   $('b-out2').value=m.props;
@@ -4195,6 +4279,15 @@ prep('Bordas com efeito','bor',function(){
   liga('b-copy1',function(){copiar('b-out1','b-cop1');});
   liga('b-copy2',function(){copiar('b-out2','b-cop2');});
   parearCor('b-f1');parearCor('b-f2');parearCor('b-c1');parearCor('b-c2');parearCor('b-c3');parearCor('b-c4');
+  /* Correcao a vista dos oito campos numericos, no padrao do c-mob. O listener do proprio
+     elemento roda antes dos de document, entao o bPreview global ja desenha com o valor
+     preso -- por isso o ramo de 'change' nao redesenha. 'blur' nao borbulha e redesenha
+     por conta propria. */
+  B_NUMS.forEach(function(f){
+    var el=$(f[0]);if(!el)return;
+    el.addEventListener('change',function(){if(bAjustar(f[0]))salvarEstado();});
+    el.addEventListener('blur',function(){if(bAjustar(f[0])){salvarEstado();bPreview();}});
+  });
 });
 prep('Contagem regressiva','cnt',function(){
   liga('c-msg-add',cMsgAdd);
@@ -4254,6 +4347,9 @@ prep('Captacao de leads','leads',function(){
   lAncToggle();
 },'desenhar a aba com o estado restaurado');
 prep('Agendamento TidyCal','tidy',function(){
+  /* estado gravado antes desta regra pode trazer altura ou corte fora da faixa: prende na
+     carga, para o campo nunca exibir um numero diferente do que o gerador vai usar. */
+  if(tAjustarTodos())salvarEstado();
   tArqToggle();
 },'desenhar a aba com o estado restaurado');
 prep('Checkout','uni',function(){
