@@ -2217,7 +2217,12 @@ function tRestaura(st){
    celular calibrada nunca era usada; o modal cortava no telefone sem nada avisar. As alturas
    ganham piso porque min-height negativo e invalido (o modal corta igual) e porque "0" caia
    no "||" e virava 2700 em silencio. O teto de 20000px so pega erro de digitacao. */
-var T_NUMS=[['t-desk',2350,500,20000],['t-mob',2700,500,20000],['t-larg',700,320,1024],['t-alt0',1600,400,20000]];
+/* O quinto elemento (inteiro) NAO e opcional: sem ele fcPreso devolve o parseFloat cru e
+   "2350.7" saia como min-height '2350.7px'. Antes da unificacao dos helpers, tPreso usava
+   parseInt e truncava; a tabela nasceu sem a quinta coluna e a truncagem se perdeu no caminho.
+   Os quatro campos sao pixels: fracao nao tem uso aqui. */
+var T_NUMS=[['t-desk',2350,500,20000,true],['t-mob',2700,500,20000,true],
+  ['t-larg',700,320,1024,true],['t-alt0',1600,400,20000,true]];
 function tPreso(id){return fcPreso(T_NUMS,id);}
 /* O endereco da intermediaria vira o src de um iframe. escAttr protege a ESTRUTURA do
    atributo (aspas), nao o esquema: src="javascript:alert(1)" continua bem formado e executa.
@@ -2230,7 +2235,10 @@ function tUrlOk(v){
   var limpo=String(v).replace(/[\u0000-\u0020]/g,'');
   if(!limpo)return false;
   if(/^https?:\/\//i.test(limpo))return true;
-  if(limpo.charAt(0)==='/')return true;
+  /* caminho do proprio site: UMA barra. Com duas o endereco e protocol-relative --
+     "//evil.com/x" resolve para OUTRO host, herdando so o esquema da pagina, enquanto o
+     comentario acima e a mensagem de erro prometem "caminho do proprio site". */
+  if(limpo.charAt(0)==='/'&&limpo.charAt(1)!=='/')return true;
   return false;
 }
 function tArqToggle(){
