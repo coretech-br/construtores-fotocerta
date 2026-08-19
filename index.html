@@ -250,6 +250,7 @@
   <h3>Instrução de uso do código gerado</h3>
   <p class="ajuda"><b>Onde colar:</b> em um <b>componente HTML</b> da página desejada, no editor do Prosite. Cole o código inteiro substituindo o conteúdo do componente.</p>
   <p class="ajuda"><b>Pré-requisitos:</b> nenhum ID Html ou CSS extra é necessário — o código é autocontido. Apenas confira que os links das imagens são públicos (storage da Alboom) e, se a galeria de origem for republicada, atualize os links aqui e gere novamente.</p>
+  <p class="ajuda"><b>Mais de uma galeria na mesma página:</b> pode. Gere um código para cada conjunto de fotos e cole cada um no seu próprio componente HTML — cada bloco assume a galeria dele, na ordem em que aparecem na página. O único cuidado é a <b>largura máxima</b> e a <b>proporção</b>, que cada bloco redefine para todas: se as galerias tiverem tamanhos diferentes, vale a última colada. Use os mesmos valores nos dois, ou aceite o valor do último.</p>
   <p class="ajuda"><b>Depois de colar:</b> salve, <b>publique</b> e confira na página publicada (o editor pode se comportar diferente). Se o slideshow aparecer cortado, aumente a altura do componente no editor.</p>
   </div>
 </div>
@@ -264,7 +265,7 @@
       <legend>Essenciais</legend>
       <label for="l-num">WhatsApp de destino <small>(DDI+DDD+número, só dígitos)</small></label>
       <input type="text" id="l-num" value="" placeholder="5527999999999">
-      <label for="l-cod">Código da página <small>(para automatizar o atendimento)</small></label>
+      <label for="l-cod">Código da página <small>(obrigatório — é ele que identifica a campanha na mensagem)</small></label>
       <input type="text" id="l-cod" value="" placeholder="ex.: CAMPANHA26">
       <label for="l-pag">Nome da página <small>(vazio = usa o título da página automaticamente)</small></label>
       <input type="text" id="l-pag" value="">
@@ -1500,6 +1501,13 @@ function sRender(){
 }
 function sLimpar(){
   if(!confirm('Limpar todas as imagens e configuracoes do slideshow?'))return;
+  /* O intervalo da previa precisa morrer AQUI. Ele foi criado sobre o sImgs antigo e, com a
+     lista zerada logo abaixo, o proximo tique cai em sImgs[novo].legenda de um indice que nao
+     existe mais -- um TypeError por tique, para sempre, porque nada mais o cancela: era o
+     unico setInterval da ferramenta sem caminho de morte. Cancelar antes de mexer no sImgs
+     mantem os dois lados coerentes; sPreview tambem cancela na entrada, mas sLimpar nao a
+     chama (a caixa de previa e substituida por texto). */
+  if(pvTimer){clearInterval(pvTimer);pvTimer=null;}
   sImgs=[];sRender();
   setRadio('s-t','fade');setRadio('s-p','3 / 2');$('s-int').value=4500;$('s-larg').value=900;
   $('s-out').value='';$('s-pv-box').innerHTML='<p class="pv-vazia">A prévia do slideshow aparece aqui.</p>';
@@ -1569,7 +1577,14 @@ function sGerar(){
     return "    {\n      url: '"+escJs(im.url)+"',\n      legenda: '"+escJs(im.legenda)+"'\n    }";
   }).join(',\n');
   var c='';
-  c+='<div id="fc-slideshow" class="fc-slideshow" aria-label="Galeria de fotos">\n';
+  /* Sem id. O bloco antes trazia id="fc-slideshow" fixo e o script fazia
+     getElementById('fc-slideshow'): colar duas galerias na mesma pagina (ensaios de Natal e
+     bastidores, por exemplo) fazia os DOIS scripts encontrarem a PRIMEIRA caixa -- a primeira
+     galeria nascia com os slides das duas e a segunda nascia vazia, sem nenhuma mensagem. Alem
+     disso dois elementos com o mesmo id sao HTML invalido. Agora cada bloco procura a primeira
+     caixa .fc-slideshow ainda nao reivindicada e a marca com data-fc-pronto -- os scripts sao
+     executados na ordem em que aparecem na pagina, entao cada um fica com a sua. */
+  c+='<div class="fc-slideshow" aria-label="Galeria de fotos">\n';
   c+='  <div class="fc-slides"></div>\n';
   c+='  <button type="button" class="fc-seta fc-seta-esq" aria-label="Foto anterior">&#10094;</button>\n';
   c+='  <button type="button" class="fc-seta fc-seta-dir" aria-label="Proxima foto">&#10095;</button>\n';
@@ -1600,12 +1615,32 @@ function sGerar(){
   c+='.fc-dots button{width:9px;height:9px;border-radius:50%;border:none;padding:0;cursor:pointer;background:rgba(255,255,255,.55);transition:background .3s,transform .3s}\n';
   c+='.fc-dots button.fc-ativa{background:#fff;transform:scale(1.25)}\n';
   c+='@media (max-width:600px){.fc-seta{width:34px;height:34px;font-size:15px;line-height:34px}.fc-legenda{font-size:13px}}\n';
+  /* Movimento reduzido: desliga o que ESTE bloco criou e nada mais. Os seletores repetem a
+     especificidade das regras de cima (o atributo data-transicao conta) e vem depois no CSS,
+     entao vencem sem !important e sem alcancar o resto do site. A troca automatica de foto
+     continua -- ela e mudanca de conteudo, nao movimento na tela: parar tambem a passagem
+     deixaria o visitante com uma foto so, que e perder o recurso em vez de acalma-lo. */
+  c+='@media (prefers-reduced-motion: reduce){\n';
+  c+='  .fc-slideshow[data-transicao] .fc-slide{transition:none}\n';
+  if(t==='zoom')c+='  .fc-slideshow[data-transicao="zoom"] .fc-slide.fc-ativa img{animation:none}\n';
+  c+='  .fc-legenda{transition:none}\n';
+  c+='  .fc-seta{transition:none}\n';
+  c+='  .fc-dots button{transition:none}\n';
+  c+='}\n';
   c+='</sty'+'le>\n\n';
   c+='<scr'+'ipt>\n(function () {\n';
   c+='  var IMAGENS = [\n'+arr+'\n  ];\n\n';
   c+='  var INTERVALO = '+intv+';\n';
   c+="  var TRANSICAO = '"+t+"';\n\n";
-  c+='  var raiz = document.getElementById(\'fc-slideshow\');\n';
+  c+='  /* Cada bloco fica com a primeira galeria ainda nao reivindicada: assim duas ou mais\n';
+  c+='     galerias podem conviver na mesma pagina sem uma anular a outra. */\n';
+  c+='  var raiz = null;\n';
+  c+='  var caixas = document.querySelectorAll(\'.fc-slideshow\');\n';
+  c+='  for (var q = 0; q < caixas.length; q++) {\n';
+  c+='    if (!caixas[q].getAttribute(\'data-fc-pronto\')) { raiz = caixas[q]; break; }\n';
+  c+='  }\n';
+  c+='  if (!raiz) return;\n';
+  c+='  raiz.setAttribute(\'data-fc-pronto\', \'1\');\n';
   c+='  raiz.setAttribute(\'data-transicao\', TRANSICAO);\n';
   c+='  var areaSlides = raiz.querySelector(\'.fc-slides\');\n';
   c+='  var areaDots = raiz.querySelector(\'.fc-dots\');\n';
