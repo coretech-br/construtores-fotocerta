@@ -103,28 +103,10 @@
   .pv-area{border:1px dashed var(--linha);border-radius:10px;padding:14px;background:#F5F1E6;margin-bottom:16px}
   .pv-vazia{color:var(--tinta-suave);font-size:13px;text-align:center;padding:30px 10px}
 
-  .pv{position:relative;width:100%;max-width:520px;margin:0 auto;overflow:hidden;border-radius:10px;background:#1a1a1a}
-  .pv .pv-slide{position:absolute;inset:0;opacity:0;z-index:0}
-  .pv .pv-slide.pv-ativa{opacity:1;z-index:1}
-  .pv .pv-fundo{position:absolute;inset:-30px;background-size:cover;background-position:center;filter:blur(18px) brightness(.75);transform:scale(1.1)}
-  .pv .pv-slide img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;z-index:1}
-  .pv[data-t="fade"] .pv-slide{transition:opacity 1s ease}
-  .pv[data-t="deslizar"] .pv-slide{opacity:1;transform:translateX(100%);transition:transform .7s ease}
-  .pv[data-t="deslizar"] .pv-slide.pv-ativa{transform:translateX(0)}
-  .pv[data-t="deslizar"] .pv-slide.pv-esq{transform:translateX(-100%)}
-  .pv[data-t="zoom"] .pv-slide{transition:opacity 1s ease}
-  .pv[data-t="zoom"] .pv-slide.pv-ativa img{animation:pvZoom 5s ease-out forwards}
-  @keyframes pvZoom{from{transform:scale(1)}to{transform:scale(1.07)}}
-  .pv .pv-leg{position:absolute;left:0;right:0;bottom:0;z-index:2;padding:26px 14px 22px;
-    background:linear-gradient(transparent,rgba(0,0,0,.65));color:#fff;font-size:13px;text-align:center;
-    pointer-events:none;opacity:0;transition:opacity .6s}
-  .pv .pv-leg.pv-vis{opacity:1}
-  .pv .pv-seta{position:absolute;top:50%;transform:translateY(-50%);z-index:3;width:32px;height:32px;border:none;
-    border-radius:50%;background:rgba(0,0,0,.35);color:#fff;font-size:14px;cursor:pointer}
-  .pv .pv-seta.e{left:8px}.pv .pv-seta.d{right:8px}
-  .pv .pv-dots{position:absolute;bottom:8px;left:0;right:0;display:flex;justify-content:center;gap:6px;z-index:3}
-  .pv .pv-dots i{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.5)}
-  .pv .pv-dots i.on{background:#fff}
+  /* As regras .pv/.pv-slide/.pv-seta/.pv-dots que ficavam aqui sumiram junto com a previa
+     antiga do slideshow: elas eram a folha de estilo de uma SEGUNDA implementacao do bloco
+     gerado, escrita a mao para a previa. Hoje a previa executa o proprio bloco dentro de um
+     iframe, e quem pinta o slideshow e o CSS que o gerador emite. Ver .s-pv-* mais abaixo. */
 
   .btn-pv{width:56px;height:56px;border:none;display:inline-flex;align-items:center;justify-content:center;
     box-shadow:0 4px 12px rgba(0,0,0,.25);vertical-align:middle;cursor:default}
@@ -141,6 +123,17 @@
   .c-pv-modos .rotulo{font-size:12px;color:var(--tinta-suave)}
   .c-pv-moldura{overflow:hidden;margin:0 auto;background:#fff;border:1px solid var(--linha);border-radius:8px}
   .c-pv-moldura iframe{border:0;display:block;background:#fff}
+
+  /* Previa do slideshow: mesma tecnica da Contagem regressiva -- o bloco gerado roda dentro
+     de um iframe de mesma origem. Nao ha estilo de slideshow aqui de proposito. */
+  .s-pv-modos{display:flex;gap:8px;align-items:center;margin:0 0 10px}
+  .s-pv-modos .rotulo{font-size:12px;color:var(--tinta-suave)}
+  .s-pv-moldura{overflow:hidden;margin:0 auto;background:#fff;border:1px solid var(--linha);border-radius:8px}
+  .s-pv-moldura iframe{border:0;display:block;background:#fff}
+  /* Aviso de configuracao (nao e erro): a combinacao e legitima, mas o operador precisa
+     enxergar o que ela custa antes de publicar. */
+  .s-alerta{background:#FFF6DF;border:1px solid #E3B23C;color:#6B5210}
+  .s-alerta b{color:#6B5210}
 </style>
 </head>
 <body>
@@ -171,7 +164,7 @@
 
 <!-- ==================== CONSTRUTOR: SLIDESHOW ==================== -->
 <div class="painel ativo" id="painel-slide" role="tabpanel">
-  <p class="descricao"><b>Slideshow de fotos</b> — gera o código de uma apresentação de imagens para colar em um componente HTML de qualquer página. Aceita fotos horizontais e verticais juntas (a foto inteira aparece sobre um fundo desfocado dela mesma), com setas de navegação, legenda individual por foto, bolinhas indicadoras, looping automático e três transições à escolha (fade, deslizar ou zoom). Ideal para mostrar ensaios anteriores nas páginas de campanha.</p>
+  <p class="descricao"><b>Slideshow de fotos</b> — gera o código de uma apresentação de imagens para colar em um componente HTML de qualquer página. Aceita fotos horizontais e verticais juntas (a foto inteira aparece sobre um fundo desfocado dela mesma), com setas de navegação e bolinhas indicadoras (cada uma pode ser desligada), legenda individual por foto, looping automático e três transições à escolha (fade, deslizar ou zoom). Também dá para usar outra proporção de quadro no celular, embaralhar a ordem a cada visita, arrastar para trocar de foto no toque e pausar enquanto o visitante olha. Ideal para mostrar ensaios anteriores nas páginas de campanha.</p>
 
   <div class="secao primeira"><span class="secao-n">1</span> Imagens</div>
   <div class="grade">
@@ -224,6 +217,60 @@
       </fieldset>
     </div>
   </div>
+  <div class="grade">
+    <div>
+      <fieldset>
+      <legend>Proporção no celular</legend>
+      <p class="ajuda">Foto em retrato dentro de um quadro horizontal aparece minúscula no telefone, que é onde a maioria vê. Abaixo da largura de corte o quadro pode ter outra proporção — o resto (transição, ritmo, legendas) continua igual.</p>
+      <label>Proporção abaixo do corte</label>
+      <div class="radios" id="s-propmob">
+      <label><input type="radio" name="s-pm" value="nao" checked><span>Usar a mesma</span></label>
+      <label><input type="radio" name="s-pm" value="2 / 3"><span>2:3 (retrato alto)</span></label>
+      <label><input type="radio" name="s-pm" value="3 / 4"><span>3:4 (retrato)</span></label>
+      <label><input type="radio" name="s-pm" value="4 / 5"><span>4:5 (retrato suave)</span></label>
+      <label><input type="radio" name="s-pm" value="1 / 1"><span>1:1 (quadrado)</span></label>
+      <label><input type="radio" name="s-pm" value="3 / 2"><span>3:2 (horizontal)</span></label>
+      <label><input type="radio" name="s-pm" value="4 / 3"><span>4:3</span></label>
+      <label><input type="radio" name="s-pm" value="16 / 9"><span>16:9 (panorâmico)</span></label>
+      </div>
+      <div id="s-mob-campo">
+      <label for="s-mob">Largura de corte do celular <small>(px, de 320 a 1024 — abaixo disso vale a proporção escolhida acima; fora da faixa o campo se corrige sozinho)</small></label>
+      <input type="number" id="s-mob" value="600" min="320" max="1024" step="10">
+      </div>
+      </fieldset>
+    </div>
+    <div>
+      <fieldset>
+      <legend>Ordem e controles do visitante</legend>
+      <label>Ordem das fotos</label>
+      <div class="radios" id="s-ordem-r">
+      <label><input type="radio" name="s-ordem" value="cadastro" checked><span>A que eu cadastrei</span></label>
+      <label><input type="radio" name="s-ordem" value="aleatoria"><span>Aleatória a cada visita</span></label>
+      </div>
+      <label>Setas de navegação</label>
+      <div class="radios" id="s-setas-r">
+      <label><input type="radio" name="s-setas" value="sim" checked><span>Mostrar</span></label>
+      <label><input type="radio" name="s-setas" value="nao"><span>Não mostrar</span></label>
+      </div>
+      <label>Bolinhas indicadoras</label>
+      <div class="radios" id="s-dots-r">
+      <label><input type="radio" name="s-dots" value="sim" checked><span>Mostrar</span></label>
+      <label><input type="radio" name="s-dots" value="nao"><span>Não mostrar</span></label>
+      </div>
+      <label>Arrastar para trocar de foto <small>(vale onde há toque: celular e tablet)</small></label>
+      <div class="radios" id="s-arrastar-r">
+      <label><input type="radio" name="s-arrastar" value="nao" checked><span>Não</span></label>
+      <label><input type="radio" name="s-arrastar" value="sim"><span>Sim</span></label>
+      </div>
+      <label>Pausar ao passar o mouse ou tocar <small>(volta a passar sozinho quando o mouse, o dedo ou o foco sai)</small></label>
+      <div class="radios" id="s-pausar-r">
+      <label><input type="radio" name="s-pausar" value="nao" checked><span>Não</span></label>
+      <label><input type="radio" name="s-pausar" value="sim"><span>Sim</span></label>
+      </div>
+      <p class="ajuda s-alerta" id="s-aviso-controles" style="display:none"></p>
+      </fieldset>
+    </div>
+  </div>
 
   <div class="secao"><span class="secao-n">3</span> Prévia e código gerado</div>
   <div class="acoes" style="margin-bottom:14px">
@@ -234,7 +281,13 @@
   <div class="grade">
     <div>
       <div class="pv-area">
+      <div class="s-pv-modos">
+      <span class="rotulo">Largura da prévia:</span>
+      <button type="button" class="botao mini" id="s-pv-desk" aria-pressed="true">Computador</button>
+      <button type="button" class="botao mini claro" id="s-pv-cel" aria-pressed="false">Celular</button>
+      </div>
       <div id="s-pv-box"><p class="pv-vazia">A prévia do slideshow aparece aqui. Adicione imagens e clique em "Atualizar prévia".</p></div>
+      <p class="ajuda"><b>O que a prévia mostra:</b> o próprio código da caixa ao lado, rodando num quadro isolado — não é um desenho parecido. <b>O que ainda difere da página publicada:</b> a largura é a largura lógica do botão acima (reduzida na tela só para caber na coluna), enquanto na página real vale a janela do visitante; as fotos vêm da internet, então a que demora aqui demora lá; e "arrastar" só se experimenta num aparelho com toque — no computador o quadro reage a mouse, teclado e cliques.</p>
       </div>
     </div>
     <div>
@@ -252,7 +305,7 @@
   <h3>Instrução de uso do código gerado</h3>
   <p class="ajuda"><b>Onde colar:</b> em um <b>componente HTML</b> da página desejada, no editor do Prosite. Cole o código inteiro substituindo o conteúdo do componente.</p>
   <p class="ajuda"><b>Pré-requisitos:</b> nenhum ID Html ou CSS extra é necessário — o código é autocontido. Apenas confira que os links das imagens são públicos (storage da Alboom) e, se a galeria de origem for republicada, atualize os links aqui e gere novamente.</p>
-  <p class="ajuda"><b>Mais de uma galeria na mesma página:</b> pode. Gere um código para cada conjunto de fotos e cole cada um no seu próprio componente HTML — cada bloco assume a galeria dele, na ordem em que aparecem na página. O único cuidado é a <b>largura máxima</b> e a <b>proporção</b>, que cada bloco redefine para todas: se as galerias tiverem tamanhos diferentes, vale a última colada. Use os mesmos valores nos dois, ou aceite o valor do último.</p>
+  <p class="ajuda"><b>Mais de uma galeria na mesma página:</b> pode. Gere um código para cada conjunto de fotos e cole cada um no seu próprio componente HTML — cada bloco assume a galeria dele, na ordem em que aparecem na página. O único cuidado é a <b>largura máxima</b> e as <b>proporções</b> (a do quadro e a do celular, com a largura de corte), que cada bloco redefine para todas: se as galerias tiverem tamanhos diferentes, vale a última colada. Use os mesmos valores nos dois, ou aceite o valor do último. Setas, bolinhas, ordem aleatória, arrastar e pausar são de cada bloco e não interferem no outro.</p>
   <p class="ajuda"><b>Depois de colar:</b> salve, <b>publique</b> e confira na página publicada (o editor pode se comportar diferente). Se o slideshow aparecer cortado, aumente a altura do componente no editor.</p>
   </div>
 </div>
@@ -1577,7 +1630,12 @@ var sImgs=[];
    duas implementacoes do mesmo limite, divergindo. Agora ha uma so, e a previa le dela.
    Tetos novos (60000 ms = 1 min por foto; 2000 px de largura) declarados tambem no HTML: nao
    apertam nenhum uso real, so pegam erro de digitacao. */
-var S_NUMS=[['s-int',4500,1500,60000,true],['s-larg',900,300,2000,true]];
+/* s-mob (corte do celular da fase 5) entra AQUI, e nao num clamp proprio: e a mesma linha que
+   alimenta o @media do bloco gerado (via sCfg) e a largura logica do iframe da previa (via
+   sPvLargura). Prender so a largura da previa deixaria o iframe num valor e o CSS gerado em
+   outro -- a previa mostraria layout de computador enquanto o codigo entregue cortava em
+   outro ponto, calada. */
+var S_NUMS=[['s-int',4500,1500,60000,true],['s-larg',900,300,2000,true],['s-mob',600,320,1024,true]];
 function sPreso(id){return fcPreso(S_NUMS,id);}
 
 /* Salvamento e restauracao desta aba (registradas em ABAS). Ficam junto do bloco da aba
@@ -1585,12 +1643,55 @@ function sPreso(id){return fcPreso(S_NUMS,id);}
 function sColeta(){
   return {
     imgs:sImgs,
-    s:{t:radio('s-t'),p:radio('s-p'),int:$('s-int').value,larg:$('s-larg').value}
+    s:{t:radio('s-t'),p:radio('s-p'),int:$('s-int').value,larg:$('s-larg').value,
+       pm:radio('s-pm'),mob:$('s-mob').value,ordem:radio('s-ordem'),
+       setas:radio('s-setas'),dots:radio('s-dots'),arrastar:radio('s-arrastar'),pausar:radio('s-pausar')}
   };
 }
 function sRestaura(st){
   if(st.imgs){sImgs=st.imgs;sRender();}
-  if(st.s){setRadio('s-t',st.s.t);setRadio('s-p',st.s.p);$('s-int').value=st.s.int;$('s-larg').value=st.s.larg;}
+  if(st.s){
+    setRadio('s-t',st.s.t);setRadio('s-p',st.s.p);$('s-int').value=st.s.int;$('s-larg').value=st.s.larg;
+    /* Campos da fase 5. O estado gravado por uma versao anterior nao os tem, e o padrao de
+       cada um e o valor que reproduz o comportamento de antes: abrir a ferramenta com uma
+       configuracao antiga salva nao pode LIGAR recurso nenhum sozinho. */
+    setRadio('s-pm',st.s.pm||'nao');
+    $('s-mob').value=(st.s.mob===undefined||st.s.mob==='')?600:st.s.mob;
+    setRadio('s-ordem',st.s.ordem||'cadastro');
+    setRadio('s-setas',st.s.setas||'sim');
+    setRadio('s-dots',st.s.dots||'sim');
+    setRadio('s-arrastar',st.s.arrastar||'nao');
+    setRadio('s-pausar',st.s.pausar||'nao');
+  }
+  sToggles();
+}
+
+/* Campos que so fazem sentido acompanhados, e o aviso do caso R6.
+   Por que AVISAR e nao RECUSAR setas e bolinhas desligadas: nesta aba a passagem automatica
+   nao tem como ser desligada -- nao existe campo para isso --, entao a combinacao nao prende
+   ninguem na primeira foto; ela apenas tira do visitante a escolha de QUAL foto ver. Vitrine
+   que so passa fotos e uso legitimo, e nada aqui esta indefinido para o gerador ter de
+   adivinhar: recusar bloquearia um layout valido. Corrigir em silencio, ligando uma seta por
+   conta propria, seria pior ainda -- e a troca de defeito visivel por invisivel que este
+   projeto ja recusou. Entao o campo diz, na cara, o que a combinacao custa. */
+function sToggles(){
+  var el=$('s-mob-campo');
+  if(el)el.style.display=(radio('s-pm')==='nao')?'none':'block';
+  var av=$('s-aviso-controles');
+  if(!av)return;
+  var semSetas=radio('s-setas')==='nao',semDots=radio('s-dots')==='nao',arr=radio('s-arrastar')==='sim';
+  if(!semSetas||!semDots){av.style.display='none';av.textContent='';return;}
+  var txt=arr
+    ? '<b>Sem setas e sem bolinhas:</b> no computador o visitante não tem como escolher a foto — as fotos apenas passam sozinhas, no tempo configurado. No celular o arrastar continua valendo. Se a intenção é uma vitrine que roda sozinha, está certo assim; ninguém fica preso na primeira foto, porque a passagem automática desta aba não se desliga.'
+    : '<b>Sem setas, sem bolinhas e sem arrastar:</b> o visitante não tem nenhum controle — as fotos apenas passam sozinhas, no tempo configurado. Ninguém fica preso na primeira foto (a passagem automática desta aba não se desliga), mas quem quiser rever uma foto vai ter de esperar a volta. Se a intenção é uma vitrine, está certo assim; se não, ligue as setas, as bolinhas ou o arrastar.';
+  /* O aviso existe para dizer o que a combinação custa, e o pausar muda esse custo: sem nenhum
+     controle, a passagem sozinha é a única coisa que ainda mexe a galeria — e é justamente ela
+     que o pausar interrompe enquanto o ponteiro está sobre o quadro. Não trava (sair resolve),
+     mas quem lê o aviso precisa saber que é a única saída. */
+  if(radio('s-pausar')==='sim')
+    txt+=' <b>Com o pausar ligado</b>, nem a passagem sozinha continua enquanto o ponteiro do mouse — ou o dedo, ou o foco do teclado — estiver sobre o quadro: quem deixar o mouse parado ali vê uma foto congelada e sem nenhum controle. Não trava, porque sair do quadro faz voltar a passar, mas essa é a única saída que sobra para o visitante.';
+  av.style.display='block';
+  av.innerHTML=txt;
 }
 
 /* O campo do link aceitava QUALQUER texto: so checava se estava vazio. "foto do natal", o nome
@@ -1632,15 +1733,17 @@ function sAdd(){
   if(!sUrlOk(url)){alert(S_URL_AVISO);return;}
   sImgs.push({url:url,legenda:$('s-leg').value.trim()});
   $('s-url').value='';$('s-leg').value='';
-  sRender();salvarEstado();
+  sRender();salvarEstado();sPreview();
 }
 function sMove(i,d){
   var j=i+d;if(j<0||j>=sImgs.length)return;
   var t=sImgs[i];sImgs[i]=sImgs[j];sImgs[j]=t;
-  sRender();salvarEstado();
+  sRender();salvarEstado();sPreview();
 }
-function sDel(i){sImgs.splice(i,1);sRender();salvarEstado();}
-function sLegEdit(i,v){sImgs[i].legenda=v;salvarEstado();}
+function sDel(i){sImgs.splice(i,1);sRender();salvarEstado();sPreview();}
+/* A lista nao tem name nem id nos campos de legenda, entao o ouvinte de documento que
+   redesenha a previa nao a alcanca: quem chama e este. */
+function sLegEdit(i,v){sImgs[i].legenda=v;salvarEstado();sPreview();}
 function sRender(){
   var ul=$('s-lista');ul.innerHTML='';
   $('s-vazio').style.display=sImgs.length?'none':'block';
@@ -1661,66 +1764,216 @@ function sRender(){
 }
 function sLimpar(){
   if(!confirm('Limpar todas as imagens e configuracoes do slideshow?'))return;
-  /* O intervalo da previa precisa morrer AQUI. Ele foi criado sobre o sImgs antigo e, com a
-     lista zerada logo abaixo, o proximo tique cai em sImgs[novo].legenda de um indice que nao
-     existe mais -- um TypeError por tique, para sempre, porque nada mais o cancela: era o
-     unico setInterval da ferramenta sem caminho de morte. Cancelar antes de mexer no sImgs
-     mantem os dois lados coerentes; sPreview tambem cancela na entrada, mas sLimpar nao a
-     chama (a caixa de previa e substituida por texto). */
-  if(pvTimer){clearInterval(pvTimer);pvTimer=null;}
+  /* O agendamento da previa precisa morrer AQUI. Na versao anterior era um setInterval que
+     rodava sobre o sImgs antigo e, com a lista zerada logo abaixo, caia em sImgs[novo].legenda
+     de um indice inexistente -- um TypeError por tique, para sempre. Hoje o motor de troca de
+     slide vive dentro do iframe (e morre com ele), mas continua havendo um timer aqui fora: o
+     debounce que remonta o quadro. Sem cancela-lo, um remonte agendado por uma tecla digitada
+     ha 300 ms repintaria a previa logo depois de sLimpar ter posto o texto no lugar dela. */
+  if(sPvTimer){clearTimeout(sPvTimer);sPvTimer=null;}
   sImgs=[];sRender();
   setRadio('s-t','fade');setRadio('s-p','3 / 2');$('s-int').value=4500;$('s-larg').value=900;
+  setRadio('s-pm','nao');$('s-mob').value=600;setRadio('s-ordem','cadastro');
+  setRadio('s-setas','sim');setRadio('s-dots','sim');setRadio('s-arrastar','nao');setRadio('s-pausar','nao');
+  sToggles();
   $('s-out').value='';$('s-pv-box').innerHTML='<p class="pv-vazia">A prévia do slideshow aparece aqui.</p>';
   salvarEstado();
 }
 
-/* --- prévia --- */
-var pvTimer=null,pvAtual=0;
-function sPreview(){
-  if(pvTimer){clearInterval(pvTimer);pvTimer=null;}
-  var box=$('s-pv-box');
-  if(!sImgs.length){box.innerHTML='<p class="pv-vazia">Adicione imagens para ver a prévia.</p>';return;}
-  /* mesmo sPreso do gerador: a previa deixou de ter um Math.max proprio, que era um segundo
-     limite escrito a mao e ja divergia do que o bloco entregue usava */
-  var t=radio('s-t'),prop=radio('s-p'),intv=sPreso('s-int');
-  var html='<div class="pv" data-t="'+t+'" style="aspect-ratio:'+prop+'">';
-  sImgs.forEach(function(im){
-    html+='<div class="pv-slide"><div class="pv-fundo" style="background-image:url(\''+im.url.replace(/'/g,'%27')+'\')"></div><img src="'+im.url.replace(/"/g,'&quot;')+'" alt=""></div>';
-  });
-  html+='<div class="pv-leg"></div>'+
-        '<button class="pv-seta e" aria-label="Anterior">\u276E</button><button class="pv-seta d" aria-label="Proxima">\u276F</button>'+
-        '<div class="pv-dots">'+sImgs.map(function(){return '<i></i>';}).join('')+'</div></div>';
-  box.innerHTML=html;
-  var raiz=box.querySelector('.pv');
-  var slides=raiz.querySelectorAll('.pv-slide');
-  var dots=raiz.querySelectorAll('.pv-dots i');
-  var elLeg=raiz.querySelector('.pv-leg');
-  pvAtual=0;
-  function mostrar(novo,dir){
-    if(t==='deslizar'){
-      var s=slides[novo];
-      s.style.transition='none';s.classList.remove('pv-ativa','pv-esq');
-      s.style.transform='translateX('+(dir<0?'-100%':'100%')+')';
-      void s.offsetWidth;s.style.transition='';s.style.transform='';
-      slides[pvAtual].classList.remove('pv-ativa');
-      slides[pvAtual].classList.add(dir<0?'pv-dir':'pv-esq');
-      s.classList.add('pv-ativa');
-    }else{
-      slides.forEach(function(sl,k){sl.classList.toggle('pv-ativa',k===novo);});
-    }
-    dots.forEach(function(d,k){d.classList.toggle('on',k===novo);});
-    var txt=sImgs[novo].legenda||'';
-    elLeg.classList.remove('pv-vis');
-    setTimeout(function(){elLeg.textContent=txt;if(txt)elLeg.classList.add('pv-vis');},250);
-    pvAtual=novo;
-  }
-  function prox(){mostrar((pvAtual+1)%sImgs.length,1);}
-  function ant(){mostrar((pvAtual-1+sImgs.length)%sImgs.length,-1);}
-  function agendar(){if(pvTimer)clearInterval(pvTimer);pvTimer=setInterval(prox,intv);}
-  raiz.querySelector('.pv-seta.d').addEventListener('click',function(){prox();agendar();});
-  raiz.querySelector('.pv-seta.e').addEventListener('click',function(){ant();agendar();});
-  mostrar(0,1);agendar();
+/* Fonte unica da configuracao desta aba: le a interface uma vez e devolve os numeros JA
+   presos a faixa declarada. sGerar e a previa leem daqui -- nao existe segundo lugar onde um
+   limite seja aplicado, que e como a versao anterior conseguia rodar a previa a 1500 ms e
+   entregar um bloco de 100 ms. */
+function sCfg(){
+  var pm=radio('s-pm');
+  return {
+    imgs:sImgs,
+    t:radio('s-t'),
+    prop:radio('s-p'),
+    intv:sPreso('s-int'),
+    larg:sPreso('s-larg'),
+    /* propmob vazio e o portao do recurso inteiro: sem ele nenhum @media novo e emitido e o
+       bloco sai byte a byte igual ao de antes desta fase. */
+    propmob:(pm==='nao')?'':pm,
+    mob:sPreso('s-mob'),
+    aleatoria:radio('s-ordem')==='aleatoria',
+    setas:radio('s-setas')!=='nao',
+    dots:radio('s-dots')!=='nao',
+    arrastar:radio('s-arrastar')==='sim',
+    pausar:radio('s-pausar')==='sim'
+  };
 }
+
+/* ---------- previa fiel: o bloco gerado rodando de verdade ----------
+   O quadro e um iframe de mesma origem, montado por document.write, na mesma tecnica que a
+   aba Contagem regressiva firmou. A ordem escrita e: shim de storage -> bloco gerado ->
+   enchimento. O bloco vai byte a byte como sai na textarea; nada do ambiente da previa entra
+   nele.
+   A previa anterior era uma SEGUNDA implementacao do slideshow (marcacao .pv-*, motor proprio
+   de troca de slide, CSS proprio). Duas implementacoes divergem: aquela ja divergia no limite
+   do intervalo, nunca teve o "deslizar" completo do bloco entregue e nao teria como mostrar
+   ordem aleatoria, arrastar nem pausar sem que os quatro recursos fossem escritos duas vezes. */
+
+/* O bloco do slideshow nao grava nada hoje, mas o shim entra assim mesmo: e o mesmo quadro que
+   vai rodar as proximas versoes do bloco, e o dia em que uma delas gravar uma chave (a ultima
+   foto vista, por exemplo) a previa passaria a sujar as chaves reais da origem da ferramenta
+   sem ninguem notar. Trocar localStorage e sessionStorage por objetos em memoria custa nada e
+   fecha a porta antes. */
+function sPvShim(){
+  var s='';
+  s+='<scr'+'ipt>\n(function(){\n';
+  s+='  function memoria(){\n';
+  s+='    var d={};\n';
+  s+='    return {\n';
+  s+='      getItem:function(k){k=String(k);return Object.prototype.hasOwnProperty.call(d,k)?d[k]:null;},\n';
+  s+='      setItem:function(k,v){d[String(k)]=String(v);},\n';
+  s+='      removeItem:function(k){delete d[String(k)];},\n';
+  s+='      clear:function(){d={};},\n';
+  s+='      key:function(i){var ks=Object.keys(d);return i<ks.length?ks[i]:null;},\n';
+  s+='      get length(){return Object.keys(d).length;},\n';
+  /* marca que so o objeto em memoria tem: e assim que a conferencia abaixo distingue o shim
+     instalado do Storage real, sem depender de instanceof nem do nome da classe. */
+  s+='      fcPvMemoria:true\n';
+  s+='    };\n  }\n';
+  s+='  function trocar(nome){\n';
+  s+='    var falso=memoria();\n';
+  s+='    try{Object.defineProperty(window,nome,{value:falso,configurable:true});return;}catch(e){}\n';
+  s+='    try{Object.defineProperty(Object.getPrototypeOf(window),nome,{value:falso,configurable:true});}catch(e){}\n';
+  s+='  }\n';
+  s+='  function instalado(nome){\n';
+  s+='    try{return !!(window[nome]&&window[nome].fcPvMemoria===true);}catch(e){return false;}\n';
+  s+='  }\n';
+  s+="  trocar('localStorage');trocar('sessionStorage');\n";
+  /* Falha silenciosa aqui e pior que falha barulhenta: setItem no Storage REAL funciona e nao
+     lanca, entao um shim que nao pegasse nao produziria erro nenhum -- so sujeira nas chaves da
+     ferramenta, descoberta tarde. A previa confere e avisa na cara do operador. */
+  s+='  var falhou=[];\n';
+  s+="  if(!instalado('localStorage'))falhou.push('localStorage');\n";
+  s+="  if(!instalado('sessionStorage'))falhou.push('sessionStorage');\n";
+  s+='  if(falhou.length){\n';
+  s+="    var av=document.createElement('div');\n";
+  s+="    av.id='s-pv-aviso-shim';\n";
+  s+='    av.setAttribute(\'style\',\'background:#8C1D18;color:#FDFBF6;font:600 12px/1.45 -apple-system,BlinkMacSystemFont,sans-serif;padding:8px 12px\');\n';
+  s+="    av.textContent='Aviso da previa: nao foi possivel isolar o '+falhou.join(' e ')+" +
+     "' deste quadro. A previa esta gravando nas chaves reais do navegador. O codigo gerado ao lado nao e afetado.';\n";
+  s+='    document.body.appendChild(av);\n';
+  s+='  }\n';
+  s+='})();\n</scr'+'ipt>\n';
+  return s;
+}
+/* Sem conteudo abaixo do slideshow nao da para ver que a pagina continua rolando enquanto o
+   dedo arrasta na diagonal -- que e justamente o que o recurso de arrastar nao pode quebrar.
+   Blocos cinzentos e mudos, de proposito: nada aqui pode competir com as fotos. */
+function sPvEnchimento(){
+  var s='',i;
+  for(i=0;i<14;i++)s+='<div class="s-pv-falso">conteudo da sua pagina</div>';
+  return s;
+}
+function sPvDoc(cfg){
+  var h='';
+  h+='<!DOCTYPE html>\n<html lang="pt-br">\n<head>\n<meta charset="utf-8">\n';
+  h+='<meta name="viewport" content="width=device-width,initial-scale=1">\n';
+  h+='<sty'+'le>\n';
+  h+='html,body{margin:0;padding:0}\n';
+  h+='body{background:#FFFFFF;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Ubuntu,sans-serif;padding:12px 0}\n';
+  h+='.s-pv-falso{background:#EDEAE1;color:#A9A294;border-radius:6px;margin:10px 12px;padding:0 14px;';
+  h+='height:78px;display:flex;align-items:center;font-size:12px;letter-spacing:.04em}\n';
+  h+='</sty'+'le>\n</head>\n<body>\n';
+  h+=sPvShim();
+  h+=sBloco(cfg);
+  h+='\n'+sPvEnchimento();
+  h+='\n</body>\n</html>';
+  return h;
+}
+/* A media query do bloco gerado e avaliada pelo iframe, entao o corte de s-mob so vira verdade
+   se as duas larguras straddlearem esse corte. Por isso as larguras logicas sao derivadas de
+   cfg.mob em vez de fixas: a estreita fica sempre <= o corte e a larga sempre acima dele. Como
+   a coluna da previa e mais estreita que um desktop, a larga e reduzida por transform:scale --
+   o scale fica do lado de FORA do iframe, entao a viewport que o bloco enxerga continua sendo a
+   largura logica, que e o que a media query le.
+   Sem piso na largura do modo Celular: um piso garantiria largura confortavel mas quebraria a
+   UNICA propriedade que este modo precisa ter -- ficar <= o corte. cfg.mob ja chega preso a
+   [320,1024] pela sCfg, entao min(380,mob) fica em [320,380] e max(920,mob+240) fica sempre
+   acima do corte em toda a faixa. */
+function sPvLargura(cfg){
+  if(sPvModo==='cel')return Math.min(380,cfg.mob);
+  return Math.max(920,cfg.mob+240);
+}
+/* "3 / 2" -> 1.5. So a previa usa, para dar altura ao quadro; o bloco gerado entrega a string
+   crua ao aspect-ratio do navegador. Valor torto cai em 1 em vez de dividir por zero. */
+function sRazao(p){
+  var m=String(p).split('/');
+  var a=parseFloat(m[0]),b=parseFloat(m[1]);
+  if(!a||!b)return 1;
+  return a/b;
+}
+var sPvTimer=null,sPvModo='desk';
+function sPvMontar(){
+  var box=$('s-pv-box');if(!box)return;
+  if(!sImgs.length){box.innerHTML='<p class="pv-vazia">Adicione imagens para ver a prévia.</p>';return;}
+  var cfg=sCfg();
+  var larg=sPvLargura(cfg);
+  var disp=box.clientWidth||440;
+  var k=Math.min(1,disp/larg);
+  /* A altura do quadro acompanha a proporcao que ESTA valendo naquela largura: com o corte do
+     celular ligado, o modo Celular mostra a foto em retrato inteira em vez de cortada pela
+     moldura. O calculo e da MOLDURA, nao do slideshow -- quem decide a proporcao do slideshow
+     e o CSS que o gerador emitiu, dentro do iframe. */
+  var propAtiva=(cfg.propmob&&larg<=cfg.mob)?cfg.propmob:cfg.prop;
+  var alt=Math.round(Math.min(560,Math.min(larg,cfg.larg)/sRazao(propAtiva)+150));
+  /* trocar o iframe inteiro e o jeito barato de parar o bloco anterior: o setInterval e os
+     listeners dele morrem junto com o documento. */
+  box.innerHTML='';
+  var moldura=document.createElement('div');
+  moldura.className='s-pv-moldura';
+  moldura.style.width=Math.round(larg*k)+'px';
+  moldura.style.height=alt+'px';
+  var ifr=document.createElement('iframe');
+  ifr.id='s-pv-frame';
+  ifr.setAttribute('title','Prévia do slideshow');
+  ifr.style.width=larg+'px';
+  ifr.style.height=Math.round(alt/k)+'px';
+  ifr.style.transform='scale('+k+')';
+  ifr.style.transformOrigin='top left';
+  moldura.appendChild(ifr);
+  box.appendChild(moldura);
+  var doc=ifr.contentDocument||(ifr.contentWindow&&ifr.contentWindow.document);
+  if(!doc)return;
+  doc.open();doc.write(sPvDoc(cfg));doc.close();
+}
+/* Remontar o iframe a cada tecla digitada custa caro e pisca. O debounce segura as mudancas de
+   campo; "Atualizar previa", a troca de modo e o blur de campo numerico passam direto. O timer
+   e UNICO e sempre cancelado antes de agendar outro. */
+function sPreview(imediato){
+  if(sPvTimer){clearTimeout(sPvTimer);sPvTimer=null;}
+  if(imediato){sPvMontar();return;}
+  sPvTimer=setTimeout(function(){sPvTimer=null;sPvMontar();},400);
+}
+function sPvBotoes(){
+  var d=$('s-pv-desk'),c=$('s-pv-cel');
+  if(d){d.className='botao mini'+(sPvModo==='desk'?'':' claro');d.setAttribute('aria-pressed',sPvModo==='desk'?'true':'false');}
+  if(c){c.className='botao mini'+(sPvModo==='cel'?'':' claro');c.setAttribute('aria-pressed',sPvModo==='cel'?'true':'false');}
+}
+function sPvModoSet(m){
+  sPvModo=m;sPvBotoes();sPreview(true);
+}
+/* Os dois campos do formulario "Adicionar imagem" nao entram na previa enquanto estao sendo
+   digitados: eles so mudam alguma coisa depois do clique em "Adicionar", que ja chama sPreview
+   por conta propria. Sem esta excecao, colar um link de storage (que e longo) remontava o
+   iframe inteiro e mandava o navegador baixar todas as fotos de novo, uma vez por rajada de
+   digitacao, sem nada mudar na tela. */
+var S_PV_IGNORA={'s-url':true,'s-leg':true};
+function sCampoMudou(e){
+  var alvo=e.target;if(!alvo)return;
+  var chave=alvo.name||alvo.id||'';
+  if(!/^s-/.test(chave))return;
+  if(S_PV_IGNORA[chave])return;
+  sToggles();sPreview();
+}
+document.addEventListener('change',sCampoMudou);
+/* 'change' so dispara quando o campo perde o foco: sem este 'input', a previa so acordaria
+   depois de o operador clicar fora. */
+document.addEventListener('input',sCampoMudou);
 
 /* --- geração de código --- */
 function sGerar(){
@@ -1736,9 +1989,21 @@ function sGerar(){
       return;
     }
   }
-  var t=radio('s-t'),prop=radio('s-p');
-  var intv=sPreso('s-int');
-  var larg=sPreso('s-larg');
+  /* Setas e bolinhas desligadas juntas NAO recusam: ver o comentario de sToggles. O aviso ja
+     esta na tela, ao lado dos proprios campos, e a passagem automatica desta aba nao se
+     desliga -- nao existe configuracao aqui que prenda o visitante na primeira foto. */
+  $('s-out').value=sBloco(sCfg());
+  sPreview(true);
+}
+
+/* Fonte unica do bloco entregue, no padrao que a aba Contagem regressiva firmou: sGerar escreve
+   o retorno na textarea e sPvMontar escreve o MESMO retorno dentro do iframe da previa. Nao
+   existe segunda formatacao em lugar nenhum -- e por isso que a previa nao tem como divergir do
+   que o operador vai colar.
+   Cada recurso da fase 5 e emitido so quando ligado, em vez de sair sempre com uma variavel de
+   ligar/desligar: com os quatro desligados o bloco sai byte a byte igual ao das versoes
+   anteriores, e o que nao esta ligado nao pesa no que o visitante baixa. */
+function sBloco(cfg){
   /* escJs, nao esc: url e legenda sao texto livre do operador e o destino e uma string JS
      dentro do bloco de script gerado. esc() so protege a string (barra invertida e
      apostrofo) e deixa passar as duas sequencias que tiram o parser HTML do estado normal
@@ -1746,9 +2011,10 @@ function sGerar(){
      de fechamento fazia o bloco montar ZERO slides e derramar o resto do codigo-fonte como
      texto na pagina. Nao e escHtml: a legenda vai para textContent no bloco entregue, e
      "&amp;" apareceria cru para o visitante. */
-  var arr=sImgs.map(function(im){
+  var arr=cfg.imgs.map(function(im){
     return "    {\n      url: '"+escJs(im.url)+"',\n      legenda: '"+escJs(im.legenda)+"'\n    }";
   }).join(',\n');
+  var t=cfg.t;
   var c='';
   /* Sem id. O bloco antes trazia id="fc-slideshow" fixo e o script fazia
      getElementById('fc-slideshow'): colar duas galerias na mesma pagina (ensaios de Natal e
@@ -1759,13 +2025,18 @@ function sGerar(){
      executados na ordem em que aparecem na pagina, entao cada um fica com a sua. */
   c+='<div class="fc-slideshow" aria-label="Galeria de fotos">\n';
   c+='  <div class="fc-slides"></div>\n';
-  c+='  <button type="button" class="fc-seta fc-seta-esq" aria-label="Foto anterior">&#10094;</button>\n';
-  c+='  <button type="button" class="fc-seta fc-seta-dir" aria-label="Proxima foto">&#10095;</button>\n';
+  if(cfg.setas){
+    c+='  <button type="button" class="fc-seta fc-seta-esq" aria-label="Foto anterior">&#10094;</button>\n';
+    c+='  <button type="button" class="fc-seta fc-seta-dir" aria-label="Proxima foto">&#10095;</button>\n';
+  }
   c+='  <div class="fc-legenda"></div>\n';
-  c+='  <div class="fc-dots"></div>\n';
+  if(cfg.dots)c+='  <div class="fc-dots"></div>\n';
   c+='</div>\n\n';
   c+='<sty'+'le>\n';
-  c+='.fc-slideshow{position:relative;width:100%;max-width:'+larg+'px;margin:0 auto;aspect-ratio:'+prop+';overflow:hidden;border-radius:12px;background:#1a1a1a}\n';
+  /* touch-action entra DENTRO desta regra, e nao numa segunda regra .fc-slideshow: duas regras
+     de mesma especificidade para o mesmo seletor nao se fundem em shorthand, e background
+     (que esta aqui) seria apagada por inteiro pela que viesse depois. Regra do projeto. */
+  c+='.fc-slideshow{position:relative;width:100%;max-width:'+cfg.larg+'px;margin:0 auto;aspect-ratio:'+cfg.prop+';overflow:hidden;border-radius:12px;background:#1a1a1a'+(cfg.arrastar?';touch-action:pan-y':'')+'}\n';
   c+='.fc-slide{position:absolute;inset:0;opacity:0;z-index:0}\n';
   c+='.fc-slide.fc-ativa{opacity:1;z-index:1}\n';
   c+='.fc-slide .fc-fundo{position:absolute;inset:-30px;background-size:cover;background-position:center;filter:blur(22px) brightness(.75);transform:scale(1.1)}\n';
@@ -1778,32 +2049,61 @@ function sGerar(){
   c+='.fc-slideshow[data-transicao="zoom"] .fc-slide{transition:opacity 1.2s ease}\n';
   c+='.fc-slideshow[data-transicao="zoom"] .fc-slide.fc-ativa img{animation:fcZoom 6s ease-out forwards}\n';
   c+='@keyframes fcZoom{from{transform:scale(1)}to{transform:scale(1.07)}}\n';
-  c+='.fc-seta{position:absolute;top:50%;transform:translateY(-50%);z-index:3;width:42px;height:42px;border:none;border-radius:50%;background:rgba(0,0,0,.35);color:#fff;font-size:18px;line-height:42px;cursor:pointer;transition:background .3s}\n';
-  c+='.fc-seta:hover{background:rgba(0,0,0,.6)}\n';
-  c+='.fc-seta-esq{left:12px}.fc-seta-dir{right:12px}\n';
+  if(cfg.setas){
+    c+='.fc-seta{position:absolute;top:50%;transform:translateY(-50%);z-index:3;width:42px;height:42px;border:none;border-radius:50%;background:rgba(0,0,0,.35);color:#fff;font-size:18px;line-height:42px;cursor:pointer;transition:background .3s}\n';
+    c+='.fc-seta:hover{background:rgba(0,0,0,.6)}\n';
+    c+='.fc-seta-esq{left:12px}.fc-seta-dir{right:12px}\n';
+  }
   c+='.fc-legenda{position:absolute;left:0;right:0;bottom:0;z-index:2;padding:40px 20px 36px;background:linear-gradient(transparent,rgba(0,0,0,.65));color:#fff;font-size:15px;text-align:center;text-shadow:0 1px 3px rgba(0,0,0,.6);pointer-events:none;opacity:0;transition:opacity .8s ease}\n';
   c+='.fc-legenda.fc-visivel{opacity:1}\n';
   c+='.fc-legenda:empty{display:none}\n';
-  c+='.fc-dots{position:absolute;bottom:12px;left:0;right:0;display:flex;justify-content:center;gap:8px;z-index:3}\n';
-  c+='.fc-dots button{width:9px;height:9px;border-radius:50%;border:none;padding:0;cursor:pointer;background:rgba(255,255,255,.55);transition:background .3s,transform .3s}\n';
-  c+='.fc-dots button.fc-ativa{background:#fff;transform:scale(1.25)}\n';
-  c+='@media (max-width:600px){.fc-seta{width:34px;height:34px;font-size:15px;line-height:34px}.fc-legenda{font-size:13px}}\n';
+  if(cfg.dots){
+    c+='.fc-dots{position:absolute;bottom:12px;left:0;right:0;display:flex;justify-content:center;gap:8px;z-index:3}\n';
+    c+='.fc-dots button{width:9px;height:9px;border-radius:50%;border:none;padding:0;cursor:pointer;background:rgba(255,255,255,.55);transition:background .3s,transform .3s}\n';
+    c+='.fc-dots button.fc-ativa{background:#fff;transform:scale(1.25)}\n';
+  }
+  /* Proporcao no celular: um @media proprio, com o corte configurado, alterando SO a
+     aspect-ratio. Nao repete nenhuma outra propriedade da regra base -- o que a regra base
+     declara continua valendo dentro do corte -- e vem depois dela no CSS, que e o que faz a
+     troca vencer sem !important. Fica separado do @media de 600px logo abaixo porque os dois
+     cortes sao independentes: um e escolha do operador, o outro e o tamanho das setas. */
+  if(cfg.propmob)c+='@media (max-width:'+cfg.mob+'px){.fc-slideshow{aspect-ratio:'+cfg.propmob+'}}\n';
+  c+='@media (max-width:600px){'+(cfg.setas?'.fc-seta{width:34px;height:34px;font-size:15px;line-height:34px}':'')+'.fc-legenda{font-size:13px}}\n';
   /* Movimento reduzido: desliga o que ESTE bloco criou e nada mais. Os seletores repetem a
      especificidade das regras de cima (o atributo data-transicao conta) e vem depois no CSS,
      entao vencem sem !important e sem alcancar o resto do site. A troca automatica de foto
      continua -- ela e mudanca de conteudo, nao movimento na tela: parar tambem a passagem
-     deixaria o visitante com uma foto so, que e perder o recurso em vez de acalma-lo. */
+     deixaria o visitante com uma foto so, que e perder o recurso em vez de acalma-lo.
+     Os recursos da fase 5 nao acrescentam animacao nenhuma: arrastar e pausar mexem no timer
+     e reaproveitam a transicao que ja existe, e a proporcao do celular e layout. Por isso
+     nada novo entra aqui -- o que entra e a AUSENCIA das linhas de seta e bolinha quando o
+     operador as desliga. */
   c+='@media (prefers-reduced-motion: reduce){\n';
   c+='  .fc-slideshow[data-transicao] .fc-slide{transition:none}\n';
   if(t==='zoom')c+='  .fc-slideshow[data-transicao="zoom"] .fc-slide.fc-ativa img{animation:none}\n';
   c+='  .fc-legenda{transition:none}\n';
-  c+='  .fc-seta{transition:none}\n';
-  c+='  .fc-dots button{transition:none}\n';
+  if(cfg.setas)c+='  .fc-seta{transition:none}\n';
+  if(cfg.dots)c+='  .fc-dots button{transition:none}\n';
   c+='}\n';
   c+='</sty'+'le>\n\n';
   c+='<scr'+'ipt>\n(function () {\n';
   c+='  var IMAGENS = [\n'+arr+'\n  ];\n\n';
-  c+='  var INTERVALO = '+intv+';\n';
+  if(cfg.aleatoria){
+    /* Embaralha UMA vez por carregamento da pagina e ANTES de montar os slides, para que a
+       troca alcance tambem a primeira posicao: embaralhar e continuar comecando do indice 0
+       da lista cadastrada faria a foto de abertura ser sempre a mesma, que e meia solucao.
+       Fisher-Yates, cada permutacao com a mesma chance. Com uma foto so o laco nao roda. */
+    c+='  /* Ordem aleatoria: embaralha uma vez por carregamento, antes de montar os slides --\n';
+    c+='     assim a foto de abertura tambem muda de visitante para visitante. */\n';
+    c+='  (function () {\n';
+    c+='    var i, j, troca;\n';
+    c+='    for (i = IMAGENS.length - 1; i > 0; i--) {\n';
+    c+='      j = Math.floor(Math.random() * (i + 1));\n';
+    c+='      troca = IMAGENS[i]; IMAGENS[i] = IMAGENS[j]; IMAGENS[j] = troca;\n';
+    c+='    }\n';
+    c+='  })();\n\n';
+  }
+  c+='  var INTERVALO = '+cfg.intv+';\n';
   c+="  var TRANSICAO = '"+t+"';\n\n";
   c+='  /* Cada bloco fica com a primeira galeria ainda nao reivindicada: assim duas ou mais\n';
   c+='     galerias podem conviver na mesma pagina sem uma anular a outra. */\n';
@@ -1816,9 +2116,18 @@ function sGerar(){
   c+='  raiz.setAttribute(\'data-fc-pronto\', \'1\');\n';
   c+='  raiz.setAttribute(\'data-transicao\', TRANSICAO);\n';
   c+='  var areaSlides = raiz.querySelector(\'.fc-slides\');\n';
-  c+='  var areaDots = raiz.querySelector(\'.fc-dots\');\n';
+  if(cfg.dots)c+='  var areaDots = raiz.querySelector(\'.fc-dots\');\n';
   c+='  var elLegenda = raiz.querySelector(\'.fc-legenda\');\n';
-  c+='  var atual = 0;\n  var timer = null;\n\n';
+  c+='  var atual = 0;\n  var timer = null;\n';
+  /* Tres origens de pausa, cada uma com o seu proprio estado, em vez de um unico booleano:
+     com um booleano so, a primeira origem que soltasse zerava a pausa das outras duas. Medido
+     no aparelho hibrido: mouse parado sobre a foto e um toque em seguida faziam o touchend
+     religar o rodizio com o ponteiro ainda ali; e tirar o mouse religava com o foco ainda numa
+     seta -- justamente a pausa de quem navega por teclado, que era o motivo de o focusin
+     existir. Estado por origem tambem nao pode se desequilibrar como um contador: evento
+     repetido ou evento perdido no maximo repete um valor, nunca deixa uma pausa presa. */
+  if(cfg.pausar)c+='  var pMouse = false, pFoco = false, pToque = false;\n';
+  c+='\n';
   c+='  IMAGENS.forEach(function (foto, i) {\n';
   c+='    var slide = document.createElement(\'div\');\n    slide.className = \'fc-slide\';\n';
   c+='    var fundo = document.createElement(\'div\');\n    fundo.className = \'fc-fundo\';\n';
@@ -1827,12 +2136,16 @@ function sGerar(){
   c+='    img.alt = foto.legenda || (\'Foto \' + (i + 1));\n';
   c+='    img.loading = (i === 0) ? \'eager\' : \'lazy\';\n';
   c+='    slide.appendChild(fundo);\n    slide.appendChild(img);\n    areaSlides.appendChild(slide);\n';
-  c+='    var dot = document.createElement(\'button\');\n    dot.type = \'button\';\n';
-  c+='    dot.setAttribute(\'aria-label\', \'Ir para a foto \' + (i + 1));\n';
-  c+='    dot.addEventListener(\'click\', function () { irPara(i, true); });\n';
-  c+='    areaDots.appendChild(dot);\n  });\n\n';
+  if(cfg.dots){
+    c+='    var dot = document.createElement(\'button\');\n    dot.type = \'button\';\n';
+    c+='    dot.setAttribute(\'aria-label\', \'Ir para a foto \' + (i + 1));\n';
+    c+='    dot.addEventListener(\'click\', function () { irPara(i, true); });\n';
+    c+='    areaDots.appendChild(dot);\n';
+  }
+  c+='  });\n\n';
   c+='  var slides = areaSlides.querySelectorAll(\'.fc-slide\');\n';
-  c+='  var dots = areaDots.querySelectorAll(\'button\');\n\n';
+  if(cfg.dots)c+='  var dots = areaDots.querySelectorAll(\'button\');\n';
+  c+='\n';
   c+='  function mostrarLegenda(i) {\n';
   c+='    var txt = IMAGENS[i].legenda || \'\';\n';
   c+='    elLegenda.classList.remove(\'fc-visivel\');\n';
@@ -1850,21 +2163,85 @@ function sGerar(){
   c+='      s.classList.add(\'fc-ativa\');\n';
   c+='    } else {\n';
   c+='      slides.forEach(function (sl, k) {\n        sl.classList.toggle(\'fc-ativa\', k === novo);\n      });\n    }\n';
-  c+='    dots.forEach(function (d, k) { d.classList.toggle(\'fc-ativa\', k === novo); });\n';
+  if(cfg.dots)c+='    dots.forEach(function (d, k) { d.classList.toggle(\'fc-ativa\', k === novo); });\n';
   c+='    mostrarLegenda(novo);\n    atual = novo;\n  }\n\n';
   c+='  function proxima()  { mostrar((atual + 1) % IMAGENS.length, +1); }\n';
   c+='  function anterior() { mostrar((atual - 1 + IMAGENS.length) % IMAGENS.length, -1); }\n\n';
-  c+='  function agendar() {\n    clearInterval(timer);\n    timer = setInterval(proxima, INTERVALO);\n  }\n\n';
-  c+='  function irPara(i, manual) {\n    var dir = (i > atual) ? +1 : -1;\n    mostrar(i, dir);\n    if (manual) agendar();\n  }\n\n';
-  c+='  raiz.querySelector(\'.fc-seta-dir\').addEventListener(\'click\', function () { proxima(); agendar(); });\n';
-  c+='  raiz.querySelector(\'.fc-seta-esq\').addEventListener(\'click\', function () { anterior(); agendar(); });\n\n';
-  c+='  slides[0].classList.add(\'fc-ativa\');\n  dots[0].classList.add(\'fc-ativa\');\n';
+  if(cfg.pausar){
+    /* agendar() passa a respeitar a pausa. Sem esta linha, qualquer coisa que chame agendar()
+       com o mouse ainda parado sobre a foto (o retorno da aba pelo visibilitychange, o fim de
+       um arrasto) religaria o rodizio embaixo do cursor. */
+    c+='  function agendar() {\n    clearInterval(timer);\n    if (pMouse || pFoco || pToque) return;\n    timer = setInterval(proxima, INTERVALO);\n  }\n\n';
+  }else{
+    c+='  function agendar() {\n    clearInterval(timer);\n    timer = setInterval(proxima, INTERVALO);\n  }\n\n';
+  }
+  if(cfg.dots)c+='  function irPara(i, manual) {\n    var dir = (i > atual) ? +1 : -1;\n    mostrar(i, dir);\n    if (manual) agendar();\n  }\n\n';
+  if(cfg.setas){
+    c+='  raiz.querySelector(\'.fc-seta-dir\').addEventListener(\'click\', function () { proxima(); agendar(); });\n';
+    c+='  raiz.querySelector(\'.fc-seta-esq\').addEventListener(\'click\', function () { anterior(); agendar(); });\n\n';
+  }
+  if(cfg.arrastar){
+    /* O bloco de arrastar vem ANTES do de pausar de proposito: no touchend os dois disparam na
+       ordem em que foram registrados, entao o arrasto troca a foto e chama agendar() (que nao
+       agenda nada enquanto pToque ainda e verdadeiro) e so depois o repensar() do pausar solta
+       a origem 'toque' e reavalia as tres.
+       Invertida, a ordem religaria o rodizio antes da troca e o dedo ainda no vidro. */
+    c+='  /* Arrastar para trocar de foto. O CSS da caixa declara touch-action:pan-y: o navegador\n';
+    c+='     continua rolando a pagina na vertical sozinho e nunca inicia rolagem horizontal aqui,\n';
+    c+='     entao nenhum preventDefault e necessario -- e por isso o gesto na diagonal continua\n';
+    c+='     rolando a pagina. O eixo e decidido na primeira movimentacao que passa de 8px: gesto\n';
+    c+='     mais vertical que horizontal e rolagem e nunca troca foto. */\n';
+    c+='  var toqueX = 0, toqueY = 0, toqueEixo = \'\';\n';
+    c+='  raiz.addEventListener(\'touchstart\', function (ev) {\n';
+    c+='    if (!ev.touches || ev.touches.length !== 1) { toqueEixo = \'nao\'; return; }\n';
+    c+='    toqueX = ev.touches[0].clientX;\n';
+    c+='    toqueY = ev.touches[0].clientY;\n';
+    c+='    toqueEixo = \'\';\n';
+    c+='  }, { passive: true });\n';
+    c+='  raiz.addEventListener(\'touchmove\', function (ev) {\n';
+    c+='    if (toqueEixo !== \'\' || !ev.touches || ev.touches.length !== 1) return;\n';
+    c+='    var dx = ev.touches[0].clientX - toqueX;\n';
+    c+='    var dy = ev.touches[0].clientY - toqueY;\n';
+    c+='    if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return;\n';
+    c+='    toqueEixo = (Math.abs(dx) > Math.abs(dy)) ? \'x\' : \'nao\';\n';
+    c+='  }, { passive: true });\n';
+    c+='  raiz.addEventListener(\'touchend\', function (ev) {\n';
+    c+='    var eixo = toqueEixo;\n';
+    c+='    toqueEixo = \'\';\n';
+    c+='    if (eixo !== \'x\' || !ev.changedTouches || !ev.changedTouches[0]) return;\n';
+    c+='    var dx = ev.changedTouches[0].clientX - toqueX;\n';
+    c+='    if (Math.abs(dx) < 40) return;\n';
+    c+='    if (dx < 0) proxima(); else anterior();\n';
+    c+='    agendar();\n';
+    c+='  }, { passive: true });\n';
+    c+='  raiz.addEventListener(\'touchcancel\', function () { toqueEixo = \'\'; }, { passive: true });\n\n';
+  }
+  if(cfg.pausar){
+    c+='  /* Pausar. Mouse parado sobre a foto e dedo apoiado nela sao quase sempre alguem lendo\n';
+    c+='     a legenda; o foco entra junto porque quem navega por teclado precisa do mesmo\n';
+    c+='     respiro. As tres origens sao independentes e cada uma guarda o seu estado: soltar\n';
+    c+='     uma nao cancela as outras. Num aparelho com mouse E toque, tirar o dedo com o\n';
+    c+='     ponteiro ainda sobre a foto mantem a pausa, e tirar o mouse com o foco numa seta\n';
+    c+='     tambem. So quando as tres estao soltas o ritmo recomeca, do zero. */\n';
+    c+='  function repensar() {\n';
+    c+='    if (pMouse || pFoco || pToque) clearInterval(timer);\n';
+    c+='    else agendar();\n';
+    c+='  }\n';
+    c+='  raiz.addEventListener(\'mouseenter\', function () { pMouse = true; repensar(); });\n';
+    c+='  raiz.addEventListener(\'mouseleave\', function () { pMouse = false; repensar(); });\n';
+    c+='  raiz.addEventListener(\'focusin\', function () { pFoco = true; repensar(); });\n';
+    c+='  raiz.addEventListener(\'focusout\', function () { pFoco = false; repensar(); });\n';
+    c+='  raiz.addEventListener(\'touchstart\', function () { pToque = true; repensar(); }, { passive: true });\n';
+    c+='  raiz.addEventListener(\'touchend\', function () { pToque = false; repensar(); }, { passive: true });\n';
+    c+='  raiz.addEventListener(\'touchcancel\', function () { pToque = false; repensar(); }, { passive: true });\n\n';
+  }
+  c+='  slides[0].classList.add(\'fc-ativa\');\n';
+  if(cfg.dots)c+='  dots[0].classList.add(\'fc-ativa\');\n';
   c+='  mostrarLegenda(0);\n  agendar();\n\n';
   c+='  document.addEventListener(\'visibilitychange\', function () {\n';
   c+='    if (document.hidden) clearInterval(timer);\n    else agendar();\n  });\n';
   c+='})();\n</scr'+'ipt>';
-  $('s-out').value=c;
-  sPreview();
+  return c;
 }
 
 /* ============================================================
@@ -4476,7 +4853,9 @@ function liga(id,fn){var el=$(id);if(el)el.addEventListener('click',fn);}
    A barra de abas vem primeiro e sozinha: e o unico passo que precisa sobreviver a tudo,
    senao a ferramenta inteira parece morta. */
 prep('Barra de abas','',function(){
-  liga('aba-slide',function(){trocarAba('slide');});
+  /* enquanto o painel esta escondido o box mede 0: a previa e remontada ao abrir a aba, ja
+     com a largura real da coluna, senao o iframe nasceria na largura de emergencia. */
+  liga('aba-slide',function(){trocarAba('slide');sPreview(true);});
   liga('aba-leads',function(){trocarAba('leads');});
   liga('aba-tidy',function(){trocarAba('tidy');});
   liga('aba-uni',function(){trocarAba('uni');});
@@ -4488,11 +4867,14 @@ prep('Barra de abas','',function(){
 prep('Slideshow','slide',function(){
   liga('s-add',sAdd);
   liga('s-gerar',sGerar);
-  liga('s-previewbtn',sPreview);
   liga('s-limparbtn',sLimpar);
   liga('s-copy',function(){copiar('s-out','s-cop');});
-  /* a previa mostra o ritmo das fotos, entao o 'blur' redesenha com o valor ja preso */
-  fcLigarFaixa(S_NUMS,sPreview);
+  liga('s-previewbtn',function(){sPreview(true);});
+  liga('s-pv-desk',function(){sPvModoSet('desk');});
+  liga('s-pv-cel',function(){sPvModoSet('cel');});
+  /* a previa mostra o ritmo das fotos e o corte do celular, entao o 'blur' redesenha com o
+     valor ja preso -- imediato, porque 'blur' e um gesto deliberado e nao uma tecla */
+  fcLigarFaixa(S_NUMS,function(){sPreview(true);});
 });
 prep('Captacao de leads','leads',function(){
   liga('l-gerar',lGerar);
@@ -4593,7 +4975,14 @@ prep('Correcao das cores livres e da chave Pix na carga','leads uni',function(){
 /* Mesmo motivo do c-mob e das cores livres: estado gravado antes desta regra pode trazer numeros
    fora da faixa, e o campo nao pode exibir algo diferente do que o gerador vai usar. */
 prep('Slideshow','slide',function(){
+  /* estado gravado antes desta regra pode trazer intervalo, largura ou corte fora da faixa:
+     prende na carga, para o campo nunca exibir um numero diferente do que o gerador vai usar. */
   if(fcAjustarTodos(S_NUMS))salvarEstado();
+  sToggles();
+  sPvBotoes();
+  /* a previa NAO e montada aqui. Ela custa um iframe com as fotos da galeria, e o operador
+     pode abrir a ferramenta so para mexer em outra aba. A montagem fica para o clique na aba
+     e para o botao "Atualizar previa" -- que e como esta aba sempre se comportou. */
 },'desenhar a aba com o estado restaurado');
 prep('Captacao de leads','leads',function(){
   if(fcAjustarTodos(L_NUMS))salvarEstado();
