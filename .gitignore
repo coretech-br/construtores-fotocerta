@@ -12,3 +12,6 @@
 
 # workspace de execucao de planos (scratch, nao versionado)
 .superpowers/
+
+# saidas de ferramenta de teste de navegador (snapshots, logs) -- nunca versionar
+.playwright-mcp/

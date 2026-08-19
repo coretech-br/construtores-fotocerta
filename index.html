@@ -324,7 +324,7 @@
     </div>
   </div>
 
-  <div class="secao"><span class="secao-n">3</span> Mensagem e textos</div>
+  <div class="secao"><span class="secao-n">3</span> Mensagem, textos e cores do pop-up</div>
   <div class="grade">
     <div>
       <fieldset>
@@ -338,6 +338,18 @@
       <label for="l-m4">Antecede o (cod: ...)</label>
       <input type="text" id="l-m4" value="Tenho um pedido para voce">
       </fieldset>
+
+      <fieldset>
+      <legend>Paleta de cores do pop-up</legend>
+      <label>Fundo do cabeçalho</label>
+      <div class="cor-linha"><input type="color" id="l-c1" value="#075E54"><input type="text" id="l-c1-t" value="#075E54"></div>
+      <label>Fundo do card</label>
+      <div class="cor-linha"><input type="color" id="l-c2" value="#ffffff"><input type="text" id="l-c2-t" value="#ffffff"></div>
+      <label>Botão enviar <small>(e borda dos campos em foco)</small></label>
+      <div class="cor-linha"><input type="color" id="l-c3" value="#25D366"><input type="text" id="l-c3-t" value="#25D366"></div>
+      <label>Rótulos do formulário</label>
+      <div class="cor-linha"><input type="color" id="l-c4" value="#333333"><input type="text" id="l-c4-t" value="#333333"></div>
+      </fieldset>
     </div>
     <div>
       <fieldset>
@@ -347,8 +359,10 @@
       <label><input type="radio" name="l-coruja" value="true" checked><span>Coruja SVG</span></label>
       <label><input type="radio" name="l-coruja" value="false"><span>Emoji / nada</span></label>
       </div>
-      <label for="l-emoji">Emoji antes do título <small>(usado só se a coruja estiver desativada)</small></label>
+      <div id="l-emoji-campo">
+      <label for="l-emoji">Emoji antes do título</label>
       <input type="text" id="l-emoji" value="">
+      </div>
       <label for="l-t1">Título do cabeçalho</label>
       <input type="text" id="l-t1" value="Fale com a Foto Certa">
       <label for="l-t2">Rótulo do campo nome</label>
@@ -367,24 +381,11 @@
     </div>
   </div>
 
-  <div class="secao"><span class="secao-n">4</span> Cores e âncora do calendário</div>
+  <div class="secao"><span class="secao-n">4</span> Âncora para o calendário</div>
   <div class="grade">
     <div>
       <fieldset>
-      <legend>Paleta de cores do pop-up</legend>
-      <label>Fundo do cabeçalho</label>
-      <div class="cor-linha"><input type="color" id="l-c1" value="#075E54"><input type="text" id="l-c1-t" value="#075E54"></div>
-      <label>Fundo do card</label>
-      <div class="cor-linha"><input type="color" id="l-c2" value="#ffffff"><input type="text" id="l-c2-t" value="#ffffff"></div>
-      <label>Botão enviar <small>(e borda dos campos em foco)</small></label>
-      <div class="cor-linha"><input type="color" id="l-c3" value="#25D366"><input type="text" id="l-c3-t" value="#25D366"></div>
-      <label>Rótulos do formulário</label>
-      <div class="cor-linha"><input type="color" id="l-c4" value="#333333"><input type="text" id="l-c4-t" value="#333333"></div>
-      </fieldset>
-    </div>
-    <div>
-      <fieldset>
-      <legend>Âncora para o calendário (iframe)</legend>
+      <legend>Âncora do botão da página (iframe)</legend>
       <div class="radios">
       <label><input type="radio" name="l-ancora" value="sim" checked><span>Incluir âncora + plano B</span></label>
       <label><input type="radio" name="l-ancora" value="nao"><span>Não incluir</span></label>
@@ -394,8 +395,13 @@
       <input type="text" id="l-anc" value="#reserva">
       <label for="l-resp">Respiro ao chegar no calendário <small>(pixels de folga acima dele)</small></label>
       <input type="number" id="l-resp" value="24" min="0" step="4">
-      <p class="ajuda"><b>Como configurar no Prosite:</b> 1) No botão/link da página (ex.: o do hero), defina a URL exatamente como a âncora acima (ex.: <b>#reserva</b>). 2) Na coluna que contém o componente HTML do iframe da página intermediária, aba <b>Avançado</b>, preencha o campo <b>ID Html</b> com o nome da âncora sem o # (ex.: <b>reserva</b>). 3) Ao clicar, o script rola suave até o calendário dentro do iframe; se ele ainda não tiver carregado, a âncora nativa leva ao topo do iframe (plano B, já incluído no código gerado).</p>
       </div>
+      </fieldset>
+    </div>
+    <div>
+      <fieldset id="l-anc-como">
+      <legend>Como configurar no Prosite</legend>
+      <p class="ajuda"><b>1)</b> No botão/link da página (ex.: o do hero), defina a URL exatamente como a âncora ao lado (ex.: <b>#reserva</b>). <b>2)</b> Na coluna que contém o componente HTML do iframe da página intermediária, aba <b>Avançado</b>, preencha o campo <b>ID Html</b> com o nome da âncora sem o # (ex.: <b>reserva</b>). <b>3)</b> Ao clicar, o script rola suave até o calendário dentro do iframe; se ele ainda não tiver carregado, a âncora nativa leva ao topo do iframe (plano B, já incluído no código gerado).</p>
       </fieldset>
     </div>
   </div>
@@ -507,7 +513,7 @@
 <div class="painel" id="painel-uni" role="tabpanel">
   <p class="descricao"><b>Checkout</b> — carrinho de pagamento completo para colar em um componente HTML. Você escolhe as <b>formas de pagamento</b> (PayPal, Pix ou os dois juntos) e monta o pedido com <b>um ou vários produtos</b>, cada um com seus próprios itens opcionais. Inclui cupons de desconto, desconto exclusivo para Pix, largura e cores ajustáveis. O PayPal traz cartão sem login e parcelamento conforme sua conta; o Pix gera QR Code e Copia e Cola na hora, com o valor exato, e aviso de pagamento via WhatsApp. Nenhum segredo vai no código: apenas o Client ID público do PayPal e a chave Pix.</p>
 
-  <div class="secao primeira"><span class="secao-n">1</span> Formas de pagamento</div>
+  <div class="secao primeira"><span class="secao-n">1</span> Formas de pagamento e identificação</div>
   <div class="grade">
     <div>
       <fieldset>
@@ -518,8 +524,13 @@
           <label><input type="radio" name="u-metodo" value="pix"><span>Somente Pix</span></label>
         </div>
         <p class="ajuda">O código gerado carrega apenas o necessário para as formas escolhidas. Com Pix ativo, a moeda é fixa em reais (o Pix só existe em BRL); somente com PayPal, você pode escolher a moeda.</p>
+      </fieldset>
+
+      <fieldset>
+        <legend>Identificação do pedido</legend>
         <label for="u-cod">Código do pedido <small>(identifica a transação no PayPal, vira o txid do Pix e entra na mensagem do WhatsApp)</small></label>
         <input type="text" id="u-cod" value="" placeholder="ex.: CAMPANHA26">
+        <p class="ajuda">Vale para as três pontas ao mesmo tempo — não é uma configuração de nenhuma forma de pagamento em particular. É por ele que você reconhece a campanha no painel do PayPal, no extrato do Pix e no WhatsApp de aviso.</p>
       </fieldset>
 
       <fieldset id="u-pp-campos">
@@ -694,6 +705,9 @@
   </div>
 
   <div class="secao"><span class="secao-n">4</span> Prévia e código gerado</div>
+  <div class="acoes" style="margin-bottom:14px">
+    <button class="botao" id="u-gerar">Gerar código</button>
+  </div>
   <div class="grade">
     <div>
       <div class="pv-area">
@@ -701,9 +715,6 @@
       </div>
     </div>
     <div>
-      <div class="acoes" style="margin-bottom:12px">
-        <button class="botao" id="u-gerar">Gerar código</button>
-      </div>
       <div class="saida">
         <h3>Código para o componente HTML
           <button class="botao mini" id="u-copy" style="margin-left:8px">Copiar</button>
@@ -1075,10 +1086,10 @@
       <label>Cor do corpo / dos detalhes</label>
       <div class="cor-linha"><input type="color" id="c-corujacorpo" value="#FDFBF6"><input type="text" id="c-corujacorpo-t" value="#FDFBF6"></div>
       <div class="cor-linha"><input type="color" id="c-corujadet" value="#FFC94A"><input type="text" id="c-corujadet-t" value="#FFC94A"></div>
-      <label>Esconder no celular?</label>
+      <label>Mostrar no celular?</label>
       <div class="radios">
-      <label><input type="radio" name="c-corujamob" value="sim" checked><span>Sim</span></label>
-      <label><input type="radio" name="c-corujamob" value="nao"><span>Não</span></label>
+      <label><input type="radio" name="c-corujamostrarmob" value="sim" checked><span>Sim</span></label>
+      <label><input type="radio" name="c-corujamostrarmob" value="nao"><span>Não</span></label>
       </div>
       <p class="ajuda">A coruja aparece nas duas pontas, ancorada fora da área que rola — ela emoldura a barra em vez de passar junto com o texto.</p>
       </div>
@@ -1580,9 +1591,30 @@ function sRestaura(st){
   if(st.s){setRadio('s-t',st.s.t);setRadio('s-p',st.s.p);$('s-int').value=st.s.int;$('s-larg').value=st.s.larg;}
 }
 
+/* O campo do link aceitava QUALQUER texto: so checava se estava vazio. "foto do natal", o nome
+   de um arquivo do computador ou um caminho colado do Finder entravam na lista, saiam no codigo
+   gerado como src e a foto simplesmente nao aparecia na pagina publicada -- defeito descoberto
+   depois de publicar, que e tarde. Mesmo criterio de cUrlOk (Contagem regressiva) e do endereco
+   da intermediaria (TidyCal): valida o formato, nao reescreve o que o operador digitou.
+   Aceita endereco http(s) completo (o caso normal, storage da Alboom), endereco sem esquema
+   (//host/foto.jpg) e caminho do proprio site (/fotos/foto.jpg). Recusa o resto -- inclusive
+   javascript: e data:, que nao tem uso legitimo aqui. Espacos e caracteres de controle sao
+   ignorados so na conferencia; o valor guardado continua sendo o que foi digitado. */
+function sUrlOk(v){
+  var limpo=String(v).replace(/[\u0000-\u0020]/g,'');
+  if(!limpo)return false;
+  if(/^https?:\/\/[^/]/i.test(limpo))return true;
+  if(/^\/\/[^/]/.test(limpo))return true;
+  if(/^[a-zA-Z][a-zA-Z0-9+.\-]*:/.test(limpo))return false;
+  return limpo.charAt(0)==='/';
+}
+var S_URL_AVISO='O link da imagem precisa ser um endereco: http(s) completo (https://storage.alboom.ninja/...) '+
+  'ou um caminho do proprio site comecando com barra (/fotos/foto.jpg). Texto solto, nome de arquivo do '+
+  'computador e outros esquemas (javascript:, data:) nao carregam foto nenhuma na pagina publicada.';
 function sAdd(){
   var url=$('s-url').value.trim();
   if(!url){alert('Informe o link da imagem.');return;}
+  if(!sUrlOk(url)){alert(S_URL_AVISO);return;}
   sImgs.push({url:url,legenda:$('s-leg').value.trim()});
   $('s-url').value='';$('s-leg').value='';
   sRender();salvarEstado();
@@ -1679,6 +1711,16 @@ function sPreview(){
 function sGerar(){
   if(fcAjustarTodos(S_NUMS))salvarEstado();
   if(!sImgs.length){alert('Adicione ao menos uma imagem.');return;}
+  /* A conferencia se repete aqui de proposito: a lista tambem chega pelo localStorage, gravada
+     por uma versao que aceitava qualquer texto. Sem esta passagem, quem ja tem link torto salvo
+     continuaria gerando codigo com foto que nunca carrega e nunca ficaria sabendo. Recusa
+     dizendo a posicao, para o operador achar a linha na lista ao lado. */
+  for(var iu=0;iu<sImgs.length;iu++){
+    if(!sUrlOk(sImgs[iu].url)){
+      alert('A imagem na posicao '+(iu+1)+' da lista nao tem um link valido ("'+sImgs[iu].url+'"). '+S_URL_AVISO+' Remova essa linha e adicione a imagem de novo.');
+      return;
+    }
+  }
   var t=radio('s-t'),prop=radio('s-p');
   var intv=sPreso('s-int');
   var larg=sPreso('s-larg');
@@ -1873,6 +1915,7 @@ function lPadroes(){
   $('l-c3').value='#25D366';$('l-c3-t').value='#25D366';
   $('l-c4').value='#333333';$('l-c4-t').value='#333333';
   setRadio('l-ancora','sim');$('l-anc').value='#reserva';$('l-resp').value=24;lAncToggle();
+  lEmojiToggle();
   lBtnPreview();lPopPreview();salvarEstado();
 }
 
@@ -1953,11 +1996,25 @@ document.addEventListener('change',function(e){
    gerava seletor invalido e o plano B simplesmente nao funcionava, sem nenhum aviso. */
 function lAncOk(v){return /^#[A-Za-z][A-Za-z0-9_-]*$/.test(v);}
 function lAncToggle(){
+  var com=(radio('l-ancora')==='sim');
   var el=$('l-anc-campos');
-  if(el)el.style.display=(radio('l-ancora')==='sim')?'block':'none';
+  if(el)el.style.display=com?'block':'none';
+  /* o passo a passo do Prosite virou fieldset proprio na coluna da direita; sem a ancora ele
+     nao descreve nada, entao some junto com os campos */
+  var como=$('l-anc-como');
+  if(como)como.style.display=com?'block':'none';
+}
+/* O emoji so entra no titulo quando a marca NAO e a coruja SVG (ver lPopPreview e lGerar):
+   com a coruja marcada -- que e o padrao -- o campo ficava na tela sugerindo que fazia alguma
+   coisa, e o que ele digitasse ali era descartado sem aviso. A aba ja sabia esconder bloco
+   irrelevante (l-anc-campos); passa a fazer o mesmo aqui. */
+function lEmojiToggle(){
+  var el=$('l-emoji-campo');
+  if(el)el.style.display=(radio('l-coruja')==='true')?'none':'block';
 }
 document.addEventListener('change',function(e){
   if(e.target.name==='l-ancora')lAncToggle();
+  if(e.target.name==='l-coruja')lEmojiToggle();
 });
 
 function lGerar(){
@@ -3520,7 +3577,8 @@ function cColeta(){
       ctafundo:$('c-ctafundo-t').value,ctatexto:$('c-ctatexto-t').value,
       fechar:radio('c-fechar'),prog:radio('c-prog'),cprog:$('c-cprog-t').value,
       coruja:radio('c-coruja'),corujaalt:$('c-corujaalt').value,gap:$('c-gap').value,
-      corujacorpo:$('c-corujacorpo-t').value,corujadet:$('c-corujadet-t').value,corujamob:radio('c-corujamob'),
+      corujacorpo:$('c-corujacorpo-t').value,corujadet:$('c-corujadet-t').value,
+      corujamostrarmob:radio('c-corujamostrarmob'),
       mov:radio('c-mov'),vel:$('c-vel').value,alt:$('c-alt').value,
       efpulsar:$('c-ef-pulsar').checked,efbrilho:$('c-ef-brilho').checked,efdegrade:$('c-ef-degrade').checked,
       efpiscar:$('c-ef-piscar').checked,eftremor:$('c-ef-tremor').checked,
@@ -3539,7 +3597,18 @@ function cRestaura(st){
   setRadio('c-fonte',C.fonte);setRadio('c-peso',C.peso);setRadio('c-formato',C.formato);
   setRadio('c-alinha',C.alinha);setRadio('c-borda',C.borda);setRadio('c-fixa',C.fixa);
   setRadio('c-empurrar',C.empurrar);setRadio('c-cta',C.cta);setRadio('c-fechar',C.fechar);
-  setRadio('c-prog',C.prog);setRadio('c-coruja',C.coruja);setRadio('c-corujamob',C.corujamob);
+  setRadio('c-prog',C.prog);setRadio('c-coruja',C.coruja);
+  /* A pergunta da coruja no celular era NEGATIVA ("Esconder no celular?") com Sim marcado por
+     padrao: quem ligava a coruja nao a via no celular e concluia que estava quebrada. Agora a
+     pergunta e positiva ("Mostrar no celular?") e o padrao e mostrar.
+     Inverter o rotulo sem inverter a chave gravada reinterpretaria em silencio o que o operador
+     ja tinha configurado -- exatamente o que este projeto recusa. Por isso a chave nova
+     (corujamostrarmob) nao e a antiga: estado gravado pela versao anterior so traz corujamob, e
+     ele e traduzido aqui uma unica vez (esconder='sim' <=> mostrar='nao'). A escolha antiga
+     sobrevive intacta; o padrao novo so vale para quem nunca configurou. */
+  if(C.corujamostrarmob!=null)setRadio('c-corujamostrarmob',C.corujamostrarmob);
+  else if(C.corujamob!=null)setRadio('c-corujamostrarmob',C.corujamob==='sim'?'nao':'sim');
+  else setRadio('c-corujamostrarmob','sim');
   setRadio('c-mov',C.mov);setRadio('c-urg',C.urg);setRadio('c-urgpulsar',C.urgpulsar);
   setRadio('c-dig',C.dig);setRadio('c-entrada',C.entrada);
   $('c-tam').value=C.tam;$('c-pad').value=C.pad;$('c-largmax').value=C.largmax;$('c-mob').value=C.mob;
@@ -3657,7 +3726,10 @@ function cCfg(){
     cta:{ativo:radio('c-cta')==='sim',txt:$('c-ctatxt').value,url:$('c-ctaurl').value},
     fechar:radio('c-fechar'),prog:radio('c-prog')==='sim',
     gap:cNum('c-gap',16),
-    coruja:{ativo:radio('c-coruja')==='sim',alt:cNum('c-corujaalt',26),mob:radio('c-corujamob')==='sim'},
+    /* escondermob, e nao mob: o nome antigo ('mob') dizia so "celular" e ficava a um passo de
+       ser lido como "aparece no celular", que e o contrario do que ele valia. */
+    coruja:{ativo:radio('c-coruja')==='sim',alt:cNum('c-corujaalt',26),
+      escondermob:radio('c-corujamostrarmob')==='nao'},
     mov:radio('c-mov'),vel:cNum('c-vel',18),alt:Math.max(2,cNum('c-alt',5)),
     efeitos:{pulsar:$('c-ef-pulsar').checked,brilho:$('c-ef-brilho').checked,degrade:$('c-ef-degrade').checked,
       piscar:$('c-ef-piscar').checked,tremor:$('c-ef-tremor').checked},
@@ -3765,7 +3837,7 @@ function cCssBase(cfg){
   if(cfg.coruja.ativo){
     s+='.fcb-coruja{flex:0 0 auto;line-height:0}\n';
     s+='.fcb-coruja svg{height:'+cfg.coruja.alt+'px;width:auto;display:block}\n';
-    if(cfg.coruja.mob)s+='@media (max-width:'+cfg.mob+'px){.fcb-coruja{display:none}}\n';
+    if(cfg.coruja.escondermob)s+='@media (max-width:'+cfg.mob+'px){.fcb-coruja{display:none}}\n';
   }
   if(cfg.cta.ativo){
     s+='.fcb-cta{flex:0 0 auto;display:inline-block;text-decoration:none;border-radius:999px;'+
@@ -4160,7 +4232,7 @@ function cLimpar(){
   setRadio('c-fonte','neutra');setRadio('c-peso','600');setRadio('c-formato','compacto');
   setRadio('c-alinha','centro');setRadio('c-borda','nao');setRadio('c-fixa','fixa');
   setRadio('c-empurrar','empurrar');setRadio('c-cta','nao');setRadio('c-fechar','nao');
-  setRadio('c-prog','nao');setRadio('c-coruja','nao');setRadio('c-corujamob','sim');
+  setRadio('c-prog','nao');setRadio('c-coruja','nao');setRadio('c-corujamostrarmob','sim');
   setRadio('c-mov','estatico');setRadio('c-urg','nao');setRadio('c-urgpulsar','sim');
   setRadio('c-dig','nenhuma');setRadio('c-entrada','imediata');
   [['c-dias','0'],['c-horas','48'],['c-mins','0'],['c-alvo',''],['c-cod',''],
@@ -4451,6 +4523,7 @@ prep('Captacao de leads','leads',function(){
   lBtnPreview();
   lPopPreview();
   lAncToggle();
+  lEmojiToggle();
 },'desenhar a aba com o estado restaurado');
 prep('Agendamento TidyCal','tidy',function(){
   /* estado gravado antes desta regra pode trazer altura ou corte fora da faixa: prende na
