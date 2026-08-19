@@ -1208,6 +1208,48 @@ function $(id){return document.getElementById(id);}
 function radio(nome){var r=document.querySelector('input[name="'+nome+'"]:checked');return r?r.value:'';}
 function setRadio(nome,val){var r=document.querySelector('input[name="'+nome+'"][value="'+val+'"]');if(r)r.checked=true;}
 function esc(s){return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'");}
+/* Compartilhadas pelas seis abas. Estavam declaradas dentro do bloco de uma aba
+   especifica e so funcionavam por hoisting: escHtml nascia na aba Captacao de leads e
+   servia a quatro abas; escAttr e escJs nasciam na Contagem; mockPP nascia na TidyCal e
+   era chamada pelo Checkout. Aqui em cima o limite "compartilhado x da aba" fica a vista.
+   Detalhe de quem for mover este bloco outra vez: o comentario e a expressao regular de
+   escJs trazem "<!--" literal, e o parser HTML entra em estado escapado dali ate o primeiro
+   "-->" do arquivo. Isso e inofensivo enquanto nenhuma linha do script trouxer "<scr"+"ipt"
+   junto (a regra do Prosite ja obriga a concatenacao), mas o trecho afetado muda de lugar
+   junto com o bloco. */
+function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+/* escHtml (compartilhada pelas seis abas) so protege texto entre tags -- nao escapa
+   aspas, entao nao serve para montar valor de atributo entre aspas duplas. cfg.cta.url
+   e a unica string livre do gerador que vai parar dentro de um atributo (href). Helper
+   dedicado em vez de mexer em escHtml, que e usada em outra ~15 lugares como texto de
+   elemento (onde aspas sao inofensivas) e cuja alteracao arriscaria regressao nas
+   previas das outras abas. */
+function escAttr(s){return escHtml(s).replace(/"/g,'&quot;');}
+/* esc() protege a string JS (barra invertida e apostrofo), mas nao protege a fatia de HTML
+   em volta. MENSAGENS, ROTULOS e o CTA ja passam por escHtml, que come o "<". MSG_FINAL e
+   CODIGO nao podem passar por escHtml -- MSG_FINAL vai para textContent (o visitante veria
+   "&amp;" cru) e CODIGO vira chave de localStorage -- entao sao estes dois que precisam de
+   tratamento proprio. Duas sequencias tiram o parser do estado normal de script:
+     "</"    fecha o elemento no primeiro "</scr'+'ipt" do texto bruto;
+     "<!--"  leva ao estado escapado e, se vier um "<scr'+'ipt" depois, ao duplamente
+             escapado -- dali o "</scr'+'ipt>" legitimo do proprio bloco deixa de fechar o
+             elemento, e a barra some junto com tudo que vier depois dela na pagina.
+   As duas ganham uma barra invertida que o parser HTML ve e o interpretador JS descarta. */
+function escJs(s){return esc(s).replace(/<\//g,'<\\/').replace(/<!--/g,'<\\!--');}
+function corMockPP(v){
+  if(v==='blue')return ['#0070BA','#fff',''];
+  if(v==='silver')return ['#EEEEEE','#003087',''];
+  if(v==='white')return ['#FFFFFF','#003087',';border:1px solid #ccc'];
+  if(v==='black')return ['#2C2E2F','#fff',''];
+  return ['#FFC439','#111',''];
+}
+function mockPP(v){
+  var cp=corMockPP(v);
+  var h='<div style="margin-top:12px;background:'+cp[0]+';border-radius:6px;padding:11px;text-align:center;font-weight:700;color:'+cp[1]+';font-style:italic'+cp[2]+'">PayPal</div>';
+  var seg=(v==='black')?['#FFFFFF','#2C2E2F',';border:1px solid #ccc']:['#2C2E2F','#fff',''];
+  h+='<div style="margin-top:6px;background:'+seg[0]+';border-radius:6px;padding:10px;text-align:center;font-weight:600;color:'+seg[1]+';font-size:13px'+seg[2]+'">Cart\u00e3o de d\u00e9bito ou cr\u00e9dito</div>';
+  return h;
+}
 function copiar(idOut,idAviso){
   var ta=$(idOut);ta.select();ta.setSelectionRange(0,99999);
   var ok=false;
@@ -1223,146 +1265,119 @@ function trocarAba(qual){
   });
 }
 
+/* ============ aviso de falha isolada ============ */
+/* Falha isolada nao pode virar falha muda. Cada aba salva, restaura e se prepara por conta
+   propria -- um defeito numa delas nao derruba as outras cinco --, mas o operador precisa
+   saber que aquela aba parou, senao a perda de configuracao volta a ser silenciosa, que e
+   justamente o que esta fase veio fechar. Tres avisos ao mesmo tempo:
+     1. barra vermelha fixa no topo, visivel em qualquer aba (o operador pode nunca abrir a
+        aba defeituosa, entao um aviso so dentro dela nao serviria);
+     2. marca "(!)" no botao da aba, para localizar qual delas parou;
+     3. console.error com a excecao inteira, para o diagnostico.
+   Cada combinacao aba+fase avisa UMA vez: salvarEstado roda a cada tecla digitada, e sem o
+   registro a barra viraria uma lista infinita da mesma linha. */
+var fcVistos={};
+function fcFalha(rotulo,fase,erro,abaId){
+  var chave=rotulo+'|'+fase;
+  if(fcVistos[chave])return;
+  fcVistos[chave]=true;
+  try{if(window.console&&console.error)console.error('[Construtores] '+rotulo+': falha ao '+fase+'.',erro);}catch(e){}
+  try{fcBarra(rotulo+': falha ao '+fase+'.');}catch(e){}
+  try{fcMarcaAba(abaId);}catch(e){}
+}
+function fcBarra(msg){
+  var bar=document.getElementById('fc-falhas');
+  if(!bar){
+    bar=document.createElement('div');
+    bar.id='fc-falhas';
+    bar.setAttribute('role','alert');
+    bar.style.cssText='position:fixed;left:0;right:0;top:0;z-index:99999;background:#8C1D18;color:#fff;'+
+      'font:13px/1.45 -apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif;padding:10px 14px;'+
+      'text-align:left;box-shadow:0 2px 10px rgba(0,0,0,.35)';
+    var t=document.createElement('div');
+    t.style.cssText='font-weight:700;margin-bottom:4px';
+    t.appendChild(document.createTextNode('Algo parou nesta ferramenta. O que nao aparece abaixo segue funcionando; o detalhe esta no console (Cmd+Option+C).'));
+    bar.appendChild(t);
+    var l=document.createElement('div');l.id='fc-falhas-lista';
+    bar.appendChild(l);
+    (document.body||document.documentElement).appendChild(bar);
+  }
+  var li=document.createElement('div');
+  li.appendChild(document.createTextNode('\u2022 '+msg));
+  document.getElementById('fc-falhas-lista').appendChild(li);
+}
+function fcMarcaAba(abaId){
+  if(!abaId)return;
+  var b=document.getElementById('aba-'+abaId);
+  if(!b||b.getAttribute('data-fc-falhou'))return;
+  b.setAttribute('data-fc-falhou','1');
+  b.appendChild(document.createTextNode(' (!)'));
+}
+/* Passo de partida isolado: a aba que falhar ao se preparar nao interrompe a fila das
+   seguintes. Antes, uma excecao em bToggles() (aba Bordas) deixava cToggles(), cMsgRender()
+   e cPvBotoes() -- todos da aba Contagem -- sem rodar, e a aba Contagem nascia meio
+   configurada por causa de um defeito na aba ao lado. */
+function prep(nome,abaId,fn){
+  try{fn();}catch(e){fcFalha(nome,'preparar a aba',e,abaId);}
+}
+
 /* ============ persistência local ============ */
+/* Uma coleta e uma restauracao POR ABA, declaradas dentro do bloco de cada aba. O objeto
+   gravado em fcConstrutores continua sendo exatamente o mesmo de antes -- as chaves de topo
+   apenas passaram a ter dono declarado:
+     Slideshow -> imgs, s | Captacao de leads -> l | TidyCal -> t
+     Checkout  -> u       | Bordas -> b            | Contagem -> cmsgs, c
+   Antes disto, salvarEstado montava o objeto inteiro numa expressao so, dentro de um unico
+   try/catch: renomear UM campo de UMA aba fazia a ferramenta parar de salvar e de restaurar
+   as configuracoes das outras cinco, sem nada na tela.
+   Quando uma aba falha ao coletar, o pedaco dela JA GRAVADO e preservado no lugar de sumir:
+   assim o defeito de programacao nao apaga a configuracao do operador, que volta inteira
+   quando o defeito for corrigido. */
+/* A ordem desta lista e a ordem das chaves no JSON gravado e a ordem em que as abas
+   restauram. E a mesma de antes (TidyCal antes de Leads, como estava na expressao unica),
+   de proposito: assim um fcConstrutores gravado pela versao anterior e um gravado por esta
+   sao iguais byte a byte, nao so equivalentes. */
+var ABAS=[
+  {id:'slide',nome:'Slideshow',           chaves:['imgs','s'],  coleta:sColeta,restaura:sRestaura},
+  {id:'tidy', nome:'Agendamento TidyCal', chaves:['t'],         coleta:tColeta,restaura:tRestaura},
+  {id:'leads',nome:'Captacao de leads',   chaves:['l'],         coleta:lColeta,restaura:lRestaura},
+  {id:'uni',  nome:'Checkout',            chaves:['u'],         coleta:uColeta,restaura:uRestaura},
+  {id:'bor',  nome:'Bordas com efeito',   chaves:['b'],         coleta:bColeta,restaura:bRestaura},
+  {id:'cnt',  nome:'Contagem regressiva', chaves:['cmsgs','c'], coleta:cColeta,restaura:cRestaura}
+];
+var fcFrag={};   /* ultimo pedaco bom de cada aba, para nao apagar o que a aba quebrada tinha */
+
 function salvarEstado(){
-  try{
-    var st={
-      imgs:sImgs,
-      s:{t:radio('s-t'),p:radio('s-p'),int:$('s-int').value,larg:$('s-larg').value},
-      t:{path:$('t-path').value,desk:$('t-desk').value,mob:$('t-mob').value,larg:$('t-larg').value,
-        arq:radio('t-arq'),url:$('t-url').value,alt0:$('t-alt0').value},
-      l:{num:$('l-num').value,cod:$('l-cod').value,pag:$('l-pag').value,
-        modo:radio('l-modo'),segauto:$('l-segauto').value,efeito:radio('l-efeito'),segef:$('l-segef').value,
-        icone:radio('l-icone'),formato:radio('l-formato'),corbtn:$('l-corbtn-t').value,
-        m1:$('l-m1').value,m2:$('l-m2').value,m3:$('l-m3').value,m4:$('l-m4').value,
-        coruja:radio('l-coruja'),emoji:$('l-emoji').value,
-        t1:$('l-t1').value,t2:$('l-t2').value,t3:$('l-t3').value,t4:$('l-t4').value,
-        t5:$('l-t5').value,t6:$('l-t6').value,t7:$('l-t7').value,
-        c1:$('l-c1-t').value,c2:$('l-c2-t').value,c3:$('l-c3-t').value,c4:$('l-c4-t').value,
-        anc:radio('l-ancora'),ancv:$('l-anc').value,resp:$('l-resp').value},
-      u:{prods:uProds,cps:uCps,metodo:radio('u-metodo'),client:$('u-client').value,moeda:radio('u-moeda'),
-        chave:$('u-chave').value,nomer:$('u-nomer').value,cidade:$('u-cidade').value,cod:$('u-cod').value,
-        selprod:radio('u-selprod'),zap:radio('u-zap'),zapnum:$('u-zapnum').value,descpix:$('u-descpix').value,
-        t1:$('u-t1').value,t2:$('u-t2').value,t3:$('u-t3').value,t4:$('u-t4').value,t5:$('u-t5').value,t6:$('u-t6').value,t7:$('u-t7').value,
-        larg:$('u-largura').value,ppcor:radio('u-ppcor'),
-        c1:$('u-c1-t').value,c2:$('u-c2-t').value,c3:$('u-c3-t').value},
-      b:{efeito:radio('b-efeito'),fundo:radio('b-fundo'),f1:$('b-f1-t').value,f2:$('b-f2-t').value,
-        fang:$('b-fang').value,fallback:radio('b-fallback'),
-        esp:$('b-esp').value,raio:$('b-raio').value,
-        c1:$('b-c1-t').value,c2:$('b-c2-t').value,c3:$('b-c3-t').value,
-        facholarg:$('b-facholarg').value,listra:$('b-listra').value,vel:$('b-vel').value,
-        halo:radio('b-halo'),haloraio:$('b-haloraio').value,haloop:$('b-haloop').value,
-        txt:radio('b-txt'),c4:$('b-c4-t').value,pad:$('b-pad').value},
-      cmsgs:cMsgs,
-      c:{modo:radio('c-modo'),dias:$('c-dias').value,horas:$('c-horas').value,mins:$('c-mins').value,
-        alvo:$('c-alvo').value,cod:$('c-cod').value,
-        und:$('c-un-d').checked,unh:$('c-un-h').checked,unm:$('c-un-m').checked,uns:$('c-un-s').checked,
-        diaszero:radio('c-diaszero'),fim:radio('c-fim'),fimtxt:$('c-fimtxt').value,
-        cfundo:$('c-cfundo-t').value,ctexto:$('c-ctexto-t').value,cdestaque:$('c-cdestaque-t').value,
-        fonte:radio('c-fonte'),tam:$('c-tam').value,peso:radio('c-peso'),
-        formato:radio('c-formato'),rd:$('c-rd').value,rh:$('c-rh').value,rm:$('c-rm').value,rs:$('c-rs').value,
-        pad:$('c-pad').value,largmax:$('c-largmax').value,alinha:radio('c-alinha'),
-        borda:radio('c-borda'),cborda:$('c-cborda-t').value,mob:$('c-mob').value,
-        fixa:radio('c-fixa'),empurrar:radio('c-empurrar'),z:$('c-z').value,
-        cta:radio('c-cta'),ctatxt:$('c-ctatxt').value,ctaurl:$('c-ctaurl').value,
-        ctafundo:$('c-ctafundo-t').value,ctatexto:$('c-ctatexto-t').value,
-        fechar:radio('c-fechar'),prog:radio('c-prog'),cprog:$('c-cprog-t').value,
-        coruja:radio('c-coruja'),corujaalt:$('c-corujaalt').value,gap:$('c-gap').value,
-        corujacorpo:$('c-corujacorpo-t').value,corujadet:$('c-corujadet-t').value,corujamob:radio('c-corujamob'),
-        mov:radio('c-mov'),vel:$('c-vel').value,alt:$('c-alt').value,
-        efpulsar:$('c-ef-pulsar').checked,efbrilho:$('c-ef-brilho').checked,efdegrade:$('c-ef-degrade').checked,
-        efpiscar:$('c-ef-piscar').checked,eftremor:$('c-ef-tremor').checked,
-        urg:radio('c-urg'),urglim:$('c-urglim').value,curg:$('c-curg-t').value,urgpulsar:radio('c-urgpulsar'),
-        dig:radio('c-dig'),entrada:radio('c-entrada'),entradapx:$('c-entradapx').value}
-    };
-    localStorage.setItem('fcConstrutores',JSON.stringify(st));
-  }catch(e){}
+  var st={},i,k,a,frag;
+  for(i=0;i<ABAS.length;i++){
+    a=ABAS[i];
+    try{frag=a.coleta();fcFrag[a.id]=frag;}
+    catch(e){frag=fcFrag[a.id];fcFalha(a.nome,'salvar as configuracoes',e,a.id);}
+    if(frag){for(k in frag){if(Object.prototype.hasOwnProperty.call(frag,k))st[k]=frag[k];}}
+  }
+  try{localStorage.setItem('fcConstrutores',JSON.stringify(st));}
+  catch(e){fcFalha('Ferramenta','gravar as configuracoes -- armazenamento do navegador indisponivel, nada esta sendo salvo',e,'');}
 }
 function restaurarEstado(){
-  try{
-    var raw=localStorage.getItem('fcConstrutores');if(!raw)return;
-    var st=JSON.parse(raw);
-    if(st.imgs){sImgs=st.imgs;sRender();}
-    if(st.s){setRadio('s-t',st.s.t);setRadio('s-p',st.s.p);$('s-int').value=st.s.int;$('s-larg').value=st.s.larg;}
-    if(st.t){$('t-path').value=st.t.path;$('t-desk').value=st.t.desk;$('t-mob').value=st.t.mob;
-      $('t-larg').value=st.t.larg;setRadio('t-arq',st.t.arq);$('t-url').value=st.t.url;$('t-alt0').value=st.t.alt0;}
-    if(st.l){var L=st.l;
-      $('l-num').value=L.num;$('l-cod').value=L.cod;$('l-pag').value=L.pag;
-      setRadio('l-modo',L.modo);$('l-segauto').value=L.segauto;setRadio('l-efeito',L.efeito);$('l-segef').value=L.segef;
-      setRadio('l-icone',L.icone);setRadio('l-formato',L.formato);
-      $('l-corbtn-t').value=L.corbtn;$('l-corbtn').value=corValida(L.corbtn)?L.corbtn:'#25D366';
-      $('l-m1').value=L.m1;$('l-m2').value=L.m2;$('l-m3').value=L.m3;$('l-m4').value=L.m4;
-      setRadio('l-coruja',L.coruja);$('l-emoji').value=L.emoji;
-      $('l-t1').value=L.t1;$('l-t2').value=L.t2;$('l-t3').value=L.t3;$('l-t4').value=L.t4;
-      $('l-t5').value=L.t5;$('l-t6').value=L.t6;$('l-t7').value=L.t7;
-      $('l-c1-t').value=L.c1;$('l-c1').value=corValida(L.c1)?L.c1:'#075E54';
-      $('l-c2-t').value=L.c2;$('l-c2').value=corValida(L.c2)?L.c2:'#ffffff';
-      $('l-c3-t').value=L.c3;$('l-c3').value=corValida(L.c3)?L.c3:'#25D366';
-      $('l-c4-t').value=L.c4;$('l-c4').value=corValida(L.c4)?L.c4:'#333333';
-      if(L.anc){setRadio('l-ancora',L.anc);$('l-anc').value=L.ancv;$('l-resp').value=L.resp;}
+  var raw,st,i,j,a,c;
+  try{raw=localStorage.getItem('fcConstrutores');}
+  catch(e){fcFalha('Ferramenta','ler as configuracoes gravadas -- armazenamento do navegador indisponivel',e,'');return;}
+  if(!raw)return;
+  try{st=JSON.parse(raw);}
+  catch(e){fcFalha('Ferramenta','entender o estado gravado -- o conteudo salvo esta corrompido',e,'');return;}
+  if(!st||typeof st!=='object')return;
+  for(i=0;i<ABAS.length;i++){
+    a=ABAS[i];
+    /* guarda o pedaco lido ANTES de tentar restaurar: se a aba falhar, o proximo
+       salvarEstado regrava este pedaco em vez de apagar o que o operador tinha */
+    fcFrag[a.id]={};
+    for(j=0;j<a.chaves.length;j++){
+      c=a.chaves[j];
+      if(st[c]!==undefined)fcFrag[a.id][c]=st[c];
     }
-    if(st.u){var U=st.u;
-      uProds=U.prods||[];uProdRender();uCps=U.cps||[];uCpRender();
-      setRadio('u-metodo',U.metodo);setRadio('u-moeda',U.moeda);setRadio('u-selprod',U.selprod);setRadio('u-zap',U.zap);
-      $('u-client').value=U.client||'';
-      $('u-chave').value=U.chave||'';
-      $('u-nomer').value=U.nomer||'';
-      $('u-cidade').value=U.cidade||'';
-      $('u-cod').value=U.cod;
-      $('u-zapnum').value=U.zapnum||'';
-      $('u-descpix').value=(U.descpix!=null&&U.descpix!=='')?U.descpix:10;
-      $('u-t1').value=U.t1;$('u-t2').value=U.t2;$('u-t3').value=U.t3;$('u-t4').value=U.t4;$('u-t5').value=U.t5;$('u-t6').value=U.t6;
-      if(U.t7)$('u-t7').value=U.t7;
-      $('u-largura').value=U.larg||420;
-      setRadio('u-ppcor',U.ppcor||'gold');
-      $('u-c1-t').value=U.c1;$('u-c1').value=corValida(U.c1)?U.c1:'#075E54';
-      $('u-c2-t').value=U.c2;$('u-c2').value=corValida(U.c2)?U.c2:'#ffffff';
-      $('u-c3-t').value=U.c3;$('u-c3').value=corValida(U.c3)?U.c3:'#333333';
-    }
-    if(st.b){var B=st.b;
-      setRadio('b-efeito',B.efeito);setRadio('b-fundo',B.fundo);setRadio('b-fallback',B.fallback);
-      setRadio('b-halo',B.halo);setRadio('b-txt',B.txt);
-      $('b-f1-t').value=B.f1;$('b-f1').value=corValida(B.f1)?B.f1:'#8A4A32';
-      $('b-f2-t').value=B.f2;$('b-f2').value=corValida(B.f2)?B.f2:'#B5674A';
-      $('b-fang').value=B.fang;$('b-esp').value=B.esp;$('b-raio').value=B.raio;
-      $('b-c1-t').value=B.c1;$('b-c1').value=corValida(B.c1)?B.c1:'#9C5638';
-      $('b-c2-t').value=B.c2;$('b-c2').value=corValida(B.c2)?B.c2:'#FFC94A';
-      $('b-c3-t').value=B.c3;$('b-c3').value=corValida(B.c3)?B.c3:'#FFF6D8';
-      $('b-facholarg').value=B.facholarg;$('b-listra').value=B.listra;$('b-vel').value=B.vel;
-      $('b-haloraio').value=B.haloraio;$('b-haloop').value=B.haloop;
-      $('b-c4-t').value=B.c4;$('b-c4').value=corValida(B.c4)?B.c4:'#F7EFDF';
-      $('b-pad').value=B.pad;
-    }
-    if(st.cmsgs){cMsgs=st.cmsgs;cMsgRender();}
-    if(st.c){var C=st.c;
-      setRadio('c-modo',C.modo);setRadio('c-diaszero',C.diaszero);setRadio('c-fim',C.fim);
-      $('c-dias').value=C.dias;$('c-horas').value=C.horas;$('c-mins').value=C.mins;
-      $('c-alvo').value=C.alvo||'';$('c-cod').value=C.cod||'';$('c-fimtxt').value=C.fimtxt;
-      $('c-un-d').checked=!!C.und;$('c-un-h').checked=!!C.unh;$('c-un-m').checked=!!C.unm;$('c-un-s').checked=!!C.uns;
-      setRadio('c-fonte',C.fonte);setRadio('c-peso',C.peso);setRadio('c-formato',C.formato);
-      setRadio('c-alinha',C.alinha);setRadio('c-borda',C.borda);setRadio('c-fixa',C.fixa);
-      setRadio('c-empurrar',C.empurrar);setRadio('c-cta',C.cta);setRadio('c-fechar',C.fechar);
-      setRadio('c-prog',C.prog);setRadio('c-coruja',C.coruja);setRadio('c-corujamob',C.corujamob);
-      setRadio('c-mov',C.mov);setRadio('c-urg',C.urg);setRadio('c-urgpulsar',C.urgpulsar);
-      setRadio('c-dig',C.dig);setRadio('c-entrada',C.entrada);
-      $('c-tam').value=C.tam;$('c-pad').value=C.pad;$('c-largmax').value=C.largmax;$('c-mob').value=C.mob;
-      $('c-z').value=C.z;$('c-rd').value=C.rd;$('c-rh').value=C.rh;$('c-rm').value=C.rm;$('c-rs').value=C.rs;
-      $('c-ctatxt').value=C.ctatxt;$('c-ctaurl').value=C.ctaurl;
-      $('c-corujaalt').value=C.corujaalt;
-      /* o campo do espacamento saiu da coruja e virou c-gap; estados gravados antes disso
-         ainda trazem corujagap */
-      $('c-gap').value=(C.gap!=null&&C.gap!=='')?C.gap:((C.corujagap!=null&&C.corujagap!=='')?C.corujagap:16);
-      $('c-vel').value=C.vel;$('c-alt').value=C.alt;$('c-urglim').value=C.urglim;$('c-entradapx').value=C.entradapx;
-      $('c-ef-pulsar').checked=!!C.efpulsar;$('c-ef-brilho').checked=!!C.efbrilho;$('c-ef-degrade').checked=!!C.efdegrade;
-      $('c-ef-piscar').checked=!!C.efpiscar;$('c-ef-tremor').checked=!!C.eftremor;
-      [['c-cfundo',C.cfundo,'#0F3A30'],['c-ctexto',C.ctexto,'#FDFBF6'],['c-cdestaque',C.cdestaque,'#FFC94A'],
-       ['c-cborda',C.cborda,'#FFC94A'],['c-ctafundo',C.ctafundo,'#FFC94A'],['c-ctatexto',C.ctatexto,'#23281F'],
-       ['c-cprog',C.cprog,'#FFC94A'],['c-corujacorpo',C.corujacorpo,'#FDFBF6'],['c-corujadet',C.corujadet,'#FFC94A'],
-       ['c-curg',C.curg,'#8C1D18']].forEach(function(p){
-        $(p[0]+'-t').value=p[1];$(p[0]).value=corValida(p[1])?p[1]:p[2];
-      });
-    }
-  }catch(e){}
+    try{a.restaura(st);}
+    catch(e){fcFalha(a.nome,'restaurar as configuracoes',e,a.id);}
+  }
 }
 function corValida(v){return /^#[0-9a-fA-F]{6}$/.test(v);}
 /* Rede do gerador: le o campo de texto da cor e devolve o padrao quando o valor nao e um
@@ -1402,6 +1417,19 @@ function parearCor(idCor){
    SLIDESHOW
    ============================================================ */
 var sImgs=[];
+
+/* Salvamento e restauracao desta aba (registradas em ABAS). Ficam junto do bloco da aba
+   para que renomear um campo daqui seja uma alteracao de um lugar so. */
+function sColeta(){
+  return {
+    imgs:sImgs,
+    s:{t:radio('s-t'),p:radio('s-p'),int:$('s-int').value,larg:$('s-larg').value}
+  };
+}
+function sRestaura(st){
+  if(st.imgs){sImgs=st.imgs;sRender();}
+  if(st.s){setRadio('s-t',st.s.t);setRadio('s-p',st.s.p);$('s-int').value=st.s.int;$('s-larg').value=st.s.larg;}
+}
 
 function sAdd(){
   var url=$('s-url').value.trim();
@@ -1599,6 +1627,38 @@ function sGerar(){
 /* ============================================================
    CAPTAÇÃO DE LEADS
    ============================================================ */
+/* Salvamento e restauracao desta aba (registradas em ABAS). */
+function lColeta(){
+  return {
+    l:{num:$('l-num').value,cod:$('l-cod').value,pag:$('l-pag').value,
+      modo:radio('l-modo'),segauto:$('l-segauto').value,efeito:radio('l-efeito'),segef:$('l-segef').value,
+      icone:radio('l-icone'),formato:radio('l-formato'),corbtn:$('l-corbtn-t').value,
+      m1:$('l-m1').value,m2:$('l-m2').value,m3:$('l-m3').value,m4:$('l-m4').value,
+      coruja:radio('l-coruja'),emoji:$('l-emoji').value,
+      t1:$('l-t1').value,t2:$('l-t2').value,t3:$('l-t3').value,t4:$('l-t4').value,
+      t5:$('l-t5').value,t6:$('l-t6').value,t7:$('l-t7').value,
+      c1:$('l-c1-t').value,c2:$('l-c2-t').value,c3:$('l-c3-t').value,c4:$('l-c4-t').value,
+      anc:radio('l-ancora'),ancv:$('l-anc').value,resp:$('l-resp').value}
+  };
+}
+function lRestaura(st){
+  if(!st.l)return;
+  var L=st.l;
+  $('l-num').value=L.num;$('l-cod').value=L.cod;$('l-pag').value=L.pag;
+  setRadio('l-modo',L.modo);$('l-segauto').value=L.segauto;setRadio('l-efeito',L.efeito);$('l-segef').value=L.segef;
+  setRadio('l-icone',L.icone);setRadio('l-formato',L.formato);
+  $('l-corbtn-t').value=L.corbtn;$('l-corbtn').value=corValida(L.corbtn)?L.corbtn:'#25D366';
+  $('l-m1').value=L.m1;$('l-m2').value=L.m2;$('l-m3').value=L.m3;$('l-m4').value=L.m4;
+  setRadio('l-coruja',L.coruja);$('l-emoji').value=L.emoji;
+  $('l-t1').value=L.t1;$('l-t2').value=L.t2;$('l-t3').value=L.t3;$('l-t4').value=L.t4;
+  $('l-t5').value=L.t5;$('l-t6').value=L.t6;$('l-t7').value=L.t7;
+  $('l-c1-t').value=L.c1;$('l-c1').value=corValida(L.c1)?L.c1:'#075E54';
+  $('l-c2-t').value=L.c2;$('l-c2').value=corValida(L.c2)?L.c2:'#ffffff';
+  $('l-c3-t').value=L.c3;$('l-c3').value=corValida(L.c3)?L.c3:'#25D366';
+  $('l-c4-t').value=L.c4;$('l-c4').value=corValida(L.c4)?L.c4:'#333333';
+  if(L.anc){setRadio('l-ancora',L.anc);$('l-anc').value=L.ancv;$('l-resp').value=L.resp;}
+}
+
 function lPadroes(){
   if(!confirm('Restaurar todos os campos para os valores padrao?'))return;
   $('l-num').value='';$('l-cod').value='';$('l-pag').value='';
@@ -1646,7 +1706,6 @@ function lBtnPreview(){
   el.style.background=cor;
   el.innerHTML=(ic==='identidade')?svgCorujaStr(cor):(ic==='recado')?svgRecadoStr():svgWhatsStr();
 }
-function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function lPopPreview(){
   var box=$('l-pv-box');if(!box)return;
   var c1=$('l-c1-t').value;if(!corValida(c1))c1='#075E54';
@@ -1919,6 +1978,19 @@ function lGerar(){
 /* ============================================================
    TIDYCAL
    ============================================================ */
+/* Salvamento e restauracao desta aba (registradas em ABAS). */
+function tColeta(){
+  return {
+    t:{path:$('t-path').value,desk:$('t-desk').value,mob:$('t-mob').value,larg:$('t-larg').value,
+      arq:radio('t-arq'),url:$('t-url').value,alt0:$('t-alt0').value}
+  };
+}
+function tRestaura(st){
+  if(!st.t)return;
+  $('t-path').value=st.t.path;$('t-desk').value=st.t.desk;$('t-mob').value=st.t.mob;
+  $('t-larg').value=st.t.larg;setRadio('t-arq',st.t.arq);$('t-url').value=st.t.url;$('t-alt0').value=st.t.alt0;
+}
+
 function tArqToggle(){
   var emb=radio('t-arq')==='embutida';
   $('t-emb').style.display=emb?'block':'none';
@@ -1991,21 +2063,6 @@ function tGerar(){
   tArqToggle();
 }
 
-function corMockPP(v){
-  if(v==='blue')return ['#0070BA','#fff',''];
-  if(v==='silver')return ['#EEEEEE','#003087',''];
-  if(v==='white')return ['#FFFFFF','#003087',';border:1px solid #ccc'];
-  if(v==='black')return ['#2C2E2F','#fff',''];
-  return ['#FFC439','#111',''];
-}
-function mockPP(v){
-  var cp=corMockPP(v);
-  var h='<div style="margin-top:12px;background:'+cp[0]+';border-radius:6px;padding:11px;text-align:center;font-weight:700;color:'+cp[1]+';font-style:italic'+cp[2]+'">PayPal</div>';
-  var seg=(v==='black')?['#FFFFFF','#2C2E2F',';border:1px solid #ccc']:['#2C2E2F','#fff',''];
-  h+='<div style="margin-top:6px;background:'+seg[0]+';border-radius:6px;padding:10px;text-align:center;font-weight:600;color:'+seg[1]+';font-size:13px'+seg[2]+'">Cart\u00e3o de d\u00e9bito ou cr\u00e9dito</div>';
-  return h;
-}
-
 /* ============================================================
    CHECKOUT (PayPal e/ou Pix, com varios produtos)
    ============================================================ */
@@ -2013,6 +2070,38 @@ var uProds=[];
 var uCps=[];
 var uEditOps=[];
 var uEditIdx=-1;
+
+/* Salvamento e restauracao desta aba (registradas em ABAS). */
+function uColeta(){
+  return {
+    u:{prods:uProds,cps:uCps,metodo:radio('u-metodo'),client:$('u-client').value,moeda:radio('u-moeda'),
+      chave:$('u-chave').value,nomer:$('u-nomer').value,cidade:$('u-cidade').value,cod:$('u-cod').value,
+      selprod:radio('u-selprod'),zap:radio('u-zap'),zapnum:$('u-zapnum').value,descpix:$('u-descpix').value,
+      t1:$('u-t1').value,t2:$('u-t2').value,t3:$('u-t3').value,t4:$('u-t4').value,t5:$('u-t5').value,t6:$('u-t6').value,t7:$('u-t7').value,
+      larg:$('u-largura').value,ppcor:radio('u-ppcor'),
+      c1:$('u-c1-t').value,c2:$('u-c2-t').value,c3:$('u-c3-t').value}
+  };
+}
+function uRestaura(st){
+  if(!st.u)return;
+  var U=st.u;
+  uProds=U.prods||[];uProdRender();uCps=U.cps||[];uCpRender();
+  setRadio('u-metodo',U.metodo);setRadio('u-moeda',U.moeda);setRadio('u-selprod',U.selprod);setRadio('u-zap',U.zap);
+  $('u-client').value=U.client||'';
+  $('u-chave').value=U.chave||'';
+  $('u-nomer').value=U.nomer||'';
+  $('u-cidade').value=U.cidade||'';
+  $('u-cod').value=U.cod;
+  $('u-zapnum').value=U.zapnum||'';
+  $('u-descpix').value=(U.descpix!=null&&U.descpix!=='')?U.descpix:10;
+  $('u-t1').value=U.t1;$('u-t2').value=U.t2;$('u-t3').value=U.t3;$('u-t4').value=U.t4;$('u-t5').value=U.t5;$('u-t6').value=U.t6;
+  if(U.t7)$('u-t7').value=U.t7;
+  $('u-largura').value=U.larg||420;
+  setRadio('u-ppcor',U.ppcor||'gold');
+  $('u-c1-t').value=U.c1;$('u-c1').value=corValida(U.c1)?U.c1:'#075E54';
+  $('u-c2-t').value=U.c2;$('u-c2').value=corValida(U.c2)?U.c2:'#ffffff';
+  $('u-c3-t').value=U.c3;$('u-c3').value=corValida(U.c3)?U.c3:'#333333';
+}
 
 function uNum(id,def){var v=parseFloat(String($(id).value).replace(',','.'));return (isNaN(v)||v<0)?def:v;}
 function uFmt(v){
@@ -2779,6 +2868,35 @@ function uGerar(){
 /* ============================================================
    BORDAS COM EFEITO (CSS puro: head + CSS do componente)
    ============================================================ */
+/* Salvamento e restauracao desta aba (registradas em ABAS). */
+function bColeta(){
+  return {
+    b:{efeito:radio('b-efeito'),fundo:radio('b-fundo'),f1:$('b-f1-t').value,f2:$('b-f2-t').value,
+      fang:$('b-fang').value,fallback:radio('b-fallback'),
+      esp:$('b-esp').value,raio:$('b-raio').value,
+      c1:$('b-c1-t').value,c2:$('b-c2-t').value,c3:$('b-c3-t').value,
+      facholarg:$('b-facholarg').value,listra:$('b-listra').value,vel:$('b-vel').value,
+      halo:radio('b-halo'),haloraio:$('b-haloraio').value,haloop:$('b-haloop').value,
+      txt:radio('b-txt'),c4:$('b-c4-t').value,pad:$('b-pad').value}
+  };
+}
+function bRestaura(st){
+  if(!st.b)return;
+  var B=st.b;
+  setRadio('b-efeito',B.efeito);setRadio('b-fundo',B.fundo);setRadio('b-fallback',B.fallback);
+  setRadio('b-halo',B.halo);setRadio('b-txt',B.txt);
+  $('b-f1-t').value=B.f1;$('b-f1').value=corValida(B.f1)?B.f1:'#8A4A32';
+  $('b-f2-t').value=B.f2;$('b-f2').value=corValida(B.f2)?B.f2:'#B5674A';
+  $('b-fang').value=B.fang;$('b-esp').value=B.esp;$('b-raio').value=B.raio;
+  $('b-c1-t').value=B.c1;$('b-c1').value=corValida(B.c1)?B.c1:'#9C5638';
+  $('b-c2-t').value=B.c2;$('b-c2').value=corValida(B.c2)?B.c2:'#FFC94A';
+  $('b-c3-t').value=B.c3;$('b-c3').value=corValida(B.c3)?B.c3:'#FFF6D8';
+  $('b-facholarg').value=B.facholarg;$('b-listra').value=B.listra;$('b-vel').value=B.vel;
+  $('b-haloraio').value=B.haloraio;$('b-haloop').value=B.haloop;
+  $('b-c4-t').value=B.c4;$('b-c4').value=corValida(B.c4)?B.c4:'#F7EFDF';
+  $('b-pad').value=B.pad;
+}
+
 function bHexRgb(h){
   h=String(h||'').trim().replace('#','');
   if(h.length===3)h=h[0]+h[0]+h[1]+h[1]+h[2]+h[2];
@@ -2987,6 +3105,64 @@ document.addEventListener('input',function(e){
 });
 
 var cMsgs=[];
+
+/* Salvamento e restauracao desta aba (registradas em ABAS). */
+function cColeta(){
+  return {
+    cmsgs:cMsgs,
+    c:{modo:radio('c-modo'),dias:$('c-dias').value,horas:$('c-horas').value,mins:$('c-mins').value,
+      alvo:$('c-alvo').value,cod:$('c-cod').value,
+      und:$('c-un-d').checked,unh:$('c-un-h').checked,unm:$('c-un-m').checked,uns:$('c-un-s').checked,
+      diaszero:radio('c-diaszero'),fim:radio('c-fim'),fimtxt:$('c-fimtxt').value,
+      cfundo:$('c-cfundo-t').value,ctexto:$('c-ctexto-t').value,cdestaque:$('c-cdestaque-t').value,
+      fonte:radio('c-fonte'),tam:$('c-tam').value,peso:radio('c-peso'),
+      formato:radio('c-formato'),rd:$('c-rd').value,rh:$('c-rh').value,rm:$('c-rm').value,rs:$('c-rs').value,
+      pad:$('c-pad').value,largmax:$('c-largmax').value,alinha:radio('c-alinha'),
+      borda:radio('c-borda'),cborda:$('c-cborda-t').value,mob:$('c-mob').value,
+      fixa:radio('c-fixa'),empurrar:radio('c-empurrar'),z:$('c-z').value,
+      cta:radio('c-cta'),ctatxt:$('c-ctatxt').value,ctaurl:$('c-ctaurl').value,
+      ctafundo:$('c-ctafundo-t').value,ctatexto:$('c-ctatexto-t').value,
+      fechar:radio('c-fechar'),prog:radio('c-prog'),cprog:$('c-cprog-t').value,
+      coruja:radio('c-coruja'),corujaalt:$('c-corujaalt').value,gap:$('c-gap').value,
+      corujacorpo:$('c-corujacorpo-t').value,corujadet:$('c-corujadet-t').value,corujamob:radio('c-corujamob'),
+      mov:radio('c-mov'),vel:$('c-vel').value,alt:$('c-alt').value,
+      efpulsar:$('c-ef-pulsar').checked,efbrilho:$('c-ef-brilho').checked,efdegrade:$('c-ef-degrade').checked,
+      efpiscar:$('c-ef-piscar').checked,eftremor:$('c-ef-tremor').checked,
+      urg:radio('c-urg'),urglim:$('c-urglim').value,curg:$('c-curg-t').value,urgpulsar:radio('c-urgpulsar'),
+      dig:radio('c-dig'),entrada:radio('c-entrada'),entradapx:$('c-entradapx').value}
+  };
+}
+function cRestaura(st){
+  if(st.cmsgs){cMsgs=st.cmsgs;cMsgRender();}
+  if(!st.c)return;
+  var C=st.c;
+  setRadio('c-modo',C.modo);setRadio('c-diaszero',C.diaszero);setRadio('c-fim',C.fim);
+  $('c-dias').value=C.dias;$('c-horas').value=C.horas;$('c-mins').value=C.mins;
+  $('c-alvo').value=C.alvo||'';$('c-cod').value=C.cod||'';$('c-fimtxt').value=C.fimtxt;
+  $('c-un-d').checked=!!C.und;$('c-un-h').checked=!!C.unh;$('c-un-m').checked=!!C.unm;$('c-un-s').checked=!!C.uns;
+  setRadio('c-fonte',C.fonte);setRadio('c-peso',C.peso);setRadio('c-formato',C.formato);
+  setRadio('c-alinha',C.alinha);setRadio('c-borda',C.borda);setRadio('c-fixa',C.fixa);
+  setRadio('c-empurrar',C.empurrar);setRadio('c-cta',C.cta);setRadio('c-fechar',C.fechar);
+  setRadio('c-prog',C.prog);setRadio('c-coruja',C.coruja);setRadio('c-corujamob',C.corujamob);
+  setRadio('c-mov',C.mov);setRadio('c-urg',C.urg);setRadio('c-urgpulsar',C.urgpulsar);
+  setRadio('c-dig',C.dig);setRadio('c-entrada',C.entrada);
+  $('c-tam').value=C.tam;$('c-pad').value=C.pad;$('c-largmax').value=C.largmax;$('c-mob').value=C.mob;
+  $('c-z').value=C.z;$('c-rd').value=C.rd;$('c-rh').value=C.rh;$('c-rm').value=C.rm;$('c-rs').value=C.rs;
+  $('c-ctatxt').value=C.ctatxt;$('c-ctaurl').value=C.ctaurl;
+  $('c-corujaalt').value=C.corujaalt;
+  /* o campo do espacamento saiu da coruja e virou c-gap; estados gravados antes disso
+     ainda trazem corujagap */
+  $('c-gap').value=(C.gap!=null&&C.gap!=='')?C.gap:((C.corujagap!=null&&C.corujagap!=='')?C.corujagap:16);
+  $('c-vel').value=C.vel;$('c-alt').value=C.alt;$('c-urglim').value=C.urglim;$('c-entradapx').value=C.entradapx;
+  $('c-ef-pulsar').checked=!!C.efpulsar;$('c-ef-brilho').checked=!!C.efbrilho;$('c-ef-degrade').checked=!!C.efdegrade;
+  $('c-ef-piscar').checked=!!C.efpiscar;$('c-ef-tremor').checked=!!C.eftremor;
+  [['c-cfundo',C.cfundo,'#0F3A30'],['c-ctexto',C.ctexto,'#FDFBF6'],['c-cdestaque',C.cdestaque,'#FFC94A'],
+   ['c-cborda',C.cborda,'#FFC94A'],['c-ctafundo',C.ctafundo,'#FFC94A'],['c-ctatexto',C.ctatexto,'#23281F'],
+   ['c-cprog',C.cprog,'#FFC94A'],['c-corujacorpo',C.corujacorpo,'#FDFBF6'],['c-corujadet',C.corujadet,'#FFC94A'],
+   ['c-curg',C.curg,'#8C1D18']].forEach(function(p){
+    $(p[0]+'-t').value=p[1];$(p[0]).value=corValida(p[1])?p[1]:p[2];
+  });
+}
 function cMsgAdd(){
   var t=$('c-msg').value.trim();
   if(!t){alert('Escreva o texto da mensagem.');return;}
@@ -3309,24 +3485,6 @@ function cCssEfeitos(cfg){
   }
   return s;
 }
-/* escHtml (compartilhada pelas seis abas) so protege texto entre tags -- nao escapa
-   aspas, entao nao serve para montar valor de atributo entre aspas duplas. cfg.cta.url
-   e a unica string livre do gerador que vai parar dentro de um atributo (href). Helper
-   dedicado em vez de mexer em escHtml, que e usada em outra ~15 lugares como texto de
-   elemento (onde aspas sao inofensivas) e cuja alteracao arriscaria regressao nas
-   previas das outras abas. */
-function escAttr(s){return escHtml(s).replace(/"/g,'&quot;');}
-/* esc() protege a string JS (barra invertida e apostrofo), mas nao protege a fatia de HTML
-   em volta. MENSAGENS, ROTULOS e o CTA ja passam por escHtml, que come o "<". MSG_FINAL e
-   CODIGO nao podem passar por escHtml -- MSG_FINAL vai para textContent (o visitante veria
-   "&amp;" cru) e CODIGO vira chave de localStorage -- entao sao estes dois que precisam de
-   tratamento proprio. Duas sequencias tiram o parser do estado normal de script:
-     "</"    fecha o elemento no primeiro "</scr'+'ipt" do texto bruto;
-     "<!--"  leva ao estado escapado e, se vier um "<scr'+'ipt" depois, ao duplamente
-             escapado -- dali o "</scr'+'ipt>" legitimo do proprio bloco deixa de fechar o
-             elemento, e a barra some junto com tudo que vier depois dela na pagina.
-   As duas ganham uma barra invertida que o parser HTML ve e o interpretador JS descarta. */
-function escJs(s){return esc(s).replace(/<\//g,'<\\/').replace(/<!--/g,'<\\!--');}
 function cJsBase(cfg){
   var j='';
   j+='  /* ===== CONFIGURACAO ===== */\n';
@@ -3766,108 +3924,145 @@ function cPvModoSet(m){
 
 /* ============ inicialização ============ */
 function liga(id,fn){var el=$(id);if(el)el.addEventListener('click',fn);}
-liga('aba-slide',function(){trocarAba('slide');});
-liga('aba-leads',function(){trocarAba('leads');});
-liga('aba-tidy',function(){trocarAba('tidy');});
-liga('s-add',sAdd);
-liga('s-gerar',sGerar);
-liga('s-previewbtn',sPreview);
-liga('s-limparbtn',sLimpar);
-liga('s-copy',function(){copiar('s-out','s-cop');});
-liga('l-gerar',lGerar);
-liga('l-padroes',lPadroes);
-liga('l-copy',function(){copiar('l-out','l-cop');});
-liga('t-gerar',tGerar);
-liga('t-copy1',function(){copiar('t-out1','t-cop1');});
-liga('t-copy2',function(){copiar('t-out2','t-cop2');});
-liga('t-copy3',function(){copiar('t-out3','t-cop3');});
-liga('aba-uni',function(){trocarAba('uni');});
-liga('aba-bor',function(){trocarAba('bor');});
-/* enquanto o painel esta escondido o box mede 0: a previa e remontada ao abrir a aba, ja com
-   a largura real da coluna, senao o iframe nasceria na largura de emergencia. */
-liga('aba-cnt',function(){trocarAba('cnt');cPreview(true);});
-liga('u-op-add',uOpAdd);
-liga('u-prod-salvar',uProdSalvar);
-liga('u-prod-cancelar',uProdLimpar);
-liga('u-cp-add',uCpAdd);
-liga('u-gerar',uGerar);
-liga('u-copy',function(){copiar('u-out','u-cop');});
-liga('b-gerar',bGerar);
-liga('b-copy1',function(){copiar('b-out1','b-cop1');});
-liga('b-copy2',function(){copiar('b-out2','b-cop2');});
-liga('c-msg-add',cMsgAdd);
-liga('c-atualizar',function(){cPreview(true);});
-liga('c-pv-desk',function(){cPvModoSet('desk');});
-liga('c-pv-cel',function(){cPvModoSet('cel');});
-/* O listener do proprio elemento corre ANTES dos de document (fase de bolha, alvo primeiro),
-   entao quando o cPreview() global rodar o valor ja esta preso -- por isso o ramo de 'change'
-   nao redesenha, senao montaria o iframe duas vezes. 'blur' nao borbulha e nao aciona nenhum
-   listener de document, entao esse redesenha por conta propria. */
-(function(){
-  var el=$('c-mob');if(!el)return;
-  el.addEventListener('change',function(){if(cMobAjustar())salvarEstado();});
-  el.addEventListener('blur',function(){if(cMobAjustar()){salvarEstado();cPreview(true);}});
-})();
-liga('c-gerar',cGerar);
-liga('c-limpar',cLimpar);
-liga('c-copy1',function(){copiar('c-out1','c-cop1');});
-parearCor('l-corbtn');parearCor('l-c1');parearCor('l-c2');parearCor('l-c3');parearCor('l-c4');
-parearCor('u-c1');parearCor('u-c2');parearCor('u-c3');
-parearCor('b-f1');parearCor('b-f2');parearCor('b-c1');parearCor('b-c2');parearCor('b-c3');parearCor('b-c4');
-parearCor('c-cfundo');parearCor('c-ctexto');parearCor('c-cdestaque');parearCor('c-cborda');
-parearCor('c-ctafundo');parearCor('c-ctatexto');parearCor('c-cprog');
-parearCor('c-corujacorpo');parearCor('c-corujadet');
-parearCor('c-curg');
+
+/* A partida tambem e por aba. Cada passo entra num prep() proprio: um defeito numa aba
+   deixa de interromper a fila e as seguintes continuam ligando botoes, restaurando campos
+   e desenhando previas. Antes, uma excecao em bToggles() (Bordas) matava cToggles(),
+   cMsgRender() e cPvBotoes() (Contagem), e a aba Contagem nascia meio configurada.
+   A barra de abas vem primeiro e sozinha: e o unico passo que precisa sobreviver a tudo,
+   senao a ferramenta inteira parece morta. */
+prep('Barra de abas','',function(){
+  liga('aba-slide',function(){trocarAba('slide');});
+  liga('aba-leads',function(){trocarAba('leads');});
+  liga('aba-tidy',function(){trocarAba('tidy');});
+  liga('aba-uni',function(){trocarAba('uni');});
+  liga('aba-bor',function(){trocarAba('bor');});
+  /* enquanto o painel esta escondido o box mede 0: a previa e remontada ao abrir a aba, ja com
+     a largura real da coluna, senao o iframe nasceria na largura de emergencia. */
+  liga('aba-cnt',function(){trocarAba('cnt');cPreview(true);});
+});
+prep('Slideshow','slide',function(){
+  liga('s-add',sAdd);
+  liga('s-gerar',sGerar);
+  liga('s-previewbtn',sPreview);
+  liga('s-limparbtn',sLimpar);
+  liga('s-copy',function(){copiar('s-out','s-cop');});
+});
+prep('Captacao de leads','leads',function(){
+  liga('l-gerar',lGerar);
+  liga('l-padroes',lPadroes);
+  liga('l-copy',function(){copiar('l-out','l-cop');});
+  parearCor('l-corbtn');parearCor('l-c1');parearCor('l-c2');parearCor('l-c3');parearCor('l-c4');
+});
+prep('Agendamento TidyCal','tidy',function(){
+  liga('t-gerar',tGerar);
+  liga('t-copy1',function(){copiar('t-out1','t-cop1');});
+  liga('t-copy2',function(){copiar('t-out2','t-cop2');});
+  liga('t-copy3',function(){copiar('t-out3','t-cop3');});
+});
+prep('Checkout','uni',function(){
+  liga('u-op-add',uOpAdd);
+  liga('u-prod-salvar',uProdSalvar);
+  liga('u-prod-cancelar',uProdLimpar);
+  liga('u-cp-add',uCpAdd);
+  liga('u-gerar',uGerar);
+  liga('u-copy',function(){copiar('u-out','u-cop');});
+  parearCor('u-c1');parearCor('u-c2');parearCor('u-c3');
+  var el=$('u-chave');
+  if(el){
+    el.addEventListener('change',function(){if(uChaveAjustar())salvarEstado();});
+    el.addEventListener('blur',function(){if(uChaveAjustar()){salvarEstado();uPreview();}});
+  }
+});
+prep('Bordas com efeito','bor',function(){
+  liga('b-gerar',bGerar);
+  liga('b-copy1',function(){copiar('b-out1','b-cop1');});
+  liga('b-copy2',function(){copiar('b-out2','b-cop2');});
+  parearCor('b-f1');parearCor('b-f2');parearCor('b-c1');parearCor('b-c2');parearCor('b-c3');parearCor('b-c4');
+});
+prep('Contagem regressiva','cnt',function(){
+  liga('c-msg-add',cMsgAdd);
+  liga('c-atualizar',function(){cPreview(true);});
+  liga('c-pv-desk',function(){cPvModoSet('desk');});
+  liga('c-pv-cel',function(){cPvModoSet('cel');});
+  liga('c-gerar',cGerar);
+  liga('c-limpar',cLimpar);
+  liga('c-copy1',function(){copiar('c-out1','c-cop1');});
+  parearCor('c-cfundo');parearCor('c-ctexto');parearCor('c-cdestaque');parearCor('c-cborda');
+  parearCor('c-ctafundo');parearCor('c-ctatexto');parearCor('c-cprog');
+  parearCor('c-corujacorpo');parearCor('c-corujadet');
+  parearCor('c-curg');
+  /* O listener do proprio elemento corre ANTES dos de document (fase de bolha, alvo primeiro),
+     entao quando o cPreview() global rodar o valor ja esta preso -- por isso o ramo de 'change'
+     nao redesenha, senao montaria o iframe duas vezes. 'blur' nao borbulha e nao aciona nenhum
+     listener de document, entao esse redesenha por conta propria. */
+  var el=$('c-mob');
+  if(el){
+    el.addEventListener('change',function(){if(cMobAjustar())salvarEstado();});
+    el.addEventListener('blur',function(){if(cMobAjustar()){salvarEstado();cPreview(true);}});
+  }
+});
 /* Cores de texto livre das abas Leads e Checkout: o campo se corrige a vista, como o c-mob.
    Mesmo motivo do listener no proprio elemento (roda antes dos de document, entao o
    salvarEstado/previa globais ja leem o valor corrigido); 'blur' nao borbulha, por isso esse
    ramo redesenha a previa por conta propria. */
-CORES_LIVRES.forEach(function(par){
-  var t=$(par[0]+'-t');if(!t)return;
-  function redesenhar(){
-    salvarEstado();
-    if(par[0].indexOf('l-')===0){lBtnPreview();lPopPreview();}else{uPreview();}
-  }
-  t.addEventListener('change',function(){if(corAjustar(par[0],par[1]))salvarEstado();});
-  t.addEventListener('blur',function(){if(corAjustar(par[0],par[1]))redesenhar();});
+prep('Correcao a vista das cores livres','',function(){
+  CORES_LIVRES.forEach(function(par){
+    var t=$(par[0]+'-t');if(!t)return;
+    function redesenhar(){
+      salvarEstado();
+      if(par[0].indexOf('l-')===0){lBtnPreview();lPopPreview();}else{uPreview();}
+    }
+    t.addEventListener('change',function(){if(corAjustar(par[0],par[1]))salvarEstado();});
+    t.addEventListener('blur',function(){if(corAjustar(par[0],par[1]))redesenhar();});
+  });
 });
-(function(){
-  var el=$('u-chave');if(!el)return;
-  el.addEventListener('change',function(){if(uChaveAjustar())salvarEstado();});
-  el.addEventListener('blur',function(){if(uChaveAjustar()){salvarEstado();uPreview();}});
-})();
+
+/* restaurarEstado ja isola aba por aba por dentro: a aba que falhar ao restaurar nao
+   impede as outras cinco de voltar, e o aviso aparece na tela. */
 restaurarEstado();
+
 /* Estado gravado antes desta regra pode trazer cor invalida ou chave com invisivel: prende na
    carga, para o campo nunca exibir algo diferente do que o gerador vai usar, e regrava para o
    valor velho nao ressurgir na proxima sessao. Roda ANTES das previas para elas ja desenharem
    o valor corrigido. */
-(function(){
+prep('Correcao das cores livres e da chave Pix na carga','',function(){
   var mudou=false;
   CORES_LIVRES.forEach(function(par){if(corAjustar(par[0],par[1]))mudou=true;});
   if(uChaveAjustar())mudou=true;
   if(mudou)salvarEstado();
-})();
-lBtnPreview();
-lPopPreview();
-lAncToggle();
-tArqToggle();
-uProdRender();
-uCpRender();
-uToggles();
-uPreview();
-bToggles();
-bPreview();
-/* estado gravado antes desta regra pode trazer c-mob fora da faixa: prende na carga, para o
-   campo nunca exibir um numero diferente do que a cCfg vai usar, e regrava para o valor velho
-   nao ressurgir na proxima sessao. */
-if(cMobAjustar())salvarEstado();
-cToggles();
-cMsgRender();
-/* A previa NAO e montada aqui. Montar na carga executaria o bloco gerado -- intervalo de 1s,
-   listeners de scroll/resize, ResizeObserver -- em toda abertura da ferramenta, mesmo para
-   quem nunca abre esta aba, e ainda com o painel escondido (clientWidth zero, largura de
-   emergencia). A montagem fica para o clique da aba, que ja chama cPreview(true). */
-cPvBotoes();
+});
+prep('Captacao de leads','leads',function(){
+  lBtnPreview();
+  lPopPreview();
+  lAncToggle();
+});
+prep('Agendamento TidyCal','tidy',function(){
+  tArqToggle();
+});
+prep('Checkout','uni',function(){
+  uProdRender();
+  uCpRender();
+  uToggles();
+  uPreview();
+});
+prep('Bordas com efeito','bor',function(){
+  bToggles();
+  bPreview();
+});
+prep('Contagem regressiva','cnt',function(){
+  /* estado gravado antes desta regra pode trazer c-mob fora da faixa: prende na carga, para o
+     campo nunca exibir um numero diferente do que a cCfg vai usar, e regrava para o valor velho
+     nao ressurgir na proxima sessao. */
+  if(cMobAjustar())salvarEstado();
+  cToggles();
+  cMsgRender();
+  /* A previa NAO e montada aqui. Montar na carga executaria o bloco gerado -- intervalo de 1s,
+     listeners de scroll/resize, ResizeObserver -- em toda abertura da ferramenta, mesmo para
+     quem nunca abre esta aba, e ainda com o painel escondido (clientWidth zero, largura de
+     emergencia). A montagem fica para o clique da aba, que ja chama cPreview(true). */
+  cPvBotoes();
+});
 })();
 </script>
 </body>
