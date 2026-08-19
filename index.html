@@ -1681,10 +1681,17 @@ function sToggles(){
   if(!av)return;
   var semSetas=radio('s-setas')==='nao',semDots=radio('s-dots')==='nao',arr=radio('s-arrastar')==='sim';
   if(!semSetas||!semDots){av.style.display='none';av.textContent='';return;}
-  av.style.display='block';
-  av.innerHTML=arr
+  var txt=arr
     ? '<b>Sem setas e sem bolinhas:</b> no computador o visitante não tem como escolher a foto — as fotos apenas passam sozinhas, no tempo configurado. No celular o arrastar continua valendo. Se a intenção é uma vitrine que roda sozinha, está certo assim; ninguém fica preso na primeira foto, porque a passagem automática desta aba não se desliga.'
     : '<b>Sem setas, sem bolinhas e sem arrastar:</b> o visitante não tem nenhum controle — as fotos apenas passam sozinhas, no tempo configurado. Ninguém fica preso na primeira foto (a passagem automática desta aba não se desliga), mas quem quiser rever uma foto vai ter de esperar a volta. Se a intenção é uma vitrine, está certo assim; se não, ligue as setas, as bolinhas ou o arrastar.';
+  /* O aviso existe para dizer o que a combinação custa, e o pausar muda esse custo: sem nenhum
+     controle, a passagem sozinha é a única coisa que ainda mexe a galeria — e é justamente ela
+     que o pausar interrompe enquanto o ponteiro está sobre o quadro. Não trava (sair resolve),
+     mas quem lê o aviso precisa saber que é a única saída. */
+  if(radio('s-pausar')==='sim')
+    txt+=' <b>Com o pausar ligado</b>, nem a passagem sozinha continua enquanto o ponteiro do mouse — ou o dedo, ou o foco do teclado — estiver sobre o quadro: quem deixar o mouse parado ali vê uma foto congelada e sem nenhum controle. Não trava, porque sair do quadro faz voltar a passar, mas essa é a única saída que sobra para o visitante.';
+  av.style.display='block';
+  av.innerHTML=txt;
 }
 
 /* O campo do link aceitava QUALQUER texto: so checava se estava vazio. "foto do natal", o nome
@@ -1950,14 +1957,23 @@ function sPvBotoes(){
 function sPvModoSet(m){
   sPvModo=m;sPvBotoes();sPreview(true);
 }
-document.addEventListener('change',function(e){
-  if(e.target&&/^s-/.test(e.target.name||e.target.id||'')){sToggles();sPreview();}
-});
+/* Os dois campos do formulario "Adicionar imagem" nao entram na previa enquanto estao sendo
+   digitados: eles so mudam alguma coisa depois do clique em "Adicionar", que ja chama sPreview
+   por conta propria. Sem esta excecao, colar um link de storage (que e longo) remontava o
+   iframe inteiro e mandava o navegador baixar todas as fotos de novo, uma vez por rajada de
+   digitacao, sem nada mudar na tela. */
+var S_PV_IGNORA={'s-url':true,'s-leg':true};
+function sCampoMudou(e){
+  var alvo=e.target;if(!alvo)return;
+  var chave=alvo.name||alvo.id||'';
+  if(!/^s-/.test(chave))return;
+  if(S_PV_IGNORA[chave])return;
+  sToggles();sPreview();
+}
+document.addEventListener('change',sCampoMudou);
 /* 'change' so dispara quando o campo perde o foco: sem este 'input', a previa so acordaria
    depois de o operador clicar fora. */
-document.addEventListener('input',function(e){
-  if(e.target&&/^s-/.test(e.target.name||e.target.id||'')){sToggles();sPreview();}
-});
+document.addEventListener('input',sCampoMudou);
 
 /* --- geração de código --- */
 function sGerar(){
@@ -2103,7 +2119,14 @@ function sBloco(cfg){
   if(cfg.dots)c+='  var areaDots = raiz.querySelector(\'.fc-dots\');\n';
   c+='  var elLegenda = raiz.querySelector(\'.fc-legenda\');\n';
   c+='  var atual = 0;\n  var timer = null;\n';
-  if(cfg.pausar)c+='  var pausado = false;\n';
+  /* Tres origens de pausa, cada uma com o seu proprio estado, em vez de um unico booleano:
+     com um booleano so, a primeira origem que soltasse zerava a pausa das outras duas. Medido
+     no aparelho hibrido: mouse parado sobre a foto e um toque em seguida faziam o touchend
+     religar o rodizio com o ponteiro ainda ali; e tirar o mouse religava com o foco ainda numa
+     seta -- justamente a pausa de quem navega por teclado, que era o motivo de o focusin
+     existir. Estado por origem tambem nao pode se desequilibrar como um contador: evento
+     repetido ou evento perdido no maximo repete um valor, nunca deixa uma pausa presa. */
+  if(cfg.pausar)c+='  var pMouse = false, pFoco = false, pToque = false;\n';
   c+='\n';
   c+='  IMAGENS.forEach(function (foto, i) {\n';
   c+='    var slide = document.createElement(\'div\');\n    slide.className = \'fc-slide\';\n';
@@ -2148,7 +2171,7 @@ function sBloco(cfg){
     /* agendar() passa a respeitar a pausa. Sem esta linha, qualquer coisa que chame agendar()
        com o mouse ainda parado sobre a foto (o retorno da aba pelo visibilitychange, o fim de
        um arrasto) religaria o rodizio embaixo do cursor. */
-    c+='  function agendar() {\n    clearInterval(timer);\n    if (pausado) return;\n    timer = setInterval(proxima, INTERVALO);\n  }\n\n';
+    c+='  function agendar() {\n    clearInterval(timer);\n    if (pMouse || pFoco || pToque) return;\n    timer = setInterval(proxima, INTERVALO);\n  }\n\n';
   }else{
     c+='  function agendar() {\n    clearInterval(timer);\n    timer = setInterval(proxima, INTERVALO);\n  }\n\n';
   }
@@ -2160,7 +2183,8 @@ function sBloco(cfg){
   if(cfg.arrastar){
     /* O bloco de arrastar vem ANTES do de pausar de proposito: no touchend os dois disparam na
        ordem em que foram registrados, entao o arrasto troca a foto e chama agendar() (que nao
-       agenda nada enquanto pausado) e so depois o retomar() do pausar solta a pausa e agenda.
+       agenda nada enquanto pToque ainda e verdadeiro) e so depois o repensar() do pausar solta
+       a origem 'toque' e reavalia as tres.
        Invertida, a ordem religaria o rodizio antes da troca e o dedo ainda no vidro. */
     c+='  /* Arrastar para trocar de foto. O CSS da caixa declara touch-action:pan-y: o navegador\n';
     c+='     continua rolando a pagina na vertical sozinho e nunca inicia rolagem horizontal aqui,\n';
@@ -2195,16 +2219,21 @@ function sBloco(cfg){
   if(cfg.pausar){
     c+='  /* Pausar. Mouse parado sobre a foto e dedo apoiado nela sao quase sempre alguem lendo\n';
     c+='     a legenda; o foco entra junto porque quem navega por teclado precisa do mesmo\n';
-    c+='     respiro. Saindo o mouse, o dedo ou o foco, o ritmo recomeca do zero. */\n';
-    c+='  function pausar() { pausado = true; clearInterval(timer); }\n';
-    c+='  function retomar() { pausado = false; agendar(); }\n';
-    c+='  raiz.addEventListener(\'mouseenter\', pausar);\n';
-    c+='  raiz.addEventListener(\'mouseleave\', retomar);\n';
-    c+='  raiz.addEventListener(\'focusin\', pausar);\n';
-    c+='  raiz.addEventListener(\'focusout\', retomar);\n';
-    c+='  raiz.addEventListener(\'touchstart\', pausar, { passive: true });\n';
-    c+='  raiz.addEventListener(\'touchend\', retomar, { passive: true });\n';
-    c+='  raiz.addEventListener(\'touchcancel\', retomar, { passive: true });\n\n';
+    c+='     respiro. As tres origens sao independentes e cada uma guarda o seu estado: soltar\n';
+    c+='     uma nao cancela as outras. Num aparelho com mouse E toque, tirar o dedo com o\n';
+    c+='     ponteiro ainda sobre a foto mantem a pausa, e tirar o mouse com o foco numa seta\n';
+    c+='     tambem. So quando as tres estao soltas o ritmo recomeca, do zero. */\n';
+    c+='  function repensar() {\n';
+    c+='    if (pMouse || pFoco || pToque) clearInterval(timer);\n';
+    c+='    else agendar();\n';
+    c+='  }\n';
+    c+='  raiz.addEventListener(\'mouseenter\', function () { pMouse = true; repensar(); });\n';
+    c+='  raiz.addEventListener(\'mouseleave\', function () { pMouse = false; repensar(); });\n';
+    c+='  raiz.addEventListener(\'focusin\', function () { pFoco = true; repensar(); });\n';
+    c+='  raiz.addEventListener(\'focusout\', function () { pFoco = false; repensar(); });\n';
+    c+='  raiz.addEventListener(\'touchstart\', function () { pToque = true; repensar(); }, { passive: true });\n';
+    c+='  raiz.addEventListener(\'touchend\', function () { pToque = false; repensar(); }, { passive: true });\n';
+    c+='  raiz.addEventListener(\'touchcancel\', function () { pToque = false; repensar(); }, { passive: true });\n\n';
   }
   c+='  slides[0].classList.add(\'fc-ativa\');\n';
   if(cfg.dots)c+='  dots[0].classList.add(\'fc-ativa\');\n';
