@@ -2976,11 +2976,23 @@ function cCssBase(cfg){
     condensada:'"Roboto Condensed","Arial Narrow",Arial,sans-serif',
     mono:'ui-monospace,SFMono-Regular,Menlo,Consolas,monospace'};
   var s='';
+  /* transition e' shorthand: se outra regra .fcb-barra tambem declarar transition (ex: a
+     entrada deslizante), a que vier depois no CSS vence por inteiro, nao so a parte que ela
+     nomeia -- por isso a lista de transicoes e o transform inicial da entrada sao acumulados
+     aqui, na UNICA regra base .fcb-barra que declara transition. cCssEfeitos nao declara
+     transition nessa mesma classe. */
+  var transBarra=['background-color .4s ease'];
+  var transformInicial='';
+  if(cfg.entrada==='deslizar'||cfg.entrada==='aposrolar'){
+    transBarra.push('transform .45s ease');
+    transformInicial='transform:translateY(-100%);';
+  }
   s+='.fcb-barra{'+(cfg.fixa?'position:fixed;top:0;left:0;right:0;z-index:'+cfg.z+';':'position:relative;')+
      'box-sizing:border-box;width:100%;background:'+cfg.cores.fundo+';color:'+cfg.cores.texto+';'+
      'font-family:'+fontes[cfg.fonte]+';font-size:'+cfg.tam+'px;font-weight:'+cfg.peso+';'+
      'padding:'+cfg.pad+'px 16px;line-height:1.3;font-variant-numeric:tabular-nums;'+
-     'transition:background-color .4s ease;'+
+     transformInicial+
+     'transition:'+transBarra.join(',')+';'+
      (cfg.borda?'border-bottom:2px solid '+cfg.cores.borda+';':'')+'}\n';
   s+='.fcb-interno{display:flex;align-items:center;gap:'+cfg.coruja.gap+'px;max-width:'+cfg.largmax+'px;margin:0 auto;'+
      'justify-content:'+(cfg.alinha==='centro'?'center':'flex-start')+'}\n';
@@ -3061,7 +3073,9 @@ function cCssEfeitos(cfg){
     s+='.fcb-num{display:inline-block;transition:transform .25s ease}\n.fcb-num.fcb-virando{transform:rotateX(90deg)}\n';
   }
   if(cfg.entrada==='deslizar'||cfg.entrada==='aposrolar'){
-    s+='.fcb-barra{transform:translateY(-100%);transition:transform .45s ease}\n';
+    /* o transform inicial (-100%) e a transition ja saem na regra base .fcb-barra
+       (cCssBase), acumulados junto de transition:background-color -- ver comentario la.
+       Aqui so o estado revelado, que e uma regra a mais sem conflito de shorthand. */
     s+='.fcb-barra.fcb-visivel{transform:translateY(0)}\n';
   }
   if(anim.length){
