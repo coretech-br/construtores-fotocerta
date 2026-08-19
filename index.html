@@ -97,6 +97,8 @@
     font-size:11.5px;line-height:1.5;white-space:pre;resize:vertical}
   .aviso-copiado{display:inline-block;margin-left:10px;font-size:13px;color:var(--verde);opacity:0;transition:opacity .3s}
   .aviso-copiado.mostra{opacity:1}
+  /* o aviso passou a poder dizer que a copia NAO aconteceu: verde continua sendo so o sucesso */
+  .aviso-copiado.falhou{color:#8C1D18;font-weight:600}
 
   .pv-area{border:1px dashed var(--linha);border-radius:10px;padding:14px;background:#F5F1E6;margin-bottom:16px}
   .pv-vazia{color:var(--tinta-suave);font-size:13px;text-align:center;padding:30px 10px}
@@ -1266,12 +1268,48 @@ function mockPP(v){
   h+='<div style="margin-top:6px;background:'+seg[0]+';border-radius:6px;padding:10px;text-align:center;font-weight:600;color:'+seg[1]+';font-size:13px'+seg[2]+'">Cart\u00e3o de d\u00e9bito ou cr\u00e9dito</div>';
   return h;
 }
+/* O aviso ao lado do botao Copiar dizia "Copiado!" acontecesse o que acontecesse: a falha do
+   execCommand era engolida por um catch vazio, o navigator.clipboard e assincrono e o resultado
+   dele nunca era conferido, e o aviso era mostrado antes de qualquer um dos dois responder. O
+   operador colava conteudo velho no Prosite achando que tinha copiado o novo -- e como isto e
+   helper compartilhado, valia para as seis abas.
+   Caso realista, sem ma-fe: a ferramenta aberta por um endereco http de rede local (ou por
+   file://) nao esta em contexto seguro, entao navigator.clipboard nem existe e o execCommand
+   e recusado. Verificado em http://<ip-da-lan>:8865: execCommand devolveu false, clipboard
+   ausente, e o aviso dizia "Copiado!" mesmo assim.
+   O caminho de SUCESSO continua identico ao de antes: mesmo texto, mesma classe, mesmos
+   1800 ms. O que mudou e que ele so acontece quando a copia acontece. */
+var FC_COPIA_FALHOU='Não copiou — o texto já está selecionado: use Cmd+C (ou Ctrl+C).';
+var fcCopiaTimer={};
+function fcAvisoCopia(av,texto,ok,ms){
+  av.textContent=texto;
+  /* toggle e nao add/remove: o mesmo <span> alterna entre os dois estados na mesma sessao */
+  if(ok)av.classList.remove('falhou');else av.classList.add('falhou');
+  av.classList.add('mostra');
+  /* um temporizador POR aviso, cancelado antes de reagendar: sem isso, dois cliques seguidos
+     no mesmo botao faziam o timer do primeiro esconder o aviso do segundo antes da hora */
+  if(fcCopiaTimer[av.id])clearTimeout(fcCopiaTimer[av.id]);
+  fcCopiaTimer[av.id]=setTimeout(function(){av.classList.remove('mostra');},ms);
+}
 function copiar(idOut,idAviso){
-  var ta=$(idOut);ta.select();ta.setSelectionRange(0,99999);
+  var ta=$(idOut),av=$(idAviso);
+  if(!ta||!av)return;
+  /* textarea vazia: a copia ate "funciona" (a area de transferencia recebe string vazia), mas
+     dizer "Copiado!" a quem ainda nao gerou o codigo e a mesma mentira de sempre */
+  if(!ta.value){fcAvisoCopia(av,'Nada para copiar — gere o código primeiro.',false,5000);return;}
+  ta.select();ta.setSelectionRange(0,99999);
   var ok=false;
-  try{ok=document.execCommand('copy');}catch(e){}
-  if(!ok&&navigator.clipboard){navigator.clipboard.writeText(ta.value);}
-  var av=$(idAviso);av.classList.add('mostra');setTimeout(function(){av.classList.remove('mostra');},1800);
+  try{ok=document.execCommand('copy');}catch(e){ok=false;}
+  if(ok){fcAvisoCopia(av,'Copiado!',true,1800);return;}
+  /* segunda via: assincrona, entao o aviso espera a resposta em vez de sair na frente dela */
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(ta.value).then(
+      function(){fcAvisoCopia(av,'Copiado!',true,1800);},
+      function(){fcAvisoCopia(av,FC_COPIA_FALHOU,false,6000);}
+    );
+    return;
+  }
+  fcAvisoCopia(av,FC_COPIA_FALHOU,false,6000);
 }
 function trocarAba(qual){
   ['slide','leads','tidy','uni','bor','cnt'].forEach(function(n){
