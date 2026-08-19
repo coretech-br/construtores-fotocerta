@@ -1176,6 +1176,17 @@
       </div>
     </div>
   </div>
+
+  <div class="instrucoes">
+  <h3>Instrução de uso do código gerado</h3>
+  <p class="ajuda"><b>Onde colar:</b> o título da saída avisa. Com <b>fixa no topo</b>, o código vai no campo <b>Tag Body</b> da página (substituindo ou somando ao que já estiver lá). Com <b>rola com a página</b>, vai num <b>componente HTML</b> que você posiciona no topo da landing pelo editor. Não há nada para colar na Tag Head.</p>
+  <p class="ajuda"><b>Por que fixa exige a Tag Body:</b> componentes HTML do Prosite vivem dentro de um iframe, e um elemento fixo dentro do iframe gruda no iframe, não na página. A Tag Body é o mesmo lugar onde mora o botão flutuante de WhatsApp, que já funciona fixo.</p>
+  <p class="ajuda"><b>A contagem não reinicia:</b> na primeira visita o código grava o horário no navegador do visitante, na chave <code>fcbar:SEU-CODIGO</code>, e todas as visitas seguintes contam a partir dali. <b>Trocar o código da campanha zera a contagem de todos</b> — é assim que se recomeça uma promoção.</p>
+  <p class="ajuda"><b>Limites que nenhum código resolve:</b> a contagem usa o relógio do aparelho do visitante, então quem estiver com a hora errada vê o tempo errado. O carimbo é por navegador: o mesmo visitante no celular e no computador começa duas contagens; aba anônima recomeça; limpar dados zera. O Safari pode descartar o registro depois de cerca de 7 dias sem visita — irrelevante para campanhas de dois ou três dias, relevante para campanhas de semanas.</p>
+  <p class="ajuda"><b>Fuso da data marcada:</b> o instante é gravado com <b>−03:00</b> fixo. Um visitante em outro fuso vê o tempo restante correto para o mesmo momento.</p>
+  <p class="ajuda"><b>Depois de publicar:</b> confira em <b>aba anônima</b> (evita cache) que a barra aparece, que o menu do site não ficou escondido atrás dela e que ao recarregar a contagem continua de onde estava. Se o menu sumir, aumente o z-index ou troque para "sobrepor". Teste também no celular, onde a barra costuma quebrar em duas linhas.</p>
+  <p class="ajuda"><b>Conversão:</b> prefira a <b>urgência progressiva</b> aos efeitos contínuos. Uma barra que só muda quando o prazo aperta comunica algo; uma que pisca o tempo todo vira ruído e o visitante para de enxergar.</p>
+  </div>
 </div>
 
 <p class="rodape">Ferramenta interna Foto Certa. Novos construtores podem ser adicionados como novas abas.</p>
@@ -3116,7 +3127,7 @@ function cCssEfeitos(cfg){
   }
   return s;
 }
-/* escHtml (compartilhada pelas cinco abas) so protege texto entre tags -- nao escapa
+/* escHtml (compartilhada pelas seis abas) so protege texto entre tags -- nao escapa
    aspas, entao nao serve para montar valor de atributo entre aspas duplas. cfg.cta.url
    e a unica string livre do gerador que vai parar dentro de um atributo (href). Helper
    dedicado em vez de mexer em escHtml, que e usada em outra ~15 lugares como texto de

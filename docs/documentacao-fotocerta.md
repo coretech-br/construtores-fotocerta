@@ -49,7 +49,7 @@ Os códigos completos estão nos arquivos anexos do projeto e podem ser regenera
 
 ## 4. Ferramenta de construtores (arquivo `index.html`, em construtores.fotocerta.com.br)
 
-Ferramenta de geração de códigos com **5 abas**, estado persistido em localStorage (chave `fcConstrutores`, por navegador/domínio).
+Ferramenta de geração de códigos com **6 abas**, estado persistido em localStorage (chave `fcConstrutores`, por navegador/domínio).
 
 ### Padrão de layout das abas (seguir sempre, inclusive em abas novas)
 
@@ -67,6 +67,7 @@ Dentro dos fieldsets: `radios` para valores de lista fechada, campos com `<small
 3. **Agendamento TidyCal** — expansão/recolhimento do modal pelos sinais `scrollToOffset`/`mutationObserver` do iframe-resizer (origem `https://tidycal.com`), alturas desktop/mobile (2350/2700, corte 700px); modos direto ou embutido (3 saídas).
 4. **Checkout** — carrinho completo, em uma só aba: **seletor de formas de pagamento** (PayPal + Pix | somente PayPal | somente Pix), **vários produtos** com opcionais próprios de cada um (seleção única ou múltipla por produto, com "sem opcional"), escolha de como o cliente seleciona produtos (1 só, estilo "escolha seu pacote", ou vários somando), cupons (% produtos, % total, fixo; validade opcional), desconto exclusivo Pix (padrão 10%, só no modo com os dois), largura, cores e cor dos botões PayPal (gold/blue/silver/white/black), marcadores desenhados. PayPal: SDK client-side só com Client ID público, `custom_id` + cupom na descrição, moeda BRL/USD/EUR quando é o único método (com Pix, fixa em BRL). Pix: BR Code estático padrão BC gerado no navegador (TLV + CRC16-CCITT), QR via qrcodejs (cdnjs), Copia e Cola, botão "Já paguei" via wa.me com produtos/opcionais/cupom/valor, txid = código do pedido, QR some se o pedido mudar. O código gerado carrega apenas a maquinaria da(s) forma(s) escolhida(s). Payload Pix validado como idêntico ao do Taggo.
 5. **Bordas com efeito** — CSS puro (sem JS) para destacar um componente: 5 efeitos (brilho giratório — a solução original da landing de Natal; degradê contínuo; halo pulsante; listras em movimento; borda fixa) + **fundo interno customizável** (cor sólida, degradê com ângulo e fallback, ou manter). Gera 2 códigos: bloco global para a Tag Head (`@keyframes` + `prefers-reduced-motion`) e as propriedades para o campo CSS Customizado do componente. Técnica: dupla camada de background (`padding-box` + `border-box`) com `background-position` animada.
+6. **Contagem regressiva** — barra de urgência para o topo da landing: contagem a partir da primeira abertura (carimbo em `localStorage`, chave `fcbar:<CODIGO>`) ou até uma data-alvo com fuso −03:00 fixo; formato compacto ou em blocos; movimento (estático, rolagem nos dois sentidos, alternância com fade ou deslize), destaque contínuo (pulsar, brilho passante e degradê animado — que quando combinados empilham-se em duas camadas de `background` numa única regra —, separador piscando, tremor), urgência progressiva por limiar, virada dos dígitos (fade ou flip: atualiza o texto do dígito no lugar e alterna uma classe para disparar a transição, sem recriar nós) e entrada da barra; extras de CTA, botão fechar com memória, barra de progresso e a coruja da identidade nas pontas. O bloco `prefers-reduced-motion` sai sempre que houver movimento — por `animation` ou por `transition` — e cobre barra, conteúdo, dígitos e barra de progresso. O radio "fixa no topo / no fluxo" decide o destino: Tag Body ou componente HTML — nunca a Tag Head, porque o bloco é autocontido.
 
 > Histórico: até ago/2026 existiam abas separadas de Checkout PayPal e Checkout Pix; foram unificadas na aba Checkout, que passou a ter seletor de formas de pagamento e múltiplos produtos. Nada se perdeu — o modo "somente PayPal" preserva a escolha de moeda, e o "somente Pix", o carrinho sem PayPal.
 
@@ -85,7 +86,7 @@ Dentro dos fieldsets: `radios` para valores de lista fechada, campos com `<small
 ## 6. Estado atual e fluxo de manutenção
 
 - Publicado e testado: hospedeira (leads + âncora + plano B), intermediária (TidyCal), a ferramenta de construtores, checkouts PayPal e Pix validados com pagamentos reais, e as bordas animadas nos blocos da landing de Natal.
-- Pendente de teste na página publicada (gerado e validado tecnicamente em ago/2026): a aba **Bordas com efeito** e a aba **Checkout** na versão com seletor de formas de pagamento e múltiplos produtos.
+- Pendente de teste na página publicada (gerado e validado tecnicamente em ago/2026): a aba **Bordas com efeito**, a aba **Checkout** na versão com seletor de formas de pagamento e múltiplos produtos, e a aba **Contagem regressiva**.
 - **Fluxo de atualização**: editar o arquivo correspondente no repositório → commit + push. O GitHub Pages republica `construtores.fotocerta.com.br` sozinho, sem o antigo passo de colar o miolo em componente do Prosite. Os arquivos em `prosite/` continuam sendo colados à mão no painel da Alboom, pois são o espelho do que vive lá.
 - **Migração do estado da ferramenta**: o `localStorage` é por origem, então o que estava salvo em `fotocerta.com.br/utl-construtor` não acompanha a mudança para `construtores.fotocerta.com.br`. Produtos, cupons e imagens cadastrados precisam ser recadastrados no novo endereço.
 
@@ -93,7 +94,7 @@ Dentro dos fieldsets: `radios` para valores de lista fechada, campos com `<small
 
 Repositório público servido pelo GitHub Pages. A raiz é o que o Pages publica; `prosite/` guarda o espelho do que está colado no painel da Alboom.
 
-- `index.html` — a ferramenta de 5 abas, servida em construtores.fotocerta.com.br
+- `index.html` — a ferramenta de 6 abas, servida em construtores.fotocerta.com.br
 - `CNAME`, `.nojekyll` — configuração do GitHub Pages (domínio próprio e desligamento do Jekyll)
 - `docs/documentacao-fotocerta.md` — este documento (fonte da verdade do contexto)
 - `docs/specs/` — specs de design das funcionalidades, um arquivo por feature
