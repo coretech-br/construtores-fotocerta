@@ -97,6 +97,8 @@
     font-size:11.5px;line-height:1.5;white-space:pre;resize:vertical}
   .aviso-copiado{display:inline-block;margin-left:10px;font-size:13px;color:var(--verde);opacity:0;transition:opacity .3s}
   .aviso-copiado.mostra{opacity:1}
+  /* o aviso passou a poder dizer que a copia NAO aconteceu: verde continua sendo so o sucesso */
+  .aviso-copiado.falhou{color:#8C1D18;font-weight:600}
 
   .pv-area{border:1px dashed var(--linha);border-radius:10px;padding:14px;background:#F5F1E6;margin-bottom:16px}
   .pv-vazia{color:var(--tinta-suave);font-size:13px;text-align:center;padding:30px 10px}
@@ -215,10 +217,10 @@
     <div>
       <fieldset>
       <legend>Ritmo e tamanho</legend>
-      <label for="s-int">Tempo de cada foto <small>(milissegundos — 4500 = 4,5s)</small></label>
-      <input type="number" id="s-int" value="4500" min="1500" step="500">
-      <label for="s-larg">Largura máxima na página <small>(pixels)</small></label>
-      <input type="number" id="s-larg" value="900" min="300" step="50">
+      <label for="s-int">Tempo de cada foto <small>(milissegundos, de 1500 a 60000 — 4500 = 4,5s)</small></label>
+      <input type="number" id="s-int" value="4500" min="1500" max="60000" step="500">
+      <label for="s-larg">Largura máxima na página <small>(pixels, de 300 a 2000)</small></label>
+      <input type="number" id="s-larg" value="900" min="300" max="2000" step="50">
       </fieldset>
     </div>
   </div>
@@ -250,6 +252,7 @@
   <h3>Instrução de uso do código gerado</h3>
   <p class="ajuda"><b>Onde colar:</b> em um <b>componente HTML</b> da página desejada, no editor do Prosite. Cole o código inteiro substituindo o conteúdo do componente.</p>
   <p class="ajuda"><b>Pré-requisitos:</b> nenhum ID Html ou CSS extra é necessário — o código é autocontido. Apenas confira que os links das imagens são públicos (storage da Alboom) e, se a galeria de origem for republicada, atualize os links aqui e gere novamente.</p>
+  <p class="ajuda"><b>Mais de uma galeria na mesma página:</b> pode. Gere um código para cada conjunto de fotos e cole cada um no seu próprio componente HTML — cada bloco assume a galeria dele, na ordem em que aparecem na página. O único cuidado é a <b>largura máxima</b> e a <b>proporção</b>, que cada bloco redefine para todas: se as galerias tiverem tamanhos diferentes, vale a última colada. Use os mesmos valores nos dois, ou aceite o valor do último.</p>
   <p class="ajuda"><b>Depois de colar:</b> salve, <b>publique</b> e confira na página publicada (o editor pode se comportar diferente). Se o slideshow aparecer cortado, aumente a altura do componente no editor.</p>
   </div>
 </div>
@@ -264,7 +267,7 @@
       <legend>Essenciais</legend>
       <label for="l-num">WhatsApp de destino <small>(DDI+DDD+número, só dígitos)</small></label>
       <input type="text" id="l-num" value="" placeholder="5527999999999">
-      <label for="l-cod">Código da página <small>(para automatizar o atendimento)</small></label>
+      <label for="l-cod">Código da página <small>(obrigatório — é ele que identifica a campanha na mensagem)</small></label>
       <input type="text" id="l-cod" value="" placeholder="ex.: CAMPANHA26">
       <label for="l-pag">Nome da página <small>(vazio = usa o título da página automaticamente)</small></label>
       <input type="text" id="l-pag" value="">
@@ -277,8 +280,8 @@
       <label><input type="radio" name="l-modo" value="botao" checked><span>Só no clique do botão</span></label>
       <label><input type="radio" name="l-modo" value="automatico"><span>Pop-up abre sozinho</span></label>
       </div>
-      <label for="l-segauto">Segundos até abrir sozinho <small>(só no modo automático)</small></label>
-      <input type="number" id="l-segauto" value="8" min="1">
+      <label for="l-segauto">Segundos até abrir sozinho <small>(de 1 a 300; só no modo automático)</small></label>
+      <input type="number" id="l-segauto" value="8" min="1" max="300">
       </fieldset>
     </div>
   </div>
@@ -315,8 +318,8 @@
       <label><input type="radio" name="l-efeito" value="pulsar"><span>Pulsar</span></label>
       <label><input type="radio" name="l-efeito" value="tremer"><span>Tremer</span></label>
       </div>
-      <label for="l-segef">Intervalo entre repetições <small>(segundos)</small></label>
-      <input type="number" id="l-segef" value="10" min="3">
+      <label for="l-segef">Intervalo entre repetições <small>(segundos, de 3 a 300)</small></label>
+      <input type="number" id="l-segef" value="10" min="3" max="300">
       </fieldset>
     </div>
   </div>
@@ -438,11 +441,11 @@
       <label for="t-path">Caminho do booking type <small>(o que vem depois de tidycal.com/)</small></label>
       <input type="text" id="t-path" value="" placeholder="usuario/nome-do-agendamento">
       <label for="t-desk">Altura com o modal aberto — desktop <small>(pixels; medir com o formulário aberto)</small></label>
-      <input type="number" id="t-desk" value="2350" min="500" step="50">
+      <input type="number" id="t-desk" value="2350" min="500" max="20000" step="50">
       <label for="t-mob">Altura com o modal aberto — celular <small>(pixels; no mobile o modal fica mais alto)</small></label>
-      <input type="number" id="t-mob" value="2700" min="500" step="50">
-      <label for="t-larg">Largura de corte do modo celular <small>(pixels; telas até esse tamanho usam a altura mobile)</small></label>
-      <input type="number" id="t-larg" value="700" min="320" step="10">
+      <input type="number" id="t-mob" value="2700" min="500" max="20000" step="50">
+      <label for="t-larg">Largura de corte do modo celular <small>(pixels, de 320 a 1024; telas até esse tamanho usam a altura mobile — 700 é o valor validado em produção)</small></label>
+      <input type="number" id="t-larg" value="700" min="320" max="1024" step="10">
       </fieldset>
     </div>
     <div>
@@ -456,7 +459,7 @@
       <label for="t-url">Endereço da página intermediária</label>
       <input type="text" id="t-url" value="https://www.fotocerta.com.br/iframe-agendamento-natal">
       <label for="t-alt0">Altura inicial do iframe na página hospedeira <small>(pixels)</small></label>
-      <input type="number" id="t-alt0" value="1600" min="400" step="100">
+      <input type="number" id="t-alt0" value="1600" min="400" max="20000" step="100">
       </div>
       </fieldset>
     </div>
@@ -801,10 +804,11 @@
     <div>
       <fieldset>
       <legend>Halo externo</legend>
-      <div class="radios">
+      <div class="radios" id="b-halo-radios">
       <label><input type="radio" name="b-halo" value="sim" checked><span>Com halo</span></label>
       <label><input type="radio" name="b-halo" value="nao"><span>Sem halo</span></label>
       </div>
+      <p class="ajuda" id="b-halo-aviso" style="display:none">No <b>halo pulsante</b>, o halo <b>é</b> o efeito — não há como desligá-lo sem desligar o efeito inteiro, então a escolha "com/sem halo" não aparece aqui. Os dois campos abaixo controlam a onda que pulsa. Se você quer uma moldura <b>sem</b> halo, escolha o efeito <b>borda fixa</b>.</p>
       <div id="b-halo-campos">
       <label for="b-haloraio">Alcance do halo <small>(px)</small></label>
       <input type="number" id="b-haloraio" value="26" min="0" max="80" step="2">
@@ -822,7 +826,7 @@
       <div id="b-txt-campo">
       <div class="cor-linha"><input type="color" id="b-c4" value="#F7EFDF"><input type="text" id="b-c4-t" value="#F7EFDF"></div>
       </div>
-      <label for="b-pad">Espaçamento interno <small>(ex.: 40px 32px — vazio = não mexer)</small></label>
+      <label for="b-pad">Espaçamento interno <small>(apenas um valor de padding: de 1 a 4 números com unidade, ex.: <b>40px 32px</b> — vazio = não mexer)</small></label>
       <input type="text" id="b-pad" value="40px 32px" placeholder="40px 32px">
       </fieldset>
     </div>
@@ -857,6 +861,7 @@
   <div class="instrucoes">
   <h3>Instrução de uso do código gerado</h3>
   <p class="ajuda"><b>Onde colar o código 1 (global):</b> em <b>Configurações → Códigos personalizados → campo do cabeçalho (head)</b> do site, com a tag style inclusa. Cola-se <b>uma única vez</b>: ele define a animação e vale para o site inteiro. Se usar efeitos diferentes em componentes diferentes, cole os blocos de cada efeito no mesmo campo (cada um tem nome próprio e não conflita).</p>
+  <p class="ajuda"><b>A regra de acessibilidade que vem junto:</b> ela desliga <b>apenas esta animação</b> para quem escolheu "reduzir movimento" no sistema — redefinindo a própria animação com um único quadro. A borda para de se mexer e continua visível (o degradê fica parado, o halo vira um anel estático). Nada mais do site é afetado: a versão anterior deste código usava <code>*</code> e apagava a animação de todas as páginas, inclusive as do tema. Se o efeito escolhido for <b>borda fixa</b>, não há animação nenhuma e o código 1 não existe.</p>
   <p class="ajuda"><b>Onde colar o código 2 (componente):</b> no campo <b>CSS Customizado</b> do próprio componente, no editor. São propriedades soltas, sem seletor — o Prosite as aplica direto no elemento do componente, então <b>não é preciso ID Html nem classe</b>. Se em algum componente o campo não aceitar propriedades soltas, inspecione o elemento publicado, pegue a classe que a Alboom gera e envolva tudo em <code>.classe { ... }</code> — nesse caso, coloque a regra completa no head.</p>
   <p class="ajuda"><b>Regra de ouro:</b> at-rules (<code>@keyframes</code>, <code>@media</code>) <b>só funcionam no head</b>; o campo do componente aceita apenas propriedades. Se a borda aparecer parada, é quase sempre porque o código 1 não foi colado no head — ou porque o nome da animação foi alterado em um dos dois lugares.</p>
   <p class="ajuda"><b>Depois de colar:</b> salve, <b>publique</b> e confira em <b>aba anônima</b> (evita cache). Verifique se a borda aparece e se está se movendo, e teste no celular. Cores mudam de percepção conforme o contexto da página — vale calibrar na página real, não só na prévia.</p>
@@ -1236,6 +1241,68 @@ function escAttr(s){return escHtml(s).replace(/"/g,'&quot;');}
              elemento, e a barra some junto com tudo que vier depois dela na pagina.
    As duas ganham uma barra invertida que o parser HTML ve e o interpretador JS descarta. */
 function escJs(s){return esc(s).replace(/<\//g,'<\\/').replace(/<!--/g,'<\\!--');}
+/* Compartilhada por Bordas e Captacao de leads: hexadecimal -> "r, g, b", para montar rgba()
+   dentro de @keyframes (onde nao da para usar a cor com alfa separado). Nasceu na aba Bordas;
+   subiu para ca quando a aba Leads passou a precisar dela -- o halo do efeito "pulsar" trazia
+   o verde do WhatsApp cravado e ignorava a cor escolhida para o botao. Fica aqui em cima em
+   vez de continuar valendo por hoisting entre blocos de abas diferentes, que e justamente o
+   que a fase anterior desfez. */
+function bHexRgb(h){
+  h=String(h||'').trim().replace('#','');
+  if(h.length===3)h=h[0]+h[0]+h[1]+h[1]+h[2]+h[2];
+  var n=parseInt(h,16);
+  if(isNaN(n))return '255, 201, 74';
+  return ((n>>16)&255)+', '+((n>>8)&255)+', '+(n&255);
+}
+/* ===== faixa declarada dos campos numericos, compartilhada por quatro abas =====
+   Cada aba declara uma tabela de linhas [id, padrao, min, max, inteiro] e nada mais. A MESMA
+   linha alimenta os dois lados -- o gerador (fcPreso, o numero que sai no codigo) e a interface
+   (fcAjustar, o numero que fica na tela) --, entao nao ha como a saida ser presa numa faixa e o
+   campo mostrar outra. Regra do projeto, nascida no c-mob da Contagem: corrigir em silencio um
+   numero que o operador esta lendo na tela troca um defeito visivel por um invisivel.
+   A correcao roda em 'change'/'blur', NUNCA em 'input': corrigir a cada tecla impediria digitar
+   "1500", porque o "1" viraria o minimo antes do resto chegar.
+   Isto comecou como duas copias quase iguais (Bordas e TidyCal) e viraria quatro ao alcancar
+   Slideshow e Leads; a quarta copia foi o momento de ter uma implementacao so. A Contagem
+   regressiva NAO entra aqui: o c-mob dela e um campo unico com clamp tambem dentro da cCfg, e a
+   aba e a referencia desta fase -- nao se mexe nela. */
+function fcFaixa(tabela,id){var i;for(i=0;i<tabela.length;i++){if(tabela[i][0]===id)return tabela[i];}return null;}
+function fcPreso(tabela,id){
+  var f=fcFaixa(tabela,id),el=$(id);
+  if(!f||!el)return null;
+  var v=parseFloat(String(el.value).replace(',','.'));
+  if(isNaN(v))v=f[1];
+  if(f[2]!=null&&v<f[2])v=f[2];
+  if(f[3]!=null&&v>f[3])v=f[3];
+  return f[4]?Math.round(v):v;
+}
+function fcAjustar(tabela,id){
+  var el=$(id);if(!el)return false;
+  var preso=String(fcPreso(tabela,id));
+  if(preso===String(el.value))return false;
+  el.value=preso;
+  return true;
+}
+function fcAjustarTodos(tabela){
+  var i,mudou=false;
+  for(i=0;i<tabela.length;i++){if(fcAjustar(tabela,tabela[i][0]))mudou=true;}
+  return mudou;
+}
+/* Liga a correcao a vista nos campos da tabela. O listener fica no PROPRIO elemento porque ele
+   corre antes dos de document (fase de bolha, alvo primeiro): quando o salvarEstado/previa
+   globais rodarem, o valor ja esta preso. 'blur' nao borbulha e nao aciona listener nenhum de
+   document, por isso e o ramo que chama 'depois' (redesenhar a previa da aba, quando ela mostra
+   o numero). */
+function fcLigarFaixa(tabela,depois){
+  var i;
+  for(i=0;i<tabela.length;i++){
+    (function(id){
+      var el=$(id);if(!el)return;
+      el.addEventListener('change',function(){if(fcAjustar(tabela,id))salvarEstado();});
+      el.addEventListener('blur',function(){if(fcAjustar(tabela,id)){salvarEstado();if(depois)depois();}});
+    })(tabela[i][0]);
+  }
+}
 function corMockPP(v){
   if(v==='blue')return ['#0070BA','#fff',''];
   if(v==='silver')return ['#EEEEEE','#003087',''];
@@ -1250,12 +1317,48 @@ function mockPP(v){
   h+='<div style="margin-top:6px;background:'+seg[0]+';border-radius:6px;padding:10px;text-align:center;font-weight:600;color:'+seg[1]+';font-size:13px'+seg[2]+'">Cart\u00e3o de d\u00e9bito ou cr\u00e9dito</div>';
   return h;
 }
+/* O aviso ao lado do botao Copiar dizia "Copiado!" acontecesse o que acontecesse: a falha do
+   execCommand era engolida por um catch vazio, o navigator.clipboard e assincrono e o resultado
+   dele nunca era conferido, e o aviso era mostrado antes de qualquer um dos dois responder. O
+   operador colava conteudo velho no Prosite achando que tinha copiado o novo -- e como isto e
+   helper compartilhado, valia para as seis abas.
+   Caso realista, sem ma-fe: a ferramenta aberta por um endereco http de rede local (ou por
+   file://) nao esta em contexto seguro, entao navigator.clipboard nem existe e o execCommand
+   e recusado. Verificado em http://<ip-da-lan>:8865: execCommand devolveu false, clipboard
+   ausente, e o aviso dizia "Copiado!" mesmo assim.
+   O caminho de SUCESSO continua identico ao de antes: mesmo texto, mesma classe, mesmos
+   1800 ms. O que mudou e que ele so acontece quando a copia acontece. */
+var FC_COPIA_FALHOU='Não copiou — o texto já está selecionado: use Cmd+C (ou Ctrl+C).';
+var fcCopiaTimer={};
+function fcAvisoCopia(av,texto,ok,ms){
+  av.textContent=texto;
+  /* toggle e nao add/remove: o mesmo <span> alterna entre os dois estados na mesma sessao */
+  if(ok)av.classList.remove('falhou');else av.classList.add('falhou');
+  av.classList.add('mostra');
+  /* um temporizador POR aviso, cancelado antes de reagendar: sem isso, dois cliques seguidos
+     no mesmo botao faziam o timer do primeiro esconder o aviso do segundo antes da hora */
+  if(fcCopiaTimer[av.id])clearTimeout(fcCopiaTimer[av.id]);
+  fcCopiaTimer[av.id]=setTimeout(function(){av.classList.remove('mostra');},ms);
+}
 function copiar(idOut,idAviso){
-  var ta=$(idOut);ta.select();ta.setSelectionRange(0,99999);
+  var ta=$(idOut),av=$(idAviso);
+  if(!ta||!av)return;
+  /* textarea vazia: a copia ate "funciona" (a area de transferencia recebe string vazia), mas
+     dizer "Copiado!" a quem ainda nao gerou o codigo e a mesma mentira de sempre */
+  if(!ta.value){fcAvisoCopia(av,'Nada para copiar — gere o código primeiro.',false,5000);return;}
+  ta.select();ta.setSelectionRange(0,99999);
   var ok=false;
-  try{ok=document.execCommand('copy');}catch(e){}
-  if(!ok&&navigator.clipboard){navigator.clipboard.writeText(ta.value);}
-  var av=$(idAviso);av.classList.add('mostra');setTimeout(function(){av.classList.remove('mostra');},1800);
+  try{ok=document.execCommand('copy');}catch(e){ok=false;}
+  if(ok){fcAvisoCopia(av,'Copiado!',true,1800);return;}
+  /* segunda via: assincrona, entao o aviso espera a resposta em vez de sair na frente dela */
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(ta.value).then(
+      function(){fcAvisoCopia(av,'Copiado!',true,1800);},
+      function(){fcAvisoCopia(av,FC_COPIA_FALHOU,false,6000);}
+    );
+    return;
+  }
+  fcAvisoCopia(av,FC_COPIA_FALHOU,false,6000);
 }
 function trocarAba(qual){
   ['slide','leads','tidy','uni','bor','cnt'].forEach(function(n){
@@ -1453,6 +1556,17 @@ function parearCor(idCor){
    ============================================================ */
 var sImgs=[];
 
+/* Faixa declarada dos campos numericos desta aba (ver fcPreso/fcAjustar no bloco compartilhado).
+   Os dois declaravam 'min' no HTML e nada o impunha: com 100 no tempo de cada foto o codigo saia
+   com INTERVALO = 100 (quinze vezes mais rapido que o minimo declarado) e com 10 na largura saia
+   max-width:10px, os dois com a tela continuando a mostrar 100 e 10. Pior, sPreview ja fazia
+   Math.max(1500, ...) por conta propria: a previa rodava a 1500 ms e o bloco entregue a 100 --
+   duas implementacoes do mesmo limite, divergindo. Agora ha uma so, e a previa le dela.
+   Tetos novos (60000 ms = 1 min por foto; 2000 px de largura) declarados tambem no HTML: nao
+   apertam nenhum uso real, so pegam erro de digitacao. */
+var S_NUMS=[['s-int',4500,1500,60000,true],['s-larg',900,300,2000,true]];
+function sPreso(id){return fcPreso(S_NUMS,id);}
+
 /* Salvamento e restauracao desta aba (registradas em ABAS). Ficam junto do bloco da aba
    para que renomear um campo daqui seja uma alteracao de um lugar so. */
 function sColeta(){
@@ -1500,6 +1614,13 @@ function sRender(){
 }
 function sLimpar(){
   if(!confirm('Limpar todas as imagens e configuracoes do slideshow?'))return;
+  /* O intervalo da previa precisa morrer AQUI. Ele foi criado sobre o sImgs antigo e, com a
+     lista zerada logo abaixo, o proximo tique cai em sImgs[novo].legenda de um indice que nao
+     existe mais -- um TypeError por tique, para sempre, porque nada mais o cancela: era o
+     unico setInterval da ferramenta sem caminho de morte. Cancelar antes de mexer no sImgs
+     mantem os dois lados coerentes; sPreview tambem cancela na entrada, mas sLimpar nao a
+     chama (a caixa de previa e substituida por texto). */
+  if(pvTimer){clearInterval(pvTimer);pvTimer=null;}
   sImgs=[];sRender();
   setRadio('s-t','fade');setRadio('s-p','3 / 2');$('s-int').value=4500;$('s-larg').value=900;
   $('s-out').value='';$('s-pv-box').innerHTML='<p class="pv-vazia">A prévia do slideshow aparece aqui.</p>';
@@ -1512,7 +1633,9 @@ function sPreview(){
   if(pvTimer){clearInterval(pvTimer);pvTimer=null;}
   var box=$('s-pv-box');
   if(!sImgs.length){box.innerHTML='<p class="pv-vazia">Adicione imagens para ver a prévia.</p>';return;}
-  var t=radio('s-t'),prop=radio('s-p'),intv=Math.max(1500,parseInt($('s-int').value,10)||4500);
+  /* mesmo sPreso do gerador: a previa deixou de ter um Math.max proprio, que era um segundo
+     limite escrito a mao e ja divergia do que o bloco entregue usava */
+  var t=radio('s-t'),prop=radio('s-p'),intv=sPreso('s-int');
   var html='<div class="pv" data-t="'+t+'" style="aspect-ratio:'+prop+'">';
   sImgs.forEach(function(im){
     html+='<div class="pv-slide"><div class="pv-fundo" style="background-image:url(\''+im.url.replace(/'/g,'%27')+'\')"></div><img src="'+im.url.replace(/"/g,'&quot;')+'" alt=""></div>';
@@ -1554,10 +1677,11 @@ function sPreview(){
 
 /* --- geração de código --- */
 function sGerar(){
+  if(fcAjustarTodos(S_NUMS))salvarEstado();
   if(!sImgs.length){alert('Adicione ao menos uma imagem.');return;}
   var t=radio('s-t'),prop=radio('s-p');
-  var intv=parseInt($('s-int').value,10)||4500;
-  var larg=parseInt($('s-larg').value,10)||900;
+  var intv=sPreso('s-int');
+  var larg=sPreso('s-larg');
   /* escJs, nao esc: url e legenda sao texto livre do operador e o destino e uma string JS
      dentro do bloco de script gerado. esc() so protege a string (barra invertida e
      apostrofo) e deixa passar as duas sequencias que tiram o parser HTML do estado normal
@@ -1569,7 +1693,14 @@ function sGerar(){
     return "    {\n      url: '"+escJs(im.url)+"',\n      legenda: '"+escJs(im.legenda)+"'\n    }";
   }).join(',\n');
   var c='';
-  c+='<div id="fc-slideshow" class="fc-slideshow" aria-label="Galeria de fotos">\n';
+  /* Sem id. O bloco antes trazia id="fc-slideshow" fixo e o script fazia
+     getElementById('fc-slideshow'): colar duas galerias na mesma pagina (ensaios de Natal e
+     bastidores, por exemplo) fazia os DOIS scripts encontrarem a PRIMEIRA caixa -- a primeira
+     galeria nascia com os slides das duas e a segunda nascia vazia, sem nenhuma mensagem. Alem
+     disso dois elementos com o mesmo id sao HTML invalido. Agora cada bloco procura a primeira
+     caixa .fc-slideshow ainda nao reivindicada e a marca com data-fc-pronto -- os scripts sao
+     executados na ordem em que aparecem na pagina, entao cada um fica com a sua. */
+  c+='<div class="fc-slideshow" aria-label="Galeria de fotos">\n';
   c+='  <div class="fc-slides"></div>\n';
   c+='  <button type="button" class="fc-seta fc-seta-esq" aria-label="Foto anterior">&#10094;</button>\n';
   c+='  <button type="button" class="fc-seta fc-seta-dir" aria-label="Proxima foto">&#10095;</button>\n';
@@ -1600,12 +1731,32 @@ function sGerar(){
   c+='.fc-dots button{width:9px;height:9px;border-radius:50%;border:none;padding:0;cursor:pointer;background:rgba(255,255,255,.55);transition:background .3s,transform .3s}\n';
   c+='.fc-dots button.fc-ativa{background:#fff;transform:scale(1.25)}\n';
   c+='@media (max-width:600px){.fc-seta{width:34px;height:34px;font-size:15px;line-height:34px}.fc-legenda{font-size:13px}}\n';
+  /* Movimento reduzido: desliga o que ESTE bloco criou e nada mais. Os seletores repetem a
+     especificidade das regras de cima (o atributo data-transicao conta) e vem depois no CSS,
+     entao vencem sem !important e sem alcancar o resto do site. A troca automatica de foto
+     continua -- ela e mudanca de conteudo, nao movimento na tela: parar tambem a passagem
+     deixaria o visitante com uma foto so, que e perder o recurso em vez de acalma-lo. */
+  c+='@media (prefers-reduced-motion: reduce){\n';
+  c+='  .fc-slideshow[data-transicao] .fc-slide{transition:none}\n';
+  if(t==='zoom')c+='  .fc-slideshow[data-transicao="zoom"] .fc-slide.fc-ativa img{animation:none}\n';
+  c+='  .fc-legenda{transition:none}\n';
+  c+='  .fc-seta{transition:none}\n';
+  c+='  .fc-dots button{transition:none}\n';
+  c+='}\n';
   c+='</sty'+'le>\n\n';
   c+='<scr'+'ipt>\n(function () {\n';
   c+='  var IMAGENS = [\n'+arr+'\n  ];\n\n';
   c+='  var INTERVALO = '+intv+';\n';
   c+="  var TRANSICAO = '"+t+"';\n\n";
-  c+='  var raiz = document.getElementById(\'fc-slideshow\');\n';
+  c+='  /* Cada bloco fica com a primeira galeria ainda nao reivindicada: assim duas ou mais\n';
+  c+='     galerias podem conviver na mesma pagina sem uma anular a outra. */\n';
+  c+='  var raiz = null;\n';
+  c+='  var caixas = document.querySelectorAll(\'.fc-slideshow\');\n';
+  c+='  for (var q = 0; q < caixas.length; q++) {\n';
+  c+='    if (!caixas[q].getAttribute(\'data-fc-pronto\')) { raiz = caixas[q]; break; }\n';
+  c+='  }\n';
+  c+='  if (!raiz) return;\n';
+  c+='  raiz.setAttribute(\'data-fc-pronto\', \'1\');\n';
   c+='  raiz.setAttribute(\'data-transicao\', TRANSICAO);\n';
   c+='  var areaSlides = raiz.querySelector(\'.fc-slides\');\n';
   c+='  var areaDots = raiz.querySelector(\'.fc-dots\');\n';
@@ -1662,6 +1813,15 @@ function sGerar(){
 /* ============================================================
    CAPTAÇÃO DE LEADS
    ============================================================ */
+/* Faixa declarada dos campos numericos desta aba (ver fcPreso/fcAjustar no bloco compartilhado).
+   Os dois declaravam 'min' no HTML e nada o impunha, com uma variante pior que a do Slideshow:
+   digitando 0 em "segundos ate abrir sozinho", o "||" tratava como ausente e trocava por 8 em
+   SILENCIO; e -5 no intervalo entre repeticoes saia inteiro como SEGUNDOS_EFEITO=-5, o que faz
+   setInterval disparar sem parar e o botao tremer/pulsar sem intervalo nenhum.
+   Tetos novos (300 s = 5 min) declarados tambem no HTML: nao apertam uso real, so pegam erro. */
+var L_NUMS=[['l-segauto',8,1,300,true],['l-segef',10,3,300,true]];
+function lPreso(id){return fcPreso(L_NUMS,id);}
+
 /* Salvamento e restauracao desta aba (registradas em ABAS). */
 function lColeta(){
   return {
@@ -1801,9 +1961,18 @@ document.addEventListener('change',function(e){
 });
 
 function lGerar(){
+  if(fcAjustarTodos(L_NUMS))salvarEstado();
   var num=$('l-num').value.replace(/\D/g,'');
   if(!num){alert('Informe o WhatsApp de destino.');return;}
-  if(!num){alert('Informe o numero do WhatsApp (so digitos).');return;}
+  /* (Havia aqui um segundo "if(!num)" identico e portanto inalcancavel: codigo morto,
+     removido junto com a correcao abaixo.) */
+  /* O codigo da pagina e a razao de ser deste recurso: e ele que chega ao atendimento como
+     "(cod: *NATAL26*)" e diz de qual campanha veio o lead. Vazio, a mensagem chegava como
+     "(cod: **)" -- defeituosa e muda, descoberta so quando o primeiro lead chegasse sem
+     identificacao. Nao ha valor certo a assumir no lugar (inventar "PADRAO" juntaria campanhas
+     diferentes no mesmo balde), entao a geracao e recusada com aviso -- mesmo criterio que a
+     Contagem regressiva ja aplica ao codigo da campanha. */
+  if(!$('l-cod').value.trim()){alert('Informe o codigo da pagina. E ele que identifica a campanha na mensagem que chega no seu WhatsApp: sem ele o lead chega com "(cod: **)" e nao ha como saber de qual pagina veio.');return;}
   /* Todo texto livre desta aba vira uma string JS dentro do bloco de script gerado (var
      CODIGO, POP_TITULO, MSG_*, ...): o destino pede escJs. Com esc() sozinho, um titulo com
      a sequencia de fechamento de script fazia a landing exibir o restante do codigo-fonte
@@ -1827,8 +1996,8 @@ function lGerar(){
   }
   var v={
     num:num,cod:escJs($('l-cod').value),pag:escJs($('l-pag').value),
-    modo:radio('l-modo'),segauto:parseInt($('l-segauto').value,10)||8,
-    efeito:radio('l-efeito'),segef:parseInt($('l-segef').value,10)||10,
+    modo:radio('l-modo'),segauto:lPreso('l-segauto'),
+    efeito:radio('l-efeito'),segef:lPreso('l-segef'),
     icone:radio('l-icone'),formato:radio('l-formato'),
     corbtn:corSegura('l-corbtn','#25D366'),
     m1:escJs($('l-m1').value),m2:escJs($('l-m2').value),m3:escJs($('l-m3').value),m4:escJs($('l-m4').value),
@@ -1843,8 +2012,12 @@ function lGerar(){
   c+='.fcw-botao{position:fixed;right:22px;bottom:92px;z-index:99990;width:60px;height:60px;border:none;background:var(--fcw-cor-botao,#25D366);cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center;transition:transform .2s,box-shadow .2s}\n';
   c+='.fcw-botao.fcw-circulo{border-radius:50%}\n.fcw-botao.fcw-quadrado{border-radius:14px}\n';
   c+='.fcw-botao:hover{transform:scale(1.08)}\n.fcw-botao svg{width:32px;height:32px}\n';
+  /* O halo do pulso sai na COR ESCOLHIDA para o botao. Antes eram dois rgba(37,211,102,...)
+     cravados -- o verde do WhatsApp --, entao um botao vermelho ou dourado pulsava com um halo
+     verde: a opcao "cor de fundo do botao" existia e funcionava pela metade. */
+  var rgbBtn=bHexRgb(v.corbtn);
   c+='.fcw-botao.fcw-pulsando{animation:fcwPulso 1.1s ease}\n';
-  c+='@keyframes fcwPulso{0%{transform:scale(1);box-shadow:0 4px 14px rgba(0,0,0,.3)}35%{transform:scale(1.14);box-shadow:0 0 0 12px rgba(37,211,102,.25),0 4px 14px rgba(0,0,0,.3)}70%{transform:scale(1);box-shadow:0 0 0 22px rgba(37,211,102,0),0 4px 14px rgba(0,0,0,.3)}100%{transform:scale(1);box-shadow:0 4px 14px rgba(0,0,0,.3)}}\n';
+  c+='@keyframes fcwPulso{0%{transform:scale(1);box-shadow:0 4px 14px rgba(0,0,0,.3)}35%{transform:scale(1.14);box-shadow:0 0 0 12px rgba('+rgbBtn+',.25),0 4px 14px rgba(0,0,0,.3)}70%{transform:scale(1);box-shadow:0 0 0 22px rgba('+rgbBtn+',0),0 4px 14px rgba(0,0,0,.3)}100%{transform:scale(1);box-shadow:0 4px 14px rgba(0,0,0,.3)}}\n';
   c+='.fcw-botao.fcw-tremendo{animation:fcwTremor .7s ease}\n';
   c+='@keyframes fcwTremor{0%,100%{transform:rotate(0)}15%{transform:rotate(-12deg)}30%{transform:rotate(10deg)}45%{transform:rotate(-8deg)}60%{transform:rotate(6deg)}75%{transform:rotate(-3deg)}}\n';
   c+='.fcw-overlay{position:fixed;inset:0;z-index:99991;background:rgba(0,0,0,.45);display:none;align-items:flex-end;justify-content:flex-end;padding:20px}\n';
@@ -1862,6 +2035,16 @@ function lGerar(){
   c+='.fcw-enviar{margin-top:14px;width:100%;border:none;border-radius:8px;background:var(--fcw-cor-acao,#25D366);color:#fff;font-size:15px;font-weight:600;padding:12px;cursor:pointer}\n';
   c+='.fcw-enviar:hover{filter:brightness(.92)}\n';
   c+='@media (max-width:480px){.fcw-overlay{padding:12px;align-items:center;justify-content:center}.fcw-botao{right:16px;bottom:84px}}\n';
+  /* Movimento reduzido: desliga o que ESTE bloco criou (o efeito de atencao em laco, a
+     transicao do botao e a ampliacao no hover) e nada mais -- nem o tema da Alboom, nem os
+     outros blocos da ferramenta. O botao continua inteiro e visivel: o que some e so a onda
+     que pulsava por cima dele, que ja e um estado transitorio. Os seletores repetem a
+     especificidade das regras acima e vem depois, entao vencem sem !important. */
+  c+='@media (prefers-reduced-motion: reduce){\n';
+  c+='  .fcw-botao{transition:none}\n';
+  c+='  .fcw-botao.fcw-pulsando,.fcw-botao.fcw-tremendo{animation:none}\n';
+  c+='  .fcw-botao:hover{transform:none}\n';
+  c+='}\n';
   c+='</sty'+'le>\n\n';
   c+='<scr'+'ipt>\n(function(){\n';
   c+='/* ===== ESSENCIAIS ===== */\n';
@@ -2026,6 +2209,38 @@ function tRestaura(st){
   $('t-larg').value=st.t.larg;setRadio('t-arq',st.t.arq);$('t-url').value=st.t.url;$('t-alt0').value=st.t.alt0;
 }
 
+/* Faixa declarada de cada campo numerico da aba: [id, padrao, min, max].
+   A lista alimenta fcPreso/fcAjustar (bloco compartilhado), entao nao ha como a saida ser
+   presa numa faixa e a tela mostrar outra. LARGURA_MOBILE cumpre aqui o mesmo papel que o c-mob
+   cumpre na Contagem regressiva -- decidir o layout de celular --, e ganha a mesma faixa
+   (320 a 1024): com "2" no campo, nenhuma tela existente cabia no modo celular e a altura de
+   celular calibrada nunca era usada; o modal cortava no telefone sem nada avisar. As alturas
+   ganham piso porque min-height negativo e invalido (o modal corta igual) e porque "0" caia
+   no "||" e virava 2700 em silencio. O teto de 20000px so pega erro de digitacao. */
+/* O quinto elemento (inteiro) NAO e opcional: sem ele fcPreso devolve o parseFloat cru e
+   "2350.7" saia como min-height '2350.7px'. Antes da unificacao dos helpers, tPreso usava
+   parseInt e truncava; a tabela nasceu sem a quinta coluna e a truncagem se perdeu no caminho.
+   Os quatro campos sao pixels: fracao nao tem uso aqui. */
+var T_NUMS=[['t-desk',2350,500,20000,true],['t-mob',2700,500,20000,true],
+  ['t-larg',700,320,1024,true],['t-alt0',1600,400,20000,true]];
+function tPreso(id){return fcPreso(T_NUMS,id);}
+/* O endereco da intermediaria vira o src de um iframe. escAttr protege a ESTRUTURA do
+   atributo (aspas), nao o esquema: src="javascript:alert(1)" continua bem formado e executa.
+   Aceita apenas http(s) e caminho do proprio site; ancora nao entra porque nao existe iframe
+   de ancora. Vazio tambem e recusado: o codigo 3 saia com src="" e o operador colava na
+   hospedeira um iframe que nunca carregava nada, sem nenhum aviso. */
+function tUrlOk(v){
+  /* controle e espaco saem antes do teste porque o navegador tambem os ignora ao resolver
+     a URL -- sem isso, um caractere de controle no meio de "javascript:" passaria pelo teste */
+  var limpo=String(v).replace(/[\u0000-\u0020]/g,'');
+  if(!limpo)return false;
+  if(/^https?:\/\//i.test(limpo))return true;
+  /* caminho do proprio site: UMA barra. Com duas o endereco e protocol-relative --
+     "//evil.com/x" resolve para OUTRO host, herdando so o esquema da pagina, enquanto o
+     comentario acima e a mensagem de erro prometem "caminho do proprio site". */
+  if(limpo.charAt(0)==='/'&&limpo.charAt(1)!=='/')return true;
+  return false;
+}
 function tArqToggle(){
   var emb=radio('t-arq')==='embutida';
   $('t-emb').style.display=emb?'block':'none';
@@ -2039,9 +2254,20 @@ document.addEventListener('change',function(e){
 function tGerar(){
   var path=$('t-path').value.trim().replace(/^https?:\/\/tidycal\.com\//,'').replace(/^\//,'');
   if(!path){alert('Informe o caminho do booking type.');return;}
-  var desk=parseInt($('t-desk').value,10)||2350;
-  var mob=parseInt($('t-mob').value,10)||2700;
-  var larg=parseInt($('t-larg').value,10)||700;
+  var emb=radio('t-arq')==='embutida';
+  var u=$('t-url').value.trim();
+  /* Validacao ANTES de montar qualquer coisa: recusar no fim deixaria as textareas com o
+     bloco anterior enquanto o alerta diz que nao gerou. */
+  if(emb&&!tUrlOk(u)){
+    alert('Informe o endereco da pagina intermediaria: um endereco http(s) completo (https://www.fotocerta.com.br/iframe-agendamento-natal) ou um caminho do proprio site comecando com barra (/iframe-agendamento-natal). Vazio, o codigo 3 sai com src="" e o iframe colado na hospedeira nao carrega nada; outros esquemas, como javascript:, nao sao aceitos.');
+    return;
+  }
+  /* Os quatro campos numericos se corrigem na tela antes de a saida ser montada -- assim o
+     que o operador esta lendo e o que vai para o codigo. */
+  if(fcAjustarTodos(T_NUMS))salvarEstado();
+  var desk=tPreso('t-desk');
+  var mob=tPreso('t-mob');
+  var larg=tPreso('t-larg');
 
   var c='';
   c+='<div class="tidycal-embed" data-path="'+escAttr(path)+'"></div>\n';
@@ -2071,7 +2297,6 @@ function tGerar(){
   c+='})();\n</scr'+'ipt>';
   $('t-out1').value=c;
 
-  var emb=radio('t-arq')==='embutida';
   if(emb){
     var b='';
     b+='<scr'+'ipt>\n(function () {\n';
@@ -2085,8 +2310,7 @@ function tGerar(){
     b+='})();\n</scr'+'ipt>';
     $('t-out2').value=b;
 
-    var u=$('t-url').value.trim();
-    var alt0=parseInt($('t-alt0').value,10)||1600;
+    var alt0=tPreso('t-alt0');
     var d='';
     d+='<ifr'+'ame\n  style="border:none; width:100%; display:block;"\n';
     d+='  src="'+escAttr(u)+'"\n  title="Agenda"\n  width="100%"\n  height="'+alt0+'"\n';
@@ -2148,6 +2372,23 @@ function uFmt(v){
 }
 
 /* ===== opcionais do produto em edicao ===== */
+/* Correcao a vista dos dois editores em linha da aba (o de opcionais e o de cupons). Mesma regra
+   do resto da ferramenta: em 'change'/'blur', nunca em 'input'. */
+function uOpPrecoAjustar(inp,i){
+  var v=parseFloat(String(inp.value).replace(',','.'));
+  if(!isNaN(v)&&v>=0){uEditOps[i].preco=v;return false;}
+  uEditOps[i].preco=0;
+  inp.value='0';
+  return true;
+}
+function uCpCodAjustar(inp,i){
+  var alto=String(inp.value).toUpperCase();
+  uCps[i].codigo=alto;
+  if(alto===inp.value)return false;
+  inp.value=alto;
+  salvarEstado();uPreview();
+  return true;
+}
 function uOpRender(){
   var ul=$('u-op-lista');if(!ul)return;
   ul.innerHTML='';
@@ -2159,6 +2400,13 @@ function uOpRender(){
     n.addEventListener('input',function(){uEditOps[i].nome=n.value;});
     var pr=document.createElement('input');pr.type='number';pr.step='0.01';pr.min='0';pr.value=op.preco;pr.placeholder='Preco';
     pr.addEventListener('input',function(){uEditOps[i].preco=pr.value;});
+    /* Preco apagado na lista virava preco:0.00 no codigo com o campo em branco na tela. Aqui a
+       recusa dos cupons NAO cabe: opcional gratis e configuracao legitima -- a propria aba ja
+       emite "Sem opcional" a preco zero, e um brinde tem preco zero de proposito. O que nao pode
+       e a tela dizer uma coisa e o codigo outra, entao o campo assume o zero a vista. Valor que
+       ja e um numero nao-negativo passa intacto, sem reescrita cosmetica. */
+    pr.addEventListener('change',function(){uOpPrecoAjustar(pr,i);});
+    pr.addEventListener('blur',function(){uOpPrecoAjustar(pr,i);});
     info.appendChild(n);info.appendChild(pr);
     var ctrl=document.createElement('div');ctrl.className='ctrl';
     [['\u2191',function(){uOpMove(i,-1);},'Subir'],['\u2193',function(){uOpMove(i,1);},'Descer'],['\u2715',function(){uOpDel(i);},'Remover']]
@@ -2248,6 +2496,12 @@ function uCpRender(){
     var info=document.createElement('div');info.className='info';
     var cod=document.createElement('input');cod.type='text';cod.value=cp.codigo;cod.placeholder='Codigo';
     cod.addEventListener('input',function(){uCps[i].codigo=cod.value.toUpperCase();salvarEstado();uPreview();});
+    /* O modelo ja guardava em maiusculas, mas o CAMPO continuava mostrando o que foi digitado:
+       tela "promo abc", codigo gerado 'PROMO ABC'. Funcionava (a comparacao em runtime ignora
+       caixa), e era exatamente o "tela diferente do codigo" que esta fase existiu para eliminar.
+       So em 'change'/'blur', nunca em 'input': reescrever a cada tecla mexeria com o cursor. */
+    cod.addEventListener('change',function(){uCpCodAjustar(cod,i);});
+    cod.addEventListener('blur',function(){uCpCodAjustar(cod,i);});
     var val=document.createElement('input');val.type='number';val.step='0.01';val.min='0';val.value=cp.valor;val.placeholder='Valor';
     val.addEventListener('input',function(){uCps[i].valor=val.value;salvarEstado();});
     var sel=document.createElement('select');
@@ -2268,11 +2522,22 @@ function uCpRender(){
     ul.appendChild(li);
   });
 }
+/* Um cupom percentual acima de 100 nao "desconta mais que tudo": o carrinho limita o desconto
+   ao subtotal e o pedido vai a zero. Era aceito sem aviso -- e um "150" digitado no lugar de
+   "15" nao tem valor certo a assumir no lugar (nem 100, nem 15), entao o cadastro e recusado
+   com aviso, como a chave Pix e o limiar de urgencia. */
+function uCpPctErro(tipo,v){
+  if(tipo!=='pct_produto'&&tipo!=='pct_total')return '';
+  if(v>100)return 'Um cupom em porcentagem nao pode passar de 100%: com '+v+'% o desconto e limitado ao subtotal e o pedido inteiro vai a R$ 0,00 -- o cliente ve "Cupom aplicado!" e um total zerado, e o PayPal recusa a ordem. Se a intencao era 15%, corrija o valor; se era realmente dar o pedido, use um cupom de valor fixo igual ao preco.';
+  return '';
+}
 function uCpAdd(){
   var cod=$('u-cp-cod').value.trim().toUpperCase();
   if(!cod){alert('Informe o codigo do cupom.');return;}
   var v=parseFloat(String($('u-cp-valor').value).replace(',','.'));
   if(isNaN(v)||v<=0){alert('Informe o valor do desconto (maior que zero).');return;}
+  var ePct=uCpPctErro(radio('u-cp-tipo')||'pct_total',v);
+  if(ePct){alert(ePct);return;}
   uCps.push({codigo:cod,tipo:radio('u-cp-tipo')||'pct_total',valor:v,validade:$('u-cp-val').value||''});
   $('u-cp-cod').value='';$('u-cp-valor').value='';$('u-cp-val').value='';
   uCpRender();salvarEstado();uPreview();
@@ -2326,7 +2591,13 @@ function uPreview(){
     if(multi)h+='<div style="font-size:13px;font-weight:600;margin:0 0 4px">'+escHtml($('u-t7').value)+'</div>';
     uProds.forEach(function(p,i){
       var preco=parseFloat(String(p.preco).replace(',','.'))||0;
-      var ativo=multi?((selprod==='multiplo')?(i===0):(i===0)):true;
+      /* O ternario que estava aqui tinha os dois ramos identicos -- residuo de uma intencao
+         que so ficou de pe na previa: pre-marcar o primeiro produto nos dois modos. O bloco
+         gerado so pre-marcava no modo radio, e por isso a previa mostrava 1 marcado e
+         R$ 420,00 enquanto o carrinho publicado abria com 0 marcados e R$ 0,00. Quem mudou
+         foi o GERADO (ver uGerar): carrinho que abre zerado nao e so infidelidade da previa,
+         e o estado inicial que levava total zero para o PayPal. Agora os dois concordam. */
+      var ativo=multi?(i===0):true;
       h+='<div style="padding:8px 0;border-bottom:1px solid #eee">';
       h+='<div style="display:flex;justify-content:space-between;gap:10px;font-weight:600;align-items:center"><span>'+(multi?marca(ativo,selprod!=='multiplo'):'')+escHtml(p.nome)+'</span><span>'+uFmt(preco)+'</span></div>';
       if(p.desc)h+='<div style="font-size:12px;color:#777;margin-left:'+(multi?'24px':'0')+'">'+escHtml(p.desc)+'</div>';
@@ -2361,7 +2632,11 @@ function uPreview(){
     h+='<div style="font-size:11px;color:#999;margin-top:4px">QR Code e Pix Copia e Cola aparecem aqui apos gerar</div></div>';
     if(zap)h+='<div style="margin-top:8px;background:#25D366;border-radius:8px;padding:10px;text-align:center;font-weight:600;color:#fff;font-size:13px">Ja paguei \u2014 avisar no WhatsApp</div>';
   }
-  h+='</div><p style="font-size:12px;color:var(--tinta-suave);text-align:center;margin:10px 0 0">Previa do carrinho (botoes ilustrativos; o total considera a primeira opcao marcada)</p>';
+  /* Legenda no formato novo: declara o que ainda difere da pagina publicada, em vez de
+     descrever o que a previa faz. A frase antiga ("o total considera a primeira opcao
+     marcada") era verdadeira na previa e falsa no bloco entregue -- a previa afirmava o
+     contrario do que o codigo fazia. */
+  h+='</div><p style="font-size:12px;color:var(--tinta-suave);text-align:center;margin:10px 0 0">Prévia do carrinho. <b>Ainda difere da página publicada:</b> os botões do PayPal são desenhos, não os botões reais; o QR é um quadriculado falso; a largura está limitada a 380 px para caber nesta coluna; e o campo de cupom é ilustrativo (aqui ele não aplica desconto nenhum). O que <b>confere</b> com o código gerado: os produtos e opcionais pré-marcados, o total inicial e as cores.</p>';
   box.innerHTML=h;
 }
 document.addEventListener('input',function(e){
@@ -2449,6 +2724,22 @@ function uGerar(){
   var descpix=parseFloat(String($('u-descpix').value).replace(',','.'));if(isNaN(descpix)||descpix<0)descpix=0;if(descpix>90)descpix=90;
   if(m!=='ambos')descpix=0;
   var selprod=radio('u-selprod')||'unico';
+
+  /* Os cupons sao conferidos AQUI, e nao so no formulario de cadastro: o campo de valor
+     DENTRO da lista de cupons nao valida nada, entao apagar o numero de um cupom ja cadastrado
+     gerava {valor:0} -- o cliente digitava o cupom, lia "Cupom aplicado!" e "Desconto - R$ 0,00"
+     e o total nao mudava. Mesma porta para o percentual acima de 100, que zera o pedido.
+     A geracao e recusada com aviso, nomeando o cupom: nao existe valor certo a assumir no lugar
+     de um campo que o operador esvaziou. */
+  var ic,cpv,cpc,cpe;
+  for(ic=0;ic<uCps.length;ic++){
+    cpc=String(uCps[ic].codigo||'').trim();
+    if(!cpc){alert('O cupom na posicao '+(ic+1)+' da lista esta sem codigo. Um cupom sem codigo nunca pode ser digitado pelo cliente: preencha o codigo ou remova a linha.');return;}
+    cpv=parseFloat(String(uCps[ic].valor).replace(',','.'));
+    if(isNaN(cpv)||cpv<=0){alert('O cupom "'+cpc+'" esta com o valor do desconto vazio ou zerado. Ele seria entregue no codigo como desconto de zero: o cliente digitaria o cupom, veria "Cupom aplicado!" e "Desconto - R$ 0,00", e o total nao mudaria. Preencha o valor ou remova o cupom.');return;}
+    cpe=uCpPctErro(uCps[ic].tipo,cpv);
+    if(cpe){alert('Cupom "'+cpc+'": '+cpe);return;}
+  }
 
   /* Nome, descricao, opcional, cupom e validade sao texto livre e viram strings JS do array
      PRODUTOS/CUPONS: escJs. Uma descricao colada de um e-mail com comentario HTML fazia o
@@ -2580,6 +2871,7 @@ function uGerar(){
   if(usaPP){
     c+="var TXT_SUCESSO='"+escJs($('u-t5').value)+"';\n";
     c+="var TXT_ERRO='"+escJs($('u-t6').value)+"';\n";
+    c+="var TXT_TOTAL_ZERO='Escolha ao menos um item: o pedido esta em zero.';\n";
   }
   if(usaPix){
     if(usaPP){
@@ -2707,7 +2999,12 @@ function uGerar(){
   c+="var lab=document.createElement('label');\n";
   c+="var inp=document.createElement('input');\n";
   c+="inp.type=tipoProd;inp.name='fcu-prod';inp.value=String(i);\n";
-  c+="if(tipoProd==='radio'&&i===0)inp.checked=true;\n";
+  /* Pre-marca o primeiro produto TAMBEM no modo checkbox. Antes so o modo radio pre-marcava,
+     e no modo "varios produtos" o carrinho publicado abria com nada marcado e total R$ 0,00 --
+     enquanto a previa da ferramenta abria com o primeiro marcado. Alem de mentir, o estado
+     inicial zerado era um dos caminhos que levavam total zero ao PayPal. O cliente continua
+     livre para desmarcar. */
+  c+='if(i===0)inp.checked=true;\n';
   c+="inp.addEventListener('change',atualizar);\n";
   c+="var mk=document.createElement('span');mk.className='fcu-mark '+(tipoProd==='checkbox'?'ck':'rd');\n";
   c+="var sp=document.createElement('span');sp.textContent=p.nome;\n";
@@ -2836,6 +3133,13 @@ function uGerar(){
     c+='if(!window.paypal){msg(TXT_ERRO,false);return;}\n';
     c+='window.paypal.Buttons({\n';
     c+="style:{layout:'vertical',shape:'rect',label:'pay',color:'"+ppcor+"'},  /* color: 'gold' | 'blue' | 'silver' | 'white' | 'black' */\n";
+    c+='/* Pedido zerado e barrado ANTES de abrir o PayPal, com mensagem propria. O caminho do\n';
+    c+='   Pix ja fazia isso; o do PayPal nao: com total zero a ordem saia com value "0.00", o\n';
+    c+='   PayPal recusava e o cliente via so a mensagem generica de erro do carrinho, sem\n';
+    c+='   nenhuma pista de que bastava marcar um item ou tirar o cupom. */\n';
+    c+='onClick:function(data,actions){\n';
+    c+='if(total()<0.01){msg(TXT_TOTAL_ZERO,false);return actions.reject();}\n';
+    c+='return actions.resolve();\n},\n';
     c+='createOrder:function(data,actions){\n';
     c+='return actions.order.create({purchase_units:[{\n';
     c+='amount:{value:total().toFixed(2),currency_code:MOEDA},\n';
@@ -2932,19 +3236,30 @@ function bRestaura(st){
   $('b-pad').value=B.pad;
 }
 
-function bHexRgb(h){
-  h=String(h||'').trim().replace('#','');
-  if(h.length===3)h=h[0]+h[0]+h[1]+h[1]+h[2]+h[2];
-  var n=parseInt(h,16);
-  if(isNaN(n))return '255, 201, 74';
-  return ((n>>16)&255)+', '+((n>>8)&255)+', '+(n&255);
-}
-function bNum(id,def,min,max){
-  var v=parseFloat(String($(id).value).replace(',','.'));
-  if(isNaN(v))return def;
-  if(min!=null&&v<min)v=min;
-  if(max!=null&&v>max)v=max;
-  return v;
+/* Faixa declarada de cada campo numerico da aba: [id, padrao, min, max, inteiro].
+   A lista alimenta fcPreso/fcAjustar (bloco compartilhado), que servem aos DOIS lados -- o que
+   sai no codigo e o que fica na tela --, entao nao ha como a saida ser presa numa faixa e o
+   campo em outra. */
+var B_NUMS=[
+  ['b-esp',4,0,20,true],['b-raio',14,0,60,true],['b-fang',150,0,360,true],
+  ['b-facholarg',5,2,25,false],['b-listra',10,3,40,true],['b-vel',4,0.5,30,false],
+  ['b-haloraio',26,0,80,true],['b-haloop',0.35,0,1,false]
+];
+function bPreso(id){return fcPreso(B_NUMS,id);}
+/* O espacamento interno e o unico texto livre desta aba e o destino dele e o CSS do
+   componente, concatenado como 'padding: '+pad+';'. Sem validacao, um ponto e virgula
+   digitado por engano ("10px; background:red") acrescenta uma segunda propriedade DEPOIS do
+   shorthand em camadas -- e o background solto apaga de uma vez o fundo interno e a moldura
+   animada, exatamente a colisao de shorthand que o CLAUDE.md descreve, aqui alcancavel pela
+   digitacao do operador. Nao ha valor "certo" a assumir no lugar do que ele escreveu, entao a
+   geracao e recusada com aviso, como na chave Pix e no limiar de urgencia. */
+function bPadOk(v){
+  var partes=String(v).split(/\s+/),i;
+  if(partes.length<1||partes.length>4)return false;
+  for(i=0;i<partes.length;i++){
+    if(!/^(0|[0-9]+(\.[0-9]+)?(px|em|rem|%|vw|vh|ch))$/.test(partes[i]))return false;
+  }
+  return true;
 }
 function bCor(id,def){var v=$(id+'-t').value;return corValida(v)?v:def;}
 
@@ -2957,7 +3272,16 @@ function bToggles(){
   el=$('b-nucleo-campo');if(el)el.style.display=(ef==='brilho')?'block':'none';
   el=$('b-listra-campo');if(el)el.style.display=(ef==='listras')?'block':'none';
   el=$('b-vel-campo');if(el)el.style.display=(ef==='fixa')?'none':'block';
-  el=$('b-halo-campos');if(el)el.style.display=(radio('b-halo')==='sim')?'block':'none';
+  /* No efeito "halo pulsante" o halo E o efeito: nao existe pulso sem halo. O radio
+     "com/sem halo" ficava visivel ali e nao desligava nada -- marcado em "sem halo", o
+     gerador so trocava os campos por 18px/0.5 fixos, os campos de alcance e intensidade
+     sumiam da tela, e o halo continuava pulsando. O rotulo mentia. Agora o radio some
+     nesse efeito, um aviso explica por que, e os campos ficam sempre a vista, porque sao
+     eles que controlam a onda. */
+  var pulso=(ef==='pulso');
+  el=$('b-halo-radios');if(el)el.style.display=pulso?'none':'flex';
+  el=$('b-halo-aviso');if(el)el.style.display=pulso?'block':'none';
+  el=$('b-halo-campos');if(el)el.style.display=(pulso||radio('b-halo')==='sim')?'block':'none';
   el=$('b-txt-campo');if(el)el.style.display=(radio('b-txt')==='sim')?'block':'none';
 }
 document.addEventListener('change',function(e){
@@ -2984,20 +3308,22 @@ function bStops(base,facho,nucleo,L){
 function bMontar(){
   var ef=radio('b-efeito');
   var fu=radio('b-fundo');
-  var esp=Math.round(bNum('b-esp',4,0,20));
-  var raio=Math.round(bNum('b-raio',14,0,60));
+  /* Todos os numeros vem de bPreso, que le a MESMA faixa que a correcao devolve ao campo. */
+  var esp=bPreso('b-esp');
+  var raio=bPreso('b-raio');
   var c1=bCor('b-c1','#9C5638');
   var c2=bCor('b-c2','#FFC94A');
   var c3=bCor('b-c3','#FFF6D8');
-  var L=bNum('b-facholarg',5,2,25);
-  var listra=Math.round(bNum('b-listra',10,3,40));
-  var vel=bNum('b-vel',4,0.5,30);
-  var halo=(radio('b-halo')==='sim');
-  var haloraio=Math.round(bNum('b-haloraio',26,0,80));
-  var haloop=bNum('b-haloop',0.35,0,1);
+  var L=bPreso('b-facholarg');
+  var listra=bPreso('b-listra');
+  var vel=bPreso('b-vel');
+  /* No efeito "pulso" o halo e o proprio efeito: os campos valem sempre, sem o radio. */
+  var halo=(ef==='pulso')||(radio('b-halo')==='sim');
+  var haloraio=bPreso('b-haloraio');
+  var haloop=bPreso('b-haloop');
   var f1=bCor('b-f1','#8A4A32');
   var f2=bCor('b-f2','#B5674A');
-  var fang=Math.round(bNum('b-fang',150,0,360));
+  var fang=bPreso('b-fang');
   var fallback=(radio('b-fallback')==='sim');
   var comTexto=(radio('b-txt')==='sim');
   var corTexto=bCor('b-c4','#F7EFDF');
@@ -3007,12 +3333,15 @@ function bMontar(){
   if(camadas&&fu==='manter'){
     return {erro:'Para este efeito, o fundo interno precisa ser cor solida ou degrade: a tecnica de borda animada pinta o miolo do componente. Dica: capture a cor atual do componente com o conta-gotas e use como cor solida.'};
   }
+  if(pad&&!bPadOk(pad)){
+    return {erro:'O espacamento interno aceita apenas um valor de padding CSS: de um a quatro numeros com unidade, separados por espaco (ex.: 40px, "40px 32px", "12px 20px 16px 20px"). Unidades aceitas: px, em, rem, %, vw, vh, ch -- e "0" sozinho. O valor digitado ("'+pad+'") entra direto no CSS do componente, entao um ponto e virgula ali acrescenta uma segunda propriedade: um "background" colado no meio apaga de uma vez o fundo interno E a moldura animada, sem nenhum aviso. Deixe o campo vazio para nao mexer no espacamento.'};
+  }
 
   var interna='';
   if(fu==='solido')interna='linear-gradient('+f1+', '+f1+')';
   else if(fu==='degrade')interna='linear-gradient('+fang+'deg, '+f1+', '+f2+')';
 
-  var props=[],anim='',keys='';
+  var props=[],anim='',keys='',keysRm='';
 
   if(camadas){
     var bordaGrad='',size='';
@@ -3021,17 +3350,20 @@ function bMontar(){
       bordaGrad='linear-gradient(120deg,\n    '+bStops(c1,c2,c3,L)+')';
       size='100% 100%, 300% 300%';
       keys='@keyframes fc-borda-brilho {\n  0%   { background-position: 0 0, 0% 0%; }\n  100% { background-position: 0 0, 100% 100%; }\n}';
+      keysRm='  @keyframes fc-borda-brilho {\n    0%, 100% { background-position: 0 0, 0% 0%; }\n  }';
     }else if(ef==='gradiente'){
       anim='fc-borda-gradiente';
       bordaGrad='linear-gradient(90deg, '+c1+', '+c2+', '+c1+')';
       size='100% 100%, 300% 100%';
       keys='@keyframes fc-borda-gradiente {\n  0%   { background-position: 0 0, 0% 0; }\n  100% { background-position: 0 0, 100% 0; }\n}';
+      keysRm='  @keyframes fc-borda-gradiente {\n    0%, 100% { background-position: 0 0, 0% 0; }\n  }';
     }else{
       anim='fc-borda-listras';
       bordaGrad='repeating-linear-gradient(45deg, '+c1+' 0 '+listra+'px, '+c2+' '+listra+'px '+(listra*2)+'px)';
       size='100% 100%, 100% 100%';
       var desl=(listra*2*1.41421).toFixed(2);
       keys='@keyframes fc-borda-listras {\n  0%   { background-position: 0 0, 0 0; }\n  100% { background-position: 0 0, '+desl+'px 0; }\n}';
+      keysRm='  @keyframes fc-borda-listras {\n    0%, 100% { background-position: 0 0, 0 0; }\n  }';
     }
     props.push('border: '+esp+'px solid transparent;');
     props.push('border-radius: '+raio+'px;');
@@ -3042,9 +3374,17 @@ function bMontar(){
     props.push('animation: '+anim+' '+vel+'s linear infinite;');
   }else if(ef==='pulso'){
     anim='fc-borda-pulso';
-    var pr=halo?haloraio:18;
-    var po=halo?haloop:0.5;
+    /* pr/po vinham de um ternario sobre "halo": marcar "sem halo" nao apagava o pulso, so
+       trocava os valores por 18px/0.5 fixos com os campos escondidos. Agora os campos valem
+       sempre neste efeito (ver bMontar/bToggles) e o ternario sumiu. */
+    var pr=haloraio;
+    var po=haloop;
     keys='@keyframes fc-borda-pulso {\n  0%   { box-shadow: 0 0 0 0 rgba('+bHexRgb(c2)+', '+po+'); }\n  70%  { box-shadow: 0 0 0 '+pr+'px rgba('+bHexRgb(c2)+', 0); }\n  100% { box-shadow: 0 0 0 0 rgba('+bHexRgb(c2)+', 0); }\n}';
+    /* Congelar o pulso no quadro 100% apagaria o halo por inteiro -- ele e "0 0 0 0
+       rgba(cor, 0)" --, e o componente perderia todo o destaque justamente para quem pediu
+       menos movimento. O quadro estatico e um anel de meio alcance na opacidade de partida:
+       parado, mas visivel. */
+    keysRm='  @keyframes fc-borda-pulso {\n    0%, 100% { box-shadow: 0 0 0 '+Math.round(pr/2)+'px rgba('+bHexRgb(c2)+', '+po+'); }\n  }';
     if(esp>0)props.push('border: '+esp+'px solid '+c1+';');
     props.push('border-radius: '+raio+'px;');
     if(fu==='solido'){if(fallback)props.push('background: '+f1+';');else props.push('background: '+f1+';');}
@@ -3061,7 +3401,7 @@ function bMontar(){
   if(comTexto)props.push('color: '+corTexto+';');
   if(pad)props.push('padding: '+pad+';');
 
-  return {anim:anim,keys:keys,props:props.join('\n'),efeito:ef};
+  return {anim:anim,keys:keys,keysRm:keysRm,props:props.join('\n'),efeito:ef};
 }
 
 function bPreview(){
@@ -3088,17 +3428,38 @@ document.addEventListener('change',function(e){
 });
 
 function bGerar(){
+  if(fcAjustarTodos(B_NUMS))salvarEstado();
   var m=bMontar();
   if(m.erro){alert(m.erro);return;}
   var c1='';
-  if(m.efeito==='fixa'){
-    c1='/* O efeito "borda fixa" nao usa animacao: nao e preciso colar nada no head. */\n';
-    c1+='/* Se quiser manter a regra de acessibilidade do site, use o bloco abaixo. */\n';
+  if(!m.keys){
+    /* Sem animacao, sem bloco: o codigo 1 antes trazia um <style> so com a regra de
+       acessibilidade, ou seja, um bloco para colar no head que nao dizia respeito a este
+       efeito. Aqui ele vira so a explicacao. */
+    c1='/* O efeito "borda fixa" nao usa animacao: nao ha nada para colar no head do site. */\n';
+    c1+='/* Cole apenas o codigo 2 no campo CSS Customizado do componente. */';
+    $('b-out1').value=c1;
+    $('b-out2').value=m.props;
+    return;
   }
   c1+='<sty'+'le>\n';
-  if(m.keys)c1+='/* Animacao da borda com efeito - cole uma vez no head do site */\n'+m.keys+'\n';
-  c1+='/* Acessibilidade: reduz o movimento para quem prefere menos animacao */\n';
-  c1+='@media (prefers-reduced-motion: reduce) {\n  * { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }\n}\n';
+  c1+='/* Animacao da borda com efeito - cole uma vez no head do site */\n'+m.keys+'\n';
+  /* Acessibilidade ESCOPADA. O bloco antigo era "* { animation-duration: 0.01ms !important;
+     animation-iteration-count: 1 !important; }": como este codigo vai para o head do SITE,
+     ele matava toda animacao de todas as paginas para quem tem movimento reduzido --
+     inclusive as do tema Alboom, o botao de captacao de leads, o slideshow e a barra de
+     contagem regressiva, que ja traz o proprio bloco escopado. E, no halo pulsante, congelar
+     em uma iteracao de 0,01 ms parava a animacao no quadro 100%, que e halo nenhum: o
+     componente perdia o destaque por completo em vez de ganhar uma versao estatica.
+     A regra agora redefine A PROPRIA animacao com um unico quadro. Duas consequencias: so as
+     animacoes fc-borda-* param (nada mais do site e tocado) e o efeito congela num estado
+     legivel -- o degrade continua a vista, o halo vira um anel parado. E, como cada bloco so
+     redefine a animacao que ele mesmo declarou, colar varios efeitos no mesmo campo do head
+     nao gera regras concorrentes. */
+  c1+='/* Acessibilidade: para quem pediu menos movimento no sistema, a MESMA animacao e\n';
+  c1+='   redefinida com um unico quadro -- a borda para de se mexer e continua visivel.\n';
+  c1+='   Vale so para esta animacao; o resto do site nao e afetado. */\n';
+  c1+='@media (prefers-reduced-motion: reduce) {\n'+m.keysRm+'\n}\n';
   c1+='</sty'+'le>';
   $('b-out1').value=c1;
   $('b-out2').value=m.props;
@@ -3982,18 +4343,26 @@ prep('Slideshow','slide',function(){
   liga('s-previewbtn',sPreview);
   liga('s-limparbtn',sLimpar);
   liga('s-copy',function(){copiar('s-out','s-cop');});
+  /* a previa mostra o ritmo das fotos, entao o 'blur' redesenha com o valor ja preso */
+  fcLigarFaixa(S_NUMS,sPreview);
 });
 prep('Captacao de leads','leads',function(){
   liga('l-gerar',lGerar);
   liga('l-padroes',lPadroes);
   liga('l-copy',function(){copiar('l-out','l-cop');});
   parearCor('l-corbtn');parearCor('l-c1');parearCor('l-c2');parearCor('l-c3');parearCor('l-c4');
+  /* a previa desta aba desenha o pop-up, que nao mostra estes dois numeros: nada a redesenhar */
+  fcLigarFaixa(L_NUMS);
 });
 prep('Agendamento TidyCal','tidy',function(){
   liga('t-gerar',tGerar);
   liga('t-copy1',function(){copiar('t-out1','t-cop1');});
   liga('t-copy2',function(){copiar('t-out2','t-cop2');});
   liga('t-copy3',function(){copiar('t-out3','t-cop3');});
+  /* Correcao a vista das alturas e do corte de celular, no padrao do c-mob: o listener fica no
+     proprio campo (roda antes dos de document, entao o salvarEstado global ja le o valor
+     preso); 'blur' nao borbulha e por isso grava por conta propria. */
+  fcLigarFaixa(T_NUMS);
 });
 prep('Checkout','uni',function(){
   liga('u-op-add',uOpAdd);
@@ -4014,6 +4383,11 @@ prep('Bordas com efeito','bor',function(){
   liga('b-copy1',function(){copiar('b-out1','b-cop1');});
   liga('b-copy2',function(){copiar('b-out2','b-cop2');});
   parearCor('b-f1');parearCor('b-f2');parearCor('b-c1');parearCor('b-c2');parearCor('b-c3');parearCor('b-c4');
+  /* Correcao a vista dos oito campos numericos, no padrao do c-mob. O listener do proprio
+     elemento roda antes dos de document, entao o bPreview global ja desenha com o valor
+     preso -- por isso o ramo de 'change' nao redesenha. 'blur' nao borbulha e redesenha
+     por conta propria. */
+  fcLigarFaixa(B_NUMS,bPreview);
 });
 prep('Contagem regressiva','cnt',function(){
   liga('c-msg-add',cMsgAdd);
@@ -4067,12 +4441,21 @@ prep('Correcao das cores livres e da chave Pix na carga','leads uni',function(){
   if(uChaveAjustar())mudou=true;
   if(mudou)salvarEstado();
 });
+/* Mesmo motivo do c-mob e das cores livres: estado gravado antes desta regra pode trazer numeros
+   fora da faixa, e o campo nao pode exibir algo diferente do que o gerador vai usar. */
+prep('Slideshow','slide',function(){
+  if(fcAjustarTodos(S_NUMS))salvarEstado();
+},'desenhar a aba com o estado restaurado');
 prep('Captacao de leads','leads',function(){
+  if(fcAjustarTodos(L_NUMS))salvarEstado();
   lBtnPreview();
   lPopPreview();
   lAncToggle();
 },'desenhar a aba com o estado restaurado');
 prep('Agendamento TidyCal','tidy',function(){
+  /* estado gravado antes desta regra pode trazer altura ou corte fora da faixa: prende na
+     carga, para o campo nunca exibir um numero diferente do que o gerador vai usar. */
+  if(fcAjustarTodos(T_NUMS))salvarEstado();
   tArqToggle();
 },'desenhar a aba com o estado restaurado');
 prep('Checkout','uni',function(){
@@ -4082,6 +4465,9 @@ prep('Checkout','uni',function(){
   uPreview();
 },'desenhar a aba com o estado restaurado');
 prep('Bordas com efeito','bor',function(){
+  /* mesmo motivo do c-mob e das cores livres: estado gravado antes desta regra pode trazer
+     numeros fora da faixa, e o campo nao pode exibir algo diferente do que bMontar vai usar. */
+  if(fcAjustarTodos(B_NUMS))salvarEstado();
   bToggles();
   bPreview();
 },'desenhar a aba com o estado restaurado');
