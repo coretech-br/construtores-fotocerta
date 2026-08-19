@@ -547,7 +547,7 @@
     <div>
       <fieldset id="u-pix-campos">
         <legend>Dados do recebedor (Pix)</legend>
-        <label for="u-chave">Chave Pix</label>
+        <label for="u-chave">Chave Pix <small>(máx. 77 caracteres; espaços das pontas e caracteres invisíveis do copiar-e-colar são removidos ao sair do campo)</small></label>
         <input type="text" id="u-chave" value="" placeholder="e-mail, telefone, CPF/CNPJ ou chave aleatoria">
         <label for="u-nomer">Nome do recebedor <small>(máx. 25 caracteres, acentos removidos no código Pix)</small></label>
         <input type="text" id="u-nomer" value="" maxlength="25" placeholder="nome que aparece no Pix">
@@ -1365,6 +1365,29 @@ function restaurarEstado(){
   }catch(e){}
 }
 function corValida(v){return /^#[0-9a-fA-F]{6}$/.test(v);}
+/* Rede do gerador: le o campo de texto da cor e devolve o padrao quando o valor nao e um
+   hexadecimal de 6 digitos. Sem isso o valor digitado ia cru para dentro de uma string JS do
+   bloco entregue -- um apostrofo bastava para fechar a string e emendar codigo arbitrario no
+   carrinho publicado, e a previa (que ja validava) mostrava a cor certa enquanto o codigo
+   levava a errada. Helper novo em vez de mexer em corValida, que as seis abas compartilham.
+   bCor e cCor fazem o mesmo nas abas Bordas e Contagem; nao sao tocadas. */
+function corSegura(idBase,def){var v=$(idBase+'-t').value;return corValida(v)?v:def;}
+/* Correcao a vista, no padrao do c-mob da Contagem: em vez de o gerador cair no padrao em
+   silencio (o operador continuaria lendo 'naoehcor' na tela e publicando '#075E54'), o proprio
+   campo se corrige e o swatch acompanha. Tela e codigo passam a mostrar sempre o MESMO valor.
+   So em 'change'/'blur', nunca em 'input': corrigir a cada tecla impediria digitar "#075E54",
+   porque "#0" viraria o padrao antes do resto chegar. */
+function corAjustar(idBase,def){
+  var t=$(idBase+'-t');if(!t)return false;
+  if(corValida(t.value))return false;
+  t.value=def;
+  var c=$(idBase);if(c)c.value=def;
+  return true;
+}
+/* Cores de texto livre das abas Leads e Checkout (as de Bordas e Contagem ja eram validadas
+   na origem por bCor/cCor). Padroes identicos aos do HTML e aos das respectivas previas. */
+var CORES_LIVRES=[['l-corbtn','#25D366'],['l-c1','#075E54'],['l-c2','#ffffff'],['l-c3','#25D366'],['l-c4','#333333'],
+  ['u-c1','#075E54'],['u-c2','#ffffff'],['u-c3','#333333']];
 document.addEventListener('input',salvarEstado);
 document.addEventListener('change',salvarEstado);
 
@@ -1472,8 +1495,15 @@ function sGerar(){
   var t=radio('s-t'),prop=radio('s-p');
   var intv=parseInt($('s-int').value,10)||4500;
   var larg=parseInt($('s-larg').value,10)||900;
+  /* escJs, nao esc: url e legenda sao texto livre do operador e o destino e uma string JS
+     dentro do bloco de script gerado. esc() so protege a string (barra invertida e
+     apostrofo) e deixa passar as duas sequencias que tiram o parser HTML do estado normal
+     de script (fechamento de tag e abertura de comentario) -- uma legenda com a sequencia
+     de fechamento fazia o bloco montar ZERO slides e derramar o resto do codigo-fonte como
+     texto na pagina. Nao e escHtml: a legenda vai para textContent no bloco entregue, e
+     "&amp;" apareceria cru para o visitante. */
   var arr=sImgs.map(function(im){
-    return "    {\n      url: '"+esc(im.url)+"',\n      legenda: '"+esc(im.legenda)+"'\n    }";
+    return "    {\n      url: '"+escJs(im.url)+"',\n      legenda: '"+escJs(im.legenda)+"'\n    }";
   }).join(',\n');
   var c='';
   c+='<div id="fc-slideshow" class="fc-slideshow" aria-label="Galeria de fotos">\n';
@@ -1666,17 +1696,26 @@ function lGerar(){
   var num=$('l-num').value.replace(/\D/g,'');
   if(!num){alert('Informe o WhatsApp de destino.');return;}
   if(!num){alert('Informe o numero do WhatsApp (so digitos).');return;}
+  /* Todo texto livre desta aba vira uma string JS dentro do bloco de script gerado (var
+     CODIGO, POP_TITULO, MSG_*, ...): o destino pede escJs. Com esc() sozinho, um titulo com
+     a sequencia de fechamento de script fazia a landing exibir o restante do codigo-fonte
+     como texto visivel para o visitante.
+     Nenhum destes vai para innerHTML nem para atributo -- o bloco entregue escreve todos por
+     textContent/placeholder --, entao escHtml/escAttr aqui produziriam "&amp;" e "&quot;"
+     visiveis para o visitante. As cores passam por corSegura: sao hexadecimais validados, nao
+     precisam de escape nenhum depois disso. */
   var v={
-    num:num,cod:esc($('l-cod').value),pag:esc($('l-pag').value),
+    num:num,cod:escJs($('l-cod').value),pag:escJs($('l-pag').value),
     modo:radio('l-modo'),segauto:parseInt($('l-segauto').value,10)||8,
     efeito:radio('l-efeito'),segef:parseInt($('l-segef').value,10)||10,
     icone:radio('l-icone'),formato:radio('l-formato'),
-    corbtn:$('l-corbtn-t').value,
-    m1:esc($('l-m1').value),m2:esc($('l-m2').value),m3:esc($('l-m3').value),m4:esc($('l-m4').value),
-    coruja:radio('l-coruja'),emoji:esc($('l-emoji').value),
-    t1:esc($('l-t1').value),t2:esc($('l-t2').value),t3:esc($('l-t3').value),t4:esc($('l-t4').value),
-    t5:esc($('l-t5').value),t6:esc($('l-t6').value),t7:esc($('l-t7').value),
-    c1:$('l-c1-t').value,c2:$('l-c2-t').value,c3:$('l-c3-t').value,c4:$('l-c4-t').value
+    corbtn:corSegura('l-corbtn','#25D366'),
+    m1:escJs($('l-m1').value),m2:escJs($('l-m2').value),m3:escJs($('l-m3').value),m4:escJs($('l-m4').value),
+    coruja:radio('l-coruja'),emoji:escJs($('l-emoji').value),
+    t1:escJs($('l-t1').value),t2:escJs($('l-t2').value),t3:escJs($('l-t3').value),t4:escJs($('l-t4').value),
+    t5:escJs($('l-t5').value),t6:escJs($('l-t6').value),t7:escJs($('l-t7').value),
+    c1:corSegura('l-c1','#075E54'),c2:corSegura('l-c2','#ffffff'),
+    c3:corSegura('l-c3','#25D366'),c4:corSegura('l-c4','#333333')
   };
   var c='';
   c+='<sty'+'le>\n';
@@ -1812,7 +1851,10 @@ function lGerar(){
     var resp=parseInt($('l-resp').value,10);if(isNaN(resp)||resp<0)resp=24;
     c+='\n\n<!-- Ancora inteligente p/ calendario no iframe -->\n';
     c+='<scr'+'ipt>\n(function(){\n';
-    c+="  var ANCORA='"+esc(anc)+"';      /* href do botao/link que aciona a rolagem (deve comecar com #) */\n";
+    /* mesma regra: ANCORA e string JS. (O uso da ancora no CSS do plano B, mais abaixo, tem
+       outro destino e outro tratamento pendente -- ver A3 da auditoria; escJs ali produziria
+       "<\/" dentro de um seletor CSS, que e escapar para o destino errado.) */
+    c+="  var ANCORA='"+escJs(anc)+"';      /* href do botao/link que aciona a rolagem (deve comecar com #) */\n";
     c+='  var RESPIRO='+resp+';             /* px de folga acima do calendario ao chegar nele */\n\n';
     c+='  function alvoY(){\n';
     c+="    var frames=document.querySelectorAll('iframe');\n";
@@ -2184,19 +2226,66 @@ document.addEventListener('change',function(e){
   if(al)uPreview();
 });
 
+/* ===== chave Pix: limpeza e limites do padrao BR Code =====
+   NOME_RECEBEDOR e CIDADE ja passavam por semAcento() dentro do bloco entregue; a chave ia
+   crua para o tlv('01', ...). Um espaco nao-quebravel vindo de copiar-e-colar do app do banco
+   sobrevivia ate o payload e o banco recusava o QR sem dizer por que. E o campo 01 do BR Code
+   cabe em 77 caracteres: uma chave maior desestrutura o TLV (o leitor le "01102aaa..." como
+   comprimento 10) enquanto o CRC continua sendo calculado sobre o payload torto -- o QR
+   PARECE valido e so um banco de verdade recusa.
+   Divisao adotada: o que o operador NAO tem como ver (invisiveis, zero-width, controle) e
+   removido e devolvido ao campo; o que ele PODE ver (espaco no meio, tamanho, campo vazio)
+   vira recusa com aviso, porque corrigir calado o que esta na tela troca defeito visivel por
+   invisivel -- a regra que este projeto ja aplicou no c-mob. Nao ha regra de formato aqui de
+   proposito: o padrao aceita e-mail, telefone, CPF/CNPJ e chave aleatoria, com formatos
+   diferentes. O limite de caracteres imprimiveis ASCII nao e estetico: tlv() conta com
+   v.length e crc16() com charCodeAt, ambos em unidades UTF-16, enquanto o banco conta bytes
+   UTF-8 -- qualquer caractere fora dessa faixa faz comprimento e CRC discordarem. */
+var PIX_CHAVE_MAX=77;
+function pixLimpar(t){
+  return String(t||'')
+    .replace(/[\u0000-\u001F\u007F-\u009F\u00AD\u200B-\u200F\u2028\u2029\u2060\uFEFF]/g,'')
+    .replace(/[\u00A0\u1680\u2000-\u200A\u202F\u205F\u3000]/g,'')
+    .replace(/^\s+|\s+$/g,'');
+}
+/* Correcao a vista, no padrao do c-mob: o campo passa a mostrar exatamente a chave que vai
+   para o codigo. So em 'change'/'blur', nunca em 'input'. */
+function uChaveAjustar(){
+  var el=$('u-chave');if(!el)return false;
+  var limpo=pixLimpar(el.value);
+  if(limpo===el.value)return false;
+  el.value=limpo;
+  return true;
+}
+/* 'bruta' e o valor antes da limpeza: chave que so tinha invisiveis merece aviso proprio
+   (senao o operador leria "preencha a chave" com o campo aparentemente preenchido); campo
+   nunca preenchido cai no aviso geral de campos obrigatorios, que ja existia. */
+function uChaveErro(chave,bruta){
+  if(!chave)return String(bruta||'').length?'A chave Pix so tinha caracteres invisiveis (vindos de copiar-e-colar) e ficou vazia depois da limpeza. Digite a chave novamente.':'';
+  if(chave.length>PIX_CHAVE_MAX)return 'A chave Pix tem '+chave.length+' caracteres e o padrao do Banco Central aceita no maximo '+PIX_CHAVE_MAX+' no campo da chave. Uma chave maior desmonta o codigo do QR sem que ele pareca invalido: confira se nao colou algo a mais.';
+  if(!/^[!-~]+$/.test(chave))return 'A chave Pix tem espaco no meio ou caractere fora do padrao. O codigo do QR conta os caracteres em bytes, e qualquer um fora da faixa comum (letras, numeros e sinais, sem espacos) faz o banco recusar o pagamento sem explicacao. Corrija a chave e gere de novo.';
+  return '';
+}
+
 /* ===== gerador ===== */
 function uGerar(){
   var m=radio('u-metodo')||'ambos';
   var usaPP=(m!=='pix'),usaPix=(m!=='paypal');
   if(!uProds.length){alert('Cadastre ao menos um produto.');return;}
-  var client=esc($('u-client').value.trim()||'COLE_AQUI_SEU_CLIENT_ID');
+  var client=escJs($('u-client').value.trim()||'COLE_AQUI_SEU_CLIENT_ID');
   if(usaPP&&!$('u-client').value.trim()){alert('Informe o Client ID do PayPal.');return;}
   var moeda=usaPix?'BRL':(radio('u-moeda')||'BRL');
-  var chave=$('u-chave').value.trim();
+  var chaveBruta=$('u-chave').value;
+  uChaveAjustar();
+  var chave=$('u-chave').value;
   var nomer=$('u-nomer').value.trim();
   var cidade=$('u-cidade').value.trim();
+  if(usaPix){
+    var erroChave=uChaveErro(chave,chaveBruta);
+    if(erroChave){alert(erroChave);return;}
+  }
   if(usaPix&&(!chave||!nomer||!cidade)){alert('Preencha a chave Pix, o nome do recebedor e a cidade.');return;}
-  var cod=esc($('u-cod').value.trim()||'PEDIDO');
+  var cod=escJs($('u-cod').value.trim()||'PEDIDO');
   var zap=usaPix&&(radio('u-zap')==='sim');
   var zapnum=String($('u-zapnum').value).replace(/\D/g,'');
   if(zap&&!zapnum){alert('Informe o numero do WhatsApp de destino.');return;}
@@ -2206,18 +2295,22 @@ function uGerar(){
   if(m!=='ambos')descpix=0;
   var selprod=radio('u-selprod')||'unico';
 
+  /* Nome, descricao, opcional, cupom e validade sao texto livre e viram strings JS do array
+     PRODUTOS/CUPONS: escJs. Uma descricao colada de um e-mail com comentario HTML fazia o
+     carrinho inteiro sumir da pagina publicada, em silencio. No bloco entregue todos saem por
+     textContent -- escHtml deixaria "&amp;" a vista do cliente. */
   var prods=uProds.map(function(p){
     var ops=(p.ops||[]).map(function(o){
       var v=parseFloat(String(o.preco).replace(',','.'))||0;
-      return "{nome:'"+esc(o.nome)+"', preco:"+v.toFixed(2)+"}";
+      return "{nome:'"+escJs(o.nome)+"', preco:"+v.toFixed(2)+"}";
     }).join(', ');
-    return "  {nome:'"+esc(p.nome)+"', descricao:'"+esc(p.desc||'')+"', preco:"+(parseFloat(p.preco)||0).toFixed(2)+",\n"+
+    return "  {nome:'"+escJs(p.nome)+"', descricao:'"+escJs(p.desc||'')+"', preco:"+(parseFloat(p.preco)||0).toFixed(2)+",\n"+
            "   selecaoOpcionais:'"+p.opsel+"', permitirNenhum:"+(p.opnenhum==='sim'?'true':'false')+",\n"+
            "   opcionais:["+ops+"]}";
   }).join(',\n');
   var cps=uCps.map(function(cp){
     var v=parseFloat(String(cp.valor).replace(',','.'))||0;
-    return "  {codigo:'"+esc(String(cp.codigo).trim().toUpperCase())+"', tipo:'"+cp.tipo+"', valor:"+v+", validade:'"+esc(cp.validade||'')+"'}";
+    return "  {codigo:'"+escJs(String(cp.codigo).trim().toUpperCase())+"', tipo:'"+cp.tipo+"', valor:"+v+", validade:'"+escJs(cp.validade||'')+"'}";
   }).join(',\n');
 
   var c='';
@@ -2294,9 +2387,9 @@ function uGerar(){
   c+="var MOEDA='"+moeda+"';"+(usaPix?"                     /* fixa em reais: o Pix so existe em BRL */":"                     /* 'BRL' | 'USD' | 'EUR' */")+"\n";
   if(usaPix){
     c+='\n/* ===== RECEBEDOR (PIX) ===== */\n';
-    c+="var CHAVE_PIX='"+esc(chave)+"';   /* sua chave Pix (e-mail, telefone, CPF/CNPJ ou aleatoria) */\n";
-    c+="var NOME_RECEBEDOR='"+esc(nomer)+"';   /* aparece no app do banco; max 25 caracteres, sem acentos no codigo */\n";
-    c+="var CIDADE='"+esc(cidade)+"';   /* max 15 caracteres, sem acentos no codigo */\n";
+    c+="var CHAVE_PIX='"+escJs(chave)+"';   /* sua chave Pix (e-mail, telefone, CPF/CNPJ ou aleatoria) */\n";
+    c+="var NOME_RECEBEDOR='"+escJs(nomer)+"';   /* aparece no app do banco; max 25 caracteres, sem acentos no codigo */\n";
+    c+="var CIDADE='"+escJs(cidade)+"';   /* max 15 caracteres, sem acentos no codigo */\n";
   }
   c+="\nvar CODIGO_PEDIDO='"+cod+"';   /* identifica o pedido"+(usaPP?" no painel do PayPal":"")+(usaPix?", vira o txid do Pix":"")+" */\n\n";
   c+='/* ===== PRODUTOS =====\n';
@@ -2320,25 +2413,25 @@ function uGerar(){
   }
   c+='/* ===== APARENCIA ===== */\n';
   c+="var LARGURA_CARRINHO='"+larg+"px';   /* largura maxima do carrinho, ex: '420px' ou '100%' */\n";
-  c+="var COR_DESTAQUE='"+$('u-c1-t').value+"';          /* titulo, linha do total e botoes */\n";
-  c+="var COR_FUNDO='"+$('u-c2-t').value+"';             /* fundo do card */\n";
-  c+="var COR_TEXTO='"+$('u-c3-t').value+"';             /* texto geral */\n\n";
+  c+="var COR_DESTAQUE='"+corSegura('u-c1','#075E54')+"';          /* titulo, linha do total e botoes */\n";
+  c+="var COR_FUNDO='"+corSegura('u-c2','#ffffff')+"';             /* fundo do card */\n";
+  c+="var COR_TEXTO='"+corSegura('u-c3','#333333')+"';             /* texto geral */\n\n";
   c+='/* ===== TEXTOS ===== */\n';
-  c+="var TXT_TITULO='"+esc($('u-t1').value)+"';\n";
-  c+="var TXT_PRODUTOS='"+esc($('u-t7').value)+"';   /* rotulo da lista, so aparece com 2+ produtos */\n";
-  c+="var TXT_OPCIONAIS='"+esc($('u-t2').value)+"';\n";
-  c+="var TXT_TOTAL='"+esc($('u-t3').value)+"';\n";
+  c+="var TXT_TITULO='"+escJs($('u-t1').value)+"';\n";
+  c+="var TXT_PRODUTOS='"+escJs($('u-t7').value)+"';   /* rotulo da lista, so aparece com 2+ produtos */\n";
+  c+="var TXT_OPCIONAIS='"+escJs($('u-t2').value)+"';\n";
+  c+="var TXT_TOTAL='"+escJs($('u-t3').value)+"';\n";
   c+="var TXT_SEM_OPCIONAL='Sem opcional';\n";
   if(usaPP){
-    c+="var TXT_SUCESSO='"+esc($('u-t5').value)+"';\n";
-    c+="var TXT_ERRO='"+esc($('u-t6').value)+"';\n";
+    c+="var TXT_SUCESSO='"+escJs($('u-t5').value)+"';\n";
+    c+="var TXT_ERRO='"+escJs($('u-t6').value)+"';\n";
   }
   if(usaPix){
     if(usaPP){
       c+="var TXT_OU='ou pague com Pix';\n";
       c+="var TXT_OU_DESC='ou pague com Pix com {PCT}% de desconto';\n";
     }
-    c+="var TXT_BOTAO_PIX='"+esc($('u-t4').value)+"';\n";
+    c+="var TXT_BOTAO_PIX='"+escJs($('u-t4').value)+"';\n";
     c+="var TXT_INSTRUCAO='Abra o app do seu banco e pague pelo QR Code ou Pix Copia e Cola';\n";
     c+="var TXT_PIXVAL='Valor no Pix';\n";
     c+="var TXT_COPIAR='Copiar codigo Pix';\n";
@@ -3694,7 +3787,35 @@ parearCor('c-cfundo');parearCor('c-ctexto');parearCor('c-cdestaque');parearCor('
 parearCor('c-ctafundo');parearCor('c-ctatexto');parearCor('c-cprog');
 parearCor('c-corujacorpo');parearCor('c-corujadet');
 parearCor('c-curg');
+/* Cores de texto livre das abas Leads e Checkout: o campo se corrige a vista, como o c-mob.
+   Mesmo motivo do listener no proprio elemento (roda antes dos de document, entao o
+   salvarEstado/previa globais ja leem o valor corrigido); 'blur' nao borbulha, por isso esse
+   ramo redesenha a previa por conta propria. */
+CORES_LIVRES.forEach(function(par){
+  var t=$(par[0]+'-t');if(!t)return;
+  function redesenhar(){
+    salvarEstado();
+    if(par[0].indexOf('l-')===0){lBtnPreview();lPopPreview();}else{uPreview();}
+  }
+  t.addEventListener('change',function(){if(corAjustar(par[0],par[1]))salvarEstado();});
+  t.addEventListener('blur',function(){if(corAjustar(par[0],par[1]))redesenhar();});
+});
+(function(){
+  var el=$('u-chave');if(!el)return;
+  el.addEventListener('change',function(){if(uChaveAjustar())salvarEstado();});
+  el.addEventListener('blur',function(){if(uChaveAjustar()){salvarEstado();uPreview();}});
+})();
 restaurarEstado();
+/* Estado gravado antes desta regra pode trazer cor invalida ou chave com invisivel: prende na
+   carga, para o campo nunca exibir algo diferente do que o gerador vai usar, e regrava para o
+   valor velho nao ressurgir na proxima sessao. Roda ANTES das previas para elas ja desenharem
+   o valor corrigido. */
+(function(){
+  var mudou=false;
+  CORES_LIVRES.forEach(function(par){if(corAjustar(par[0],par[1]))mudou=true;});
+  if(uChaveAjustar())mudou=true;
+  if(mudou)salvarEstado();
+})();
 lBtnPreview();
 lPopPreview();
 lAncToggle();
