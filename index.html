@@ -439,11 +439,11 @@
       <label for="t-path">Caminho do booking type <small>(o que vem depois de tidycal.com/)</small></label>
       <input type="text" id="t-path" value="" placeholder="usuario/nome-do-agendamento">
       <label for="t-desk">Altura com o modal aberto — desktop <small>(pixels; medir com o formulário aberto)</small></label>
-      <input type="number" id="t-desk" value="2350" min="500" step="50">
+      <input type="number" id="t-desk" value="2350" min="500" max="20000" step="50">
       <label for="t-mob">Altura com o modal aberto — celular <small>(pixels; no mobile o modal fica mais alto)</small></label>
-      <input type="number" id="t-mob" value="2700" min="500" step="50">
-      <label for="t-larg">Largura de corte do modo celular <small>(pixels; telas até esse tamanho usam a altura mobile)</small></label>
-      <input type="number" id="t-larg" value="700" min="320" step="10">
+      <input type="number" id="t-mob" value="2700" min="500" max="20000" step="50">
+      <label for="t-larg">Largura de corte do modo celular <small>(pixels, de 320 a 1024; telas até esse tamanho usam a altura mobile — 700 é o valor validado em produção)</small></label>
+      <input type="number" id="t-larg" value="700" min="320" max="1024" step="10">
       </fieldset>
     </div>
     <div>
@@ -457,7 +457,7 @@
       <label for="t-url">Endereço da página intermediária</label>
       <input type="text" id="t-url" value="https://www.fotocerta.com.br/iframe-agendamento-natal">
       <label for="t-alt0">Altura inicial do iframe na página hospedeira <small>(pixels)</small></label>
-      <input type="number" id="t-alt0" value="1600" min="400" step="100">
+      <input type="number" id="t-alt0" value="1600" min="400" max="20000" step="100">
       </div>
       </fieldset>
     </div>
@@ -2096,6 +2096,50 @@ function tRestaura(st){
   $('t-larg').value=st.t.larg;setRadio('t-arq',st.t.arq);$('t-url').value=st.t.url;$('t-alt0').value=st.t.alt0;
 }
 
+/* Faixa declarada de cada campo numerico da aba: [id, padrao, min, max].
+   Uma lista so serve ao gerador e a correcao do campo, entao nao ha como a saida ser presa
+   numa faixa e a tela mostrar outra. LARGURA_MOBILE cumpre aqui o mesmo papel que o c-mob
+   cumpre na Contagem regressiva -- decidir o layout de celular --, e ganha a mesma faixa
+   (320 a 1024): com "2" no campo, nenhuma tela existente cabia no modo celular e a altura de
+   celular calibrada nunca era usada; o modal cortava no telefone sem nada avisar. As alturas
+   ganham piso porque min-height negativo e invalido (o modal corta igual) e porque "0" caia
+   no "||" e virava 2700 em silencio. O teto de 20000px so pega erro de digitacao. */
+var T_NUMS=[['t-desk',2350,500,20000],['t-mob',2700,500,20000],['t-larg',700,320,1024],['t-alt0',1600,400,20000]];
+function tFaixa(id){var i;for(i=0;i<T_NUMS.length;i++){if(T_NUMS[i][0]===id)return T_NUMS[i];}return null;}
+function tPreso(id){
+  var f=tFaixa(id),v=parseInt($(id).value,10);
+  if(isNaN(v))v=f[1];
+  if(v<f[2])v=f[2];
+  if(v>f[3])v=f[3];
+  return v;
+}
+/* Correcao a vista, no padrao do c-mob. So em 'change'/'blur', nunca em 'input'. */
+function tAjustar(id){
+  var el=$(id);if(!el)return false;
+  var preso=String(tPreso(id));
+  if(preso===String(el.value))return false;
+  el.value=preso;
+  return true;
+}
+function tAjustarTodos(){
+  var i,mudou=false;
+  for(i=0;i<T_NUMS.length;i++){if(tAjustar(T_NUMS[i][0]))mudou=true;}
+  return mudou;
+}
+/* O endereco da intermediaria vira o src de um iframe. escAttr protege a ESTRUTURA do
+   atributo (aspas), nao o esquema: src="javascript:alert(1)" continua bem formado e executa.
+   Aceita apenas http(s) e caminho do proprio site; ancora nao entra porque nao existe iframe
+   de ancora. Vazio tambem e recusado: o codigo 3 saia com src="" e o operador colava na
+   hospedeira um iframe que nunca carregava nada, sem nenhum aviso. */
+function tUrlOk(v){
+  /* controle e espaco saem antes do teste porque o navegador tambem os ignora ao resolver
+     a URL -- sem isso, um caractere de controle no meio de "javascript:" passaria pelo teste */
+  var limpo=String(v).replace(/[\u0000-\u0020]/g,'');
+  if(!limpo)return false;
+  if(/^https?:\/\//i.test(limpo))return true;
+  if(limpo.charAt(0)==='/')return true;
+  return false;
+}
 function tArqToggle(){
   var emb=radio('t-arq')==='embutida';
   $('t-emb').style.display=emb?'block':'none';
@@ -2109,9 +2153,20 @@ document.addEventListener('change',function(e){
 function tGerar(){
   var path=$('t-path').value.trim().replace(/^https?:\/\/tidycal\.com\//,'').replace(/^\//,'');
   if(!path){alert('Informe o caminho do booking type.');return;}
-  var desk=parseInt($('t-desk').value,10)||2350;
-  var mob=parseInt($('t-mob').value,10)||2700;
-  var larg=parseInt($('t-larg').value,10)||700;
+  var emb=radio('t-arq')==='embutida';
+  var u=$('t-url').value.trim();
+  /* Validacao ANTES de montar qualquer coisa: recusar no fim deixaria as textareas com o
+     bloco anterior enquanto o alerta diz que nao gerou. */
+  if(emb&&!tUrlOk(u)){
+    alert('Informe o endereco da pagina intermediaria: um endereco http(s) completo (https://www.fotocerta.com.br/iframe-agendamento-natal) ou um caminho do proprio site comecando com barra (/iframe-agendamento-natal). Vazio, o codigo 3 sai com src="" e o iframe colado na hospedeira nao carrega nada; outros esquemas, como javascript:, nao sao aceitos.');
+    return;
+  }
+  /* Os quatro campos numericos se corrigem na tela antes de a saida ser montada -- assim o
+     que o operador esta lendo e o que vai para o codigo. */
+  if(tAjustarTodos())salvarEstado();
+  var desk=tPreso('t-desk');
+  var mob=tPreso('t-mob');
+  var larg=tPreso('t-larg');
 
   var c='';
   c+='<div class="tidycal-embed" data-path="'+escAttr(path)+'"></div>\n';
@@ -2141,7 +2196,6 @@ function tGerar(){
   c+='})();\n</scr'+'ipt>';
   $('t-out1').value=c;
 
-  var emb=radio('t-arq')==='embutida';
   if(emb){
     var b='';
     b+='<scr'+'ipt>\n(function () {\n';
@@ -2155,8 +2209,7 @@ function tGerar(){
     b+='})();\n</scr'+'ipt>';
     $('t-out2').value=b;
 
-    var u=$('t-url').value.trim();
-    var alt0=parseInt($('t-alt0').value,10)||1600;
+    var alt0=tPreso('t-alt0');
     var d='';
     d+='<ifr'+'ame\n  style="border:none; width:100%; display:block;"\n';
     d+='  src="'+escAttr(u)+'"\n  title="Agenda"\n  width="100%"\n  height="'+alt0+'"\n';
@@ -4064,6 +4117,14 @@ prep('Agendamento TidyCal','tidy',function(){
   liga('t-copy1',function(){copiar('t-out1','t-cop1');});
   liga('t-copy2',function(){copiar('t-out2','t-cop2');});
   liga('t-copy3',function(){copiar('t-out3','t-cop3');});
+  /* Correcao a vista das alturas e do corte de celular, no padrao do c-mob: o listener fica no
+     proprio campo (roda antes dos de document, entao o salvarEstado global ja le o valor
+     preso); 'blur' nao borbulha e por isso grava por conta propria. */
+  T_NUMS.forEach(function(f){
+    var el=$(f[0]);if(!el)return;
+    el.addEventListener('change',function(){if(tAjustar(f[0]))salvarEstado();});
+    el.addEventListener('blur',function(){if(tAjustar(f[0]))salvarEstado();});
+  });
 });
 prep('Checkout','uni',function(){
   liga('u-op-add',uOpAdd);
