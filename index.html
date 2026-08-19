@@ -3007,6 +3007,24 @@ function cCssBase(cfg){
   }
   s+='.fcb-curta{display:none}\n';
   s+='@media (max-width:'+cfg.mob+'px){.fcb-longa{display:none}.fcb-curta{display:inline}}\n';
+  if(cfg.coruja.ativo){
+    s+='.fcb-coruja{flex:0 0 auto;line-height:0}\n';
+    s+='.fcb-coruja svg{height:'+cfg.coruja.alt+'px;width:auto;display:block}\n';
+    if(cfg.coruja.mob)s+='@media (max-width:'+cfg.mob+'px){.fcb-coruja{display:none}}\n';
+  }
+  if(cfg.cta.ativo){
+    s+='.fcb-cta{flex:0 0 auto;display:inline-block;text-decoration:none;border-radius:999px;'+
+       'background:'+cfg.cores.ctaFundo+';color:'+cfg.cores.ctaTexto+';font-weight:700;'+
+       'padding:.45em 1.1em;font-size:.92em;white-space:nowrap}\n';
+  }
+  if(cfg.fechar!=='nao'){
+    s+='.fcb-fechar{flex:0 0 auto;border:none;background:none;color:inherit;cursor:pointer;'+
+       'font-size:1.15em;line-height:1;padding:4px 6px;opacity:.7}\n';
+    s+='.fcb-fechar:hover{opacity:1}\n';
+  }
+  if(cfg.prog){
+    s+='.fcb-prog{position:absolute;left:0;bottom:0;height:3px;width:0;background:'+cfg.cores.prog+';transition:width 1s linear}\n';
+  }
   s+=cCssEfeitos(cfg);
   return s;
 }
@@ -3078,10 +3096,20 @@ function cCssEfeitos(cfg){
        Aqui so o estado revelado, que e uma regra a mais sem conflito de shorthand. */
     s+='.fcb-barra.fcb-visivel{transform:translateY(0)}\n';
   }
-  if(anim.length){
+  /* nem todo movimento vem de @keyframes: a entrada deslizante, a alternancia de
+     mensagens (altfade/altdesliza) e a virada dos digitos (fade/flip) usam transition,
+     nao animation. Se um desses for o unico efeito ativo, anim.length fica vazio e o
+     bloco reduced-motion inteiro deixava de sair -- a barra deslizava/alternava/virava
+     mesmo para quem pediu menos movimento no sistema. O bloco agora sai sempre que
+     houver movimento, por animation OU por transition, e neutraliza os dois. */
+  var temTransMov=(cfg.entrada==='deslizar'||cfg.entrada==='aposrolar')||
+    (cfg.mov==='altfade'||cfg.mov==='altdesliza')||(cfg.dig==='fade'||cfg.dig==='flip');
+  if(anim.length||temTransMov){
     s+='@media (prefers-reduced-motion: reduce){\n';
-    s+='  '+anim.join(',')+'{animation:none}\n';
+    if(anim.length)s+='  '+anim.join(',')+'{animation:none}\n';
     s+='  .fcb-barra{transition:none}\n';
+    if(cfg.mov==='altfade'||cfg.mov==='altdesliza')s+='  .fcb-conteudo{transition:none}\n';
+    if(cfg.dig==='fade'||cfg.dig==='flip')s+='  .fcb-num{transition:none}\n';
     s+='}\n';
   }
   return s;
@@ -3158,8 +3186,39 @@ function cJsBase(cfg){
   j+='    if(!msg.curta)return longa;\n';
   j+="    return '<span class=\"fcb-longa\">'+longa+'</span><span class=\"fcb-curta\">'+comMarca(msg.curta)+'</span>';\n  }\n\n";
   j+='  var ROLANDO='+(cfg.mov==='rolaesq'||cfg.mov==='roladir')+';\n';
-  j+='  raiz.innerHTML=\'<div class="fcb-interno"><div class="fcb-conteudo"></div></div>\';\n';
+  var interno='<div class="fcb-interno">';
+  if(cfg.coruja.ativo)interno+='<div class="fcb-coruja fcb-coruja-e"></div>';
+  interno+='<div class="fcb-conteudo"></div>';
+  if(cfg.cta.ativo)interno+='<a class="fcb-cta" href="'+escHtml(cfg.cta.url)+'">'+escHtml(cfg.cta.txt)+'</a>';
+  if(cfg.coruja.ativo)interno+='<div class="fcb-coruja fcb-coruja-d"></div>';
+  if(cfg.fechar!=='nao')interno+='<button type="button" class="fcb-fechar" aria-label="Fechar">\u2715</button>';
+  interno+='</div>';
+  if(cfg.prog)interno+='<div class="fcb-prog"></div>';
+  j+="  raiz.innerHTML='"+esc(interno)+"';\n";
   j+="  var conteudo=raiz.querySelector('.fcb-conteudo');\n";
+  if(cfg.coruja.ativo){
+    j+=cSvgCorujaGer(cfg);
+    j+="  var corujas=raiz.querySelectorAll('.fcb-coruja');\n";
+    j+='  for(var ci=0;ci<corujas.length;ci++)corujas[ci].innerHTML=svgCoruja();\n\n';
+  }
+  if(cfg.fechar!=='nao'){
+    j+="  var CHAVE_FECHADA='fcbar:'+CODIGO+':fechada';\n";
+    j+=(cfg.fechar==='sessao')
+      ? "  function lerFechada(){try{return sessionStorage.getItem(CHAVE_FECHADA);}catch(e){return null;}}\n"+
+        "  function marcarFechada(){try{sessionStorage.setItem(CHAVE_FECHADA,'1');}catch(e){}}\n"
+      : "  function lerFechada(){return ler(CHAVE_FECHADA);}\n"+
+        "  function marcarFechada(){guardar(CHAVE_FECHADA,'1');}\n";
+    j+="  if(lerFechada()==='1'){raiz.style.display='none';return;}\n";
+    j+="  raiz.querySelector('.fcb-fechar').addEventListener('click',function(){\n";
+    j+="    marcarFechada();raiz.style.display='none';liberarEspaco();\n  });\n\n";
+  }
+  if(cfg.prog){
+    j+="  var barraProg=raiz.querySelector('.fcb-prog');\n";
+    j+='  function pintarProgresso(restante){\n';
+    j+='    var total=alvo-inicio;if(total<=0){barraProg.style.width=\'100%\';return;}\n';
+    j+='    var pct=Math.min(100,Math.max(0,(1-(restante/total))*100));\n';
+    j+="    barraProg.style.width=pct.toFixed(2)+'%';\n  }\n\n";
+  }
   j+='  var msgAtual=0;\n';
   j+='  var chaveAnterior=null;         /* forca remontagem do relogio na 1a vez e apos pintarMensagem */\n';
   j+='  var VIRANDO_MS=250;             /* bate com a duracao da transicao css de fade/flip */\n';
@@ -3244,6 +3303,7 @@ function cJsBase(cfg){
     j+='    }\n';
   }
   j+='    atualizarRelogio(restante);\n';
+  if(cfg.prog)j+='    pintarProgresso(restante);\n';
   j+='  }\n\n';
   j+='  pintarMensagem();\n';
   j+='  tick();\n';
@@ -3251,6 +3311,21 @@ function cJsBase(cfg){
   j+='  espaco();\n';
   j+="  window.addEventListener('resize',espaco);\n";
   j+='  if(window.ResizeObserver)new ResizeObserver(espaco).observe(raiz);\n';
+  return j;
+}
+function cSvgCorujaGer(cfg){
+  var j='';
+  j+='  function svgCoruja(){\n';
+  j+="    var corpo='"+cfg.cores.corujaCorpo+"',det='"+cfg.cores.corujaDet+"';\n";
+  j+="    return '<svg viewBox=\"0 0 32 38\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">'+\n";
+  j+="      '<ellipse cx=\"16\" cy=\"25\" rx=\"8.5\" ry=\"11\" fill=\"'+corpo+'\"/>'+\n";
+  j+="      '<path fill=\"none\" stroke=\"'+det+'\" stroke-width=\"1.2\" d=\"M9 22 Q11 30 14 35 M23 22 Q21 30 18 35\"/>'+\n";
+  j+="      '<path fill=\"'+corpo+'\" d=\"M16 3.8 C13.7 1.6 8 2.3 7.6 8 C7.3 12.9 11 18 16 21 C21 18 24.7 12.9 24.4 8 C24 2.3 18.3 1.6 16 3.8 Z\"/>'+\n";
+  j+="      '<circle cx=\"12.6\" cy=\"9.6\" r=\"1.6\" fill=\"'+det+'\"/>'+\n";
+  j+="      '<circle cx=\"19.4\" cy=\"9.6\" r=\"1.6\" fill=\"'+det+'\"/>'+\n";
+  j+="      '<path fill=\"'+det+'\" d=\"M16 11 L15.2 14.4 Q16 15.5 16.8 14.4 Z\"/>'+\n";
+  j+="      '<path stroke=\"'+det+'\" stroke-width=\"1.4\" stroke-linecap=\"round\" fill=\"none\" d=\"M13 35.5 L13 37.2 M16 36 L16 37.8 M19 35.5 L19 37.2\"/>'+\n";
+  j+="      '</svg>';\n  }\n\n";
   return j;
 }
 
