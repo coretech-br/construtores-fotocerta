@@ -1348,9 +1348,11 @@ function prep(nome,abaId,fn,fase){
        pagina ser recarregada. Sem isso a preservacao seria unilateral: a aba teria voltado
        com padroes (ou meio restaurada), e a primeira tecla digitada em QUALQUER aba coletaria
        esse DOM e sobrescreveria o que estava gravado. Medido com estado malformado, sem
-       injetar codigo: 'cmsgs' gravado como objeto derrubava 57 dos 62 campos da Contagem
+       injetar codigo: 'cmsgs' gravado como objeto derrubava 40 dos 66 campos da Contagem
        quando o operador mexia na aba TidyCal, e 'u.prods' gravado como texto zerava chave
-       Pix, Client ID e codigo do pedido sem ninguem abrir o Checkout.
+       Pix, Client ID e codigo do pedido sem ninguem abrir o Checkout. (A contagem exata
+       depende de quantos campos o estado de referencia tinha preenchidos; o que nao depende
+       e o alcance: a perda vazava para abas que o operador nem abriu.)
    Assim a configuracao do operador volta inteira quando o defeito for corrigido -- e a aba em
    so-leitura avisa na barra que nao esta gravando. */
 /* A ordem desta lista e a ordem das chaves no JSON gravado e a ordem em que as abas
