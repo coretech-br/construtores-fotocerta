@@ -217,10 +217,10 @@
     <div>
       <fieldset>
       <legend>Ritmo e tamanho</legend>
-      <label for="s-int">Tempo de cada foto <small>(milissegundos — 4500 = 4,5s)</small></label>
-      <input type="number" id="s-int" value="4500" min="1500" step="500">
-      <label for="s-larg">Largura máxima na página <small>(pixels)</small></label>
-      <input type="number" id="s-larg" value="900" min="300" step="50">
+      <label for="s-int">Tempo de cada foto <small>(milissegundos, de 1500 a 60000 — 4500 = 4,5s)</small></label>
+      <input type="number" id="s-int" value="4500" min="1500" max="60000" step="500">
+      <label for="s-larg">Largura máxima na página <small>(pixels, de 300 a 2000)</small></label>
+      <input type="number" id="s-larg" value="900" min="300" max="2000" step="50">
       </fieldset>
     </div>
   </div>
@@ -280,8 +280,8 @@
       <label><input type="radio" name="l-modo" value="botao" checked><span>Só no clique do botão</span></label>
       <label><input type="radio" name="l-modo" value="automatico"><span>Pop-up abre sozinho</span></label>
       </div>
-      <label for="l-segauto">Segundos até abrir sozinho <small>(só no modo automático)</small></label>
-      <input type="number" id="l-segauto" value="8" min="1">
+      <label for="l-segauto">Segundos até abrir sozinho <small>(de 1 a 300; só no modo automático)</small></label>
+      <input type="number" id="l-segauto" value="8" min="1" max="300">
       </fieldset>
     </div>
   </div>
@@ -318,8 +318,8 @@
       <label><input type="radio" name="l-efeito" value="pulsar"><span>Pulsar</span></label>
       <label><input type="radio" name="l-efeito" value="tremer"><span>Tremer</span></label>
       </div>
-      <label for="l-segef">Intervalo entre repetições <small>(segundos)</small></label>
-      <input type="number" id="l-segef" value="10" min="3">
+      <label for="l-segef">Intervalo entre repetições <small>(segundos, de 3 a 300)</small></label>
+      <input type="number" id="l-segef" value="10" min="3" max="300">
       </fieldset>
     </div>
   </div>
@@ -1254,6 +1254,55 @@ function bHexRgb(h){
   if(isNaN(n))return '255, 201, 74';
   return ((n>>16)&255)+', '+((n>>8)&255)+', '+(n&255);
 }
+/* ===== faixa declarada dos campos numericos, compartilhada por quatro abas =====
+   Cada aba declara uma tabela de linhas [id, padrao, min, max, inteiro] e nada mais. A MESMA
+   linha alimenta os dois lados -- o gerador (fcPreso, o numero que sai no codigo) e a interface
+   (fcAjustar, o numero que fica na tela) --, entao nao ha como a saida ser presa numa faixa e o
+   campo mostrar outra. Regra do projeto, nascida no c-mob da Contagem: corrigir em silencio um
+   numero que o operador esta lendo na tela troca um defeito visivel por um invisivel.
+   A correcao roda em 'change'/'blur', NUNCA em 'input': corrigir a cada tecla impediria digitar
+   "1500", porque o "1" viraria o minimo antes do resto chegar.
+   Isto comecou como duas copias quase iguais (Bordas e TidyCal) e viraria quatro ao alcancar
+   Slideshow e Leads; a quarta copia foi o momento de ter uma implementacao so. A Contagem
+   regressiva NAO entra aqui: o c-mob dela e um campo unico com clamp tambem dentro da cCfg, e a
+   aba e a referencia desta fase -- nao se mexe nela. */
+function fcFaixa(tabela,id){var i;for(i=0;i<tabela.length;i++){if(tabela[i][0]===id)return tabela[i];}return null;}
+function fcPreso(tabela,id){
+  var f=fcFaixa(tabela,id),el=$(id);
+  if(!f||!el)return null;
+  var v=parseFloat(String(el.value).replace(',','.'));
+  if(isNaN(v))v=f[1];
+  if(f[2]!=null&&v<f[2])v=f[2];
+  if(f[3]!=null&&v>f[3])v=f[3];
+  return f[4]?Math.round(v):v;
+}
+function fcAjustar(tabela,id){
+  var el=$(id);if(!el)return false;
+  var preso=String(fcPreso(tabela,id));
+  if(preso===String(el.value))return false;
+  el.value=preso;
+  return true;
+}
+function fcAjustarTodos(tabela){
+  var i,mudou=false;
+  for(i=0;i<tabela.length;i++){if(fcAjustar(tabela,tabela[i][0]))mudou=true;}
+  return mudou;
+}
+/* Liga a correcao a vista nos campos da tabela. O listener fica no PROPRIO elemento porque ele
+   corre antes dos de document (fase de bolha, alvo primeiro): quando o salvarEstado/previa
+   globais rodarem, o valor ja esta preso. 'blur' nao borbulha e nao aciona listener nenhum de
+   document, por isso e o ramo que chama 'depois' (redesenhar a previa da aba, quando ela mostra
+   o numero). */
+function fcLigarFaixa(tabela,depois){
+  var i;
+  for(i=0;i<tabela.length;i++){
+    (function(id){
+      var el=$(id);if(!el)return;
+      el.addEventListener('change',function(){if(fcAjustar(tabela,id))salvarEstado();});
+      el.addEventListener('blur',function(){if(fcAjustar(tabela,id)){salvarEstado();if(depois)depois();}});
+    })(tabela[i][0]);
+  }
+}
 function corMockPP(v){
   if(v==='blue')return ['#0070BA','#fff',''];
   if(v==='silver')return ['#EEEEEE','#003087',''];
@@ -1507,6 +1556,17 @@ function parearCor(idCor){
    ============================================================ */
 var sImgs=[];
 
+/* Faixa declarada dos campos numericos desta aba (ver fcPreso/fcAjustar no bloco compartilhado).
+   Os dois declaravam 'min' no HTML e nada o impunha: com 100 no tempo de cada foto o codigo saia
+   com INTERVALO = 100 (quinze vezes mais rapido que o minimo declarado) e com 10 na largura saia
+   max-width:10px, os dois com a tela continuando a mostrar 100 e 10. Pior, sPreview ja fazia
+   Math.max(1500, ...) por conta propria: a previa rodava a 1500 ms e o bloco entregue a 100 --
+   duas implementacoes do mesmo limite, divergindo. Agora ha uma so, e a previa le dela.
+   Tetos novos (60000 ms = 1 min por foto; 2000 px de largura) declarados tambem no HTML: nao
+   apertam nenhum uso real, so pegam erro de digitacao. */
+var S_NUMS=[['s-int',4500,1500,60000,true],['s-larg',900,300,2000,true]];
+function sPreso(id){return fcPreso(S_NUMS,id);}
+
 /* Salvamento e restauracao desta aba (registradas em ABAS). Ficam junto do bloco da aba
    para que renomear um campo daqui seja uma alteracao de um lugar so. */
 function sColeta(){
@@ -1573,7 +1633,9 @@ function sPreview(){
   if(pvTimer){clearInterval(pvTimer);pvTimer=null;}
   var box=$('s-pv-box');
   if(!sImgs.length){box.innerHTML='<p class="pv-vazia">Adicione imagens para ver a prévia.</p>';return;}
-  var t=radio('s-t'),prop=radio('s-p'),intv=Math.max(1500,parseInt($('s-int').value,10)||4500);
+  /* mesmo sPreso do gerador: a previa deixou de ter um Math.max proprio, que era um segundo
+     limite escrito a mao e ja divergia do que o bloco entregue usava */
+  var t=radio('s-t'),prop=radio('s-p'),intv=sPreso('s-int');
   var html='<div class="pv" data-t="'+t+'" style="aspect-ratio:'+prop+'">';
   sImgs.forEach(function(im){
     html+='<div class="pv-slide"><div class="pv-fundo" style="background-image:url(\''+im.url.replace(/'/g,'%27')+'\')"></div><img src="'+im.url.replace(/"/g,'&quot;')+'" alt=""></div>';
@@ -1615,10 +1677,11 @@ function sPreview(){
 
 /* --- geração de código --- */
 function sGerar(){
+  if(fcAjustarTodos(S_NUMS))salvarEstado();
   if(!sImgs.length){alert('Adicione ao menos uma imagem.');return;}
   var t=radio('s-t'),prop=radio('s-p');
-  var intv=parseInt($('s-int').value,10)||4500;
-  var larg=parseInt($('s-larg').value,10)||900;
+  var intv=sPreso('s-int');
+  var larg=sPreso('s-larg');
   /* escJs, nao esc: url e legenda sao texto livre do operador e o destino e uma string JS
      dentro do bloco de script gerado. esc() so protege a string (barra invertida e
      apostrofo) e deixa passar as duas sequencias que tiram o parser HTML do estado normal
@@ -1750,6 +1813,15 @@ function sGerar(){
 /* ============================================================
    CAPTAÇÃO DE LEADS
    ============================================================ */
+/* Faixa declarada dos campos numericos desta aba (ver fcPreso/fcAjustar no bloco compartilhado).
+   Os dois declaravam 'min' no HTML e nada o impunha, com uma variante pior que a do Slideshow:
+   digitando 0 em "segundos ate abrir sozinho", o "||" tratava como ausente e trocava por 8 em
+   SILENCIO; e -5 no intervalo entre repeticoes saia inteiro como SEGUNDOS_EFEITO=-5, o que faz
+   setInterval disparar sem parar e o botao tremer/pulsar sem intervalo nenhum.
+   Tetos novos (300 s = 5 min) declarados tambem no HTML: nao apertam uso real, so pegam erro. */
+var L_NUMS=[['l-segauto',8,1,300,true],['l-segef',10,3,300,true]];
+function lPreso(id){return fcPreso(L_NUMS,id);}
+
 /* Salvamento e restauracao desta aba (registradas em ABAS). */
 function lColeta(){
   return {
@@ -1889,6 +1961,7 @@ document.addEventListener('change',function(e){
 });
 
 function lGerar(){
+  if(fcAjustarTodos(L_NUMS))salvarEstado();
   var num=$('l-num').value.replace(/\D/g,'');
   if(!num){alert('Informe o WhatsApp de destino.');return;}
   /* (Havia aqui um segundo "if(!num)" identico e portanto inalcancavel: codigo morto,
@@ -1923,8 +1996,8 @@ function lGerar(){
   }
   var v={
     num:num,cod:escJs($('l-cod').value),pag:escJs($('l-pag').value),
-    modo:radio('l-modo'),segauto:parseInt($('l-segauto').value,10)||8,
-    efeito:radio('l-efeito'),segef:parseInt($('l-segef').value,10)||10,
+    modo:radio('l-modo'),segauto:lPreso('l-segauto'),
+    efeito:radio('l-efeito'),segef:lPreso('l-segef'),
     icone:radio('l-icone'),formato:radio('l-formato'),
     corbtn:corSegura('l-corbtn','#25D366'),
     m1:escJs($('l-m1').value),m2:escJs($('l-m2').value),m3:escJs($('l-m3').value),m4:escJs($('l-m4').value),
@@ -2137,35 +2210,15 @@ function tRestaura(st){
 }
 
 /* Faixa declarada de cada campo numerico da aba: [id, padrao, min, max].
-   Uma lista so serve ao gerador e a correcao do campo, entao nao ha como a saida ser presa
-   numa faixa e a tela mostrar outra. LARGURA_MOBILE cumpre aqui o mesmo papel que o c-mob
+   A lista alimenta fcPreso/fcAjustar (bloco compartilhado), entao nao ha como a saida ser
+   presa numa faixa e a tela mostrar outra. LARGURA_MOBILE cumpre aqui o mesmo papel que o c-mob
    cumpre na Contagem regressiva -- decidir o layout de celular --, e ganha a mesma faixa
    (320 a 1024): com "2" no campo, nenhuma tela existente cabia no modo celular e a altura de
    celular calibrada nunca era usada; o modal cortava no telefone sem nada avisar. As alturas
    ganham piso porque min-height negativo e invalido (o modal corta igual) e porque "0" caia
    no "||" e virava 2700 em silencio. O teto de 20000px so pega erro de digitacao. */
 var T_NUMS=[['t-desk',2350,500,20000],['t-mob',2700,500,20000],['t-larg',700,320,1024],['t-alt0',1600,400,20000]];
-function tFaixa(id){var i;for(i=0;i<T_NUMS.length;i++){if(T_NUMS[i][0]===id)return T_NUMS[i];}return null;}
-function tPreso(id){
-  var f=tFaixa(id),v=parseInt($(id).value,10);
-  if(isNaN(v))v=f[1];
-  if(v<f[2])v=f[2];
-  if(v>f[3])v=f[3];
-  return v;
-}
-/* Correcao a vista, no padrao do c-mob. So em 'change'/'blur', nunca em 'input'. */
-function tAjustar(id){
-  var el=$(id);if(!el)return false;
-  var preso=String(tPreso(id));
-  if(preso===String(el.value))return false;
-  el.value=preso;
-  return true;
-}
-function tAjustarTodos(){
-  var i,mudou=false;
-  for(i=0;i<T_NUMS.length;i++){if(tAjustar(T_NUMS[i][0]))mudou=true;}
-  return mudou;
-}
+function tPreso(id){return fcPreso(T_NUMS,id);}
 /* O endereco da intermediaria vira o src de um iframe. escAttr protege a ESTRUTURA do
    atributo (aspas), nao o esquema: src="javascript:alert(1)" continua bem formado e executa.
    Aceita apenas http(s) e caminho do proprio site; ancora nao entra porque nao existe iframe
@@ -2203,7 +2256,7 @@ function tGerar(){
   }
   /* Os quatro campos numericos se corrigem na tela antes de a saida ser montada -- assim o
      que o operador esta lendo e o que vai para o codigo. */
-  if(tAjustarTodos())salvarEstado();
+  if(fcAjustarTodos(T_NUMS))salvarEstado();
   var desk=tPreso('t-desk');
   var mob=tPreso('t-mob');
   var larg=tPreso('t-larg');
@@ -3146,40 +3199,15 @@ function bRestaura(st){
 }
 
 /* Faixa declarada de cada campo numerico da aba: [id, padrao, min, max, inteiro].
-   Uma lista so serve aos DOIS lados -- bMontar (o que sai no codigo) e bAjustar (o que fica
-   na tela) --, entao nao ha como a saida ser presa numa faixa e o campo em outra. */
+   A lista alimenta fcPreso/fcAjustar (bloco compartilhado), que servem aos DOIS lados -- o que
+   sai no codigo e o que fica na tela --, entao nao ha como a saida ser presa numa faixa e o
+   campo em outra. */
 var B_NUMS=[
   ['b-esp',4,0,20,true],['b-raio',14,0,60,true],['b-fang',150,0,360,true],
   ['b-facholarg',5,2,25,false],['b-listra',10,3,40,true],['b-vel',4,0.5,30,false],
   ['b-haloraio',26,0,80,true],['b-haloop',0.35,0,1,false]
 ];
-function bFaixa(id){var i;for(i=0;i<B_NUMS.length;i++){if(B_NUMS[i][0]===id)return B_NUMS[i];}return null;}
-function bNum(id,def,min,max,inteiro){
-  var v=parseFloat(String($(id).value).replace(',','.'));
-  if(isNaN(v))v=def;
-  if(min!=null&&v<min)v=min;
-  if(max!=null&&v>max)v=max;
-  return inteiro?Math.round(v):v;
-}
-function bPreso(id){var f=bFaixa(id);return bNum(f[0],f[1],f[2],f[3],f[4]);}
-/* Correcao a vista, no padrao do c-mob da Contagem. Antes, bNum prendia o valor na faixa e nao
-   devolvia nada para o campo: o operador digitava 50 na espessura, continuava lendo 50 na tela
-   e copiava um CSS com 20px -- oito campos com o mesmo defeito. Agora o proprio campo se
-   corrige, e tela e codigo mostram sempre o MESMO numero.
-   So em 'change'/'blur', nunca em 'input': corrigir a cada tecla impediria digitar "26",
-   porque o "2" viraria o minimo antes do resto chegar. */
-function bAjustar(id){
-  var el=$(id);if(!el)return false;
-  var preso=String(bPreso(id));
-  if(preso===String(el.value))return false;
-  el.value=preso;
-  return true;
-}
-function bAjustarTodos(){
-  var i,mudou=false;
-  for(i=0;i<B_NUMS.length;i++){if(bAjustar(B_NUMS[i][0]))mudou=true;}
-  return mudou;
-}
+function bPreso(id){return fcPreso(B_NUMS,id);}
 /* O espacamento interno e o unico texto livre desta aba e o destino dele e o CSS do
    componente, concatenado como 'padding: '+pad+';'. Sem validacao, um ponto e virgula
    digitado por engano ("10px; background:red") acrescenta uma segunda propriedade DEPOIS do
@@ -3242,7 +3270,7 @@ function bStops(base,facho,nucleo,L){
 function bMontar(){
   var ef=radio('b-efeito');
   var fu=radio('b-fundo');
-  /* Todos os numeros vem de bPreso, que le a MESMA faixa que bAjustar devolve ao campo. */
+  /* Todos os numeros vem de bPreso, que le a MESMA faixa que a correcao devolve ao campo. */
   var esp=bPreso('b-esp');
   var raio=bPreso('b-raio');
   var c1=bCor('b-c1','#9C5638');
@@ -3362,7 +3390,7 @@ document.addEventListener('change',function(e){
 });
 
 function bGerar(){
-  if(bAjustarTodos())salvarEstado();
+  if(fcAjustarTodos(B_NUMS))salvarEstado();
   var m=bMontar();
   if(m.erro){alert(m.erro);return;}
   var c1='';
@@ -4277,12 +4305,16 @@ prep('Slideshow','slide',function(){
   liga('s-previewbtn',sPreview);
   liga('s-limparbtn',sLimpar);
   liga('s-copy',function(){copiar('s-out','s-cop');});
+  /* a previa mostra o ritmo das fotos, entao o 'blur' redesenha com o valor ja preso */
+  fcLigarFaixa(S_NUMS,sPreview);
 });
 prep('Captacao de leads','leads',function(){
   liga('l-gerar',lGerar);
   liga('l-padroes',lPadroes);
   liga('l-copy',function(){copiar('l-out','l-cop');});
   parearCor('l-corbtn');parearCor('l-c1');parearCor('l-c2');parearCor('l-c3');parearCor('l-c4');
+  /* a previa desta aba desenha o pop-up, que nao mostra estes dois numeros: nada a redesenhar */
+  fcLigarFaixa(L_NUMS);
 });
 prep('Agendamento TidyCal','tidy',function(){
   liga('t-gerar',tGerar);
@@ -4292,11 +4324,7 @@ prep('Agendamento TidyCal','tidy',function(){
   /* Correcao a vista das alturas e do corte de celular, no padrao do c-mob: o listener fica no
      proprio campo (roda antes dos de document, entao o salvarEstado global ja le o valor
      preso); 'blur' nao borbulha e por isso grava por conta propria. */
-  T_NUMS.forEach(function(f){
-    var el=$(f[0]);if(!el)return;
-    el.addEventListener('change',function(){if(tAjustar(f[0]))salvarEstado();});
-    el.addEventListener('blur',function(){if(tAjustar(f[0]))salvarEstado();});
-  });
+  fcLigarFaixa(T_NUMS);
 });
 prep('Checkout','uni',function(){
   liga('u-op-add',uOpAdd);
@@ -4321,11 +4349,7 @@ prep('Bordas com efeito','bor',function(){
      elemento roda antes dos de document, entao o bPreview global ja desenha com o valor
      preso -- por isso o ramo de 'change' nao redesenha. 'blur' nao borbulha e redesenha
      por conta propria. */
-  B_NUMS.forEach(function(f){
-    var el=$(f[0]);if(!el)return;
-    el.addEventListener('change',function(){if(bAjustar(f[0]))salvarEstado();});
-    el.addEventListener('blur',function(){if(bAjustar(f[0])){salvarEstado();bPreview();}});
-  });
+  fcLigarFaixa(B_NUMS,bPreview);
 });
 prep('Contagem regressiva','cnt',function(){
   liga('c-msg-add',cMsgAdd);
@@ -4379,7 +4403,13 @@ prep('Correcao das cores livres e da chave Pix na carga','leads uni',function(){
   if(uChaveAjustar())mudou=true;
   if(mudou)salvarEstado();
 });
+/* Mesmo motivo do c-mob e das cores livres: estado gravado antes desta regra pode trazer numeros
+   fora da faixa, e o campo nao pode exibir algo diferente do que o gerador vai usar. */
+prep('Slideshow','slide',function(){
+  if(fcAjustarTodos(S_NUMS))salvarEstado();
+},'desenhar a aba com o estado restaurado');
 prep('Captacao de leads','leads',function(){
+  if(fcAjustarTodos(L_NUMS))salvarEstado();
   lBtnPreview();
   lPopPreview();
   lAncToggle();
@@ -4387,7 +4417,7 @@ prep('Captacao de leads','leads',function(){
 prep('Agendamento TidyCal','tidy',function(){
   /* estado gravado antes desta regra pode trazer altura ou corte fora da faixa: prende na
      carga, para o campo nunca exibir um numero diferente do que o gerador vai usar. */
-  if(tAjustarTodos())salvarEstado();
+  if(fcAjustarTodos(T_NUMS))salvarEstado();
   tArqToggle();
 },'desenhar a aba com o estado restaurado');
 prep('Checkout','uni',function(){
@@ -4399,7 +4429,7 @@ prep('Checkout','uni',function(){
 prep('Bordas com efeito','bor',function(){
   /* mesmo motivo do c-mob e das cores livres: estado gravado antes desta regra pode trazer
      numeros fora da faixa, e o campo nao pode exibir algo diferente do que bMontar vai usar. */
-  if(bAjustarTodos())salvarEstado();
+  if(fcAjustarTodos(B_NUMS))salvarEstado();
   bToggles();
   bPreview();
 },'desenhar a aba com o estado restaurado');
