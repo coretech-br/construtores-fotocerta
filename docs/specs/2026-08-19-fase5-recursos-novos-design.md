@@ -4,7 +4,7 @@
 
 ## 1. Escopo
 
-Vinte recursos, em duas origens:
+Dezenove recursos, em duas origens (um vigésimo, o R16, foi removido pelo dono depois da validação — ver 2.4):
 
 - **14 sugestões** das auditorias das cinco abas antigas (a décima quinta — permitir mais de um slideshow por página — já foi entregue na fase 3).
 - **6 pedidos novos** do dono, feitos depois de usar a aba Contagem regressiva na prática.
@@ -60,7 +60,7 @@ Nenhum esbarra em limitação técnica. As decisões de projeto que exigiam esco
 
 **R15. Botão para abrir a página de teste** antes de gerar, evitando descobrir o endereço errado só depois de publicar.
 
-**R16. Pré-preenchimento do formulário do TidyCal** por parâmetros de URL, repassando nome e e-mail.
+~~**R16. Pré-preenchimento do formulário do TidyCal** por parâmetros de URL.~~ **Removido em 19/08/2026, a pedido do dono.** A premissa não se sustenta no fluxo real: o pop-up de captação existe para quem tem dúvida e vai ao WhatsApp; quem já decidiu vai direto ao calendário. Os dois públicos não se cruzam, então não há dado capturado para repassar. Implementar seria esforço sem ganho.
 
 **R17. Presets de altura por tipo de agendamento**, em vez de calibrar os números à mão.
 
@@ -83,6 +83,8 @@ Nenhum esbarra em limitação técnica. As decisões de projeto que exigiam esco
 **D1. "Mostrar no celular?" continua sendo controle separado** da posição da coruja. Razão: é legítimo querer as duas corujas no computador e só uma, ou nenhuma, no celular.
 
 **D2. O campo de altura da coruja vira um teto**, não uma escolha entre fixo e automático. A coruja cresce com a barra até no máximo aquele valor. Um controle a menos, e protege contra barra de três ou quatro linhas produzindo uma coruja desproporcional.
+
+> **Nota de implementação (fase 5, entregue).** "Cresce com a barra", "para no teto" e "com uma linha só fica no tamanho do teto" não são simultaneamente realizáveis: se a coruja também **impõe** o teto como altura mínima da linha, a linha nunca fica abaixo do teto e `min(teto, linha)` dá teto sempre — o recurso vira letra morta. Piso e teto no mesmo número se anulam. Como D2 diz que o número é o **teto** (e que o modo fixo saiu), a implementação não põe piso: a coruja acompanha a altura da linha e para no teto. Consequência: numa barra cuja linha é mais baixa que o teto (texto curto, sem botão de ação e sem botão de fechar) a coruja fica menor que o teto em vez de esticar a barra. A condição é a **linha ser mais baixa que o teto**. Com o teto padrão de 26 px, barra com botão de ação não muda (linha de ~50 px). Mas quem tiver subido o teto para 40 ou 60 verá a coruja menor do que via antes — medido: com teto 60, o desenho cai de 59,99 para 30,33 px, e a barra encolhe de 80 para 50,33. Subir o teto também alarga o espaço reservado nas pontas, mesmo quando a coruja não cresce, porque a largura do quadro acompanha o teto.
 
 **D3. Os cinco efeitos de destaque vão para o pop-up de leads**, mesmo os que tendem a irritar num cabeçalho pequeno. Razão do dono: fica pronto, e a decisão de usar é dele no momento da campanha. Registrada a ressalva de que pulsar e tremer são pouco recomendáveis ali.
 
@@ -127,7 +129,7 @@ Nenhum esbarra em limitação técnica. As decisões de projeto que exigiam esco
 | Ordem aleatória com uma foto só | Sem efeito, não quebra |
 | Setas e bolinhas desligadas sem avanço automático | Visitante fica preso na primeira foto — recusar ou avisar |
 | Coruja "dos dois lados" no celular com título longo | O corte do celular já esconde as duas se "Mostrar no celular" estiver desligado |
-| Barra de uma linha só | A coruja fica no tamanho do teto, como hoje |
+| ~~Barra de uma linha só~~ | ~~A coruja fica no tamanho do teto~~ — **riscado na entrega:** contradiz D2 e é irrealizável junto com "cresce com a barra". Ver a nota em 3/D2. Medido: 19,50 px contra teto de 26. |
 | Horário de atendimento sem faixa preenchida | O modo fica desligado |
 | Pergunta de qualificação sem opções cadastradas | O campo não aparece no pop-up |
 
