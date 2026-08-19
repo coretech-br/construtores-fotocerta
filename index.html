@@ -2995,6 +2995,73 @@ function cCssBase(cfg){
   }
   s+='.fcb-curta{display:none}\n';
   s+='@media (max-width:'+cfg.mob+'px){.fcb-longa{display:none}.fcb-curta{display:inline}}\n';
+  s+=cCssEfeitos(cfg);
+  return s;
+}
+function cCssEfeitos(cfg){
+  var s='',anim=[];
+  if(cfg.mov==='rolaesq'||cfg.mov==='roladir'){
+    s+='.fcb-trilho{display:inline-flex;white-space:nowrap;will-change:transform;'+
+       'animation:fcb-rola '+cfg.vel+'s linear infinite'+(cfg.mov==='roladir'?' reverse':'')+'}\n';
+    s+='.fcb-trilho > span{padding-right:3em}\n';
+    s+='@keyframes fcb-rola{from{transform:translateX(0)}to{transform:translateX(-50%)}}\n';
+    anim.push('.fcb-trilho');
+  }
+  if(cfg.mov==='altfade'){
+    s+='.fcb-conteudo{transition:opacity .4s ease}\n.fcb-conteudo.fcb-saindo{opacity:0}\n';
+  }
+  if(cfg.mov==='altdesliza'){
+    s+='.fcb-conteudo{transition:transform .4s ease,opacity .4s ease}\n';
+    s+='.fcb-conteudo.fcb-saindo{transform:translateY(-100%);opacity:0}\n';
+  }
+  if(cfg.efeitos.pulsar){
+    s+='.fcb-conteudo{animation:fcb-pulsar 1.8s ease-in-out infinite}\n';
+    s+='@keyframes fcb-pulsar{0%,100%{transform:scale(1)}50%{transform:scale(1.035)}}\n';
+    anim.push('.fcb-conteudo');
+  }
+  if(cfg.efeitos.brilho){
+    s+='.fcb-barra{background-image:linear-gradient(100deg,rgba(255,255,255,0) 40%,rgba(255,255,255,.28) 50%,rgba(255,255,255,0) 60%);'+
+       'background-size:250% 100%;background-repeat:no-repeat;animation:fcb-brilho 5s linear infinite}\n';
+    s+='@keyframes fcb-brilho{from{background-position:150% 0}to{background-position:-150% 0}}\n';
+    anim.push('.fcb-barra');
+  }
+  if(cfg.efeitos.degrade){
+    s+='.fcb-barra{background-image:linear-gradient(90deg,'+cfg.cores.fundo+','+cfg.cores.destaque+','+cfg.cores.fundo+');'+
+       'background-size:200% 100%;animation:fcb-degrade 8s linear infinite}\n';
+    s+='@keyframes fcb-degrade{from{background-position:0 0}to{background-position:200% 0}}\n';
+    anim.push('.fcb-barra');
+  }
+  if(cfg.efeitos.piscar&&cfg.formato==='compacto'){
+    s+='.fcb-sep{animation:fcb-piscar 1s steps(1) infinite}\n';
+    s+='@keyframes fcb-piscar{0%,49%{opacity:.65}50%,100%{opacity:0}}\n';
+    anim.push('.fcb-sep');
+  }
+  if(cfg.efeitos.tremor){
+    s+='.fcb-interno{animation:fcb-tremor 6s ease-in-out infinite}\n';
+    s+='@keyframes fcb-tremor{0%,90%,100%{transform:translateX(0)}92%{transform:translateX(-3px)}94%{transform:translateX(3px)}96%{transform:translateX(-2px)}98%{transform:translateX(2px)}}\n';
+    anim.push('.fcb-interno');
+  }
+  if(cfg.urg.ativo&&cfg.urg.pulsar){
+    s+='.fcb-barra.fcb-urgente .fcb-conteudo{animation:fcb-urgpulsar 1s ease-in-out infinite}\n';
+    s+='@keyframes fcb-urgpulsar{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}\n';
+    anim.push('.fcb-barra.fcb-urgente .fcb-conteudo');
+  }
+  if(cfg.dig==='fade'){
+    s+='.fcb-num{transition:opacity .25s ease}\n.fcb-num.fcb-virando{opacity:.15}\n';
+  }
+  if(cfg.dig==='flip'){
+    s+='.fcb-num{display:inline-block;transition:transform .25s ease}\n.fcb-num.fcb-virando{transform:rotateX(90deg)}\n';
+  }
+  if(cfg.entrada==='deslizar'||cfg.entrada==='aposrolar'){
+    s+='.fcb-barra{transform:translateY(-100%);transition:transform .45s ease}\n';
+    s+='.fcb-barra.fcb-visivel{transform:translateY(0)}\n';
+  }
+  if(anim.length){
+    s+='@media (prefers-reduced-motion: reduce){\n';
+    s+='  '+anim.join(',')+'{animation:none}\n';
+    s+='  .fcb-barra{transition:none}\n';
+    s+='}\n';
+  }
   return s;
 }
 function cJsBase(cfg){
@@ -3059,10 +3126,31 @@ function cJsBase(cfg){
   j+='    var longa=comMarca(msg.texto);\n';
   j+='    if(!msg.curta)return longa;\n';
   j+="    return '<span class=\"fcb-longa\">'+longa+'</span><span class=\"fcb-curta\">'+comMarca(msg.curta)+'</span>';\n  }\n\n";
+  j+='  var ROLANDO='+(cfg.mov==='rolaesq'||cfg.mov==='roladir')+';\n';
   j+='  raiz.innerHTML=\'<div class="fcb-interno"><div class="fcb-conteudo"></div></div>\';\n';
   j+="  var conteudo=raiz.querySelector('.fcb-conteudo');\n";
-  j+='  var msgAtual=0;\n\n';
-  j+='  function espaco(){\n';
+  j+='  var msgAtual=0;\n';
+  if(cfg.urg.ativo)j+='  var LIMITE_URGENCIA='+(cfg.urg.lim*60000)+';\n';
+  if((cfg.mov==='altfade'||cfg.mov==='altdesliza')&&cfg.msgs.length>1){
+    j+='  setInterval(function(){\n';
+    j+="    conteudo.classList.add('fcb-saindo');\n";
+    j+='    setTimeout(function(){\n';
+    j+='      msgAtual++;pintarMensagem();tick();\n';
+    j+="      conteudo.classList.remove('fcb-saindo');\n";
+    j+='    },400);\n';
+    j+='  },'+(cfg.alt*1000)+');\n\n';
+  }
+  if(cfg.entrada==='deslizar'){
+    j+="  setTimeout(function(){raiz.classList.add('fcb-visivel');},80);\n";
+  }
+  if(cfg.entrada==='aposrolar'){
+    j+='  function verRolagem(){\n';
+    j+='    var y=window.pageYOffset||document.documentElement.scrollTop;\n';
+    j+="    if(y>"+cfg.entradapx+")raiz.classList.add('fcb-visivel');\n";
+    j+="    else raiz.classList.remove('fcb-visivel');\n  }\n";
+    j+="  window.addEventListener('scroll',verRolagem);\n  verRolagem();\n";
+  }
+  j+='\n  function espaco(){\n';
   j+='    if(!EMPURRA_CONTEUDO)return;\n';
   j+="    document.body.style.paddingTop=raiz.offsetHeight+'px';\n  }\n";
   j+='  function liberarEspaco(){\n';
@@ -3075,7 +3163,8 @@ function cJsBase(cfg){
   j+='  }\n\n';
   j+='  /* pintarMensagem roda so na montagem e na troca de mensagem */\n';
   j+='  function pintarMensagem(){\n';
-  j+='    conteudo.innerHTML=textoCom(MENSAGENS[msgAtual%MENSAGENS.length]);\n';
+  j+='    var html=textoCom(MENSAGENS[msgAtual%MENSAGENS.length]);\n';
+  j+="    conteudo.innerHTML=ROLANDO?('<div class=\"fcb-trilho\"><span>'+html+'</span><span>'+html+'</span></div>'):html;\n";
   j+='  }\n';
   j+='  /* atualizarRelogio roda a cada segundo e toca so nos marcadores */\n';
   j+='  function atualizarRelogio(restante){\n';
@@ -3091,6 +3180,12 @@ function cJsBase(cfg){
   j+="      }else if(AO_ZERAR==='zerado'){restante=0;}\n";
   j+='      else{encerrar();return;}\n';
   j+='    }\n';
+  if(cfg.urg.ativo){
+    j+='    if(restante<=LIMITE_URGENCIA){\n';
+    j+="      raiz.classList.add('fcb-urgente');\n";
+    j+="      raiz.style.background='"+cfg.cores.urg+"';\n";
+    j+='    }\n';
+  }
   j+='    atualizarRelogio(restante);\n';
   j+='  }\n\n';
   j+='  pintarMensagem();\n';
