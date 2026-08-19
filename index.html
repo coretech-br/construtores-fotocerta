@@ -531,7 +531,7 @@
       <label for="l-horfim">Fecha às</label>
       <input type="time" id="l-horfim" value="18:00">
       <label for="l-horaviso">Aviso mostrado fora do horário</label>
-      <input type="text" id="l-horaviso" value="Estamos fora do horario de atendimento. Deixe seu recado: respondemos assim que voltarmos.">
+      <input type="text" id="l-horaviso" value="Estamos fora do horário de atendimento. Deixe seu recado: respondemos assim que voltarmos.">
       <p class="ajuda l-alerta" id="l-hor-aviso" style="display:none"></p>
       </div>
       </fieldset>
@@ -2513,7 +2513,7 @@ function lPadroes(){
   [1,2,3,4,5].forEach(function(d){$('l-hor-d'+d).checked=true;});
   [0,6].forEach(function(d){$('l-hor-d'+d).checked=false;});
   $('l-horini').value='09:00';$('l-horfim').value='18:00';
-  $('l-horaviso').value='Estamos fora do horario de atendimento. Deixe seu recado: respondemos assim que voltarmos.';
+  $('l-horaviso').value='Estamos fora do horário de atendimento. Deixe seu recado: respondemos assim que voltarmos.';
   $('l-qlabel').value='Qual ensaio te interessa?';$('l-qdica').value='Escolha uma opção (opcional)';
   $('l-qmsg').value='Interesse';$('l-qop').value='';
   lQops=[];lQRender();
@@ -2531,9 +2531,28 @@ function lPadroes(){
 }
 
 /* ---------- lista de opcoes da pergunta de qualificacao ---------- */
+/* Teto da lista fechada. Nao e limite tecnico: um <select> com dezenas de linhas deixa de ser
+   "lista fechada para qualificar" e vira rolagem no celular, onde o pop-up ja e apertado. */
+var L_Q_MAX=20;
 function lQAdd(){
-  var t=$('l-qop').value.trim();
+  var t=$('l-qop').value.trim(),i;
   if(!t){alert('Escreva o texto da opcao.');return;}
+  /* Duas opcoes com o mesmo texto sao indistinguiveis para o visitante: ele escolhe uma das
+     duas, a mensagem chega igual nos dois casos e o operador nunca fica sabendo que cadastrou
+     duas. Recusa com aviso, no criterio desta fase -- nao ha o que assumir no lugar (apagar a
+     segunda calado seria decidir por ele), e o texto que ele acabou de digitar continua no
+     campo para ser corrigido. Comparacao sem acento nao entra: "Gestante" e "gestante" sao a
+     mesma opcao para quem le a lista, entao o teste ignora maiusculas e espacos das pontas. */
+  for(i=0;i<lQops.length;i++){
+    if(String(lQops[i]).trim().toLowerCase()===t.toLowerCase()){
+      alert('A opcao "'+lQops[i]+'" ja esta na lista (posicao '+(i+1)+'). Duas opcoes com o mesmo texto ficam indistinguiveis para o visitante: ele escolhe uma das duas e a mensagem chega igual nos dois casos.');
+      return;
+    }
+  }
+  if(lQops.length>=L_Q_MAX){
+    alert('A lista ja tem '+L_Q_MAX+' opcoes, que e o maximo. Uma lista maior que isso deixa de ajudar o visitante a se qualificar e vira rolagem dentro do pop-up, que no celular ja e apertado. Remova alguma antes de acrescentar outra.');
+    return;
+  }
   lQops.push(t);
   $('l-qop').value='';
   lQRender();salvarEstado();lPreview();
@@ -2888,7 +2907,13 @@ function lJs(v){
   /* rico: o cabecalho deixou de ser "coruja opcional + texto" e passou a ter um miolo proprio
      (o ponto piscando e o trilho da rolagem precisam de um no so deles). Fora desses dois
      casos o codigo emitido e exatamente o de antes. */
+  /* rico: o cabecalho deixou de ser "coruja + texto" e passou a precisar de um no proprio para
+     o miolo (o ponto piscando entra ANTES dele, entao o texto nao pode mais ser filho direto
+     do titulo). rolando: alem do no, ele precisa da CLASSE .fcw-conteudo -- e a classe so sai
+     quando a regra dela sai, senao o markup entregue carrega uma classe sem nenhuma regra no
+     CSS, que e residuo que o proximo leitor tem de decifrar. */
   var rico=(v.ef.piscar||v.mov!=='estatico');
+  var rolando=(v.mov!=='estatico');
   var svgTopo=(v.corujaCor==='livre')?'svgCorujaTopo()':'svgCoruja(COR_TOPO_POPUP)';
   c+='<scr'+'ipt>\n(function(){\n';
   c+='/* ===== ESSENCIAIS ===== */\n';
@@ -2958,8 +2983,15 @@ function lJs(v){
     c+='var agora=new Date();\n';
     c+='/* O relogio do VISITANTE pode estar em qualquer fuso (viagem, aparelho desacertado,\n';
     c+='   cliente de fora), e o horario de atendimento e o SEU. Por isso o instante e levado\n';
-    c+='   para o fuso fixo acima antes de qualquer comparacao. */\n';
-    c+='var local=new Date(agora.getTime()+(agora.getTimezoneOffset()+HORARIO_FUSO*60)*60000);\n';
+    c+='   para o fuso fixo acima antes de qualquer comparacao.\n';
+    c+='   DUAS passadas, e nao uma: getTimezoneOffset() responde pelo instante em que e lido,\n';
+    c+='   mas a leitura de parede (getDay/getHours) acontece no instante JA DESLOCADO. Se os\n';
+    c+='   dois cairem em lados opostos de uma virada de horario de verao DO VISITANTE, o\n';
+    c+='   deslocamento sai uma hora errado -- duas vezes por ano, so em fuso que tem horario\n';
+    c+='   de verao. A segunda passada reaplica o deslocamento com o offset lido no instante\n';
+    c+='   deslocado, que e o offset que os getters vao mesmo usar. */\n';
+    c+='var passo=new Date(agora.getTime()+(agora.getTimezoneOffset()+HORARIO_FUSO*60)*60000);\n';
+    c+='var local=new Date(agora.getTime()+(passo.getTimezoneOffset()+HORARIO_FUSO*60)*60000);\n';
     c+='var dia=local.getDay(),min=local.getHours()*60+local.getMinutes();\n';
     c+='var abre=minutosHora(HORARIO_ABRE),fecha=minutosHora(HORARIO_FECHA),i,d;\n';
     c+='for(i=0;i<HORARIO_DIAS.length;i++){\n';
@@ -2998,13 +3030,14 @@ function lJs(v){
   if(v.corujaEsq)c+='elTitulo.innerHTML='+svgTopo+';\n';
   if(v.ef.piscar)c+="elTitulo.insertAdjacentHTML('beforeend','<span class=\"fcw-sep\">\\u2022</span>');\n";
   c+="var spanTxt=document.createElement('span');\n";
-  if(rico)c+="spanTxt.className='fcw-conteudo';\n";
+  if(rolando)c+="spanTxt.className='fcw-conteudo';\n";
   c+='spanTxt.textContent=POP_TITULO;\nelTitulo.appendChild(spanTxt);\n';
   if(v.corujaDir)c+="elTitulo.insertAdjacentHTML('beforeend',"+svgTopo+");\n";
   c+='}else{\n';
   if(rico){
     if(v.ef.piscar)c+="elTitulo.innerHTML='<span class=\"fcw-sep\">\\u2022</span>';\n";
-    c+="var spanAlt=document.createElement('span');\nspanAlt.className='fcw-conteudo';\n";
+    c+="var spanAlt=document.createElement('span');\n";
+    if(rolando)c+="spanAlt.className='fcw-conteudo';\n";
     c+="spanAlt.textContent=POP_IDENTIDADE?(POP_IDENTIDADE+' '+POP_TITULO):POP_TITULO;\nelTitulo.appendChild(spanAlt);\n";
   }else{
     c+="elTitulo.textContent=POP_IDENTIDADE?(POP_IDENTIDADE+' '+POP_TITULO):POP_TITULO;\n";
