@@ -133,12 +133,12 @@
 
   .rodape{max-width:1080px;margin:0 auto 30px;padding:0 20px;font-size:12px;color:var(--tinta-suave)}
 
-  .c-pv-barra{box-sizing:border-box;width:100%;overflow:hidden}
-  .c-pv-barra .fcb-num{font-weight:700;color:var(--c-pv-destaque,inherit)}
-  .c-pv-barra .fcb-bloco{display:inline-block;text-align:center;margin:0 4px}
-  .c-pv-barra .fcb-bloco .fcb-num{display:block;font-size:1.25em;line-height:1.1}
-  .c-pv-barra .fcb-bloco .fcb-rot{display:block;font-size:.62em;opacity:.75;text-transform:uppercase;letter-spacing:.04em}
-  .c-pv-barra .fcb-sep,.c-pv-barra .fcb-suf{opacity:.65;margin:0 1px}
+  /* Previa da contagem regressiva: o bloco gerado roda dentro de um iframe de mesma origem.
+     Nao ha estilo de barra aqui -- quem pinta a barra e o CSS que o proprio gerador emite. */
+  .c-pv-modos{display:flex;gap:8px;align-items:center;margin:0 0 10px}
+  .c-pv-modos .rotulo{font-size:12px;color:var(--tinta-suave)}
+  .c-pv-moldura{overflow:hidden;margin:0 auto;background:#fff;border:1px solid var(--linha);border-radius:8px}
+  .c-pv-moldura iframe{border:0;display:block;background:#fff}
 </style>
 </head>
 <body>
@@ -1002,7 +1002,7 @@
       <div id="c-borda-campo">
       <div class="cor-linha"><input type="color" id="c-cborda" value="#FFC94A"><input type="text" id="c-cborda-t" value="#FFC94A"></div>
       </div>
-      <label for="c-mob">Largura de corte do celular <small>(px — abaixo disso usa a versão curta e esconde a coruja)</small></label>
+      <label for="c-mob">Largura de corte do celular <small>(px, de 320 a 1024 — abaixo disso usa a versão curta e esconde a coruja; fora da faixa o campo se corrige sozinho)</small></label>
       <input type="number" id="c-mob" value="640" min="320" max="1024" step="10">
       </fieldset>
     </div>
@@ -1165,9 +1165,14 @@
   <div class="grade">
     <div>
       <div class="pv-area">
+      <div class="c-pv-modos">
+      <span class="rotulo">Ver como:</span>
+      <button type="button" class="botao mini" id="c-pv-desk" aria-pressed="true">Computador</button>
+      <button type="button" class="botao mini claro" id="c-pv-cel" aria-pressed="false">Celular</button>
+      </div>
       <div id="c-pv-box"></div>
       </div>
-      <p class="ajuda">A prévia mostra cores, fonte, formato do contador e mensagem — movimento, efeitos, coruja, botão de ação, botão de fechar e barra de progresso só aparecem na página publicada.</p>
+      <p class="ajuda">A prévia roda o código gerado de verdade: é o mesmo bloco que sai na saída ao lado, executando dentro de um quadro isolado. O que ainda difere da página publicada: a barra fixa gruda no topo do quadro, não da janela; o relógio é o do seu computador; a contagem sempre começa agora, enquanto na página real ela conta a partir da primeira visita de cada visitante; o botão de fechar esquece o clique a cada atualização da prévia; o modo <b>Computador</b> é exibido reduzido para caber na coluna, então julgue o tamanho da fonte pelo modo <b>Celular</b>, que sai em tamanho real; e o quadro não carrega o CSS do tema do site.</p>
     </div>
     <div>
       <div class="saida">
@@ -2907,6 +2912,24 @@ function cAlvoIso(){
      segundos. */
   return partes[0]+'T'+partes[1].slice(0,5)+':00-03:00';
 }
+/* O clamp da cCfg protege a saida, mas sozinho ele corrigia o codigo entregue em silencio: o
+   operador digitava 100, lia 100 na tela e copiava um bloco com max-width:320px. Esta aba ja
+   decidiu duas vezes o contrario disso -- no limiar de urgencia, avisar e bloquear em vez de
+   clampar calado, porque mudar sem avisar um numero que o operador esta lendo troca um defeito
+   visivel por um invisivel. Aqui o campo se corrige na propria interface: o valor preso volta
+   para o input, entao o que esta na tela e o que sai no codigo sao sempre o MESMO numero e a
+   correcao acontece na frente do operador. O clamp da cCfg fica como rede -- e ele que segura
+   estado restaurado do localStorage gravado antes desta regra existir.
+   So em 'change'/'blur', nunca em 'input': corrigir a cada tecla impediria digitar "320",
+   porque o "3" viraria 320 antes do resto chegar. */
+function cMobAjustar(){
+  var el=$('c-mob');if(!el)return false;
+  var bruto=parseInt(el.value,10);
+  var preso=isNaN(bruto)?640:Math.max(320,Math.min(1024,bruto));
+  if(String(preso)===String(el.value))return false;
+  el.value=String(preso);
+  return true;
+}
 function cCfg(){
   var dias=cNum('c-dias',0),horas=cNum('c-horas',0),mins=cNum('c-mins',0);
   return {
@@ -2925,7 +2948,15 @@ function cCfg(){
     formato:radio('c-formato'),
     rotulos:{d:$('c-rd').value,h:$('c-rh').value,m:$('c-rm').value,s:$('c-rs').value},
     pad:cNum('c-pad',10),largmax:cNum('c-largmax',1100),alinha:radio('c-alinha'),
-    borda:radio('c-borda')==='sim',mob:cNum('c-mob',640),
+    /* O corte do celular e preso a faixa declarada no campo (min=320, max=1024) AQUI, na
+       fonte da configuracao, e nao so na largura do iframe da previa. O input number nao
+       impoe min/max a valor digitado e cNum e parseInt sem limite, entao "100" chegava
+       inteiro ate o @media. Prender so a largura da previa NAO resolve: o iframe iria para
+       320px enquanto o CSS gerado continuaria com max-width:100px, a media query nao casaria
+       e o modo Celular mostraria layout de computador calado -- exatamente a previa que
+       mente em silencio. Preso na cCfg, os dois lados leem o mesmo numero e nao ha como
+       divergirem. Valor dentro da faixa passa intacto: a saida gerada nao muda. */
+    borda:radio('c-borda')==='sim',mob:Math.max(320,Math.min(1024,cNum('c-mob',640))),
     fixa:radio('c-fixa')==='fixa',empurrar:radio('c-empurrar')==='empurrar',z:cNum('c-z',99980),
     cta:{ativo:radio('c-cta')==='sim',txt:$('c-ctatxt').value,url:$('c-ctaurl').value},
     fechar:radio('c-fechar'),prog:radio('c-prog')==='sim',
@@ -2939,37 +2970,11 @@ function cCfg(){
     msgs:cMsgs.length?cMsgs:[{texto:'Oferta por tempo limitado {contador}',curta:''}]
   };
 }
-function cPartes(ms){
-  if(ms<0)ms=0;
-  var t=Math.floor(ms/1000);
-  return {d:Math.floor(t/86400),h:Math.floor(t%86400/3600),m:Math.floor(t%3600/60),s:t%60};
-}
-function cAlvoMs(cfg,inicioMs){
-  if(cfg.modo==='data'){var v=Date.parse(cfg.alvoIso);return isNaN(v)?inicioMs:v;}
-  return inicioMs+cfg.duracaoMs;
-}
-function cDois(n){return (n<10?'0':'')+n;}
-function cFormatarHTML(p,cfg){
-  var u=cfg.unidades,mostraD=u.d&&!(cfg.diaszero&&p.d===0);
-  var itens=[];
-  if(mostraD)itens.push([cDois(p.d),cfg.rotulos.d,'d']);
-  if(u.h)itens.push([cDois(p.h),cfg.rotulos.h,'h']);
-  if(u.m)itens.push([cDois(p.m),cfg.rotulos.m,'m']);
-  if(u.s)itens.push([cDois(p.s),cfg.rotulos.s,'s']);
-  if(!itens.length)return '';
-  var h='',i;
-  if(cfg.formato==='blocos'){
-    for(i=0;i<itens.length;i++){
-      h+='<span class="fcb-bloco"><span class="fcb-num">'+itens[i][0]+'</span><span class="fcb-rot">'+escHtml(itens[i][1])+'</span></span>';
-    }
-  }else{
-    for(i=0;i<itens.length;i++){
-      if(i)h+='<span class="fcb-sep">:</span>';
-      h+='<span class="fcb-num">'+itens[i][0]+'</span><span class="fcb-suf">'+itens[i][2]+'</span>';
-    }
-  }
-  return '<span class="fcb-rel">'+h+'</span>';
-}
+/* O motor de contagem da previa foi removido: cFormatarHTML, cPartes, cAlvoMs e cDois eram
+   uma segunda implementacao do relogio, mantida so para a previa desenhar alguma coisa.
+   Duas implementacoes do mesmo motor divergem -- ja divergiram aqui duas vezes (escape de
+   HTML presente de um lado e ausente do outro; urgencia sem ramo "else" no gerado). Agora a
+   previa executa o bloco que cBloco() monta, dentro de um iframe. Ver cPvMontar. */
 
 /* escAttr protege a ESTRUTURA do atributo (aspas), nao o esquema: href="javascript:..."
    continua sendo um atributo bem formado e executa ao clique. Aceita ancora, caminho
@@ -2997,6 +3002,13 @@ function cGerar(){
       alert('A urgência começa faltando '+cfg.urg.lim+' min, mas a contagem inteira é mais curta que isso: a barra nasceria já na cor de urgência e a cor de fundo configurada nunca apareceria. Reduza o limiar ou aumente a duração.');return;
     }
   }
+  $('c-out1').value=cBloco(cfg);
+  cTitulo();
+}
+/* Fonte unica do bloco entregue. cGerar escreve o retorno na textarea; cPvMontar escreve o
+   MESMO retorno dentro do iframe da previa. Nao existe segunda formatacao em lugar nenhum --
+   e por isso que a previa nao tem como divergir do que o operador vai colar. */
+function cBloco(cfg){
   var c='';
   c+='<!-- ============================================================\n';
   c+='     FOTO CERTA - BARRA DE CONTAGEM REGRESSIVA\n';
@@ -3006,8 +3018,7 @@ function cGerar(){
   c+='<sty'+'le>\n'+cCssBase(cfg)+'</sty'+'le>\n\n';
   c+='<div class="fcb-barra" id="fcb-barra"></div>\n\n';
   c+='<scr'+'ipt>\n(function () {\n'+cJsBase(cfg)+'})();\n</scr'+'ipt>\n';
-  $('c-out1').value=c;
-  cTitulo();
+  return c;
 }
 function cTitulo(){
   /* #c-out-titulo e um <span> so para o texto: escrever por nodeValue no primeiro filho do
@@ -3490,56 +3501,143 @@ function cLimpar(){
   cToggles();cPreview(true);salvarEstado();
 }
 
-var cPvTimer=null,cPvAltTimer=null,cPvInicio=null,cPvSig=null,cPvMsg=0;
-function cPreview(reiniciar){
+/* ---------- previa fiel: o bloco gerado rodando de verdade ----------
+   O quadro e um iframe de mesma origem (mesma tecnica que a pagina intermediaria do Prosite
+   ja usa em producao para medir altura), montado por document.write. A ordem escrita e:
+   shim de storage -> bloco gerado -> enchimento. O bloco vai byte a byte como sai na
+   textarea; nada do ambiente da previa entra nele. */
+
+/* O bloco gerado carimba o inicio da contagem em localStorage['fcbar:'+CODIGO]. Dentro da
+   previa isso seria duas vezes errado: sujaria as chaves reais da origem da ferramenta e,
+   na segunda vez que o operador abrisse a aba, a previa nasceria com a contagem ja gasta --
+   ou ja vencida. O shim troca localStorage e sessionStorage do DOCUMENTO DA PREVIA por
+   objetos em memoria, que morrem junto com o iframe. A previa sempre comeca do zero. */
+function cPvShim(){
+  var s='';
+  s+='<scr'+'ipt>\n(function(){\n';
+  s+='  function memoria(){\n';
+  s+='    var d={};\n';
+  s+='    return {\n';
+  s+='      getItem:function(k){k=String(k);return Object.prototype.hasOwnProperty.call(d,k)?d[k]:null;},\n';
+  s+='      setItem:function(k,v){d[String(k)]=String(v);},\n';
+  s+='      removeItem:function(k){delete d[String(k)];},\n';
+  s+='      clear:function(){d={};},\n';
+  s+='      key:function(i){var ks=Object.keys(d);return i<ks.length?ks[i]:null;},\n';
+  s+='      get length(){return Object.keys(d).length;},\n';
+  /* marca que so o objeto em memoria tem: e' assim que a conferencia abaixo distingue o
+     shim instalado do Storage real, sem depender de instanceof nem do nome da classe. */
+  s+='      fcPvMemoria:true\n';
+  s+='    };\n  }\n';
+  s+='  function trocar(nome){\n';
+  s+='    var falso=memoria();\n';
+  s+='    try{Object.defineProperty(window,nome,{value:falso,configurable:true});return;}catch(e){}\n';
+  s+='    try{Object.defineProperty(Object.getPrototypeOf(window),nome,{value:falso,configurable:true});}catch(e){}\n';
+  s+='  }\n';
+  s+='  function instalado(nome){\n';
+  s+='    try{return !!(window[nome]&&window[nome].fcPvMemoria===true);}catch(e){return false;}\n';
+  s+='  }\n';
+  s+="  trocar('localStorage');trocar('sessionStorage');\n";
+  /* Falha silenciosa aqui e' pior que falha barulhenta: o try/catch do bloco gerado nao
+     denuncia nada, porque setItem no Storage REAL funciona e nao lanca. O sintoma so
+     apareceria na segunda abertura da aba, como contagem ja vencida, sem sinal nenhum.
+     Hoje funciona, mas a garantia depende de o navegador continuar deixando localStorage
+     configuravel -- entao a previa confere e avisa na cara do operador se nao conferir. */
+  s+="  var falhou=[];\n";
+  s+="  if(!instalado('localStorage'))falhou.push('localStorage');\n";
+  s+="  if(!instalado('sessionStorage'))falhou.push('sessionStorage');\n";
+  s+='  if(falhou.length){\n';
+  s+="    var av=document.createElement('div');\n";
+  s+="    av.id='c-pv-aviso-shim';\n";
+  s+='    av.setAttribute(\'style\',\'background:#8C1D18;color:#FDFBF6;font:600 12px/1.45 -apple-system,BlinkMacSystemFont,sans-serif;padding:8px 12px\');\n';
+  s+="    av.textContent='Aviso da previa: nao foi possivel isolar o '+falhou.join(' e ')+" +
+     "' deste quadro. A previa esta gravando nas chaves reais do navegador e pode nascer com a contagem ja vencida. O codigo gerado ao lado nao e afetado.';\n";
+  s+='    document.body.appendChild(av);\n';
+  s+='  }\n';
+  s+='})();\n</scr'+'ipt>\n';
+  return s;
+}
+/* Sem conteudo abaixo da barra nao da para ver o padding-top empurrando a pagina, nem a
+   entrada "depois de rolar", nem a barra fixa se comportando como fixa. Blocos cinzentos e
+   mudos, de proposito: nada aqui pode competir com a barra. */
+function cPvEnchimento(){
+  var s='',i;
+  for(i=0;i<14;i++)s+='<div class="c-pv-falso">conteudo da sua pagina</div>';
+  return s;
+}
+function cPvDoc(cfg){
+  var h='';
+  h+='<!DOCTYPE html>\n<html lang="pt-br">\n<head>\n<meta charset="utf-8">\n';
+  h+='<meta name="viewport" content="width=device-width,initial-scale=1">\n';
+  h+='<sty'+'le>\n';
+  h+='html,body{margin:0;padding:0}\n';
+  h+='body{background:#FFFFFF;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Ubuntu,sans-serif}\n';
+  h+='.c-pv-falso{background:#EDEAE1;color:#A9A294;border-radius:6px;margin:10px 12px;padding:0 14px;';
+  h+='height:78px;display:flex;align-items:center;font-size:12px;letter-spacing:.04em}\n';
+  h+='</sty'+'le>\n</head>\n<body>\n';
+  h+=cPvShim();
+  h+=cBloco(cfg);
+  h+=cPvEnchimento();
+  h+='\n</body>\n</html>';
+  return h;
+}
+/* A media query do bloco gerado e avaliada pelo iframe, entao o corte de c-mob so vira
+   verdade se as duas larguras straddlearem esse corte. Por isso as larguras logicas sao
+   derivadas de cfg.mob em vez de fixas: a estreita fica sempre <= corte e a larga sempre
+   acima dele. Como a coluna da previa e mais estreita que um desktop, a larga e reduzida
+   por transform:scale -- o scale e do lado de FORA do iframe, entao a viewport que o bloco
+   enxerga continua sendo a largura logica, que e o que a media query le. */
+function cPvLargura(cfg){
+  /* Sem piso na largura do modo Celular: um piso garantiria largura confortavel mas quebraria
+     a UNICA propriedade que este modo precisa ter -- ficar <= o corte. cfg.mob ja chega preso
+     a [320,1024] pela cCfg, entao min(380,mob) fica em [320,380]: confortavel e sempre <= o
+     corte, sem piso nenhum. E max(920,mob+240) fica sempre acima do corte em toda a faixa. */
+  if(cPvModo==='cel')return Math.min(380,cfg.mob);
+  return Math.max(920,cfg.mob+240);
+}
+var cPvTimer=null,cPvModo='desk';
+var C_PV_ALTURA=340;
+function cPvMontar(){
   var box=$('c-pv-box');if(!box)return;
-  if(cPvTimer){clearInterval(cPvTimer);cPvTimer=null;}
-  if(cPvAltTimer){clearInterval(cPvAltTimer);cPvAltTimer=null;}
   var cfg=cCfg();
-  /* o ponto de partida da previa e reiniciado quando o que determina o alvo (modo/duracao/
-     data) muda desde o ultimo desenho -- assim ajustar cor sem mudar a duracao nao reinicia a
-     contagem (mesmo principio do codigo gerado: nao reinicia a toa). Mas "Atualizar previa" e
-     uma acao explicita do usuario que significa "redesenhe com o que eu configurei, agora" --
-     por isso reinicia sempre, mesmo se sig nao mudou, senao fica sem saida quando o usuario
-     passa muito tempo so mexendo em cor com uma duracao curta configurada antes. */
-  var sig=cfg.modo+'|'+(cfg.modo==='data'?cfg.alvoIso:cfg.duracaoMs);
-  if(cPvInicio===null||reiniciar||sig!==cPvSig){cPvInicio=(new Date()).getTime();cPvSig=sig;}
-  var alvo=cAlvoMs(cfg,cPvInicio);
-  var fontes={neutra:'-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Ubuntu,sans-serif',
-    humanista:'"Helvetica Neue",Helvetica,Arial,sans-serif',
-    condensada:'"Roboto Condensed","Arial Narrow",Arial,sans-serif',
-    mono:'ui-monospace,SFMono-Regular,Menlo,Consolas,monospace'};
-  box.innerHTML='<div class="c-pv-barra"><div class="c-pv-conteudo"></div></div>'+
-    '<p style="font-size:12px;color:var(--tinta-suave);text-align:center;margin:12px 0 0">'+
-    (cfg.fixa?'Na pagina real esta barra fica fixa no topo (codigo para a Tag Body).'
-             :'Na pagina real esta barra rola com a pagina (codigo para um componente HTML).')+'</p>';
-  var barra=box.querySelector('.c-pv-barra');
-  barra.style.cssText='background:'+cfg.cores.fundo+';color:'+cfg.cores.texto+';font-family:'+fontes[cfg.fonte]+
-    ';font-size:'+cfg.tam+'px;font-weight:'+cfg.peso+';padding:'+cfg.pad+'px 16px;border-radius:6px;'+
-    'text-align:'+(cfg.alinha==='centro'?'center':'left')+';font-variant-numeric:tabular-nums;'+
-    (cfg.borda?'border-bottom:2px solid '+cfg.cores.borda+';':'');
-  barra.style.setProperty('--c-pv-destaque',cfg.cores.destaque);
-  var alvoEl=box.querySelector('.c-pv-conteudo');
-  function pinta(){
-    var restante=alvo-(new Date()).getTime();
-    if(restante<=0){
-      if(cfg.fim==='esconder'){alvoEl.innerHTML='<i style="opacity:.7">(a barra some quando zera)</i>';return;}
-      if(cfg.fim==='mensagem'){alvoEl.textContent=cfg.fimtxt;return;}
-      if(cfg.fim==='reiniciar'){cPvInicio=(new Date()).getTime();alvo=cAlvoMs(cfg,cPvInicio);restante=alvo-cPvInicio;}
-      else restante=0;
-    }
-    var msg=cfg.msgs[cPvMsg%cfg.msgs.length];
-    var rel=cFormatarHTML(cPartes(restante),cfg);
-    var txt=escHtml(msg.texto);
-    alvoEl.innerHTML=txt.indexOf('{contador}')>=0?txt.split('{contador}').join(rel):(txt+' '+rel);
-    if(cfg.urg.ativo&&restante<=cfg.urg.lim*60000)barra.style.background=cfg.cores.urg;
-    else barra.style.background=cfg.cores.fundo;
-  }
-  pinta();
-  cPvTimer=setInterval(pinta,1000);
-  if((cfg.mov==='altfade'||cfg.mov==='altdesliza')&&cfg.msgs.length>1){
-    cPvAltTimer=setInterval(function(){cPvMsg++;},cfg.alt*1000);
-  }
+  var larg=cPvLargura(cfg);
+  var disp=box.clientWidth||440;
+  var k=Math.min(1,disp/larg);
+  /* trocar o iframe inteiro e o jeito barato de parar o bloco anterior: os setInterval, os
+     listeners de scroll/resize e o ResizeObserver dele morrem junto com o documento. */
+  box.innerHTML='';
+  var moldura=document.createElement('div');
+  moldura.className='c-pv-moldura';
+  moldura.style.width=Math.round(larg*k)+'px';
+  moldura.style.height=C_PV_ALTURA+'px';
+  var ifr=document.createElement('iframe');
+  ifr.id='c-pv-frame';
+  ifr.setAttribute('title','Previa da barra de contagem regressiva');
+  ifr.style.width=larg+'px';
+  ifr.style.height=Math.round(C_PV_ALTURA/k)+'px';
+  ifr.style.transform='scale('+k+')';
+  ifr.style.transformOrigin='top left';
+  moldura.appendChild(ifr);
+  box.appendChild(moldura);
+  var doc=ifr.contentDocument||(ifr.contentWindow&&ifr.contentWindow.document);
+  if(!doc)return;
+  doc.open();doc.write(cPvDoc(cfg));doc.close();
+}
+/* Remontar o iframe a cada tecla digitada custa caro e pisca. O debounce segura as mudancas
+   de campo; "Atualizar previa" e a troca de modo passam direto. O timer e UNICO e sempre
+   cancelado antes de agendar outro -- a versao anterior desta aba acumulou timers por nao
+   fazer isso. */
+function cPreview(imediato){
+  if(cPvTimer){clearTimeout(cPvTimer);cPvTimer=null;}
+  if(imediato){cPvMontar();return;}
+  cPvTimer=setTimeout(function(){cPvTimer=null;cPvMontar();},400);
+}
+function cPvBotoes(){
+  var d=$('c-pv-desk'),c=$('c-pv-cel');
+  if(d){d.className='botao mini'+(cPvModo==='desk'?'':' claro');d.setAttribute('aria-pressed',cPvModo==='desk'?'true':'false');}
+  if(c){c.className='botao mini'+(cPvModo==='cel'?'':' claro');c.setAttribute('aria-pressed',cPvModo==='cel'?'true':'false');}
+}
+function cPvModoSet(m){
+  cPvModo=m;cPvBotoes();cPreview(true);
 }
 
 /* ============ inicialização ============ */
@@ -3561,7 +3659,9 @@ liga('t-copy2',function(){copiar('t-out2','t-cop2');});
 liga('t-copy3',function(){copiar('t-out3','t-cop3');});
 liga('aba-uni',function(){trocarAba('uni');});
 liga('aba-bor',function(){trocarAba('bor');});
-liga('aba-cnt',function(){trocarAba('cnt');});
+/* enquanto o painel esta escondido o box mede 0: a previa e remontada ao abrir a aba, ja com
+   a largura real da coluna, senao o iframe nasceria na largura de emergencia. */
+liga('aba-cnt',function(){trocarAba('cnt');cPreview(true);});
 liga('u-op-add',uOpAdd);
 liga('u-prod-salvar',uProdSalvar);
 liga('u-prod-cancelar',uProdLimpar);
@@ -3573,6 +3673,17 @@ liga('b-copy1',function(){copiar('b-out1','b-cop1');});
 liga('b-copy2',function(){copiar('b-out2','b-cop2');});
 liga('c-msg-add',cMsgAdd);
 liga('c-atualizar',function(){cPreview(true);});
+liga('c-pv-desk',function(){cPvModoSet('desk');});
+liga('c-pv-cel',function(){cPvModoSet('cel');});
+/* O listener do proprio elemento corre ANTES dos de document (fase de bolha, alvo primeiro),
+   entao quando o cPreview() global rodar o valor ja esta preso -- por isso o ramo de 'change'
+   nao redesenha, senao montaria o iframe duas vezes. 'blur' nao borbulha e nao aciona nenhum
+   listener de document, entao esse redesenha por conta propria. */
+(function(){
+  var el=$('c-mob');if(!el)return;
+  el.addEventListener('change',function(){if(cMobAjustar())salvarEstado();});
+  el.addEventListener('blur',function(){if(cMobAjustar()){salvarEstado();cPreview(true);}});
+})();
 liga('c-gerar',cGerar);
 liga('c-limpar',cLimpar);
 liga('c-copy1',function(){copiar('c-out1','c-cop1');});
@@ -3594,9 +3705,17 @@ uToggles();
 uPreview();
 bToggles();
 bPreview();
+/* estado gravado antes desta regra pode trazer c-mob fora da faixa: prende na carga, para o
+   campo nunca exibir um numero diferente do que a cCfg vai usar, e regrava para o valor velho
+   nao ressurgir na proxima sessao. */
+if(cMobAjustar())salvarEstado();
 cToggles();
 cMsgRender();
-cPreview();
+/* A previa NAO e montada aqui. Montar na carga executaria o bloco gerado -- intervalo de 1s,
+   listeners de scroll/resize, ResizeObserver -- em toda abertura da ferramenta, mesmo para
+   quem nunca abre esta aba, e ainda com o painel escondido (clientWidth zero, largura de
+   emergencia). A montagem fica para o clique da aba, que ja chama cPreview(true). */
+cPvBotoes();
 })();
 </script>
 </body>
