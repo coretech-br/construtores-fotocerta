@@ -30,6 +30,25 @@ Valem para **todas** as tarefas. Copiadas do spec e do `CLAUDE.md`.
 - **Sobre a lista de animações do spec:** a entrada da barra (`fcb-entra`) e a virada dos dígitos (`fcb-fade` / `fcb-flip`) são implementadas com `transition`, não com `@keyframes` — o efeito é o mesmo, sem animação em laço, e uma transição é o instrumento certo para uma mudança de estado pontual. Os nomes `fcb-entra` e `fcb-fade` portanto não aparecem no CSS gerado; não é omissão.
 - **O contador nunca remonta o conteúdo.** A mensagem entra uma vez com marcadores `[data-fcb-rel]` vazios; o tick de cada segundo preenche só esses marcadores. Reescrever o `innerHTML` a cada segundo reiniciaria a animação CSS da rolagem — o marquee tremeria no lugar em vez de rolar. Vale para as Tasks 8, 9 e 10.
 
+## O escopo IIFE — leia antes de escrever qualquer asserção
+
+Todo o `<script>` do arquivo vive dentro de **uma única IIFE** (`index.html:948` … `})();`). Consequência prática: `cCfg`, `cPartes`, `cMsgs`, `salvarEstado` e todas as demais funções internas **não existem no escopo global** e não podem ser chamadas de um console externo — a tentativa levanta `ReferenceError`.
+
+Portanto: **toda asserção é dirigida por DOM.** Você preenche campos, dispara eventos, clica em botões e lê o resultado no DOM, no `localStorage` ou na textarea de saída. Nunca chame função interna direto.
+
+Dois idiomas que você vai usar o tempo todo:
+
+```js
+// preencher um campo E disparar o listener que salva/atualiza
+$$('c-tam').value = '21';
+$$('c-tam').dispatchEvent(new Event('input', {bubbles:true}));
+
+// marcar um radio (o clique já dispara change)
+document.querySelector('input[name="c-formato"][value="blocos"]').click();
+```
+
+Não exponha nada em `window` para facilitar teste — é poluição de código de produção numa página estática pública.
+
 ## Como verificar (não há framework de teste)
 
 O projeto é um HTML único sem build, npm ou runner. A verificação é feita por asserção no console do navegador. **Antes de qualquer tarefa**, abra `index.html` no navegador e cole este helper no console:
@@ -256,6 +275,7 @@ cToggles();
 T('radio modo tem valor', R('c-modo') === 'abertura');
 T('radio fim tem valor', R('c-fim') === 'esconder');
 T('codigo nasce vazio', V('c-cod') === '');
+T('duracao horas tem valor padrao 48', V('c-horas') === '48');
 T('campos de duracao visiveis', $$('c-abertura-campos').style.display === 'block');
 T('campo de data escondido', $$('c-data-campos').style.display === 'none');
 T('mensagem final escondida', $$('c-fimtxt-campo').style.display === 'none');
@@ -268,7 +288,7 @@ document.querySelector('input[name="c-fim"][value="mensagem"]').click();
 T('mensagem final aparece', $$('c-fimtxt-campo').style.display === 'block');
 ```
 
-Esperado: 19 × PASS.
+Esperado: 20 × PASS.
 
 - [ ] **Passo 7: Commit**
 
@@ -335,14 +355,14 @@ function cMsgAdd(){
   if(!t){alert('Escreva o texto da mensagem.');return;}
   cMsgs.push({texto:t,curta:$('c-msgcurta').value.trim()});
   $('c-msg').value='';$('c-msgcurta').value='';
-  cMsgRender();salvarEstado();cPreview();
+  cMsgRender();salvarEstado();
 }
 function cMsgMove(i,d){
   var j=i+d;if(j<0||j>=cMsgs.length)return;
   var t=cMsgs[i];cMsgs[i]=cMsgs[j];cMsgs[j]=t;
-  cMsgRender();salvarEstado();cPreview();
+  cMsgRender();salvarEstado();
 }
-function cMsgDel(i){cMsgs.splice(i,1);cMsgRender();salvarEstado();cPreview();}
+function cMsgDel(i){cMsgs.splice(i,1);cMsgRender();salvarEstado();}
 function cMsgRender(){
   var ul=$('c-msg-lista');if(!ul)return;
   ul.innerHTML='';
@@ -365,13 +385,7 @@ function cMsgRender(){
 }
 ```
 
-**Nota:** `cPreview()` só existe a partir da Task 7. Até lá, adicione um stub no topo do bloco da aba para não quebrar:
-
-```js
-function cPreview(){}
-```
-
-Remova o stub na Task 7, ao implementar a versão real.
+**Nota:** o CRUD ainda não chama a prévia — `cPreview()` só nasce na Task 7, que acrescenta as chamadas a estas três funções. Não crie stub vazio: nesta tarefa a lista funciona sem prévia, e é assim que ela deve ser revisada.
 
 - [ ] **Passo 5: Ligar e chamar no bootstrap**
 
@@ -745,6 +759,20 @@ parearCor('c-curg');
 ```js
 ['c-vel','c-alt','c-ef-pulsar','c-ef-brilho','c-ef-degrade','c-ef-piscar','c-ef-tremor','c-urglim','c-curg','c-entradapx']
   .forEach(function(id){ T('campo ' + id, !!$$(id)); });
+// valores padrao — a mutacao de um default passou despercebida nas Tasks 2 e 4
+T('vel padrao 18', V('c-vel') === '18');
+T('alt padrao 5', V('c-alt') === '5');
+T('urglim padrao 60', V('c-urglim') === '60');
+T('entradapx padrao 300', V('c-entradapx') === '300');
+T('curg padrao', V('c-curg-t') === '#8C1D18');
+T('mov comeca estatico', R('c-mov') === 'estatico');
+T('dig comeca nenhuma', R('c-dig') === 'nenhuma');
+T('entrada comeca imediata', R('c-entrada') === 'imediata');
+T('urg comeca desligada', R('c-urg') === 'nao');
+T('nenhum efeito marcado por padrao',
+  ['c-ef-pulsar','c-ef-brilho','c-ef-degrade','c-ef-piscar','c-ef-tremor']
+    .every(function(id){ return $$(id).checked === false; }));
+// comportamento dos toggles
 T('velocidade escondida no estatico', $$('c-vel-campo').style.display === 'none');
 document.querySelector('input[name="c-mov"][value="rolaesq"]').click();
 T('rolagem mostra velocidade', $$('c-vel-campo').style.display === 'block');
@@ -757,7 +785,7 @@ document.querySelector('input[name="c-entrada"][value="aposrolar"]').click();
 T('entrada apos rolar mostra px', $$('c-entrada-campo').style.display === 'block');
 ```
 
-Esperado: 16 × PASS.
+Esperado: 26 × PASS.
 
 - [ ] **Passo 7: Commit**
 
@@ -780,12 +808,14 @@ git add index.html && git commit -m "feat(contagem): secao 4 - efeitos e movimen
 
 ```js
 $$('c-tam').value = '21';
+$$('c-tam').dispatchEvent(new Event('input', {bubbles:true}));
 document.querySelector('input[name="c-formato"][value="blocos"]').click();
-salvarEstado();
-var st = JSON.parse(localStorage.getItem('fcConstrutores'));
+var st = JSON.parse(localStorage.getItem('fcConstrutores') || '{}');
 T('ramo c gravado', !!st.c);
-T('tamanho gravado', st.c && st.c.tam === '21');
+T('tamanho gravado', !!st.c && st.c.tam === '21');
 ```
+
+O `dispatchEvent` é o que aciona o listener global de `input` que chama `salvarEstado()` — você não chama a função, provoca o evento que a chama.
 
 - [ ] **Passo 2: Rodar e confirmar que falha**
 
@@ -854,33 +884,40 @@ Em `restaurarEstado()`, após o bloco `if(st.b){...}`:
 
 - [ ] **Passo 5: Rodar e confirmar que passa**
 
+**Parte A — gravação.** Cole numa aba recém-carregada:
+
 ```js
-$$('c-tam').value = '21';
-$$('c-cod').value = 'TESTE99';
+$$('c-tam').value = '21'; $$('c-tam').dispatchEvent(new Event('input',{bubbles:true}));
+$$('c-cod').value = 'TESTE99'; $$('c-cod').dispatchEvent(new Event('input',{bubbles:true}));
 document.querySelector('input[name="c-formato"][value="blocos"]').click();
 document.querySelector('input[name="c-coruja"][value="sim"]').click();
 $$('c-ef-pulsar').checked = true;
-cMsgs = [{texto:'Teste {contador}', curta:''}]; cMsgRender();
-salvarEstado();
+$$('c-ef-pulsar').dispatchEvent(new Event('change',{bubbles:true}));
+$$('c-msg').value = 'Teste {contador}'; $$('c-msg-add').click();
 var st = JSON.parse(localStorage.getItem('fcConstrutores'));
 T('ramo c gravado', !!st.c);
 T('tamanho gravado', st.c.tam === '21');
 T('formato gravado', st.c.formato === 'blocos');
+T('coruja gravada', st.c.coruja === 'sim');
 T('checkbox gravado', st.c.efpulsar === true);
 T('mensagens gravadas', st.cmsgs.length === 1);
-// simula recarregar
-$$('c-tam').value = '15'; cMsgs = []; cMsgRender();
-document.querySelector('input[name="c-formato"][value="compacto"]').click();
-restaurarEstado();
+```
+
+**Parte B — restauração.** Agora **recarregue a página** (F5) e recole o helper. O recarregamento re-executa o bootstrap, que chama `restaurarEstado()` — é o percurso real, não uma simulação:
+
+```js
+$$('aba-cnt').click();
 T('tamanho restaurado', V('c-tam') === '21');
 T('formato restaurado', R('c-formato') === 'blocos');
 T('coruja restaurada', R('c-coruja') === 'sim');
 T('checkbox restaurado', $$('c-ef-pulsar').checked === true);
-T('mensagens restauradas', cMsgs.length === 1 && cMsgs[0].texto === 'Teste {contador}');
 T('codigo restaurado', V('c-cod') === 'TESTE99');
+T('mensagem restaurada na lista', $$('c-msg-lista').children.length === 1);
+T('texto da mensagem restaurado', $$('c-msg-lista').textContent.indexOf('Teste {contador}') >= 0);
+T('campos de coruja visiveis apos restaurar', $$('c-coruja-campos').style.display === 'block');
 ```
 
-Esperado: 11 × PASS.
+Esperado: 6 × PASS na parte A, 8 × PASS na parte B. A última asserção da parte B verifica algo que só o percurso real revela: que `cToggles()` roda depois de `restaurarEstado()` no bootstrap, senão os campos restaurados ficam com a visibilidade errada.
 
 - [ ] **Passo 6: Commit**
 
@@ -907,14 +944,14 @@ git add index.html && git commit -m "feat(contagem): persistencia do estado da a
 - [ ] **Passo 1: Escrever a asserção que falha**
 
 ```js
-T('cPartes existe', typeof cPartes === 'function');
-T('cCfg existe', typeof cCfg === 'function');
 T('caixa de previa existe', !!$$('c-pv-box'));
+T('botao atualizar previa existe', !!$$('c-atualizar'));
+T('botao gerar existe', !!$$('c-gerar'));
 ```
 
 - [ ] **Passo 2: Rodar e confirmar que falha**
 
-Esperado: 3 × FAIL (`cPreview` existe como stub vazio da Task 3 — será substituído).
+Esperado: 3 × FAIL.
 
 - [ ] **Passo 3: Adicionar a seção 5**
 
@@ -944,7 +981,7 @@ Esperado: 3 × FAIL (`cPreview` existe como stub vazio da Task 3 — será subst
 
 - [ ] **Passo 4: Implementar o motor**
 
-Substitua o stub `function cPreview(){}` por:
+Acrescente junto às demais funções da aba:
 
 ```js
 function cNum(id,def){var v=parseInt($(id).value,10);return isNaN(v)?def:v;}
@@ -1076,15 +1113,16 @@ Adicione o CSS da prévia junto às demais regras no `<style>` do topo do arquiv
 - [ ] **Passo 6: Ligar botões, `parearCor` e bootstrap**
 
 ```js
-liga('c-gerar',cGerar);
 liga('c-atualizar',cPreview);
 liga('c-copy1',function(){copiar('c-out1','c-cop1');});
 ```
 
-`cGerar` só existe na Task 8; até lá `liga` não quebra (ele checa o elemento, não a função — mas a referência a `cGerar` sim). **Portanto adicione um stub agora** e substitua na Task 8:
+O botão `c-gerar` fica sem ligação nesta tarefa — `cGerar` nasce na Task 8, que acrescenta o `liga('c-gerar',cGerar);`. Não crie stub vazio: referenciar uma função inexistente aqui quebraria o carregamento do arquivo inteiro.
+
+Acrescente também as chamadas de prévia ao CRUD da Task 3, agora que `cPreview` existe — ao final de `cMsgAdd`, `cMsgMove` e `cMsgDel`:
 
 ```js
-function cGerar(){}
+  cPreview();
 ```
 
 Em `parearCor`, troque o corpo para chamar também a prévia da contagem:
@@ -1105,24 +1143,67 @@ cPreview();
 
 - [ ] **Passo 7: Rodar e confirmar que passa**
 
+O motor é verificado **através da prévia** — é a superfície observável dele. Numa aba recém-carregada, limpe a lista de mensagens (remova as que existirem clicando no `✕`) e cole:
+
 ```js
-T('cPartes 2d 3h 4m 5s', (function(){ var p = cPartes(((2*24+3)*60+4)*60000 + 5000);
-  return p.d===2 && p.h===3 && p.m===4 && p.s===5; })());
-T('cPartes nunca negativo', (function(){ var p = cPartes(-5000); return p.d===0&&p.h===0&&p.m===0&&p.s===0; })());
-T('cAlvoMs modo abertura soma duracao', (function(){
-  var cfg = cCfg(); cfg.modo='abertura'; cfg.duracaoMs=60000; return cAlvoMs(cfg, 1000) === 61000; })());
-T('cCfg cod vazio vira padrao', (function(){ $$('c-cod').value=''; return cCfg().cod === 'padrao'; })());
-T('cCfg sem mensagem usa a padrao', (function(){ var m=cMsgs; cMsgs=[];
-  var r = cCfg().msgs.length===1 && cCfg().msgs[0].texto.indexOf('{contador}')>=0; cMsgs=m; return r; })());
-T('formato compacto tem separador', cFormatarHTML({d:1,h:2,m:3,s:4}, cCfg()).indexOf('fcb-sep') >= 0);
-T('esconde dias zerados', (function(){ var cfg=cCfg(); cfg.diaszero=true;
-  return cFormatarHTML({d:0,h:2,m:3,s:4}, cfg).indexOf('>00<') < 0; })());
-cPreview();
-T('previa desenhou a barra', !!$$('c-pv-box').querySelector('.c-pv-barra'));
-T('previa mostra o relogio', $$('c-pv-box').innerHTML.indexOf('fcb-num') >= 0);
+$$('aba-cnt').click();
+$$('c-msg').value = 'Faltam {contador}'; $$('c-msg-add').click();
+document.querySelector('input[name="c-modo"][value="abertura"]').click();
+document.querySelector('input[name="c-formato"][value="compacto"]').click();
+document.querySelector('input[name="c-diaszero"][value="nao"]').click();
+['c-un-d','c-un-h','c-un-m','c-un-s'].forEach(function(id){ $$(id).checked = true; });
+$$('c-dias').value='2'; $$('c-horas').value='3'; $$('c-mins').value='4';
+['c-dias','c-horas','c-mins'].forEach(function(id){
+  $$(id).dispatchEvent(new Event('input',{bubbles:true})); });
+$$('c-atualizar').click();
+var box = $$('c-pv-box'), txt = box.textContent;
+T('previa desenhou a barra', !!box.querySelector('.c-pv-barra'));
+T('previa usa a mensagem cadastrada', txt.indexOf('Faltam') >= 0);
+T('previa mostra 4 unidades', box.querySelectorAll('.fcb-num').length === 4);
+T('dias com dois digitos', box.querySelectorAll('.fcb-num')[0].textContent === '02');
+T('horas corretas', box.querySelectorAll('.fcb-num')[1].textContent === '03');
+T('minutos corretos', box.querySelectorAll('.fcb-num')[2].textContent === '04');
+T('formato compacto tem separador', !!box.querySelector('.fcb-sep'));
 ```
 
-Esperado: 9 × PASS. Confira também a olho: a prévia deve estar contando 1 segundo por vez.
+Agora as regras de exibição:
+
+```js
+// esconder dias quando zerarem
+$$('c-dias').value='0'; $$('c-dias').dispatchEvent(new Event('input',{bubbles:true}));
+document.querySelector('input[name="c-diaszero"][value="sim"]').click();
+$$('c-atualizar').click();
+T('esconde dias zerados', $$('c-pv-box').querySelectorAll('.fcb-num').length === 3);
+document.querySelector('input[name="c-diaszero"][value="nao"]').click();
+$$('c-atualizar').click();
+T('mostra dias zerados quando pedido', $$('c-pv-box').querySelectorAll('.fcb-num').length === 4);
+// unidade desmarcada some
+$$('c-un-s').checked = false;
+$$('c-un-s').dispatchEvent(new Event('change',{bubbles:true}));
+$$('c-atualizar').click();
+T('unidade desmarcada some', $$('c-pv-box').querySelectorAll('.fcb-num').length === 3);
+$$('c-un-s').checked = true; $$('c-un-s').dispatchEvent(new Event('change',{bubbles:true}));
+// formato em blocos
+document.querySelector('input[name="c-formato"][value="blocos"]').click();
+$$('c-atualizar').click();
+T('formato blocos usa caixas', $$('c-pv-box').querySelectorAll('.fcb-bloco').length === 4);
+T('blocos tem rotulo por extenso', $$('c-pv-box').querySelector('.fcb-rot').textContent.length > 1);
+// sem mensagem cadastrada, cai na mensagem padrao
+$$('c-msg-lista').querySelector('button[aria-label="Remover"]').click();
+$$('c-atualizar').click();
+T('sem mensagem usa a padrao', $$('c-pv-box').textContent.indexOf('tempo limitado') >= 0);
+```
+
+E o essencial — a contagem tem que andar sozinha:
+
+```js
+var antes = $$('c-pv-box').textContent;
+setTimeout(function(){
+  T('previa anda sozinha', $$('c-pv-box').textContent !== antes);
+}, 1500);
+```
+
+Esperado: 7 + 6 PASS nos dois primeiros blocos, e `previa anda sozinha` PASS cerca de 1,5s depois.
 
 - [ ] **Passo 8: Commit**
 
@@ -1135,7 +1216,7 @@ git add index.html && git commit -m "feat(contagem): motor de contagem e previa 
 ### Task 8: Gerador — bloco base
 
 **Arquivos:**
-- Modificar: `index.html` — função `cGerar` (substitui o stub da Task 7)
+- Modificar: `index.html` — função `cGerar` nova, mais a ligação do botão `c-gerar`
 
 **Interfaces:**
 - Consome: `cCfg()`, `esc(s)`, `escHtml(s)`.
@@ -1153,11 +1234,11 @@ T('titulo diz Tag Body', $$('c-out-titulo').textContent.indexOf('Tag Body') >= 0
 
 - [ ] **Passo 2: Rodar e confirmar que falha**
 
-Esperado: 2 × FAIL (o stub não escreve nada).
+Esperado: 2 × FAIL (o botão ainda não tem função ligada).
 
 - [ ] **Passo 3: Implementar `cGerar`**
 
-Substitua `function cGerar(){}` por:
+Acrescente junto às demais funções da aba, e ligue o botão no bloco de `liga(...)` com `liga('c-gerar',cGerar);`:
 
 ```js
 function cGerar(){
@@ -1336,16 +1417,17 @@ Ao final de `cToggles()`:
 - [ ] **Passo 7: Rodar e confirmar que passa**
 
 ```js
-cMsgs = [{texto:'Termina em {contador}', curta:''}]; cMsgRender();
+$$('c-msg').value = 'Termina em {contador}'; $$('c-msg-add').click();
 $$('c-cod').value = 'TESTE'; $$('c-horas').value = '2';
+['c-cod','c-horas'].forEach(function(id){
+  $$(id).dispatchEvent(new Event('input',{bubbles:true})); });
 document.querySelector('input[name="c-modo"][value="abertura"]').click();
 document.querySelector('input[name="c-fixa"][value="fixa"]').click();
 $$('c-gerar').click();
 var out = V('c-out1');
 T('gerou codigo', out.length > 500);
 T('titulo diz Tag Body', $$('c-out-titulo').textContent.indexOf('Tag Body') >= 0);
-T('script blindado', out.indexOf('<scr' + 'ipt>') >= 0 && out.indexOf('<script>') < 0);
-T('style blindado', out.indexOf('<sty' + 'le>') >= 0 && out.indexOf('<style>') < 0);
+T('saida traz as tags de verdade', out.indexOf('<scr'+'ipt>') >= 0 && out.indexOf('<sty'+'le>') >= 0);
 T('esta em IIFE', out.indexOf('(function () {') >= 0 && out.indexOf('})();') >= 0);
 T('sem tag semantica', !/<(section|header|nav|footer|article|aside)[\s>]/.test(out));
 T('sem evento inline', !/\son(click|load|change)\s*=/.test(out));
@@ -1360,7 +1442,14 @@ T('titulo muda para componente', $$('c-out-titulo').textContent.indexOf('compone
 T('sem position fixed no fluxo', V('c-out1').indexOf('position:fixed') < 0);
 ```
 
-Esperado: 12 × PASS.
+Esperado: 13 × PASS.
+
+**A blindagem não se verifica na saída — verifica-se no código-fonte.** `'<scr'+'ipt>'` e `'<script>'` são a mesma string em tempo de execução, então nenhuma asserção sobre `out` distingue as duas: a saída **precisa** conter as tags de verdade, é isso que o usuário cola. O que a regra 2 do manual do Prosite exige é que o **fonte do `index.html`** não traga essas sequências inteiras — senão o parser HTML encerra o bloco `<script>` da própria ferramenta no meio. Verifique no terminal:
+
+```bash
+grep -c "'<scr'+'ipt>'\|'</scr'+'ipt>'\|'<sty'+'le>'" index.html   # deve ser > 0
+grep -n "c+='</script>'\|c+='<script>'\|c+='<style>'" index.html    # deve sair vazio
+```
 
 **Verificação funcional adicional:** copie a saída para um arquivo `/tmp/teste-barra.html` envolto em `<!doctype html><html><body>` + código + `</body></html>`, abra no navegador e confirme que a barra aparece, conta, e que ao recarregar **não reinicia**.
 
@@ -1840,8 +1929,12 @@ Depois da Task 11, rode a bateria completa numa aba recém-recarregada:
 });
 // 2. Gera nas duas posicoes
 $$('aba-cnt').click();
-cMsgs = [{texto:'Termina em {contador}', curta:'{contador}'}]; cMsgRender();
+$$('c-msg').value = 'Termina em {contador}';
+$$('c-msgcurta').value = '{contador}';
+$$('c-msg-add').click();
 $$('c-cod').value = 'FINAL'; $$('c-horas').value = '3';
+['c-cod','c-horas'].forEach(function(id){
+  $$(id).dispatchEvent(new Event('input',{bubbles:true})); });
 ['fixa','fluxo'].forEach(function(p){
   document.querySelector('input[name="c-fixa"][value="' + p + '"]').click();
   $$('c-gerar').click();
@@ -1854,8 +1947,11 @@ $$('c-cod').value = 'FINAL'; $$('c-horas').value = '3';
   T(p + ': em IIFE', o.indexOf('(function () {') >= 0);
 });
 // 3. Estado sobrevive ao recarregamento
-salvarEstado();
 T('estado gravado', !!JSON.parse(localStorage.getItem('fcConstrutores')).c);
+// recarregue a pagina (F5), recole o helper e confirme:
+//   $$('aba-cnt').click();
+//   T('codigo sobreviveu', V('c-cod') === 'FINAL');
+//   T('mensagem sobreviveu', $$('c-msg-lista').children.length >= 1);
 ```
 
 **Teste manual obrigatório antes de considerar pronto** (feito pelo usuário, conforme a seção 8 do spec):

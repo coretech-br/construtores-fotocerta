@@ -15,6 +15,7 @@ A página é um único arquivo HTML sem dependências e sem servidor: todo o pro
 | Agendamento TidyCal | Embed do TidyCal com expansão e recolhimento do modal dentro de iframe. |
 | Checkout | Carrinho com PayPal e/ou Pix, múltiplos produtos com opcionais, cupons e desconto exclusivo para Pix. O Pix sai como BR Code estático no padrão do Banco Central, gerado no navegador. |
 | Bordas com efeito | CSS puro para destacar um componente: brilho giratório, degradê contínuo, halo pulsante, listras ou borda fixa. |
+| Contagem regressiva | Barra de urgência para o topo da página, com contador que não reinicia quando o visitante recarrega, efeitos de movimento e destaque, e opção de barra fixa. |
 
 ## Como usar
 

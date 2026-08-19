@@ -132,6 +132,13 @@
   .pv-btn-linha p{margin:0;font-size:12px;color:var(--tinta-suave)}
 
   .rodape{max-width:1080px;margin:0 auto 30px;padding:0 20px;font-size:12px;color:var(--tinta-suave)}
+
+  .c-pv-barra{box-sizing:border-box;width:100%;overflow:hidden}
+  .c-pv-barra .fcb-num{font-weight:700;color:var(--c-pv-destaque,inherit)}
+  .c-pv-barra .fcb-bloco{display:inline-block;text-align:center;margin:0 4px}
+  .c-pv-barra .fcb-bloco .fcb-num{display:block;font-size:1.25em;line-height:1.1}
+  .c-pv-barra .fcb-bloco .fcb-rot{display:block;font-size:.62em;opacity:.75;text-transform:uppercase;letter-spacing:.04em}
+  .c-pv-barra .fcb-sep,.c-pv-barra .fcb-suf{opacity:.65;margin:0 1px}
 </style>
 </head>
 <body>
@@ -157,6 +164,7 @@
   <button class="aba" id="aba-tidy" role="tab" aria-selected="false">Agendamento TidyCal</button>
   <button class="aba" id="aba-uni" role="tab" aria-selected="false">Checkout</button>
   <button class="aba" id="aba-bor" role="tab" aria-selected="false">Bordas com efeito</button>
+  <button class="aba" id="aba-cnt" role="tab" aria-selected="false">Contagem regressiva</button>
 </div>
 
 <!-- ==================== CONSTRUTOR: SLIDESHOW ==================== -->
@@ -856,6 +864,334 @@
   </div>
 </div>
 
+<div class="painel" id="painel-cnt" role="tabpanel">
+  <p class="descricao"><b>Contagem regressiva</b> — gera a barra de urgência para o topo de uma landing page, com mensagem, contador em dias/horas/minutos/segundos e efeitos. A contagem não reinicia quando o visitante recarrega a página: o momento da primeira visita fica guardado no navegador dele. Pode contar um prazo a partir da primeira abertura ou até uma data marcada. O código sai pronto para a <b>Tag Body</b> (barra fixa no topo) ou para um <b>componente HTML</b> (barra que rola com a página).</p>
+  <div class="secao primeira"><span class="secao-n">1</span> Contagem e encerramento</div>
+  <div class="grade">
+    <div>
+      <fieldset>
+      <legend>Como contar</legend>
+      <div class="radios">
+      <label><input type="radio" name="c-modo" value="abertura" checked><span>A partir da primeira abertura</span></label>
+      <label><input type="radio" name="c-modo" value="data"><span>Até uma data marcada</span></label>
+      </div>
+      <div id="c-abertura-campos">
+      <label for="c-dias">Duração — dias</label>
+      <input type="number" id="c-dias" value="0" min="0" max="365" step="1">
+      <label for="c-horas">Duração — horas</label>
+      <input type="number" id="c-horas" value="48" min="0" max="23" step="1">
+      <label for="c-mins">Duração — minutos</label>
+      <input type="number" id="c-mins" value="0" min="0" max="59" step="1">
+      <p class="ajuda">Cada visitante tem o próprio prazo, contado da primeira vez que abriu a página naquele navegador.</p>
+      </div>
+      <div id="c-data-campos">
+      <label for="c-alvo">Data e hora do encerramento</label>
+      <input type="datetime-local" id="c-alvo" value="">
+      <p class="ajuda">O instante é gravado no código com o fuso de Brasília (<b>−03:00</b>) fixo, para que todo visitante conte até o mesmo momento, esteja onde estiver.</p>
+      </div>
+      <label for="c-cod">Código da campanha <small>(identifica esta contagem no navegador do visitante)</small></label>
+      <input type="text" id="c-cod" value="" placeholder="ex.: CAMPANHA26">
+      <p class="ajuda"><b>Trocar este código zera a contagem de todos os visitantes.</b> É o jeito de recomeçar uma campanha. Duas campanhas com códigos diferentes convivem no mesmo site sem se atrapalhar.</p>
+      </fieldset>
+    </div>
+    <div>
+      <fieldset>
+      <legend>Unidades exibidas</legend>
+      <div class="radios">
+      <label><input type="checkbox" id="c-un-d" checked><span>Dias</span></label>
+      <label><input type="checkbox" id="c-un-h" checked><span>Horas</span></label>
+      <label><input type="checkbox" id="c-un-m" checked><span>Minutos</span></label>
+      <label><input type="checkbox" id="c-un-s" checked><span>Segundos</span></label>
+      </div>
+      <label>Esconder os dias quando chegarem a zero?</label>
+      <div class="radios">
+      <label><input type="radio" name="c-diaszero" value="sim" checked><span>Sim</span></label>
+      <label><input type="radio" name="c-diaszero" value="nao"><span>Não</span></label>
+      </div>
+      </fieldset>
+      <fieldset>
+      <legend>Quando a contagem zerar</legend>
+      <div class="radios">
+      <label><input type="radio" name="c-fim" value="esconder" checked><span>Esconder a barra</span></label>
+      <label><input type="radio" name="c-fim" value="mensagem"><span>Mostrar mensagem final</span></label>
+      <label><input type="radio" name="c-fim" value="zerado"><span>Manter em 00:00:00</span></label>
+      <label><input type="radio" name="c-fim" value="reiniciar"><span>Reiniciar o ciclo</span></label>
+      </div>
+      <div id="c-fimtxt-campo">
+      <label for="c-fimtxt">Mensagem final</label>
+      <input type="text" id="c-fimtxt" value="Promoção encerrada">
+      </div>
+      <p class="ajuda" id="c-reiniciar-aviso"><b>Reiniciar o ciclo</b> só funciona no modo "a partir da primeira abertura": ao zerar, começa outro prazo do mesmo tamanho. Cria urgência permanente que não corresponde a um prazo real — use com consciência.</p>
+      </fieldset>
+    </div>
+  </div>
+  <div class="secao"><span class="secao-n">2</span> Mensagens</div>
+  <div class="grade">
+    <div>
+      <fieldset>
+      <legend>Adicionar mensagem</legend>
+      <label for="c-msg">Texto <small>(use <code>{contador}</code> para marcar onde o relógio entra)</small></label>
+      <input type="text" id="c-msg" value="" placeholder="Oferta de Natal termina em {contador}">
+      <label for="c-msgcurta">Versão curta para o celular <small>(opcional)</small></label>
+      <input type="text" id="c-msgcurta" value="" placeholder="Termina em {contador}">
+      <div class="acoes"><button class="botao" id="c-msg-add">Adicionar mensagem</button></div>
+      <p class="ajuda">Sem o marcador <code>{contador}</code>, o relógio aparece depois do texto. Com <b>duas ou mais</b> mensagens, os efeitos de alternância da seção 4 passam a fazer sentido; com uma só, a barra fica estática ou rolando.</p>
+      </fieldset>
+    </div>
+    <div>
+      <fieldset>
+      <legend>Mensagens da barra</legend>
+      <p class="vazio" id="c-msg-vazio">Nenhuma mensagem ainda. Sem nenhuma, o código usa "Oferta por tempo limitado {contador}".</p>
+      <ul class="lista-imgs" id="c-msg-lista"></ul>
+      </fieldset>
+    </div>
+  </div>
+  <div class="secao"><span class="secao-n">3</span> Aparência, posição e extras</div>
+  <div class="grade">
+    <div>
+      <fieldset>
+      <legend>Cores e tipografia</legend>
+      <label>Cor de fundo da barra</label>
+      <div class="cor-linha"><input type="color" id="c-cfundo" value="#0F3A30"><input type="text" id="c-cfundo-t" value="#0F3A30"></div>
+      <label>Cor do texto</label>
+      <div class="cor-linha"><input type="color" id="c-ctexto" value="#FDFBF6"><input type="text" id="c-ctexto-t" value="#FDFBF6"></div>
+      <label>Cor de destaque dos números</label>
+      <div class="cor-linha"><input type="color" id="c-cdestaque" value="#FFC94A"><input type="text" id="c-cdestaque-t" value="#FFC94A"></div>
+      <label>Pilha de fonte <small>(sem serifa, todas do sistema — sem download)</small></label>
+      <div class="radios">
+      <label><input type="radio" name="c-fonte" value="neutra" checked><span>Neutra</span></label>
+      <label><input type="radio" name="c-fonte" value="humanista"><span>Humanista</span></label>
+      <label><input type="radio" name="c-fonte" value="condensada"><span>Condensada</span></label>
+      <label><input type="radio" name="c-fonte" value="mono"><span>Dígitos monoespaçados</span></label>
+      </div>
+      <label for="c-tam">Tamanho da fonte <small>(px)</small></label>
+      <input type="number" id="c-tam" value="15" min="10" max="32" step="1">
+      <label>Espessura</label>
+      <div class="radios">
+      <label><input type="radio" name="c-peso" value="400"><span>Normal</span></label>
+      <label><input type="radio" name="c-peso" value="600" checked><span>Semi-negrito</span></label>
+      <label><input type="radio" name="c-peso" value="700"><span>Negrito</span></label>
+      </div>
+      </fieldset>
+      <fieldset>
+      <legend>Formato e espaço</legend>
+      <label>Formato do contador</label>
+      <div class="radios">
+      <label><input type="radio" name="c-formato" value="compacto" checked><span>Compacto <small>(02d 14h 33m 12s)</small></span></label>
+      <label><input type="radio" name="c-formato" value="blocos"><span>Blocos com rótulo</span></label>
+      </div>
+      <label for="c-rd">Rótulos das unidades <small>(usados por extenso no formato blocos)</small></label>
+      <input type="text" id="c-rd" value="dias">
+      <input type="text" id="c-rh" value="horas">
+      <input type="text" id="c-rm" value="min">
+      <input type="text" id="c-rs" value="seg">
+      <label for="c-pad">Espaçamento interno vertical <small>(px)</small></label>
+      <input type="number" id="c-pad" value="10" min="0" max="40" step="1">
+      <label for="c-largmax">Largura máxima do conteúdo <small>(px)</small></label>
+      <input type="number" id="c-largmax" value="1100" min="320" max="1920" step="10">
+      <label>Alinhamento</label>
+      <div class="radios">
+      <label><input type="radio" name="c-alinha" value="centro" checked><span>Centro</span></label>
+      <label><input type="radio" name="c-alinha" value="esquerda"><span>Esquerda</span></label>
+      </div>
+      <label>Linha divisória inferior</label>
+      <div class="radios">
+      <label><input type="radio" name="c-borda" value="nao" checked><span>Não</span></label>
+      <label><input type="radio" name="c-borda" value="sim"><span>Sim</span></label>
+      </div>
+      <div id="c-borda-campo">
+      <div class="cor-linha"><input type="color" id="c-cborda" value="#FFC94A"><input type="text" id="c-cborda-t" value="#FFC94A"></div>
+      </div>
+      <label for="c-mob">Largura de corte do celular <small>(px — abaixo disso usa a versão curta e esconde a coruja)</small></label>
+      <input type="number" id="c-mob" value="640" min="320" max="1024" step="10">
+      </fieldset>
+    </div>
+    <div>
+      <fieldset>
+      <legend>Posição</legend>
+      <div class="radios">
+      <label><input type="radio" name="c-fixa" value="fixa" checked><span>Fixa no topo</span></label>
+      <label><input type="radio" name="c-fixa" value="fluxo"><span>Rola com a página</span></label>
+      </div>
+      <p class="ajuda">A escolha define <b>onde colar o código</b>: fixa vai na <b>Tag Body</b> da página; rolando com a página vai num <b>componente HTML</b> posicionado no topo pelo editor. O título da saída na seção 5 avisa qual dos dois.</p>
+      <div id="c-fixa-campos">
+      <label>Espaço para a barra</label>
+      <div class="radios">
+      <label><input type="radio" name="c-empurrar" value="empurrar" checked><span>Empurrar o conteúdo</span></label>
+      <label><input type="radio" name="c-empurrar" value="sobrepor"><span>Sobrepor</span></label>
+      </div>
+      <label for="c-z">z-index</label>
+      <input type="number" id="c-z" value="99980" min="1" max="2147483647" step="10">
+      <p class="ajuda">Se o menu do tema também for fixo, os dois disputam o topo. Comece com <b>empurrar</b>; se o menu sumir atrás da barra, aumente o z-index ou troque para sobrepor. Só dá para conferir na página publicada.</p>
+      </div>
+      </fieldset>
+      <fieldset>
+      <legend>Extras da barra</legend>
+      <label for="c-gap">Espaçamento entre os itens da barra <small>(px)</small></label>
+      <input type="number" id="c-gap" value="16" min="0" max="60" step="1">
+      <p class="ajuda">Separa o conteúdo da coruja, do botão de ação e do botão de fechar. Só tem efeito visível quando algum desses estiver ligado.</p>
+      <label>Botão de ação (CTA)</label>
+      <div class="radios">
+      <label><input type="radio" name="c-cta" value="nao" checked><span>Não ter</span></label>
+      <label><input type="radio" name="c-cta" value="sim"><span>Incluir</span></label>
+      </div>
+      <div id="c-cta-campos">
+      <label for="c-ctatxt">Texto do botão</label>
+      <input type="text" id="c-ctatxt" value="Quero garantir">
+      <label for="c-ctaurl">Link ou âncora</label>
+      <input type="text" id="c-ctaurl" value="#reserva">
+      <label>Cor do botão / do texto do botão</label>
+      <div class="cor-linha"><input type="color" id="c-ctafundo" value="#FFC94A"><input type="text" id="c-ctafundo-t" value="#FFC94A"></div>
+      <div class="cor-linha"><input type="color" id="c-ctatexto" value="#23281F"><input type="text" id="c-ctatexto-t" value="#23281F"></div>
+      <p class="ajuda">Se o link for uma âncora como <code>#reserva</code>, a coluna de destino precisa ter esse valor no campo <b>ID Html</b> (aba Avançado do componente).</p>
+      </div>
+      <label>Botão de fechar</label>
+      <div class="radios">
+      <label><input type="radio" name="c-fechar" value="nao" checked><span>Não ter</span></label>
+      <label><input type="radio" name="c-fechar" value="sessao"><span>Fecha pela sessão</span></label>
+      <label><input type="radio" name="c-fechar" value="sempre"><span>Fecha de vez</span></label>
+      </div>
+      <label>Barra de progresso do tempo decorrido</label>
+      <div class="radios">
+      <label><input type="radio" name="c-prog" value="nao" checked><span>Não ter</span></label>
+      <label><input type="radio" name="c-prog" value="sim"><span>Incluir</span></label>
+      </div>
+      <div id="c-prog-campo">
+      <div class="cor-linha"><input type="color" id="c-cprog" value="#FFC94A"><input type="text" id="c-cprog-t" value="#FFC94A"></div>
+      </div>
+      <label>Coruja da identidade nas pontas</label>
+      <div class="radios">
+      <label><input type="radio" name="c-coruja" value="nao" checked><span>Não usar</span></label>
+      <label><input type="radio" name="c-coruja" value="sim"><span>Usar</span></label>
+      </div>
+      <div id="c-coruja-campos">
+      <label for="c-corujaalt">Altura <small>(px)</small></label>
+      <input type="number" id="c-corujaalt" value="26" min="14" max="60" step="1">
+      <label>Cor do corpo / dos detalhes</label>
+      <div class="cor-linha"><input type="color" id="c-corujacorpo" value="#FDFBF6"><input type="text" id="c-corujacorpo-t" value="#FDFBF6"></div>
+      <div class="cor-linha"><input type="color" id="c-corujadet" value="#FFC94A"><input type="text" id="c-corujadet-t" value="#FFC94A"></div>
+      <label>Esconder no celular?</label>
+      <div class="radios">
+      <label><input type="radio" name="c-corujamob" value="sim" checked><span>Sim</span></label>
+      <label><input type="radio" name="c-corujamob" value="nao"><span>Não</span></label>
+      </div>
+      <p class="ajuda">A coruja aparece nas duas pontas, ancorada fora da área que rola — ela emoldura a barra em vez de passar junto com o texto.</p>
+      </div>
+      </fieldset>
+    </div>
+  </div>
+  <div class="secao"><span class="secao-n">4</span> Efeitos e movimento</div>
+  <div class="grade">
+    <div>
+      <fieldset>
+      <legend>Movimento do conteúdo</legend>
+      <div class="radios">
+      <label><input type="radio" name="c-mov" value="estatico" checked><span>Estático</span></label>
+      <label><input type="radio" name="c-mov" value="rolaesq"><span>Rolagem para a esquerda</span></label>
+      <label><input type="radio" name="c-mov" value="roladir"><span>Rolagem para a direita</span></label>
+      <label><input type="radio" name="c-mov" value="altfade"><span>Alternância com fade</span></label>
+      <label><input type="radio" name="c-mov" value="altdesliza"><span>Alternância deslizando</span></label>
+      </div>
+      <div id="c-vel-campo">
+      <label for="c-vel">Duração do ciclo de rolagem <small>(segundos — maior = mais lento)</small></label>
+      <input type="number" id="c-vel" value="18" min="2" max="60" step="1">
+      </div>
+      <div id="c-alt-campo">
+      <label for="c-alt">Intervalo entre mensagens <small>(segundos)</small></label>
+      <input type="number" id="c-alt" value="5" min="2" max="30" step="1">
+      <p class="ajuda">A alternância precisa de <b>duas ou mais</b> mensagens na seção 2. Com uma só, o código gerado cai para estático.</p>
+      </div>
+      </fieldset>
+      <fieldset>
+      <legend>Virada dos dígitos</legend>
+      <div class="radios">
+      <label><input type="radio" name="c-dig" value="nenhuma" checked><span>Nenhuma</span></label>
+      <label><input type="radio" name="c-dig" value="fade"><span>Fade</span></label>
+      <label><input type="radio" name="c-dig" value="flip"><span>Flip</span></label>
+      </div>
+      </fieldset>
+      <fieldset>
+      <legend>Entrada da barra</legend>
+      <div class="radios">
+      <label><input type="radio" name="c-entrada" value="imediata" checked><span>Imediata</span></label>
+      <label><input type="radio" name="c-entrada" value="deslizar"><span>Deslizando do topo</span></label>
+      <label><input type="radio" name="c-entrada" value="aposrolar"><span>Depois de rolar</span></label>
+      </div>
+      <div id="c-entrada-campo">
+      <label for="c-entradapx">Aparecer depois de rolar <small>(px)</small></label>
+      <input type="number" id="c-entradapx" value="300" min="50" max="3000" step="50">
+      </div>
+      </fieldset>
+    </div>
+    <div>
+      <fieldset>
+      <legend>Destaque contínuo <small>(pode combinar)</small></legend>
+      <div class="radios">
+      <label><input type="checkbox" id="c-ef-pulsar"><span>Pulsar</span></label>
+      <label><input type="checkbox" id="c-ef-brilho"><span>Brilho passante</span></label>
+      <label><input type="checkbox" id="c-ef-degrade"><span>Degradê animado</span></label>
+      <label><input type="checkbox" id="c-ef-piscar"><span>Separador piscando</span></label>
+      <label><input type="checkbox" id="c-ef-tremor"><span>Tremor</span></label>
+      </div>
+      <p class="ajuda">O <b>separador piscando</b> só aparece no formato compacto (é o <code>:</code> entre os números). Efeitos contínuos chamam atenção o tempo todo e cansam — na dúvida, prefira a urgência progressiva ao lado, que só age quando o prazo aperta.</p>
+      </fieldset>
+      <fieldset>
+      <legend>Urgência progressiva</legend>
+      <div class="radios">
+      <label><input type="radio" name="c-urg" value="nao" checked><span>Não usar</span></label>
+      <label><input type="radio" name="c-urg" value="sim"><span>Usar</span></label>
+      </div>
+      <div id="c-urg-campos">
+      <label for="c-urglim">Entrar em urgência faltando <small>(minutos)</small></label>
+      <input type="number" id="c-urglim" value="60" min="1" max="10080" step="1">
+      <label>Cor de urgência <small>(substitui o fundo da barra)</small></label>
+      <div class="cor-linha"><input type="color" id="c-curg" value="#8C1D18"><input type="text" id="c-curg-t" value="#8C1D18"></div>
+      <label>Pulsar ao entrar na urgência?</label>
+      <div class="radios">
+      <label><input type="radio" name="c-urgpulsar" value="sim" checked><span>Sim</span></label>
+      <label><input type="radio" name="c-urgpulsar" value="nao"><span>Não</span></label>
+      </div>
+      </div>
+      </fieldset>
+    </div>
+  </div>
+
+  <div class="secao"><span class="secao-n">5</span> Prévia e código gerado</div>
+  <div class="acoes" style="margin-bottom:14px">
+    <button class="botao" id="c-gerar">Gerar código</button>
+    <button class="botao claro" id="c-atualizar">Atualizar prévia</button>
+    <button class="botao claro" id="c-limpar">Limpar tudo</button>
+  </div>
+  <div class="grade">
+    <div>
+      <div class="pv-area">
+      <div id="c-pv-box"></div>
+      </div>
+      <p class="ajuda">A prévia mostra cores, fonte, formato do contador e mensagem — movimento, efeitos, coruja, botão de ação, botão de fechar e barra de progresso só aparecem na página publicada.</p>
+    </div>
+    <div>
+      <div class="saida">
+      <h3><span id="c-out-titulo">Código gerado</span>
+      <button class="botao mini" id="c-copy1" style="margin-left:8px">Copiar</button>
+      <span class="aviso-copiado" id="c-cop1">Copiado!</span>
+      </h3>
+      <textarea id="c-out1" readonly spellcheck="false" style="height:420px" placeholder="O código gerado aparece aqui."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <div class="instrucoes">
+  <h3>Instrução de uso do código gerado</h3>
+  <p class="ajuda"><b>Onde colar:</b> o título da saída avisa. Com <b>fixa no topo</b>, o código vai no campo <b>Tag Body</b> da página (substituindo ou somando ao que já estiver lá). Com <b>rola com a página</b>, vai num <b>componente HTML</b> que você posiciona no topo da landing pelo editor. Não há nada para colar na Tag Head.</p>
+  <p class="ajuda"><b>Por que fixa exige a Tag Body:</b> componentes HTML do Prosite vivem dentro de um iframe, e um elemento fixo dentro do iframe gruda no iframe, não na página. A Tag Body é o mesmo lugar onde mora o botão flutuante de WhatsApp, que já funciona fixo.</p>
+  <p class="ajuda"><b>A contagem não reinicia:</b> na primeira visita o código grava o horário no navegador do visitante, na chave <code>fcbar:SEU-CODIGO</code>, e todas as visitas seguintes contam a partir dali. <b>Trocar o código da campanha zera a contagem de todos</b> — é assim que se recomeça uma promoção.</p>
+  <p class="ajuda"><b>Limites que nenhum código resolve:</b> a contagem usa o relógio do aparelho do visitante, então quem estiver com a hora errada vê o tempo errado. O carimbo é por navegador: o mesmo visitante no celular e no computador começa duas contagens; aba anônima recomeça; limpar dados zera. O Safari pode descartar o registro depois de cerca de 7 dias sem visita — irrelevante para campanhas de dois ou três dias, relevante para campanhas de semanas.</p>
+  <p class="ajuda"><b>Fuso da data marcada:</b> o instante é gravado com <b>−03:00</b> fixo. Um visitante em outro fuso vê o tempo restante correto para o mesmo momento.</p>
+  <p class="ajuda"><b>Depois de publicar:</b> confira em <b>aba anônima</b> (evita cache) que a barra aparece, que o menu do site não ficou escondido atrás dela e que ao recarregar a contagem continua de onde estava. Se o menu sumir, aumente o z-index ou troque para "sobrepor". Teste também no celular, onde a barra costuma quebrar em duas linhas.</p>
+  <p class="ajuda"><b>Conversão:</b> prefira a <b>urgência progressiva</b> aos efeitos contínuos. Uma barra que só muda quando o prazo aperta comunica algo; uma que pisca o tempo todo vira ruído e o visitante para de enxergar.</p>
+  </div>
+</div>
+
 <p class="rodape">Ferramenta interna Foto Certa. Novos construtores podem ser adicionados como novas abas.</p>
 
 <script>
@@ -875,7 +1211,7 @@ function copiar(idOut,idAviso){
   var av=$(idAviso);av.classList.add('mostra');setTimeout(function(){av.classList.remove('mostra');},1800);
 }
 function trocarAba(qual){
-  ['slide','leads','tidy','uni','bor'].forEach(function(n){
+  ['slide','leads','tidy','uni','bor','cnt'].forEach(function(n){
     var p=$('painel-'+n),a=$('aba-'+n);
     if(p)p.classList.toggle('ativo',n===qual);
     if(a){a.classList.toggle('ativa',n===qual);a.setAttribute('aria-selected',n===qual?'true':'false');}
@@ -911,7 +1247,28 @@ function salvarEstado(){
         c1:$('b-c1-t').value,c2:$('b-c2-t').value,c3:$('b-c3-t').value,
         facholarg:$('b-facholarg').value,listra:$('b-listra').value,vel:$('b-vel').value,
         halo:radio('b-halo'),haloraio:$('b-haloraio').value,haloop:$('b-haloop').value,
-        txt:radio('b-txt'),c4:$('b-c4-t').value,pad:$('b-pad').value}
+        txt:radio('b-txt'),c4:$('b-c4-t').value,pad:$('b-pad').value},
+      cmsgs:cMsgs,
+      c:{modo:radio('c-modo'),dias:$('c-dias').value,horas:$('c-horas').value,mins:$('c-mins').value,
+        alvo:$('c-alvo').value,cod:$('c-cod').value,
+        und:$('c-un-d').checked,unh:$('c-un-h').checked,unm:$('c-un-m').checked,uns:$('c-un-s').checked,
+        diaszero:radio('c-diaszero'),fim:radio('c-fim'),fimtxt:$('c-fimtxt').value,
+        cfundo:$('c-cfundo-t').value,ctexto:$('c-ctexto-t').value,cdestaque:$('c-cdestaque-t').value,
+        fonte:radio('c-fonte'),tam:$('c-tam').value,peso:radio('c-peso'),
+        formato:radio('c-formato'),rd:$('c-rd').value,rh:$('c-rh').value,rm:$('c-rm').value,rs:$('c-rs').value,
+        pad:$('c-pad').value,largmax:$('c-largmax').value,alinha:radio('c-alinha'),
+        borda:radio('c-borda'),cborda:$('c-cborda-t').value,mob:$('c-mob').value,
+        fixa:radio('c-fixa'),empurrar:radio('c-empurrar'),z:$('c-z').value,
+        cta:radio('c-cta'),ctatxt:$('c-ctatxt').value,ctaurl:$('c-ctaurl').value,
+        ctafundo:$('c-ctafundo-t').value,ctatexto:$('c-ctatexto-t').value,
+        fechar:radio('c-fechar'),prog:radio('c-prog'),cprog:$('c-cprog-t').value,
+        coruja:radio('c-coruja'),corujaalt:$('c-corujaalt').value,gap:$('c-gap').value,
+        corujacorpo:$('c-corujacorpo-t').value,corujadet:$('c-corujadet-t').value,corujamob:radio('c-corujamob'),
+        mov:radio('c-mov'),vel:$('c-vel').value,alt:$('c-alt').value,
+        efpulsar:$('c-ef-pulsar').checked,efbrilho:$('c-ef-brilho').checked,efdegrade:$('c-ef-degrade').checked,
+        efpiscar:$('c-ef-piscar').checked,eftremor:$('c-ef-tremor').checked,
+        urg:radio('c-urg'),urglim:$('c-urglim').value,curg:$('c-curg-t').value,urgpulsar:radio('c-urgpulsar'),
+        dig:radio('c-dig'),entrada:radio('c-entrada'),entradapx:$('c-entradapx').value}
     };
     localStorage.setItem('fcConstrutores',JSON.stringify(st));
   }catch(e){}
@@ -971,6 +1328,35 @@ function restaurarEstado(){
       $('b-c4-t').value=B.c4;$('b-c4').value=corValida(B.c4)?B.c4:'#F7EFDF';
       $('b-pad').value=B.pad;
     }
+    if(st.cmsgs){cMsgs=st.cmsgs;cMsgRender();}
+    if(st.c){var C=st.c;
+      setRadio('c-modo',C.modo);setRadio('c-diaszero',C.diaszero);setRadio('c-fim',C.fim);
+      $('c-dias').value=C.dias;$('c-horas').value=C.horas;$('c-mins').value=C.mins;
+      $('c-alvo').value=C.alvo||'';$('c-cod').value=C.cod||'';$('c-fimtxt').value=C.fimtxt;
+      $('c-un-d').checked=!!C.und;$('c-un-h').checked=!!C.unh;$('c-un-m').checked=!!C.unm;$('c-un-s').checked=!!C.uns;
+      setRadio('c-fonte',C.fonte);setRadio('c-peso',C.peso);setRadio('c-formato',C.formato);
+      setRadio('c-alinha',C.alinha);setRadio('c-borda',C.borda);setRadio('c-fixa',C.fixa);
+      setRadio('c-empurrar',C.empurrar);setRadio('c-cta',C.cta);setRadio('c-fechar',C.fechar);
+      setRadio('c-prog',C.prog);setRadio('c-coruja',C.coruja);setRadio('c-corujamob',C.corujamob);
+      setRadio('c-mov',C.mov);setRadio('c-urg',C.urg);setRadio('c-urgpulsar',C.urgpulsar);
+      setRadio('c-dig',C.dig);setRadio('c-entrada',C.entrada);
+      $('c-tam').value=C.tam;$('c-pad').value=C.pad;$('c-largmax').value=C.largmax;$('c-mob').value=C.mob;
+      $('c-z').value=C.z;$('c-rd').value=C.rd;$('c-rh').value=C.rh;$('c-rm').value=C.rm;$('c-rs').value=C.rs;
+      $('c-ctatxt').value=C.ctatxt;$('c-ctaurl').value=C.ctaurl;
+      $('c-corujaalt').value=C.corujaalt;
+      /* o campo do espacamento saiu da coruja e virou c-gap; estados gravados antes disso
+         ainda trazem corujagap */
+      $('c-gap').value=(C.gap!=null&&C.gap!=='')?C.gap:((C.corujagap!=null&&C.corujagap!=='')?C.corujagap:16);
+      $('c-vel').value=C.vel;$('c-alt').value=C.alt;$('c-urglim').value=C.urglim;$('c-entradapx').value=C.entradapx;
+      $('c-ef-pulsar').checked=!!C.efpulsar;$('c-ef-brilho').checked=!!C.efbrilho;$('c-ef-degrade').checked=!!C.efdegrade;
+      $('c-ef-piscar').checked=!!C.efpiscar;$('c-ef-tremor').checked=!!C.eftremor;
+      [['c-cfundo',C.cfundo,'#0F3A30'],['c-ctexto',C.ctexto,'#FDFBF6'],['c-cdestaque',C.cdestaque,'#FFC94A'],
+       ['c-cborda',C.cborda,'#FFC94A'],['c-ctafundo',C.ctafundo,'#FFC94A'],['c-ctatexto',C.ctatexto,'#23281F'],
+       ['c-cprog',C.cprog,'#FFC94A'],['c-corujacorpo',C.corujacorpo,'#FDFBF6'],['c-corujadet',C.corujadet,'#FFC94A'],
+       ['c-curg',C.curg,'#8C1D18']].forEach(function(p){
+        $(p[0]+'-t').value=p[1];$(p[0]).value=corValida(p[1])?p[1]:p[2];
+      });
+    }
   }catch(e){}
 }
 function corValida(v){return /^#[0-9a-fA-F]{6}$/.test(v);}
@@ -980,8 +1366,8 @@ document.addEventListener('change',salvarEstado);
 /* pareia seletor de cor com campo de texto */
 function parearCor(idCor){
   var c=$(idCor),t=$(idCor+'-t');
-  c.addEventListener('input',function(){t.value=c.value;salvarEstado();lBtnPreview();});
-  t.addEventListener('input',function(){if(corValida(t.value)){c.value=t.value;lBtnPreview();}});
+  c.addEventListener('input',function(){t.value=c.value;salvarEstado();lBtnPreview();if(/^c-/.test(idCor))cPreview();});
+  t.addEventListener('input',function(){if(corValida(t.value)){c.value=t.value;lBtnPreview();if(/^c-/.test(idCor))cPreview();}});
 }
 
 /* ============================================================
@@ -2436,6 +2822,726 @@ function bGerar(){
   $('b-out2').value=m.props;
 }
 
+/* ============================================================
+   CONTAGEM REGRESSIVA
+   ============================================================ */
+function cToggles(){
+  var modo=radio('c-modo'),fim=radio('c-fim'),el;
+  el=$('c-abertura-campos');if(el)el.style.display=(modo==='abertura')?'block':'none';
+  el=$('c-data-campos');if(el)el.style.display=(modo==='data')?'block':'none';
+  el=$('c-fimtxt-campo');if(el)el.style.display=(fim==='mensagem')?'block':'none';
+  el=$('c-reiniciar-aviso');if(el)el.style.display=(modo==='abertura')?'block':'none';
+  var rr=document.querySelector('input[name="c-fim"][value="reiniciar"]');
+  if(rr){
+    rr.disabled=(modo!=='abertura');
+    if(rr.disabled&&rr.checked)setRadio('c-fim','esconder');
+  }
+  el=$('c-fixa-campos');if(el)el.style.display=(radio('c-fixa')==='fixa')?'block':'none';
+  el=$('c-borda-campo');if(el)el.style.display=(radio('c-borda')==='sim')?'block':'none';
+  el=$('c-cta-campos');if(el)el.style.display=(radio('c-cta')==='sim')?'block':'none';
+  el=$('c-prog-campo');if(el)el.style.display=(radio('c-prog')==='sim')?'block':'none';
+  el=$('c-coruja-campos');if(el)el.style.display=(radio('c-coruja')==='sim')?'block':'none';
+  var mov=radio('c-mov');
+  el=$('c-vel-campo');if(el)el.style.display=(mov==='rolaesq'||mov==='roladir')?'block':'none';
+  el=$('c-alt-campo');if(el)el.style.display=(mov==='altfade'||mov==='altdesliza')?'block':'none';
+  el=$('c-entrada-campo');if(el)el.style.display=(radio('c-entrada')==='aposrolar')?'block':'none';
+  el=$('c-urg-campos');if(el)el.style.display=(radio('c-urg')==='sim')?'block':'none';
+  cTitulo();
+}
+document.addEventListener('change',function(e){
+  if(e.target&&/^c-/.test(e.target.name||e.target.id||'')){cToggles();cPreview();}
+});
+/* 'change' so dispara quando o campo perde o foco: sem este 'input', a previa so acordava
+   depois de o operador clicar fora. A aba de bordas ja ouvia os dois. */
+document.addEventListener('input',function(e){
+  if(e.target&&/^c-/.test(e.target.name||e.target.id||'')){cToggles();cPreview();}
+});
+
+var cMsgs=[];
+function cMsgAdd(){
+  var t=$('c-msg').value.trim();
+  if(!t){alert('Escreva o texto da mensagem.');return;}
+  cMsgs.push({texto:t,curta:$('c-msgcurta').value.trim()});
+  $('c-msg').value='';$('c-msgcurta').value='';
+  cMsgRender();salvarEstado();
+  cPreview();
+}
+function cMsgMove(i,d){
+  var j=i+d;if(j<0||j>=cMsgs.length)return;
+  var t=cMsgs[i];cMsgs[i]=cMsgs[j];cMsgs[j]=t;
+  cMsgRender();salvarEstado();
+  cPreview();
+}
+function cMsgDel(i){cMsgs.splice(i,1);cMsgRender();salvarEstado();cPreview();}
+function cMsgRender(){
+  var ul=$('c-msg-lista');if(!ul)return;
+  ul.innerHTML='';
+  $('c-msg-vazio').style.display=cMsgs.length?'none':'block';
+  cMsgs.forEach(function(m,i){
+    var li=document.createElement('li');
+    var info=document.createElement('div');info.className='info';
+    var tx=document.createElement('div');tx.className='url';tx.textContent=m.texto;tx.title=m.texto;
+    info.appendChild(tx);
+    if(m.curta){
+      var cu=document.createElement('div');cu.className='url';cu.textContent='celular: '+m.curta;cu.title=m.curta;
+      info.appendChild(cu);
+    }
+    var ctrl=document.createElement('div');ctrl.className='ctrl';
+    [['\u2191',function(){cMsgMove(i,-1);},'Subir'],['\u2193',function(){cMsgMove(i,1);},'Descer'],['\u2715',function(){cMsgDel(i);},'Remover']]
+      .forEach(function(b){var bt=document.createElement('button');bt.textContent=b[0];bt.title=b[2];bt.setAttribute('aria-label',b[2]);bt.addEventListener('click',b[1]);ctrl.appendChild(bt);});
+    li.appendChild(info);li.appendChild(ctrl);
+    ul.appendChild(li);
+  });
+}
+
+function cNum(id,def){var v=parseInt($(id).value,10);return isNaN(v)?def:v;}
+function cCor(id,def){var v=$(id+'-t').value;return corValida(v)?v:def;}
+function cAlvoIso(){
+  var v=$('c-alvo').value;
+  if(!v)return '';
+  var partes=v.split('T');
+  if(partes.length<2)return '';
+  /* -03:00 fixo (horario de Brasilia; sem horario de verao desde 2019). O campo nao tem
+     "step", entao o navegador so devolve HH:MM, mas montamos o ISO a partir dos componentes
+     (nunca com cirurgia de string no valor bruto) para nao quebrar se algum dia vier com
+     segundos. */
+  return partes[0]+'T'+partes[1].slice(0,5)+':00-03:00';
+}
+function cCfg(){
+  var dias=cNum('c-dias',0),horas=cNum('c-horas',0),mins=cNum('c-mins',0);
+  return {
+    modo:radio('c-modo'),
+    duracaoMs:((dias*24+horas)*60+mins)*60000,
+    alvoIso:cAlvoIso(),
+    cod:$('c-cod').value.trim()||'padrao',
+    unidades:{d:$('c-un-d').checked,h:$('c-un-h').checked,m:$('c-un-m').checked,s:$('c-un-s').checked},
+    diaszero:radio('c-diaszero')==='sim',
+    fim:radio('c-fim'),fimtxt:$('c-fimtxt').value,
+    cores:{fundo:cCor('c-cfundo','#0F3A30'),texto:cCor('c-ctexto','#FDFBF6'),destaque:cCor('c-cdestaque','#FFC94A'),
+      borda:cCor('c-cborda','#FFC94A'),urg:cCor('c-curg','#8C1D18'),
+      ctaFundo:cCor('c-ctafundo','#FFC94A'),ctaTexto:cCor('c-ctatexto','#23281F'),
+      prog:cCor('c-cprog','#FFC94A'),corujaCorpo:cCor('c-corujacorpo','#FDFBF6'),corujaDet:cCor('c-corujadet','#FFC94A')},
+    fonte:radio('c-fonte'),tam:cNum('c-tam',15),peso:radio('c-peso'),
+    formato:radio('c-formato'),
+    rotulos:{d:$('c-rd').value,h:$('c-rh').value,m:$('c-rm').value,s:$('c-rs').value},
+    pad:cNum('c-pad',10),largmax:cNum('c-largmax',1100),alinha:radio('c-alinha'),
+    borda:radio('c-borda')==='sim',mob:cNum('c-mob',640),
+    fixa:radio('c-fixa')==='fixa',empurrar:radio('c-empurrar')==='empurrar',z:cNum('c-z',99980),
+    cta:{ativo:radio('c-cta')==='sim',txt:$('c-ctatxt').value,url:$('c-ctaurl').value},
+    fechar:radio('c-fechar'),prog:radio('c-prog')==='sim',
+    gap:cNum('c-gap',16),
+    coruja:{ativo:radio('c-coruja')==='sim',alt:cNum('c-corujaalt',26),mob:radio('c-corujamob')==='sim'},
+    mov:radio('c-mov'),vel:cNum('c-vel',18),alt:Math.max(2,cNum('c-alt',5)),
+    efeitos:{pulsar:$('c-ef-pulsar').checked,brilho:$('c-ef-brilho').checked,degrade:$('c-ef-degrade').checked,
+      piscar:$('c-ef-piscar').checked,tremor:$('c-ef-tremor').checked},
+    urg:{ativo:radio('c-urg')==='sim',lim:cNum('c-urglim',60),pulsar:radio('c-urgpulsar')==='sim'},
+    dig:radio('c-dig'),entrada:radio('c-entrada'),entradapx:cNum('c-entradapx',300),
+    msgs:cMsgs.length?cMsgs:[{texto:'Oferta por tempo limitado {contador}',curta:''}]
+  };
+}
+function cPartes(ms){
+  if(ms<0)ms=0;
+  var t=Math.floor(ms/1000);
+  return {d:Math.floor(t/86400),h:Math.floor(t%86400/3600),m:Math.floor(t%3600/60),s:t%60};
+}
+function cAlvoMs(cfg,inicioMs){
+  if(cfg.modo==='data'){var v=Date.parse(cfg.alvoIso);return isNaN(v)?inicioMs:v;}
+  return inicioMs+cfg.duracaoMs;
+}
+function cDois(n){return (n<10?'0':'')+n;}
+function cFormatarHTML(p,cfg){
+  var u=cfg.unidades,mostraD=u.d&&!(cfg.diaszero&&p.d===0);
+  var itens=[];
+  if(mostraD)itens.push([cDois(p.d),cfg.rotulos.d,'d']);
+  if(u.h)itens.push([cDois(p.h),cfg.rotulos.h,'h']);
+  if(u.m)itens.push([cDois(p.m),cfg.rotulos.m,'m']);
+  if(u.s)itens.push([cDois(p.s),cfg.rotulos.s,'s']);
+  if(!itens.length)return '';
+  var h='',i;
+  if(cfg.formato==='blocos'){
+    for(i=0;i<itens.length;i++){
+      h+='<span class="fcb-bloco"><span class="fcb-num">'+itens[i][0]+'</span><span class="fcb-rot">'+escHtml(itens[i][1])+'</span></span>';
+    }
+  }else{
+    for(i=0;i<itens.length;i++){
+      if(i)h+='<span class="fcb-sep">:</span>';
+      h+='<span class="fcb-num">'+itens[i][0]+'</span><span class="fcb-suf">'+itens[i][2]+'</span>';
+    }
+  }
+  return '<span class="fcb-rel">'+h+'</span>';
+}
+
+/* escAttr protege a ESTRUTURA do atributo (aspas), nao o esquema: href="javascript:..."
+   continua sendo um atributo bem formado e executa ao clique. Aceita ancora, caminho
+   relativo e http(s); recusa qualquer outro esquema. Os caracteres de controle e o espaco
+   sao removidos antes do teste porque o navegador tambem os ignora ao resolver a URL --
+   sem isso, "jav\tascript:alert(1)" passaria pelo teste e viraria javascript: no clique. */
+function cUrlOk(v){
+  var limpo=String(v).replace(/[\u0000-\u0020]/g,'');
+  if(!limpo)return false;
+  if(limpo.charAt(0)==='#')return true;
+  if(/^https?:\/\//i.test(limpo))return true;
+  if(/^[a-zA-Z][a-zA-Z0-9+.\-]*:/.test(limpo))return false;
+  return true;
+}
+function cGerar(){
+  var cfg=cCfg();
+  if(cfg.modo==='data'&&!$('c-alvo').value){alert('Informe a data e hora do encerramento.');return;}
+  if(cfg.modo==='abertura'&&cfg.duracaoMs<=0){alert('Informe uma duração maior que zero.');return;}
+  if(!$('c-cod').value.trim()){alert('Informe o código da campanha. Sem ele, duas campanhas diferentes dividem a mesma chave no navegador do visitante e a segunda nasce já encerrada para quem visitou a primeira.');return;}
+  if(!cfg.unidades.d&&!cfg.unidades.h&&!cfg.unidades.m&&!cfg.unidades.s){alert('Marque pelo menos uma unidade (dias, horas, minutos ou segundos). Sem nenhuma, a barra sai sem contador.');return;}
+  if(cfg.cta.ativo&&!cUrlOk(cfg.cta.url)){alert('O link do botão de ação precisa ser uma âncora (#reserva), um caminho do site (/natal-2026) ou um endereço http(s). Outros esquemas, como javascript:, não são aceitos.');return;}
+  if(cfg.urg.ativo){
+    var totalMs=(cfg.modo==='data')?(Date.parse(cfg.alvoIso)-(new Date()).getTime()):cfg.duracaoMs;
+    if(!isNaN(totalMs)&&cfg.urg.lim*60000>=totalMs){
+      alert('A urgência começa faltando '+cfg.urg.lim+' min, mas a contagem inteira é mais curta que isso: a barra nasceria já na cor de urgência e a cor de fundo configurada nunca apareceria. Reduza o limiar ou aumente a duração.');return;
+    }
+  }
+  var c='';
+  c+='<!-- ============================================================\n';
+  c+='     FOTO CERTA - BARRA DE CONTAGEM REGRESSIVA\n';
+  c+='     ONDE COLAR: '+(cfg.fixa?'campo Tag Body da pagina':'componente HTML no topo da pagina')+'\n';
+  c+='     Gerado pela ferramenta em construtores.fotocerta.com.br\n';
+  c+='     ============================================================ -->\n\n';
+  c+='<sty'+'le>\n'+cCssBase(cfg)+'</sty'+'le>\n\n';
+  c+='<div class="fcb-barra" id="fcb-barra"></div>\n\n';
+  c+='<scr'+'ipt>\n(function () {\n'+cJsBase(cfg)+'})();\n</scr'+'ipt>\n';
+  $('c-out1').value=c;
+  cTitulo();
+}
+function cTitulo(){
+  /* #c-out-titulo e um <span> so para o texto: escrever por nodeValue no primeiro filho do
+     <h3> dependia de esse filho ser um no de texto -- se o titulo passasse a comecar com um
+     elemento a atribuicao virava no-op silencioso, e se ficasse vazio virava TypeError que
+     derrubava cToggles inteiro (cTitulo e chamada de dentro dele). */
+  var t=$('c-out-titulo');if(!t)return;
+  var fixa=radio('c-fixa')==='fixa';
+  t.textContent=fixa?'Código para a Tag Body da página':'Código para o componente HTML';
+}
+function cCssBase(cfg){
+  var fontes={neutra:'-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Ubuntu,sans-serif',
+    humanista:'"Helvetica Neue",Helvetica,Arial,sans-serif',
+    condensada:'"Roboto Condensed","Arial Narrow",Arial,sans-serif',
+    mono:'ui-monospace,SFMono-Regular,Menlo,Consolas,monospace'};
+  var s='';
+  /* transition e' shorthand: se outra regra .fcb-barra tambem declarar transition (ex: a
+     entrada deslizante), a que vier depois no CSS vence por inteiro, nao so a parte que ela
+     nomeia -- por isso a lista de transicoes e o transform inicial da entrada sao acumulados
+     aqui, na UNICA regra base .fcb-barra que declara transition. cCssEfeitos nao declara
+     transition nessa mesma classe. */
+  var transBarra=['background-color .4s ease'];
+  var transformInicial='';
+  if(cfg.entrada==='deslizar'||cfg.entrada==='aposrolar'){
+    transBarra.push('transform .45s ease');
+    transformInicial='transform:translateY(-100%);';
+  }
+  s+='.fcb-barra{'+(cfg.fixa?'position:fixed;top:0;left:0;right:0;z-index:'+cfg.z+';':'position:relative;')+
+     'box-sizing:border-box;width:100%;background:'+cfg.cores.fundo+';color:'+cfg.cores.texto+';'+
+     'font-family:'+fontes[cfg.fonte]+';font-size:'+cfg.tam+'px;font-weight:'+cfg.peso+';'+
+     'padding:'+cfg.pad+'px 16px;line-height:1.3;font-variant-numeric:tabular-nums;'+
+     transformInicial+
+     'transition:'+transBarra.join(',')+';'+
+     (cfg.borda?'border-bottom:2px solid '+cfg.cores.borda+';':'')+'}\n';
+  s+='.fcb-interno{display:flex;align-items:center;gap:'+cfg.gap+'px;max-width:'+cfg.largmax+'px;margin:0 auto;'+
+     'justify-content:'+(cfg.alinha==='centro'?'center':'flex-start')+'}\n';
+  s+='.fcb-conteudo{flex:1 1 auto;min-width:0;overflow:hidden;text-align:'+(cfg.alinha==='centro'?'center':'left')+'}\n';
+  s+='.fcb-num{font-weight:700;color:'+cfg.cores.destaque+'}\n';
+  s+='.fcb-sep,.fcb-suf{opacity:.65;margin:0 1px}\n';
+  s+='.fcb-rel{white-space:nowrap}\n';
+  if(cfg.formato==='blocos'){
+    s+='.fcb-bloco{display:inline-block;text-align:center;margin:0 5px}\n';
+    s+='.fcb-bloco .fcb-num{display:block;font-size:1.3em;line-height:1.1}\n';
+    s+='.fcb-bloco .fcb-rot{display:block;font-size:.62em;opacity:.75;text-transform:uppercase;letter-spacing:.04em}\n';
+  }
+  s+='.fcb-curta{display:none}\n';
+  s+='@media (max-width:'+cfg.mob+'px){.fcb-longa{display:none}.fcb-curta{display:inline}}\n';
+  if(cfg.coruja.ativo){
+    s+='.fcb-coruja{flex:0 0 auto;line-height:0}\n';
+    s+='.fcb-coruja svg{height:'+cfg.coruja.alt+'px;width:auto;display:block}\n';
+    if(cfg.coruja.mob)s+='@media (max-width:'+cfg.mob+'px){.fcb-coruja{display:none}}\n';
+  }
+  if(cfg.cta.ativo){
+    s+='.fcb-cta{flex:0 0 auto;display:inline-block;text-decoration:none;border-radius:999px;'+
+       'background:'+cfg.cores.ctaFundo+';color:'+cfg.cores.ctaTexto+';font-weight:700;'+
+       'padding:.45em 1.1em;font-size:.92em;white-space:nowrap}\n';
+  }
+  if(cfg.fechar!=='nao'){
+    s+='.fcb-fechar{flex:0 0 auto;border:none;background:none;color:inherit;cursor:pointer;'+
+       'font-size:1.15em;line-height:1;padding:4px 6px;opacity:.7}\n';
+    s+='.fcb-fechar:hover{opacity:1}\n';
+  }
+  if(cfg.prog){
+    s+='.fcb-prog{position:absolute;left:0;bottom:0;height:3px;width:0;background:'+cfg.cores.prog+';transition:width 1s linear}\n';
+  }
+  s+=cCssEfeitos(cfg);
+  return s;
+}
+function cCssEfeitos(cfg){
+  var s='',anim=[];
+  if(cfg.mov==='rolaesq'||cfg.mov==='roladir'){
+    s+='.fcb-trilho{display:inline-flex;white-space:nowrap;will-change:transform;'+
+       'animation:fcb-rola '+cfg.vel+'s linear infinite'+(cfg.mov==='roladir'?' reverse':'')+'}\n';
+    s+='.fcb-trilho > span{padding-right:3em}\n';
+    s+='@keyframes fcb-rola{from{transform:translateX(0)}to{transform:translateX(-50%)}}\n';
+    anim.push('.fcb-trilho');
+  }
+  if(cfg.mov==='altfade'){
+    s+='.fcb-conteudo{transition:opacity .4s ease}\n.fcb-conteudo.fcb-saindo{opacity:0}\n';
+  }
+  if(cfg.mov==='altdesliza'){
+    s+='.fcb-conteudo{transition:transform .4s ease,opacity .4s ease}\n';
+    s+='.fcb-conteudo.fcb-saindo{transform:translateY(-100%);opacity:0}\n';
+  }
+  if(cfg.efeitos.pulsar){
+    s+='.fcb-conteudo{animation:fcb-pulsar 1.8s ease-in-out infinite}\n';
+    s+='@keyframes fcb-pulsar{0%,100%{transform:scale(1)}50%{transform:scale(1.035)}}\n';
+    anim.push('.fcb-conteudo');
+  }
+  if(cfg.efeitos.brilho||cfg.efeitos.degrade){
+    var bgImg=[],bgTam=[],bgRep=[],bgAnim=[];
+    if(cfg.efeitos.brilho){
+      bgImg.push('linear-gradient(100deg,rgba(255,255,255,0) 40%,rgba(255,255,255,.28) 50%,rgba(255,255,255,0) 60%)');
+      bgTam.push('250% 100%');
+      bgRep.push('no-repeat');
+      bgAnim.push('fcb-brilho 5s linear infinite');
+      s+='@keyframes fcb-brilho{from{background-position:150% 0}to{background-position:-150% 0}}\n';
+    }
+    if(cfg.efeitos.degrade){
+      bgImg.push('linear-gradient(90deg,'+cfg.cores.fundo+','+cfg.cores.destaque+','+cfg.cores.fundo+')');
+      bgTam.push('200% 100%');
+      bgRep.push('repeat');
+      bgAnim.push('fcb-degrade 8s linear infinite');
+      s+='@keyframes fcb-degrade{from{background-position:0 0}to{background-position:200% 0}}\n';
+    }
+    s+='.fcb-barra{background-image:'+bgImg.join(',')+';background-size:'+bgTam.join(',')+';'+
+       'background-repeat:'+bgRep.join(',')+';animation:'+bgAnim.join(',')+'}\n';
+    anim.push('.fcb-barra');
+    if(cfg.urg.ativo&&cfg.efeitos.degrade){
+      /* o degrade e uma camada opaca: sozinho, esconderia a cor de urgencia, que o JS aplica
+         em background-color. Regra propria do estado urgente, so com a camada de imagem
+         repintada -- seletor diferente do da regra base, entao nao ha shorthand se
+         atropelando (as camadas ficam na MESMA ordem: brilho antes, degrade depois). */
+      var bgUrg=[];
+      if(cfg.efeitos.brilho)bgUrg.push('linear-gradient(100deg,rgba(255,255,255,0) 40%,rgba(255,255,255,.28) 50%,rgba(255,255,255,0) 60%)');
+      bgUrg.push('linear-gradient(90deg,'+cfg.cores.urg+','+cfg.cores.destaque+','+cfg.cores.urg+')');
+      s+='.fcb-barra.fcb-urgente{background-image:'+bgUrg.join(',')+'}\n';
+    }
+  }
+  if(cfg.efeitos.piscar&&cfg.formato==='compacto'){
+    s+='.fcb-sep{animation:fcb-piscar 1s steps(1) infinite}\n';
+    s+='@keyframes fcb-piscar{0%,49%{opacity:.65}50%,100%{opacity:0}}\n';
+    anim.push('.fcb-sep');
+  }
+  if(cfg.efeitos.tremor){
+    s+='.fcb-interno{animation:fcb-tremor 6s ease-in-out infinite}\n';
+    s+='@keyframes fcb-tremor{0%,90%,100%{transform:translateX(0)}92%{transform:translateX(-3px)}94%{transform:translateX(3px)}96%{transform:translateX(-2px)}98%{transform:translateX(2px)}}\n';
+    anim.push('.fcb-interno');
+  }
+  if(cfg.urg.ativo&&cfg.urg.pulsar){
+    s+='.fcb-barra.fcb-urgente .fcb-conteudo{animation:fcb-urgpulsar 1s ease-in-out infinite}\n';
+    s+='@keyframes fcb-urgpulsar{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}\n';
+    anim.push('.fcb-barra.fcb-urgente .fcb-conteudo');
+  }
+  if(cfg.dig==='fade'){
+    s+='.fcb-num{transition:opacity .25s ease}\n.fcb-num.fcb-virando{opacity:.15}\n';
+  }
+  if(cfg.dig==='flip'){
+    s+='.fcb-num{display:inline-block;transition:transform .25s ease}\n.fcb-num.fcb-virando{transform:rotateX(90deg)}\n';
+  }
+  if(cfg.entrada==='deslizar'||cfg.entrada==='aposrolar'){
+    /* o transform inicial (-100%) e a transition ja saem na regra base .fcb-barra
+       (cCssBase), acumulados junto de transition:background-color -- ver comentario la.
+       Aqui so o estado revelado, que e uma regra a mais sem conflito de shorthand. */
+    s+='.fcb-barra.fcb-visivel{transform:translateY(0)}\n';
+  }
+  /* nem todo movimento vem de @keyframes: a entrada deslizante, a alternancia de
+     mensagens (altfade/altdesliza), a virada dos digitos (fade/flip) e a barra de
+     progresso usam transition, nao animation. Se um desses for o unico efeito ativo,
+     anim.length fica vazio e o bloco reduced-motion inteiro deixava de sair -- a barra
+     deslizava/alternava/virava/a barra de progresso avancava com movimento continuo
+     mesmo para quem pediu menos movimento no sistema. O bloco agora sai sempre que
+     houver movimento, por animation OU por transition, e neutraliza os dois. */
+  var temTransMov=(cfg.entrada==='deslizar'||cfg.entrada==='aposrolar')||
+    (cfg.mov==='altfade'||cfg.mov==='altdesliza')||(cfg.dig==='fade'||cfg.dig==='flip')||cfg.prog;
+  if(anim.length||temTransMov){
+    s+='@media (prefers-reduced-motion: reduce){\n';
+    if(anim.length)s+='  '+anim.join(',')+'{animation:none}\n';
+    s+='  .fcb-barra{transition:none}\n';
+    if(cfg.mov==='altfade'||cfg.mov==='altdesliza')s+='  .fcb-conteudo{transition:none}\n';
+    if(cfg.dig==='fade'||cfg.dig==='flip')s+='  .fcb-num{transition:none}\n';
+    if(cfg.prog)s+='  .fcb-prog{transition:none}\n';
+    s+='}\n';
+  }
+  return s;
+}
+/* escHtml (compartilhada pelas seis abas) so protege texto entre tags -- nao escapa
+   aspas, entao nao serve para montar valor de atributo entre aspas duplas. cfg.cta.url
+   e a unica string livre do gerador que vai parar dentro de um atributo (href). Helper
+   dedicado em vez de mexer em escHtml, que e usada em outra ~15 lugares como texto de
+   elemento (onde aspas sao inofensivas) e cuja alteracao arriscaria regressao nas
+   previas das outras abas. */
+function escAttr(s){return escHtml(s).replace(/"/g,'&quot;');}
+/* esc() protege a string JS (barra invertida e apostrofo), mas nao protege a fatia de HTML
+   em volta. MENSAGENS, ROTULOS e o CTA ja passam por escHtml, que come o "<". MSG_FINAL e
+   CODIGO nao podem passar por escHtml -- MSG_FINAL vai para textContent (o visitante veria
+   "&amp;" cru) e CODIGO vira chave de localStorage -- entao sao estes dois que precisam de
+   tratamento proprio. Duas sequencias tiram o parser do estado normal de script:
+     "</"    fecha o elemento no primeiro "</scr'+'ipt" do texto bruto;
+     "<!--"  leva ao estado escapado e, se vier um "<scr'+'ipt" depois, ao duplamente
+             escapado -- dali o "</scr'+'ipt>" legitimo do proprio bloco deixa de fechar o
+             elemento, e a barra some junto com tudo que vier depois dela na pagina.
+   As duas ganham uma barra invertida que o parser HTML ve e o interpretador JS descarta. */
+function escJs(s){return esc(s).replace(/<\//g,'<\\/').replace(/<!--/g,'<\\!--');}
+function cJsBase(cfg){
+  var j='';
+  j+='  /* ===== CONFIGURACAO ===== */\n';
+  j+="  var MODO='"+cfg.modo+"';                 /* 'abertura' = prazo por visitante | 'data' = ate um instante fixo */\n";
+  j+='  var DURACAO_MS='+cfg.duracaoMs+';        /* usado so no modo abertura */\n';
+  j+="  var ALVO_ISO='"+esc(cfg.alvoIso)+"';     /* usado so no modo data, com fuso -03:00 */\n";
+  j+="  var CODIGO='"+escJs(cfg.cod)+"';         /* trocar este codigo zera a contagem de todos os visitantes */\n";
+  j+="  var AO_ZERAR='"+cfg.fim+"';              /* 'esconder' | 'mensagem' | 'zerado' | 'reiniciar' */\n";
+  j+="  var MSG_FINAL='"+escJs(cfg.fimtxt)+"';   /* texto mostrado quando AO_ZERAR e 'mensagem' */\n";
+  j+='  /* Mensagens da barra. Em cada uma, {contador} marca ONDE o relogio entra no texto;\n';
+  j+='     sem o marcador o relogio aparece depois do texto. "curta" e a versao usada abaixo\n';
+  j+='     da largura de corte do celular (vazia = usa a longa). Com duas ou mais mensagens,\n';
+  j+='     a alternancia configurada na ferramenta passa a girar entre elas. */\n';
+  j+='  var MENSAGENS=[\n';
+  cfg.msgs.forEach(function(m,i){
+    j+="    {texto:'"+esc(escHtml(m.texto))+"',curta:'"+esc(escHtml(m.curta||''))+"'}"+(i<cfg.msgs.length-1?',':'')+'\n';
+  });
+  j+='  ];\n';
+  j+='  var UNIDADES={d:'+cfg.unidades.d+',h:'+cfg.unidades.h+',m:'+cfg.unidades.m+',s:'+cfg.unidades.s+'};  /* true|false: quais unidades aparecem no relogio */\n';
+  j+="  var ROTULOS={d:'"+esc(escHtml(cfg.rotulos.d))+"',h:'"+esc(escHtml(cfg.rotulos.h))+"',m:'"+esc(escHtml(cfg.rotulos.m))+"',s:'"+esc(escHtml(cfg.rotulos.s))+"'};  /* nomes das unidades, escritos por extenso no formato 'blocos' */\n";
+  j+='  var ESCONDE_DIAS_ZERADOS='+cfg.diaszero+';  /* true = o bloco de dias some quando chega a zero */\n';
+  j+="  var FORMATO='"+cfg.formato+"';           /* 'compacto' | 'blocos' */\n";
+  j+="  var DIG='"+cfg.dig+"';                    /* 'nenhuma' | 'fade' | 'flip' */\n";
+  j+='  var EMPURRA_CONTEUDO='+(cfg.fixa&&cfg.empurrar)+';  /* true = reserva espaco no topo da pagina para a barra fixa */\n';
+  if(cfg.urg.ativo)j+='  var LIMITE_URGENCIA='+(cfg.urg.lim*60000)+';   /* ms restantes para entrar em urgencia ('+cfg.urg.lim+' min) */\n';
+  j+='\n  /* Daqui para baixo nao precisa mexer */\n\n';
+  j+='  var raiz=document.getElementById(\'fcb-barra\');\n  if(!raiz)return;\n\n';
+  j+='  function guardar(k,v){try{localStorage.setItem(k,v);}catch(e){}}\n';
+  j+='  function ler(k){try{return localStorage.getItem(k);}catch(e){return null;}}\n\n';
+  j+="  var CHAVE='fcbar:'+CODIGO;\n";
+  j+='  var agora=(new Date()).getTime();\n';
+  j+='  var inicio=parseInt(ler(CHAVE),10);\n';
+  j+='  if(!inicio||isNaN(inicio)){inicio=agora;guardar(CHAVE,String(inicio));}\n\n';
+  j+="  function alvoMs(){\n";
+  j+="    if(MODO==='data'){var v=Date.parse(ALVO_ISO);return isNaN(v)?inicio:v;}\n";
+  j+='    return inicio+DURACAO_MS;\n  }\n';
+  j+='  var alvo=alvoMs();\n\n';
+  j+='  function dois(n){return (n<10?\'0\':\'\')+n;}\n';
+  j+='  function partes(ms){\n';
+  j+='    if(ms<0)ms=0;\n    var t=Math.floor(ms/1000);\n';
+  j+='    return {d:Math.floor(t/86400),h:Math.floor(t%86400/3600),m:Math.floor(t%3600/60),s:t%60};\n  }\n\n';
+  j+='  function itensRelogio(p){\n';
+  j+='    var itens=[];\n';
+  j+='    if(UNIDADES.d&&!(ESCONDE_DIAS_ZERADOS&&p.d===0))itens.push([dois(p.d),ROTULOS.d,\'d\']);\n';
+  j+='    if(UNIDADES.h)itens.push([dois(p.h),ROTULOS.h,\'h\']);\n';
+  j+='    if(UNIDADES.m)itens.push([dois(p.m),ROTULOS.m,\'m\']);\n';
+  j+='    if(UNIDADES.s)itens.push([dois(p.s),ROTULOS.s,\'s\']);\n';
+  j+='    return itens;\n  }\n';
+  j+='  /* a chave identifica QUAIS unidades estao visiveis (ex: "hms" ou "dhms") -- muda\n';
+  j+='     so quando ESCONDE_DIAS_ZERADOS derruba o bloco de dias ao cruzar 24h. So nesse\n';
+  j+='     caso vale remontar o marcador; a cada segundo normal so o texto dos digitos muda. */\n';
+  j+='  function chaveRelogio(itens){\n';
+  j+='    var k=\'\',i;\n    for(i=0;i<itens.length;i++)k+=itens[i][2];\n    return k;\n  }\n';
+  j+='  function relogio(p){\n';
+  j+='    var itens=itensRelogio(p),h=\'\',i;\n';
+  j+='    if(!itens.length)return \'\';\n';
+  j+="    if(FORMATO==='blocos'){\n";
+  j+='      for(i=0;i<itens.length;i++)h+=\'<span class="fcb-bloco"><span class="fcb-num">\'+itens[i][0]+\'</span><span class="fcb-rot">\'+itens[i][1]+\'</span></span>\';\n';
+  j+='    }else{\n';
+  j+='      for(i=0;i<itens.length;i++){\n';
+  j+='        if(i)h+=\'<span class="fcb-sep">:</span>\';\n';
+  j+='        h+=\'<span class="fcb-num">\'+itens[i][0]+\'</span><span class="fcb-suf">\'+itens[i][2]+\'</span>\';\n';
+  j+='      }\n    }\n';
+  j+="    return '<span class=\"fcb-rel\">'+h+'</span>';\n  }\n\n";
+  j+='  /* O relogio NAO e reescrito junto com a mensagem: a mensagem entra uma vez,\n';
+  j+='     com marcadores [data-fcb-rel] vazios, e o tick de cada segundo preenche\n';
+  j+='     apenas esses marcadores. Reescrever o innerHTML inteiro reiniciaria a\n';
+  j+='     animacao CSS da rolagem a cada segundo. */\n';
+  j+="  var MARCA='<span data-fcb-rel></span>';\n";
+  j+='  function comMarca(t){\n';
+  j+="    if(t.indexOf('{contador}')<0)return t+' '+MARCA;\n";
+  j+="    return t.split('{contador}').join(MARCA);\n  }\n";
+  j+='  function textoCom(msg){\n';
+  j+='    var longa=comMarca(msg.texto);\n';
+  j+='    if(!msg.curta)return longa;\n';
+  j+="    return '<span class=\"fcb-longa\">'+longa+'</span><span class=\"fcb-curta\">'+comMarca(msg.curta)+'</span>';\n  }\n\n";
+  j+='  var ROLANDO='+(cfg.mov==='rolaesq'||cfg.mov==='roladir')+';\n';
+  var interno='<div class="fcb-interno">';
+  if(cfg.coruja.ativo)interno+='<div class="fcb-coruja fcb-coruja-e"></div>';
+  interno+='<div class="fcb-conteudo"></div>';
+  if(cfg.cta.ativo)interno+='<a class="fcb-cta" href="'+escAttr(cfg.cta.url)+'">'+escHtml(cfg.cta.txt)+'</a>';
+  if(cfg.coruja.ativo)interno+='<div class="fcb-coruja fcb-coruja-d"></div>';
+  if(cfg.fechar!=='nao')interno+='<button type="button" class="fcb-fechar" aria-label="Fechar">\u2715</button>';
+  interno+='</div>';
+  if(cfg.prog)interno+='<div class="fcb-prog"></div>';
+  j+="  raiz.innerHTML='"+esc(interno)+"';\n";
+  j+="  var conteudo=raiz.querySelector('.fcb-conteudo');\n";
+  /* Os dois intervalos (tick de 1s e alternancia de mensagens) sao declarados aqui, antes
+     de qualquer bloco que precise para-los: o clique no botao fechar e o encerrar() ficam
+     mais abaixo no codigo gerado, mas os dois derrubam os DOIS timers pelo mesmo helper --
+     antes, a alternancia era anonima e sobrevivia ao fim da contagem, fazendo a mensagem
+     final piscar para sempre. */
+  j+='  var timer=null,altTimer=null;\n';
+  j+='  function pararTimers(){\n';
+  j+='    if(timer){clearInterval(timer);timer=null;}\n';
+  j+='    if(altTimer){clearInterval(altTimer);altTimer=null;}\n  }\n';
+  if(cfg.coruja.ativo){
+    j+=cSvgCorujaGer(cfg);
+    j+="  var corujas=raiz.querySelectorAll('.fcb-coruja');\n";
+    j+='  for(var ci=0;ci<corujas.length;ci++)corujas[ci].innerHTML=svgCoruja();\n\n';
+  }
+  if(cfg.fechar!=='nao'){
+    j+="  var CHAVE_FECHADA='fcbar:'+CODIGO+':fechada';\n";
+    j+=(cfg.fechar==='sessao')
+      ? "  function lerFechada(){try{return sessionStorage.getItem(CHAVE_FECHADA);}catch(e){return null;}}\n"+
+        "  function marcarFechada(){try{sessionStorage.setItem(CHAVE_FECHADA,'1');}catch(e){}}\n"
+      : "  function lerFechada(){return ler(CHAVE_FECHADA);}\n"+
+        "  function marcarFechada(){guardar(CHAVE_FECHADA,'1');}\n";
+    j+="  if(lerFechada()==='1'){raiz.style.display='none';return;}\n";
+    j+="  raiz.querySelector('.fcb-fechar').addEventListener('click',function(){\n";
+    j+="    marcarFechada();pararTimers();raiz.style.display='none';liberarEspaco();\n  });\n\n";
+  }
+  if(cfg.prog){
+    j+="  var barraProg=raiz.querySelector('.fcb-prog');\n";
+    j+='  function pintarProgresso(restante){\n';
+    j+='    var total=alvo-inicio;if(total<=0){barraProg.style.width=\'100%\';return;}\n';
+    j+='    var pct=Math.min(100,Math.max(0,(1-(restante/total))*100));\n';
+    j+="    barraProg.style.width=pct.toFixed(2)+'%';\n  }\n\n";
+  }
+  j+='  var msgAtual=0;\n';
+  j+='  var chaveAnterior=null;         /* forca remontagem do relogio na 1a vez e apos pintarMensagem */\n';
+  j+='  var VIRANDO_MS=250;             /* bate com a duracao da transicao css de fade/flip */\n';
+  if((cfg.mov==='altfade'||cfg.mov==='altdesliza')&&cfg.msgs.length>1){
+    j+='  altTimer=setInterval(function(){\n';
+    j+="    conteudo.classList.add('fcb-saindo');\n";
+    j+='    setTimeout(function(){\n';
+    j+='      msgAtual++;pintarMensagem();tick();\n';
+    j+="      conteudo.classList.remove('fcb-saindo');\n";
+    j+='    },400);\n';
+    j+='  },'+(cfg.alt*1000)+');\n\n';
+  }
+  if(cfg.entrada==='deslizar'){
+    j+="  setTimeout(function(){raiz.classList.add('fcb-visivel');espaco();},80);\n";
+  }
+  if(cfg.entrada==='aposrolar'){
+    j+='  function verRolagem(){\n';
+    j+='    var y=window.pageYOffset||document.documentElement.scrollTop;\n';
+    j+="    if(y>"+cfg.entradapx+")raiz.classList.add('fcb-visivel');\n";
+    j+="    else raiz.classList.remove('fcb-visivel');\n";
+    j+='    espaco();\n  }\n';
+    j+="  window.addEventListener('scroll',verRolagem);\n  verRolagem();\n";
+  }
+  /* O padding-top so pode existir enquanto a barra ocupa o topo de verdade. Com entrada
+     deslizante ou "depois de rolar" a barra so aparece quando ganha a classe fcb-visivel:
+     aplicar o espaco na montagem deixava uma faixa vazia no topo ate o visitante rolar. */
+  j+='\n  function barraAparente(){\n';
+  j+="    if(raiz.style.display==='none')return false;\n";
+  j+='    return '+((cfg.entrada==='deslizar'||cfg.entrada==='aposrolar')
+      ?"raiz.classList.contains('fcb-visivel')":'true')+';\n  }\n';
+  j+='  function espaco(){\n';
+  j+='    if(!EMPURRA_CONTEUDO)return;\n';
+  j+="    if(!barraAparente()){document.body.style.paddingTop='';return;}\n";
+  j+="    document.body.style.paddingTop=raiz.offsetHeight+'px';\n  }\n";
+  j+='  function liberarEspaco(){\n';
+  j+="    if(EMPURRA_CONTEUDO)document.body.style.paddingTop='';\n  }\n\n";
+  j+='  function encerrar(){\n';
+  j+='    pararTimers();\n';
+  j+="    if(AO_ZERAR==='esconder'){raiz.style.display='none';liberarEspaco();return;}\n";
+  j+="    if(AO_ZERAR==='mensagem'){conteudo.textContent=MSG_FINAL;espaco();return;}\n";
+  j+='  }\n\n';
+  if(cfg.mov==='rolaesq'||cfg.mov==='roladir'){
+    /* A animacao desloca o trilho em -50%, ou seja, exatamente uma metade. Para a emenda
+       nao deixar vao, cada metade precisa ser no minimo tao larga quanto a area visivel --
+       com uma mensagem curta, duas copias somavam menos que a barra e o bloco "saltava" de
+       volta deixando um vazio. Aqui o conteudo e repetido ate cobrir a largura medida no
+       proprio DOM, e o trilho recebe duas metades identicas dessa repeticao. */
+    j+='  var trilhoN=0,trilhoUm=1;\n';
+    j+='  function montarTrilho(html){\n';
+    j+="    conteudo.innerHTML='<div class=\"fcb-trilho\"><span>'+html+'</span></div>';\n";
+    j+="    var trilho=conteudo.querySelector('.fcb-trilho');\n";
+    j+='    trilhoUm=trilho.firstChild.offsetWidth||1;\n';
+    j+='    trilhoN=Math.max(1,Math.ceil((conteudo.offsetWidth||0)/trilhoUm));\n';
+    j+="    var meia='',i;\n";
+    j+="    for(i=0;i<trilhoN;i++)meia+='<span>'+html+'</span>';\n";
+    j+='    trilho.innerHTML=meia+meia;\n  }\n';
+    /* girar o celular muda a largura visivel: se o numero de copias necessarias mudou, o
+       trilho e remontado -- so nesse caso, para nao reiniciar a animacao a cada resize.
+       A conta usa trilhoUm, a MESMA base medida na montagem (uma copia com o marcador do
+       relogio ainda vazio); medir a copia ja preenchida daria outro numero e o trilho seria
+       remontado a cada resize, reiniciando a animacao sem motivo. */
+    j+='  function conferirTrilho(){\n';
+    j+='    if(!trilhoN)return;\n';
+    j+='    var n=Math.max(1,Math.ceil((conteudo.offsetWidth||0)/trilhoUm));\n';
+    j+='    if(n!==trilhoN){pintarMensagem();tick();}\n  }\n';
+  }
+  j+='  /* pintarMensagem roda so na montagem e na troca de mensagem: o marcador do relogio\n';
+  j+='     volta a ficar vazio, entao forca a proxima atualizarRelogio a remontar do zero. */\n';
+  j+='  function pintarMensagem(){\n';
+  j+='    chaveAnterior=null;\n';
+  j+='    var html=textoCom(MENSAGENS[msgAtual%MENSAGENS.length]);\n';
+  j+='    if(ROLANDO)montarTrilho(html);\n';
+  j+='    else conteudo.innerHTML=html;\n';
+  j+='  }\n';
+  j+='  /* atualizarRelogio roda a cada segundo. Normalmente so troca o texto dos digitos que\n';
+  j+='     mudaram (sem tocar nos nos do DOM), para a transicao css de fade/flip poder animar\n';
+  j+='     e para nao gerar churn de innerHTML a cada tick. So remonta o marcador inteiro\n';
+  j+='     quando o conjunto de unidades visiveis muda (ex: dias somem ao cruzar 24h) ou na\n';
+  j+='     primeira chamada apos a montagem/troca de mensagem. */\n';
+  j+='  function atualizarRelogio(restante){\n';
+  j+='    var p=partes(restante),itens=itensRelogio(p),chave=chaveRelogio(itens);\n';
+  j+="    var els=conteudo.querySelectorAll('[data-fcb-rel]'),i,k;\n";
+  j+='    if(chave!==chaveAnterior){\n';
+  j+='      var h=relogio(p);\n';
+  j+='      for(i=0;i<els.length;i++)els[i].innerHTML=h;\n';
+  j+='      chaveAnterior=chave;\n';
+  j+='      return;\n';
+  j+='    }\n';
+  j+='    for(i=0;i<els.length;i++){\n';
+  j+="      var nums=els[i].querySelectorAll('.fcb-num');\n";
+  j+='      for(k=0;k<itens.length;k++){\n';
+  j+='        if(nums[k]&&nums[k].textContent!==itens[k][0]){\n';
+  j+='          nums[k].textContent=itens[k][0];\n';
+  j+="          if(DIG!=='nenhuma'){\n";
+  j+="            nums[k].classList.add('fcb-virando');\n";
+  j+='            (function(el){setTimeout(function(){el.classList.remove(\'fcb-virando\');},VIRANDO_MS);})(nums[k]);\n';
+  j+='          }\n';
+  j+='        }\n';
+  j+='      }\n';
+  j+='    }\n';
+  j+='  }\n\n';
+  j+='  function tick(){\n';
+  j+='    var restante=alvo-(new Date()).getTime();\n';
+  j+='    if(restante<=0){\n';
+  j+="      if(AO_ZERAR==='reiniciar'&&MODO==='abertura'){\n";
+  j+='        inicio=(new Date()).getTime();guardar(CHAVE,String(inicio));alvo=alvoMs();\n';
+  j+='        restante=alvo-inicio;\n';
+  j+="      }else if(AO_ZERAR==='zerado'){restante=0;}\n";
+  j+='      else{encerrar();return;}\n';
+  j+='    }\n';
+  if(cfg.urg.ativo){
+    /* background e' shorthand: aplicado inline, zerava background-image e apagava o brilho
+       passante e o degrade justo quando eles mais importariam. backgroundColor troca so a
+       camada de cor. E o ramo "else" e obrigatorio: com AO_ZERAR='reiniciar' o restante
+       volta a ficar acima do limiar no ciclo seguinte, e sem ele a barra ficava vermelha e
+       pulsando para sempre. */
+    j+='    if(restante<=LIMITE_URGENCIA){\n';
+    j+="      raiz.classList.add('fcb-urgente');\n";
+    j+="      raiz.style.backgroundColor='"+cfg.cores.urg+"';\n";
+    j+='    }else{\n';
+    j+="      raiz.classList.remove('fcb-urgente');\n";
+    j+="      raiz.style.backgroundColor='"+cfg.cores.fundo+"';\n";
+    j+='    }\n';
+  }
+  j+='    atualizarRelogio(restante);\n';
+  if(cfg.prog)j+='    pintarProgresso(restante);\n';
+  j+='  }\n\n';
+  j+='  pintarMensagem();\n';
+  j+='  tick();\n';
+  j+='  timer=setInterval(tick,1000);\n';
+  j+='  espaco();\n';
+  j+="  window.addEventListener('resize',espaco);\n";
+  if(cfg.mov==='rolaesq'||cfg.mov==='roladir')j+="  window.addEventListener('resize',conferirTrilho);\n";
+  j+='  if(window.ResizeObserver)new ResizeObserver(espaco).observe(raiz);\n';
+  return j;
+}
+function cSvgCorujaGer(cfg){
+  var j='';
+  j+='  function svgCoruja(){\n';
+  j+="    var corpo='"+cfg.cores.corujaCorpo+"',det='"+cfg.cores.corujaDet+"';\n";
+  j+="    return '<svg viewBox=\"0 0 32 38\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">'+\n";
+  j+="      '<ellipse cx=\"16\" cy=\"25\" rx=\"8.5\" ry=\"11\" fill=\"'+corpo+'\"/>'+\n";
+  j+="      '<path fill=\"none\" stroke=\"'+det+'\" stroke-width=\"1.2\" d=\"M9 22 Q11 30 14 35 M23 22 Q21 30 18 35\"/>'+\n";
+  j+="      '<path fill=\"'+corpo+'\" d=\"M16 3.8 C13.7 1.6 8 2.3 7.6 8 C7.3 12.9 11 18 16 21 C21 18 24.7 12.9 24.4 8 C24 2.3 18.3 1.6 16 3.8 Z\"/>'+\n";
+  j+="      '<circle cx=\"12.6\" cy=\"9.6\" r=\"1.6\" fill=\"'+det+'\"/>'+\n";
+  j+="      '<circle cx=\"19.4\" cy=\"9.6\" r=\"1.6\" fill=\"'+det+'\"/>'+\n";
+  j+="      '<path fill=\"'+det+'\" d=\"M16 11 L15.2 14.4 Q16 15.5 16.8 14.4 Z\"/>'+\n";
+  j+="      '<path stroke=\"'+det+'\" stroke-width=\"1.4\" stroke-linecap=\"round\" fill=\"none\" d=\"M13 35.5 L13 37.2 M16 36 L16 37.8 M19 35.5 L19 37.2\"/>'+\n";
+  j+="      '</svg>';\n  }\n\n";
+  return j;
+}
+
+function cLimpar(){
+  if(!confirm('Limpar todas as mensagens e configuracoes da contagem regressiva?'))return;
+  cMsgs=[];cMsgRender();
+  $('c-msg').value='';$('c-msgcurta').value='';
+  setRadio('c-modo','abertura');setRadio('c-diaszero','sim');setRadio('c-fim','esconder');
+  setRadio('c-fonte','neutra');setRadio('c-peso','600');setRadio('c-formato','compacto');
+  setRadio('c-alinha','centro');setRadio('c-borda','nao');setRadio('c-fixa','fixa');
+  setRadio('c-empurrar','empurrar');setRadio('c-cta','nao');setRadio('c-fechar','nao');
+  setRadio('c-prog','nao');setRadio('c-coruja','nao');setRadio('c-corujamob','sim');
+  setRadio('c-mov','estatico');setRadio('c-urg','nao');setRadio('c-urgpulsar','sim');
+  setRadio('c-dig','nenhuma');setRadio('c-entrada','imediata');
+  [['c-dias','0'],['c-horas','48'],['c-mins','0'],['c-alvo',''],['c-cod',''],
+   ['c-fimtxt','Promoção encerrada'],['c-tam','15'],['c-rd','dias'],['c-rh','horas'],
+   ['c-rm','min'],['c-rs','seg'],['c-pad','10'],['c-largmax','1100'],['c-mob','640'],
+   ['c-z','99980'],['c-ctatxt','Quero garantir'],['c-ctaurl','#reserva'],['c-gap','16'],
+   ['c-corujaalt','26'],['c-vel','18'],['c-alt','5'],['c-urglim','60'],['c-entradapx','300']]
+    .forEach(function(p){var el=$(p[0]);if(el)el.value=p[1];});
+  ['c-un-d','c-un-h','c-un-m','c-un-s'].forEach(function(id){$(id).checked=true;});
+  ['c-ef-pulsar','c-ef-brilho','c-ef-degrade','c-ef-piscar','c-ef-tremor'].forEach(function(id){$(id).checked=false;});
+  [['c-cfundo','#0F3A30'],['c-ctexto','#FDFBF6'],['c-cdestaque','#FFC94A'],['c-cborda','#FFC94A'],
+   ['c-ctafundo','#FFC94A'],['c-ctatexto','#23281F'],['c-cprog','#FFC94A'],
+   ['c-corujacorpo','#FDFBF6'],['c-corujadet','#FFC94A'],['c-curg','#8C1D18']]
+    .forEach(function(p){$(p[0]).value=p[1];$(p[0]+'-t').value=p[1];});
+  $('c-out1').value='';
+  cToggles();cPreview(true);salvarEstado();
+}
+
+var cPvTimer=null,cPvAltTimer=null,cPvInicio=null,cPvSig=null,cPvMsg=0;
+function cPreview(reiniciar){
+  var box=$('c-pv-box');if(!box)return;
+  if(cPvTimer){clearInterval(cPvTimer);cPvTimer=null;}
+  if(cPvAltTimer){clearInterval(cPvAltTimer);cPvAltTimer=null;}
+  var cfg=cCfg();
+  /* o ponto de partida da previa e reiniciado quando o que determina o alvo (modo/duracao/
+     data) muda desde o ultimo desenho -- assim ajustar cor sem mudar a duracao nao reinicia a
+     contagem (mesmo principio do codigo gerado: nao reinicia a toa). Mas "Atualizar previa" e
+     uma acao explicita do usuario que significa "redesenhe com o que eu configurei, agora" --
+     por isso reinicia sempre, mesmo se sig nao mudou, senao fica sem saida quando o usuario
+     passa muito tempo so mexendo em cor com uma duracao curta configurada antes. */
+  var sig=cfg.modo+'|'+(cfg.modo==='data'?cfg.alvoIso:cfg.duracaoMs);
+  if(cPvInicio===null||reiniciar||sig!==cPvSig){cPvInicio=(new Date()).getTime();cPvSig=sig;}
+  var alvo=cAlvoMs(cfg,cPvInicio);
+  var fontes={neutra:'-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Ubuntu,sans-serif',
+    humanista:'"Helvetica Neue",Helvetica,Arial,sans-serif',
+    condensada:'"Roboto Condensed","Arial Narrow",Arial,sans-serif',
+    mono:'ui-monospace,SFMono-Regular,Menlo,Consolas,monospace'};
+  box.innerHTML='<div class="c-pv-barra"><div class="c-pv-conteudo"></div></div>'+
+    '<p style="font-size:12px;color:var(--tinta-suave);text-align:center;margin:12px 0 0">'+
+    (cfg.fixa?'Na pagina real esta barra fica fixa no topo (codigo para a Tag Body).'
+             :'Na pagina real esta barra rola com a pagina (codigo para um componente HTML).')+'</p>';
+  var barra=box.querySelector('.c-pv-barra');
+  barra.style.cssText='background:'+cfg.cores.fundo+';color:'+cfg.cores.texto+';font-family:'+fontes[cfg.fonte]+
+    ';font-size:'+cfg.tam+'px;font-weight:'+cfg.peso+';padding:'+cfg.pad+'px 16px;border-radius:6px;'+
+    'text-align:'+(cfg.alinha==='centro'?'center':'left')+';font-variant-numeric:tabular-nums;'+
+    (cfg.borda?'border-bottom:2px solid '+cfg.cores.borda+';':'');
+  barra.style.setProperty('--c-pv-destaque',cfg.cores.destaque);
+  var alvoEl=box.querySelector('.c-pv-conteudo');
+  function pinta(){
+    var restante=alvo-(new Date()).getTime();
+    if(restante<=0){
+      if(cfg.fim==='esconder'){alvoEl.innerHTML='<i style="opacity:.7">(a barra some quando zera)</i>';return;}
+      if(cfg.fim==='mensagem'){alvoEl.textContent=cfg.fimtxt;return;}
+      if(cfg.fim==='reiniciar'){cPvInicio=(new Date()).getTime();alvo=cAlvoMs(cfg,cPvInicio);restante=alvo-cPvInicio;}
+      else restante=0;
+    }
+    var msg=cfg.msgs[cPvMsg%cfg.msgs.length];
+    var rel=cFormatarHTML(cPartes(restante),cfg);
+    var txt=escHtml(msg.texto);
+    alvoEl.innerHTML=txt.indexOf('{contador}')>=0?txt.split('{contador}').join(rel):(txt+' '+rel);
+    if(cfg.urg.ativo&&restante<=cfg.urg.lim*60000)barra.style.background=cfg.cores.urg;
+    else barra.style.background=cfg.cores.fundo;
+  }
+  pinta();
+  cPvTimer=setInterval(pinta,1000);
+  if((cfg.mov==='altfade'||cfg.mov==='altdesliza')&&cfg.msgs.length>1){
+    cPvAltTimer=setInterval(function(){cPvMsg++;},cfg.alt*1000);
+  }
+}
+
 /* ============ inicialização ============ */
 function liga(id,fn){var el=$(id);if(el)el.addEventListener('click',fn);}
 liga('aba-slide',function(){trocarAba('slide');});
@@ -2455,6 +3561,7 @@ liga('t-copy2',function(){copiar('t-out2','t-cop2');});
 liga('t-copy3',function(){copiar('t-out3','t-cop3');});
 liga('aba-uni',function(){trocarAba('uni');});
 liga('aba-bor',function(){trocarAba('bor');});
+liga('aba-cnt',function(){trocarAba('cnt');});
 liga('u-op-add',uOpAdd);
 liga('u-prod-salvar',uProdSalvar);
 liga('u-prod-cancelar',uProdLimpar);
@@ -2464,9 +3571,18 @@ liga('u-copy',function(){copiar('u-out','u-cop');});
 liga('b-gerar',bGerar);
 liga('b-copy1',function(){copiar('b-out1','b-cop1');});
 liga('b-copy2',function(){copiar('b-out2','b-cop2');});
+liga('c-msg-add',cMsgAdd);
+liga('c-atualizar',function(){cPreview(true);});
+liga('c-gerar',cGerar);
+liga('c-limpar',cLimpar);
+liga('c-copy1',function(){copiar('c-out1','c-cop1');});
 parearCor('l-corbtn');parearCor('l-c1');parearCor('l-c2');parearCor('l-c3');parearCor('l-c4');
 parearCor('u-c1');parearCor('u-c2');parearCor('u-c3');
 parearCor('b-f1');parearCor('b-f2');parearCor('b-c1');parearCor('b-c2');parearCor('b-c3');parearCor('b-c4');
+parearCor('c-cfundo');parearCor('c-ctexto');parearCor('c-cdestaque');parearCor('c-cborda');
+parearCor('c-ctafundo');parearCor('c-ctatexto');parearCor('c-cprog');
+parearCor('c-corujacorpo');parearCor('c-corujadet');
+parearCor('c-curg');
 restaurarEstado();
 lBtnPreview();
 lPopPreview();
@@ -2478,6 +3594,9 @@ uToggles();
 uPreview();
 bToggles();
 bPreview();
+cToggles();
+cMsgRender();
+cPreview();
 })();
 </script>
 </body>

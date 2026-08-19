@@ -12,7 +12,7 @@ Repositório **público**, servido pelo GitHub Pages em **construtores.fotocerta
 
 | Caminho | O que é / onde é usado |
 |---|---|
-| `index.html` | A ferramenta geradora (5 abas: slideshow, captação de leads, agendamento TidyCal, checkout, bordas com efeito). É a página servida pelo Pages. |
+| `index.html` | A ferramenta geradora (6 abas: slideshow, captação de leads, agendamento TidyCal, checkout, bordas com efeito, contagem regressiva). É a página servida pelo Pages. |
 | `CNAME` | Domínio próprio do Pages: `construtores.fotocerta.com.br`. |
 | `.nojekyll` | Impede o Pages de processar o repositório como Jekyll. |
 | `docs/documentacao-fotocerta.md` | Contexto completo: arquitetura, manual do Prosite, decisões, estado atual. Fonte da verdade. |
@@ -34,9 +34,11 @@ Ao criar campo novo que receba esse tipo de dado, siga a mesma regra: `value=""`
 
 ## Padrão de todo código novo
 
-**No código gerado:** variáveis de customização no topo, comentadas com os valores permitidos; seção "Daqui para baixo nao precisa mexer"; prefixos próprios (classes `fc-` no slideshow, `fcw-` na captação de leads, `fcu-` no checkout; animações `fc-borda-*` nas bordas).
+**No código gerado:** variáveis de customização no topo, comentadas com os valores permitidos; seção "Daqui para baixo nao precisa mexer"; prefixos próprios (classes `fc-` no slideshow, `fcw-` na captação de leads, `fcu-` no checkout, `fcb-` na contagem regressiva; animações `fc-borda-*` nas bordas).
 
-**No layout das abas da ferramenta** (obrigatório também para abas novas — detalhes na seção 4 da documentação): descrição no topo → **seções numeradas** de configuração (`<div class="secao"><span class="secao-n">N</span> Título</div>` + `<div class="grade">` de duas colunas de fieldsets, agrupadas por tema; formulário de cadastro à esquerda e lista à direita quando houver) → **última seção "Prévia e código gerado"**, com os botões de ação, a prévia à esquerda e as saídas de código à direita → **instruções de uso ao final**, em largura total. Campos e funções levam o prefixo da aba (`s-`, `l-`, `t-`, `u-`, `b-`).
+**No layout das abas da ferramenta** (obrigatório também para abas novas — detalhes na seção 4 da documentação): descrição no topo → **seções numeradas** de configuração (`<div class="secao"><span class="secao-n">N</span> Título</div>` + `<div class="grade">` de duas colunas de fieldsets, agrupadas por tema; formulário de cadastro à esquerda e lista à direita quando houver) → **última seção "Prévia e código gerado"**, com os botões de ação, a prévia à esquerda e as saídas de código à direita → **instruções de uso ao final**, em largura total. Campos e funções levam o prefixo da aba (`s-`, `l-`, `t-`, `u-`, `b-`, `c-`).
+
+**CSS gerado programaticamente:** nunca emitir uma segunda regra para um seletor que outra função já declarou. Propriedades shorthand (`transition`, `background`, `animation`) não se fundem entre duas regras do mesmo seletor com a mesma especificidade — a que vier depois no CSS vence por inteiro e apaga a primeira. Acumular tudo (transições, camadas de background, animações) numa única regra existente para aquele seletor.
 
 ## Fluxo de manutenção (importante)
 
