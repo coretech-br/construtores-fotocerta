@@ -37,7 +37,7 @@ Alternativas descartadas: chave derivada do caminho da página (quebra ao renome
 
 Mede a **altura real** da barra e aplica `padding-top` no `<body>` por JS, reagindo a `resize` e a `ResizeObserver` sobre a própria barra — mesmo arsenal do `ajustarAltura` da página intermediária, que já dá conta das reflows do Prosite. Valor fixo em px foi descartado: erra assim que o texto quebra em duas linhas no celular.
 
-Radio **empurrar o conteúdo / sobrepor**, porque a convivência com o menu do tema pode exigir sobrepor.
+Radio **empurrar o conteúdo / sobrepor**. Em landing page — o uso previsto, e que não tem menu — `empurrar` é o correto. O `sobrepor` serve para a barra flutuar sobre o hero, e existe também como escape caso a página tenha algum outro elemento fixo no topo.
 
 Ao esconder a barra no fim da contagem, o `padding-top` é devolvido.
 
@@ -240,7 +240,7 @@ Ordem fixa: `<style>` → `<div class="fcb-barra">` → `<script>`. Variáveis d
 - **Carimbo por navegador**: celular e desktop do mesmo visitante começam separado; aba anônima recomeça; limpar dados zera.
 - **Safari / ITP**: pode descartar o storage após cerca de 7 dias sem visita. Irrelevante para campanhas de 24–72h, relevante para campanhas de semanas.
 - **Fuso da data-alvo**: fixado em −03:00 no código gerado.
-- **Convivência com o menu do tema**: se o menu do Prosite também for fixo, os dois disputam o topo. Resolve-se com `z-index` ou trocando para "sobrepor" — só se verifica na página publicada.
+- **Disputa pelo topo**: não se aplica ao uso previsto. A barra é para **landing pages**, que não têm menu, então `empurrar` resolve e o `z-index` raramente precisa ser tocado. O radio e o campo permanecem como escape para o caso de a página vir a ter outro elemento fixo no topo.
 
 ## 7. Impacto no restante da ferramenta
 

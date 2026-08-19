@@ -1022,7 +1022,7 @@
       </div>
       <label for="c-z">z-index</label>
       <input type="number" id="c-z" value="99980" min="1" max="2147483647" step="10">
-      <p class="ajuda">Se o menu do tema também for fixo, os dois disputam o topo. Comece com <b>empurrar</b>; se o menu sumir atrás da barra, aumente o z-index ou troque para sobrepor. Só dá para conferir na página publicada.</p>
+      <p class="ajuda">Em landing page, que não tem menu, <b>empurrar</b> é o certo: a barra reserva o próprio espaço e nada do topo fica coberto. Use <b>sobrepor</b> só se quiser a barra flutuando por cima do hero. O z-index raramente precisa ser tocado — ele existe para o caso de a página ter algum outro elemento fixo disputando o topo.</p>
       </div>
       </fieldset>
       <fieldset>
@@ -1192,7 +1192,7 @@
   <p class="ajuda"><b>A contagem não reinicia:</b> na primeira visita o código grava o horário no navegador do visitante, na chave <code>fcbar:SEU-CODIGO</code>, e todas as visitas seguintes contam a partir dali. <b>Trocar o código da campanha zera a contagem de todos</b> — é assim que se recomeça uma promoção.</p>
   <p class="ajuda"><b>Limites que nenhum código resolve:</b> a contagem usa o relógio do aparelho do visitante, então quem estiver com a hora errada vê o tempo errado. O carimbo é por navegador: o mesmo visitante no celular e no computador começa duas contagens; aba anônima recomeça; limpar dados zera. O Safari pode descartar o registro depois de cerca de 7 dias sem visita — irrelevante para campanhas de dois ou três dias, relevante para campanhas de semanas.</p>
   <p class="ajuda"><b>Fuso da data marcada:</b> o instante é gravado com <b>−03:00</b> fixo. Um visitante em outro fuso vê o tempo restante correto para o mesmo momento.</p>
-  <p class="ajuda"><b>Depois de publicar:</b> confira em <b>aba anônima</b> (evita cache) que a barra aparece, que o menu do site não ficou escondido atrás dela e que ao recarregar a contagem continua de onde estava. Se o menu sumir, aumente o z-index ou troque para "sobrepor". Teste também no celular, onde a barra costuma quebrar em duas linhas.</p>
+  <p class="ajuda"><b>Depois de publicar:</b> confira em <b>aba anônima</b> (evita cache) que a barra aparece, que o topo da página não ficou coberto e que ao recarregar a contagem continua de onde estava. Teste também no celular, onde a barra costuma quebrar em duas linhas. Se a página tiver algum outro elemento fixo no topo disputando espaço com a barra, é aí que entram o z-index e o "sobrepor".</p>
   <p class="ajuda"><b>Conversão:</b> prefira a <b>urgência progressiva</b> aos efeitos contínuos. Uma barra que só muda quando o prazo aperta comunica algo; uma que pisca o tempo todo vira ruído e o visitante para de enxergar.</p>
   </div>
 </div>
