@@ -88,6 +88,13 @@ Nenhum esbarra em limitação técnica. As decisões de projeto que exigiam esco
 
 **D3. Os cinco efeitos de destaque vão para o pop-up de leads**, mesmo os que tendem a irritar num cabeçalho pequeno. Razão do dono: fica pronto, e a decisão de usar é dele no momento da campanha. Registrada a ressalva de que pulsar e tremer são pouco recomendáveis ali.
 
+> **Notas de implementação (fase 5, Leads — entregue).** Três pontos que o spec deixou em aberto e foram decididos na implementação:
+> - **O que muda fora do horário (R8).** O botão continua abrindo, o formulário continua enviando e a mensagem continua indo para o WhatsApp. O que muda é a promessa: um aviso âmbar aparece no topo do formulário. Critério: mensagem de WhatsApp fica esperando, então barrar o recado perderia o lead sem proteger ninguém — e prometer resposta imediata às 22h é a promessa que não se cumpre. O aviso é recalculado **em cada abertura do pop-up**, porque uma aba deixada aberta atravessa a virada do expediente.
+> - **Fuso (R8).** Fixo no código gerado (`HORARIO_FUSO=-3`), como a data-alvo da Contagem regressiva. O horário de atendimento é o do fotógrafo, não o do visitante; com a hora local do aparelho, o mesmo instante seria "dentro" para um visitante e "fora" para outro. Faixa que cruza a meia-noite é aceita (o dia marcado é o do início); abertura igual a fechamento é recusada com aviso; sem dia marcado ou com hora em branco o modo fica desligado, com aviso visível na aba.
+> - **A resposta na mensagem (R9).** Entra como linha própria entre a página e o `(cod: …)`, no formato `Interesse *Ensaio newborn*.`, com o prefixo configurável em campo próprio (mesmo padrão dos outros "antecede…" da aba). A resposta é **opcional para o visitante**: sem escolha a linha não existe e a mensagem sai idêntica à de quem não usa o recurso.
+>
+> Além disso, a **rolagem do cabeçalho é medida na abertura do pop-up**, e não na montagem do bloco: o pop-up nasce com `display:none` e dentro de elemento escondido toda medida dá zero — a solução de repetir o conteúdo até cobrir o container foi reaproveitada da Contagem, mas o momento da medição precisou mudar. E o **separador piscando** foi adaptado: sem relógio no cabeçalho, ele entra como um ponto (`•`) piscando antes do título, com a adaptação escrita na ajuda do campo.
+
 **D4. A posição da coruja no Leads vale apenas para o cabeçalho do pop-up.** O botão flutuante tem a coruja como ícone único, onde posição não se aplica.
 
 **D5. O movimento do conteúdo no Leads leva só as opções de mensagem única.**
