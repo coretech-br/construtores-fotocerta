@@ -1018,7 +1018,7 @@
       <div id="c-borda-campo">
       <div class="cor-linha"><input type="color" id="c-cborda" value="#FFC94A"><input type="text" id="c-cborda-t" value="#FFC94A"></div>
       </div>
-      <label for="c-mob">Largura de corte do celular <small>(px, de 320 a 1024 — abaixo disso usa a versão curta e esconde a coruja; fora da faixa o campo se corrige sozinho)</small></label>
+      <label for="c-mob">Largura de corte do celular <small>(px, de 320 a 1024 — abaixo disso usa a versão curta e, se você tiver pedido para escondê-la, some com a coruja; fora da faixa o campo se corrige sozinho)</small></label>
       <input type="number" id="c-mob" value="640" min="320" max="1024" step="10">
       </fieldset>
     </div>
@@ -1075,13 +1075,15 @@
       <div id="c-prog-campo">
       <div class="cor-linha"><input type="color" id="c-cprog" value="#FFC94A"><input type="text" id="c-cprog-t" value="#FFC94A"></div>
       </div>
-      <label>Coruja da identidade nas pontas</label>
+      <label>Coruja da identidade</label>
       <div class="radios">
       <label><input type="radio" name="c-coruja" value="nao" checked><span>Não usar</span></label>
-      <label><input type="radio" name="c-coruja" value="sim"><span>Usar</span></label>
+      <label><input type="radio" name="c-coruja" value="esq"><span>À esquerda</span></label>
+      <label><input type="radio" name="c-coruja" value="dir"><span>À direita</span></label>
+      <label><input type="radio" name="c-coruja" value="ambos"><span>Dos dois lados</span></label>
       </div>
       <div id="c-coruja-campos">
-      <label for="c-corujaalt">Altura <small>(px)</small></label>
+      <label for="c-corujaalt">Altura máxima <small>(px, de 14 a 60 — é um teto, não um tamanho fixo: a coruja cresce com a barra até esse valor e para; fora da faixa o campo se corrige sozinho)</small></label>
       <input type="number" id="c-corujaalt" value="26" min="14" max="60" step="1">
       <label>Cor do corpo / dos detalhes</label>
       <div class="cor-linha"><input type="color" id="c-corujacorpo" value="#FDFBF6"><input type="text" id="c-corujacorpo-t" value="#FDFBF6"></div>
@@ -1091,7 +1093,7 @@
       <label><input type="radio" name="c-corujamostrarmob" value="sim" checked><span>Sim</span></label>
       <label><input type="radio" name="c-corujamostrarmob" value="nao"><span>Não</span></label>
       </div>
-      <p class="ajuda">A coruja aparece nas duas pontas, ancorada fora da área que rola — ela emoldura a barra em vez de passar junto com o texto.</p>
+      <p class="ajuda">A coruja fica ancorada na ponta, <b>fora da área que rola</b> — ela emoldura a barra em vez de passar junto com o texto. A altura dela <b>acompanha a da barra</b> e para no teto acima: quando o texto quebra em duas linhas — o que é comum no celular — ela cresce e ocupa o espaço que antes sobrava. Numa barra baixa (texto curto, sem botão de ação e sem botão de fechar) ela acompanha a linha e fica menor que o teto; o teto não estica a barra, só limita a coruja. "Mostrar no celular?" é independente da posição: dá para ter as duas no computador e nenhuma no telefone.</p>
       </div>
       </fieldset>
     </div>
@@ -3553,7 +3555,7 @@ function cToggles(){
   el=$('c-borda-campo');if(el)el.style.display=(radio('c-borda')==='sim')?'block':'none';
   el=$('c-cta-campos');if(el)el.style.display=(radio('c-cta')==='sim')?'block':'none';
   el=$('c-prog-campo');if(el)el.style.display=(radio('c-prog')==='sim')?'block':'none';
-  el=$('c-coruja-campos');if(el)el.style.display=(radio('c-coruja')==='sim')?'block':'none';
+  el=$('c-coruja-campos');if(el)el.style.display=(radio('c-coruja')!=='nao')?'block':'none';
   var mov=radio('c-mov');
   el=$('c-vel-campo');if(el)el.style.display=(mov==='rolaesq'||mov==='roladir')?'block':'none';
   el=$('c-alt-campo');if(el)el.style.display=(mov==='altfade'||mov==='altdesliza')?'block':'none';
@@ -3589,7 +3591,7 @@ function cColeta(){
       cta:radio('c-cta'),ctatxt:$('c-ctatxt').value,ctaurl:$('c-ctaurl').value,
       ctafundo:$('c-ctafundo-t').value,ctatexto:$('c-ctatexto-t').value,
       fechar:radio('c-fechar'),prog:radio('c-prog'),cprog:$('c-cprog-t').value,
-      coruja:radio('c-coruja'),corujaalt:$('c-corujaalt').value,gap:$('c-gap').value,
+      corujapos:radio('c-coruja'),corujaalt:$('c-corujaalt').value,gap:$('c-gap').value,
       corujacorpo:$('c-corujacorpo-t').value,corujadet:$('c-corujadet-t').value,
       corujamostrarmob:radio('c-corujamostrarmob'),
       mov:radio('c-mov'),vel:$('c-vel').value,alt:$('c-alt').value,
@@ -3610,7 +3612,19 @@ function cRestaura(st){
   setRadio('c-fonte',C.fonte);setRadio('c-peso',C.peso);setRadio('c-formato',C.formato);
   setRadio('c-alinha',C.alinha);setRadio('c-borda',C.borda);setRadio('c-fixa',C.fixa);
   setRadio('c-empurrar',C.empurrar);setRadio('c-cta',C.cta);setRadio('c-fechar',C.fechar);
-  setRadio('c-prog',C.prog);setRadio('c-coruja',C.coruja);
+  setRadio('c-prog',C.prog);
+  /* O liga/desliga da coruja ('nao' | 'sim') virou escolha de POSICAO
+     ('nao' | 'esq' | 'dir' | 'ambos'). A chave gravada e nova (corujapos) pelo mesmo motivo da
+     corujamostrarmob logo abaixo: estado gravado pela versao anterior so traz 'coruja', e ele e
+     traduzido aqui uma unica vez, em vez de a mesma chave passar a significar outra coisa.
+     Quem tinha a coruja LIGADA a tinha nas DUAS pontas -- entao 'sim' vira 'ambos', nunca uma
+     ponta so: escolher um lado por ele seria reinterpretar em silencio o que ele configurou.
+     O teste e por 'sim', e nao por 'nao', de proposito: na versao anterior qualquer valor que
+     nao fosse exatamente 'sim' deixava o radio no padrao dela, que era NAO USAR -- entao estado
+     corrompido (vazio ou lixo) continua caindo em NAO USAR, e nao em coruja nas duas pontas. */
+  if(C.corujapos!=null)setRadio('c-coruja',C.corujapos);
+  else if(C.coruja!=null)setRadio('c-coruja',C.coruja==='sim'?'ambos':'nao');
+  else setRadio('c-coruja','nao');
   /* A pergunta da coruja no celular era NEGATIVA ("Esconder no celular?") com Sim marcado por
      padrao: quem ligava a coruja nao a via no celular e concluia que estava quebrada. Agora a
      pergunta e positiva ("Mostrar no celular?") e o padrao e mostrar.
@@ -3712,8 +3726,18 @@ function cMobAjustar(){
   el.value=String(preso);
   return true;
 }
+/* Faixa declarada dos campos numericos desta aba que precisam se corrigir a vista, no mesmo
+   formato de B_NUMS: [id, padrao, min, max, inteiro]. O teto da coruja entrou aqui porque ele
+   deixou de ser so "a altura do desenho" e passou a gerar tambem a LARGURA do quadro
+   (teto*32/38). Teto zero ou negativo produziria quadro de largura zero, ou seja, coruja
+   ligada e invisivel -- defeito mudo. Preso na mesma tabela que alimenta a tela e a geracao,
+   os dois lados leem sempre o mesmo numero.
+   c-mob nao entra aqui: ele tem cMobAjustar proprio, com o clamp repetido dentro da cCfg. */
+var C_NUMS=[['c-corujaalt',26,14,60,true]];
 function cCfg(){
   var dias=cNum('c-dias',0),horas=cNum('c-horas',0),mins=cNum('c-mins',0);
+  var cpos=radio('c-coruja');
+  var calt=fcPreso(C_NUMS,'c-corujaalt');if(calt==null)calt=26;
   return {
     modo:radio('c-modo'),
     duracaoMs:((dias*24+horas)*60+mins)*60000,
@@ -3745,8 +3769,12 @@ function cCfg(){
     gap:cNum('c-gap',16),
     /* escondermob, e nao mob: o nome antigo ('mob') dizia so "celular" e ficava a um passo de
        ser lido como "aparece no celular", que e o contrario do que ele valia. */
-    coruja:{ativo:radio('c-coruja')==='sim',alt:cNum('c-corujaalt',26),
-      escondermob:radio('c-corujamostrarmob')==='nao'},
+    /* pos e a escolha crua; esq/dir dizem qual ponta recebe o desenho e ativo continua sendo
+       o unico portao do CSS, do markup e do JS da coruja -- com 'nao', nada dela e emitido e o
+       bloco sai byte a byte igual ao de antes deste recurso. alt e o TETO de altura. */
+    coruja:{pos:cpos,ativo:cpos!=='nao',
+      esq:(cpos==='esq'||cpos==='ambos'),dir:(cpos==='dir'||cpos==='ambos'),
+      alt:calt,escondermob:radio('c-corujamostrarmob')==='nao'},
     mov:radio('c-mov'),vel:cNum('c-vel',18),alt:Math.max(2,cNum('c-alt',5)),
     efeitos:{pulsar:$('c-ef-pulsar').checked,brilho:$('c-ef-brilho').checked,degrade:$('c-ef-degrade').checked,
       piscar:$('c-ef-piscar').checked,tremor:$('c-ef-tremor').checked},
@@ -3852,8 +3880,33 @@ function cCssBase(cfg){
   s+='.fcb-curta{display:none}\n';
   s+='@media (max-width:'+cfg.mob+'px){.fcb-longa{display:none}.fcb-curta{display:inline}}\n';
   if(cfg.coruja.ativo){
-    s+='.fcb-coruja{flex:0 0 auto;line-height:0}\n';
-    s+='.fcb-coruja svg{height:'+cfg.coruja.alt+'px;width:auto;display:block}\n';
+    /* A coruja acompanha a altura da barra, sem uma linha de JavaScript.
+       align-self:stretch faz o quadro dela ocupar toda a altura da linha do flex -- e a altura
+       dessa linha e justamente o que cresce quando o texto quebra em duas. O desenho fica
+       posicionado de forma absoluta dentro do quadro, e o quadro tem largura FIXA igual a
+       teto*32/38, a proporcao do viewBox: com o preserveAspectRatio padrao (meet), o SVG passa
+       a caber pela LARGURA assim que o quadro fica mais alto que o teto, entao a altura
+       renderizada para exatamente no teto e o desenho fica centrado no espaco que sobra.
+       Altura renderizada = min(teto, altura da linha). O teto e um limite geometrico, nao uma
+       conta refeita a cada resize -- nao existe listener de resize para esquecer de remover.
+
+       Por que o quadro NAO leva min-height:teto: como o desenho e absoluto, o quadro nao
+       contribui altura nenhuma para a linha, e e por isso que a coruja consegue crescer.
+       Um piso de teto na linha faria a linha nunca ficar abaixo do teto, e min(teto, linha)
+       daria teto sempre -- a coruja voltaria a ser um tamanho fixo e o recurso viraria letra
+       morta. Piso e teto no mesmo numero se anulam; o dono escolheu que o numero e o TETO
+       ("nao uma escolha entre fixo e automatico": o modo fixo saiu).
+       Consequencia registrada: numa barra cuja linha e mais baixa que o teto (texto curto sem
+       botao de acao nem botao de fechar), a coruja agora acompanha a linha em vez de esticar a
+       barra ate o teto. Barra com botao de acao -- o caso das campanhas -- ja tem linha mais
+       alta que o teto padrao, e nela nada muda.
+
+       A regra continua sendo a UNICA regra de .fcb-coruja no CSS gerado (a do @media do celular
+       so declara display, propriedade que nenhuma outra regra desta classe declara). */
+    var largCoruja=Math.round(cfg.coruja.alt*32/38*100)/100;
+    s+='.fcb-coruja{flex:0 0 auto;align-self:stretch;position:relative;line-height:0;'+
+       'width:'+largCoruja+'px}\n';
+    s+='.fcb-coruja svg{position:absolute;top:0;left:0;width:100%;height:100%;display:block}\n';
     if(cfg.coruja.escondermob)s+='@media (max-width:'+cfg.mob+'px){.fcb-coruja{display:none}}\n';
   }
   if(cfg.cta.ativo){
@@ -4048,10 +4101,13 @@ function cJsBase(cfg){
   j+="    return '<span class=\"fcb-longa\">'+longa+'</span><span class=\"fcb-curta\">'+comMarca(msg.curta)+'</span>';\n  }\n\n";
   j+='  var ROLANDO='+(cfg.mov==='rolaesq'||cfg.mov==='roladir')+';\n';
   var interno='<div class="fcb-interno">';
-  if(cfg.coruja.ativo)interno+='<div class="fcb-coruja fcb-coruja-e"></div>';
+  /* As corujas sao IRMAS de .fcb-conteudo, nunca filhas: so o miolo tem overflow:hidden e so
+     ele abriga o trilho da rolagem. Dentro dele, a coruja passaria e sumiria junto com o
+     texto em vez de emoldurar a barra. */
+  if(cfg.coruja.esq)interno+='<div class="fcb-coruja fcb-coruja-e"></div>';
   interno+='<div class="fcb-conteudo"></div>';
   if(cfg.cta.ativo)interno+='<a class="fcb-cta" href="'+escAttr(cfg.cta.url)+'">'+escHtml(cfg.cta.txt)+'</a>';
-  if(cfg.coruja.ativo)interno+='<div class="fcb-coruja fcb-coruja-d"></div>';
+  if(cfg.coruja.dir)interno+='<div class="fcb-coruja fcb-coruja-d"></div>';
   if(cfg.fechar!=='nao')interno+='<button type="button" class="fcb-fechar" aria-label="Fechar">\u2715</button>';
   interno+='</div>';
   if(cfg.prog)interno+='<div class="fcb-prog"></div>';
@@ -4499,6 +4555,7 @@ prep('Contagem regressiva','cnt',function(){
     el.addEventListener('change',function(){if(cMobAjustar())salvarEstado();});
     el.addEventListener('blur',function(){if(cMobAjustar()){salvarEstado();cPreview(true);}});
   }
+  fcLigarFaixa(C_NUMS,function(){cPreview(true);});
 });
 /* Cores de texto livre das abas Leads e Checkout: o campo se corrige a vista, como o c-mob.
    Mesmo motivo do listener no proprio elemento (roda antes dos de document, entao o
@@ -4566,6 +4623,7 @@ prep('Contagem regressiva','cnt',function(){
      campo nunca exibir um numero diferente do que a cCfg vai usar, e regrava para o valor velho
      nao ressurgir na proxima sessao. */
   if(cMobAjustar())salvarEstado();
+  if(fcAjustarTodos(C_NUMS))salvarEstado();
   cToggles();
   cMsgRender();
   /* A previa NAO e montada aqui. Montar na carga executaria o bloco gerado -- intervalo de 1s,

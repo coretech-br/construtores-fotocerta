@@ -84,6 +84,8 @@ Nenhum esbarra em limitação técnica. As decisões de projeto que exigiam esco
 
 **D2. O campo de altura da coruja vira um teto**, não uma escolha entre fixo e automático. A coruja cresce com a barra até no máximo aquele valor. Um controle a menos, e protege contra barra de três ou quatro linhas produzindo uma coruja desproporcional.
 
+> **Nota de implementação (fase 5, entregue).** "Cresce com a barra", "para no teto" e "com uma linha só fica no tamanho do teto" não são simultaneamente realizáveis: se a coruja também **impõe** o teto como altura mínima da linha, a linha nunca fica abaixo do teto e `min(teto, linha)` dá teto sempre — o recurso vira letra morta. Piso e teto no mesmo número se anulam. Como D2 diz que o número é o **teto** (e que o modo fixo saiu), a implementação não põe piso: a coruja acompanha a altura da linha e para no teto. Consequência: numa barra cuja linha é mais baixa que o teto (texto curto, sem botão de ação e sem botão de fechar) a coruja fica menor que o teto em vez de esticar a barra. Barra com botão de ação — o caso das campanhas — já tem linha mais alta que o teto padrão de 26 px e não muda.
+
 **D3. Os cinco efeitos de destaque vão para o pop-up de leads**, mesmo os que tendem a irritar num cabeçalho pequeno. Razão do dono: fica pronto, e a decisão de usar é dele no momento da campanha. Registrada a ressalva de que pulsar e tremer são pouco recomendáveis ali.
 
 **D4. A posição da coruja no Leads vale apenas para o cabeçalho do pop-up.** O botão flutuante tem a coruja como ícone único, onde posição não se aplica.
