@@ -1237,6 +1237,19 @@ function escAttr(s){return escHtml(s).replace(/"/g,'&quot;');}
              elemento, e a barra some junto com tudo que vier depois dela na pagina.
    As duas ganham uma barra invertida que o parser HTML ve e o interpretador JS descarta. */
 function escJs(s){return esc(s).replace(/<\//g,'<\\/').replace(/<!--/g,'<\\!--');}
+/* Compartilhada por Bordas e Captacao de leads: hexadecimal -> "r, g, b", para montar rgba()
+   dentro de @keyframes (onde nao da para usar a cor com alfa separado). Nasceu na aba Bordas;
+   subiu para ca quando a aba Leads passou a precisar dela -- o halo do efeito "pulsar" trazia
+   o verde do WhatsApp cravado e ignorava a cor escolhida para o botao. Fica aqui em cima em
+   vez de continuar valendo por hoisting entre blocos de abas diferentes, que e justamente o
+   que a fase anterior desfez. */
+function bHexRgb(h){
+  h=String(h||'').trim().replace('#','');
+  if(h.length===3)h=h[0]+h[0]+h[1]+h[1]+h[2]+h[2];
+  var n=parseInt(h,16);
+  if(isNaN(n))return '255, 201, 74';
+  return ((n>>16)&255)+', '+((n>>8)&255)+', '+(n&255);
+}
 function corMockPP(v){
   if(v==='blue')return ['#0070BA','#fff',''];
   if(v==='silver')return ['#EEEEEE','#003087',''];
@@ -1838,7 +1851,15 @@ document.addEventListener('change',function(e){
 function lGerar(){
   var num=$('l-num').value.replace(/\D/g,'');
   if(!num){alert('Informe o WhatsApp de destino.');return;}
-  if(!num){alert('Informe o numero do WhatsApp (so digitos).');return;}
+  /* (Havia aqui um segundo "if(!num)" identico e portanto inalcancavel: codigo morto,
+     removido junto com a correcao abaixo.) */
+  /* O codigo da pagina e a razao de ser deste recurso: e ele que chega ao atendimento como
+     "(cod: *NATAL26*)" e diz de qual campanha veio o lead. Vazio, a mensagem chegava como
+     "(cod: **)" -- defeituosa e muda, descoberta so quando o primeiro lead chegasse sem
+     identificacao. Nao ha valor certo a assumir no lugar (inventar "PADRAO" juntaria campanhas
+     diferentes no mesmo balde), entao a geracao e recusada com aviso -- mesmo criterio que a
+     Contagem regressiva ja aplica ao codigo da campanha. */
+  if(!$('l-cod').value.trim()){alert('Informe o codigo da pagina. E ele que identifica a campanha na mensagem que chega no seu WhatsApp: sem ele o lead chega com "(cod: **)" e nao ha como saber de qual pagina veio.');return;}
   /* Todo texto livre desta aba vira uma string JS dentro do bloco de script gerado (var
      CODIGO, POP_TITULO, MSG_*, ...): o destino pede escJs. Com esc() sozinho, um titulo com
      a sequencia de fechamento de script fazia a landing exibir o restante do codigo-fonte
@@ -1878,8 +1899,12 @@ function lGerar(){
   c+='.fcw-botao{position:fixed;right:22px;bottom:92px;z-index:99990;width:60px;height:60px;border:none;background:var(--fcw-cor-botao,#25D366);cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center;transition:transform .2s,box-shadow .2s}\n';
   c+='.fcw-botao.fcw-circulo{border-radius:50%}\n.fcw-botao.fcw-quadrado{border-radius:14px}\n';
   c+='.fcw-botao:hover{transform:scale(1.08)}\n.fcw-botao svg{width:32px;height:32px}\n';
+  /* O halo do pulso sai na COR ESCOLHIDA para o botao. Antes eram dois rgba(37,211,102,...)
+     cravados -- o verde do WhatsApp --, entao um botao vermelho ou dourado pulsava com um halo
+     verde: a opcao "cor de fundo do botao" existia e funcionava pela metade. */
+  var rgbBtn=bHexRgb(v.corbtn);
   c+='.fcw-botao.fcw-pulsando{animation:fcwPulso 1.1s ease}\n';
-  c+='@keyframes fcwPulso{0%{transform:scale(1);box-shadow:0 4px 14px rgba(0,0,0,.3)}35%{transform:scale(1.14);box-shadow:0 0 0 12px rgba(37,211,102,.25),0 4px 14px rgba(0,0,0,.3)}70%{transform:scale(1);box-shadow:0 0 0 22px rgba(37,211,102,0),0 4px 14px rgba(0,0,0,.3)}100%{transform:scale(1);box-shadow:0 4px 14px rgba(0,0,0,.3)}}\n';
+  c+='@keyframes fcwPulso{0%{transform:scale(1);box-shadow:0 4px 14px rgba(0,0,0,.3)}35%{transform:scale(1.14);box-shadow:0 0 0 12px rgba('+rgbBtn+',.25),0 4px 14px rgba(0,0,0,.3)}70%{transform:scale(1);box-shadow:0 0 0 22px rgba('+rgbBtn+',0),0 4px 14px rgba(0,0,0,.3)}100%{transform:scale(1);box-shadow:0 4px 14px rgba(0,0,0,.3)}}\n';
   c+='.fcw-botao.fcw-tremendo{animation:fcwTremor .7s ease}\n';
   c+='@keyframes fcwTremor{0%,100%{transform:rotate(0)}15%{transform:rotate(-12deg)}30%{transform:rotate(10deg)}45%{transform:rotate(-8deg)}60%{transform:rotate(6deg)}75%{transform:rotate(-3deg)}}\n';
   c+='.fcw-overlay{position:fixed;inset:0;z-index:99991;background:rgba(0,0,0,.45);display:none;align-items:flex-end;justify-content:flex-end;padding:20px}\n';
@@ -1897,6 +1922,16 @@ function lGerar(){
   c+='.fcw-enviar{margin-top:14px;width:100%;border:none;border-radius:8px;background:var(--fcw-cor-acao,#25D366);color:#fff;font-size:15px;font-weight:600;padding:12px;cursor:pointer}\n';
   c+='.fcw-enviar:hover{filter:brightness(.92)}\n';
   c+='@media (max-width:480px){.fcw-overlay{padding:12px;align-items:center;justify-content:center}.fcw-botao{right:16px;bottom:84px}}\n';
+  /* Movimento reduzido: desliga o que ESTE bloco criou (o efeito de atencao em laco, a
+     transicao do botao e a ampliacao no hover) e nada mais -- nem o tema da Alboom, nem os
+     outros blocos da ferramenta. O botao continua inteiro e visivel: o que some e so a onda
+     que pulsava por cima dele, que ja e um estado transitorio. Os seletores repetem a
+     especificidade das regras acima e vem depois, entao vencem sem !important. */
+  c+='@media (prefers-reduced-motion: reduce){\n';
+  c+='  .fcw-botao{transition:none}\n';
+  c+='  .fcw-botao.fcw-pulsando,.fcw-botao.fcw-tremendo{animation:none}\n';
+  c+='  .fcw-botao:hover{transform:none}\n';
+  c+='}\n';
   c+='</sty'+'le>\n\n';
   c+='<scr'+'ipt>\n(function(){\n';
   c+='/* ===== ESSENCIAIS ===== */\n';
