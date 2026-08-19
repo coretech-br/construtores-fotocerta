@@ -3097,23 +3097,32 @@ function cCssEfeitos(cfg){
     s+='.fcb-barra.fcb-visivel{transform:translateY(0)}\n';
   }
   /* nem todo movimento vem de @keyframes: a entrada deslizante, a alternancia de
-     mensagens (altfade/altdesliza) e a virada dos digitos (fade/flip) usam transition,
-     nao animation. Se um desses for o unico efeito ativo, anim.length fica vazio e o
-     bloco reduced-motion inteiro deixava de sair -- a barra deslizava/alternava/virava
+     mensagens (altfade/altdesliza), a virada dos digitos (fade/flip) e a barra de
+     progresso usam transition, nao animation. Se um desses for o unico efeito ativo,
+     anim.length fica vazio e o bloco reduced-motion inteiro deixava de sair -- a barra
+     deslizava/alternava/virava/a barra de progresso avancava com movimento continuo
      mesmo para quem pediu menos movimento no sistema. O bloco agora sai sempre que
      houver movimento, por animation OU por transition, e neutraliza os dois. */
   var temTransMov=(cfg.entrada==='deslizar'||cfg.entrada==='aposrolar')||
-    (cfg.mov==='altfade'||cfg.mov==='altdesliza')||(cfg.dig==='fade'||cfg.dig==='flip');
+    (cfg.mov==='altfade'||cfg.mov==='altdesliza')||(cfg.dig==='fade'||cfg.dig==='flip')||cfg.prog;
   if(anim.length||temTransMov){
     s+='@media (prefers-reduced-motion: reduce){\n';
     if(anim.length)s+='  '+anim.join(',')+'{animation:none}\n';
     s+='  .fcb-barra{transition:none}\n';
     if(cfg.mov==='altfade'||cfg.mov==='altdesliza')s+='  .fcb-conteudo{transition:none}\n';
     if(cfg.dig==='fade'||cfg.dig==='flip')s+='  .fcb-num{transition:none}\n';
+    if(cfg.prog)s+='  .fcb-prog{transition:none}\n';
     s+='}\n';
   }
   return s;
 }
+/* escHtml (compartilhada pelas cinco abas) so protege texto entre tags -- nao escapa
+   aspas, entao nao serve para montar valor de atributo entre aspas duplas. cfg.cta.url
+   e a unica string livre do gerador que vai parar dentro de um atributo (href). Helper
+   dedicado em vez de mexer em escHtml, que e usada em outra ~15 lugares como texto de
+   elemento (onde aspas sao inofensivas) e cuja alteracao arriscaria regressao nas
+   previas das outras abas. */
+function escAttr(s){return escHtml(s).replace(/"/g,'&quot;');}
 function cJsBase(cfg){
   var j='';
   j+='  /* ===== CONFIGURACAO ===== */\n';
@@ -3189,7 +3198,7 @@ function cJsBase(cfg){
   var interno='<div class="fcb-interno">';
   if(cfg.coruja.ativo)interno+='<div class="fcb-coruja fcb-coruja-e"></div>';
   interno+='<div class="fcb-conteudo"></div>';
-  if(cfg.cta.ativo)interno+='<a class="fcb-cta" href="'+escHtml(cfg.cta.url)+'">'+escHtml(cfg.cta.txt)+'</a>';
+  if(cfg.cta.ativo)interno+='<a class="fcb-cta" href="'+escAttr(cfg.cta.url)+'">'+escHtml(cfg.cta.txt)+'</a>';
   if(cfg.coruja.ativo)interno+='<div class="fcb-coruja fcb-coruja-d"></div>';
   if(cfg.fechar!=='nao')interno+='<button type="button" class="fcb-fechar" aria-label="Fechar">\u2715</button>';
   interno+='</div>';
