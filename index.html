@@ -2391,11 +2391,22 @@ function uCpRender(){
     ul.appendChild(li);
   });
 }
+/* Um cupom percentual acima de 100 nao "desconta mais que tudo": o carrinho limita o desconto
+   ao subtotal e o pedido vai a zero. Era aceito sem aviso -- e um "150" digitado no lugar de
+   "15" nao tem valor certo a assumir no lugar (nem 100, nem 15), entao o cadastro e recusado
+   com aviso, como a chave Pix e o limiar de urgencia. */
+function uCpPctErro(tipo,v){
+  if(tipo!=='pct_produto'&&tipo!=='pct_total')return '';
+  if(v>100)return 'Um cupom em porcentagem nao pode passar de 100%: com '+v+'% o desconto e limitado ao subtotal e o pedido inteiro vai a R$ 0,00 -- o cliente ve "Cupom aplicado!" e um total zerado, e o PayPal recusa a ordem. Se a intencao era 15%, corrija o valor; se era realmente dar o pedido, use um cupom de valor fixo igual ao preco.';
+  return '';
+}
 function uCpAdd(){
   var cod=$('u-cp-cod').value.trim().toUpperCase();
   if(!cod){alert('Informe o codigo do cupom.');return;}
   var v=parseFloat(String($('u-cp-valor').value).replace(',','.'));
   if(isNaN(v)||v<=0){alert('Informe o valor do desconto (maior que zero).');return;}
+  var ePct=uCpPctErro(radio('u-cp-tipo')||'pct_total',v);
+  if(ePct){alert(ePct);return;}
   uCps.push({codigo:cod,tipo:radio('u-cp-tipo')||'pct_total',valor:v,validade:$('u-cp-val').value||''});
   $('u-cp-cod').value='';$('u-cp-valor').value='';$('u-cp-val').value='';
   uCpRender();salvarEstado();uPreview();
@@ -2449,7 +2460,13 @@ function uPreview(){
     if(multi)h+='<div style="font-size:13px;font-weight:600;margin:0 0 4px">'+escHtml($('u-t7').value)+'</div>';
     uProds.forEach(function(p,i){
       var preco=parseFloat(String(p.preco).replace(',','.'))||0;
-      var ativo=multi?((selprod==='multiplo')?(i===0):(i===0)):true;
+      /* O ternario que estava aqui tinha os dois ramos identicos -- residuo de uma intencao
+         que so ficou de pe na previa: pre-marcar o primeiro produto nos dois modos. O bloco
+         gerado so pre-marcava no modo radio, e por isso a previa mostrava 1 marcado e
+         R$ 420,00 enquanto o carrinho publicado abria com 0 marcados e R$ 0,00. Quem mudou
+         foi o GERADO (ver uGerar): carrinho que abre zerado nao e so infidelidade da previa,
+         e o estado inicial que levava total zero para o PayPal. Agora os dois concordam. */
+      var ativo=multi?(i===0):true;
       h+='<div style="padding:8px 0;border-bottom:1px solid #eee">';
       h+='<div style="display:flex;justify-content:space-between;gap:10px;font-weight:600;align-items:center"><span>'+(multi?marca(ativo,selprod!=='multiplo'):'')+escHtml(p.nome)+'</span><span>'+uFmt(preco)+'</span></div>';
       if(p.desc)h+='<div style="font-size:12px;color:#777;margin-left:'+(multi?'24px':'0')+'">'+escHtml(p.desc)+'</div>';
@@ -2484,7 +2501,11 @@ function uPreview(){
     h+='<div style="font-size:11px;color:#999;margin-top:4px">QR Code e Pix Copia e Cola aparecem aqui apos gerar</div></div>';
     if(zap)h+='<div style="margin-top:8px;background:#25D366;border-radius:8px;padding:10px;text-align:center;font-weight:600;color:#fff;font-size:13px">Ja paguei \u2014 avisar no WhatsApp</div>';
   }
-  h+='</div><p style="font-size:12px;color:var(--tinta-suave);text-align:center;margin:10px 0 0">Previa do carrinho (botoes ilustrativos; o total considera a primeira opcao marcada)</p>';
+  /* Legenda no formato novo: declara o que ainda difere da pagina publicada, em vez de
+     descrever o que a previa faz. A frase antiga ("o total considera a primeira opcao
+     marcada") era verdadeira na previa e falsa no bloco entregue -- a previa afirmava o
+     contrario do que o codigo fazia. */
+  h+='</div><p style="font-size:12px;color:var(--tinta-suave);text-align:center;margin:10px 0 0">Prévia do carrinho. <b>Ainda difere da página publicada:</b> os botões do PayPal são desenhos, não os botões reais; o QR é um quadriculado falso; a largura está limitada a 380 px para caber nesta coluna; e o campo de cupom é ilustrativo (aqui ele não aplica desconto nenhum). O que <b>confere</b> com o código gerado: os produtos e opcionais pré-marcados, o total inicial e as cores.</p>';
   box.innerHTML=h;
 }
 document.addEventListener('input',function(e){
@@ -2572,6 +2593,22 @@ function uGerar(){
   var descpix=parseFloat(String($('u-descpix').value).replace(',','.'));if(isNaN(descpix)||descpix<0)descpix=0;if(descpix>90)descpix=90;
   if(m!=='ambos')descpix=0;
   var selprod=radio('u-selprod')||'unico';
+
+  /* Os cupons sao conferidos AQUI, e nao so no formulario de cadastro: o campo de valor
+     DENTRO da lista de cupons nao valida nada, entao apagar o numero de um cupom ja cadastrado
+     gerava {valor:0} -- o cliente digitava o cupom, lia "Cupom aplicado!" e "Desconto - R$ 0,00"
+     e o total nao mudava. Mesma porta para o percentual acima de 100, que zera o pedido.
+     A geracao e recusada com aviso, nomeando o cupom: nao existe valor certo a assumir no lugar
+     de um campo que o operador esvaziou. */
+  var ic,cpv,cpc,cpe;
+  for(ic=0;ic<uCps.length;ic++){
+    cpc=String(uCps[ic].codigo||'').trim();
+    if(!cpc){alert('O cupom na posicao '+(ic+1)+' da lista esta sem codigo. Um cupom sem codigo nunca pode ser digitado pelo cliente: preencha o codigo ou remova a linha.');return;}
+    cpv=parseFloat(String(uCps[ic].valor).replace(',','.'));
+    if(isNaN(cpv)||cpv<=0){alert('O cupom "'+cpc+'" esta com o valor do desconto vazio ou zerado. Ele seria entregue no codigo como desconto de zero: o cliente digitaria o cupom, veria "Cupom aplicado!" e "Desconto - R$ 0,00", e o total nao mudaria. Preencha o valor ou remova o cupom.');return;}
+    cpe=uCpPctErro(uCps[ic].tipo,cpv);
+    if(cpe){alert('Cupom "'+cpc+'": '+cpe);return;}
+  }
 
   /* Nome, descricao, opcional, cupom e validade sao texto livre e viram strings JS do array
      PRODUTOS/CUPONS: escJs. Uma descricao colada de um e-mail com comentario HTML fazia o
@@ -2703,6 +2740,7 @@ function uGerar(){
   if(usaPP){
     c+="var TXT_SUCESSO='"+escJs($('u-t5').value)+"';\n";
     c+="var TXT_ERRO='"+escJs($('u-t6').value)+"';\n";
+    c+="var TXT_TOTAL_ZERO='Escolha ao menos um item: o pedido esta em zero.';\n";
   }
   if(usaPix){
     if(usaPP){
@@ -2830,7 +2868,12 @@ function uGerar(){
   c+="var lab=document.createElement('label');\n";
   c+="var inp=document.createElement('input');\n";
   c+="inp.type=tipoProd;inp.name='fcu-prod';inp.value=String(i);\n";
-  c+="if(tipoProd==='radio'&&i===0)inp.checked=true;\n";
+  /* Pre-marca o primeiro produto TAMBEM no modo checkbox. Antes so o modo radio pre-marcava,
+     e no modo "varios produtos" o carrinho publicado abria com nada marcado e total R$ 0,00 --
+     enquanto a previa da ferramenta abria com o primeiro marcado. Alem de mentir, o estado
+     inicial zerado era um dos caminhos que levavam total zero ao PayPal. O cliente continua
+     livre para desmarcar. */
+  c+='if(i===0)inp.checked=true;\n';
   c+="inp.addEventListener('change',atualizar);\n";
   c+="var mk=document.createElement('span');mk.className='fcu-mark '+(tipoProd==='checkbox'?'ck':'rd');\n";
   c+="var sp=document.createElement('span');sp.textContent=p.nome;\n";
@@ -2959,6 +3002,13 @@ function uGerar(){
     c+='if(!window.paypal){msg(TXT_ERRO,false);return;}\n';
     c+='window.paypal.Buttons({\n';
     c+="style:{layout:'vertical',shape:'rect',label:'pay',color:'"+ppcor+"'},  /* color: 'gold' | 'blue' | 'silver' | 'white' | 'black' */\n";
+    c+='/* Pedido zerado e barrado ANTES de abrir o PayPal, com mensagem propria. O caminho do\n';
+    c+='   Pix ja fazia isso; o do PayPal nao: com total zero a ordem saia com value "0.00", o\n';
+    c+='   PayPal recusava e o cliente via so a mensagem generica de erro do carrinho, sem\n';
+    c+='   nenhuma pista de que bastava marcar um item ou tirar o cupom. */\n';
+    c+='onClick:function(data,actions){\n';
+    c+='if(total()<0.01){msg(TXT_TOTAL_ZERO,false);return actions.reject();}\n';
+    c+='return actions.resolve();\n},\n';
     c+='createOrder:function(data,actions){\n';
     c+='return actions.order.create({purchase_units:[{\n';
     c+='amount:{value:total().toFixed(2),currency_code:MOEDA},\n';
@@ -4213,6 +4263,9 @@ prep('Checkout','uni',function(){
   uPreview();
 },'desenhar a aba com o estado restaurado');
 prep('Bordas com efeito','bor',function(){
+  /* mesmo motivo do c-mob e das cores livres: estado gravado antes desta regra pode trazer
+     numeros fora da faixa, e o campo nao pode exibir algo diferente do que bMontar vai usar. */
+  if(bAjustarTodos())salvarEstado();
   bToggles();
   bPreview();
 },'desenhar a aba com o estado restaurado');
