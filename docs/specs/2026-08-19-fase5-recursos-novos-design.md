@@ -4,7 +4,7 @@
 
 ## 1. Escopo
 
-Vinte recursos, em duas origens:
+Dezenove recursos, em duas origens (um vigésimo, o R16, foi removido pelo dono depois da validação — ver 2.4):
 
 - **14 sugestões** das auditorias das cinco abas antigas (a décima quinta — permitir mais de um slideshow por página — já foi entregue na fase 3).
 - **6 pedidos novos** do dono, feitos depois de usar a aba Contagem regressiva na prática.
@@ -60,7 +60,7 @@ Nenhum esbarra em limitação técnica. As decisões de projeto que exigiam esco
 
 **R15. Botão para abrir a página de teste** antes de gerar, evitando descobrir o endereço errado só depois de publicar.
 
-**R16. Pré-preenchimento do formulário do TidyCal** por parâmetros de URL, repassando nome e e-mail.
+~~**R16. Pré-preenchimento do formulário do TidyCal** por parâmetros de URL.~~ **Removido em 19/08/2026, a pedido do dono.** A premissa não se sustenta no fluxo real: o pop-up de captação existe para quem tem dúvida e vai ao WhatsApp; quem já decidiu vai direto ao calendário. Os dois públicos não se cruzam, então não há dado capturado para repassar. Implementar seria esforço sem ganho.
 
 **R17. Presets de altura por tipo de agendamento**, em vez de calibrar os números à mão.
 
