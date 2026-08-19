@@ -1516,7 +1516,7 @@ function sGerar(){
   c+='  IMAGENS.forEach(function (foto, i) {\n';
   c+='    var slide = document.createElement(\'div\');\n    slide.className = \'fc-slide\';\n';
   c+='    var fundo = document.createElement(\'div\');\n    fundo.className = \'fc-fundo\';\n';
-  c+='    fundo.style.backgroundImage = \'url("\' + foto.url + \'")\';\n';
+  c+='    fundo.style.backgroundImage = \'url("\' + foto.url.replace(/"/g, \'%22\') + \'")\';\n';
   c+='    var img = document.createElement(\'img\');\n    img.src = foto.url;\n';
   c+='    img.alt = foto.legenda || (\'Foto \' + (i + 1));\n';
   c+='    img.loading = (i === 0) ? \'eager\' : \'lazy\';\n';
@@ -1867,7 +1867,7 @@ function tGerar(){
   var larg=parseInt($('t-larg').value,10)||700;
 
   var c='';
-  c+='<div class="tidycal-embed" data-path="'+path+'"></div>\n';
+  c+='<div class="tidycal-embed" data-path="'+escAttr(path)+'"></div>\n';
   c+='<scr'+'ipt src="https://asset-tidycal.b-cdn.net/js/embed.js" async></scr'+'ipt>\n\n';
   c+='<sty'+'le>\n  iframe.tidycal-embed { transition: min-height 0.25s ease; }\n</sty'+'le>\n\n';
   c+='<scr'+'ipt>\n(function () {\n';
@@ -1912,7 +1912,7 @@ function tGerar(){
     var alt0=parseInt($('t-alt0').value,10)||1600;
     var d='';
     d+='<ifr'+'ame\n  style="border:none; width:100%; display:block;"\n';
-    d+='  src="'+u+'"\n  title="Agenda"\n  width="100%"\n  height="'+alt0+'"\n';
+    d+='  src="'+escAttr(u)+'"\n  title="Agenda"\n  width="100%"\n  height="'+alt0+'"\n';
     d+='  scrolling="no"\n  frameborder="0"\n  allow="fullscreen">\n</ifr'+'ame>';
     $('t-out3').value=d;
   }else{
