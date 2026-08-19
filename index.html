@@ -1272,7 +1272,8 @@ function trocarAba(qual){
    justamente o que esta fase veio fechar. Tres avisos ao mesmo tempo:
      1. barra vermelha fixa no topo, visivel em qualquer aba (o operador pode nunca abrir a
         aba defeituosa, entao um aviso so dentro dela nao serviria);
-     2. marca "(!)" no botao da aba, para localizar qual delas parou;
+     2. marca "(!)" no botao da aba, para localizar qual delas parou (passo que toca
+        duas abas passa as duas, senao a barra diz "o que" e nada diz "onde");
      3. console.error com a excecao inteira, para o diagnostico.
    Cada combinacao aba+fase avisa UMA vez: salvarEstado roda a cada tecla digitada, e sem o
    registro a barra viraria uma lista infinita da mesma linha. */
@@ -1305,20 +1306,30 @@ function fcBarra(msg){
   var li=document.createElement('div');
   li.appendChild(document.createTextNode('\u2022 '+msg));
   document.getElementById('fc-falhas-lista').appendChild(li);
+  /* a barra e fixa e cresce a cada falha nova: sem compensar a propria altura ela acabaria
+     cobrindo justamente os botoes das abas -- inclusive a marca (!) para onde ela aponta.
+     O body nasce sem padding (so margin:0), entao esta e a unica origem deste valor. */
+  try{if(document.body)document.body.style.paddingTop=(bar.offsetHeight+10)+'px';}catch(e){}
 }
 function fcMarcaAba(abaId){
   if(!abaId)return;
-  var b=document.getElementById('aba-'+abaId);
-  if(!b||b.getAttribute('data-fc-falhou'))return;
-  b.setAttribute('data-fc-falhou','1');
-  b.appendChild(document.createTextNode(' (!)'));
+  var ids=String(abaId).split(' '),i,b;
+  for(i=0;i<ids.length;i++){
+    if(!ids[i])continue;
+    b=document.getElementById('aba-'+ids[i]);
+    if(!b||b.getAttribute('data-fc-falhou'))continue;
+    b.setAttribute('data-fc-falhou','1');
+    b.appendChild(document.createTextNode(' (!)'));
+  }
 }
 /* Passo de partida isolado: a aba que falhar ao se preparar nao interrompe a fila das
-   seguintes. Antes, uma excecao em bToggles() (aba Bordas) deixava cToggles(), cMsgRender()
+   seguintes. Cada aba aparece duas vezes na fila (ligar botoes; desenhar com o estado
+   restaurado), e por isso a segunda passa uma 'fase' propria -- fcVistos deduplica por
+   rotulo+fase, e sem isso a falha da segunda passagem ficaria escondida pela da primeira. Antes, uma excecao em bToggles() (aba Bordas) deixava cToggles(), cMsgRender()
    e cPvBotoes() -- todos da aba Contagem -- sem rodar, e a aba Contagem nascia meio
    configurada por causa de um defeito na aba ao lado. */
-function prep(nome,abaId,fn){
-  try{fn();}catch(e){fcFalha(nome,'preparar a aba',e,abaId);}
+function prep(nome,abaId,fn,fase){
+  try{fn();}catch(e){fcFalha(nome,fase||'preparar a aba',e,abaId);}
 }
 
 /* ============ persistência local ============ */
@@ -1330,13 +1341,25 @@ function prep(nome,abaId,fn){
    Antes disto, salvarEstado montava o objeto inteiro numa expressao so, dentro de um unico
    try/catch: renomear UM campo de UMA aba fazia a ferramenta parar de salvar e de restaurar
    as configuracoes das outras cinco, sem nada na tela.
-   Quando uma aba falha ao coletar, o pedaco dela JA GRAVADO e preservado no lugar de sumir:
-   assim o defeito de programacao nao apaga a configuracao do operador, que volta inteira
-   quando o defeito for corrigido. */
+   Quando uma aba falha, o pedaco dela JA GRAVADO e preservado no lugar de sumir, e isso vale
+   para os DOIS lados:
+     - falha ao COLETAR  -> aquela gravacao usa o ultimo pedaco bom;
+     - falha ao RESTAURAR -> a aba entra em fcSoLeitura e NUNCA MAIS coleta do DOM ate a
+       pagina ser recarregada. Sem isso a preservacao seria unilateral: a aba teria voltado
+       com padroes (ou meio restaurada), e a primeira tecla digitada em QUALQUER aba coletaria
+       esse DOM e sobrescreveria o que estava gravado. Medido com estado malformado, sem
+       injetar codigo: 'cmsgs' gravado como objeto derrubava 57 dos 62 campos da Contagem
+       quando o operador mexia na aba TidyCal, e 'u.prods' gravado como texto zerava chave
+       Pix, Client ID e codigo do pedido sem ninguem abrir o Checkout.
+   Assim a configuracao do operador volta inteira quando o defeito for corrigido -- e a aba em
+   so-leitura avisa na barra que nao esta gravando. */
 /* A ordem desta lista e a ordem das chaves no JSON gravado e a ordem em que as abas
-   restauram. E a mesma de antes (TidyCal antes de Leads, como estava na expressao unica),
-   de proposito: assim um fcConstrutores gravado pela versao anterior e um gravado por esta
-   sao iguais byte a byte, nao so equivalentes. */
+   restauram. Ela repete a ordem antiga (TidyCal antes de Leads, como estava na expressao
+   unica) por CONVENIENCIA, nao por necessidade: a compatibilidade nao depende dela --
+   restaurar le por chave, e uma copia com a ordem visual foi testada e restaurou os mesmos
+   campos. O que a ordem antiga compra e diff limpo em comparacoes de regressao, porque o
+   texto gravado sai identico ao da versao anterior. Reordenar e seguro; so custa um diff
+   ruidoso no proximo teste que comparar o JSON como texto. */
 var ABAS=[
   {id:'slide',nome:'Slideshow',           chaves:['imgs','s'],  coleta:sColeta,restaura:sRestaura},
   {id:'tidy', nome:'Agendamento TidyCal', chaves:['t'],         coleta:tColeta,restaura:tRestaura},
@@ -1345,14 +1368,21 @@ var ABAS=[
   {id:'bor',  nome:'Bordas com efeito',   chaves:['b'],         coleta:bColeta,restaura:bRestaura},
   {id:'cnt',  nome:'Contagem regressiva', chaves:['cmsgs','c'], coleta:cColeta,restaura:cRestaura}
 ];
-var fcFrag={};   /* ultimo pedaco bom de cada aba, para nao apagar o que a aba quebrada tinha */
+var fcFrag={};       /* ultimo pedaco bom de cada aba, para nao apagar o que a aba quebrada tinha */
+var fcSoLeitura={};  /* abas que falharam ao restaurar: param de coletar do DOM ate recarregar */
 
 function salvarEstado(){
   var st={},i,k,a,frag;
   for(i=0;i<ABAS.length;i++){
     a=ABAS[i];
-    try{frag=a.coleta();fcFrag[a.id]=frag;}
-    catch(e){frag=fcFrag[a.id];fcFalha(a.nome,'salvar as configuracoes',e,a.id);}
+    if(fcSoLeitura[a.id]){
+      /* aba que nao conseguiu restaurar: o DOM dela nao representa o que o operador tinha,
+         entao o que vale e o pedaco lido do armazenamento */
+      frag=fcFrag[a.id];
+    }else{
+      try{frag=a.coleta();fcFrag[a.id]=frag;}
+      catch(e){frag=fcFrag[a.id];fcFalha(a.nome,'salvar as configuracoes',e,a.id);}
+    }
     if(frag){for(k in frag){if(Object.prototype.hasOwnProperty.call(frag,k))st[k]=frag[k];}}
   }
   try{localStorage.setItem('fcConstrutores',JSON.stringify(st));}
@@ -1376,7 +1406,10 @@ function restaurarEstado(){
       if(st[c]!==undefined)fcFrag[a.id][c]=st[c];
     }
     try{a.restaura(st);}
-    catch(e){fcFalha(a.nome,'restaurar as configuracoes',e,a.id);}
+    catch(e){
+      fcSoLeitura[a.id]=true;
+      fcFalha(a.nome,'restaurar as configuracoes -- o que ja estava gravado foi mantido, e esta aba nao grava nada ate a pagina ser recarregada',e,a.id);
+    }
   }
 }
 function corValida(v){return /^#[0-9a-fA-F]{6}$/.test(v);}
@@ -4006,7 +4039,7 @@ prep('Contagem regressiva','cnt',function(){
    Mesmo motivo do listener no proprio elemento (roda antes dos de document, entao o
    salvarEstado/previa globais ja leem o valor corrigido); 'blur' nao borbulha, por isso esse
    ramo redesenha a previa por conta propria. */
-prep('Correcao a vista das cores livres','',function(){
+prep('Correcao a vista das cores livres','leads uni',function(){
   CORES_LIVRES.forEach(function(par){
     var t=$(par[0]+'-t');if(!t)return;
     function redesenhar(){
@@ -4026,7 +4059,7 @@ restaurarEstado();
    carga, para o campo nunca exibir algo diferente do que o gerador vai usar, e regrava para o
    valor velho nao ressurgir na proxima sessao. Roda ANTES das previas para elas ja desenharem
    o valor corrigido. */
-prep('Correcao das cores livres e da chave Pix na carga','',function(){
+prep('Correcao das cores livres e da chave Pix na carga','leads uni',function(){
   var mudou=false;
   CORES_LIVRES.forEach(function(par){if(corAjustar(par[0],par[1]))mudou=true;});
   if(uChaveAjustar())mudou=true;
@@ -4036,20 +4069,20 @@ prep('Captacao de leads','leads',function(){
   lBtnPreview();
   lPopPreview();
   lAncToggle();
-});
+},'desenhar a aba com o estado restaurado');
 prep('Agendamento TidyCal','tidy',function(){
   tArqToggle();
-});
+},'desenhar a aba com o estado restaurado');
 prep('Checkout','uni',function(){
   uProdRender();
   uCpRender();
   uToggles();
   uPreview();
-});
+},'desenhar a aba com o estado restaurado');
 prep('Bordas com efeito','bor',function(){
   bToggles();
   bPreview();
-});
+},'desenhar a aba com o estado restaurado');
 prep('Contagem regressiva','cnt',function(){
   /* estado gravado antes desta regra pode trazer c-mob fora da faixa: prende na carga, para o
      campo nunca exibir um numero diferente do que a cCfg vai usar, e regrava para o valor velho
@@ -4062,7 +4095,7 @@ prep('Contagem regressiva','cnt',function(){
      quem nunca abre esta aba, e ainda com o painel escondido (clientWidth zero, largura de
      emergencia). A montagem fica para o clique da aba, que ja chama cPreview(true). */
   cPvBotoes();
-});
+},'desenhar a aba com o estado restaurado');
 })();
 </script>
 </body>
