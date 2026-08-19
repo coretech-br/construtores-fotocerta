@@ -1093,7 +1093,7 @@
       <label><input type="radio" name="c-corujamostrarmob" value="sim" checked><span>Sim</span></label>
       <label><input type="radio" name="c-corujamostrarmob" value="nao"><span>Não</span></label>
       </div>
-      <p class="ajuda">A coruja fica ancorada na ponta, <b>fora da área que rola</b> — ela emoldura a barra em vez de passar junto com o texto. A altura dela <b>acompanha a da barra</b> e para no teto acima: quando o texto quebra em duas linhas — o que é comum no celular — ela cresce e ocupa o espaço que antes sobrava. Numa barra baixa (texto curto, sem botão de ação e sem botão de fechar) ela acompanha a linha e fica menor que o teto; o teto não estica a barra, só limita a coruja. "Mostrar no celular?" é independente da posição: dá para ter as duas no computador e nenhuma no telefone.</p>
+      <p class="ajuda">A coruja fica ancorada na ponta, <b>fora da área que rola</b> — ela emoldura a barra em vez de passar junto com o texto. A altura dela <b>acompanha a da barra</b> e para no teto acima: quando o texto quebra em duas linhas — o que é comum no celular — ela cresce e ocupa o espaço que antes sobrava. Numa barra mais baixa que o teto ela acompanha a linha e fica menor: o teto não estica a barra, só limita a coruja. Com o teto padrão de 26 isso só acontece em barra bem curta, mas <b>acima de 30 vale também para barra com botão</b> — e subir o teto alarga o espaço reservado nas pontas mesmo quando a coruja não cresce, o que estreita a coluna de texto. "Mostrar no celular?" é independente da posição: dá para ter as duas no computador e nenhuma no telefone.</p>
       </div>
       </fieldset>
     </div>
@@ -3898,8 +3898,11 @@ function cCssBase(cfg){
        ("nao uma escolha entre fixo e automatico": o modo fixo saiu).
        Consequencia registrada: numa barra cuja linha e mais baixa que o teto (texto curto sem
        botao de acao nem botao de fechar), a coruja agora acompanha a linha em vez de esticar a
-       barra ate o teto. Barra com botao de acao -- o caso das campanhas -- ja tem linha mais
-       alta que o teto padrao, e nela nada muda.
+       barra ate o teto. A condicao e a LINHA ser mais baixa que o TETO: com o teto padrao de
+       26px, barra com botao de acao nao muda (linha de ~50px), mas a partir de ~30px de teto
+       ela muda tambem -- com teto 60 o desenho cai de 59,99 para 30,33px. E como a largura do
+       quadro e teto*32/38, subir o teto alarga o espaco reservado nas pontas mesmo quando a
+       coruja nao cresce, estreitando a coluna de texto.
 
        A regra continua sendo a UNICA regra de .fcb-coruja no CSS gerado (a do @media do celular
        so declara display, propriedade que nenhuma outra regra desta classe declara). */
