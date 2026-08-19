@@ -1172,7 +1172,7 @@
       </div>
       <div id="c-pv-box"></div>
       </div>
-      <p class="ajuda">A prévia roda o código gerado de verdade: é o mesmo bloco que sai na saída ao lado, executando dentro de um quadro isolado. Continua diferente da página publicada em três pontos: a barra fixa gruda no topo do quadro, não da janela; o relógio é o do seu computador; e aqui a contagem sempre começa agora, enquanto na página real ela conta a partir da primeira visita de cada visitante.</p>
+      <p class="ajuda">A prévia roda o código gerado de verdade: é o mesmo bloco que sai na saída ao lado, executando dentro de um quadro isolado. O que ainda difere da página publicada: a barra fixa gruda no topo do quadro, não da janela; o relógio é o do seu computador; a contagem sempre começa agora, enquanto na página real ela conta a partir da primeira visita de cada visitante; o botão de fechar esquece o clique a cada atualização da prévia; o modo <b>Computador</b> é exibido reduzido para caber na coluna, então julgue o tamanho da fonte pelo modo <b>Celular</b>, que sai em tamanho real; e o quadro não carrega o CSS do tema do site.</p>
     </div>
     <div>
       <div class="saida">
@@ -2930,7 +2930,15 @@ function cCfg(){
     formato:radio('c-formato'),
     rotulos:{d:$('c-rd').value,h:$('c-rh').value,m:$('c-rm').value,s:$('c-rs').value},
     pad:cNum('c-pad',10),largmax:cNum('c-largmax',1100),alinha:radio('c-alinha'),
-    borda:radio('c-borda')==='sim',mob:cNum('c-mob',640),
+    /* O corte do celular e preso a faixa declarada no campo (min=320, max=1024) AQUI, na
+       fonte da configuracao, e nao so na largura do iframe da previa. O input number nao
+       impoe min/max a valor digitado e cNum e parseInt sem limite, entao "100" chegava
+       inteiro ate o @media. Prender so a largura da previa NAO resolve: o iframe iria para
+       320px enquanto o CSS gerado continuaria com max-width:100px, a media query nao casaria
+       e o modo Celular mostraria layout de computador calado -- exatamente a previa que
+       mente em silencio. Preso na cCfg, os dois lados leem o mesmo numero e nao ha como
+       divergirem. Valor dentro da faixa passa intacto: a saida gerada nao muda. */
+    borda:radio('c-borda')==='sim',mob:Math.max(320,Math.min(1024,cNum('c-mob',640))),
     fixa:radio('c-fixa')==='fixa',empurrar:radio('c-empurrar')==='empurrar',z:cNum('c-z',99980),
     cta:{ativo:radio('c-cta')==='sim',txt:$('c-ctatxt').value,url:$('c-ctaurl').value},
     fechar:radio('c-fechar'),prog:radio('c-prog')==='sim',
@@ -3497,14 +3505,36 @@ function cPvShim(){
   s+='      removeItem:function(k){delete d[String(k)];},\n';
   s+='      clear:function(){d={};},\n';
   s+='      key:function(i){var ks=Object.keys(d);return i<ks.length?ks[i]:null;},\n';
-  s+='      get length(){return Object.keys(d).length;}\n';
+  s+='      get length(){return Object.keys(d).length;},\n';
+  /* marca que so o objeto em memoria tem: e' assim que a conferencia abaixo distingue o
+     shim instalado do Storage real, sem depender de instanceof nem do nome da classe. */
+  s+='      fcPvMemoria:true\n';
   s+='    };\n  }\n';
   s+='  function trocar(nome){\n';
   s+='    var falso=memoria();\n';
   s+='    try{Object.defineProperty(window,nome,{value:falso,configurable:true});return;}catch(e){}\n';
   s+='    try{Object.defineProperty(Object.getPrototypeOf(window),nome,{value:falso,configurable:true});}catch(e){}\n';
   s+='  }\n';
+  s+='  function instalado(nome){\n';
+  s+='    try{return !!(window[nome]&&window[nome].fcPvMemoria===true);}catch(e){return false;}\n';
+  s+='  }\n';
   s+="  trocar('localStorage');trocar('sessionStorage');\n";
+  /* Falha silenciosa aqui e' pior que falha barulhenta: o try/catch do bloco gerado nao
+     denuncia nada, porque setItem no Storage REAL funciona e nao lanca. O sintoma so
+     apareceria na segunda abertura da aba, como contagem ja vencida, sem sinal nenhum.
+     Hoje funciona, mas a garantia depende de o navegador continuar deixando localStorage
+     configuravel -- entao a previa confere e avisa na cara do operador se nao conferir. */
+  s+="  var falhou=[];\n";
+  s+="  if(!instalado('localStorage'))falhou.push('localStorage');\n";
+  s+="  if(!instalado('sessionStorage'))falhou.push('sessionStorage');\n";
+  s+='  if(falhou.length){\n';
+  s+="    var av=document.createElement('div');\n";
+  s+="    av.id='c-pv-aviso-shim';\n";
+  s+='    av.setAttribute(\'style\',\'background:#8C1D18;color:#FDFBF6;font:600 12px/1.45 -apple-system,BlinkMacSystemFont,sans-serif;padding:8px 12px\');\n';
+  s+="    av.textContent='Aviso da previa: nao foi possivel isolar o '+falhou.join(' e ')+" +
+     "' deste quadro. A previa esta gravando nas chaves reais do navegador e pode nascer com a contagem ja vencida. O codigo gerado ao lado nao e afetado.';\n";
+  s+='    document.body.appendChild(av);\n';
+  s+='  }\n';
   s+='})();\n</scr'+'ipt>\n';
   return s;
 }
@@ -3539,7 +3569,11 @@ function cPvDoc(cfg){
    por transform:scale -- o scale e do lado de FORA do iframe, entao a viewport que o bloco
    enxerga continua sendo a largura logica, que e o que a media query le. */
 function cPvLargura(cfg){
-  if(cPvModo==='cel')return Math.max(280,Math.min(380,cfg.mob));
+  /* Sem piso na largura do modo Celular: um piso garantiria largura confortavel mas quebraria
+     a UNICA propriedade que este modo precisa ter -- ficar <= o corte. cfg.mob ja chega preso
+     a [320,1024] pela cCfg, entao min(380,mob) fica em [320,380]: confortavel e sempre <= o
+     corte, sem piso nenhum. E max(920,mob+240) fica sempre acima do corte em toda a faixa. */
+  if(cPvModo==='cel')return Math.min(380,cfg.mob);
   return Math.max(920,cfg.mob+240);
 }
 var cPvTimer=null,cPvModo='desk';
@@ -3646,8 +3680,11 @@ bToggles();
 bPreview();
 cToggles();
 cMsgRender();
+/* A previa NAO e montada aqui. Montar na carga executaria o bloco gerado -- intervalo de 1s,
+   listeners de scroll/resize, ResizeObserver -- em toda abertura da ferramenta, mesmo para
+   quem nunca abre esta aba, e ainda com o painel escondido (clientWidth zero, largura de
+   emergencia). A montagem fica para o clique da aba, que ja chama cPreview(true). */
 cPvBotoes();
-cPreview(true);
 })();
 </script>
 </body>
