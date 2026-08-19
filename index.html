@@ -2372,6 +2372,23 @@ function uFmt(v){
 }
 
 /* ===== opcionais do produto em edicao ===== */
+/* Correcao a vista dos dois editores em linha da aba (o de opcionais e o de cupons). Mesma regra
+   do resto da ferramenta: em 'change'/'blur', nunca em 'input'. */
+function uOpPrecoAjustar(inp,i){
+  var v=parseFloat(String(inp.value).replace(',','.'));
+  if(!isNaN(v)&&v>=0){uEditOps[i].preco=v;return false;}
+  uEditOps[i].preco=0;
+  inp.value='0';
+  return true;
+}
+function uCpCodAjustar(inp,i){
+  var alto=String(inp.value).toUpperCase();
+  uCps[i].codigo=alto;
+  if(alto===inp.value)return false;
+  inp.value=alto;
+  salvarEstado();uPreview();
+  return true;
+}
 function uOpRender(){
   var ul=$('u-op-lista');if(!ul)return;
   ul.innerHTML='';
@@ -2383,6 +2400,13 @@ function uOpRender(){
     n.addEventListener('input',function(){uEditOps[i].nome=n.value;});
     var pr=document.createElement('input');pr.type='number';pr.step='0.01';pr.min='0';pr.value=op.preco;pr.placeholder='Preco';
     pr.addEventListener('input',function(){uEditOps[i].preco=pr.value;});
+    /* Preco apagado na lista virava preco:0.00 no codigo com o campo em branco na tela. Aqui a
+       recusa dos cupons NAO cabe: opcional gratis e configuracao legitima -- a propria aba ja
+       emite "Sem opcional" a preco zero, e um brinde tem preco zero de proposito. O que nao pode
+       e a tela dizer uma coisa e o codigo outra, entao o campo assume o zero a vista. Valor que
+       ja e um numero nao-negativo passa intacto, sem reescrita cosmetica. */
+    pr.addEventListener('change',function(){uOpPrecoAjustar(pr,i);});
+    pr.addEventListener('blur',function(){uOpPrecoAjustar(pr,i);});
     info.appendChild(n);info.appendChild(pr);
     var ctrl=document.createElement('div');ctrl.className='ctrl';
     [['\u2191',function(){uOpMove(i,-1);},'Subir'],['\u2193',function(){uOpMove(i,1);},'Descer'],['\u2715',function(){uOpDel(i);},'Remover']]
@@ -2472,6 +2496,12 @@ function uCpRender(){
     var info=document.createElement('div');info.className='info';
     var cod=document.createElement('input');cod.type='text';cod.value=cp.codigo;cod.placeholder='Codigo';
     cod.addEventListener('input',function(){uCps[i].codigo=cod.value.toUpperCase();salvarEstado();uPreview();});
+    /* O modelo ja guardava em maiusculas, mas o CAMPO continuava mostrando o que foi digitado:
+       tela "promo abc", codigo gerado 'PROMO ABC'. Funcionava (a comparacao em runtime ignora
+       caixa), e era exatamente o "tela diferente do codigo" que esta fase existiu para eliminar.
+       So em 'change'/'blur', nunca em 'input': reescrever a cada tecla mexeria com o cursor. */
+    cod.addEventListener('change',function(){uCpCodAjustar(cod,i);});
+    cod.addEventListener('blur',function(){uCpCodAjustar(cod,i);});
     var val=document.createElement('input');val.type='number';val.step='0.01';val.min='0';val.value=cp.valor;val.placeholder='Valor';
     val.addEventListener('input',function(){uCps[i].valor=val.value;salvarEstado();});
     var sel=document.createElement('select');
