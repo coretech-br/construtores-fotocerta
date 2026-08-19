@@ -3019,16 +3019,24 @@ function cCssEfeitos(cfg){
     s+='@keyframes fcb-pulsar{0%,100%{transform:scale(1)}50%{transform:scale(1.035)}}\n';
     anim.push('.fcb-conteudo');
   }
-  if(cfg.efeitos.brilho){
-    s+='.fcb-barra{background-image:linear-gradient(100deg,rgba(255,255,255,0) 40%,rgba(255,255,255,.28) 50%,rgba(255,255,255,0) 60%);'+
-       'background-size:250% 100%;background-repeat:no-repeat;animation:fcb-brilho 5s linear infinite}\n';
-    s+='@keyframes fcb-brilho{from{background-position:150% 0}to{background-position:-150% 0}}\n';
-    anim.push('.fcb-barra');
-  }
-  if(cfg.efeitos.degrade){
-    s+='.fcb-barra{background-image:linear-gradient(90deg,'+cfg.cores.fundo+','+cfg.cores.destaque+','+cfg.cores.fundo+');'+
-       'background-size:200% 100%;animation:fcb-degrade 8s linear infinite}\n';
-    s+='@keyframes fcb-degrade{from{background-position:0 0}to{background-position:200% 0}}\n';
+  if(cfg.efeitos.brilho||cfg.efeitos.degrade){
+    var bgImg=[],bgTam=[],bgRep=[],bgAnim=[];
+    if(cfg.efeitos.brilho){
+      bgImg.push('linear-gradient(100deg,rgba(255,255,255,0) 40%,rgba(255,255,255,.28) 50%,rgba(255,255,255,0) 60%)');
+      bgTam.push('250% 100%');
+      bgRep.push('no-repeat');
+      bgAnim.push('fcb-brilho 5s linear infinite');
+      s+='@keyframes fcb-brilho{from{background-position:150% 0}to{background-position:-150% 0}}\n';
+    }
+    if(cfg.efeitos.degrade){
+      bgImg.push('linear-gradient(90deg,'+cfg.cores.fundo+','+cfg.cores.destaque+','+cfg.cores.fundo+')');
+      bgTam.push('200% 100%');
+      bgRep.push('repeat');
+      bgAnim.push('fcb-degrade 8s linear infinite');
+      s+='@keyframes fcb-degrade{from{background-position:0 0}to{background-position:200% 0}}\n';
+    }
+    s+='.fcb-barra{background-image:'+bgImg.join(',')+';background-size:'+bgTam.join(',')+';'+
+       'background-repeat:'+bgRep.join(',')+';animation:'+bgAnim.join(',')+'}\n';
     anim.push('.fcb-barra');
   }
   if(cfg.efeitos.piscar&&cfg.formato==='compacto'){
@@ -3082,6 +3090,7 @@ function cJsBase(cfg){
   j+="  var ROTULOS={d:'"+esc(escHtml(cfg.rotulos.d))+"',h:'"+esc(escHtml(cfg.rotulos.h))+"',m:'"+esc(escHtml(cfg.rotulos.m))+"',s:'"+esc(escHtml(cfg.rotulos.s))+"'};\n";
   j+='  var ESCONDE_DIAS_ZERADOS='+cfg.diaszero+';\n';
   j+="  var FORMATO='"+cfg.formato+"';           /* 'compacto' | 'blocos' */\n";
+  j+="  var DIG='"+cfg.dig+"';                    /* 'nenhuma' | 'fade' | 'flip' */\n";
   j+='  var EMPURRA_CONTEUDO='+(cfg.fixa&&cfg.empurrar)+';\n';
   j+='\n  /* Daqui para baixo nao precisa mexer */\n\n';
   j+='  var raiz=document.getElementById(\'fcb-barra\');\n  if(!raiz)return;\n\n';
@@ -3099,12 +3108,20 @@ function cJsBase(cfg){
   j+='  function partes(ms){\n';
   j+='    if(ms<0)ms=0;\n    var t=Math.floor(ms/1000);\n';
   j+='    return {d:Math.floor(t/86400),h:Math.floor(t%86400/3600),m:Math.floor(t%3600/60),s:t%60};\n  }\n\n';
-  j+='  function relogio(p){\n';
-  j+='    var itens=[],h=\'\',i;\n';
+  j+='  function itensRelogio(p){\n';
+  j+='    var itens=[];\n';
   j+='    if(UNIDADES.d&&!(ESCONDE_DIAS_ZERADOS&&p.d===0))itens.push([dois(p.d),ROTULOS.d,\'d\']);\n';
   j+='    if(UNIDADES.h)itens.push([dois(p.h),ROTULOS.h,\'h\']);\n';
   j+='    if(UNIDADES.m)itens.push([dois(p.m),ROTULOS.m,\'m\']);\n';
   j+='    if(UNIDADES.s)itens.push([dois(p.s),ROTULOS.s,\'s\']);\n';
+  j+='    return itens;\n  }\n';
+  j+='  /* a chave identifica QUAIS unidades estao visiveis (ex: "hms" ou "dhms") -- muda\n';
+  j+='     so quando ESCONDE_DIAS_ZERADOS derruba o bloco de dias ao cruzar 24h. So nesse\n';
+  j+='     caso vale remontar o marcador; a cada segundo normal so o texto dos digitos muda. */\n';
+  j+='  function chaveRelogio(itens){\n';
+  j+='    var k=\'\',i;\n    for(i=0;i<itens.length;i++)k+=itens[i][2];\n    return k;\n  }\n';
+  j+='  function relogio(p){\n';
+  j+='    var itens=itensRelogio(p),h=\'\',i;\n';
   j+='    if(!itens.length)return \'\';\n';
   j+="    if(FORMATO==='blocos'){\n";
   j+='      for(i=0;i<itens.length;i++)h+=\'<span class="fcb-bloco"><span class="fcb-num">\'+itens[i][0]+\'</span><span class="fcb-rot">\'+itens[i][1]+\'</span></span>\';\n';
@@ -3130,6 +3147,8 @@ function cJsBase(cfg){
   j+='  raiz.innerHTML=\'<div class="fcb-interno"><div class="fcb-conteudo"></div></div>\';\n';
   j+="  var conteudo=raiz.querySelector('.fcb-conteudo');\n";
   j+='  var msgAtual=0;\n';
+  j+='  var chaveAnterior=null;         /* forca remontagem do relogio na 1a vez e apos pintarMensagem */\n';
+  j+='  var VIRANDO_MS=250;             /* bate com a duracao da transicao css de fade/flip */\n';
   if(cfg.urg.ativo)j+='  var LIMITE_URGENCIA='+(cfg.urg.lim*60000)+';\n';
   if((cfg.mov==='altfade'||cfg.mov==='altdesliza')&&cfg.msgs.length>1){
     j+='  setInterval(function(){\n';
@@ -3161,15 +3180,39 @@ function cJsBase(cfg){
   j+="    if(AO_ZERAR==='esconder'){raiz.style.display='none';liberarEspaco();return;}\n";
   j+="    if(AO_ZERAR==='mensagem'){conteudo.textContent=MSG_FINAL;espaco();return;}\n";
   j+='  }\n\n';
-  j+='  /* pintarMensagem roda so na montagem e na troca de mensagem */\n';
+  j+='  /* pintarMensagem roda so na montagem e na troca de mensagem: o marcador do relogio\n';
+  j+='     volta a ficar vazio, entao forca a proxima atualizarRelogio a remontar do zero. */\n';
   j+='  function pintarMensagem(){\n';
+  j+='    chaveAnterior=null;\n';
   j+='    var html=textoCom(MENSAGENS[msgAtual%MENSAGENS.length]);\n';
   j+="    conteudo.innerHTML=ROLANDO?('<div class=\"fcb-trilho\"><span>'+html+'</span><span>'+html+'</span></div>'):html;\n";
   j+='  }\n';
-  j+='  /* atualizarRelogio roda a cada segundo e toca so nos marcadores */\n';
+  j+='  /* atualizarRelogio roda a cada segundo. Normalmente so troca o texto dos digitos que\n';
+  j+='     mudaram (sem tocar nos nos do DOM), para a transicao css de fade/flip poder animar\n';
+  j+='     e para nao gerar churn de innerHTML a cada tick. So remonta o marcador inteiro\n';
+  j+='     quando o conjunto de unidades visiveis muda (ex: dias somem ao cruzar 24h) ou na\n';
+  j+='     primeira chamada apos a montagem/troca de mensagem. */\n';
   j+='  function atualizarRelogio(restante){\n';
-  j+="    var els=conteudo.querySelectorAll('[data-fcb-rel]'),h=relogio(partes(restante)),i;\n";
-  j+='    for(i=0;i<els.length;i++)els[i].innerHTML=h;\n';
+  j+='    var p=partes(restante),itens=itensRelogio(p),chave=chaveRelogio(itens);\n';
+  j+="    var els=conteudo.querySelectorAll('[data-fcb-rel]'),i,k;\n";
+  j+='    if(chave!==chaveAnterior){\n';
+  j+='      var h=relogio(p);\n';
+  j+='      for(i=0;i<els.length;i++)els[i].innerHTML=h;\n';
+  j+='      chaveAnterior=chave;\n';
+  j+='      return;\n';
+  j+='    }\n';
+  j+='    for(i=0;i<els.length;i++){\n';
+  j+="      var nums=els[i].querySelectorAll('.fcb-num');\n";
+  j+='      for(k=0;k<itens.length;k++){\n';
+  j+='        if(nums[k]&&nums[k].textContent!==itens[k][0]){\n';
+  j+='          nums[k].textContent=itens[k][0];\n';
+  j+="          if(DIG!=='nenhuma'){\n";
+  j+="            nums[k].classList.add('fcb-virando');\n";
+  j+='            (function(el){setTimeout(function(){el.classList.remove(\'fcb-virando\');},VIRANDO_MS);})(nums[k]);\n';
+  j+='          }\n';
+  j+='        }\n';
+  j+='      }\n';
+  j+='    }\n';
   j+='  }\n\n';
   j+='  function tick(){\n';
   j+='    var restante=alvo-(new Date()).getTime();\n';
