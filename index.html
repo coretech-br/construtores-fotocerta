@@ -1002,7 +1002,7 @@
       <div id="c-borda-campo">
       <div class="cor-linha"><input type="color" id="c-cborda" value="#FFC94A"><input type="text" id="c-cborda-t" value="#FFC94A"></div>
       </div>
-      <label for="c-mob">Largura de corte do celular <small>(px — abaixo disso usa a versão curta e esconde a coruja)</small></label>
+      <label for="c-mob">Largura de corte do celular <small>(px, de 320 a 1024 — abaixo disso usa a versão curta e esconde a coruja; fora da faixa o campo se corrige sozinho)</small></label>
       <input type="number" id="c-mob" value="640" min="320" max="1024" step="10">
       </fieldset>
     </div>
@@ -2912,6 +2912,24 @@ function cAlvoIso(){
      segundos. */
   return partes[0]+'T'+partes[1].slice(0,5)+':00-03:00';
 }
+/* O clamp da cCfg protege a saida, mas sozinho ele corrigia o codigo entregue em silencio: o
+   operador digitava 100, lia 100 na tela e copiava um bloco com max-width:320px. Esta aba ja
+   decidiu duas vezes o contrario disso -- no limiar de urgencia, avisar e bloquear em vez de
+   clampar calado, porque mudar sem avisar um numero que o operador esta lendo troca um defeito
+   visivel por um invisivel. Aqui o campo se corrige na propria interface: o valor preso volta
+   para o input, entao o que esta na tela e o que sai no codigo sao sempre o MESMO numero e a
+   correcao acontece na frente do operador. O clamp da cCfg fica como rede -- e ele que segura
+   estado restaurado do localStorage gravado antes desta regra existir.
+   So em 'change'/'blur', nunca em 'input': corrigir a cada tecla impediria digitar "320",
+   porque o "3" viraria 320 antes do resto chegar. */
+function cMobAjustar(){
+  var el=$('c-mob');if(!el)return false;
+  var bruto=parseInt(el.value,10);
+  var preso=isNaN(bruto)?640:Math.max(320,Math.min(1024,bruto));
+  if(String(preso)===String(el.value))return false;
+  el.value=String(preso);
+  return true;
+}
 function cCfg(){
   var dias=cNum('c-dias',0),horas=cNum('c-horas',0),mins=cNum('c-mins',0);
   return {
@@ -3657,6 +3675,15 @@ liga('c-msg-add',cMsgAdd);
 liga('c-atualizar',function(){cPreview(true);});
 liga('c-pv-desk',function(){cPvModoSet('desk');});
 liga('c-pv-cel',function(){cPvModoSet('cel');});
+/* O listener do proprio elemento corre ANTES dos de document (fase de bolha, alvo primeiro),
+   entao quando o cPreview() global rodar o valor ja esta preso -- por isso o ramo de 'change'
+   nao redesenha, senao montaria o iframe duas vezes. 'blur' nao borbulha e nao aciona nenhum
+   listener de document, entao esse redesenha por conta propria. */
+(function(){
+  var el=$('c-mob');if(!el)return;
+  el.addEventListener('change',function(){if(cMobAjustar())salvarEstado();});
+  el.addEventListener('blur',function(){if(cMobAjustar()){salvarEstado();cPreview(true);}});
+})();
 liga('c-gerar',cGerar);
 liga('c-limpar',cLimpar);
 liga('c-copy1',function(){copiar('c-out1','c-cop1');});
@@ -3678,6 +3705,10 @@ uToggles();
 uPreview();
 bToggles();
 bPreview();
+/* estado gravado antes desta regra pode trazer c-mob fora da faixa: prende na carga, para o
+   campo nunca exibir um numero diferente do que a cCfg vai usar, e regrava para o valor velho
+   nao ressurgir na proxima sessao. */
+if(cMobAjustar())salvarEstado();
 cToggles();
 cMsgRender();
 /* A previa NAO e montada aqui. Montar na carga executaria o bloco gerado -- intervalo de 1s,
