@@ -19,7 +19,10 @@
   .topo h1{font-size:22px;font-weight:600;margin:0;letter-spacing:.3px}
   .topo p{margin:2px 0 0;color:var(--tinta-suave);font-size:13px}
 
-  .abas{max-width:1080px;margin:18px auto 0;padding:0 20px;display:flex;gap:8px}
+  /* flex-wrap: os botoes ganharam um selo "fora" (preset geral, fase 3) e a barra passou a
+     poder nao caber. Sem quebrar linha ela estouraria a largura da pagina -- o que ja
+     acontecia em janela estreita antes desta fase (medido: 11 px em 700 px). */
+  .abas{max-width:1080px;margin:18px auto 0;padding:0 20px;display:flex;gap:8px;flex-wrap:wrap}
   .aba{border:1px solid var(--linha);border-bottom:none;background:transparent;color:var(--tinta-suave);
     padding:10px 18px;border-radius:10px 10px 0 0;cursor:pointer;font-size:14px;font-weight:600}
   .aba.ativa{background:var(--papel);color:var(--verde)}
@@ -242,6 +245,77 @@
      sem prefixo de aba, porque o visual e o mesmo nos dois lugares. */
   .alerta{background:#FFF6DF;border:1px solid #E3B23C;color:#6B5210}
   .alerta b{color:#6B5210}
+
+  /* ===== preset geral (fase 3) =====
+     Tudo o que a fase 3 desenha vive no espaco de nomes 'fcg-', pelo mesmo motivo que a
+     biblioteca de presets vive em 'fcp-': campo de aba comeca por prefixo de UMA letra
+     (s-, t-, l-, u-, b-, c-), entao um ID 'fcg-...' nao pode colidir com campo de aba nem
+     ser alcancado pelos listeners de "mudou alguma coisa nesta aba" (todos guardados por
+     expressao regular de prefixo). A fase 2 pagou caro para aprender isso (u-pnome). */
+  /* Quem gruda no topo e SO a linha (.fcg-fixa), nunca o painel de detalhes. Medido com o
+     painel aberto: a barra inteira tem 607 px de altura, e grudar isso no topo comeria mais de
+     meia janela e esconderia justamente a aba que o operador esta configurando. Aberto o
+     painel, ele rola embora; a linha -- campanha, pagina e estado -- e que fica a vista.
+     sticky, e nao position:fixed: a barra vermelha de falhas (fc-falhas) JA e fixed no topo e
+     compensa a propria altura empurrando o body. Duas fixas no topo se cobririam, e a de falha
+     tem de vencer -- por isso ela fica em z-index 99999 e esta, em 50.
+     A caixa que gruda e a de LARGURA INTEIRA, e nao a de 1080 px centrada: fosse a centrada, o
+     conteudo da pagina apareceria rolando por baixo nas duas faixas laterais.
+     E .fcg-fixa e filha direta do <body>, sem nenhuma caixa em volta juntando-a ao painel:
+     sticky gruda dentro do bloco que a CONTEM, e uma caixa de 605 px (linha + painel aberto)
+     levaria a linha embora junto com ela na primeira rolagem. Medido: com o painel aberto e a
+     pagina em 1200 px, a linha ficava em top:-547 -- fora da tela, sem grudar em nada. */
+  .fcg-fixa{position:sticky;top:0;z-index:50;background:var(--papel);
+    border-bottom:1px solid var(--linha);box-shadow:0 1px 6px rgba(0,0,0,.08)}
+  .fcg-linha{max-width:1080px;margin:0 auto;padding:10px 20px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .fcg-linha label{margin:0;font-size:13px;white-space:nowrap}
+  .fcg-linha select{width:auto;min-width:190px;max-width:100%;padding:7px 10px;font-size:13px}
+  .fcg-nome{font-size:13px;font-weight:700;color:var(--verde);min-width:0;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .fcg-selo{font-size:11px;font-weight:700;border-radius:999px;padding:3px 10px;white-space:nowrap;
+    border:1px solid var(--linha);color:var(--tinta-suave);background:#fff}
+  .fcg-selo.salvo{color:#294B24;background:#EAF3E9;border-color:#7FA97A}
+  .fcg-selo.alterado{color:#6B5210;background:#FFF6DF;border-color:#E3B23C}
+  .fcg-cresce{flex:1 1 20px;min-width:0}
+  .fcg-painel{padding:14px 20px;display:none;border-bottom:1px solid var(--linha)}
+  .fcg-painel.aberto{display:block}
+  .fcg-painel .grade{max-width:1080px;margin:0 auto}
+  .fcg-painel fieldset{margin-bottom:0}
+  .fcg-painel textarea{height:110px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    font-size:11.5px;line-height:1.45}
+
+  /* Interruptor no topo de cada aba (montado por fcgIntMontar). Amarelo quando a aba esta
+     FORA da pagina: e o estado que precisa saltar aos olhos, porque e o padrao de todo preset
+     geral novo e porque uma aba fora nao entra no painel consolidado da fase 5. */
+  .fcg-int{border:1px solid var(--linha);border-radius:10px;padding:12px 14px;margin:0 0 18px;background:#F5F1E6}
+  .fcg-int.fora{border-color:#E3B23C;background:#FFF6DF}
+  .fcg-int .fcg-tit{font-size:12px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;
+    color:var(--verde);margin-bottom:6px}
+  .fcg-int.fora .fcg-tit{color:#6B5210}
+  .fcg-int .ajuda{margin-top:8px}
+  .fcg-int .acoes{margin-top:8px}
+  .fcg-diff{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;
+    word-break:break-all}
+
+  /* Aba fora da pagina: esmaecida e com um selo, mas CLICAVEL -- e preciso poder abri-la para
+     liga-la. O selo diz "fora" e o titulo/aria-label dizem a frase inteira: seis abas com
+     "fora desta pagina" escrito por extenso (que e o estado inicial de todo preset geral novo)
+     dariam uma barra de tres linhas. .abas ganha flex-wrap pelo mesmo motivo. */
+  .aba.fcg-fora{opacity:.55}
+  .aba .fcg-chip{display:inline-block;margin-left:6px;font-size:10px;font-weight:700;
+    letter-spacing:.5px;text-transform:uppercase;border:1px solid #E3B23C;background:#FFF6DF;
+    color:#6B5210;border-radius:999px;padding:1px 6px}
+
+  /* Pergunta de tres saidas (salvar / descartar / cancelar). confirm() do navegador so tem
+     duas, e trocar de preset com alteracoes nao salvas precisa das tres -- perder trabalho em
+     silencio e exatamente o que esta fase nao pode fazer. */
+  .fcg-modal{position:fixed;left:0;right:0;top:0;bottom:0;z-index:99998;background:rgba(35,40,31,.55);
+    display:flex;align-items:center;justify-content:center;padding:20px}
+  .fcg-cx{background:var(--papel);border:1px solid var(--linha);border-radius:12px;padding:20px;
+    max-width:580px;width:100%;box-shadow:0 12px 40px rgba(0,0,0,.35)}
+  .fcg-cx h2{margin:0 0 8px;font-size:16px;color:var(--verde)}
+  .fcg-cx p{margin:0 0 8px;font-size:14px;line-height:1.55}
+  .fcg-cx ul{margin:0 0 12px;padding-left:20px;font-size:13px;line-height:1.6}
 </style>
 </head>
 <body>
@@ -251,6 +325,59 @@
   <div>
     <h1>Construtores Foto Certa</h1>
     <p>Gere o código dos componentes do Prosite preenchendo os parâmetros. Os valores ficam salvos neste navegador.</p>
+  </div>
+</div>
+
+<!-- ==================== PRESET GERAL (fase 3) ====================
+     Barra sempre visivel acima das abas: qual campanha, qual pagina e se o que esta na tela
+     ja foi salvo naquele preset. Sem preset geral selecionado a ferramenta se comporta
+     exatamente como sempre (estado "Rascunho"), e nada aqui muda o que os geradores emitem --
+     preset geral e organizacao de ENTRADA. -->
+<div class="fcg-fixa">
+  <div class="fcg-linha">
+    <label for="fcg-sel">Preset geral</label>
+    <select id="fcg-sel"></select>
+    <span class="fcg-nome" id="fcg-nome">Rascunho</span>
+    <span class="fcg-selo" id="fcg-estado">rascunho</span>
+    <span class="fcg-selo" id="fcg-conta"></span>
+    <span class="fcg-cresce"></span>
+    <button class="botao mini" type="button" id="fcg-salvar">Salvar</button>
+    <button class="botao mini claro" type="button" id="fcg-descartar" title="Descartar as alterações e voltar ao que está guardado neste preset geral">Descartar</button>
+    <button class="botao mini claro" type="button" id="fcg-detalhes">Detalhes</button>
+  </div>
+</div>
+<div class="fcg-painel" id="fcg-painel">
+    <div class="grade">
+      <div>
+        <fieldset>
+          <legend>Campanha e página</legend>
+          <label for="fcg-campanha">Campanha <small>(o mesmo nome nas duas páginas — é assim que a ferramenta sabe que elas são da mesma campanha)</small></label>
+          <input type="text" id="fcg-campanha" value="" placeholder="ex.: Natal 2026" list="fcg-campanhas" autocomplete="off">
+          <datalist id="fcg-campanhas"></datalist>
+          <label>Página</label>
+          <div class="radios">
+            <label><input type="radio" name="fcg-pagina" value="hospedeira" checked><span>Hospedeira</span></label>
+            <label><input type="radio" name="fcg-pagina" value="embutida"><span>Embutida</span></label>
+          </div>
+          <div class="acoes">
+            <button class="botao" type="button" id="fcg-criar">Salvar como preset geral</button>
+            <button class="botao claro" type="button" id="fcg-apagar">Apagar este preset geral</button>
+          </div>
+          <p class="ajuda"><b>O nome não se digita:</b> ele vem da campanha mais a página — <i>Natal 2026 · Hospedeira</i>. Com o nome derivado, a ferramenta sabe que as duas páginas pertencem à mesma campanha e pode comparar uma com a outra.</p>
+          <p class="ajuda"><b>Salvar como preset geral</b> cria um preset novo com o que está na tela agora, e nele <b>todas as abas nascem fora da página</b>. Ligue as que esta página realmente usa: aba esquecida <i>fora</i> some da página e você vê; aba esquecida <i>dentro</i> publica um bloco a mais e você não vê.</p>
+          <p class="ajuda"><b>Onde fica:</b> no armazenamento deste navegador, como todo o resto — não acompanha outro computador. Apagar um preset geral não mexe em nenhum código já colado no site.</p>
+        </fieldset>
+      </div>
+      <div>
+        <fieldset>
+          <legend>Outros códigos meus</legend>
+          <label for="fcg-head">Tag Head <small>(o que você já cola à mão nesta página e não sai de nenhuma aba)</small></label>
+          <textarea id="fcg-head" spellcheck="false"></textarea>
+          <label for="fcg-body">Tag Body <small>(idem, para o campo Tag Body)</small></label>
+          <textarea id="fcg-body" spellcheck="false"></textarea>
+          <p class="ajuda">Estes dois campos ficam guardados <b>por página</b>, dentro do preset geral — ao trocar de preset, eles trocam junto. <b>Nunca vêm de outra página:</b> um preset geral criado a partir de outro nasce com os dois vazios, e sair para o Rascunho também os esvazia. É a mesma proteção que faz as abas nascerem fora — só que aqui, sem interruptor, a proteção é não copiar. <b>Ainda não são usados por nada</b>: quem vai juntá-los aos blocos gerados é o painel consolidado, na próxima etapa. Por enquanto eles servem para você não perder esse código de vista.</p>
+        </fieldset>
+      </div>
   </div>
 </div>
 
@@ -2045,7 +2172,11 @@ var ABAS=[
    pref:'t',fora:[],operacionais:[],resumo:tPresetResumo,redesenhar:tPresetDepois,antesDeSalvar:tPresetAntes,
    exemplo:'ex.: Natal 2026 - ensaio tematico',
    guarda:'tudo o que está configurado nesta aba — o caminho do agendamento no TidyCal, as duas alturas, a largura de corte, o modo (direto ou embutido), o endereço da página intermediária e a altura inicial do iframe.'},
-  {id:'leads',nome:'Captacao de leads',   chaves:['l'],         coleta:lColeta,restaura:lRestaura,
+  /* 'nome' e TEXTO DE INTERFACE: aparece na barra vermelha de falhas, nas perguntas do preset
+     geral e no interruptor de cada aba. Por isso vai com acento, como manda a convencao do
+     arquivo -- e por isso os prep() desta aba usam exatamente a mesma grafia, senao a barra
+     mostraria as duas. */
+  {id:'leads',nome:'Captação de leads',   chaves:['l'],         coleta:lColeta,restaura:lRestaura,
    pref:'l',fora:[],operacionais:[['num','o número do WhatsApp']],resumo:lPresetResumo,redesenhar:lPresetDepois,antesDeSalvar:lPresetAntes,
    exemplo:'ex.: Natal 2026 - hospedeira',
    guarda:'tudo o que está configurado nesta aba — modo de exibição, ícone, formato, cores e posição do botão, os quatro trechos da mensagem, os textos do pop-up, o cabeçalho (coruja, movimento e efeitos), o horário de atendimento, a pergunta de qualificação com as opções cadastradas e a âncora.'},
@@ -2092,6 +2223,18 @@ function salvarEstado(){
   }
   try{localStorage.setItem('fcConstrutores',JSON.stringify(st));}
   catch(e){fcFalha('Ferramenta','gravar as configuracoes -- armazenamento do navegador indisponivel, nada esta sendo salvo',e,'');}
+  /* A barra do preset geral (fase 3) diz se a tela ainda confere com o preset selecionado, e
+     tem de acordar em TODA mudanca de valor -- nao so nas que passam por uma tecla. Ligar isso
+     aos eventos 'input'/'change' de document parecia bastar e NAO bastava: adicionar uma foto,
+     remover um produto, salvar ou remover um preset de aba mudam o estado por um CLIQUE em
+     botao, e o clique nao dispara nem 'input' nem 'change'. Medido: removendo da biblioteca o
+     preset de onde a aba tinha vindo, o aviso continuava dizendo "veio de X, e continua igual
+     a ele" sobre um preset que ja nao existia -- exatamente a classe de defeito (tela dizendo
+     uma coisa e o estado dizendo outra) que este projeto mais paga para evitar.
+     Aqui e o ponto por onde TUDO passa: nao ha mudanca de valor nesta ferramenta que nao
+     termine em salvarEstado. Try proprio porque gravar e sagrado: um defeito no desenho da
+     barra nao pode impedir o salvamento que acabou de acontecer. */
+  try{fcgAgendar();}catch(e){}
 }
 function restaurarEstado(){
   var raw,st,i,j,a,c;
@@ -2352,6 +2495,11 @@ function fcPresetSalvar(a){
   var novo={nome:nome,carimbo:carimbo,valores:valores};
   if(i>=0)lista[i]=novo;else lista.push(novo);
   if(campo)campo.value='';
+  /* Se a aba veio DESTE preset, a marca de origem acompanha o carimbo novo (ver
+     fcgOrigemRecarimbar). Try proprio, pela mesma razao do fcgOrigemMarcar: um defeito na
+     anotacao nao pode desfazer um "Salvar preset" que ja deu certo. */
+  try{fcgOrigemRecarimbar(a,novo);}
+  catch(e){fcFalha('Preset geral','recarimbar a marca de origem depois de regravar o preset',e,'');}
   fcPresetsRender(a);salvarEstado();
 }
 /* Aplicar passa pelo restaura() da propria aba -- o MESMO caminho do estado gravado --, entao
@@ -2381,6 +2529,11 @@ function fcPresetAplicar(a,i){
   }
   try{if(a.redesenhar)a.redesenhar();}
   catch(e){fcFalha(a.nome,'redesenhar a aba depois de aplicar um preset',e,a.id);}
+  /* Marca de ORIGEM (fase 3): o preset geral guarda uma COPIA dos valores e anota de onde ela
+     veio, para poder avisar depois "veio de 'X', que mudou depois". Try proprio: um defeito na
+     anotacao nao pode desfazer um "Aplicar" que ja deu certo. */
+  try{fcgOrigemMarcar(a,p);}
+  catch(e){fcFalha('Preset geral','anotar a origem do preset aplicado',e,'');}
   salvarEstado();
 }
 function fcPresetRemover(a,i){
@@ -2492,6 +2645,912 @@ function fcLista(v){
   if(!v.length)return '';
   if(v.length===1)return v[0];
   return v.slice(0,v.length-1).join(', ')+' e '+v[v.length-1];
+}
+
+/* ============ preset geral (fase 3) ============ */
+/* O QUE E. Um preset geral e a configuracao das SEIS abas para UMA pagina de UMA campanha.
+   Ele responde "para qual pagina vai este codigo?" uma vez so, em vez de seis vezes -- seis
+   chances de inconsistencia viram zero. O nome exibido e DERIVADO (campanha + pagina:
+   "Natal 2026 - Hospedeira"), nunca digitado: nome livre impediria a ferramenta de saber que
+   duas paginas pertencem a mesma campanha, que e o que sustenta o aviso de divergencia.
+
+   O QUE ELE NAO E. Nao e um caminho novo de ler ou escrever campos. Os valores de uma aba
+   saem de fcPresetCapturar(a) -- o mesmo coleta() que alimenta o estado gravado e a biblioteca
+   de presets da fase 2 -- e voltam pelo restaura() da propria aba. Se um campo entra no estado
+   gravado, ele entra aqui pela mesma linha.
+
+   ONDE MORA, E POR QUE NUM LUGAR SEPARADO. Chave propria no armazenamento:
+   'fcConstrutoresGerais'. A chave 'fcConstrutores' -- o rascunho, o estado das seis abas --
+   NAO E TOCADA por esta fase. Isso e o que torna a migracao de risco zero: quem nunca criar um
+   preset geral tem exatamente a ferramenta de antes, e um defeito aqui nao pode corromper a
+   configuracao das abas, que e o que o operador tem a perder.
+
+   O RASCUNHO CONTINUA SENDO A TELA. Com ou sem preset geral selecionado, o que esta na tela e
+   gravado em 'fcConstrutores' como sempre. Um preset geral e uma FOTOGRAFIA guardada com nome;
+   o selo da barra diz se a tela ainda confere com ela (salvo) ou ja nao confere (alterado).
+
+   ESQUEMA DE ID: tudo o que esta fase desenha e 'fcg-...'. Ver o comentario do CSS. */
+var FCG={
+  presets:[],        /* [{id, campanha, pagina, abas:{abaId:{ativa,valores,origem}}, codigos:{head,body}, atualizadoEm}] */
+  ativo:null,        /* id do preset geral selecionado, ou null (Rascunho) */
+  ativas:{},         /* rascunho de trabalho: abaId -> a aba participa desta pagina? */
+  origens:{},        /* rascunho de trabalho: abaId -> {preset,carimbo} | null */
+  codigos:{head:'',body:''},  /* rascunho de trabalho: "Outros codigos meus" */
+  fora:0,            /* quantos presets gerais gravados estavam ilegiveis e ficaram de fora */
+  dup:0,             /* quantos vieram com campanha+pagina repetida e precisaram ser renomeados */
+  pronto:false       /* so depois de fcgIniciar; antes disso nada aqui pode gravar nem desenhar */
+};
+var FCG_CHAVE='fcConstrutoresGerais';
+var FCG_PAGINAS=[['hospedeira','Hospedeira'],['embutida','Embutida']];
+var FCG_CAMPANHA_MAX=60;
+var fcgTimer=null;       /* timer UNICO do redesenho adiado; cancelado antes de reagendar */
+var fcgCacheInt={};      /* ultimo HTML de cada bloco de aviso, para nao redesenhar a toa */
+var fcgVerDiff={};       /* abaId -> a lista de campos diferentes esta aberta? */
+
+/* texto puro vai por no de texto, nunca por innerHTML: nome de campanha e nome de preset sao
+   texto livre do operador e aqui nao tem por que passar perto de marcacao */
+function fcgTexto(el,txt){while(el.firstChild)el.removeChild(el.firstChild);el.appendChild(document.createTextNode(txt));}
+var fcgAvisouFora=false;
+var fcgAvisouDup=false;
+function fcgPaginaRotulo(v){var i;for(i=0;i<FCG_PAGINAS.length;i++){if(FCG_PAGINAS[i][0]===v)return FCG_PAGINAS[i][1];}return '';}
+function fcgNome(p){return p?(p.campanha+' \u00B7 '+fcgPaginaRotulo(p.pagina)):'';}
+function fcgChaveCampanha(s){return String(s==null?'':s).trim().toLowerCase();}
+function fcgAtivo(){return FCG.ativo?fcgAchar(FCG.ativo):null;}
+function fcgAchar(id){var i;for(i=0;i<FCG.presets.length;i++){if(FCG.presets[i].id===id)return FCG.presets[i];}return null;}
+function fcgAcharPor(campanha,pagina){
+  var alvo=fcgChaveCampanha(campanha),i;
+  for(i=0;i<FCG.presets.length;i++){
+    if(fcgChaveCampanha(FCG.presets[i].campanha)===alvo&&FCG.presets[i].pagina===pagina)return FCG.presets[i];
+  }
+  return null;
+}
+/* A outra pagina da MESMA campanha. E o unico par que o aviso de divergencia compara: sem as
+   duas paginas nao ha o que comparar, e paginas de campanhas diferentes tem todo o direito de
+   levar dados diferentes. */
+function fcgIrmao(p){
+  if(!p)return null;
+  return fcgAcharPor(p.campanha,p.pagina==='hospedeira'?'embutida':'hospedeira');
+}
+function fcgCampanhas(){
+  var vistas={},out=[],i,k;
+  for(i=0;i<FCG.presets.length;i++){
+    k=fcgChaveCampanha(FCG.presets[i].campanha);
+    if(k&&!vistas[k]){vistas[k]=true;out.push(FCG.presets[i].campanha);}
+  }
+  out.sort();
+  return out;
+}
+function fcgNovoId(){return 'pg'+fcAgora().toString(36)+'-'+Math.floor(Math.random()*1000000).toString(36);}
+/* Um nome de campanha que ainda nao esteja ocupado NESTA pagina. So a leitura do armazenamento
+   usa isto -- ver fcgLer. O sufixo entra na CAMPANHA, e nao na pagina, porque pagina e escolha
+   fechada entre duas; e o corte pelo teto de caracteres existe para o nome consertado nao
+   nascer maior do que o proprio campo aceita. */
+function fcgCampanhaLivre(base,pagina){
+  var n=2,nome;
+  base=String(base==null?'':base).trim();
+  if(base.length>FCG_CAMPANHA_MAX-6)base=base.substring(0,FCG_CAMPANHA_MAX-6);
+  for(;;){
+    nome=base+' ('+n+')';
+    if(!fcgAcharPor(nome,pagina))return nome;
+    n++;
+    if(n>999)return base+' ('+fcgNovoId()+')';
+  }
+}
+
+/* ---- valores de uma aba: caminho unico, o mesmo da biblioteca de presets ---- */
+/* Aba em so-leitura (falhou ao restaurar e parou de coletar do DOM ate a pagina recarregar)
+   nao pode ser lida da tela: o DOM dela nao representa o que o operador tinha. Aqui vale a
+   MESMA saida que salvarEstado ja usa -- o ultimo pedaco bom lido do armazenamento --, e nao
+   um segundo caminho de leitura. Sem isso, a alternativa seria recusar salvar o preset geral
+   inteiro por causa de uma aba quebrada, e o operador perderia o trabalho das outras cinco. */
+/* Cache de UMA passagem de desenho: fcgAtualizar le os valores das seis abas tres vezes (selo
+   salvo/alterado, marca de origem, divergencia), e cada leitura e um coleta() clonado -- com 46
+   fotos na lista do slideshow isso pesa. O cache vive so dentro da passagem (fcgVals e criado e
+   destruido por fcgAtualizar) e NUNCA atravessa uma decisao: fcgMotivos chamado por
+   fcgTrocarPara roda fora dele e le a tela na hora. Ninguem pode alterar o objeto devolvido --
+   quem precisa mexer clona antes (fcClone). */
+var fcgVals=null;
+function fcgValoresDaAba(a){
+  var r;
+  if(fcgVals&&fcgVals[a.id])return fcgVals[a.id];
+  r=fcgValoresDaAbaLer(a);
+  if(fcgVals)fcgVals[a.id]=r;
+  return r;
+}
+function fcgValoresDaAbaLer(a){
+  var frag,o,i;
+  if(fcSoLeitura[a.id]){
+    frag=fcClone(fcFrag[a.id])||{};
+    o=frag[a.pref];
+    if(o){
+      delete o.presets;                                        /* a biblioteca nao entra */
+      if(a.fora){for(i=0;i<a.fora.length;i++)delete o[a.fora[i]];}
+    }
+    return frag;
+  }
+  return fcPresetCapturar(a)||{};
+}
+/* Escreve os valores de UMA aba na tela pelo restaura() dela -- o mesmo caminho do estado
+   gravado e do "Aplicar" da biblioteca. As travas que ja existem continuam valendo (corValida
+   dentro do restaura, fcAjustarTodos dentro do redesenhar). */
+function fcgAplicarAba(a,valores){
+  var frag=fcClone(valores)||{},atual,cur,o,k;
+  if(a.fora&&a.fora.length){
+    /* campos 'fora' descrevem OUTRO componente (a consolidacao do codigo 1 da Bordas): o
+       preset nao tem o que dizer sobre eles, entao conservam o que esta na tela */
+    atual=a.coleta();cur=atual[a.pref]||{};
+    o=frag[a.pref]||(frag[a.pref]={});
+    for(k=0;k<a.fora.length;k++)o[a.fora[k]]=cur[a.fora[k]];
+  }
+  a.restaura(frag);
+  if(a.redesenhar)a.redesenhar();
+}
+
+/* ---- leitura e gravacao do armazenamento ---- */
+function fcgGravar(){
+  if(!FCG.pronto)return;
+  var st={v:1,presets:FCG.presets,ativo:FCG.ativo,ativas:FCG.ativas,origens:FCG.origens,codigos:FCG.codigos};
+  try{localStorage.setItem(FCG_CHAVE,JSON.stringify(st));}
+  catch(e){fcFalha('Preset geral','gravar os presets gerais -- armazenamento do navegador indisponivel',e,'');}
+}
+/* Leitura defensiva, no mesmo criterio da biblioteca de presets: item a item, e o que fica de
+   fora e ANUNCIADO na barra em vez de sumir calado. Preset geral ilegivel nao pode derrubar a
+   ferramenta nem apagar os legiveis. */
+function fcgLerPreset(x){
+  var p,i,a,ab,vals;
+  if(!fcEhObjeto(x))return null;
+  if(typeof x.campanha!=='string'||!x.campanha.trim())return null;
+  if(x.pagina!=='hospedeira'&&x.pagina!=='embutida')return null;
+  p={id:(typeof x.id==='string'&&x.id)?x.id:fcgNovoId(),
+     campanha:x.campanha.trim(),pagina:x.pagina,abas:{},
+     codigos:{head:'',body:''},
+     atualizadoEm:(typeof x.atualizadoEm==='number'&&isFinite(x.atualizadoEm))?x.atualizadoEm:0};
+  for(i=0;i<ABAS.length;i++){
+    a=ABAS[i];
+    ab=(fcEhObjeto(x.abas)&&fcEhObjeto(x.abas[a.id]))?x.abas[a.id]:null;
+    vals=(ab&&fcEhObjeto(ab.valores))?ab.valores:{};
+    p.abas[a.id]={ativa:!!(ab&&ab.ativa),valores:vals,origem:fcgLerOrigem(ab&&ab.origem)};
+  }
+  if(fcEhObjeto(x.codigos)){
+    if(typeof x.codigos.head==='string')p.codigos.head=x.codigos.head;
+    if(typeof x.codigos.body==='string')p.codigos.body=x.codigos.body;
+  }
+  return p;
+}
+function fcgLerOrigem(o){
+  if(!fcEhObjeto(o))return null;
+  if(typeof o.preset!=='string'||!o.preset.trim())return null;
+  return {preset:o.preset,carimbo:(typeof o.carimbo==='number'&&isFinite(o.carimbo))?o.carimbo:0};
+}
+function fcgLer(){
+  var raw,st,i,p,a;
+  try{raw=localStorage.getItem(FCG_CHAVE);}
+  catch(e){fcFalha('Preset geral','ler os presets gerais -- armazenamento do navegador indisponivel',e,'');return;}
+  if(!raw)return;
+  try{st=JSON.parse(raw);}
+  catch(e){fcFalha('Preset geral','entender os presets gerais gravados -- o conteudo salvo esta corrompido',e,'');return;}
+  if(!fcEhObjeto(st))return;
+  if(fcEhArray(st.presets)){
+    for(i=0;i<st.presets.length;i++){
+      p=fcgLerPreset(st.presets[i]);
+      if(!p){FCG.fora++;continue;}
+      /* Par (campanha, pagina) repetido: o segundo era lido e ficava INVISIVEL -- o seletor
+         procura por par e acha sempre o primeiro, entao o segundo nao aparecia em lista
+         nenhuma, nao era contado e nao gerava aviso; nao havia como seleciona-lo nem apaga-lo.
+         Pela interface o par e inalcancavel hoje (criar e renomear recusam colisao), mas o R4
+         da fase 4 promete "importar como copia" em colisao de nome, e para preset geral isso
+         produz exatamente este par. Entre descartar o segundo e mostra-lo, esta fase mostra:
+         ele e renomeado para um nome livre, aparece na lista e pode ser apagado. O renome e
+         dito na barra, uma vez (ver fcgRenderBarra). */
+      if(fcgAcharPor(p.campanha,p.pagina)){p.campanha=fcgCampanhaLivre(p.campanha,p.pagina);FCG.dup++;}
+      FCG.presets.push(p);
+    }
+  }else if(st.presets!==undefined&&st.presets!==null){FCG.fora++;}
+  if(typeof st.ativo==='string'&&fcgAchar(st.ativo))FCG.ativo=st.ativo;
+  for(i=0;i<ABAS.length;i++){
+    a=ABAS[i];
+    FCG.ativas[a.id]=!!(fcEhObjeto(st.ativas)&&st.ativas[a.id]);
+    FCG.origens[a.id]=fcgLerOrigem(fcEhObjeto(st.origens)?st.origens[a.id]:null);
+  }
+  if(fcEhObjeto(st.codigos)){
+    if(typeof st.codigos.head==='string')FCG.codigos.head=st.codigos.head;
+    if(typeof st.codigos.body==='string')FCG.codigos.body=st.codigos.body;
+  }
+}
+
+/* ---- salvo x alterado ----
+   O selo da barra e uma EXIBICAO adiada (fcgAgendar, 250 ms), mas toda decisao que pode
+   destruir trabalho recalcula isto na hora, sincronamente. Um selo adiado nunca decide se a
+   troca de preset bloqueia ou nao. */
+function fcgMotivos(){
+  var p=fcgAtivo(),motivos=[],i,a,ab;
+  if(!p)return motivos;
+  for(i=0;i<ABAS.length;i++){
+    a=ABAS[i];
+    ab=p.abas[a.id]||{ativa:false,valores:{},origem:null};
+    if(!!FCG.ativas[a.id]!==!!ab.ativa)
+      motivos.push('a aba “'+a.nome+'” foi '+(FCG.ativas[a.id]?'ligada nesta página':'tirada desta página'));
+    if(!fcValoresIguais(fcgValoresDaAba(a),ab.valores||{}))
+      motivos.push('os campos da aba “'+a.nome+'” mudaram');
+    if(fcCanon(FCG.origens[a.id]||null)!==fcCanon(ab.origem||null))
+      motivos.push('a marca de origem da aba “'+a.nome+'” mudou');
+  }
+  if(FCG.codigos.head!==((p.codigos&&p.codigos.head)||''))motivos.push('o campo “Outros códigos meus — Tag Head” mudou');
+  if(FCG.codigos.body!==((p.codigos&&p.codigos.body)||''))motivos.push('o campo “Outros códigos meus — Tag Body” mudou');
+  /* Os campos de campanha e pagina NAO entram aqui, e a razao e concreta: flipar o radio para
+     "Embutida" e o gesto natural de quem vai criar a segunda pagina da campanha. Se isso
+     contasse como "alterado", a pergunta de troca ofereceria "salvar antes" -- e salvar
+     RENOMEARIA a pagina Hospedeira para Embutida, que e o oposto do que o operador quis.
+     Em vez disso, renomear e um passo declarado: fcgSalvarNoAtivo confirma a troca de nome
+     dizendo o nome velho e o novo. */
+  return motivos;
+}
+function fcgAlterado(){return fcgMotivos().length>0;}
+
+/* ---- marca de origem (R3) ----
+   O preset geral guarda uma COPIA dos valores, nunca um ponteiro: editar um preset de aba
+   mudaria em silencio todas as campanhas que o usam, e apaga-lo quebraria os presets gerais.
+   Mas anota de onde a copia veio, para a divergencia ficar VISIVEL com oferta de conciliar,
+   em vez de propagacao silenciosa. Nunca atualiza sozinho.
+   Os quatro estados saem de duas perguntas, e as duas usam so o que a fase 2 deixou pronto:
+     - o preset de aba com aquele nome ainda existe?            -> senao, 'sumiu'
+     - o carimbo dele e o mesmo de quando a copia foi feita?    -> senao, 'mudou'
+   Se o carimbo e o mesmo, entao os valores dele SAO os valores copiados (a fase 2 garante que
+   o carimbo so avanca quando os valores mudam), e uma comparacao canonica responde se a copia
+   foi editada aqui dentro: 'modificado' ou 'igual'. */
+function fcgOrigemEstado(a){
+  var org=FCG.origens[a.id],lista,i,pa;
+  if(!org||!org.preset)return null;
+  lista=fcPresets[a.id]||[];
+  i=fcPresetIndice(a,org.preset);
+  pa=(i>=0)?lista[i]:null;
+  if(!pa)return {tipo:'sumiu',nome:org.preset,pa:null};
+  if(pa.carimbo!==org.carimbo)return {tipo:'mudou',nome:pa.nome,pa:pa};
+  if(!fcValoresIguais(fcgValoresDaAba(a),pa.valores))return {tipo:'modificado',nome:pa.nome,pa:pa};
+  return {tipo:'igual',nome:pa.nome,pa:pa};
+}
+/* Chamada pelo "Aplicar" da biblioteca de presets. So anota quando ha preset geral
+   selecionado: no Rascunho nao existe onde guardar a marca, e inventar uma daria um aviso que
+   nunca teria dono. */
+function fcgOrigemMarcar(a,p){
+  if(!FCG.pronto||!FCG.ativo)return;
+  FCG.origens[a.id]={preset:p.nome,carimbo:p.carimbo};
+  fcgGravar();fcgAtualizar();
+}
+/* Chamada pelo "Salvar preset" da biblioteca, e so quando a origem desta aba JA aponta para o
+   preset que acabou de ser regravado. E o gesto de rotina: aplicar X, ajustar um campo,
+   regravar X para capturar o ajuste. Sem este recarimbo, o carimbo do preset avancava e a
+   marca de origem ficava para tras, entao a aba passava a dizer "veio de 'X', que mudou
+   depois" enquanto o painel logo abaixo dizia "Campos diferentes (0): nenhum" -- aviso falso,
+   exatamente o que a regra do carimbo da fase 2 existe para evitar. Recarimbar aqui e seguro
+   porque o que foi gravado no preset e o mesmo fcPresetCapturar que a tela devolve: o estado
+   que fica e 'igual' por ser verdade, nao por otimismo. Apontar a origem para OUTRO preset
+   nunca acontece -- isso seria decidir pelo operador de onde a configuracao dele veio.
+   A comparacao de nome e a mesma de fcPresetIndice: sem caixa e sem espaco nas pontas. */
+function fcgOrigemRecarimbar(a,p){
+  var org;
+  if(!FCG.pronto||!FCG.ativo)return;
+  org=FCG.origens[a.id];
+  if(!org||!org.preset)return;
+  if(String(org.preset).trim().toLowerCase()!==String(p.nome).trim().toLowerCase())return;
+  if(org.preset===p.nome&&org.carimbo===p.carimbo)return;
+  FCG.origens[a.id]={preset:p.nome,carimbo:p.carimbo};
+  fcgGravar();fcgAtualizar();
+}
+/* Nomes dos campos que diferem entre dois conjuntos de valores da mesma aba. Sao os nomes
+   INTERNOS, e o texto diz isso: inventar rotulo bonito para 60 campos seria uma segunda tabela
+   de nomes, que divergiria da primeira no dia em que um campo fosse renomeado. */
+function fcgCamposDiferentes(a,x,y){
+  var out=[],vistas={},k,ox,oy;
+  x=x||{};y=y||{};
+  for(k in x){if(Object.prototype.hasOwnProperty.call(x,k))vistas[k]=1;}
+  for(k in y){if(Object.prototype.hasOwnProperty.call(y,k))vistas[k]=1;}
+  for(k in vistas){
+    if(!Object.prototype.hasOwnProperty.call(vistas,k))continue;
+    if(k===a.pref)continue;
+    if(fcCanon(x[k])!==fcCanon(y[k]))out.push(k);
+  }
+  ox=x[a.pref]||{};oy=y[a.pref]||{};
+  vistas={};
+  for(k in ox){if(Object.prototype.hasOwnProperty.call(ox,k))vistas[k]=1;}
+  for(k in oy){if(Object.prototype.hasOwnProperty.call(oy,k))vistas[k]=1;}
+  for(k in vistas){
+    if(!Object.prototype.hasOwnProperty.call(vistas,k))continue;
+    if(fcCanon(ox[k])!==fcCanon(oy[k]))out.push(k);
+  }
+  out.sort();
+  return out;
+}
+
+/* ---- divergencia de campo operacional entre as duas paginas da campanha (R1) ----
+   So dispara quando a MESMA aba esta ativa nas DUAS paginas: sem isso nao ha o que comparar.
+   Nao bloqueia -- pode ser intencional (recebedor diferente, WhatsApp de outro atendente). */
+function fcgDivergencia(a){
+  var p=fcgAtivo(),out=[],irmao,ab,meu,dele,i,ch,va,vb;
+  if(!p||!a.operacionais||!a.operacionais.length)return out;
+  if(!FCG.ativas[a.id])return out;
+  irmao=fcgIrmao(p);
+  if(!irmao)return out;
+  ab=irmao.abas[a.id];
+  if(!ab||!ab.ativa)return out;
+  meu=fcgValoresDaAba(a)[a.pref]||{};
+  dele=(ab.valores&&ab.valores[a.pref])||{};
+  for(i=0;i<a.operacionais.length;i++){
+    ch=a.operacionais[i][0];
+    va=(meu[ch]==null)?'':String(meu[ch]);
+    vb=(dele[ch]==null)?'':String(dele[ch]);
+    if(va!==vb)out.push(a.operacionais[i][1]);
+  }
+  return out;
+}
+
+/* ---- pergunta de tres saidas ----
+   Construida com DOM, sem ID nenhum: a caixa nasce e morre a cada pergunta, e um ID repetido
+   e exatamente o defeito que a fase 2 pagou caro. opcoes = [{rotulo, valor, claro}]. */
+function fcgPerguntar(titulo,linhas,opcoes,cb){
+  var fundo=document.createElement('div'),cx=document.createElement('div'),
+      h=document.createElement('h2'),acoes=document.createElement('div'),i,b,ul,li,esc;
+  fundo.className='fcg-modal';
+  cx.className='fcg-cx';
+  h.appendChild(document.createTextNode(titulo));
+  cx.appendChild(h);
+  for(i=0;i<linhas.length;i++){
+    if(fcEhArray(linhas[i])){
+      ul=document.createElement('ul');
+      for(var j=0;j<linhas[i].length;j++){
+        li=document.createElement('li');li.appendChild(document.createTextNode(linhas[i][j]));ul.appendChild(li);
+      }
+      cx.appendChild(ul);
+    }else{
+      var pp=document.createElement('p');pp.appendChild(document.createTextNode(linhas[i]));cx.appendChild(pp);
+    }
+  }
+  acoes.className='acoes';
+  function fechar(v){
+    try{document.removeEventListener('keydown',esc);}catch(e){}
+    if(fundo.parentNode)fundo.parentNode.removeChild(fundo);
+    cb(v);
+  }
+  for(i=0;i<opcoes.length;i++){
+    b=document.createElement('button');
+    b.type='button';
+    b.className='botao'+(opcoes[i].claro?' claro':'');
+    b.appendChild(document.createTextNode(opcoes[i].rotulo));
+    (function(v){b.addEventListener('click',function(){fechar(v);});})(opcoes[i].valor);
+    acoes.appendChild(b);
+  }
+  cx.appendChild(acoes);
+  fundo.appendChild(cx);
+  esc=function(ev){if(ev.keyCode===27)fechar(null);};
+  document.addEventListener('keydown',esc);
+  (document.body||document.documentElement).appendChild(fundo);
+  try{acoes.firstChild.focus();}catch(e){}
+}
+
+/* ---- trocar de preset geral ----
+   Tres caminhos, e nenhum deles perde trabalho em silencio:
+     1. Rascunho -> preset X : a tela seria SUBSTITUIDA pelos valores de X, e o que esta na
+        tela nao esta guardado em preset geral nenhum. Sempre pergunta.
+     2. Preset A -> preset B : se A esta 'salvo', a tela ja e a copia de A e nada se perde;
+        troca direto. Se esta 'alterado', pergunta com as tres saidas.
+     3. Preset A -> Rascunho : as seis abas nao sao sobrescritas (a tela continua na tela), mas
+        as alteracoes deixam de ter para onde ir. Pergunta assim mesmo, dizendo exatamente
+        isso. Os dois campos "Outros codigos meus" sao a excecao e voltam a vazio: eles sao de
+        UMA pagina, e o Rascunho nao e uma pagina (ver fcgAdotar). */
+function fcgTrocarPara(id){
+  var atual=fcgAtivo(),alvo=id?fcgAchar(id):null,motivos;
+  if((atual?atual.id:null)===(alvo?alvo.id:null)){fcgAtualizar();return;}
+  if(!atual){
+    if(!alvo){fcgAdotar(null);return;}
+    fcgPerguntar('Trocar para “'+fcgNome(alvo)+'”?',
+      ['Isto substitui tudo o que está na tela pela configuração guardada em “'+fcgNome(alvo)+'”, nas seis abas.',
+       'O que está na tela agora é o rascunho e não está guardado em nenhum preset geral. Se quiser mantê-lo, guarde-o primeiro.'],
+      [{rotulo:'Guardar a tela como preset geral primeiro',valor:'guardar'},
+       {rotulo:'Substituir a tela',valor:'trocar',claro:true},
+       {rotulo:'Cancelar',valor:null,claro:true}],
+      function(v){
+        if(v==='guardar'){fcgPainelAbrir(true);var c=$('fcg-campanha');if(c)c.focus();fcgAtualizar();return;}
+        if(v==='trocar')fcgAdotar(alvo);
+        else fcgAtualizar();
+      });
+    return;
+  }
+  motivos=fcgMotivos();
+  if(!motivos.length){fcgAdotar(alvo);return;}
+  fcgPerguntar(alvo?('Trocar para “'+fcgNome(alvo)+'”?'):'Sair para o Rascunho?',
+    ['Há alterações na tela que ainda não foram salvas em “'+fcgNome(atual)+'”:',
+     motivos,
+     alvo?('Trocar substitui a tela pela configuração de “'+fcgNome(alvo)+'”, e estas alterações não voltam.')
+         :'Sair para o Rascunho não mexe nas seis abas — o que está nelas continua lá. O que se perde é o vínculo: estas alterações deixam de ter para onde ser salvas. Os dois campos “Outros códigos meus” voltam a ficar vazios, porque são de uma página só e o Rascunho não é uma página.'],
+    [{rotulo:'Salvar em “'+fcgNome(atual)+'” e trocar',valor:'salvar'},
+     {rotulo:alvo?'Descartar e trocar':'Sair sem salvar',valor:'trocar',claro:true},
+     {rotulo:'Cancelar',valor:null,claro:true}],
+    function(v){
+      if(v==='salvar'){if(!fcgSalvarComoEsta())return fcgAtualizar();fcgAdotar(alvo);return;}
+      if(v==='trocar')fcgAdotar(alvo);
+      else fcgAtualizar();
+    });
+}
+/* Passa a valer o preset alvo (ou o Rascunho). Trocar para um preset ESCREVE na tela; sair
+   para o Rascunho nao escreve nada -- a tela continua sendo o rascunho, como sempre foi. */
+function fcgAdotar(p){
+  var i,a,ab,travadas=[];
+  if(p){
+    for(i=0;i<ABAS.length;i++){
+      a=ABAS[i];
+      ab=p.abas[a.id]||{ativa:false,valores:{},origem:null};
+      if(fcSoLeitura[a.id]){travadas.push(a.nome);}
+      else{
+        try{fcgAplicarAba(a,ab.valores);}
+        catch(e){
+          /* mesma regra do estado gravado: o DOM ficou meio escrito e ja nao representa nada,
+             entao a aba para de coletar ate recarregar em vez de sobrescrever o que esta salvo */
+          fcSoLeitura[a.id]=true;
+          fcFalha(a.nome,'aplicar um preset geral -- o que ja estava gravado foi mantido, e esta aba nao grava nada ate a pagina ser recarregada',e,a.id);
+          travadas.push(a.nome);
+        }
+      }
+      FCG.ativas[a.id]=!!ab.ativa;
+      FCG.origens[a.id]=ab.origem?{preset:ab.origem.preset,carimbo:ab.origem.carimbo}:null;
+    }
+    FCG.codigos={head:(p.codigos&&p.codigos.head)||'',body:(p.codigos&&p.codigos.body)||''};
+    FCG.ativo=p.id;
+    salvarEstado();
+  }else{
+    FCG.ativo=null;
+    /* O Rascunho nao e uma pagina, entao os "Outros codigos meus" da pagina que estava
+       selecionada nao podem ficar na tela: dali eles seriam levados para a proxima pagina
+       criada, que e o vazamento entre campanhas descrito em fcgCriar. O que estava salvo
+       continua salvo dentro do preset; o que nao estava foi nomeado na pergunta de tres
+       saidas, que lista "o campo Outros codigos meus -- Tag Head mudou" entre os motivos. */
+    FCG.codigos={head:'',body:''};
+  }
+  fcgGravar();
+  fcgSincronizarCampos();
+  fcgAtualizar();
+  if(travadas.length)alert('Estas abas não receberam a configuração do preset geral porque pararam de gravar nesta sessão: '+fcLista(travadas)+'. O aviso vermelho no topo diz por quê. Recarregue a página e selecione o preset de novo.');
+}
+
+/* ---- salvar, criar, apagar, descartar ---- */
+/* O MIOLO do salvamento: escreve a tela DENTRO do preset p, sem tocar no nome dele nem nos
+   campos do painel. Renomear nao mora aqui de proposito -- ver fcgSalvarComoEsta logo abaixo. */
+function fcgGravarNoPreset(p){
+  var i,a;
+  for(i=0;i<ABAS.length;i++){
+    a=ABAS[i];
+    p.abas[a.id]={ativa:!!FCG.ativas[a.id],
+                  valores:fcClone(fcgValoresDaAba(a))||{},
+                  origem:FCG.origens[a.id]?{preset:FCG.origens[a.id].preset,carimbo:FCG.origens[a.id].carimbo}:null};
+  }
+  p.codigos={head:FCG.codigos.head,body:FCG.codigos.body};
+  p.atualizadoEm=fcAgora();
+  fcgGravar();
+}
+/* "Salvar em 'X' antes" / "Salvar em 'X' e trocar": as perguntas de tres saidas prometem um
+   NOME, entao salvam naquele nome. Nao leem os campos do painel, nao renomeiam, nao reescrevem
+   os campos e nao tem como falhar.
+   O caminho que faltava: em "Natal 2026 - Hospedeira", flipar o radio para Embutida (o gesto
+   de quem vai criar a segunda pagina), ter uma edicao nao salva e clicar "Salvar como preset
+   geral". O botao dizia "Salvar em 'Natal 2026 - Hospedeira' antes" e, por ler os campos,
+   RENOMEAVA a Hospedeira para Embutida -- e em seguida recusava criar, por colidir com o
+   preset que acabara de renomear. A campanha terminava com uma pagina so, e a confirmacao de
+   renomear ainda aconselhava usar exatamente a acao em andamento. Um botao que promete um nome
+   tem de fazer o que o nome diz; renomear continua sendo passo declarado, no botao "Salvar". */
+function fcgSalvarComoEsta(){
+  var p=fcgAtivo();
+  if(!p)return false;
+  fcgGravarNoPreset(p);
+  fcgAtualizar();
+  return true;
+}
+/* O botao "Salvar" da barra. Aqui SIM a campanha e a pagina vem dos campos do painel: e assim
+   que se RENOMEIA um preset geral -- nao ha nome digitado para renomear.
+   Renomear para uma combinacao que JA EXISTE e recusado, nao fundido: fundir apagaria o outro
+   preset, e entre destruir e preservar esta fase preserva. */
+function fcgSalvarNoAtivo(silencioso){
+  var p=fcgAtivo(),campanha,pagina,colisao;
+  if(!p){if(!silencioso)alert('Nenhum preset geral selecionado. Use “Salvar como preset geral” para criar um a partir do que está na tela.');return false;}
+  campanha=fcgCampanhaCampo();
+  if(campanha===null)return false;
+  pagina=radio('fcg-pagina')||p.pagina;
+  colisao=fcgAcharPor(campanha,pagina);
+  if(colisao&&colisao.id!==p.id){
+    alert('Já existe um preset geral “'+fcgNome(colisao)+'”. Dois presets gerais da mesma campanha e da mesma página deixariam de dizer qual é qual. Escolha outra campanha ou outra página, ou selecione aquele preset e salve nele.');
+    return false;
+  }
+  /* renomear e um passo declarado, com o nome velho e o novo a vista: o campo de campanha e o
+     radio de pagina servem tambem para descrever um preset que ainda vai ser CRIADO, entao
+     encontra-los diferentes nao basta para renomear em silencio o que ja existe */
+  if(campanha!==p.campanha||pagina!==p.pagina){
+    if(!confirm('Salvar também renomeia este preset geral.\n\nDe: '+fcgNome(p)+'\nPara: '+campanha+' \u00B7 '+fcgPaginaRotulo(pagina)+'\n\nSe você queria criar a OUTRA página desta campanha, cancele aqui e use “Salvar como preset geral”.')){
+      return false;
+    }
+  }
+  p.campanha=campanha;p.pagina=pagina;
+  fcgGravarNoPreset(p);
+  fcgSincronizarCampos();fcgAtualizar();
+  return true;
+}
+function fcgCampanhaCampo(){
+  var el=$('fcg-campanha'),v=el?el.value.trim():'';
+  if(!v){alert('Dê o nome da campanha antes de salvar. O nome do preset geral é a campanha mais a página — é assim que a ferramenta sabe que as duas páginas são da mesma campanha.');return null;}
+  if(v.length>FCG_CAMPANHA_MAX){alert('O nome da campanha passa de '+FCG_CAMPANHA_MAX+' caracteres. Um nome curto é o que cabe na barra e na lista.');return null;}
+  return v;
+}
+/* Cria um preset geral novo a partir do que esta na tela. TODAS AS ABAS NASCEM FORA -- e a
+   decisao registrada na spec, e o motivo esta escrito no texto de ajuda do painel: aba
+   esquecida FORA falha de forma visivel (falta um bloco na pagina); aba esquecida DENTRO falha
+   de forma invisivel (um bloco a mais numa pagina publicada). Entre um defeito visivel e um
+   invisivel, este projeto escolhe o visivel. */
+function fcgCriar(){
+  function criar(){
+    var campanha=fcgCampanhaCampo(),pagina,p,i,a,deOutro,cods,limpou,msg;
+    if(campanha===null)return;
+    pagina=radio('fcg-pagina')||'hospedeira';
+    if(fcgAcharPor(campanha,pagina)){
+      alert('Já existe um preset geral “'+campanha+' \u00B7 '+fcgPaginaRotulo(pagina)+'”. Selecione-o na barra e use “Salvar” para atualizá-lo com o que está na tela.');
+      return;
+    }
+    /* "Outros codigos meus" e da PAGINA, como as abas -- so que as abas tem interruptor e
+       nascem FORA, e estes dois campos nao tem interruptor nenhum. A protecao equivalente e
+       nao copiar: preset geral criado a partir de OUTRO preset geral nasce com os dois
+       VAZIOS. Medido antes disto: com o Tag Head da Hospedeira do Natal na tela, criar
+       "Pascoa 2027 - Hospedeira" -- outra campanha -- fazia a pagina nova nascer carregando o
+       Tag Head do Natal, e com o painel de detalhes recolhido isso e invisivel. Quando a fase
+       5 colar codigos.head na pagina, seria exatamente o "bloco a mais numa pagina publicada"
+       que o padrao FORA existe para impedir. Nascendo do RASCUNHO os dois vao junto: ali
+       foram digitados para esta pagina, e nao ha outra pagina de onde tenham vindo. */
+    deOutro=!!fcgAtivo();
+    limpou=deOutro&&!!(FCG.codigos.head||FCG.codigos.body);
+    cods=deOutro?{head:'',body:''}:{head:FCG.codigos.head,body:FCG.codigos.body};
+    p={id:fcgNovoId(),campanha:campanha,pagina:pagina,abas:{},codigos:{head:cods.head,body:cods.body},atualizadoEm:fcAgora()};
+    for(i=0;i<ABAS.length;i++){
+      a=ABAS[i];
+      p.abas[a.id]={ativa:false,valores:fcClone(fcgValoresDaAba(a))||{},origem:null};
+      FCG.ativas[a.id]=false;
+      /* a marca de origem e do preset geral, e este e novo: comeca sem nenhuma */
+      FCG.origens[a.id]=null;
+    }
+    FCG.codigos={head:cods.head,body:cods.body};
+    FCG.presets.push(p);
+    FCG.ativo=p.id;
+    fcgGravar();fcgSincronizarCampos();fcgAtualizar();
+    msg='Preset geral “'+fcgNome(p)+'” criado com o que está na tela.\n\nAs seis abas nasceram FORA desta página, de propósito: ligue uma a uma as que esta página realmente usa, no interruptor no topo de cada aba. Os valores de todas continuam guardados.';
+    if(limpou)msg+='\n\nOs dois campos “Outros códigos meus” nasceram VAZIOS: eles são de uma página só e não vêm da página anterior. O que estava neles continua guardado no preset geral de onde você veio.';
+    alert(msg);
+  }
+  var motivos=fcgAtivo()?fcgMotivos():[];
+  if(!motivos.length){criar();return;}
+  fcgPerguntar('Criar um preset geral novo?',
+    ['Há alterações na tela que ainda não foram salvas em “'+fcgNome(fcgAtivo())+'”:',
+     motivos,
+     'Criar um preset novo leva o que está na tela para ele. O preset atual fica como estava, sem estas alterações.'],
+    [{rotulo:'Salvar em “'+fcgNome(fcgAtivo())+'” antes',valor:'salvar'},
+     {rotulo:'Criar sem salvar',valor:'criar',claro:true},
+     {rotulo:'Cancelar',valor:null,claro:true}],
+    function(v){
+      if(v==='salvar'){if(fcgSalvarComoEsta())criar();else fcgAtualizar();return;}
+      if(v==='criar')criar();
+      else fcgAtualizar();
+    });
+}
+function fcgApagar(){
+  var p=fcgAtivo(),ligadas=[],i,a;
+  if(!p){alert('Nenhum preset geral selecionado.');return;}
+  for(i=0;i<ABAS.length;i++){a=ABAS[i];if(p.abas[a.id]&&p.abas[a.id].ativa)ligadas.push(a.nome);}
+  if(!confirm('Apagar o preset geral “'+fcgNome(p)+'”?\n\n'+
+    'Some a fotografia das seis abas guardada nele'+(ligadas.length?(', com estas ligadas nesta página: '+fcLista(ligadas)):'')+
+    ', mais os “Outros códigos meus” desta página. Isto não volta.\n\n'+
+    'O que está na tela agora NÃO é apagado: continua na tela, como rascunho. Nenhum código já colado no site é afetado.'))return;
+  for(i=0;i<FCG.presets.length;i++){if(FCG.presets[i].id===p.id){FCG.presets.splice(i,1);break;}}
+  FCG.ativo=null;
+  fcgGravar();fcgSincronizarCampos();fcgAtualizar();
+}
+function fcgDescartar(){
+  var p=fcgAtivo(),motivos;
+  if(!p){alert('Nenhum preset geral selecionado — no Rascunho não há nada de onde descartar.');return;}
+  motivos=fcgMotivos();
+  if(!motivos.length){alert('Não há alterações: a tela já confere com “'+fcgNome(p)+'”.');return;}
+  if(!confirm('Descartar as alterações e voltar a “'+fcgNome(p)+'”?\n\n'+
+    'O que se perde:\n\u2022 '+motivos.join('\n\u2022 ')+'\n\nIsto reescreve as seis abas com a configuração guardada no preset. Não volta.'))return;
+  fcgAdotar(p);
+}
+
+/* ---- desenho ---- */
+function fcgPainelAbrir(abrir){
+  var el=$('fcg-painel'),b=$('fcg-detalhes');
+  if(!el)return;
+  if(abrir===undefined)abrir=!el.classList.contains('aberto');
+  el.classList.toggle('aberto',!!abrir);
+  if(b)b.setAttribute('aria-expanded',abrir?'true':'false');
+}
+/* Escreve nos CAMPOS (campanha, pagina, codigos manuais). So e chamada quando o preset ativo
+   muda ou quando a ferramenta abre -- nunca no redesenho de cada tecla, senao o cursor do
+   operador saltaria enquanto ele digita. */
+function fcgSincronizarCampos(){
+  var p=fcgAtivo(),el;
+  el=$('fcg-campanha');if(el)el.value=p?p.campanha:'';
+  setRadio('fcg-pagina',p?p.pagina:'hospedeira');
+  el=$('fcg-head');if(el)el.value=FCG.codigos.head;
+  el=$('fcg-body');if(el)el.value=FCG.codigos.body;
+  fcgDatalist();
+}
+function fcgDatalist(){
+  var dl=$('fcg-campanhas'),nomes=fcgCampanhas(),i,o;
+  if(!dl)return;
+  while(dl.firstChild)dl.removeChild(dl.firstChild);
+  for(i=0;i<nomes.length;i++){o=document.createElement('option');o.value=nomes[i];dl.appendChild(o);}
+}
+/* O seletor agrupa por campanha (optgroup): e o ganho de a campanha ser um campo proprio --
+   as duas paginas de uma campanha aparecem juntas, e da para ver de relance se a segunda
+   ainda nao existe. Reconstruido so quando a lista muda de verdade (assinatura), para nao
+   fechar a lista suspensa na cara de quem a abriu. */
+/* null, e nao '': a assinatura de "nenhum preset geral" e a string vazia, entao comecar em ''
+   fazia a PRIMEIRA montagem ser pulada -- e a caixa nascia sem nenhuma opcao, nem a do
+   Rascunho. Quem nunca criou um preset geral (todo operador de primeira viagem) via o controle
+   principal da barra como uma caixa cinza vazia. null nunca e igual a uma assinatura. */
+var fcgSelAssin=null;
+function fcgRenderSel(){
+  var sel=$('fcg-sel'),assin,i,j,camp,grupo,op,p;
+  if(!sel)return;
+  assin='';
+  for(i=0;i<FCG.presets.length;i++)assin+=FCG.presets[i].id+'|'+FCG.presets[i].campanha+'|'+FCG.presets[i].pagina+'\n';
+  if(assin!==fcgSelAssin){
+    fcgSelAssin=assin;
+    while(sel.firstChild)sel.removeChild(sel.firstChild);
+    op=document.createElement('option');op.value='';
+    op.appendChild(document.createTextNode('Rascunho — sem preset geral'));
+    sel.appendChild(op);
+    camp=fcgCampanhas();
+    for(i=0;i<camp.length;i++){
+      grupo=document.createElement('optgroup');
+      grupo.label=camp[i];
+      for(j=0;j<FCG_PAGINAS.length;j++){
+        p=fcgAcharPor(camp[i],FCG_PAGINAS[j][0]);
+        if(!p)continue;
+        op=document.createElement('option');op.value=p.id;
+        op.appendChild(document.createTextNode(FCG_PAGINAS[j][1]));
+        grupo.appendChild(op);
+      }
+      sel.appendChild(grupo);
+    }
+  }
+  sel.value=FCG.ativo||'';
+}
+function fcgRenderBarra(){
+  var p=fcgAtivo(),el,alterado=p?fcgAlterado():false,ligadas=0,i;
+  fcgRenderSel();
+  el=$('fcg-nome');
+  if(el){
+    fcgTexto(el,p?fcgNome(p):'Rascunho');
+    el.title=p?('Campanha “'+p.campanha+'”, página '+fcgPaginaRotulo(p.pagina)+'.')
+              :'Sem preset geral: a ferramenta se comporta exatamente como sempre e guarda os últimos valores usados.';
+  }
+  el=$('fcg-estado');
+  if(el){
+    el.className='fcg-selo'+(p?(alterado?' alterado':' salvo'):'');
+    fcgTexto(el,p?(alterado?'alterado':'salvo'):'rascunho');
+    el.title=p?(alterado?'A tela tem alterações que ainda não foram salvas neste preset geral.':'A tela confere com o que está guardado neste preset geral.')
+              :'Sem preset geral: os valores ficam salvos neste navegador como sempre.';
+  }
+  for(i=0;i<ABAS.length;i++){if(FCG.ativas[ABAS[i].id])ligadas++;}
+  el=$('fcg-conta');
+  if(el){
+    if(!p){el.style.display='none';}
+    else{
+      el.style.display='';
+      el.className='fcg-selo'+(ligadas?'':' alterado');
+      fcgTexto(el,ligadas+' de '+ABAS.length+' abas nesta página');
+      el.title=ligadas?'':'Nenhuma aba foi ligada nesta página ainda. Ligue as que ela usa no interruptor no topo de cada aba.';
+    }
+  }
+  el=$('fcg-salvar');if(el)el.disabled=!p;
+  el=$('fcg-descartar');if(el)el.disabled=!p;
+  el=$('fcg-apagar');if(el)el.disabled=!p;
+  /* presets gerais ilegiveis: dito uma vez, na barra vermelha, em vez de sumir calado */
+  if(FCG.fora>0&&!fcgAvisouFora){
+    fcgAvisouFora=true;
+    /* a barra monta "<rotulo>: falha ao <fase>.", entao a fase tem de ser uma acao */
+    fcFalha('Preset geral','ler '+FCG.fora+' dos presets gerais gravados -- eles estavam ilegiveis e ficaram de fora; os legiveis continuam na lista','','');
+  }
+  /* par repetido no armazenamento: dito uma vez, com o conserto explicado */
+  if(FCG.dup>0&&!fcgAvisouDup){
+    fcgAvisouDup=true;
+    fcFalha('Preset geral','ler '+FCG.dup+' dos presets gerais gravados sem repetir campanha e pagina -- o(s) repetido(s) ganharam um numero no fim do nome da campanha para poderem aparecer na lista e ser apagados; confira qual e o que vale','','');
+  }
+}
+/* Estado da aba na barra de abas: esmaecida com selo quando esta fora da pagina, e CLICAVEL
+   de qualquer jeito -- e preciso poder abrir a aba para liga-la. O selo e um <span> proprio,
+   acrescentado e removido sem tocar no resto do botao: o " (!)" de fcMarcaAba e um no de texto
+   irmao e precisa continuar onde esta. */
+function fcgRenderAbaBotao(a){
+  var b=$('aba-'+a.id),chip,p=fcgAtivo(),fora=!!p&&!FCG.ativas[a.id];
+  if(!b)return;
+  chip=b.querySelector('.fcg-chip');
+  b.classList.toggle('fcg-fora',fora);
+  if(fora){
+    if(!chip){
+      chip=document.createElement('span');
+      chip.className='fcg-chip';
+      chip.appendChild(document.createTextNode('fora'));
+      b.appendChild(chip);
+    }
+    b.title='Esta aba está fora desta página. Clique para abri-la e ligá-la.';
+    b.setAttribute('aria-label',a.nome+' — fora desta página');
+  }else{
+    if(chip)chip.parentNode.removeChild(chip);
+    b.removeAttribute('title');
+    b.removeAttribute('aria-label');
+  }
+}
+/* O interruptor no topo de cada aba. A estrutura (os dois radios) e montada UMA vez; o que
+   muda a cada redesenho e so o titulo, a classe e os dois blocos de aviso, que nao contem
+   campo nenhum. Redesenhar os radios a cada tecla tiraria o foco de quem acabou de clicar. */
+function fcgIntMontar(a){
+  var painel=$('painel-'+a.id),d,nome='fcg-usar-'+a.id,h;
+  if(!painel||$('fcg-int-'+a.id))return;
+  d=document.createElement('div');
+  d.className='fcg-int';
+  d.id='fcg-int-'+a.id;
+  h='<div class="fcg-tit" id="fcg-tit-'+a.id+'"></div>';
+  h+='<div class="radios">'+
+     '<label><input type="radio" name="'+nome+'" value="sim"><span>Usar esta aba nesta página</span></label>'+
+     '<label><input type="radio" name="'+nome+'" value="nao" checked><span>Fora desta página</span></label>'+
+     '</div>';
+  h+='<div id="fcg-msg-'+a.id+'"></div>';
+  d.innerHTML=h;
+  painel.insertBefore(d,painel.firstChild);
+  var rs=d.querySelectorAll('input[type=radio]'),i;
+  for(i=0;i<rs.length;i++){
+    rs[i].addEventListener('change',function(){
+      FCG.ativas[a.id]=(radio(nome)==='sim');
+      fcgGravar();fcgAtualizar();
+    });
+  }
+}
+function fcgRenderInt(a){
+  var d=$('fcg-int-'+a.id),tit=$('fcg-tit-'+a.id),msg=$('fcg-msg-'+a.id),
+      p=fcgAtivo(),usa=!!FCG.ativas[a.id],h='',org,div,i,dif,btns;
+  if(!d)return;
+  if(!p){d.style.display='none';return;}   /* Rascunho: a aba fica exatamente como sempre foi */
+  d.style.display='';
+  d.classList.toggle('fora',!usa);
+  setRadio('fcg-usar-'+a.id,usa?'sim':'nao');
+  if(tit)fcgTexto(tit,usa
+    ? ('Esta aba faz parte de “'+fcgNome(p)+'”')
+    : ('Esta aba está FORA de “'+fcgNome(p)+'”'));
+  if(!msg)return;
+
+  h+='<p class="ajuda">'+(usa
+    ? 'O que está aqui pertence à página <b>'+escHtml(fcgPaginaRotulo(p.pagina))+'</b> da campanha <b>'+escHtml(p.campanha)+'</b>. Tirar a aba desta página <b>não apaga nada</b>: os valores ficam guardados e voltam ao religar.'
+    : 'Os valores desta aba continuam guardados e visíveis — só não pertencem a esta página. Ligue a aba se a página <b>'+escHtml(fcgPaginaRotulo(p.pagina))+'</b> usar este bloco.')+'</p>';
+
+  /* aviso de divergencia (R1): ambar, nomeando o campo, e sem bloquear nada.
+     "tem outro valor PARA", e nao "em": o rotulo de 'operacionais' ja traz o artigo ("o numero
+     do WhatsApp"), entao prefixar "em " dava "tem outro valor em o numero do WhatsApp". */
+  div=fcgDivergencia(a);
+  if(div.length){
+    h+='<p class="ajuda alerta"><b>A outra página desta campanha ('+
+       escHtml(fcgPaginaRotulo(p.pagina==='hospedeira'?'embutida':'hospedeira'))+
+       ') tem outro valor para '+escHtml(fcLista(div))+'.</b> Pode ser intencional — isto não impede nada. Se não for, confira qual das duas páginas está com o valor certo.</p>';
+  }
+
+  /* marca de origem (R3) */
+  org=fcgOrigemEstado(a);
+  if(org){
+    if(org.tipo==='igual'){
+      h+='<p class="ajuda">Esta configuração <b>veio do preset “'+escHtml(org.nome)+'”</b> desta aba, e continua igual a ele.'+
+         '<span class="acoes"><button type="button" class="botao mini claro" data-fcg-desv="1">Desvincular</button></span></p>';
+    }else if(org.tipo==='modificado'){
+      h+='<p class="ajuda"><b>Modificado a partir de “'+escHtml(org.nome)+'”.</b> Os campos desta aba foram editados depois da cópia. O preset de origem não muda por causa disso — e esta cópia não muda por causa dele.'+
+         '<span class="acoes"><button type="button" class="botao mini claro" data-fcg-dif="1">'+(fcgVerDiff[a.id]?'Ocultar diferença':'Ver diferença')+'</button>'+
+         '<button type="button" class="botao mini claro" data-fcg-atu="1">Voltar ao preset “'+escHtml(org.nome)+'”</button>'+
+         '<button type="button" class="botao mini claro" data-fcg-desv="1">Desvincular</button></span></p>';
+    }else if(org.tipo==='mudou'){
+      h+='<p class="ajuda alerta"><b>Veio de “'+escHtml(org.nome)+'”, que mudou depois.</b> O preset de aba com esse nome foi regravado com outros valores desde que esta cópia foi feita. Nada é atualizado sozinho: a decisão é sua.'+
+         '<span class="acoes"><button type="button" class="botao mini claro" data-fcg-dif="1">'+(fcgVerDiff[a.id]?'Ocultar diferença':'Ver diferença')+'</button>'+
+         '<button type="button" class="botao mini claro" data-fcg-atu="1">Atualizar com o preset</button>'+
+         '<button type="button" class="botao mini claro" data-fcg-desv="1">Desvincular</button></span></p>';
+    }else{
+      h+='<p class="ajuda alerta"><b>A origem não existe mais.</b> Esta configuração veio do preset “'+escHtml(org.nome)+'” desta aba, que não está mais na biblioteca. <b>Nada aqui foi afetado</b> — os valores são uma cópia e continuam inteiros; só a marca de origem ficou sem dono.'+
+         '<span class="acoes"><button type="button" class="botao mini claro" data-fcg-desv="1">Desvincular</button></span></p>';
+    }
+    if(fcgVerDiff[a.id]&&org.pa){
+      dif=fcgCamposDiferentes(a,fcgValoresDaAba(a),org.pa.valores);
+      h+='<p class="ajuda"><b>Campos diferentes do preset “'+escHtml(org.nome)+'” ('+dif.length+'):</b> '+
+         (dif.length?('<span class="fcg-diff">'+escHtml(dif.join(', '))+'</span>'):'nenhum')+
+         '<br>São os nomes internos dos campos, como a ferramenta os guarda.</p>';
+    }
+  }
+  if(fcgCacheInt[a.id]===h)return;   /* nada mudou: nao redesenha (e nao rouba o foco de um botao) */
+  fcgCacheInt[a.id]=h;
+  msg.innerHTML=h;
+  btns=msg.querySelectorAll('[data-fcg-desv]');
+  for(i=0;i<btns.length;i++)btns[i].addEventListener('click',function(){fcgDesvincular(a);});
+  btns=msg.querySelectorAll('[data-fcg-dif]');
+  for(i=0;i<btns.length;i++)btns[i].addEventListener('click',function(){fcgVerDiff[a.id]=!fcgVerDiff[a.id];fcgCacheInt[a.id]=null;fcgAtualizar();});
+  btns=msg.querySelectorAll('[data-fcg-atu]');
+  for(i=0;i<btns.length;i++)btns[i].addEventListener('click',function(){fcgAtualizarComOrigem(a);});
+}
+function fcgDesvincular(a){
+  FCG.origens[a.id]=null;
+  fcgVerDiff[a.id]=false;fcgCacheInt[a.id]=null;
+  fcgGravar();fcgAtualizar();
+}
+/* "Atualizar com o preset" reescreve a aba com os valores do preset de origem. E o unico
+   caminho destrutivo da marca de origem, e por isso confirma dizendo quantos campos mudam. */
+function fcgAtualizarComOrigem(a){
+  var org=fcgOrigemEstado(a),dif;
+  if(!org||!org.pa)return;
+  dif=fcgCamposDiferentes(a,fcgValoresDaAba(a),org.pa.valores);
+  if(fcPresetBloqueado(a))return;
+  if(!confirm('Reescrever a aba “'+a.nome+'” com a configuração do preset “'+org.nome+'”?\n\n'+
+    dif.length+' campo(s) desta aba mudam de valor: '+(dif.join(', ')||'—')+'\n\n'+
+    'O que está na tela nesta aba não volta. As outras cinco abas não são tocadas.'))return;
+  try{fcgAplicarAba(a,org.pa.valores);}
+  catch(e){
+    fcSoLeitura[a.id]=true;
+    fcFalha(a.nome,'atualizar a aba com o preset de origem -- o que ja estava gravado foi mantido, e esta aba nao grava nada ate a pagina ser recarregada',e,a.id);
+    alert('Não foi possível atualizar esta aba. O que estava gravado foi mantido; recarregue a página.');
+    return;
+  }
+  FCG.origens[a.id]={preset:org.pa.nome,carimbo:org.pa.carimbo};
+  fcgVerDiff[a.id]=false;fcgCacheInt[a.id]=null;
+  salvarEstado();fcgGravar();fcgAtualizar();
+}
+
+function fcgAtualizar(){
+  var i;
+  if(!FCG.pronto)return;
+  if(fcgTimer){clearTimeout(fcgTimer);fcgTimer=null;}
+  fcgVals={};
+  try{
+    try{fcgRenderBarra();}catch(e){fcFalha('Preset geral','desenhar a barra do preset geral',e,'');}
+    for(i=0;i<ABAS.length;i++){
+      (function(a){
+        try{fcgRenderAbaBotao(a);fcgRenderInt(a);}
+        catch(e){fcFalha('Preset geral','desenhar o interruptor da aba '+a.nome,e,a.id);}
+      })(ABAS[i]);
+    }
+  }finally{fcgVals=null;}
+}
+/* Timer UNICO, cancelado antes de reagendar. Chamado por salvarEstado, entao cobre toda
+   mudanca de valor da ferramenta. O redesenho le as seis abas (fcPresetCapturar em cada uma), e
+   fazer isso a cada tecla com 46 fotos na lista custa caro sem nada ganhar: o selo pode chegar
+   250 ms depois. O que NAO pode chegar atrasado e a decisao de bloquear uma troca -- por isso
+   fcgTrocarPara chama fcgMotivos() na hora, e nunca le o selo. */
+function fcgAgendar(){
+  if(!FCG.pronto)return;
+  if(fcgTimer)clearTimeout(fcgTimer);
+  fcgTimer=setTimeout(function(){fcgTimer=null;fcgAtualizar();},250);
+}
+
+function fcgIniciar(){
+  var i,sel;
+  for(i=0;i<ABAS.length;i++){FCG.ativas[ABAS[i].id]=false;FCG.origens[ABAS[i].id]=null;}
+  fcgLer();
+  FCG.pronto=true;
+  for(i=0;i<ABAS.length;i++){
+    (function(a){prep('Preset geral',a.id,function(){fcgIntMontar(a);},'montar o interruptor da aba');})(ABAS[i]);
+  }
+  fcgSincronizarCampos();
+  liga('fcg-detalhes',function(){fcgPainelAbrir();});
+  liga('fcg-salvar',function(){fcgSalvarNoAtivo(false);});
+  liga('fcg-descartar',fcgDescartar);
+  liga('fcg-criar',fcgCriar);
+  liga('fcg-apagar',fcgApagar);
+  sel=$('fcg-sel');
+  if(sel)sel.addEventListener('change',function(){fcgTrocarPara(sel.value||null);});
+  ['head','body'].forEach(function(qual){
+    var el=$('fcg-'+qual);
+    if(!el)return;
+    el.addEventListener('input',function(){FCG.codigos[qual]=el.value;fcgGravar();fcgAgendar();});
+    el.addEventListener('change',function(){FCG.codigos[qual]=el.value;fcgGravar();fcgAgendar();});
+  });
+  /* Nao ha listener de 'input'/'change' aqui de proposito: quem acorda a barra e o proprio
+     salvarEstado (ver o comentario la), que e por onde toda mudanca de valor passa -- inclusive
+     as que vem de um clique em botao e nunca disparam 'input' nem 'change'. */
+  fcgAtualizar();
 }
 
 /* ============================================================
@@ -7958,7 +9017,7 @@ prep('Slideshow','slide',function(){
      valor ja preso -- imediato, porque 'blur' e um gesto deliberado e nao uma tecla */
   fcLigarFaixa(S_NUMS,function(){sPreview(true);});
 });
-prep('Captacao de leads','leads',function(){
+prep('Captação de leads','leads',function(){
   liga('l-gerar',lGerar);
   liga('l-atualizar',function(){lPreview(true);});
   liga('l-pv-desk',function(){lPvModoSet('desk');});
@@ -8118,7 +9177,7 @@ prep('Slideshow','slide',function(){
      pode abrir a ferramenta so para mexer em outra aba. A montagem fica para o clique na aba
      e para o botao "Atualizar previa" -- que e como esta aba sempre se comportou. */
 },'desenhar a aba com o estado restaurado');
-prep('Captacao de leads','leads',function(){
+prep('Captação de leads','leads',function(){
   if(fcAjustarTodos(L_NUMS))salvarEstado();
   lBtnPreview();
   lQRender();
@@ -8172,6 +9231,13 @@ prep('Contagem regressiva','cnt',function(){
      emergencia). A montagem fica para o clique da aba, que ja chama cPreview(true). */
   cPvBotoes();
 },'desenhar a aba com o estado restaurado');
+
+/* O preset geral e o ULTIMO passo da partida, e nao por acaso: fcgValoresDaAba le o que esta na
+   tela, e a tela so termina de ser desenhada -- e de ter os numeros presos a faixa pelo
+   fcAjustarTodos de cada aba -- depois dos seis passos "desenhar a aba com o estado restaurado".
+   Lendo antes, a barra compararia uma tela ainda por corrigir com o preset gravado e diria
+   "alterado" numa ferramenta recem-aberta em que ninguem mexeu. */
+prep('Preset geral','',fcgIniciar,'preparar a barra do preset geral');
 })();
 </script>
 </body>
