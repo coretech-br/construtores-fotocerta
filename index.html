@@ -659,6 +659,7 @@
   <div class="instrucoes">
   <h3>Instrução de uso do código gerado</h3>
   <p class="ajuda"><b>Onde colar:</b> no campo <b>Tag Body</b> da página hospedeira (configurações da página no Prosite). Se já houver ali uma versão anterior <b>deste</b> bloco (ela começa com o comentário <code>FOTO CERTA - BOTAO FLUTUANTE</code>), <b>substitua esse bloco inteiro</b> — colar a versão nova por cima da antiga duplica o botão flutuante. O que estiver no campo e for de <b>outro</b> construtor — a barra de contagem regressiva, por exemplo — <b>fica onde está</b>: os blocos convivem no mesmo campo, um embaixo do outro. Apagar o campo inteiro derrubaria a barra de contagem sem nenhum aviso.</p>
+  <p class="ajuda"><b>Primeira troca, quando o bloco antigo não tem cabeçalho:</b> versões geradas antes de ago/2026 saíam sem o cometário de identificação, então não há o que procurar. Nesse caso, o bloco antigo é <b>o trecho do WhatsApp inteiro</b>: começa no <code>&lt;style&gt;</code> que abre as regras <code>.fcw-</code> e termina no <b>último</b> <code>&lt;/script&gt;</code> desse trecho. Apague dessa abertura até esse fechamento e cole o novo no lugar. O que vier antes ou depois é de outro construtor e fica. Da próxima vez o cabeçalho já estará lá.</p>
   <p class="ajuda"><b>Pré-requisitos no Prosite (só se a âncora estiver incluída):</b> 1) o botão/link da página (ex.: o do hero) deve ter a URL igual à âncora configurada (ex.: <b>#reserva</b>); 2) a coluna que contém o componente HTML do iframe da página intermediária deve ter, na aba <b>Avançado</b>, o campo <b>ID Html</b> preenchido com o nome da âncora sem o # (ex.: <b>reserva</b>). O botão flutuante e o pop-up não exigem nenhuma configuração extra.</p>
   <p class="ajuda"><b>Depois de colar:</b> salve, <b>publique</b> e teste na página publicada: botão da coruja único no canto, pop-up abrindo e enviando ao WhatsApp, e clique do hero rolando até o calendário.</p>
   </div>
@@ -1242,7 +1243,7 @@
       <label for="c-dias">Duração — dias</label>
       <input type="number" id="c-dias" value="0" min="0" max="365" step="1">
       <label for="c-horas">Duração — horas</label>
-      <input type="number" id="c-horas" value="48" min="0" max="23" step="1">
+      <input type="number" id="c-horas" value="48" min="0" step="1">
       <label for="c-mins">Duração — minutos</label>
       <input type="number" id="c-mins" value="0" min="0" max="59" step="1">
       <p class="ajuda">Cada visitante tem o próprio prazo, contado da primeira vez que abriu a página naquele navegador.</p>
@@ -1617,6 +1618,21 @@ function bHexRgb(h){
   if(isNaN(n))return '255, 201, 74';
   return ((n>>16)&255)+', '+((n>>8)&255)+', '+(n&255);
 }
+/* Limpeza compartilhada pelos DOIS validadores de endereco -- cUrlOk (botao de acao da
+   Contagem regressiva) e tUrlOk (pagina intermediaria do TidyCal). Ela faz o que o NAVEGADOR
+   faz antes de resolver a URL, para o teste enxergar o mesmo endereco que o clique vai abrir:
+   1. Controle e espaco somem: sem isso, um caractere de controle no meio de "javascript:"
+      passaria pelo teste e viraria javascript: no clique.
+   2. Barra invertida vira barra. Medido: href="/\evil.com/x" e resolvido pelo navegador como
+      http://evil.com/x -- OUTRO host --, e passava pelos dois validadores, porque o segundo
+      caractere nao era "/". Alinhar as duas abas fechou a coerencia entre elas, mas nao a
+      classe do defeito; a classe fecha aqui, num lugar so. Nenhum caminho legitimo do site
+      leva barra invertida, entao normalizar nao recusa nada que devesse passar.
+   A limpeza vale so para o TESTE: o que sai no codigo continua sendo o que o operador digitou
+   -- e, quando o teste recusa, nada sai. */
+function urlLimpa(v){
+  return String(v).replace(/[\u0000-\u0020]/g,'').replace(/\\/g,'/');
+}
 /* ===== faixa declarada dos campos numericos, compartilhada por quatro abas =====
    Cada aba declara uma tabela de linhas [id, padrao, min, max, inteiro] e nada mais. A MESMA
    linha alimenta os dois lados -- o gerador (fcPreso, o numero que sai no codigo) e a interface
@@ -1627,8 +1643,12 @@ function bHexRgb(h){
    "1500", porque o "1" viraria o minimo antes do resto chegar.
    Isto comecou como duas copias quase iguais (Bordas e TidyCal) e viraria quatro ao alcancar
    Slideshow e Leads; a quarta copia foi o momento de ter uma implementacao so. A Contagem
-   regressiva NAO entra aqui: o c-mob dela e um campo unico com clamp tambem dentro da cCfg, e a
-   aba e a referencia desta fase -- nao se mexe nela. */
+   regressiva entrou por ultimo, na revisao final de ago/2026: hoje as SEIS abas usam esta
+   mecanica, e a tabela dela (C_NUMS) tem os catorze campos numericos da aba. Ficou escrito
+   aqui, por tres fases, que ela nao entrava porque "o c-mob dela e um campo unico" --
+   afirmacao falsa que sozinha manteve a lacuna aberta, e justamente no comentario que se le
+   primeiro ao mexer em fcPreso/fcAjustar. Excluir uma aba desta tabela exige contar os campos
+   dela antes. */
 function fcFaixa(tabela,id){var i;for(i=0;i<tabela.length;i++){if(tabela[i][0]===id)return tabela[i];}return null;}
 /* O clamp em si, separado da origem do valor. Ele nasceu dentro de fcPreso, que le do campo;
    a biblioteca de presets da aba Bordas (fase 5) precisou prender numeros que NAO tem campo na
@@ -3612,9 +3632,9 @@ function tPreso(id){return fcPreso(T_NUMS,id);}
    de ancora. Vazio tambem e recusado: o codigo 3 saia com src="" e o operador colava na
    hospedeira um iframe que nunca carregava nada, sem nenhum aviso. */
 function tUrlOk(v){
-  /* controle e espaco saem antes do teste porque o navegador tambem os ignora ao resolver
-     a URL -- sem isso, um caractere de controle no meio de "javascript:" passaria pelo teste */
-  var limpo=String(v).replace(/[\u0000-\u0020]/g,'');
+  /* urlLimpa aplica o que o navegador aplica antes de resolver a URL: tira controle/espaco e
+     normaliza barra invertida. Ver o comentario dela no bloco compartilhado. */
+  var limpo=urlLimpa(v);
   if(!limpo)return false;
   if(/^https?:\/\//i.test(limpo))return true;
   /* caminho do proprio site: UMA barra. Com duas o endereco e protocol-relative --
@@ -6042,10 +6062,12 @@ function cCfg(){
 /* escAttr protege a ESTRUTURA do atributo (aspas), nao o esquema: href="javascript:..."
    continua sendo um atributo bem formado e executa ao clique. Aceita ancora, caminho
    relativo e http(s); recusa qualquer outro esquema. Os caracteres de controle e o espaco
-   sao removidos antes do teste porque o navegador tambem os ignora ao resolver a URL --
-   sem isso, "jav\tascript:alert(1)" passaria pelo teste e viraria javascript: no clique. */
+   sao removidos antes do teste, por urlLimpa, porque o navegador tambem os ignora ao resolver
+   a URL. A mesma urlLimpa normaliza a barra invertida, que o navegador tambem trata como
+   barra: sem isso, "/\evil.com/x" chegava ao href como endereco de outro host. */
 function cUrlOk(v){
-  var limpo=String(v).replace(/[\u0000-\u0020]/g,'');
+  /* mesma limpeza do tUrlOk, pela mesma funcao: as duas abas tem de recusar o mesmo conjunto */
+  var limpo=urlLimpa(v);
   if(!limpo)return false;
   if(limpo.charAt(0)==='#')return true;
   if(/^https?:\/\//i.test(limpo))return true;
