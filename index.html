@@ -30,9 +30,20 @@
   .painel.ativo{display:block}
 
   .grade{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px}
-  @media (max-width:840px){.grade{grid-template-columns:1fr}}
+  /* minmax(0,1fr) tambem aqui, e nao 1fr: o minimo automatico de uma faixa 1fr e o min-content
+     dela, e o min-content de um cartao da lista e o endereco inteiro da foto (150+ caracteres
+     sem um unico ponto de quebra). Medido com as 46 fotos da galeria 121894 numa janela de
+     700 px: a faixa saia com 1299 px e a pagina inteira ganhava barra de rolagem horizontal.
+     A regra de duas colunas ja usava minmax(0,1fr); esta tinha ficado para tras. */
+  @media (max-width:840px){.grade{grid-template-columns:minmax(0,1fr)}}
 
-  fieldset{border:1px solid var(--linha);border-radius:10px;padding:14px 16px 16px;margin:0 0 16px}
+  /* min-width:0 desfaz o min-inline-size:min-content que o navegador da de presente a todo
+     <fieldset>. Com ele, um texto sem espaco (o endereco de uma foto do storage tem 150+
+     caracteres e nenhum ponto de quebra) empurrava o fieldset ate a largura do texto: medido
+     com as 46 fotos da galeria 121894, a coluna da grade tinha 507 px e o fieldset saia com
+     1253 px, atravessando a borda do cartao e invadindo a coluna vizinha. O text-overflow
+     ellipsis que ja existia nunca chegava a agir, porque nada la em cima obrigava a encolher. */
+  fieldset{border:1px solid var(--linha);border-radius:10px;padding:14px 16px 16px;margin:0 0 16px;min-width:0}
   legend{font-size:12px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--verde);padding:0 6px}
   label{display:block;font-size:13px;font-weight:600;margin:10px 0 4px}
   label small{font-weight:400;color:var(--tinta-suave)}
@@ -66,17 +77,35 @@
   .botao.mini{padding:5px 10px;font-size:12px}
   .acoes{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px}
 
-  .lista-imgs{list-style:none;margin:12px 0 0;padding:0}
+  /* position:relative para o offsetTop dos itens ser medido contra a propria lista -- e o que
+     sListaVer usa para trazer de volta o item movido quando a lista tem area de rolagem. */
+  .lista-imgs{list-style:none;margin:12px 0 0;padding:0;position:relative}
   .lista-imgs li{display:flex;align-items:center;gap:10px;border:1px solid var(--linha);border-radius:8px;
     padding:8px;margin-bottom:8px;background:#fff}
   .lista-imgs img{width:64px;height:44px;object-fit:cover;border-radius:5px;background:var(--areia);flex-shrink:0}
   .lista-imgs .info{flex:1;min-width:0}
-  .lista-imgs .url{font-size:11px;color:var(--tinta-suave);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  /* O endereco e cortado no MEIO, nao no fim: o comeco (esquema, host e pasta da galeria) e
+     igual nas 46 fotos e nao identifica nada, enquanto o nome do arquivo carrega a data, o
+     numero da foto e o nome da familia. Duas caixas na mesma linha -- a pasta encolhe antes
+     (flex-shrink 200 contra 1) e some primeiro; o nome do arquivo so comeca a ser cortado
+     quando a pasta ja foi inteira. O endereco completo continua no title de quem passa o
+     mouse. */
+  .lista-imgs .url{display:flex;font-size:11px;color:var(--tinta-suave);min-width:0}
+  .lista-imgs .url span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex-grow:0;flex-basis:auto}
+  .lista-imgs .url .pasta{flex-shrink:200}
+  .lista-imgs .url .arq{flex-shrink:1;color:var(--tinta);font-weight:600}
   .lista-imgs input[type=text]{padding:5px 8px;font-size:13px;margin-top:4px}
   .lista-imgs .ctrl{display:flex;flex-direction:column;gap:3px}
   .lista-imgs .ctrl button{border:1px solid var(--linha);background:#fff;border-radius:6px;width:28px;height:24px;
     cursor:pointer;font-size:12px;color:var(--tinta);line-height:1}
   .lista-imgs .ctrl button:hover{border-color:var(--verde);color:var(--verde)}
+  /* Area de rolagem propria da lista (hoje so a do slideshow a usa). Sem ela, 46 fotos
+     empurram as secoes 2, 3 e 4 da aba para 5,5 mil pixels abaixo. O teto e de 5 cartoes
+     inteiros -- ver o comentario de sListaVer para o porque deste numero. */
+  .lista-rolagem{max-height:520px;overflow-y:auto;padding-right:6px}
+  /* Quantas fotos ha na lista. Com area de rolagem o operador deixa de ver o fim dela, e o
+     numero da confirmacao de "Limpar lista" precisa poder ser conferido antes do clique. */
+  .lista-conta{font-size:12px;color:var(--tinta-suave);margin:10px 0 0}
   .radios input[type=radio],.lista-imgs input[type=checkbox]{-webkit-appearance:auto;appearance:auto;opacity:1;position:static;width:auto;height:auto}
   .secao{display:flex;align-items:center;gap:10px;margin:28px 0 14px;font-size:13px;font-weight:700;
     text-transform:uppercase;letter-spacing:.8px;color:var(--verde);border-top:1px solid var(--linha);padding-top:20px}
@@ -223,8 +252,10 @@
     <div>
       <fieldset>
       <legend>Imagens do slideshow</legend>
-      <ul class="lista-imgs" id="s-lista"></ul>
+      <p class="lista-conta" id="s-conta"></p>
+      <ul class="lista-imgs lista-rolagem" id="s-lista"></ul>
       <p class="vazio" id="s-vazio">Nenhuma imagem ainda. Adicione os links acima, uma a uma, ou traga uma galeria inteira no bloco abaixo — depois dá para reordenar com as setas.</p>
+      <div class="acoes"><button class="botao claro" id="s-lista-limpar">Limpar lista</button></div>
       </fieldset>
     </div>
   </div>
@@ -2086,12 +2117,42 @@ function corAjustar(idBase,def){
   var c=$(idBase);if(c)c.value=def;
   return true;
 }
-/* Cores de texto livre das abas Leads e Checkout (as de Bordas e Contagem ja eram validadas
-   na origem, pela mesma corSegura). Padroes identicos aos do HTML e aos das respectivas
-   previas. */
+/* Cores de texto livre das QUATRO abas que as tem. Padroes identicos aos do HTML e aos que
+   as chamadas de corSegura passam nos geradores -- os dois lados precisam dizer o mesmo
+   numero, senao a correcao a vista conserta o campo para uma cor e o codigo sai com outra.
+   Ago/2026: as abas Bordas e Contagem entraram nesta lista. Ate aqui elas so tinham a rede do
+   gerador (corSegura), que protege o codigo entregue mas nao o campo: esvaziar b-c1-t e gerar
+   deixava o campo VAZIO na tela e mandava '#9C5638' para o CSS. Tela e codigo discordavam em
+   silencio, que e a classe de defeito que este projeto mais paga para aprender. */
 var CORES_LIVRES=[['l-corbtn','#25D366'],['l-c1','#075E54'],['l-c2','#ffffff'],['l-c3','#25D366'],['l-c4','#333333'],
   ['l-corujacorpo','#ffffff'],['l-corujadet','#075E54'],
-  ['u-c1','#075E54'],['u-c2','#ffffff'],['u-c3','#333333']];
+  ['u-c1','#075E54'],['u-c2','#ffffff'],['u-c3','#333333'],
+  ['b-f1','#8A4A32'],['b-f2','#B5674A'],['b-c1','#9C5638'],['b-c2','#FFC94A'],['b-c3','#FFF6D8'],
+  ['b-c4','#F7EFDF'],['b-pvcor','#23281F'],
+  ['c-cfundo','#0F3A30'],['c-ctexto','#FDFBF6'],['c-cdestaque','#FFC94A'],['c-cborda','#FFC94A'],
+  ['c-ctafundo','#FFC94A'],['c-ctatexto','#23281F'],['c-cprog','#FFC94A'],
+  ['c-corujacorpo','#FDFBF6'],['c-corujadet','#FFC94A'],['c-curg','#8C1D18']];
+/* Corrige a vista as cores livres de UMA aba, pelo prefixo. Existe porque o mesmo laco ja
+   estava copiado em lPresetDepois e uPresetDepois: com quatro abas seriam quatro copias, e
+   copia numero tres e onde uma delas ganha uma regra que as outras nao ganham. */
+function fcCoresAjustar(pref){
+  var i,mudou=false;
+  for(i=0;i<CORES_LIVRES.length;i++){
+    if(CORES_LIVRES[i][0].indexOf(pref)===0&&corAjustar(CORES_LIVRES[i][0],CORES_LIVRES[i][1]))mudou=true;
+  }
+  return mudou;
+}
+/* O que cada aba precisa redesenhar depois de a cor ter sido corrigida a vista. Mapa por
+   prefixo em vez de cadeia de ifs com um ramo "senao" no fim: o ramo senao seria o do
+   Checkout, e a aba esquecida na proxima vez cairia nele -- redesenhando a previa errada
+   sem erro nenhum no console. */
+function fcCorRedesenhar(idBase){
+  var p=idBase.slice(0,2);
+  if(p==='l-'){lBtnPreview();lPreview(true);return;}
+  if(p==='u-'){uPreview(true);return;}
+  if(p==='b-'){bPreview();return;}
+  if(p==='c-'){cPreview(true);return;}
+}
 document.addEventListener('input',salvarEstado);
 document.addEventListener('change',salvarEstado);
 
@@ -2539,23 +2600,72 @@ function sAdd(){
   $('s-url').value='';$('s-leg').value='';
   sRender();salvarEstado();sPreview();
 }
+/* Traz de volta para dentro da area de rolagem o cartao da posicao i. Sem isto, subir ou
+   descer uma foto que esta na borda visivel a manda para fora do quadro e o operador perde de
+   vista justamente o item que acabou de mover -- ele continuaria clicando na seta, so que
+   agora sobre a foto que tomou o lugar.
+   Por que 520 px de teto (a regra .lista-rolagem): o cartao mede 96 px mais 8 px de respiro,
+   entao 520 sao exatamente CINCO cartoes inteiros. Cinco e o menor numero que mantem o item
+   movido e os dois vizinhos de cada lado a vista, que e o que torna a troca legivel; e o teto
+   ainda cabe, com a moldura do fieldset, dentro de uma janela de 800 px de altura -- area de
+   rolagem mais alta que a janela obrigaria a rolar a pagina para ver o fim da propria area de
+   rolagem, que e a segunda metade do incomodo que este ajuste veio resolver.
+   Contas em offsetTop, e nao scrollIntoView: o scrollIntoView tambem rola a PAGINA, e a lista
+   voltaria ao lugar as custas de a aba inteira saltar debaixo do operador. */
+function sListaVer(i){
+  var ul=$('s-lista'),li=ul?ul.children[i]:null;
+  if(!ul||!li)return;
+  var topo=li.offsetTop,alt=li.offsetHeight;
+  if(topo<ul.scrollTop)ul.scrollTop=topo;
+  else if(topo+alt>ul.scrollTop+ul.clientHeight)ul.scrollTop=topo+alt-ul.clientHeight;
+}
 function sMove(i,d){
   var j=i+d;if(j<0||j>=sImgs.length)return;
   var t=sImgs[i];sImgs[i]=sImgs[j];sImgs[j]=t;
   sRender();salvarEstado();sPreview();
+  sListaVer(j);
 }
 function sDel(i){sImgs.splice(i,1);sRender();salvarEstado();sPreview();}
+/* Esvazia SO a lista de imagens -- as configuracoes da apresentacao ficam. E acao destrutiva
+   sem desfazer, entao a confirmacao diz o numero (conferivel na linha acima da lista) e diz o
+   que NAO acontece, na mesma redacao que a remocao de preset ja usa. */
+function sListaLimpar(){
+  var n=sImgs.length;
+  if(!n)return;
+  if(!confirm('Remover '+(n===1?'a única imagem':'as '+n+' imagens')+' da lista? Isto esvazia só a lista desta aba — as configurações da apresentação ficam como estão e nenhum código já colado no site é afetado. Não há como desfazer.'))return;
+  sImgs=[];sRender();salvarEstado();sPreview();
+}
+/* Separa o endereco em pasta e nome do arquivo. O corte e a ultima barra do CAMINHO: procurar
+   no endereco inteiro faria uma barra dentro da query (?x=a/b) virar o corte e o "nome do
+   arquivo" nascer sem o nome do arquivo. A query fica junto do nome, que e onde ela e cortada
+   primeiro pelo ellipsis -- ela e ruido (?t=1710544714) e nao identifica foto nenhuma. */
+function sUrlPartes(u){
+  var s=String(u),q=s.indexOf('?'),caminho=(q<0?s:s.slice(0,q)),i=caminho.lastIndexOf('/');
+  if(i<0||i===caminho.length-1)return {pasta:'',arq:s};
+  return {pasta:s.slice(0,i+1),arq:s.slice(i+1)};
+}
 /* A lista nao tem name nem id nos campos de legenda, entao o ouvinte de documento que
    redesenha a previa nao a alcanca: quem chama e este. */
 function sLegEdit(i,v){sImgs[i].legenda=v;salvarEstado();sPreview();}
 function sRender(){
-  var ul=$('s-lista');ul.innerHTML='';
+  var ul=$('s-lista');
+  /* A posicao da rolagem e guardada e reposta porque redesenhar apaga o conteudo: sem isto,
+     editar a legenda da foto 40 jogaria a lista de volta para a foto 1 a cada tecla. */
+  var rolagem=ul.scrollTop;
+  ul.innerHTML='';
   $('s-vazio').style.display=sImgs.length?'none':'block';
+  $('s-conta').textContent=sImgs.length===1?'1 imagem na lista.':sImgs.length+' imagens na lista.';
+  $('s-conta').style.display=sImgs.length?'block':'none';
+  $('s-lista-limpar').disabled=!sImgs.length;
   sImgs.forEach(function(im,i){
     var li=document.createElement('li');
     var img=document.createElement('img');img.src=im.url;img.alt='';
     var info=document.createElement('div');info.className='info';
-    var url=document.createElement('div');url.className='url';url.textContent=im.url;url.title=im.url;
+    var partes=sUrlPartes(im.url);
+    var url=document.createElement('div');url.className='url';url.title=im.url;
+    var pasta=document.createElement('span');pasta.className='pasta';pasta.textContent=partes.pasta;
+    var arq=document.createElement('span');arq.className='arq';arq.textContent=partes.arq;
+    url.appendChild(pasta);url.appendChild(arq);
     var leg=document.createElement('input');leg.type='text';leg.value=im.legenda;leg.placeholder='Legenda (opcional)';
     leg.addEventListener('input',function(){sLegEdit(i,leg.value);});
     info.appendChild(url);info.appendChild(leg);
@@ -2565,6 +2675,7 @@ function sRender(){
     li.appendChild(img);li.appendChild(info);li.appendChild(ctrl);
     ul.appendChild(li);
   });
+  ul.scrollTop=rolagem;
 }
 /* ---------- importador de galeria ----------
    Cadastrar foto a foto e proibitivo: a galeria de exemplo tem 46 fotos e o portfolio, 58.
@@ -3575,11 +3686,9 @@ function lPresetAntes(){
    antigo pode trazer cor invalida, e o campo nao pode exibir algo diferente do que o gerador
    vai usar. */
 function lPresetDepois(){
-  var mudou=false,i;
+  var mudou=false;
   if(fcAjustarTodos(L_NUMS))mudou=true;
-  for(i=0;i<CORES_LIVRES.length;i++){
-    if(CORES_LIVRES[i][0].indexOf('l-')===0&&corAjustar(CORES_LIVRES[i][0],CORES_LIVRES[i][1]))mudou=true;
-  }
+  if(fcCoresAjustar('l-'))mudou=true;
   if(mudou)salvarEstado();
   lBtnPreview();lQRender();lToggles();lPvBotoes();lPreview(true);
 }
@@ -4797,11 +4906,9 @@ function uPresetAntes(){
   return '';
 }
 function uPresetDepois(){
-  var mudou=false,i;
+  var mudou=false;
   if(fcAjustarTodos(U_NUMS))mudou=true;
-  for(i=0;i<CORES_LIVRES.length;i++){
-    if(CORES_LIVRES[i][0].indexOf('u-')===0&&corAjustar(CORES_LIVRES[i][0],CORES_LIVRES[i][1]))mudou=true;
-  }
+  if(fcCoresAjustar('u-'))mudou=true;
   /* a chave Pix guardada num preset antigo pode trazer invisiveis do copiar-e-colar: mesma
      limpeza a vista que a carga faz */
   if(uChaveAjustar())mudou=true;
@@ -6412,9 +6519,15 @@ function bPresetAntes(){
   if(m.erro)return 'A configuracao atual nao gera codigo, entao nao ha o que salvar: '+m.erro;
   return '';
 }
-/* Depois de aplicar: o mesmo passo que a partida da aba executa com o estado restaurado. */
+/* Depois de aplicar: o mesmo passo que a partida da aba executa com o estado restaurado.
+   As cores de texto livre passam pela mesma correcao a vista que a carga faz -- um preset
+   antigo pode trazer cor invalida, e o campo nao pode exibir algo diferente do que o gerador
+   vai usar. */
 function bPresetDepois(){
-  if(fcAjustarTodos(B_NUMS))salvarEstado();
+  var mudou=false;
+  if(fcAjustarTodos(B_NUMS))mudou=true;
+  if(fcCoresAjustar('b-'))mudou=true;
+  if(mudou)salvarEstado();
   bToggles();bPreview();
 }
 /* A caixa de consolidacao do codigo 1 lista os presets desta aba, entao ela e repovoada
@@ -6851,8 +6964,13 @@ function cPresetAntes(){
   if(fcAjustarTodos(C_NUMS))salvarEstado();
   return '';
 }
+/* Mesma razao do bPresetDepois: as cores de texto livre desta aba tambem se corrigem a vista
+   depois de aplicar um preset. */
 function cPresetDepois(){
-  if(fcAjustarTodos(C_NUMS))salvarEstado();
+  var mudou=false;
+  if(fcAjustarTodos(C_NUMS))mudou=true;
+  if(fcCoresAjustar('c-'))mudou=true;
+  if(mudou)salvarEstado();
   cToggles();cMsgRender();cPvBotoes();cPreview(true);
 }
 function cMsgAdd(){
@@ -7723,6 +7841,7 @@ prep('Logotipo do topo','',function(){
 prep('Slideshow','slide',function(){
   liga('s-add',sAdd);
   liga('s-gerar',sGerar);
+  liga('s-lista-limpar',sListaLimpar);
   liga('s-limparbtn',sLimpar);
   liga('s-copy',function(){copiar('s-out','s-cop');});
   liga('s-previewbtn',function(){sPreview(true);});
@@ -7843,19 +7962,17 @@ prep('Contagem regressiva','cnt',function(){
      redesenha por conta propria. */
   fcLigarFaixa(C_NUMS,function(){cPreview(true);});
 });
-/* Cores de texto livre das abas Leads e Checkout: o campo se corrige a vista, como o c-mob.
+/* Cores de texto livre das quatro abas que as tem: o campo se corrige a vista, como o c-mob.
    Mesmo motivo do listener no proprio elemento (roda antes dos de document, entao o
    salvarEstado/previa globais ja leem o valor corrigido); 'blur' nao borbulha, por isso esse
-   ramo redesenha a previa por conta propria. */
-prep('Correcao a vista das cores livres','leads uni',function(){
+   ramo redesenha a previa por conta propria, e por prefixo (fcCorRedesenhar).
+   So em 'change'/'blur', nunca em 'input': corrigir a cada tecla impediria digitar '#075E54',
+   porque '#0' viraria o padrao antes do resto chegar. */
+prep('Correcao a vista das cores livres','leads uni bor cnt',function(){
   CORES_LIVRES.forEach(function(par){
     var t=$(par[0]+'-t');if(!t)return;
-    function redesenhar(){
-      salvarEstado();
-      if(par[0].indexOf('l-')===0){lBtnPreview();lPreview(true);}else{uPreview(true);}
-    }
     t.addEventListener('change',function(){if(corAjustar(par[0],par[1]))salvarEstado();});
-    t.addEventListener('blur',function(){if(corAjustar(par[0],par[1]))redesenhar();});
+    t.addEventListener('blur',function(){if(corAjustar(par[0],par[1])){salvarEstado();fcCorRedesenhar(par[0]);}});
   });
 });
 
@@ -7877,7 +7994,7 @@ for(var iAba=0;iAba<ABAS.length;iAba++){
    carga, para o campo nunca exibir algo diferente do que o gerador vai usar, e regrava para o
    valor velho nao ressurgir na proxima sessao. Roda ANTES das previas para elas ja desenharem
    o valor corrigido. */
-prep('Correcao das cores livres e da chave Pix na carga','leads uni',function(){
+prep('Correcao das cores livres e da chave Pix na carga','leads uni bor cnt',function(){
   var mudou=false;
   CORES_LIVRES.forEach(function(par){if(corAjustar(par[0],par[1]))mudou=true;});
   if(uChaveAjustar())mudou=true;
@@ -7890,6 +8007,10 @@ prep('Slideshow','slide',function(){
      prende na carga, para o campo nunca exibir um numero diferente do que o gerador vai usar. */
   if(fcAjustarTodos(S_NUMS))salvarEstado();
   sToggles();
+  /* sRender tambem desenha a contagem da lista e liga/desliga o "Limpar lista". Sem estado
+     gravado o sRestaura nao chega a chamar sRender, e o botao nasceria ligado sobre uma lista
+     vazia -- parecendo que ha o que limpar. */
+  sRender();
   /* O importador nao tem estado salvo de proposito: o codigo-fonte colado chega a centenas
      de milhares de caracteres e nao pode disputar o espaco de fcConstrutores com a
      configuracao das seis abas. Entao aqui so o desenho inicial -- campo da legenda padrao

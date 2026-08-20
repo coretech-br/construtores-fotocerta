@@ -11,7 +11,7 @@ O tempo real é medido pelo **relógio dos commits**: do início do trabalho da 
 |---|---|---|---|---|
 | 1 | Importador de galeria | 2–3h | **56 min** | ✅ mesclada (`0041655`) |
 | 2 | Presets de aba nas seis abas | 2–3h | 42 min até a branch | 🔄 branch `evolucao/2-presets-aba`, aguardando revisão e merge |
-| 2.5 | Interface da lista de imagens (A, B, C) | 45–75 min | — | 🔄 em execução (início 20/08 13:28) |
+| 2.5 | Interface da lista de imagens (A, B, C) + cores livres (D) | 45–75 min | 47 min até a branch | 🔄 branch `evolucao/2.5-interface-lista`, aguardando revisão e merge |
 | 3 | Preset geral | 4–5h | — | não iniciada |
 | 4 | Exportar e importar JSON | 2–3h | — | não iniciada |
 | 5 | Painel consolidado | 3–4h | — | não iniciada |
@@ -36,6 +36,17 @@ O tempo real é medido pelo **relógio dos commits**: do início do trabalho da 
 - **Decisão registrada:** dados operacionais **entram** no preset — é a fotografia da aba, e tirá-los devolveria a aba pela metade em silêncio. Não saem do navegador, e as abas Leads e Checkout dizem isso na tela, nomeando os campos. O resumo da lista nunca os mostra.
 - **Regressão:** as **9 saídas** dos seis geradores byte a byte idênticas às de `main` para configuração igual (mesmo `localStorage`, duas versões servidas pelo mesmo `localhost`), rodada duas vezes — a segunda com preset salvo nas seis abas, para provar que preset é entrada e não muda o que sai.
 - **Compatibilidade provada com estado antigo montado à mão:** presets de Bordas em `{nome,cfg}` aparecem na lista, e o código 1 **consolidado a partir de um deles** saiu byte a byte igual ao da versão anterior. A tradução é de mão única (versão anterior não lê o formato novo) — registrado de propósito.
+
+### Fase 2.5 — Interface da lista de imagens, e as cores livres que a fase 2 achou
+
+- **Início:** 20/08/2026, 13:28. **Branch pronta para revisão:** 20/08/2026, 14:15 (**47 min**; o real da tabela só fecha no merge).
+- **Base:** `main` = `4d8d57d`. **Branch:** `evolucao/2.5-interface-lista`. **Não mesclada.**
+- **A — o endereço vazava do cartão.** A causa não era o texto: era que **nada obrigava a caixa a encolher**. Duas regras somadas — o `min-inline-size:min-content` que o navegador dá a todo `<fieldset>` e o `1fr` (sem `minmax(0,…)`) da coluna única abaixo de 840 px. O `text-overflow:ellipsis` já estava lá desde sempre e nunca chegava a agir. Medido com as 46 fotos: **coluna de 507 px contra fieldset de 1253 px** na janela larga, e **faixa de 1299 px numa janela de 700 px**, com barra de rolagem horizontal na página inteira. A segunda metade — identificar a foto — virou corte no **meio** do endereço: a pasta encolhe primeiro e some, o nome do arquivo sobrevive. **46 de 46 textos visíveis ficam distintos**, nas duas larguras.
+- **A regra que fica é maior que a lista.** `fieldset{min-width:0}` e `minmax(0,1fr)` valem para a ferramenta inteira: as listas de produtos, cupons e mensagens da Contagem têm a mesma estrutura e o mesmo defeito latente. Estava esperando alguém colar um texto longo o bastante.
+- **C — a altura foi escolhida por conta, não por gosto: 520 px = 5 cartões inteiros.** Piso: cinco é o menor número que mantém o item movido e os vizinhos de cada lado à vista. Teto: 520 px mais a moldura do fieldset ainda cabem numa janela de 800 px — área de rolagem mais alta que a janela obriga a rolar a página para ver o fim da própria área de rolagem, que é a segunda metade do incômodo. Seção 1 com 46 fotos: **5563 px → 1413 px**.
+- **D era pré-existente em `main`, e a prova está registrada.** Servindo as duas versões pelo mesmo `localhost`: em `4d8d57d`, esvaziar `b-c1-t` e gerar deixa o campo **vazio na tela** com `#9C5638` no código; na branch, o campo se corrige para `#9C5638` e os dois passam a dizer o mesmo. Os **17 campos** (7 nas Bordas, 10 na Contagem) passam nos quatro testes: vazio corrige, inválido corrige, `#075E54` digitado letra a letra não é interrompido, valor válido sobrevive ao `change`/`blur`.
+- **Regressão:** as **9 saídas** dos seis geradores byte a byte idênticas às de `main`, com o mesmo `localStorage` (SHA-256 do estado semeado igual dos dois lados) e as duas versões servidas pelo mesmo `localhost`. Varredura de IDs repetidos: `[]`, com 369 IDs (367 antes; os dois novos são `s-conta` e `s-lista-limpar`).
+- **O que a fase não fez, de propósito:** largura da ferramenta e número de colunas continuam onde estavam. É o achado D do dono, e ele vai na fase 5 junto com o painel consolidado — decidir o envelope de layout agora seria decidi-lo às cegas e refazê-lo depois.
 
 ---
 
@@ -65,9 +76,9 @@ Quatro pontos, levantados com a lista já carregada com 46 fotos importadas.
 
 | # | Achado | Onde entra |
 |---|---|---|
-| A | O endereço da foto **vaza para fora do cartão** — os links do storage são longos demais para a caixa. | Fase 2.5 |
-| B | Falta **"Limpar lista"**. Carregou uma galeria grande e quer refazer? Só removendo uma a uma. | Fase 2.5 |
-| C | Lista grande **empurra todas as demais configurações para baixo**. Provável solução: área de rolagem própria para a lista. | Fase 2.5 |
+| A | O endereço da foto **vaza para fora do cartão** — os links do storage são longos demais para a caixa. | Fase 2.5 ✅ |
+| B | Falta **"Limpar lista"**. Carregou uma galeria grande e quer refazer? Só removendo uma a uma. | Fase 2.5 ✅ |
+| C | Lista grande **empurra todas as demais configurações para baixo**. Provável solução: área de rolagem própria para a lista. | Fase 2.5 ✅ |
 | D | A ferramenta é **centralizada e de largura fixa**, sobrando espaço nas laterais (o dono usa monitor 2K). As abas têm duas colunas; poderiam ter mais conforme o espaço, e a lista de imagens poderia ocupar a largura inteira, abaixo dos parâmetros da seção 1. | **Fase 5** |
 
 ### Por que A, B e C viram uma fase 2.5, e D não
