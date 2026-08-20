@@ -134,6 +134,16 @@
      enxergar o que ela custa antes de publicar. */
   .s-alerta{background:#FFF6DF;border:1px solid #E3B23C;color:#6B5210}
   .s-alerta b{color:#6B5210}
+
+  /* Previa da captacao de leads: mesma tecnica da Contagem regressiva e do Slideshow -- o
+     bloco gerado roda dentro de um iframe de mesma origem. Nao ha estilo de pop-up aqui de
+     proposito: quem pinta o pop-up e o CSS que o proprio gerador emite. */
+  .l-pv-modos{display:flex;gap:8px;align-items:center;margin:0 0 10px}
+  .l-pv-modos .rotulo{font-size:12px;color:var(--tinta-suave)}
+  .l-pv-moldura{overflow:hidden;margin:0 auto;background:#fff;border:1px solid var(--linha);border-radius:8px}
+  .l-pv-moldura iframe{border:0;display:block;background:#fff}
+  .l-alerta{background:#FFF6DF;border:1px solid #E3B23C;color:#6B5210}
+  .l-alerta b{color:#6B5210}
 </style>
 </head>
 <body>
@@ -374,6 +384,18 @@
       <label for="l-segef">Intervalo entre repetições <small>(segundos, de 3 a 300)</small></label>
       <input type="number" id="l-segef" value="10" min="3" max="300">
       </fieldset>
+
+      <fieldset>
+      <legend>Posição do botão flutuante</legend>
+      <label>Canto</label>
+      <div class="radios">
+      <label><input type="radio" name="l-btnlado" value="dir" checked><span>Direita</span></label>
+      <label><input type="radio" name="l-btnlado" value="esq"><span>Esquerda</span></label>
+      </div>
+      <label for="l-btnbaixo">Distância do rodapé <small>(px, de 0 a 400; fora da faixa o campo se corrige sozinho)</small></label>
+      <input type="number" id="l-btnbaixo" value="92" min="0" max="400" step="1">
+      <p class="ajuda">O padrão de 92 px deixa o botão acima da faixa de rodapé do tema. No celular o bloco continua usando <b>8 px a menos</b> de rodapé e 16 px de margem lateral (contra 22 no computador), como sempre fez — a distância acima é a do computador.</p>
+      </fieldset>
     </div>
   </div>
 
@@ -407,15 +429,6 @@
     <div>
       <fieldset>
       <legend>Textos do pop-up</legend>
-      <label>Marca no título</label>
-      <div class="radios">
-      <label><input type="radio" name="l-coruja" value="true" checked><span>Coruja SVG</span></label>
-      <label><input type="radio" name="l-coruja" value="false"><span>Emoji / nada</span></label>
-      </div>
-      <div id="l-emoji-campo">
-      <label for="l-emoji">Emoji antes do título</label>
-      <input type="text" id="l-emoji" value="">
-      </div>
       <label for="l-t1">Título do cabeçalho</label>
       <input type="text" id="l-t1" value="Fale com a Foto Certa">
       <label for="l-t2">Rótulo do campo nome</label>
@@ -434,7 +447,133 @@
     </div>
   </div>
 
-  <div class="secao"><span class="secao-n">4</span> Âncora para o calendário</div>
+  <div class="secao"><span class="secao-n">4</span> Cabeçalho do pop-up: coruja, movimento e efeitos</div>
+  <div class="grade">
+    <div>
+      <fieldset>
+      <legend>Coruja no cabeçalho</legend>
+      <label>Posição</label>
+      <div class="radios">
+      <label><input type="radio" name="l-corujapos" value="nao"><span>Não usar</span></label>
+      <label><input type="radio" name="l-corujapos" value="esq" checked><span>À esquerda</span></label>
+      <label><input type="radio" name="l-corujapos" value="dir"><span>À direita</span></label>
+      <label><input type="radio" name="l-corujapos" value="ambos"><span>Dos dois lados</span></label>
+      </div>
+      <div id="l-emoji-campo">
+      <label for="l-emoji">Emoji antes do título <small>(só aparece quando a coruja não é usada)</small></label>
+      <input type="text" id="l-emoji" value="">
+      </div>
+      <div id="l-corujacor-campos">
+      <label>Cores da coruja</label>
+      <div class="radios">
+      <label><input type="radio" name="l-corujacor" value="auto" checked><span>Corpo branco, detalhes na cor do cabeçalho</span></label>
+      <label><input type="radio" name="l-corujacor" value="livre"><span>Escolher as duas</span></label>
+      </div>
+      <div id="l-corujacor-livre">
+      <label>Cor do corpo / dos detalhes</label>
+      <div class="cor-linha"><input type="color" id="l-corujacorpo" value="#ffffff"><input type="text" id="l-corujacorpo-t" value="#ffffff"></div>
+      <div class="cor-linha"><input type="color" id="l-corujadet" value="#075E54"><input type="text" id="l-corujadet-t" value="#075E54"></div>
+      </div>
+      </div>
+      <p class="ajuda">A coruja fica ancorada na ponta, <b>fora da área que rola</b>: com o movimento ligado ela emoldura o cabeçalho em vez de passar junto com o texto. A posição vale <b>só para o cabeçalho do pop-up</b> — no botão flutuante a coruja é o ícone inteiro, e ali posição não se aplica.</p>
+      </fieldset>
+    </div>
+    <div>
+      <fieldset>
+      <legend>Movimento do conteúdo</legend>
+      <div class="radios">
+      <label><input type="radio" name="l-mov" value="estatico" checked><span>Estático</span></label>
+      <label><input type="radio" name="l-mov" value="rolaesq"><span>Rolagem para a esquerda</span></label>
+      <label><input type="radio" name="l-mov" value="roladir"><span>Rolagem para a direita</span></label>
+      </div>
+      <div id="l-vel-campo">
+      <label for="l-vel">Duração do ciclo de rolagem <small>(segundos, de 2 a 60 — maior = mais lento; fora da faixa o campo se corrige sozinho)</small></label>
+      <input type="number" id="l-vel" value="18" min="2" max="60" step="1">
+      </div>
+      <p class="ajuda">As duas opções de <b>alternância</b> da Contagem regressiva não entram aqui: elas exigem duas ou mais mensagens, e o cabeçalho tem um título só. Com a rolagem ligada o título é <b>repetido até cobrir a largura do cabeçalho</b> — é o que evita o vão que a duplicação simples deixa num título curto. O trilho é medido quando o pop-up abre, porque antes disso ele está escondido e mede zero.</p>
+      </fieldset>
+      <fieldset>
+      <legend>Destaque contínuo <small>(pode combinar)</small></legend>
+      <div class="radios">
+      <label><input type="checkbox" id="l-ef-pulsar"><span>Pulsar</span></label>
+      <label><input type="checkbox" id="l-ef-brilho"><span>Brilho passante</span></label>
+      <label><input type="checkbox" id="l-ef-degrade"><span>Degradê animado</span></label>
+      <label><input type="checkbox" id="l-ef-piscar"><span>Separador piscando</span></label>
+      <label><input type="checkbox" id="l-ef-tremor"><span>Tremor</span></label>
+      </div>
+      <p class="ajuda">São os cinco da Contagem regressiva. <b>Ressalva registrada:</b> num cabeçalho pequeno, <b>pulsar</b> e <b>tremor</b> incomodam mais do que ajudam — ficam disponíveis porque a decisão de usar é da campanha. O <b>separador piscando</b> não tem relógio para separar aqui: ele entra como um ponto (•) piscando antes do título. O <b>degradê</b> anima entre a cor do cabeçalho e a cor do botão enviar. Quem pede menos movimento no sistema não vê nenhum dos cinco.</p>
+      </fieldset>
+    </div>
+  </div>
+
+  <div class="secao"><span class="secao-n">5</span> Horário de atendimento</div>
+  <div class="grade">
+    <div>
+      <fieldset>
+      <legend>Faixa de atendimento</legend>
+      <div class="radios">
+      <label><input type="radio" name="l-hor" value="nao" checked><span>Não usar</span></label>
+      <label><input type="radio" name="l-hor" value="sim"><span>Usar</span></label>
+      </div>
+      <div id="l-hor-campos">
+      <label>Dias atendidos</label>
+      <div class="radios">
+      <label><input type="checkbox" id="l-hor-d1" checked><span>Seg</span></label>
+      <label><input type="checkbox" id="l-hor-d2" checked><span>Ter</span></label>
+      <label><input type="checkbox" id="l-hor-d3" checked><span>Qua</span></label>
+      <label><input type="checkbox" id="l-hor-d4" checked><span>Qui</span></label>
+      <label><input type="checkbox" id="l-hor-d5" checked><span>Sex</span></label>
+      <label><input type="checkbox" id="l-hor-d6"><span>Sáb</span></label>
+      <label><input type="checkbox" id="l-hor-d0"><span>Dom</span></label>
+      </div>
+      <label for="l-horini">Abre às</label>
+      <input type="time" id="l-horini" value="09:00">
+      <label for="l-horfim">Fecha às</label>
+      <input type="time" id="l-horfim" value="18:00">
+      <label for="l-horaviso">Aviso mostrado fora do horário</label>
+      <input type="text" id="l-horaviso" value="Estamos fora do horário de atendimento. Deixe seu recado: respondemos assim que voltarmos.">
+      <p class="ajuda l-alerta" id="l-hor-aviso" style="display:none"></p>
+      </div>
+      </fieldset>
+    </div>
+    <div>
+      <fieldset>
+      <legend>O que muda fora do horário</legend>
+      <p class="ajuda">O botão continua abrindo o pop-up e o recado continua indo para o WhatsApp: <b>fora do horário ninguém é impedido de deixar recado</b>, porque a mensagem fica lá esperando. O que muda é a <b>promessa</b> — um aviso aparece no topo do formulário dizendo que a resposta não é imediata. O aviso é recalculado <b>toda vez que o pop-up abre</b>, então uma página deixada aberta na virada das 18h mostra o aviso certo quando o visitante finalmente clicar.</p>
+      <p class="ajuda"><b>O fuso é fixo no código.</b> O relógio do visitante pode estar em qualquer lugar (viagem, aparelho desacertado, cliente de fora), e o horário de atendimento é o <b>seu</b>. O bloco gerado converte o instante para o fuso de Brasília (−3, sem horário de verão desde 2019) antes de decidir — mesma escolha que a Contagem regressiva fez para a data de encerramento. Atendendo de outro fuso, troque <code>HORARIO_FUSO</code> no topo do código gerado.</p>
+      <p class="ajuda">Faixa que <b>cruza a meia-noite</b> (ex.: das 20:00 às 02:00) é aceita: o dia marcado é o dia em que o expediente <b>começa</b>. Abertura e fechamento iguais são recusados na geração — não há como saber se você quis dizer 24 horas ou zero.</p>
+      <p class="ajuda">Sem nenhum dia marcado, ou com um dos horários em branco, <b>o modo fica desligado</b> e o bloco sai sem nada disso — o aviso ao lado diz isso na tela, para o desligamento não ser silencioso.</p>
+      </fieldset>
+    </div>
+  </div>
+
+  <div class="secao"><span class="secao-n">6</span> Pergunta de qualificação</div>
+  <div class="grade">
+    <div>
+      <fieldset>
+      <legend>A pergunta e as opções</legend>
+      <label for="l-qlabel">Rótulo da pergunta no pop-up</label>
+      <input type="text" id="l-qlabel" value="Qual ensaio te interessa?">
+      <label for="l-qdica">Texto da opção vazia</label>
+      <input type="text" id="l-qdica" value="Escolha uma opção (opcional)">
+      <label for="l-qmsg">Antecede a resposta na mensagem do WhatsApp</label>
+      <input type="text" id="l-qmsg" value="Interesse">
+      <label for="l-qop">Nova opção da lista</label>
+      <input type="text" id="l-qop" placeholder="ex.: Ensaio gestante">
+      <div class="acoes"><button class="botao" id="l-q-add">Adicionar opção</button></div>
+      </fieldset>
+    </div>
+    <div>
+      <fieldset>
+      <legend>Opções cadastradas</legend>
+      <p class="vazio" id="l-q-vazio">Nenhuma opção ainda. <b>Sem opções cadastradas a pergunta não aparece no pop-up</b> e nada muda no código gerado — é assim que este recurso fica desligado.</p>
+      <ul class="lista-imgs" id="l-q-lista"></ul>
+      <p class="ajuda">A resposta é <b>opcional para o visitante</b>: uma pergunta obrigatória custaria leads, e o recado já é o que importa. Escolhendo alguma coisa, a mensagem ganha uma linha entre a página e o código — <code>Interesse *Ensaio gestante*</code>. Sem escolher, essa linha simplesmente não existe e a mensagem sai exatamente como sairia sem o recurso.</p>
+      </fieldset>
+    </div>
+  </div>
+
+  <div class="secao"><span class="secao-n">7</span> Âncora para o calendário</div>
   <div class="grade">
     <div>
       <fieldset>
@@ -459,15 +598,22 @@
     </div>
   </div>
 
-  <div class="secao"><span class="secao-n">5</span> Prévia e código gerado</div>
+  <div class="secao"><span class="secao-n">8</span> Prévia e código gerado</div>
   <div class="acoes">
     <button class="botao" id="l-gerar">Gerar código</button>
+    <button class="botao claro" id="l-atualizar">Atualizar prévia</button>
     <button class="botao claro" id="l-padroes">Restaurar padrões</button>
     </div>
   <div class="grade">
     <div>
       <div class="pv-area">
+      <div class="l-pv-modos">
+      <span class="rotulo">Largura da prévia:</span>
+      <button type="button" class="botao mini" id="l-pv-desk" aria-pressed="true">Computador</button>
+      <button type="button" class="botao mini claro" id="l-pv-cel" aria-pressed="false">Celular</button>
+      </div>
       <div id="l-pv-box"></div>
+      <p class="ajuda">A prévia roda <b>o próprio código da caixa ao lado</b>, dentro de um quadro isolado — não é um desenho parecido. <b>O que ainda difere da página publicada:</b> o quadro abre o pop-up sozinho (na página real ele espera o clique ou o tempo do modo automático), e por isso o botão flutuante aparece atrás do véu escuro; o foco automático do campo nome e o <code>window.open</code> do botão enviar são <b>neutralizados só dentro do quadro</b>, senão a prévia roubaria o cursor do formulário e abriria o WhatsApp a cada atualização — o código gerado não é afetado; o aviso de horário usa o relógio deste computador convertido para o fuso configurado; a largura é a largura lógica do botão acima (reduzida na tela só para caber na coluna), enquanto na página real vale a janela do visitante; e o quadro não carrega o CSS do tema do site.</p>
       </div>
     </div>
     <div>
@@ -1606,6 +1752,7 @@ function corAjustar(idBase,def){
 /* Cores de texto livre das abas Leads e Checkout (as de Bordas e Contagem ja eram validadas
    na origem por bCor/cCor). Padroes identicos aos do HTML e aos das respectivas previas. */
 var CORES_LIVRES=[['l-corbtn','#25D366'],['l-c1','#075E54'],['l-c2','#ffffff'],['l-c3','#25D366'],['l-c4','#333333'],
+  ['l-corujacorpo','#ffffff'],['l-corujadet','#075E54'],
   ['u-c1','#075E54'],['u-c2','#ffffff'],['u-c3','#333333']];
 document.addEventListener('input',salvarEstado);
 document.addEventListener('change',salvarEstado);
@@ -2248,13 +2395,30 @@ function sBloco(cfg){
    CAPTAÇÃO DE LEADS
    ============================================================ */
 /* Faixa declarada dos campos numericos desta aba (ver fcPreso/fcAjustar no bloco compartilhado).
-   Os dois declaravam 'min' no HTML e nada o impunha, com uma variante pior que a do Slideshow:
-   digitando 0 em "segundos ate abrir sozinho", o "||" tratava como ausente e trocava por 8 em
-   SILENCIO; e -5 no intervalo entre repeticoes saia inteiro como SEGUNDOS_EFEITO=-5, o que faz
-   setInterval disparar sem parar e o botao tremer/pulsar sem intervalo nenhum.
-   Tetos novos (300 s = 5 min) declarados tambem no HTML: nao apertam uso real, so pegam erro. */
-var L_NUMS=[['l-segauto',8,1,300,true],['l-segef',10,3,300,true]];
+   Os dois primeiros declaravam 'min' no HTML e nada o impunha, com uma variante pior que a do
+   Slideshow: digitando 0 em "segundos ate abrir sozinho", o "||" tratava como ausente e trocava
+   por 8 em SILENCIO; e -5 no intervalo entre repeticoes saia inteiro como SEGUNDOS_EFEITO=-5, o
+   que faz setInterval disparar sem parar e o botao tremer/pulsar sem intervalo nenhum.
+   Tetos (300 s = 5 min) declarados tambem no HTML: nao apertam uso real, so pegam erro.
+   Os dois ultimos sao da fase 5 e entram aqui pelo mesmo motivo de sempre: l-btnbaixo vira
+   'bottom' no CSS do botao flutuante (negativo o jogaria para fora da tela) e l-vel vira a
+   duracao da animacao de rolagem (zero ou negativo faz o trilho piscar em vez de rolar). A
+   MESMA linha alimenta o gerador e a correcao a vista do campo. */
+var L_NUMS=[['l-segauto',8,1,300,true],['l-segef',10,3,300,true],
+  ['l-btnbaixo',92,0,400,true],['l-vel',18,2,60,true]];
 function lPreso(id){return fcPreso(L_NUMS,id);}
+
+/* Opcoes da pergunta de qualificacao. Lista vazia = recurso desligado (o campo nao aparece no
+   pop-up e o bloco gerado nao ganha uma linha sequer por causa dele). */
+var lQops=[];
+
+/* Dias marcados no horario de atendimento, no indice que Date.getDay() usa (0=domingo). */
+function lHorDias(){
+  var ds=[],i,el;
+  for(i=0;i<7;i++){el=$('l-hor-d'+i);if(el&&el.checked)ds.push(i);}
+  return ds;
+}
+function lHoraOk(v){return /^\d{1,2}:\d{2}$/.test(String(v||''));}
 
 /* Salvamento e restauracao desta aba (registradas em ABAS). */
 function lColeta(){
@@ -2262,8 +2426,16 @@ function lColeta(){
     l:{num:$('l-num').value,cod:$('l-cod').value,pag:$('l-pag').value,
       modo:radio('l-modo'),segauto:$('l-segauto').value,efeito:radio('l-efeito'),segef:$('l-segef').value,
       icone:radio('l-icone'),formato:radio('l-formato'),corbtn:$('l-corbtn-t').value,
+      btnlado:radio('l-btnlado'),btnbaixo:$('l-btnbaixo').value,
       m1:$('l-m1').value,m2:$('l-m2').value,m3:$('l-m3').value,m4:$('l-m4').value,
-      coruja:radio('l-coruja'),emoji:$('l-emoji').value,
+      corujapos:radio('l-corujapos'),emoji:$('l-emoji').value,
+      corujacor:radio('l-corujacor'),corujacorpo:$('l-corujacorpo-t').value,corujadet:$('l-corujadet-t').value,
+      mov:radio('l-mov'),vel:$('l-vel').value,
+      efpulsar:$('l-ef-pulsar').checked,efbrilho:$('l-ef-brilho').checked,efdegrade:$('l-ef-degrade').checked,
+      efpiscar:$('l-ef-piscar').checked,eftremor:$('l-ef-tremor').checked,
+      hor:radio('l-hor'),hordias:lHorDias(),horini:$('l-horini').value,horfim:$('l-horfim').value,
+      horaviso:$('l-horaviso').value,
+      qlabel:$('l-qlabel').value,qdica:$('l-qdica').value,qmsg:$('l-qmsg').value,qops:lQops,
       t1:$('l-t1').value,t2:$('l-t2').value,t3:$('l-t3').value,t4:$('l-t4').value,
       t5:$('l-t5').value,t6:$('l-t6').value,t7:$('l-t7').value,
       c1:$('l-c1-t').value,c2:$('l-c2-t').value,c3:$('l-c3-t').value,c4:$('l-c4-t').value,
@@ -2272,13 +2444,46 @@ function lColeta(){
 }
 function lRestaura(st){
   if(!st.l)return;
-  var L=st.l;
+  var L=st.l,i;
   $('l-num').value=L.num;$('l-cod').value=L.cod;$('l-pag').value=L.pag;
   setRadio('l-modo',L.modo);$('l-segauto').value=L.segauto;setRadio('l-efeito',L.efeito);$('l-segef').value=L.segef;
   setRadio('l-icone',L.icone);setRadio('l-formato',L.formato);
   $('l-corbtn-t').value=L.corbtn;$('l-corbtn').value=corValida(L.corbtn)?L.corbtn:'#25D366';
+  if(L.btnlado!=null)setRadio('l-btnlado',L.btnlado);
+  if(L.btnbaixo!=null&&L.btnbaixo!=='')$('l-btnbaixo').value=L.btnbaixo;
   $('l-m1').value=L.m1;$('l-m2').value=L.m2;$('l-m3').value=L.m3;$('l-m4').value=L.m4;
-  setRadio('l-coruja',L.coruja);$('l-emoji').value=L.emoji;
+  /* O liga/desliga da coruja do cabecalho ('true' | 'false') virou escolha de POSICAO
+     ('nao' | 'esq' | 'dir' | 'ambos'). A chave gravada e nova (corujapos) pelo mesmo motivo da
+     Contagem regressiva: estado gravado pela versao anterior so traz 'coruja', e ele e traduzido
+     aqui uma unica vez, em vez de a mesma chave passar a significar outra coisa.
+     Quem tinha a coruja LIGADA a tinha A ESQUERDA -- que e onde ela sempre esteve neste
+     cabecalho --, entao 'true' vira 'esq'. E o teste e por 'false', e nao por 'true', de
+     proposito: na versao anterior setRadio com valor desconhecido nao mexia em nada e o radio
+     ficava no padrao do HTML, que era COM coruja. Testar por 'true' faria estado corrompido
+     (vazio ou lixo) cair em NAO USAR, invertendo em silencio o que o operador via. */
+  if(L.corujapos!=null)setRadio('l-corujapos',L.corujapos);
+  else if(L.coruja!=null)setRadio('l-corujapos',L.coruja==='false'?'nao':'esq');
+  else setRadio('l-corujapos','esq');
+  $('l-emoji').value=L.emoji;
+  if(L.corujacor!=null)setRadio('l-corujacor',L.corujacor);
+  if(L.corujacorpo!=null){$('l-corujacorpo-t').value=L.corujacorpo;$('l-corujacorpo').value=corValida(L.corujacorpo)?L.corujacorpo:'#ffffff';}
+  if(L.corujadet!=null){$('l-corujadet-t').value=L.corujadet;$('l-corujadet').value=corValida(L.corujadet)?L.corujadet:'#075E54';}
+  if(L.mov!=null)setRadio('l-mov',L.mov);
+  if(L.vel!=null&&L.vel!=='')$('l-vel').value=L.vel;
+  $('l-ef-pulsar').checked=!!L.efpulsar;$('l-ef-brilho').checked=!!L.efbrilho;$('l-ef-degrade').checked=!!L.efdegrade;
+  $('l-ef-piscar').checked=!!L.efpiscar;$('l-ef-tremor').checked=!!L.eftremor;
+  if(L.hor!=null)setRadio('l-hor',L.hor);
+  if(L.hordias&&L.hordias.length!=null){
+    for(i=0;i<7;i++){var el=$('l-hor-d'+i);if(el)el.checked=false;}
+    for(i=0;i<L.hordias.length;i++){var ed=$('l-hor-d'+L.hordias[i]);if(ed)ed.checked=true;}
+  }
+  if(L.horini!=null)$('l-horini').value=L.horini;
+  if(L.horfim!=null)$('l-horfim').value=L.horfim;
+  if(L.horaviso!=null)$('l-horaviso').value=L.horaviso;
+  if(L.qlabel!=null)$('l-qlabel').value=L.qlabel;
+  if(L.qdica!=null)$('l-qdica').value=L.qdica;
+  if(L.qmsg!=null)$('l-qmsg').value=L.qmsg;
+  if(L.qops&&L.qops.length!=null){lQops=[];for(i=0;i<L.qops.length;i++)lQops.push(String(L.qops[i]));lQRender();}
   $('l-t1').value=L.t1;$('l-t2').value=L.t2;$('l-t3').value=L.t3;$('l-t4').value=L.t4;
   $('l-t5').value=L.t5;$('l-t6').value=L.t6;$('l-t7').value=L.t7;
   $('l-c1-t').value=L.c1;$('l-c1').value=corValida(L.c1)?L.c1:'#075E54';
@@ -2295,9 +2500,23 @@ function lPadroes(){
   setRadio('l-efeito','normal');$('l-segef').value=10;
   setRadio('l-icone','identidade');setRadio('l-formato','circulo');
   $('l-corbtn').value='#25D366';$('l-corbtn-t').value='#25D366';
+  setRadio('l-btnlado','dir');$('l-btnbaixo').value=92;
   $('l-m1').value='Ola Foto Certa';$('l-m2').value='meu nome e';
   $('l-m3').value='Estava olhando a pagina';$('l-m4').value='Tenho um pedido para voce';
-  setRadio('l-coruja','true');$('l-emoji').value='';
+  setRadio('l-corujapos','esq');$('l-emoji').value='';
+  setRadio('l-corujacor','auto');
+  $('l-corujacorpo').value='#ffffff';$('l-corujacorpo-t').value='#ffffff';
+  $('l-corujadet').value='#075E54';$('l-corujadet-t').value='#075E54';
+  setRadio('l-mov','estatico');$('l-vel').value=18;
+  ['l-ef-pulsar','l-ef-brilho','l-ef-degrade','l-ef-piscar','l-ef-tremor'].forEach(function(id){$(id).checked=false;});
+  setRadio('l-hor','nao');
+  [1,2,3,4,5].forEach(function(d){$('l-hor-d'+d).checked=true;});
+  [0,6].forEach(function(d){$('l-hor-d'+d).checked=false;});
+  $('l-horini').value='09:00';$('l-horfim').value='18:00';
+  $('l-horaviso').value='Estamos fora do horário de atendimento. Deixe seu recado: respondemos assim que voltarmos.';
+  $('l-qlabel').value='Qual ensaio te interessa?';$('l-qdica').value='Escolha uma opção (opcional)';
+  $('l-qmsg').value='Interesse';$('l-qop').value='';
+  lQops=[];lQRender();
   $('l-t1').value='Fale com a Foto Certa';$('l-t2').value='Seu nome';
   $('l-t3').value='Como podemos te chamar?';$('l-t4').value='Seu recado';
   $('l-t5').value='Escreva sua mensagem...';$('l-t6').value='Enviar pelo WhatsApp';
@@ -2306,9 +2525,59 @@ function lPadroes(){
   $('l-c2').value='#ffffff';$('l-c2-t').value='#ffffff';
   $('l-c3').value='#25D366';$('l-c3-t').value='#25D366';
   $('l-c4').value='#333333';$('l-c4-t').value='#333333';
-  setRadio('l-ancora','sim');$('l-anc').value='#reserva';$('l-resp').value=24;lAncToggle();
-  lEmojiToggle();
-  lBtnPreview();lPopPreview();salvarEstado();
+  setRadio('l-ancora','sim');$('l-anc').value='#reserva';$('l-resp').value=24;
+  lToggles();
+  lBtnPreview();lPreview(true);salvarEstado();
+}
+
+/* ---------- lista de opcoes da pergunta de qualificacao ---------- */
+/* Teto da lista fechada. Nao e limite tecnico: um <select> com dezenas de linhas deixa de ser
+   "lista fechada para qualificar" e vira rolagem no celular, onde o pop-up ja e apertado. */
+var L_Q_MAX=20;
+function lQAdd(){
+  var t=$('l-qop').value.trim(),i;
+  if(!t){alert('Escreva o texto da opcao.');return;}
+  /* Duas opcoes com o mesmo texto sao indistinguiveis para o visitante: ele escolhe uma das
+     duas, a mensagem chega igual nos dois casos e o operador nunca fica sabendo que cadastrou
+     duas. Recusa com aviso, no criterio desta fase -- nao ha o que assumir no lugar (apagar a
+     segunda calado seria decidir por ele), e o texto que ele acabou de digitar continua no
+     campo para ser corrigido. Comparacao sem acento nao entra: "Gestante" e "gestante" sao a
+     mesma opcao para quem le a lista, entao o teste ignora maiusculas e espacos das pontas. */
+  for(i=0;i<lQops.length;i++){
+    if(String(lQops[i]).trim().toLowerCase()===t.toLowerCase()){
+      alert('A opcao "'+lQops[i]+'" ja esta na lista (posicao '+(i+1)+'). Duas opcoes com o mesmo texto ficam indistinguiveis para o visitante: ele escolhe uma das duas e a mensagem chega igual nos dois casos.');
+      return;
+    }
+  }
+  if(lQops.length>=L_Q_MAX){
+    alert('A lista ja tem '+L_Q_MAX+' opcoes, que e o maximo. Uma lista maior que isso deixa de ajudar o visitante a se qualificar e vira rolagem dentro do pop-up, que no celular ja e apertado. Remova alguma antes de acrescentar outra.');
+    return;
+  }
+  lQops.push(t);
+  $('l-qop').value='';
+  lQRender();salvarEstado();lPreview();
+}
+function lQMove(i,d){
+  var j=i+d;if(j<0||j>=lQops.length)return;
+  var t=lQops[i];lQops[i]=lQops[j];lQops[j]=t;
+  lQRender();salvarEstado();lPreview();
+}
+function lQDel(i){lQops.splice(i,1);lQRender();salvarEstado();lPreview();}
+function lQRender(){
+  var ul=$('l-q-lista');if(!ul)return;
+  ul.innerHTML='';
+  var vazio=$('l-q-vazio');if(vazio)vazio.style.display=lQops.length?'none':'block';
+  lQops.forEach(function(txt,i){
+    var li=document.createElement('li');
+    var info=document.createElement('div');info.className='info';
+    var tx=document.createElement('div');tx.className='url';tx.textContent=txt;tx.title=txt;
+    info.appendChild(tx);
+    var ctrl=document.createElement('div');ctrl.className='ctrl';
+    [['\u2191',function(){lQMove(i,-1);},'Subir'],['\u2193',function(){lQMove(i,1);},'Descer'],['\u2715',function(){lQDel(i);},'Remover']]
+      .forEach(function(b){var bt=document.createElement('button');bt.textContent=b[0];bt.title=b[2];bt.setAttribute('aria-label',b[2]);bt.addEventListener('click',b[1]);ctrl.appendChild(bt);});
+    li.appendChild(info);li.appendChild(ctrl);
+    ul.appendChild(li);
+  });
 }
 
 function svgCorujaStr(cor){
@@ -2328,6 +2597,9 @@ function svgRecadoStr(){
 function svgWhatsStr(){
   return '<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" fill="#fff" aria-hidden="true"><path d="M16.04 3C9.4 3 4 8.36 4 14.96c0 2.64.87 5.08 2.34 7.06L4.8 27.2l5.34-1.5a12.1 12.1 0 0 0 5.9 1.52c6.63 0 12.03-5.36 12.03-11.96S22.67 3 16.04 3zm0 21.87c-1.9 0-3.67-.55-5.16-1.5l-.37-.23-3.17.9.92-3.05-.24-.38a9.62 9.62 0 0 1-1.66-5.65c0-5.33 4.4-9.66 9.68-9.66 5.29 0 9.68 4.33 9.68 9.66s-4.4 9.9-9.68 9.9zm5.3-7.4c-.29-.15-1.71-.84-1.98-.93-.26-.1-.46-.15-.65.14-.19.29-.74.93-.9 1.12-.17.2-.34.22-.63.08-.29-.15-1.22-.45-2.33-1.43-.86-.77-1.44-1.71-1.61-2-.17-.29-.02-.45.13-.6.13-.13.29-.34.43-.5.15-.17.19-.3.29-.49.1-.2.05-.37-.02-.51-.08-.15-.65-1.57-.9-2.15-.23-.56-.47-.48-.65-.49h-.55c-.19 0-.5.07-.77.36-.26.29-1 .98-1 2.4 0 1.41 1.03 2.78 1.17 2.97.15.19 2.03 3.1 4.92 4.35.69.3 1.22.47 1.64.61.69.22 1.31.19 1.81.11.55-.08 1.71-.7 1.95-1.37.24-.68.24-1.26.17-1.38-.07-.12-.26-.2-.55-.34z"/></svg>';
 }
+/* Amostra do botao flutuante ao lado do seletor de cor. Nao e a previa do bloco -- e um
+   mostruario de cor, formato e icone, tres coisas que o operador escolhe ali mesmo. A previa
+   do pop-up e do botao POSICIONADO na pagina e a da secao 8, que roda o bloco gerado. */
 function lBtnPreview(){
   var el=$('l-btnpv');
   var cor=$('l-corbtn-t').value;if(!corValida(cor))cor='#25D366';
@@ -2336,42 +2608,6 @@ function lBtnPreview(){
   el.style.background=cor;
   el.innerHTML=(ic==='identidade')?svgCorujaStr(cor):(ic==='recado')?svgRecadoStr():svgWhatsStr();
 }
-function lPopPreview(){
-  var box=$('l-pv-box');if(!box)return;
-  var c1=$('l-c1-t').value;if(!corValida(c1))c1='#075E54';
-  var c2=$('l-c2-t').value;if(!corValida(c2))c2='#ffffff';
-  var c3=$('l-c3-t').value;if(!corValida(c3))c3='#25D366';
-  var c4=$('l-c4-t').value;if(!corValida(c4))c4='#333333';
-  var usaCoruja=radio('l-coruja')==='true';
-  var marca=usaCoruja?('<span style="display:inline-flex;width:20px;height:24px;flex-shrink:0">'+svgCorujaStr(c1)+'</span>')
-    :($('l-emoji').value?('<span>'+escHtml($('l-emoji').value)+'</span>'):'');
-  var campo='display:block;border:1px solid #ccc;border-radius:8px;padding:10px 12px;font-size:14px;background:#fff;color:#999;';
-  var html='';
-  html+='<div style="max-width:340px;margin:0 auto;background:'+c2+';border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.25);overflow:hidden">';
-  html+='<div style="background:'+c1+';color:#fff;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;font-size:15px;font-weight:600;font-family:inherit">';
-  html+='<span style="display:inline-flex;align-items:center;gap:8px">'+marca+'<span>'+escHtml($('l-t1').value)+'</span></span>';
-  html+='<span style="font-size:20px;line-height:1;opacity:.9">&times;</span></div>';
-  html+='<div style="padding:16px 18px 18px">';
-  html+='<div style="font-size:13px;font-weight:600;color:'+c4+';margin:0 0 4px">'+escHtml($('l-t2').value)+'</div>';
-  html+='<div style="'+campo+'">'+escHtml($('l-t3').value)+'</div>';
-  html+='<div style="font-size:13px;font-weight:600;color:'+c4+';margin:10px 0 4px">'+escHtml($('l-t4').value)+'</div>';
-  html+='<div style="'+campo+'height:72px">'+escHtml($('l-t5').value)+'</div>';
-  html+='<div style="margin-top:14px;border-radius:8px;background:'+c3+';color:#fff;font-size:15px;font-weight:600;padding:12px;text-align:center">'+escHtml($('l-t6').value)+'</div>';
-  html+='</div></div>';
-  html+='<p style="font-size:12px;color:var(--tinta-suave);text-align:center;margin:10px 0 0">Prévia do pop-up (atualiza conforme você edita)</p>';
-  box.innerHTML=html;
-}
-document.addEventListener('input',function(e){
-  var al=(e.target.id&&e.target.id.indexOf('l-')===0)||(e.target.name&&e.target.name.indexOf('l-')===0);
-  if(al)lPopPreview();
-});
-document.addEventListener('change',function(e){
-  var al=(e.target.id&&e.target.id.indexOf('l-')===0)||(e.target.name&&e.target.name.indexOf('l-')===0);
-  if(al)lPopPreview();
-});
-document.addEventListener('change',function(e){
-  if(e.target.name==='l-icone'||e.target.name==='l-formato')lBtnPreview();
-});
 
 /* A ancora tem DOIS destinos no bloco entregue: uma string JS (var ANCORA, ja protegida por
    escJs) e um SELETOR CSS na regra do plano B. Dentro de <style> o parser esta em RAWTEXT:
@@ -2396,25 +2632,104 @@ function lAncToggle(){
   var como=$('l-anc-como');
   if(como)como.style.display=com?'block':'none';
 }
-/* O emoji so entra no titulo quando a marca NAO e a coruja SVG (ver lPopPreview e lGerar):
-   com a coruja marcada -- que e o padrao -- o campo ficava na tela sugerindo que fazia alguma
-   coisa, e o que ele digitasse ali era descartado sem aviso. A aba ja sabia esconder bloco
-   irrelevante (l-anc-campos); passa a fazer o mesmo aqui. */
+/* O emoji so entra no titulo quando a coruja NAO e usada (ver lBloco): com uma posicao de
+   coruja marcada -- que e o padrao -- o campo ficava na tela sugerindo que fazia alguma coisa,
+   e o que o operador digitasse ali era descartado sem aviso. */
 function lEmojiToggle(){
   var el=$('l-emoji-campo');
-  if(el)el.style.display=(radio('l-coruja')==='true')?'none':'block';
+  if(el)el.style.display=(radio('l-corujapos')==='nao')?'block':'none';
 }
-document.addEventListener('change',function(e){
-  if(e.target.name==='l-ancora')lAncToggle();
-  if(e.target.name==='l-coruja')lEmojiToggle();
-});
+/* Um lugar so para decidir o que aparece e o que some nesta aba. O aviso do horario e o unico
+   que escreve texto: quando o operador liga o modo mas nao deixa faixa preenchida, o modo fica
+   desligado no bloco -- e um desligamento silencioso seria a mesma troca de defeito visivel por
+   invisivel que esta aba ja recusou nos numeros e nas cores. */
+function lToggles(){
+  var el;
+  lAncToggle();
+  lEmojiToggle();
+  el=$('l-corujacor-campos');if(el)el.style.display=(radio('l-corujapos')==='nao')?'none':'block';
+  el=$('l-corujacor-livre');if(el)el.style.display=(radio('l-corujacor')==='livre')?'block':'none';
+  el=$('l-vel-campo');if(el)el.style.display=(radio('l-mov')!=='estatico')?'block':'none';
+  var horLigado=(radio('l-hor')==='sim');
+  el=$('l-hor-campos');if(el)el.style.display=horLigado?'block':'none';
+  var av=$('l-hor-aviso');
+  if(av){
+    var falta=[];
+    if(!lHorDias().length)falta.push('nenhum dia marcado');
+    if(!lHoraOk($('l-horini').value))falta.push('hora de abertura em branco');
+    if(!lHoraOk($('l-horfim').value))falta.push('hora de fechamento em branco');
+    if(horLigado&&falta.length){
+      av.style.display='block';
+      av.innerHTML='<b>O modo esta desligado no codigo gerado:</b> '+escHtml(falta.join(', '))+'. O bloco sai sem o aviso de horario, exatamente como se o modo nunca tivesse sido ligado.';
+    }else{
+      av.style.display='none';
+      av.textContent='';
+    }
+  }
+}
+
+/* ---------- configuracao: fonte unica lida pelo gerador E pela previa ----------
+   Todo texto livre desta aba vira uma string JS dentro do bloco de script gerado (var CODIGO,
+   POP_TITULO, MSG_*, ...): o destino pede escJs. Com esc() sozinho, um titulo com a sequencia
+   de fechamento de script fazia a landing exibir o restante do codigo-fonte como texto visivel
+   para o visitante.
+   Nenhum destes vai para innerHTML nem para atributo -- o bloco entregue escreve todos por
+   textContent/placeholder --, entao escHtml/escAttr aqui produziriam "&amp;" e "&quot;" visiveis
+   para o visitante. As cores passam por corSegura: sao hexadecimais validados, nao precisam de
+   escape nenhum depois disso. As horas passam por lHoraOk (so digitos e ':') e os dias sao
+   indices inteiros, entao tambem entram crus.
+   ancOk carrega o resultado da validacao do seletor em vez de a previa recusar: lGerar recusa
+   antes de montar o bloco, entao quando ha codigo gerado ancOk e sempre true e os dois lados
+   leem exatamente o mesmo objeto. */
+function lCfg(){
+  var pos=radio('l-corujapos'),mov=radio('l-mov'),i;
+  var dias=lHorDias(),hini=$('l-horini').value,hfim=$('l-horfim').value;
+  var horLigado=(radio('l-hor')==='sim');
+  var horAtivo=horLigado&&dias.length>0&&lHoraOk(hini)&&lHoraOk(hfim)&&hini!==hfim;
+  var ops=[];
+  for(i=0;i<lQops.length;i++)ops.push(escJs(lQops[i]));
+  var comAnc=(radio('l-ancora')==='sim'),anc='',ancOk=true,resp=24;
+  if(comAnc){
+    anc=$('l-anc').value.trim();
+    if(anc&&anc.charAt(0)!=='#')anc='#'+anc;
+    if(!anc)anc='#reserva';
+    ancOk=lAncOk(anc);
+    resp=parseInt($('l-resp').value,10);if(isNaN(resp)||resp<0)resp=24;
+  }
+  return {
+    num:$('l-num').value.replace(/\D/g,''),cod:escJs($('l-cod').value),pag:escJs($('l-pag').value),
+    modo:radio('l-modo'),segauto:lPreso('l-segauto'),
+    efeito:radio('l-efeito'),segef:lPreso('l-segef'),
+    icone:radio('l-icone'),formato:radio('l-formato'),
+    corbtn:corSegura('l-corbtn','#25D366'),
+    btnLado:radio('l-btnlado'),btnBaixo:lPreso('l-btnbaixo'),
+    m1:escJs($('l-m1').value),m2:escJs($('l-m2').value),m3:escJs($('l-m3').value),m4:escJs($('l-m4').value),
+    /* pos e a escolha crua; esq/dir dizem qual ponta recebe o desenho e coruja continua sendo o
+       unico portao do POP_USAR_CORUJA_SVG -- com 'nao', o pop-up cai no caminho do emoji, que e
+       exatamente o que a versao anterior fazia com "Emoji / nada". */
+    corujaPos:pos,coruja:(pos!=='nao'),
+    corujaEsq:(pos==='esq'||pos==='ambos'),corujaDir:(pos==='dir'||pos==='ambos'),
+    corujaCor:radio('l-corujacor'),
+    corujaCorpo:corSegura('l-corujacorpo','#ffffff'),corujaDet:corSegura('l-corujadet','#075E54'),
+    emoji:escJs($('l-emoji').value),
+    mov:mov,vel:lPreso('l-vel'),
+    ef:{pulsar:$('l-ef-pulsar').checked,brilho:$('l-ef-brilho').checked,degrade:$('l-ef-degrade').checked,
+      piscar:$('l-ef-piscar').checked,tremor:$('l-ef-tremor').checked},
+    hor:{ligado:horLigado,ativo:horAtivo,dias:dias,ini:hini,fim:hfim,aviso:escJs($('l-horaviso').value)},
+    q:{ativo:ops.length>0,label:escJs($('l-qlabel').value),dica:escJs($('l-qdica').value),
+      msg:escJs($('l-qmsg').value),ops:ops},
+    t1:escJs($('l-t1').value),t2:escJs($('l-t2').value),t3:escJs($('l-t3').value),t4:escJs($('l-t4').value),
+    t5:escJs($('l-t5').value),t6:escJs($('l-t6').value),t7:escJs($('l-t7').value),
+    c1:corSegura('l-c1','#075E54'),c2:corSegura('l-c2','#ffffff'),
+    c3:corSegura('l-c3','#25D366'),c4:corSegura('l-c4','#333333'),
+    anc:{ativo:comAnc,v:anc,ok:ancOk,resp:resp}
+  };
+}
 
 function lGerar(){
   if(fcAjustarTodos(L_NUMS))salvarEstado();
-  var num=$('l-num').value.replace(/\D/g,'');
-  if(!num){alert('Informe o WhatsApp de destino.');return;}
-  /* (Havia aqui um segundo "if(!num)" identico e portanto inalcancavel: codigo morto,
-     removido junto com a correcao abaixo.) */
+  var v=lCfg();
+  if(!v.num){alert('Informe o WhatsApp de destino.');return;}
   /* O codigo da pagina e a razao de ser deste recurso: e ele que chega ao atendimento como
      "(cod: *NATAL26*)" e diz de qual campanha veio o lead. Vazio, a mensagem chegava como
      "(cod: **)" -- defeituosa e muda, descoberta so quando o primeiro lead chegasse sem
@@ -2422,43 +2737,48 @@ function lGerar(){
      diferentes no mesmo balde), entao a geracao e recusada com aviso -- mesmo criterio que a
      Contagem regressiva ja aplica ao codigo da campanha. */
   if(!$('l-cod').value.trim()){alert('Informe o codigo da pagina. E ele que identifica a campanha na mensagem que chega no seu WhatsApp: sem ele o lead chega com "(cod: **)" e nao ha como saber de qual pagina veio.');return;}
-  /* Todo texto livre desta aba vira uma string JS dentro do bloco de script gerado (var
-     CODIGO, POP_TITULO, MSG_*, ...): o destino pede escJs. Com esc() sozinho, um titulo com
-     a sequencia de fechamento de script fazia a landing exibir o restante do codigo-fonte
-     como texto visivel para o visitante.
-     Nenhum destes vai para innerHTML nem para atributo -- o bloco entregue escreve todos por
-     textContent/placeholder --, entao escHtml/escAttr aqui produziriam "&amp;" e "&quot;"
-     visiveis para o visitante. As cores passam por corSegura: sao hexadecimais validados, nao
-     precisam de escape nenhum depois disso. */
   /* Ancora resolvida e validada ANTES de montar qualquer coisa: recusar no fim deixaria a
      textarea com o bloco anterior enquanto o alerta diz que nao gerou. */
-  var comAnc=(radio('l-ancora')==='sim'),anc='',resp=24;
-  if(comAnc){
-    anc=$('l-anc').value.trim();
-    if(anc&&anc.charAt(0)!=='#')anc='#'+anc;
-    if(!anc)anc='#reserva';
-    if(!lAncOk(anc)){
-      alert('A ancora precisa ser # seguido de uma letra e depois so letras, numeros, hifen ou sublinhado (ex.: #reserva, #secao-2). O valor digitado vira seletor no CSS do plano B: com espaco ou acento a regra nasce invalida e o plano B nao funciona, sem nenhum aviso na pagina; com chave, chaveta ou tag, o CSS gerado deixa de ser CSS.');
-      return;
-    }
-    resp=parseInt($('l-resp').value,10);if(isNaN(resp)||resp<0)resp=24;
+  if(v.anc.ativo&&!v.anc.ok){
+    alert('A ancora precisa ser # seguido de uma letra e depois so letras, numeros, hifen ou sublinhado (ex.: #reserva, #secao-2). O valor digitado vira seletor no CSS do plano B: com espaco ou acento a regra nasce invalida e o plano B nao funciona, sem nenhum aviso na pagina; com chave, chaveta ou tag, o CSS gerado deixa de ser CSS.');
+    return;
   }
-  var v={
-    num:num,cod:escJs($('l-cod').value),pag:escJs($('l-pag').value),
-    modo:radio('l-modo'),segauto:lPreso('l-segauto'),
-    efeito:radio('l-efeito'),segef:lPreso('l-segef'),
-    icone:radio('l-icone'),formato:radio('l-formato'),
-    corbtn:corSegura('l-corbtn','#25D366'),
-    m1:escJs($('l-m1').value),m2:escJs($('l-m2').value),m3:escJs($('l-m3').value),m4:escJs($('l-m4').value),
-    coruja:radio('l-coruja'),emoji:escJs($('l-emoji').value),
-    t1:escJs($('l-t1').value),t2:escJs($('l-t2').value),t3:escJs($('l-t3').value),t4:escJs($('l-t4').value),
-    t5:escJs($('l-t5').value),t6:escJs($('l-t6').value),t7:escJs($('l-t7').value),
-    c1:corSegura('l-c1','#075E54'),c2:corSegura('l-c2','#ffffff'),
-    c3:corSegura('l-c3','#25D366'),c4:corSegura('l-c4','#333333')
-  };
+  /* Abrir e fechar na MESMA hora nao tem leitura unica: pode ser "24 horas" ou "nenhum minuto",
+     e as duas mudam o que o visitante ve. Recusa com aviso, no mesmo criterio da chave Pix e do
+     codigo da pagina -- assumir uma das duas por conta propria seria decidir calado. */
+  if(v.hor.ligado&&v.hor.ini===v.hor.fim&&lHoraOk(v.hor.ini)){
+    alert('A hora de abertura e a de fechamento estao iguais ('+v.hor.ini+'). Nao da para saber se voce quis dizer 24 horas por dia ou nenhum minuto de atendimento. Ajuste uma das duas.');
+    return;
+  }
+  $('l-out').value=lBloco(v);
+  lPreview(true);
+}
+
+/* Fonte unica do bloco entregue, no padrao que a Contagem regressiva firmou e o Slideshow
+   seguiu: lGerar escreve o retorno na textarea e lPvMontar escreve o MESMO retorno dentro do
+   iframe da previa. Nao existe segunda formatacao em lugar nenhum -- e por isso que a previa
+   nao tem como divergir do que o operador vai colar.
+   Cada recurso da fase 5 e emitido so quando ligado, em vez de sair sempre com uma variavel de
+   ligar/desligar: com todos desligados o bloco sai byte a byte igual ao das versoes anteriores,
+   e o que nao esta ligado nao pesa no que o visitante baixa. */
+function lBloco(v){
   var c='';
+  c+=lCss(v);
+  c+=lJs(v);
+  if(v.anc.ativo)c+=lAncora(v);
+  return c;
+}
+
+/* CSS do bloco. UMA regra por seletor: as propriedades que os recursos novos acrescentam sao
+   ACUMULADAS na regra que ja existia, nunca emitidas numa segunda regra. Shorthand
+   (background, animation, transition) nao se funde entre duas regras de mesma especificidade --
+   a de baixo vence por inteiro --, e e assim que um recurso apagaria o outro em silencio. */
+function lCss(v){
+  var c='',i;
+  var lado=(v.btnLado==='esq')?'left':'right';
+  var baixoMob=Math.max(0,v.btnBaixo-8);
   c+='<sty'+'le>\n';
-  c+='.fcw-botao{position:fixed;right:22px;bottom:92px;z-index:99990;width:60px;height:60px;border:none;background:var(--fcw-cor-botao,#25D366);cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center;transition:transform .2s,box-shadow .2s}\n';
+  c+='.fcw-botao{position:fixed;'+lado+':22px;bottom:'+v.btnBaixo+'px;z-index:99990;width:60px;height:60px;border:none;background:var(--fcw-cor-botao,#25D366);cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center;transition:transform .2s,box-shadow .2s}\n';
   c+='.fcw-botao.fcw-circulo{border-radius:50%}\n.fcw-botao.fcw-quadrado{border-radius:14px}\n';
   c+='.fcw-botao:hover{transform:scale(1.08)}\n.fcw-botao svg{width:32px;height:32px}\n';
   /* O halo do pulso sai na COR ESCOLHIDA para o botao. Antes eram dois rgba(37,211,102,...)
@@ -2472,29 +2792,129 @@ function lGerar(){
   c+='.fcw-overlay{position:fixed;inset:0;z-index:99991;background:rgba(0,0,0,.45);display:none;align-items:flex-end;justify-content:flex-end;padding:20px}\n';
   c+='.fcw-overlay.fcw-aberto{display:flex}\n';
   c+='.fcw-card{width:100%;max-width:340px;background:var(--fcw-cor-fundo,#fff);border-radius:16px;box-shadow:0 10px 40px rgba(0,0,0,.3);overflow:hidden}\n';
-  c+='.fcw-topo{background:var(--fcw-cor-topo,#075E54);color:#fff;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;font-size:15px;font-weight:600}\n';
-  c+='.fcw-titulo{display:inline-flex;align-items:center;gap:8px}\n.fcw-titulo svg{width:20px;height:24px;flex-shrink:0}\n';
+  /* Camadas de fundo e animacoes do cabecalho, todas nesta unica regra .fcw-topo. A ordem
+     importa duas vezes: 'background' e shorthand e zera background-image, entao os longhands
+     vem DEPOIS dele; e brilho e degrade sao camadas empilhadas na mesma ordem em que entram
+     nas tres listas (imagem, tamanho, repeticao). O tremor entra na mesma lista de animation
+     porque anima transform e as outras duas animam background-position -- tres animacoes que
+     nao disputam propriedade nenhuma. */
+  var bgImg=[],bgTam=[],bgRep=[],animTopo=[],rm=[],keys='';
+  if(v.ef.brilho){
+    bgImg.push('linear-gradient(100deg,rgba(255,255,255,0) 40%,rgba(255,255,255,.28) 50%,rgba(255,255,255,0) 60%)');
+    bgTam.push('250% 100%');bgRep.push('no-repeat');
+    animTopo.push('fcw-brilho 5s linear infinite');
+    keys+='@keyframes fcw-brilho{from{background-position:150% 0}to{background-position:-150% 0}}\n';
+  }
+  if(v.ef.degrade){
+    bgImg.push('linear-gradient(90deg,'+v.c1+','+v.c3+','+v.c1+')');
+    bgTam.push('200% 100%');bgRep.push('repeat');
+    animTopo.push('fcw-degrade 8s linear infinite');
+    keys+='@keyframes fcw-degrade{from{background-position:0 0}to{background-position:200% 0}}\n';
+  }
+  if(v.ef.tremor){
+    animTopo.push('fcw-tremor 6s ease-in-out infinite');
+    keys+='@keyframes fcw-tremor{0%,90%,100%{transform:translateX(0)}92%{transform:translateX(-3px)}94%{transform:translateX(3px)}96%{transform:translateX(-2px)}98%{transform:translateX(2px)}}\n';
+  }
+  var exTopo='';
+  if(bgImg.length)exTopo+=';background-image:'+bgImg.join(',')+';background-size:'+bgTam.join(',')+';background-repeat:'+bgRep.join(',');
+  if(animTopo.length){exTopo+=';animation:'+animTopo.join(',');rm.push('.fcw-topo');}
+  c+='.fcw-topo{background:var(--fcw-cor-topo,#075E54);color:#fff;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;font-size:15px;font-weight:600'+exTopo+'}\n';
+  /* .fcw-titulo e a linha interna do cabecalho: e ela que ganha o espaco disponivel quando o
+     conteudo rola (sem flex/min-width o overflow do miolo nunca teria o que cortar) e e nela
+     que o pulsar age -- o tremor fica no .fcw-topo justamente para os dois transforms nao se
+     atropelarem no mesmo elemento. */
+  var exTit='';
+  if(v.mov!=='estatico')exTit+=';flex:1 1 auto;min-width:0';
+  if(v.ef.pulsar){
+    exTit+=';animation:fcw-pulsar 1.8s ease-in-out infinite';
+    keys+='@keyframes fcw-pulsar{0%,100%{transform:scale(1)}50%{transform:scale(1.035)}}\n';
+    rm.push('.fcw-titulo');
+  }
+  c+='.fcw-titulo{display:inline-flex;align-items:center;gap:8px'+exTit+'}\n.fcw-titulo svg{width:20px;height:24px;flex-shrink:0}\n';
   c+='.fcw-fechar{border:none;background:none;color:#fff;font-size:20px;line-height:1;cursor:pointer;padding:2px 6px}\n';
   c+='.fcw-corpo{padding:16px 18px 18px}\n';
   c+='.fcw-corpo label{display:block;font-size:13px;font-weight:600;color:var(--fcw-cor-texto,#333);margin:10px 0 4px}\n';
-  c+='.fcw-corpo input,.fcw-corpo textarea{width:100%;box-sizing:border-box;border:1px solid #ccc;border-radius:8px;padding:10px 12px;font-size:14px;font-family:inherit;outline:none;background:#fff}\n';
-  c+='.fcw-corpo input:focus,.fcw-corpo textarea:focus{border-color:var(--fcw-cor-acao,#25D366)}\n';
+  /* O <select> da pergunta entra na MESMA regra dos outros campos em vez de ganhar regra
+     propria: mesma caixa, mesma borda, mesmo foco. O seletor so cresce quando a pergunta
+     existe -- sem opcoes cadastradas o CSS sai identico ao de antes deste recurso. */
+  var selCampo=v.q.ativo?',.fcw-corpo select':'';
+  var selFoco=v.q.ativo?',.fcw-corpo select:focus':'';
+  c+='.fcw-corpo input,.fcw-corpo textarea'+selCampo+'{width:100%;box-sizing:border-box;border:1px solid #ccc;border-radius:8px;padding:10px 12px;font-size:14px;font-family:inherit;outline:none;background:#fff}\n';
+  c+='.fcw-corpo input:focus,.fcw-corpo textarea:focus'+selFoco+'{border-color:var(--fcw-cor-acao,#25D366)}\n';
   c+='.fcw-corpo textarea{resize:vertical;min-height:80px}\n';
   c+='.fcw-erro{color:#c0392b;font-size:12px;margin-top:6px;display:none}\n';
   c+='.fcw-enviar{margin-top:14px;width:100%;border:none;border-radius:8px;background:var(--fcw-cor-acao,#25D366);color:#fff;font-size:15px;font-weight:600;padding:12px;cursor:pointer}\n';
   c+='.fcw-enviar:hover{filter:brightness(.92)}\n';
-  c+='@media (max-width:480px){.fcw-overlay{padding:12px;align-items:center;justify-content:center}.fcw-botao{right:16px;bottom:84px}}\n';
+  if(v.hor.ativo){
+    c+='.fcw-aviso{background:#FFF6DF;color:#6B5210;border:1px solid #E3B23C;border-radius:8px;padding:10px 12px;font-size:13px;line-height:1.4;display:none}\n';
+  }
+  if(v.ef.piscar){
+    c+='.fcw-sep{opacity:.65;animation:fcw-piscar 1s steps(1) infinite}\n';
+    keys+='@keyframes fcw-piscar{0%,49%{opacity:.65}50%,100%{opacity:0}}\n';
+    rm.push('.fcw-sep');
+  }
+  if(v.mov!=='estatico'){
+    /* O miolo que rola. A coruja NAO entra aqui: ela e irma deste bloco dentro de .fcw-titulo,
+       porque so este tem overflow:hidden -- dentro dele a coruja passaria e sumiria junto com o
+       texto em vez de emoldurar o cabecalho. */
+    c+='.fcw-conteudo{display:block;flex:1 1 auto;min-width:0;overflow:hidden}\n';
+    c+='.fcw-trilho{display:inline-flex;white-space:nowrap;will-change:transform;'+
+       'animation:fcw-rola '+v.vel+'s linear infinite'+(v.mov==='roladir'?' reverse':'')+'}\n';
+    c+='.fcw-trilho > span{padding-right:3em}\n';
+    keys+='@keyframes fcw-rola{from{transform:translateX(0)}to{transform:translateX(-50%)}}\n';
+    rm.push('.fcw-trilho');
+  }
+  c+=keys;
+  c+='@media (max-width:480px){.fcw-overlay{padding:12px;align-items:center;justify-content:center}.fcw-botao{'+lado+':16px;bottom:'+baixoMob+'px}}\n';
   /* Movimento reduzido: desliga o que ESTE bloco criou (o efeito de atencao em laco, a
      transicao do botao e a ampliacao no hover) e nada mais -- nem o tema da Alboom, nem os
      outros blocos da ferramenta. O botao continua inteiro e visivel: o que some e so a onda
      que pulsava por cima dele, que ja e um estado transitorio. Os seletores repetem a
-     especificidade das regras acima e vem depois, entao vencem sem !important. */
+     especificidade das regras acima e vem depois, entao vencem sem !important.
+     Os cinco efeitos do cabecalho e a rolagem entram na MESMA linha extra: cada um deles so
+     produz movimento por 'animation', entao uma linha resolve os cinco. */
   c+='@media (prefers-reduced-motion: reduce){\n';
   c+='  .fcw-botao{transition:none}\n';
   c+='  .fcw-botao.fcw-pulsando,.fcw-botao.fcw-tremendo{animation:none}\n';
   c+='  .fcw-botao:hover{transform:none}\n';
+  if(rm.length)c+='  '+rm.join(',')+'{animation:none}\n';
   c+='}\n';
   c+='</sty'+'le>\n\n';
+  return c;
+}
+
+/* Coruja do cabecalho com as duas cores separadas. So sai quando o operador escolhe "Escolher
+   as duas": no modo automatico o bloco continua chamando svgCoruja(COR_TOPO_POPUP), que e o
+   que ele sempre fez -- corpo branco, detalhes na cor do cabecalho. */
+function lSvgCorujaTopo(v){
+  var j='';
+  j+='function svgCorujaTopo(){\n';
+  j+="var corpo='"+v.corujaCorpo+"',det='"+v.corujaDet+"';\n";
+  j+="return '<svg viewBox=\"0 0 32 38\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">'+\n";
+  j+="'<ellipse cx=\"16\" cy=\"25\" rx=\"8.5\" ry=\"11\" fill=\"'+corpo+'\"/>'+\n";
+  j+="'<path fill=\"none\" stroke=\"'+det+'\" stroke-width=\"1.2\" d=\"M9 22 Q11 30 14 35 M23 22 Q21 30 18 35\"/>'+\n";
+  j+="'<path fill=\"'+corpo+'\" d=\"M16 3.8 C13.7 1.6 8 2.3 7.6 8 C7.3 12.9 11 18 16 21 C21 18 24.7 12.9 24.4 8 C24 2.3 18.3 1.6 16 3.8 Z\"/>'+\n";
+  j+="'<circle cx=\"12.6\" cy=\"9.6\" r=\"1.6\" fill=\"'+det+'\"/>'+\n";
+  j+="'<circle cx=\"19.4\" cy=\"9.6\" r=\"1.6\" fill=\"'+det+'\"/>'+\n";
+  j+="'<path fill=\"'+det+'\" d=\"M16 11 L15.2 14.4 Q16 15.5 16.8 14.4 Z\"/>'+\n";
+  j+="'<path stroke=\"'+det+'\" stroke-width=\"1.4\" stroke-linecap=\"round\" fill=\"none\" d=\"M13 35.5 L13 37.2 M16 36 L16 37.8 M19 35.5 L19 37.2\"/>'+\n";
+  j+="'</svg>';\n}\n\n";
+  return j;
+}
+
+function lJs(v){
+  var c='';
+  /* rico: o cabecalho deixou de ser "coruja opcional + texto" e passou a ter um miolo proprio
+     (o ponto piscando e o trilho da rolagem precisam de um no so deles). Fora desses dois
+     casos o codigo emitido e exatamente o de antes. */
+  /* rico: o cabecalho deixou de ser "coruja + texto" e passou a precisar de um no proprio para
+     o miolo (o ponto piscando entra ANTES dele, entao o texto nao pode mais ser filho direto
+     do titulo). rolando: alem do no, ele precisa da CLASSE .fcw-conteudo -- e a classe so sai
+     quando a regra dela sai, senao o markup entregue carrega uma classe sem nenhuma regra no
+     CSS, que e residuo que o proximo leitor tem de decifrar. */
+  var rico=(v.ef.piscar||v.mov!=='estatico');
+  var rolando=(v.mov!=='estatico');
+  var svgTopo=(v.corujaCor==='livre')?'svgCorujaTopo()':'svgCoruja(COR_TOPO_POPUP)';
   c+='<scr'+'ipt>\n(function(){\n';
   c+='/* ===== ESSENCIAIS ===== */\n';
   c+="var NUMERO_WHATSAPP='"+v.num+"';  /* WhatsApp de destino: DDI+DDD+numero, so digitos */\n";
@@ -2530,13 +2950,61 @@ function lGerar(){
   c+="var COR_FUNDO_POPUP='"+v.c2+"';        /* fundo do card */\n";
   c+="var COR_BOTAO_POPUP='"+v.c3+"';        /* botao enviar + borda dos campos em foco */\n";
   c+="var COR_TEXTO_POPUP='"+v.c4+"';        /* cor dos rotulos do formulario */\n\n";
+  if(v.hor.ativo){
+    c+='/* ===== HORARIO DE ATENDIMENTO ===== */\n';
+    c+='/* Fora da faixa o pop-up AVISA, mas continua abrindo e continua enviando: mensagem de\n';
+    c+='   WhatsApp fica esperando, entao barrar o recado so perderia o lead. O que muda e a\n';
+    c+='   promessa de resposta imediata, recalculada a cada abertura do pop-up. */\n';
+    c+='var HORARIO_FUSO=-3;                       /* fuso FIXO em horas (-3 = Brasilia, sem horario de verao desde 2019) */\n';
+    c+='var HORARIO_DIAS=['+v.hor.dias.join(',')+'];   /* dias atendidos: 0=domingo, 1=segunda ... 6=sabado */\n';
+    c+="var HORARIO_ABRE='"+v.hor.ini+"';               /* hora de abertura, no formato HH:MM */\n";
+    c+="var HORARIO_FECHA='"+v.hor.fim+"';              /* fechamento; menor que a abertura = expediente cruza a meia-noite */\n";
+    c+="var HORARIO_AVISO='"+v.hor.aviso+"';\n\n";
+  }
+  if(v.q.ativo){
+    c+='/* ===== PERGUNTA DE QUALIFICACAO ===== */\n';
+    c+='/* Lista fechada e resposta OPCIONAL: sem escolha, a linha nao entra na mensagem. */\n';
+    c+="var PERGUNTA_ROTULO='"+v.q.label+"';   /* rotulo da pergunta no pop-up */\n";
+    c+="var PERGUNTA_DICA='"+v.q.dica+"';      /* texto da opcao vazia (a que nao escolhe nada) */\n";
+    c+="var PERGUNTA_MSG='"+v.q.msg+"';        /* antecede a resposta na mensagem do WhatsApp */\n";
+    c+="var PERGUNTA_OPCOES=['"+v.q.ops.join("','")+"'];\n\n";
+  }
   c+='/* ============================================================\n   Daqui para baixo nao precisa mexer\n   ============================================================ */\n\n';
   c+="function svgCoruja(c){\nreturn '<svg viewBox=\"0 0 32 38\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">'+\n'<ellipse cx=\"16\" cy=\"25\" rx=\"8.5\" ry=\"11\" fill=\"#fff\"/>'+\n'<path fill=\"none\" stroke=\"'+c+'\" stroke-width=\"1.2\" d=\"M9 22 Q11 30 14 35 M23 22 Q21 30 18 35\"/>'+\n'<path fill=\"#fff\" d=\"M16 3.8 C13.7 1.6 8 2.3 7.6 8 C7.3 12.9 11 18 16 21 C21 18 24.7 12.9 24.4 8 C24 2.3 18.3 1.6 16 3.8 Z\"/>'+\n'<circle cx=\"12.6\" cy=\"9.6\" r=\"1.6\" fill=\"'+c+'\"/>'+\n'<circle cx=\"19.4\" cy=\"9.6\" r=\"1.6\" fill=\"'+c+'\"/>'+\n'<path fill=\"'+c+'\" d=\"M16 11 L15.2 14.4 Q16 15.5 16.8 14.4 Z\"/>'+\n'<path stroke=\"'+c+'\" stroke-width=\"1.4\" stroke-linecap=\"round\" fill=\"none\" d=\"M13 35.5 L13 37.2 M16 36 L16 37.8 M19 35.5 L19 37.2\"/>'+\n'</svg>';\n}\n\n";
+  if(v.corujaCor==='livre')c+=lSvgCorujaTopo(v);
   c+="function iconeBotao(){\nif(ICONE_BOTAO==='identidade')return svgCoruja(COR_BOTAO_FLUTUANTE);\n";
   c+="if(ICONE_BOTAO==='recado')return '"+svgRecadoStr().replace(/'/g,"\\'")+"';\n";
   c+="return '"+svgWhatsStr().replace(/'/g,"\\'")+"';\n}\n\n";
   c+="function jaViu(){\ntry{return sessionStorage.getItem('fcwAutoVisto')==='1';}catch(e){return false;}\n}\n";
   c+="function marcarVisto(){\ntry{sessionStorage.setItem('fcwAutoVisto','1');}catch(e){}\n}\n\n";
+  if(v.hor.ativo){
+    c+="function minutosHora(h){\nvar p=String(h).split(':');\nreturn (parseInt(p[0],10)||0)*60+(parseInt(p[1],10)||0);\n}\n";
+    c+='function dentroDoHorario(){\n';
+    c+='var agora=new Date();\n';
+    c+='/* O relogio do VISITANTE pode estar em qualquer fuso (viagem, aparelho desacertado,\n';
+    c+='   cliente de fora), e o horario de atendimento e o SEU. Por isso o instante e levado\n';
+    c+='   para o fuso fixo acima antes de qualquer comparacao.\n';
+    c+='   DUAS passadas, e nao uma: getTimezoneOffset() responde pelo instante em que e lido,\n';
+    c+='   mas a leitura de parede (getDay/getHours) acontece no instante JA DESLOCADO. Se os\n';
+    c+='   dois cairem em lados opostos de uma virada de horario de verao DO VISITANTE, o\n';
+    c+='   deslocamento sai uma hora errado -- duas vezes por ano, so em fuso que tem horario\n';
+    c+='   de verao. A segunda passada reaplica o deslocamento com o offset lido no instante\n';
+    c+='   deslocado, que e o offset que os getters vao mesmo usar. */\n';
+    c+='var passo=new Date(agora.getTime()+(agora.getTimezoneOffset()+HORARIO_FUSO*60)*60000);\n';
+    c+='var local=new Date(agora.getTime()+(passo.getTimezoneOffset()+HORARIO_FUSO*60)*60000);\n';
+    c+='var dia=local.getDay(),min=local.getHours()*60+local.getMinutes();\n';
+    c+='var abre=minutosHora(HORARIO_ABRE),fecha=minutosHora(HORARIO_FECHA),i,d;\n';
+    c+='for(i=0;i<HORARIO_DIAS.length;i++){\n';
+    c+='d=HORARIO_DIAS[i];\n';
+    c+='if(fecha>abre){\n';
+    c+='if(d===dia&&min>=abre&&min<fecha)return true;\n';
+    c+='}else{\n';
+    c+='/* expediente que cruza a meia-noite: o dia marcado e o dia em que ele COMECA */\n';
+    c+='if(d===dia&&min>=abre)return true;\n';
+    c+='if((d+1)%7===dia&&min<fecha)return true;\n';
+    c+='}\n}\n';
+    c+='return false;\n}\n\n';
+  }
   c+="function montar(){\nvar nomePagina=NOME_PAGINA||document.title||'seu site';\n";
   c+="var formato=(FORMATO_BOTAO==='quadrado')?'fcw-quadrado':'fcw-circulo';\n";
   c+='var timerAuto=null;\nvar timerEfeito=null;\n\n';
@@ -2544,7 +3012,9 @@ function lGerar(){
   c+="'<div class=\"fcw-overlay\"><div class=\"fcw-card\">'+\n";
   c+="'<div class=\"fcw-topo\"><span class=\"fcw-titulo\"></span> <button type=\"button\" class=\"fcw-fechar\" aria-label=\"Fechar\">&times;</button></div>'+\n";
   c+="'<div class=\"fcw-corpo\">'+\n";
+  if(v.hor.ativo)c+="'<div class=\"fcw-aviso\"></div>'+\n";
   c+="'<label for=\"fcw-nome\" class=\"fcw-lbl-nome\"></label><input id=\"fcw-nome\" type=\"text\" maxlength=\"60\">'+\n";
+  if(v.q.ativo)c+="'<label for=\"fcw-interesse\" class=\"fcw-lbl-interesse\"></label><select id=\"fcw-interesse\"></select>'+\n";
   c+="'<label for=\"fcw-recado\" class=\"fcw-lbl-recado\"></label><textarea id=\"fcw-recado\" maxlength=\"500\"></textarea>'+\n";
   c+="'<div class=\"fcw-erro\"></div><button type=\"button\" class=\"fcw-enviar\"></button>'+\n";
   c+="'</div></div></div>';\n\n";
@@ -2556,19 +3026,74 @@ function lGerar(){
   c+="wrap.style.setProperty('--fcw-cor-texto',COR_TEXTO_POPUP);\n";
   c+='document.body.appendChild(wrap);\n\n';
   c+="var elTitulo=wrap.querySelector('.fcw-titulo');\n";
-  c+='if(POP_USAR_CORUJA_SVG){\nelTitulo.innerHTML=svgCoruja(COR_TOPO_POPUP);\n';
-  c+="var spanTxt=document.createElement('span');\nspanTxt.textContent=POP_TITULO;\nelTitulo.appendChild(spanTxt);\n";
-  c+="}else{\nelTitulo.textContent=POP_IDENTIDADE?(POP_IDENTIDADE+' '+POP_TITULO):POP_TITULO;\n}\n\n";
+  c+='if(POP_USAR_CORUJA_SVG){\n';
+  if(v.corujaEsq)c+='elTitulo.innerHTML='+svgTopo+';\n';
+  if(v.ef.piscar)c+="elTitulo.insertAdjacentHTML('beforeend','<span class=\"fcw-sep\">\\u2022</span>');\n";
+  c+="var spanTxt=document.createElement('span');\n";
+  if(rolando)c+="spanTxt.className='fcw-conteudo';\n";
+  c+='spanTxt.textContent=POP_TITULO;\nelTitulo.appendChild(spanTxt);\n';
+  if(v.corujaDir)c+="elTitulo.insertAdjacentHTML('beforeend',"+svgTopo+");\n";
+  c+='}else{\n';
+  if(rico){
+    if(v.ef.piscar)c+="elTitulo.innerHTML='<span class=\"fcw-sep\">\\u2022</span>';\n";
+    c+="var spanAlt=document.createElement('span');\n";
+    if(rolando)c+="spanAlt.className='fcw-conteudo';\n";
+    c+="spanAlt.textContent=POP_IDENTIDADE?(POP_IDENTIDADE+' '+POP_TITULO):POP_TITULO;\nelTitulo.appendChild(spanAlt);\n";
+  }else{
+    c+="elTitulo.textContent=POP_IDENTIDADE?(POP_IDENTIDADE+' '+POP_TITULO):POP_TITULO;\n";
+  }
+  c+='}\n\n';
   c+="wrap.querySelector('.fcw-lbl-nome').textContent=POP_LABEL_NOME;\n";
   c+="wrap.querySelector('.fcw-lbl-recado').textContent=POP_LABEL_RECADO;\n";
   c+="wrap.querySelector('#fcw-nome').placeholder=POP_DICA_NOME;\n";
   c+="wrap.querySelector('#fcw-recado').placeholder=POP_DICA_RECADO;\n";
   c+="wrap.querySelector('.fcw-enviar').textContent=POP_BOTAO_ENVIAR;\n";
-  c+="wrap.querySelector('.fcw-erro').textContent=POP_MSG_ERRO;\n\n";
+  c+="wrap.querySelector('.fcw-erro').textContent=POP_MSG_ERRO;\n";
+  if(v.hor.ativo)c+="wrap.querySelector('.fcw-aviso').textContent=HORARIO_AVISO;\n";
+  if(v.q.ativo){
+    c+="wrap.querySelector('.fcw-lbl-interesse').textContent=PERGUNTA_ROTULO;\n";
+    c+="var selInteresse=wrap.querySelector('#fcw-interesse');\n";
+    c+="var opVazia=document.createElement('option');\nopVazia.value='';\nopVazia.textContent=PERGUNTA_DICA;\nselInteresse.appendChild(opVazia);\n";
+    c+='var oi,op;\nfor(oi=0;oi<PERGUNTA_OPCOES.length;oi++){\n';
+    c+="op=document.createElement('option');\nop.value=PERGUNTA_OPCOES[oi];\nop.textContent=PERGUNTA_OPCOES[oi];\nselInteresse.appendChild(op);\n}\n";
+  }
+  c+='\n';
   c+="var botao=wrap.querySelector('.fcw-botao');\nvar overlay=wrap.querySelector('.fcw-overlay');\n";
   c+="var fechar=wrap.querySelector('.fcw-fechar');\nvar enviar=wrap.querySelector('.fcw-enviar');\n";
   c+="var campoNome=wrap.querySelector('#fcw-nome');\nvar campoRecado=wrap.querySelector('#fcw-recado');\n";
-  c+="var erro=wrap.querySelector('.fcw-erro');\n\n";
+  c+="var erro=wrap.querySelector('.fcw-erro');\n";
+  if(v.hor.ativo)c+="var avisoHorario=wrap.querySelector('.fcw-aviso');\n";
+  c+='\n';
+  if(v.mov!=='estatico'){
+    /* Mesma solucao da barra de contagem regressiva: duplicar o conteudo e transladar -50%
+       deixa vao quando uma copia e mais estreita que o container -- e o titulo de um pop-up e
+       curto e o cabecalho e estreito, entao o vao seria a regra e nao a excecao. O conteudo e
+       REPETIDO ate cobrir a largura medida no proprio DOM, e o trilho recebe duas metades
+       identicas dessa repeticao.
+       A diferenca em relacao a barra: aqui o pop-up nasce com display:none, e dentro de um
+       elemento escondido toda medida da zero. Por isso o trilho e montado (e conferido) na
+       ABERTURA do pop-up, nao na montagem do bloco. */
+    c+="var conteudo=wrap.querySelector('.fcw-conteudo');\n";
+    c+="var trilhoTexto=conteudo?conteudo.textContent:'';\n";
+    c+='var trilhoN=0,trilhoUm=1;\n';
+    c+='function montarTrilho(){\n';
+    c+='if(!conteudo)return;\n';
+    c+="conteudo.innerHTML='';\n";
+    c+="var trilho=document.createElement('div');\ntrilho.className='fcw-trilho';\n";
+    c+="var base=document.createElement('span');\nbase.textContent=trilhoTexto;\n";
+    c+='trilho.appendChild(base);\nconteudo.appendChild(trilho);\n';
+    c+='trilhoUm=base.offsetWidth||1;\n';
+    c+='trilhoN=Math.max(1,Math.ceil((conteudo.offsetWidth||0)/trilhoUm));\n';
+    c+="trilho.innerHTML='';\nvar i,sp;\n";
+    c+="for(i=0;i<trilhoN*2;i++){\nsp=document.createElement('span');\nsp.textContent=trilhoTexto;\ntrilho.appendChild(sp);\n}\n}\n";
+    /* girar o celular muda a largura visivel: se o numero de copias necessarias mudou, o
+       trilho e remontado -- so nesse caso, para nao reiniciar a animacao a cada resize. */
+    c+='function conferirTrilho(){\n';
+    c+='if(!conteudo)return;\n';
+    c+='if(!trilhoN){montarTrilho();return;}\n';
+    c+='var n=Math.max(1,Math.ceil((conteudo.offsetWidth||0)/trilhoUm));\n';
+    c+='if(n!==trilhoN)montarTrilho();\n}\n\n';
+  }
   c+="var classeEfeito=(EFEITO==='pulsar')?'fcw-pulsando':(EFEITO==='tremer')?'fcw-tremendo':'';\n";
   c+='function dispararEfeito(){\nif(!classeEfeito)return;\n';
   c+="if(overlay.classList.contains('fcw-aberto'))return;\n";
@@ -2577,7 +3102,13 @@ function lGerar(){
   c+="botao.addEventListener('animationend',function(){botao.classList.remove(classeEfeito);});\n";
   c+='timerEfeito=setInterval(dispararEfeito,SEGUNDOS_EFEITO*1000);\n}\n\n';
   c+='function abrir(automatico){\n';
+  if(v.hor.ativo){
+    /* recalculado A CADA abertura, nao uma vez na carga: uma pagina deixada aberta atravessa
+       a virada do expediente, e o aviso precisa estar certo na hora do clique */
+    c+="if(avisoHorario)avisoHorario.style.display=dentroDoHorario()?'none':'block';\n";
+  }
   c+="overlay.classList.add('fcw-aberto');\n";
+  if(v.mov!=='estatico')c+='conferirTrilho();\n';
   c+='if(!automatico){setTimeout(function(){campoNome.focus();},100);}\n}\n';
   c+='function fecharPopup(){\n';
   c+="overlay.classList.remove('fcw-aberto');\n";
@@ -2590,57 +3121,246 @@ function lGerar(){
   c+='var nome=campoNome.value.trim();\nvar recado=campoRecado.value.trim();\n';
   c+="if(!nome||!recado){erro.style.display='block';return;}\n";
   c+="erro.style.display='none';\n";
-  c+="var mensagem=MSG_SAUDACAO+', '+MSG_MEU_NOME+' *'+nome+'*.\\n'+MSG_PAGINA+' *'+nomePagina+'*.\\n'+MSG_PEDIDO+' (cod: *'+CODIGO+'*)\\n'+recado;\n";
+  if(v.q.ativo){
+    c+="var interesse=selInteresse?selInteresse.value:'';\n";
+    c+="var linhaInteresse=interesse?(PERGUNTA_MSG+' *'+interesse+'*.\\n'):'';\n";
+    c+="var mensagem=MSG_SAUDACAO+', '+MSG_MEU_NOME+' *'+nome+'*.\\n'+MSG_PAGINA+' *'+nomePagina+'*.\\n'+linhaInteresse+MSG_PEDIDO+' (cod: *'+CODIGO+'*)\\n'+recado;\n";
+  }else{
+    c+="var mensagem=MSG_SAUDACAO+', '+MSG_MEU_NOME+' *'+nome+'*.\\n'+MSG_PAGINA+' *'+nomePagina+'*.\\n'+MSG_PEDIDO+' (cod: *'+CODIGO+'*)\\n'+recado;\n";
+  }
   c+="var url='https://wa.me/'+NUMERO_WHATSAPP+'?text='+encodeURIComponent(mensagem);\n";
-  c+="window.open(url,'_blank');\nfecharPopup();\ncampoNome.value='';\ncampoRecado.value='';\n});\n\n";
+  c+="window.open(url,'_blank');\nfecharPopup();\ncampoNome.value='';\ncampoRecado.value='';\n";
+  if(v.q.ativo)c+="if(selInteresse)selInteresse.value='';\n";
+  c+='});\n\n';
   c+="campoNome.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();campoRecado.focus();}});\n\n";
+  if(v.mov!=='estatico'){
+    c+="window.addEventListener('resize',function(){if(overlay.classList.contains('fcw-aberto'))conferirTrilho();});\n\n";
+  }
   c+="if(MODO==='automatico'&&!jaViu()){\ntimerAuto=setTimeout(function(){\ntimerAuto=null;\nabrir(true);\n},SEGUNDOS_AUTO*1000);\n}\n}\n\n";
   c+="if(document.body)montar();\nelse document.addEventListener('DOMContentLoaded',montar);\n})();\n</scr"+"ipt>";
-
-  if(comAnc){
-    c+='\n\n<!-- Ancora inteligente p/ calendario no iframe -->\n';
-    c+='<scr'+'ipt>\n(function(){\n';
-    /* Destino string JS: escJs. O outro destino da mesma ancora -- o seletor da regra CSS do
-       plano B, mais abaixo -- e protegido por lAncOk la em cima (validacao de seletor), nao
-       por escape: dentro de <style> o parser ignora "</" e "<!--" e escJs seria inerte. */
-    c+="  var ANCORA='"+escJs(anc)+"';      /* href do botao/link que aciona a rolagem (deve comecar com #) */\n";
-    c+='  var RESPIRO='+resp+';             /* px de folga acima do calendario ao chegar nele */\n\n';
-    c+='  function alvoY(){\n';
-    c+="    var frames=document.querySelectorAll('iframe');\n";
-    c+='    for(var i=0;i<frames.length;i++){\n';
-    c+='      var f=frames[i];\n';
-    c+='      try{\n';
-    c+='        var doc=f.contentDocument;\n';
-    c+='        if(!doc)continue;\n';
-    c+="        var cal=doc.querySelector('.tidycal-embed');\n";
-    c+='        if(!cal)continue;\n';
-    c+='        var topoIframe=f.getBoundingClientRect().top+window.pageYOffset;\n';
-    c+='        var dentroIframe=cal.getBoundingClientRect().top;\n';
-    c+='        return topoIframe+dentroIframe-RESPIRO;\n';
-    c+='      }catch(e){/* iframe de outro dominio: ignora */}\n';
-    c+='    }\n    return null;\n  }\n\n';
-    c+="  document.addEventListener('click',function(e){\n";
-    c+='    var el=e.target;\n';
-    c+="    while(el&&el.tagName!=='A'){el=el.parentElement;}\n";
-    c+='    if(!el)return;\n';
-    c+="    var href=el.getAttribute('href')||'';\n";
-    c+='    if(href!==ANCORA)return;\n';
-    c+='    var y=alvoY();\n';
-    c+='    if(y===null)return;         /* nao achou o calendario: deixa a ancora nativa agir */\n';
-    c+='    e.preventDefault();\n';
-    c+="    window.scrollTo({top:y,behavior:'smooth'});\n";
-    c+='  });\n})();\n</scr'+'ipt>\n\n';
-    c+='<!-- Rolagem suave + respiro da ancora nativa (plano B) -->\n';
-    c+='<sty'+'le>\n';
-    c+='/* scroll-behavior: rolagem suave em toda ancora nativa da pagina */\n';
-    c+='/* scroll-margin-top: folga em px quando a ancora nativa cai no '+anc+' */\n';
-    c+='html { scroll-behavior: smooth; }\n';
-    c+=anc+' { scroll-margin-top: '+resp+'px; }\n';
-    c+='</sty'+'le>';
-  }
-
-  $('l-out').value=c;
+  return c;
 }
+
+function lAncora(v){
+  var c='',anc=v.anc.v,resp=v.anc.resp;
+  c+='\n\n<!-- Ancora inteligente p/ calendario no iframe -->\n';
+  c+='<scr'+'ipt>\n(function(){\n';
+  /* Destino string JS: escJs. O outro destino da mesma ancora -- o seletor da regra CSS do
+     plano B, mais abaixo -- e protegido por lAncOk (validacao de seletor), nao por escape:
+     dentro de <style> o parser ignora "</" e "<!--" e escJs seria inerte. */
+  c+="  var ANCORA='"+escJs(anc)+"';      /* href do botao/link que aciona a rolagem (deve comecar com #) */\n";
+  c+='  var RESPIRO='+resp+';             /* px de folga acima do calendario ao chegar nele */\n\n';
+  c+='  function alvoY(){\n';
+  c+="    var frames=document.querySelectorAll('iframe');\n";
+  c+='    for(var i=0;i<frames.length;i++){\n';
+  c+='      var f=frames[i];\n';
+  c+='      try{\n';
+  c+='        var doc=f.contentDocument;\n';
+  c+='        if(!doc)continue;\n';
+  c+="        var cal=doc.querySelector('.tidycal-embed');\n";
+  c+='        if(!cal)continue;\n';
+  c+='        var topoIframe=f.getBoundingClientRect().top+window.pageYOffset;\n';
+  c+='        var dentroIframe=cal.getBoundingClientRect().top;\n';
+  c+='        return topoIframe+dentroIframe-RESPIRO;\n';
+  c+='      }catch(e){/* iframe de outro dominio: ignora */}\n';
+  c+='    }\n    return null;\n  }\n\n';
+  c+="  document.addEventListener('click',function(e){\n";
+  c+='    var el=e.target;\n';
+  c+="    while(el&&el.tagName!=='A'){el=el.parentElement;}\n";
+  c+='    if(!el)return;\n';
+  c+="    var href=el.getAttribute('href')||'';\n";
+  c+='    if(href!==ANCORA)return;\n';
+  c+='    var y=alvoY();\n';
+  c+='    if(y===null)return;         /* nao achou o calendario: deixa a ancora nativa agir */\n';
+  c+='    e.preventDefault();\n';
+  c+="    window.scrollTo({top:y,behavior:'smooth'});\n";
+  c+='  });\n})();\n</scr'+'ipt>\n\n';
+  c+='<!-- Rolagem suave + respiro da ancora nativa (plano B) -->\n';
+  c+='<sty'+'le>\n';
+  c+='/* scroll-behavior: rolagem suave em toda ancora nativa da pagina */\n';
+  c+='/* scroll-margin-top: folga em px quando a ancora nativa cai no '+anc+' */\n';
+  c+='html { scroll-behavior: smooth; }\n';
+  c+=anc+' { scroll-margin-top: '+resp+'px; }\n';
+  c+='</sty'+'le>';
+  return c;
+}
+
+/* ---------- previa fiel: o bloco gerado rodando de verdade ----------
+   O quadro e um iframe de mesma origem, montado por document.write, na mesma tecnica que a aba
+   Contagem regressiva firmou e o Slideshow seguiu. A ordem escrita e: shim de ambiente ->
+   bloco gerado -> enchimento -> abertura automatica. O bloco vai byte a byte como sai na
+   textarea; nada do ambiente da previa entra nele.
+   A previa anterior era uma SEGUNDA implementacao do pop-up (markup proprio, estilos inline
+   proprios, sem botao flutuante e sem nenhum comportamento). Duas implementacoes divergem: com
+   sete recursos entrando nesta fase, ela divergiria em horario, pergunta, posicao do botao,
+   coruja, movimento e os cinco efeitos -- tudo de uma vez. */
+
+/* Tres trocas, todas do AMBIENTE do quadro e nenhuma do bloco entregue:
+   1. localStorage/sessionStorage viram objetos em memoria. O bloco grava 'fcwAutoVisto' no
+      sessionStorage quando o pop-up fecha: sem o shim, a previa sujaria a chave real da origem
+      da ferramenta e, no modo automatico, nasceria "ja vista" na segunda abertura da aba.
+   2. HTMLElement.prototype.focus vira no-op. O bloco foca o campo nome 100 ms depois do clique,
+      e a previa abre o pop-up sozinha a cada atualizacao -- o cursor do operador seria roubado
+      do formulario ao lado a cada 400 ms de digitacao.
+   3. window.open vira no-op. Sem isso, experimentar o botao enviar abriria o WhatsApp de
+      verdade numa aba nova.
+   As tres sao conferidas depois e denunciadas na cara do operador se nao pegarem: setItem no
+   Storage real nao lanca, focus() nao lanca e window.open nao lanca -- as tres falhariam
+   caladas, que e o unico jeito de falhar que este projeto nao aceita. */
+function lPvShim(){
+  var s='';
+  s+='<scr'+'ipt>\n(function(){\n';
+  s+='  function memoria(){\n';
+  s+='    var d={};\n';
+  s+='    return {\n';
+  s+='      getItem:function(k){k=String(k);return Object.prototype.hasOwnProperty.call(d,k)?d[k]:null;},\n';
+  s+='      setItem:function(k,v){d[String(k)]=String(v);},\n';
+  s+='      removeItem:function(k){delete d[String(k)];},\n';
+  s+='      clear:function(){d={};},\n';
+  s+='      key:function(i){var ks=Object.keys(d);return i<ks.length?ks[i]:null;},\n';
+  s+='      get length(){return Object.keys(d).length;},\n';
+  s+='      fcPvMemoria:true\n';
+  s+='    };\n  }\n';
+  s+='  function trocar(nome){\n';
+  s+='    var falso=memoria();\n';
+  s+='    try{Object.defineProperty(window,nome,{value:falso,configurable:true});return;}catch(e){}\n';
+  s+='    try{Object.defineProperty(Object.getPrototypeOf(window),nome,{value:falso,configurable:true});}catch(e){}\n';
+  s+='  }\n';
+  s+='  function instalado(nome){\n';
+  s+='    try{return !!(window[nome]&&window[nome].fcPvMemoria===true);}catch(e){return false;}\n';
+  s+='  }\n';
+  s+="  trocar('localStorage');trocar('sessionStorage');\n";
+  s+='  try{HTMLElement.prototype.focus=function(){};HTMLElement.prototype.fcPvSemFoco=true;}catch(e){}\n';
+  s+='  try{window.open=function(){return null;};window.open.fcPvSemAbrir=true;}catch(e){}\n';
+  s+='  var falhou=[];\n';
+  s+="  if(!instalado('localStorage'))falhou.push('localStorage');\n";
+  s+="  if(!instalado('sessionStorage'))falhou.push('sessionStorage');\n";
+  s+='  try{if(!HTMLElement.prototype.fcPvSemFoco)falhou.push(\'foco automatico\');}catch(e){falhou.push(\'foco automatico\');}\n';
+  s+='  try{if(!window.open.fcPvSemAbrir)falhou.push(\'abertura de aba nova\');}catch(e){falhou.push(\'abertura de aba nova\');}\n';
+  s+='  if(falhou.length){\n';
+  s+="    var av=document.createElement('div');\n";
+  s+="    av.id='l-pv-aviso-shim';\n";
+  s+='    av.setAttribute(\'style\',\'background:#8C1D18;color:#FDFBF6;font:600 12px/1.45 -apple-system,BlinkMacSystemFont,sans-serif;padding:8px 12px\');\n';
+  s+="    av.textContent='Aviso da previa: nao foi possivel isolar '+falhou.join(' e ')+" +
+     "' neste quadro. A previa pode gravar nas chaves reais do navegador, roubar o cursor do formulario ao lado ou abrir o WhatsApp numa aba nova. O codigo gerado ao lado nao e afetado.';\n";
+  s+='    document.body.appendChild(av);\n';
+  s+='  }\n';
+  s+='})();\n</scr'+'ipt>\n';
+  return s;
+}
+/* Sem conteudo abaixo nao da para ver o botao flutuante se comportando como fixo enquanto a
+   pagina rola -- que e justamente o que a distancia do rodape configura. Blocos cinzentos e
+   mudos, de proposito. */
+function lPvEnchimento(){
+  var s='',i;
+  for(i=0;i<14;i++)s+='<div class="l-pv-falso">conteudo da sua pagina</div>';
+  return s;
+}
+/* A abertura automatica e do AMBIENTE da previa, escrita DEPOIS do bloco: sem ela o quadro
+   mostraria so o botao flutuante, e seis dos sete recursos desta fase vivem dentro do pop-up.
+   O clique passa pelo caminho real do bloco (abrir(false)), entao o aviso de horario e o
+   trilho da rolagem sao calculados como seriam na pagina publicada. */
+function lPvAbrir(){
+  var s='';
+  s+='<scr'+'ipt>\n(function(){\n';
+  s+='  function abrir(){\n';
+  s+="    var b=document.querySelector('.fcw-botao');\n";
+  s+='    if(b)b.click();\n';
+  s+='  }\n';
+  s+='  setTimeout(abrir,60);\n';
+  s+='})();\n</scr'+'ipt>\n';
+  return s;
+}
+function lPvDoc(v){
+  var h='';
+  h+='<!DOCTYPE html>\n<html lang="pt-br">\n<head>\n<meta charset="utf-8">\n';
+  h+='<meta name="viewport" content="width=device-width,initial-scale=1">\n';
+  h+='<sty'+'le>\n';
+  h+='html,body{margin:0;padding:0}\n';
+  h+='body{background:#FFFFFF;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Ubuntu,sans-serif;padding:12px 0}\n';
+  h+='.l-pv-falso{background:#EDEAE1;color:#A9A294;border-radius:6px;margin:10px 12px;padding:0 14px;';
+  h+='height:78px;display:flex;align-items:center;font-size:12px;letter-spacing:.04em}\n';
+  h+='</sty'+'le>\n</head>\n<body>\n';
+  h+=lPvShim();
+  h+=lBloco(v);
+  h+='\n'+lPvEnchimento();
+  h+='\n'+lPvAbrir();
+  h+='\n</body>\n</html>';
+  return h;
+}
+/* O corte do pop-up e fixo em 480px dentro do proprio bloco (a @media que reposiciona o card e
+   o botao), entao aqui nao ha campo para derivar: a largura estreita fica abaixo de 480 e a
+   larga acima. Como a coluna da previa e mais estreita que um desktop, a larga e reduzida por
+   transform:scale -- o scale fica do lado de FORA do iframe, entao a viewport que o bloco
+   enxerga continua sendo a largura logica, que e o que a media query le. */
+var L_PV_CORTE=480;
+function lPvLargura(){
+  if(lPvModo==='cel')return 380;
+  return 920;
+}
+var lPvTimer=null,lPvModo='desk';
+var L_PV_ALTURA=520;
+function lPvMontar(){
+  var box=$('l-pv-box');if(!box)return;
+  var v=lCfg();
+  var larg=lPvLargura();
+  var disp=box.clientWidth||440;
+  var k=Math.min(1,disp/larg);
+  /* trocar o iframe inteiro e o jeito barato de parar o bloco anterior: o setInterval do efeito
+     de atencao, o setTimeout do modo automatico e os listeners dele morrem junto com o
+     documento. */
+  box.innerHTML='';
+  var moldura=document.createElement('div');
+  moldura.className='l-pv-moldura';
+  moldura.style.width=Math.round(larg*k)+'px';
+  moldura.style.height=L_PV_ALTURA+'px';
+  var ifr=document.createElement('iframe');
+  ifr.id='l-pv-frame';
+  ifr.setAttribute('title','Prévia do pop-up de captação de leads');
+  ifr.style.width=larg+'px';
+  ifr.style.height=Math.round(L_PV_ALTURA/k)+'px';
+  ifr.style.transform='scale('+k+')';
+  ifr.style.transformOrigin='top left';
+  moldura.appendChild(ifr);
+  box.appendChild(moldura);
+  var doc=ifr.contentDocument||(ifr.contentWindow&&ifr.contentWindow.document);
+  if(!doc)return;
+  doc.open();doc.write(lPvDoc(v));doc.close();
+}
+/* Remontar o iframe a cada tecla digitada custa caro e pisca. O debounce segura as mudancas de
+   campo; "Atualizar previa", a troca de modo e o blur de campo numerico passam direto. O timer
+   e UNICO e sempre cancelado antes de agendar outro. */
+function lPreview(imediato){
+  if(lPvTimer){clearTimeout(lPvTimer);lPvTimer=null;}
+  if(imediato){lPvMontar();return;}
+  lPvTimer=setTimeout(function(){lPvTimer=null;lPvMontar();},400);
+}
+function lPvBotoes(){
+  var d=$('l-pv-desk'),c=$('l-pv-cel');
+  if(d){d.className='botao mini'+(lPvModo==='desk'?'':' claro');d.setAttribute('aria-pressed',lPvModo==='desk'?'true':'false');}
+  if(c){c.className='botao mini'+(lPvModo==='cel'?'':' claro');c.setAttribute('aria-pressed',lPvModo==='cel'?'true':'false');}
+}
+function lPvModoSet(m){
+  lPvModo=m;lPvBotoes();lPreview(true);
+}
+/* O campo de cadastro de opcao nao entra na previa enquanto esta sendo digitado: ele so muda
+   alguma coisa depois do clique em "Adicionar opcao", que ja chama lPreview por conta propria.
+   Sem esta excecao, digitar ali remontaria o iframe a cada rajada de tecla sem nada mudar. */
+var L_PV_IGNORA={'l-qop':true};
+function lCampoMudou(e){
+  var alvo=e.target;if(!alvo)return;
+  var chave=alvo.name||alvo.id||'';
+  if(chave.indexOf('l-')!==0)return;
+  if(L_PV_IGNORA[chave])return;
+  lToggles();lPreview();
+}
+document.addEventListener('change',lCampoMudou);
+/* 'change' so dispara quando o campo perde o foco: sem este 'input', a previa e os campos que
+   aparecem e somem so acordariam depois de o operador clicar fora. */
+document.addEventListener('input',lCampoMudou);
+document.addEventListener('change',function(e){
+  if(e.target.name==='l-icone'||e.target.name==='l-formato')lBtnPreview();
+});
 
 /* ============================================================
    TIDYCAL
@@ -4856,7 +5576,7 @@ prep('Barra de abas','',function(){
   /* enquanto o painel esta escondido o box mede 0: a previa e remontada ao abrir a aba, ja
      com a largura real da coluna, senao o iframe nasceria na largura de emergencia. */
   liga('aba-slide',function(){trocarAba('slide');sPreview(true);});
-  liga('aba-leads',function(){trocarAba('leads');});
+  liga('aba-leads',function(){trocarAba('leads');lPreview(true);});
   liga('aba-tidy',function(){trocarAba('tidy');});
   liga('aba-uni',function(){trocarAba('uni');});
   liga('aba-bor',function(){trocarAba('bor');});
@@ -4878,11 +5598,18 @@ prep('Slideshow','slide',function(){
 });
 prep('Captacao de leads','leads',function(){
   liga('l-gerar',lGerar);
+  liga('l-atualizar',function(){lPreview(true);});
+  liga('l-pv-desk',function(){lPvModoSet('desk');});
+  liga('l-pv-cel',function(){lPvModoSet('cel');});
   liga('l-padroes',lPadroes);
+  liga('l-q-add',lQAdd);
   liga('l-copy',function(){copiar('l-out','l-cop');});
   parearCor('l-corbtn');parearCor('l-c1');parearCor('l-c2');parearCor('l-c3');parearCor('l-c4');
-  /* a previa desta aba desenha o pop-up, que nao mostra estes dois numeros: nada a redesenhar */
-  fcLigarFaixa(L_NUMS);
+  parearCor('l-corujacorpo');parearCor('l-corujadet');
+  /* a previa agora roda o bloco gerado, e os quatro numeros desta tabela chegam nele (segundos
+     ate abrir sozinho, intervalo do efeito, distancia do rodape e duracao da rolagem): o 'blur'
+     redesenha com o valor ja preso -- imediato, porque 'blur' e um gesto deliberado */
+  fcLigarFaixa(L_NUMS,function(){lPreview(true);});
 });
 prep('Agendamento TidyCal','tidy',function(){
   liga('t-gerar',tGerar);
@@ -4951,7 +5678,7 @@ prep('Correcao a vista das cores livres','leads uni',function(){
     var t=$(par[0]+'-t');if(!t)return;
     function redesenhar(){
       salvarEstado();
-      if(par[0].indexOf('l-')===0){lBtnPreview();lPopPreview();}else{uPreview();}
+      if(par[0].indexOf('l-')===0){lBtnPreview();lPreview(true);}else{uPreview();}
     }
     t.addEventListener('change',function(){if(corAjustar(par[0],par[1]))salvarEstado();});
     t.addEventListener('blur',function(){if(corAjustar(par[0],par[1]))redesenhar();});
@@ -4987,9 +5714,13 @@ prep('Slideshow','slide',function(){
 prep('Captacao de leads','leads',function(){
   if(fcAjustarTodos(L_NUMS))salvarEstado();
   lBtnPreview();
-  lPopPreview();
-  lAncToggle();
-  lEmojiToggle();
+  lQRender();
+  lToggles();
+  /* A previa NAO e montada aqui. Montar na carga executaria o bloco gerado -- o setInterval do
+     efeito de atencao e o setTimeout do modo automatico -- em toda abertura da ferramenta,
+     mesmo para quem nunca abre esta aba, e ainda com o painel escondido (clientWidth zero,
+     largura de emergencia). A montagem fica para o clique da aba, que ja chama lPreview(true). */
+  lPvBotoes();
 },'desenhar a aba com o estado restaurado');
 prep('Agendamento TidyCal','tidy',function(){
   /* estado gravado antes desta regra pode trazer altura ou corte fora da faixa: prende na
