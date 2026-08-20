@@ -840,11 +840,19 @@
           <input type="text" id="u-pdesc" placeholder="Sessão em estúdio com cenário natalino">
           <label for="u-ppreco">Preço</label>
           <input type="number" id="u-ppreco" placeholder="420" min="0" step="0.01">
+          <label>Vende por quantidade? <small>(um ensaio se vende uma vez; uma foto extra se vende em várias)</small></label>
+          <div class="radios">
+            <label><input type="radio" name="u-pqtd" value="nao" checked><span>Não <small>(sim ou não)</small></span></label>
+            <label><input type="radio" name="u-pqtd" value="sim"><span>Sim <small>(com seletor de quantidade)</small></span></label>
+          </div>
 
           <label>Itens opcionais deste produto</label>
           <div class="dupla">
             <input type="text" id="u-op-nome" placeholder="Pacote com 10 fotos">
             <input type="number" id="u-op-preco" placeholder="300" min="0" step="0.01">
+          </div>
+          <div class="radios">
+            <label><input type="checkbox" id="u-op-qtd"><span>Este opcional vende por quantidade</span></label>
           </div>
           <div class="acoes"><button class="botao claro" id="u-op-add">Adicionar opcional</button></div>
           <ul class="lista-imgs" id="u-op-lista"></ul>
@@ -881,6 +889,11 @@
         </div>
         <ul class="lista-imgs" id="u-prod-lista"></ul>
         <p class="vazio" id="u-prod-vazio">Nenhum produto cadastrado ainda. Use o formulário ao lado.</p>
+        <div id="u-qtdmax-campo">
+          <label for="u-qtdmax">Quantidade máxima por item <small>(de 2 a 99; fora da faixa o campo se corrige sozinho)</small></label>
+          <input type="number" id="u-qtdmax" value="10" min="2" max="99" step="1">
+          <p class="ajuda">Vale para <b>todos</b> os itens vendidos por quantidade. O seletor vai de <b>0</b> até esse número, e <b>0 equivale a não escolher o item</b>: ele sai da conta, do resumo e da mensagem do WhatsApp. A quantidade do produto e a do opcional são <b>independentes</b> — dois ensaios com um álbum somam dois ensaios e um álbum, não dois álbuns.</p>
+        </div>
       </fieldset>
 
       <fieldset>
@@ -3688,7 +3701,7 @@ function uColeta(){
       chave:$('u-chave').value,nomer:$('u-nomer').value,cidade:$('u-cidade').value,cod:$('u-cod').value,
       selprod:radio('u-selprod'),zap:radio('u-zap'),zapnum:$('u-zapnum').value,descpix:$('u-descpix').value,
       t1:$('u-t1').value,t2:$('u-t2').value,t3:$('u-t3').value,t4:$('u-t4').value,t5:$('u-t5').value,t6:$('u-t6').value,t7:$('u-t7').value,
-      larg:$('u-largura').value,ppcor:radio('u-ppcor'),
+      larg:$('u-largura').value,ppcor:radio('u-ppcor'),qtdmax:$('u-qtdmax').value,
       c1:$('u-c1-t').value,c2:$('u-c2-t').value,c3:$('u-c3-t').value}
   };
 }
@@ -3707,13 +3720,36 @@ function uRestaura(st){
   $('u-t1').value=U.t1;$('u-t2').value=U.t2;$('u-t3').value=U.t3;$('u-t4').value=U.t4;$('u-t5').value=U.t5;$('u-t6').value=U.t6;
   if(U.t7)$('u-t7').value=U.t7;
   $('u-largura').value=U.larg||420;
+  $('u-qtdmax').value=(U.qtdmax!=null&&U.qtdmax!=='')?U.qtdmax:10;
   setRadio('u-ppcor',U.ppcor||'gold');
   $('u-c1-t').value=U.c1;$('u-c1').value=corValida(U.c1)?U.c1:'#075E54';
   $('u-c2-t').value=U.c2;$('u-c2').value=corValida(U.c2)?U.c2:'#ffffff';
   $('u-c3-t').value=U.c3;$('u-c3').value=corValida(U.c3)?U.c3:'#333333';
 }
 
+/* Faixa declarada dos campos numericos desta aba, no formato de S_NUMS/B_NUMS:
+   [id, padrao, min, max, inteiro]. A MESMA linha alimenta o gerador (fcPreso) e a interface
+   (fcAjustar), entao nao ha como a saida ser presa numa faixa e o campo mostrar outra.
+   Os dois campos antigos (largura e desconto Pix) NAO entraram: o clamp deles e outro -- uma
+   largura abaixo de 240 vira 420, e nao 240 --, e move-los mudaria numero cobrado sem que
+   nenhum recurso desta fase pedisse. */
+var U_NUMS=[['u-qtdmax',10,2,99,true]];
+function uPreso(id){return fcPreso(U_NUMS,id);}
 function uNum(id,def){var v=parseFloat(String($(id).value).replace(',','.'));return (isNaN(v)||v<0)?def:v;}
+/* Quantos itens DESTE produto (ele proprio e seus opcionais) foram marcados como vendidos por
+   quantidade. Serve a lista da aba e, somado, decide se o recurso inteiro esta ligado. */
+function uQtdItens(p){
+  var n=p.qtd?1:0,ops=p.ops||[],i;
+  for(i=0;i<ops.length;i++)if(ops[i].qtd)n++;
+  return n;
+}
+/* O recurso so entra no bloco entregue se ALGUM item pedir quantidade. Com nenhum, o carrinho
+   sai byte a byte igual ao de antes desta fase -- nem CSS, nem variavel, nem seletor a mais. */
+function uQtdLigada(prods){
+  var i;
+  for(i=0;i<prods.length;i++)if(uQtdItens(prods[i]))return true;
+  return false;
+}
 function uFmt(v){
   var mo=(radio('u-metodo')==='paypal')?radio('u-moeda'):'BRL';
   var s=v.toFixed(2);
@@ -3759,6 +3795,15 @@ function uOpRender(){
     pr.addEventListener('change',function(){uOpPrecoAjustar(pr,i);});
     pr.addEventListener('blur',function(){uOpPrecoAjustar(pr,i);});
     info.appendChild(n);info.appendChild(pr);
+    /* R2: cada opcional declara se aceita quantidade. Um "album impresso" vende varios; uma
+       "hora extra de estudio" tambem; "revelacao em papel fine art" nao. Fica no proprio item
+       porque a decisao e do item, nao do carrinho. */
+    var lq=document.createElement('label');
+    lq.style.cssText='display:flex;align-items:center;gap:6px;margin:5px 0 0;font-size:12px;font-weight:400;color:var(--tinta-suave)';
+    var cq=document.createElement('input');cq.type='checkbox';cq.checked=!!op.qtd;
+    cq.addEventListener('change',function(){uEditOps[i].qtd=cq.checked;});
+    lq.appendChild(cq);lq.appendChild(document.createTextNode('vende por quantidade'));
+    info.appendChild(lq);
     var ctrl=document.createElement('div');ctrl.className='ctrl';
     [['\u2191',function(){uOpMove(i,-1);},'Subir'],['\u2193',function(){uOpMove(i,1);},'Descer'],['\u2715',function(){uOpDel(i);},'Remover']]
       .forEach(function(b){var bt=document.createElement('button');bt.textContent=b[0];bt.title=b[2];bt.setAttribute('aria-label',b[2]);bt.addEventListener('click',b[1]);ctrl.appendChild(bt);});
@@ -3771,8 +3816,8 @@ function uOpAdd(){
   if(!n){alert('Informe o nome do opcional.');return;}
   var v=parseFloat(String($('u-op-preco').value).replace(',','.'));
   if(isNaN(v)||v<0)v=0;
-  uEditOps.push({nome:n,preco:v});
-  $('u-op-nome').value='';$('u-op-preco').value='';
+  uEditOps.push({nome:n,preco:v,qtd:!!$('u-op-qtd').checked});
+  $('u-op-nome').value='';$('u-op-preco').value='';$('u-op-qtd').checked=false;
   uOpRender();
 }
 function uOpMove(i,d){var j=i+d;if(j<0||j>=uEditOps.length)return;var t=uEditOps[i];uEditOps[i]=uEditOps[j];uEditOps[j]=t;uOpRender();}
@@ -3782,7 +3827,8 @@ function uOpDel(i){uEditOps.splice(i,1);uOpRender();}
 function uProdLimpar(){
   $('u-pnome').value='';$('u-pdesc').value='';$('u-ppreco').value='';
   uEditOps=[];uEditIdx=-1;uOpRender();
-  setRadio('u-opsel','unico');setRadio('u-opnenhum','nao');
+  setRadio('u-opsel','unico');setRadio('u-opnenhum','nao');setRadio('u-pqtd','nao');
+  $('u-op-qtd').checked=false;
   $('u-prod-salvar').textContent='Adicionar produto';
   $('u-prod-cancelar').style.display='none';
   uToggles();
@@ -3794,16 +3840,18 @@ function uProdSalvar(){
   if(isNaN(v)||v<0){alert('Informe o preco do produto.');return;}
   var p={nome:n,desc:$('u-pdesc').value.trim(),preco:v,
     opsel:radio('u-opsel')||'unico',opnenhum:radio('u-opnenhum')||'nao',
-    ops:uEditOps.map(function(o){return {nome:o.nome,preco:o.preco};})};
+    qtd:radio('u-pqtd')==='sim',
+    ops:uEditOps.map(function(o){return {nome:o.nome,preco:o.preco,qtd:!!o.qtd};})};
   if(uEditIdx>=0)uProds[uEditIdx]=p;else uProds.push(p);
   uProdLimpar();uProdRender();salvarEstado();uPreview();
 }
 function uProdEditar(i){
   var p=uProds[i];
   $('u-pnome').value=p.nome;$('u-pdesc').value=p.desc||'';$('u-ppreco').value=p.preco;
-  uEditOps=(p.ops||[]).map(function(o){return {nome:o.nome,preco:o.preco};});
+  uEditOps=(p.ops||[]).map(function(o){return {nome:o.nome,preco:o.preco,qtd:!!o.qtd};});
   uEditIdx=i;uOpRender();
   setRadio('u-opsel',p.opsel);setRadio('u-opnenhum',p.opnenhum);
+  setRadio('u-pqtd',p.qtd?'sim':'nao');
   $('u-prod-salvar').textContent='Salvar alteracoes';
   $('u-prod-cancelar').style.display='inline-block';
   uToggles();
@@ -3825,7 +3873,8 @@ function uProdRender(){
     var txt=document.createElement('div');
     txt.style.fontSize='13px';
     var qtd=(p.ops&&p.ops.length)?(' \u00b7 '+p.ops.length+' opcional'+(p.ops.length>1?'is':'')):' \u00b7 sem opcionais';
-    txt.textContent=p.nome+' \u2014 '+uFmt(parseFloat(p.preco)||0)+qtd;
+    var nq=uQtdItens(p);
+    txt.textContent=p.nome+' \u2014 '+uFmt(parseFloat(p.preco)||0)+qtd+(nq?(' \u00b7 '+nq+' com quantidade'):'');
     info.appendChild(txt);
     var ctrl=document.createElement('div');ctrl.className='ctrl';
     [['\u2191',function(){uProdMove(i,-1);},'Subir'],['\u2193',function(){uProdMove(i,1);},'Descer'],
@@ -3908,6 +3957,7 @@ function uToggles(){
   el=$('u-zap-campo');if(el)el.style.display=(radio('u-zap')==='sim')?'block':'none';
   el=$('u-opnenhum-campo');if(el)el.style.display=(radio('u-opsel')==='unico')?'block':'none';
   el=$('u-selprod-campo');if(el)el.style.display=(uProds.length>1)?'block':'none';
+  el=$('u-qtdmax-campo');if(el)el.style.display=uQtdLigada(uProds)?'block':'none';
 }
 document.addEventListener('change',function(e){
   if(e.target.name&&e.target.name.indexOf('u-')===0)uToggles();
@@ -4141,6 +4191,7 @@ function uCfg(){
     larg:larg, ppcor:radio('u-ppcor')||'gold', descpix:descpix,
     selprod:radio('u-selprod')||'unico',
     prods:uProds, cps:uCps,
+    qtdLigada:uQtdLigada(uProds), qtdmax:uPreso('u-qtdmax')||10,
     c1:corSegura('u-c1','#075E54'), c2:corSegura('u-c2','#ffffff'), c3:corSegura('u-c3','#333333'),
     t1:$('u-t1').value, t2:$('u-t2').value, t3:$('u-t3').value, t4:$('u-t4').value,
     t5:$('u-t5').value, t6:$('u-t6').value, t7:$('u-t7').value
@@ -4183,6 +4234,10 @@ function uGerar(){
     if(cpe){alert('Cupom "'+cpc+'": '+cpe);return;}
   }
 
+  /* os campos numericos se corrigem na tela antes de a saida ser montada -- assim o que o
+     operador esta lendo e o que vai para o codigo */
+  if(fcAjustarTodos(U_NUMS))salvarEstado();
+
   $('u-out').value=uBloco(uCfg());
   uPreview(true);
 }
@@ -4198,6 +4253,7 @@ function uBloco(cfg){
   var cod=escJs(cfg.cod||'PEDIDO');
   var zap=cfg.zap,zapnum=cfg.zapnum,larg=cfg.larg,ppcor=cfg.ppcor;
   var descpix=cfg.descpix,selprod=cfg.selprod;
+  var usaQtd=cfg.qtdLigada;
 
   /* Nome, descricao, opcional, cupom e validade sao texto livre e viram strings JS do array
      PRODUTOS/CUPONS: escJs. Uma descricao colada de um e-mail com comentario HTML fazia o
@@ -4206,10 +4262,10 @@ function uBloco(cfg){
   var prods=cfg.prods.map(function(p){
     var ops=(p.ops||[]).map(function(o){
       var v=parseFloat(String(o.preco).replace(',','.'))||0;
-      return "{nome:'"+escJs(o.nome)+"', preco:"+v.toFixed(2)+"}";
+      return "{nome:'"+escJs(o.nome)+"', preco:"+v.toFixed(2)+(o.qtd?", qtd:true":"")+"}";
     }).join(', ');
     return "  {nome:'"+escJs(p.nome)+"', descricao:'"+escJs(p.desc||'')+"', preco:"+(parseFloat(p.preco)||0).toFixed(2)+",\n"+
-           "   selecaoOpcionais:'"+p.opsel+"', permitirNenhum:"+(p.opnenhum==='sim'?'true':'false')+",\n"+
+           "   selecaoOpcionais:'"+p.opsel+"', permitirNenhum:"+(p.opnenhum==='sim'?'true':'false')+(p.qtd?", quantidade:true":"")+",\n"+
            "   opcionais:["+ops+"]}";
   }).join(',\n');
   var cps=cfg.cps.map(function(cp){
@@ -4238,6 +4294,12 @@ function uBloco(cfg){
   c+='.fcuni input:checked+.fcu-mark{border-color:var(--fcu-destaque,#075E54);background:var(--fcu-destaque,#075E54)}\n';
   c+='.fcuni input:checked+.fcu-mark.rd:after{content:"";position:absolute;left:3px;top:3px;width:8px;height:8px;border-radius:50%;background:#fff}\n';
   c+='.fcuni input:checked+.fcu-mark.ck:after{content:"";position:absolute;left:4px;top:0;width:5px;height:10px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(40deg)}\n';
+  if(usaQtd){
+    c+='.fcuni .fcu-qtd{display:flex;align-items:center;gap:6px;flex-shrink:0}\n';
+    c+='.fcuni .fcu-qtd-b{border:1px solid #d8d2c4;border-radius:6px;background:#fff;color:inherit;width:26px;height:26px;padding:0;line-height:1;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit}\n';
+    c+='.fcuni .fcu-qtd-b:hover{border-color:var(--fcu-destaque,#075E54)}\n';
+    c+='.fcuni .fcu-qtd-v{min-width:22px;text-align:center;font-size:13px;font-weight:600}\n';
+  }
   c+='.fcuni .fcu-cupom{margin:12px 0 2px}\n';
   c+='.fcuni .fcu-cupom-l{display:flex;gap:8px}\n';
   c+='.fcuni .fcu-cupom-l input[type="text"]{flex:1;min-width:0;border:1px solid #ccc;border-radius:8px;padding:9px 10px;font-size:14px;font-family:inherit;text-transform:uppercase;background:#fff;color:inherit;position:static;opacity:1;width:auto;height:auto;pointer-events:auto}\n';
@@ -4299,9 +4361,16 @@ function uBloco(cfg){
   c+='/* ===== PRODUTOS =====\n';
   c+='   Cada produto tem seus proprios opcionais.\n';
   c+="   selecaoOpcionais: 'unico' = o cliente escolhe 1 | 'multiplo' = pode marcar varios\n";
-  c+='   permitirNenhum: true = inclui a opcao "sem opcional" (so no modo unico) */\n';
+  if(usaQtd){
+    c+='   permitirNenhum: true = inclui a opcao "sem opcional" (so no modo unico)\n';
+    c+='   quantidade: true no produto, qtd: true no opcional = mostra o seletor de quantidade */\n';
+  }else{
+    c+='   permitirNenhum: true = inclui a opcao "sem opcional" (so no modo unico) */\n';
+  }
   c+='var PRODUTOS=[\n'+prods+'\n];\n';
-  c+="var SELECAO_PRODUTOS='"+selprod+"';   /* com 2+ produtos: 'unico' = escolhe 1 | 'multiplo' = pode somar varios */\n\n";
+  c+="var SELECAO_PRODUTOS='"+selprod+"';   /* com 2+ produtos: 'unico' = escolhe 1 | 'multiplo' = pode somar varios */\n";
+  if(usaQtd)c+='var QUANTIDADE_MAXIMA='+cfg.qtdmax+';   /* teto do seletor de quantidade; o seletor vai de 0 ate ele, e 0 = item nao escolhido */\n';
+  c+='\n';
   c+='/* ===== CUPONS DE DESCONTO ===== */\n';
   c+="/* tipo: 'pct_produto' = % sobre os produtos (sem opcionais) | 'pct_total' = % sobre tudo | 'fixo' = valor fixo\n";
   c+="   validade: 'AAAA-MM-DD' (vale ate o fim do dia) | '' = sem validade */\n";
@@ -4449,7 +4518,30 @@ function uBloco(cfg){
   c+='if(multiProd)rotProd.textContent=TXT_PRODUTOS;\n';
   c+="else rotProd.style.display='none';\n";
   c+="var listaProds=raiz.querySelector('.fcu-prods-l');\n";
-  c+='var blocos=[],itensProd=[];\n\n';
+  c+='var blocos=[],itensProd=[];\n';
+  if(usaQtd){
+    c+='var qtdsProd=[],qtdsOp=[],precosProd=[],precosOp=[];\n';
+    c+='function qtdProd(i){var q=qtdsProd[i];return (q==null)?1:q;}\n';
+    c+='function qtdOp(i,j){var a=qtdsOp[i];var q=a?a[j]:null;return (q==null)?1:q;}\n';
+    /* Um construtor so para os dois usos (produto e opcional): o seletor do produto e o do
+       opcional tem o mesmo comportamento, e duas copias divergiriam. */
+    c+='function fazQtd(inicial,aoMudar){\n';
+    c+="var cx=document.createElement('div');cx.className='fcu-qtd';\n";
+    c+='var atual=inicial;\n';
+    c+="var menos=document.createElement('button');menos.type='button';menos.className='fcu-qtd-b';menos.textContent='-';menos.setAttribute('aria-label','Diminuir a quantidade');\n";
+    c+="var vis=document.createElement('span');vis.className='fcu-qtd-v';vis.textContent=String(inicial);\n";
+    c+="var mais=document.createElement('button');mais.type='button';mais.className='fcu-qtd-b';mais.textContent='+';mais.setAttribute('aria-label','Aumentar a quantidade');\n";
+    c+='function por(n){\n';
+    c+='if(n<0)n=0;\n';
+    c+='if(n>QUANTIDADE_MAXIMA)n=QUANTIDADE_MAXIMA;\n';
+    c+='if(n===atual)return;\n';
+    c+='atual=n;vis.textContent=String(n);aoMudar(n);\n}\n';
+    c+="menos.addEventListener('click',function(){por(atual-1);});\n";
+    c+="mais.addEventListener('click',function(){por(atual+1);});\n";
+    c+='cx.appendChild(menos);cx.appendChild(vis);cx.appendChild(mais);\n';
+    c+='return cx;\n}\n';
+  }
+  c+='\n';
   c+='PRODUTOS.forEach(function(p,i){\n';
   c+="var bloco=document.createElement('div');bloco.className='fcu-prod';\n";
   c+="var linha=document.createElement('div');linha.className='fcu-prod-l';\n";
@@ -4471,7 +4563,12 @@ function uBloco(cfg){
   c+='}else{\n';
   c+="var sp2=document.createElement('span');sp2.textContent=p.nome;linha.appendChild(sp2);\n";
   c+='}\n';
+  if(usaQtd){
+    c+='qtdsProd[i]=1;qtdsOp[i]=[];\n';
+    c+='if(p.quantidade)linha.appendChild(fazQtd(1,function(n){qtdsProd[i]=n;atualizar();}));\n';
+  }
   c+="var pr=document.createElement('span');pr.textContent=moedaFmt(p.preco);\n";
+  if(usaQtd)c+='precosProd[i]=p.quantidade?pr:null;\n';
   c+='linha.appendChild(pr);\n';
   c+='bloco.appendChild(linha);\n';
   c+='if(p.descricao){\n';
@@ -4496,20 +4593,30 @@ function uBloco(cfg){
   c+="var mk2=document.createElement('span');mk2.className='fcu-mark '+(tipoOp==='checkbox'?'ck':'rd');\n";
   c+="var sp3=document.createElement('span');sp3.textContent=op.nome;\n";
   c+='lab2.appendChild(inp2);lab2.appendChild(mk2);lab2.appendChild(sp3);\n';
+  if(usaQtd){
+    c+='qtdsOp[i][j]=1;\n';
+    c+='if(op.qtd&&!op.nenhum)row.appendChild(fazQtd(1,function(n){qtdsOp[i][j]=n;atualizar();}));\n';
+  }
   c+="var pr2=document.createElement('span');pr2.textContent=op.nenhum?'':('+ '+moedaFmt(op.preco));\n";
+  if(usaQtd)c+='if(op.qtd&&!op.nenhum){precosOp[i]=precosOp[i]||[];precosOp[i][j]=pr2;}\n';
   c+='row.appendChild(lab2);row.appendChild(pr2);\n';
   c+='caixa.appendChild(row);\n});\n}\n';
   c+='bloco.appendChild(caixa);\n';
   c+='blocos.push(bloco);\n';
   c+='listaProds.appendChild(bloco);\n});\n\n';
   c+='function produtoAtivo(i){\n';
+  /* Quantidade zero equivale a item nao escolhido: sai da conta, do resumo, da descricao do
+     PayPal e da mensagem do WhatsApp. Barrar aqui, e nao em cada soma, e o que garante que os
+     quatro concordem. O seletor continua a vista para o cliente poder voltar a 1. */
+  if(usaQtd)c+='if(qtdProd(i)<1)return false;\n';
   c+='if(!multiProd)return true;\n';
   c+='var el=raiz.querySelector(\'input[name="fcu-prod"][value="\'+i+\'"]\');\n';
   c+='return !!(el&&el.checked);\n}\n\n';
   c+='var cupomAtivo=null;\n\n';
   c+='function somaProdutos(){\n';
   c+='var t=0;\n';
-  c+='PRODUTOS.forEach(function(p,i){if(produtoAtivo(i))t+=p.preco;});\n';
+  if(usaQtd)c+='PRODUTOS.forEach(function(p,i){if(produtoAtivo(i))t+=p.preco*qtdProd(i);});\n';
+  else c+='PRODUTOS.forEach(function(p,i){if(produtoAtivo(i))t+=p.preco;});\n';
   c+='return t;\n}\n\n';
   c+='function subtotal(){\n';
   c+='var t=somaProdutos();\n';
@@ -4518,7 +4625,8 @@ function uBloco(cfg){
   c+='var sel=raiz.querySelectorAll(\'input[name="fcu-op-\'+i+\'"]:checked\');\n';
   c+='for(var k=0;k<sel.length;k++){\n';
   c+='var op=itensProd[i][parseInt(sel[k].value,10)];\n';
-  c+='if(op&&!op.nenhum)t+=op.preco;\n}\n});\n';
+  if(usaQtd)c+='if(op&&!op.nenhum)t+=op.preco*qtdOp(i,parseInt(sel[k].value,10));\n}\n});\n';
+  else c+='if(op&&!op.nenhum)t+=op.preco;\n}\n});\n';
   c+='return t;\n}\n\n';
   c+='function descontoAtual(){\n';
   c+='if(!cupomAtivo)return 0;\n';
@@ -4551,7 +4659,16 @@ function uBloco(cfg){
   c+='function atualizar(){\n';
   c+='PRODUTOS.forEach(function(p,i){\n';
   c+="var caixa=blocos[i].querySelector('.fcu-ops');\n";
-  c+="if(caixa)caixa.style.display=produtoAtivo(i)?'block':'none';\n});\n";
+  c+="if(caixa)caixa.style.display=produtoAtivo(i)?'block':'none';\n";
+  /* O preco da linha passa a mostrar o subtotal do item (preco x quantidade). Mostrar o preco
+     unitario ao lado de um seletor em 3 obrigaria o cliente a fazer a conta de cabeca para
+     conferir o total -- e o total e o unico numero que ele nao pode conferir de outro jeito. */
+  if(usaQtd){
+    c+='if(precosProd[i])precosProd[i].textContent=moedaFmt(p.preco*qtdProd(i));\n';
+    c+='var pop=precosOp[i];\n';
+    c+='if(pop){for(var z=0;z<pop.length;z++){if(pop[z])pop[z].textContent=\'+ \'+moedaFmt(itensProd[i][z].preco*qtdOp(i,z));}}\n';
+  }
+  c+='});\n';
   c+="raiz.querySelector('.fcu-total-v').textContent=moedaFmt(total());\n";
   if(descpix>0)c+="raiz.querySelector('.fcu-pixlinha-v').textContent=moedaFmt(totalPix());\n";
   c+='linhaDesconto();\n';
@@ -4578,7 +4695,8 @@ function uBloco(cfg){
   c+="raiz.querySelector('.fcu-cupom-l button').addEventListener('click',aplicarCupom);\n\n";
   c+='function nomesSelecionados(){\n';
   c+='var ns=[];\n';
-  c+='PRODUTOS.forEach(function(p,i){if(produtoAtivo(i))ns.push(p.nome);});\n';
+  if(usaQtd)c+="PRODUTOS.forEach(function(p,i){if(produtoAtivo(i))ns.push(p.nome+(p.quantidade?(' x'+qtdProd(i)):''));});\n";
+  else c+='PRODUTOS.forEach(function(p,i){if(produtoAtivo(i))ns.push(p.nome);});\n';
   c+='return ns;\n}\n\n';
   if(usaPP){
     c+='function msg(txt,ok){\n';
@@ -4642,11 +4760,20 @@ function uBloco(cfg){
       c+="partes.push('Pedido cod: *'+CODIGO_PEDIDO+'*');\n";
       c+='PRODUTOS.forEach(function(p,i){\n';
       c+='if(!produtoAtivo(i))return;\n';
-      c+="partes.push('- *'+p.nome+'* '+moedaFmt(p.preco));\n";
+      if(usaQtd)c+="partes.push('- *'+p.nome+'*'+(p.quantidade?(' x'+qtdProd(i)):'')+' '+moedaFmt(p.preco*qtdProd(i)));\n";
+      else c+="partes.push('- *'+p.nome+'* '+moedaFmt(p.preco));\n";
       c+='var sel=raiz.querySelectorAll(\'input[name="fcu-op-\'+i+\'"]:checked\');\n';
       c+='for(var k=0;k<sel.length;k++){\n';
-      c+='var op=itensProd[i][parseInt(sel[k].value,10)];\n';
-      c+="if(op&&!op.nenhum)partes.push('   + '+op.nome+' '+moedaFmt(op.preco));\n}\n});\n";
+      if(usaQtd){
+        c+='var jz=parseInt(sel[k].value,10);\n';
+        c+='var op=itensProd[i][jz];\n';
+        /* opcional zerado sai da mensagem pelo mesmo motivo que o produto zerado: a quantidade
+           zero equivale a nao ter escolhido o item. */
+        c+="if(op&&!op.nenhum&&qtdOp(i,jz)>0)partes.push('   + '+op.nome+(op.qtd?(' x'+qtdOp(i,jz)):'')+' '+moedaFmt(op.preco*qtdOp(i,jz)));\n}\n});\n";
+      }else{
+        c+='var op=itensProd[i][parseInt(sel[k].value,10)];\n';
+        c+="if(op&&!op.nenhum)partes.push('   + '+op.nome+' '+moedaFmt(op.preco));\n}\n});\n";
+      }
       c+="if(cupomAtivo)partes.push('Cupom: '+cupomAtivo.codigo);\n";
       if(descpix>0)c+="if(DESCONTO_PIX>0)partes.push('Desconto Pix: -'+DESCONTO_PIX+'%');\n";
       c+="partes.push('Valor pago: *'+moedaFmt(totalPix())+'*');\n";
@@ -6222,6 +6349,9 @@ prep('Checkout','uni',function(){
   liga('u-cp-add',uCpAdd);
   liga('u-gerar',uGerar);
   liga('u-atualizar',function(){uPreview(true);});
+  /* a previa roda o bloco gerado e os numeros desta tabela chegam nele: o 'blur' redesenha com
+     o valor ja preso -- imediato, porque 'blur' e um gesto deliberado e nao uma tecla */
+  fcLigarFaixa(U_NUMS,function(){uPreview(true);});
   liga('u-pv-desk',function(){uPvModoSet('desk');});
   liga('u-pv-cel',function(){uPvModoSet('cel');});
   liga('u-copy',function(){copiar('u-out','u-cop');});
@@ -6333,6 +6463,9 @@ prep('Agendamento TidyCal','tidy',function(){
   tArqToggle();
 },'desenhar a aba com o estado restaurado');
 prep('Checkout','uni',function(){
+  /* estado gravado antes desta regra pode trazer numero fora da faixa: prende na carga, para o
+     campo nunca exibir algo diferente do que uCfg vai usar. */
+  if(fcAjustarTodos(U_NUMS))salvarEstado();
   uProdRender();
   uCpRender();
   uToggles();
