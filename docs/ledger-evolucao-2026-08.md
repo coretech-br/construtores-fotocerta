@@ -12,10 +12,10 @@ O tempo real é medido pelo **relógio dos commits**: do início do trabalho da 
 | 1 | Importador de galeria | 2–3h | **56 min** | ✅ mesclada (`0041655`) |
 | 2 | Presets de aba nas seis abas | 2–3h | 42 min até a branch | 🔄 branch `evolucao/2-presets-aba`, aguardando revisão e merge |
 | 2.5 | Interface da lista de imagens (A, B, C) + cores livres (D) | 45–75 min | 47 min até a branch | 🔄 branch `evolucao/2.5-interface-lista`, aguardando revisão e merge |
-| 3 | Preset geral | 4–5h | — | não iniciada |
+| 3 | Preset geral | 4–5h | 43 min até a branch | 🔄 branch `evolucao/3-preset-geral`, aguardando revisão e merge |
 | 4 | Exportar e importar JSON | 2–3h | — | não iniciada |
 | 5 | Painel consolidado | 3–4h | — | não iniciada |
-| | **Total** | **13–18h + 2.5** | **2h21 até aqui** | |
+| | **Total** | **13–18h + 2.5** | **3h04 até aqui** | |
 
 ## Registro por fase
 
@@ -56,6 +56,32 @@ Zero Critical, dois Important, cinco Minor. Os dois Important são as duas metad
 - **Esconder o host tirou o único lugar onde ele era legível.** A justificativa original — “o cadastro manual já garante o host” — era falsa: `sAdd` chama só `sUrlOk`. Registrado por inteiro na documentação; a decisão foi **avisar em vez de recusar**, e marcar o host **só** quando ele não é esperado.
 - **Minor.** O “corte no meio” era nominal (a pasta colapsava a 0 px, sem sinal de que havia texto antes) — `min-width:1.1em` devolve o `…` à esquerda, e o limite dos prefixos longos ficou escrito. Dois comentários descreviam caso inexistente (“dois vizinhos de cada lado”, quando `sListaVer` alinha pela borda; e `sLegEdit` como motivo da guarda de `scrollTop`, quando ela não chama `sRender`) — corrigidos para o que é verdade. Janela baixa: duas `@media` derrubam o teto, e o limite que resta (~388 px) está escrito. Caixa de código vencida: `sSaidaVence` nas cinco portas de mudança da lista.
 - **Regressão da rodada:** as **9 saídas** byte a byte idênticas às de `main` (`4d8d57d`), pelo SHA-256 de cada uma, com o mesmo `localStorage` semeado (46 fotos, dois produtos, PayPal e Pix preenchidos) e as duas versões servidas pelo mesmo `localhost`.
+
+### Fase 3 — Preset geral
+
+- **Início:** 20/08/2026, 14:49. **Branch pronta para revisão:** 20/08/2026, 15:32 (**43 min**; o real da tabela só fecha no merge).
+- **Base:** `main` = `a77c16a` (fases 1, 2 e 2.5 mescladas). **Branch:** `evolucao/3-preset-geral`. **Não mesclada.**
+- **O que foi construído:** R1 (campanha + página, nome derivado, seletor agrupado, aviso de divergência de campo operacional), R2 (aba ativa/fora com os valores preservados, barra de abas mostrando o estado, interruptor no topo de cada aba, padrão "todas fora" ao criar), R3 (cópia com marca de origem e os quatro estados dela), R5 parcial (os dois campos de "Outros códigos meus" guardados, sem consumidor — é a fase 5 que os usa) e R6 (barra sempre visível, troca bloqueada com as três saídas).
+- **O que a fase 2 deixou e foi consumido, sem nada refeito:** `coleta()`/`restaura()` por aba (via `fcPresetCapturar` e o `restaura` da própria aba — não existe segundo caminho de leitura ou escrita de campos), `pref`/`fora`/`operacionais`/`redesenhar` do registro `ABAS`, o `carimbo` por preset (é ele que distingue "a origem mudou" de "a cópia foi editada", sem guardar uma segunda cópia dos valores) e `fcCanon`/`fcValoresIguais`.
+- **Chave própria, migração de risco zero.** `fcConstrutoresGerais`; `fcConstrutores` não é tocada. Provado nos dois sentidos: estado gravado pela **própria `main`** (inclusive com biblioteca de presets nas seis abas) abre na branch sem uma linha de aviso, e a chave nova com JSON inválido derruba só a barra do preset geral — as seis abas e as seis bibliotecas voltam inteiras.
+- **Regressão:** as **9 saídas** dos seis geradores byte a byte idênticas às de `main` (SHA-256 completo de cada uma) para a mesma configuração, com as duas versões servidas pelo mesmo `localhost` e o mesmo `localStorage` semeado. **Três cenários:** Rascunho, preset geral com as seis abas ligadas e os códigos manuais preenchidos, e preset geral com uma aba fora. O `fcConstrutores` gravado sai com o **mesmo hash** nos três — a prova de que a camada nova não encosta na antiga. Varredura de IDs repetidos: `[]`, com 401 IDs (369 antes; os 32 novos são todos `fcg-…`).
+
+#### Os dois defeitos que a verificação como operador achou
+
+- **O aviso de origem mentia depois de um clique.** Ligar o redesenho da barra aos eventos `input`/`change` de `document` cobre o que se digita e **não** cobre o que se clica: adicionar foto, reordenar lista, remover produto, salvar ou remover preset de aba mudam o estado por botão. Medido: removida da biblioteca a origem de onde a aba tinha vindo, o aviso seguia dizendo *"veio de 'X', e continua igual a ele"* sobre um preset que já não existia. A correção não foi acrescentar mais um listener, foi mudar o ponto de escuta: quem acorda a barra passou a ser o `salvarEstado`, por onde toda mudança de valor desta ferramenta passa. De quebra, os dois listeners de `document` saíram.
+- **A barra grudada comia meia janela.** O painel de detalhes estava dentro do elemento `sticky`: aberto, 607 px pinados no topo. Separar a linha (55 px) do painel não bastou — `sticky` gruda dentro do bloco que a **contém**, e com a linha ainda dentro de uma caixa de 605 px ela ia embora junto (medido: `top:-547` com a página em 1200 px). A linha virou filha direta do `<body>`.
+
+#### Decisões tomadas dentro do escopo
+
+- **Renomear não conta como "alterado".** Os campos de campanha e página descrevem tanto o preset ativo quanto um que ainda vai ser criado. Se mexer neles marcasse "alterado", flipar o rádio para *Embutida* — o gesto natural de quem vai criar a segunda página — faria a pergunta de troca oferecer "salvar antes", e salvar **renomearia** a Hospedeira para Embutida. Renomear ficou sendo um passo declarado, com confirmação que mostra o nome velho e o novo.
+- **Renomear para uma combinação que já existe é recusado, não fundido.** Fundir apagaria o outro preset. Entre destruir e preservar, preserva.
+- **Aba em só-leitura entra no preset pelo último fragmento bom (`fcFrag`), e não é escrita ao aplicar.** Recusar salvar o preset geral inteiro por causa de uma aba quebrada custaria ao operador o trabalho das outras cinco. Ao aplicar, a aba é pulada e nomeada num aviso. Medido com `cmsgs` gravado como objeto: o código da campanha da Contagem (`NATAL26BARRA`) sobrevive dentro do preset geral.
+- **O selo é adiado (250 ms, timer único); a decisão nunca é.** `fcgTrocarPara` recalcula sincronamente e não lê o selo.
+- **O rótulo da aba Captação de leads passou a levar acento** (`ABAS[].nome` e os dois `prep()` da aba, na mesma grafia). `nome` é texto de interface — aparece na barra vermelha de falhas e agora também nas perguntas do preset geral e no interruptor de cada aba.
+
+#### O que a fase não fez, de propósito
+
+Exportar/importar JSON (fase 4) e o painel consolidado (fase 5). Os campos de "Outros códigos meus" são **guardados e não consumidos**, e o texto de ajuda ao lado deles diz isso — campo que parece fazer algo que ainda não faz é a mesma mentira de tela que este projeto vem desfazendo.
 
 ---
 
