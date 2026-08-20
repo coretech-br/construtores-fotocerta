@@ -11,10 +11,11 @@ O tempo real é medido pelo **relógio dos commits**: do início do trabalho da 
 |---|---|---|---|---|
 | 1 | Importador de galeria | 2–3h | **56 min** | ✅ mesclada (`0041655`) |
 | 2 | Presets de aba nas seis abas | 2–3h | 42 min até a branch | 🔄 branch `evolucao/2-presets-aba`, aguardando revisão e merge |
+| 2.5 | Interface da lista de imagens (A, B, C) | 45–75 min | — | 🔄 em execução (início 20/08 13:28) |
 | 3 | Preset geral | 4–5h | — | não iniciada |
 | 4 | Exportar e importar JSON | 2–3h | — | não iniciada |
 | 5 | Painel consolidado | 3–4h | — | não iniciada |
-| | **Total** | **13–18h** | **56 min até aqui** | |
+| | **Total** | **13–18h + 2.5** | **2h21 até aqui** | |
 
 ## Registro por fase
 
