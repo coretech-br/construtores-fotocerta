@@ -84,16 +84,34 @@
     padding:8px;margin-bottom:8px;background:#fff}
   .lista-imgs img{width:64px;height:44px;object-fit:cover;border-radius:5px;background:var(--areia);flex-shrink:0}
   .lista-imgs .info{flex:1;min-width:0}
-  /* O endereco e cortado no MEIO, nao no fim: o comeco (esquema, host e pasta da galeria) e
-     igual nas 46 fotos e nao identifica nada, enquanto o nome do arquivo carrega a data, o
-     numero da foto e o nome da familia. Duas caixas na mesma linha -- a pasta encolhe antes
-     (flex-shrink 200 contra 1) e some primeiro; o nome do arquivo so comeca a ser cortado
-     quando a pasta ja foi inteira. O endereco completo continua no title de quem passa o
-     mouse. */
-  .lista-imgs .url{display:flex;font-size:11px;color:var(--tinta-suave);min-width:0}
-  .lista-imgs .url span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex-grow:0;flex-basis:auto}
-  .lista-imgs .url .pasta{flex-shrink:200}
-  .lista-imgs .url .arq{flex-shrink:1;color:var(--tinta);font-weight:600}
+  /* Uma linha so, cortada com reticencia no fim. QUATRO renderizadores usam .url e TRES deles
+     (opcoes de Leads, e o texto e o recado curto da Contagem) poem o texto DIRETO no <div>.
+     Por isso o corte de linha unica mora aqui, no proprio .url, e nao nos filhos: com
+     display:flex no .url comum, esse texto solto vira item de flex anonimo -- que nao aceita
+     text-overflow --, e um texto sem ponto de quebra volta a ser pintado por cima do cartao,
+     enquanto um texto com espacos abre uma segunda linha. */
+  .lista-imgs .url{font-size:11px;color:var(--tinta-suave);min-width:0;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  /* Variante do slideshow, a unica que e flex: o endereco e cortado no MEIO, nao no fim. O
+     comeco (esquema, host e pasta da galeria) e igual nas 46 fotos e nao identifica nada,
+     enquanto o nome do arquivo carrega a data, o numero da foto e o nome da familia. Duas
+     caixas na mesma linha -- a pasta encolhe antes (flex-shrink 200 contra 1) e some
+     primeiro; o nome do arquivo so comeca a ser cortado quando a pasta ja virou um "...". O
+     endereco completo continua no title de quem passa o mouse. */
+  .lista-imgs .url.partida{display:flex}
+  .lista-imgs .url.partida span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex-grow:0;flex-basis:auto}
+  /* min-width de 1.1em, e nao 0: colapsando a EXATAMENTE 0 px, a pasta sumia sem deixar
+     sinal nenhum, e o nome do arquivo comecava rente a borda esquerda como se fosse o
+     endereco inteiro. 1.1em da para o text-overflow da propria pasta desenhar o "..." e mais
+     nada -- e o marcador de corte A ESQUERDA, que a reticencia do fim nao da. */
+  .lista-imgs .url.partida .pasta{flex-shrink:200;min-width:1.1em}
+  .lista-imgs .url.partida .arq{flex-shrink:1;color:var(--tinta);font-weight:600}
+  /* Host que NAO e um dos enderecos esperados da Alboom (ver sHostEsperado). So aparece
+     nessas linhas: entre 46 fotos legitimas, a linha estranha salta aos olhos em vez de se
+     disfarcar de foto normal. flex-shrink:0 para nao ser a primeira a encolher; o teto de
+     12em impede que um host comprido tome o lugar do nome do arquivo. */
+  .lista-imgs .url.partida .host{flex-shrink:0;max-width:12em;color:#B3261E;font-weight:700;
+    background:#FBEAE8;border:1px solid #E7B9B4;border-radius:4px;padding:0 4px;margin-right:4px}
   .lista-imgs input[type=text]{padding:5px 8px;font-size:13px;margin-top:4px}
   .lista-imgs .ctrl{display:flex;flex-direction:column;gap:3px}
   .lista-imgs .ctrl button{border:1px solid var(--linha);background:#fff;border-radius:6px;width:28px;height:24px;
@@ -103,6 +121,18 @@
      empurram as secoes 2, 3 e 4 da aba para 5,5 mil pixels abaixo. O teto e de 5 cartoes
      inteiros -- ver o comentario de sListaVer para o porque deste numero. */
   .lista-rolagem{max-height:520px;overflow-y:auto;padding-right:6px}
+  /* Janela baixa. O invariante que o teto existe para sustentar e "a linha da contagem e o
+     botao Limpar lista cabem na MESMA tela", e ele depende da altura da JANELA, nao so do
+     teto: da linha da contagem ate a base do botao vao o teto mais 76 px de moldura. Medido
+     com 46 fotos: 5 cartoes ocupam 596 px, 4 ocupam 492 e 3 ocupam 388. A 600 px de janela o
+     teto de 5 sobrava 4 px -- folga que some no primeiro arredondamento, e foi assim que o
+     invariante foi visto falhando. Em vez de ficar so escrito na documentacao, o teto cai
+     junto, sempre em cartoes inteiros. Os cortes ficam ACIMA do que cada teto precisa (620
+     para um teto que pede 596; 520 para um que pede 492), para nenhuma faixa comecar rente ao
+     limite. Abaixo de 388 px de janela o invariante nao se sustenta com teto nenhum: a
+     moldura sozinha ja passa disso. */
+  @media (max-height:620px){.lista-rolagem{max-height:416px}}
+  @media (max-height:520px){.lista-rolagem{max-height:312px}}
   /* Quantas fotos ha na lista. Com area de rolagem o operador deixa de ver o fim dela, e o
      numero da confirmacao de "Limpar lista" precisa poder ser conferido antes do clique. */
   .lista-conta{font-size:12px;color:var(--tinta-suave);margin:10px 0 0}
@@ -410,6 +440,7 @@
       <span class="aviso-copiado" id="s-cop">Copiado!</span>
       </h3>
       <textarea id="s-out" readonly spellcheck="false" placeholder="O código gerado aparece aqui."></textarea>
+      <p class="ajuda"><b>Mexeu na lista, a caixa esvazia.</b> Acrescentar, remover, reordenar, importar ou limpar a lista apaga o código já gerado: ele traz as fotos <b>nome por nome, na ordem</b>, então depois de qualquer uma dessas ações ele descreveria uma lista que não existe mais. Clique em <b>Gerar código</b> de novo. Mudar as configurações (intervalo, largura, proporção) <b>não</b> esvazia — ali a caixa envelhece em silêncio, como em todas as abas, e vale gerar de novo antes de copiar.</p>
       </div>
     </div>
   </div>
@@ -2592,24 +2623,56 @@ var S_URL_AVISO='O link da imagem precisa ser um endereco: http(s) completo '+
   '(//storage.alboom.ninja/foto.jpg) ou caminho a partir da raiz do site (/fotos/foto.jpg). '+
   'Texto solto, nome de arquivo do computador, outros esquemas (javascript:, data:) e barra '+
   'a mais ou barra invertida no comeco nao carregam foto nenhuma na pagina publicada.';
+/* Host do endereco, quando ha um. Aceita as tres formas que sUrlOk deixa passar: https://host,
+   //host e caminho a partir da raiz (que nao tem host nenhum, e por isso devolve vazio). */
+function sUrlHost(v){
+  var s=String(v).replace(/[\u0000-\u0020]/g,''),m;
+  m=s.match(/^https?:\/\/([^\/?#]*)/i);
+  if(m)return m[1];
+  m=s.match(/^\/\/([^\/?#]*)/);
+  if(m)return m[1];
+  return '';
+}
+/* O endereco esta num dos lugares de onde as fotos da Foto Certa costumam vir? Caminho da raiz
+   conta como esperado -- e o proprio site. Nao e validacao: sUrlOk continua sendo agnostica a
+   host de proposito, porque o operador pode ter motivo legitimo para hospedar uma foto em
+   outro lugar. Isto aqui so separa o comum do estranho, para o estranho poder ser dito. */
+function sHostEsperado(v){
+  var h=sUrlHost(v).toLowerCase(),i;
+  if(!h)return true;
+  for(i=0;i<S_HOSTS_ALBOOM.length;i++)if(h===S_HOSTS_ALBOOM[i])return true;
+  return false;
+}
 function sAdd(){
-  var url=$('s-url').value.trim();
+  var url=$('s-url').value.trim(),host;
   if(!url){alert('Informe o link da imagem.');return;}
   if(!sUrlOk(url)){alert(S_URL_AVISO);return;}
+  /* AVISA, nao recusa. O importador exige host da Alboom porque la o endereco foi colhido de
+     um texto de terceiro; aqui foi digitado pelo operador, que pode ter motivo legitimo para
+     hospedar uma foto fora do storage. O que nao pode e a foto de fora entrar em silencio e
+     depois se disfarcar de foto normal no meio de 46 -- por isso o aviso na hora, e a marca
+     do host no cartao, que fica. */
+  host=sUrlHost(url);
+  if(!sHostEsperado(url)&&!confirm('Esta foto não está no storage da Alboom: o endereço aponta para “'+host+'”. Isso é permitido — pode ser uma foto que você hospedou em outro lugar —, mas confira se o endereço é mesmo esse, porque a foto será carregada de lá na página publicada. Na lista ao lado ela aparece com o host em destaque. Adicionar mesmo assim?'))return;
   sImgs.push({url:url,legenda:$('s-leg').value.trim()});
   $('s-url').value='';$('s-leg').value='';
-  sRender();salvarEstado();sPreview();
+  sRender();salvarEstado();sPreview();sSaidaVence();
 }
 /* Traz de volta para dentro da area de rolagem o cartao da posicao i. Sem isto, subir ou
    descer uma foto que esta na borda visivel a manda para fora do quadro e o operador perde de
    vista justamente o item que acabou de mover -- ele continuaria clicando na seta, so que
    agora sobre a foto que tomou o lugar.
    Por que 520 px de teto (a regra .lista-rolagem): o cartao mede 96 px mais 8 px de respiro,
-   entao 520 sao exatamente CINCO cartoes inteiros. Cinco e o menor numero que mantem o item
-   movido e os dois vizinhos de cada lado a vista, que e o que torna a troca legivel; e o teto
-   ainda cabe, com a moldura do fieldset, dentro de uma janela de 800 px de altura -- area de
+   entao 520 sao exatamente CINCO cartoes inteiros -- o item movido mais QUATRO vizinhos.
+   Onde ficam esses quatro: as duas contas abaixo alinham o item pela BORDA da area, entao
+   descendo o item para na base e os quatro aparecem ACIMA dele, e subindo ele para no topo e
+   os quatro aparecem ABAIXO. Nos dois casos os quatro sao as posicoes por onde ele acabou de
+   passar, que e justamente o trecho que precisa ficar legivel para a troca fazer sentido.
+   (Nao sao dois de cada lado: alinhamento pela borda nao centraliza nada.) E o teto ainda
+   cabe, com a moldura do fieldset, dentro de uma janela de 800 px de altura -- area de
    rolagem mais alta que a janela obrigaria a rolar a pagina para ver o fim da propria area de
-   rolagem, que e a segunda metade do incomodo que este ajuste veio resolver.
+   rolagem, que e a segunda metade do incomodo que este ajuste veio resolver. Em janela baixa
+   o teto cai para 4 e depois para 3 cartoes; ver as @media de .lista-rolagem.
    Contas em offsetTop, e nao scrollIntoView: o scrollIntoView tambem rola a PAGINA, e a lista
    voltaria ao lugar as custas de a aba inteira saltar debaixo do operador. */
 function sListaVer(i){
@@ -2622,18 +2685,32 @@ function sListaVer(i){
 function sMove(i,d){
   var j=i+d;if(j<0||j>=sImgs.length)return;
   var t=sImgs[i];sImgs[i]=sImgs[j];sImgs[j]=t;
-  sRender();salvarEstado();sPreview();
+  sRender();salvarEstado();sPreview();sSaidaVence();
   sListaVer(j);
 }
-function sDel(i){sImgs.splice(i,1);sRender();salvarEstado();sPreview();}
+function sDel(i){sImgs.splice(i,1);sRender();salvarEstado();sPreview();sSaidaVence();}
+/* A caixa de codigo vence quando a LISTA muda. Medido antes disto: com 46 fotos geradas,
+   "Limpar lista" deixava a tela dizendo "Adicione imagens" e a caixa com os mesmos 17462
+   caracteres de antes -- um clique so separava as duas. Tela e codigo gerado discordando e a
+   classe de defeito recorrente deste projeto, entao a caixa esvazia em vez de mentir.
+   Vale para as CINCO portas de mudanca da lista (sAdd, sDel, sMove, sListaLimpar,
+   sImpAplicar), e nao so para as que esvaziam: a lista e a unica parte desta aba que o bloco
+   gerado reproduz LITERALMENTE (o vetor de url e legenda, na ordem), entao lista mudada e
+   bloco que nomeia foto que nao esta mais la, ou na ordem errada. Mudar o intervalo tambem
+   deixa a caixa velha -- isso e verdade nas seis abas e nao se conserta aqui sozinho.
+   Nao mexe na previa: ela roda o gerador a cada mudanca e ja esta certa. */
+function sSaidaVence(){
+  var o=$('s-out');
+  if(o&&o.value)o.value='';
+}
 /* Esvazia SO a lista de imagens -- as configuracoes da apresentacao ficam. E acao destrutiva
    sem desfazer, entao a confirmacao diz o numero (conferivel na linha acima da lista) e diz o
    que NAO acontece, na mesma redacao que a remocao de preset ja usa. */
 function sListaLimpar(){
   var n=sImgs.length;
   if(!n)return;
-  if(!confirm('Remover '+(n===1?'a única imagem':'as '+n+' imagens')+' da lista? Isto esvazia só a lista desta aba — as configurações da apresentação ficam como estão e nenhum código já colado no site é afetado. Não há como desfazer.'))return;
-  sImgs=[];sRender();salvarEstado();sPreview();
+  if(!confirm('Remover '+(n===1?'a única imagem':'as '+n+' imagens')+' da lista? Isto esvazia só a lista desta aba — as configurações da apresentação ficam como estão e nenhum código já colado no site é afetado. O código na caixa ao lado é apagado junto, porque descreveria uma lista que não existe mais. Não há como desfazer.'))return;
+  sImgs=[];sRender();salvarEstado();sPreview();sSaidaVence();
 }
 /* Separa o endereco em pasta e nome do arquivo. O corte e a ultima barra do CAMINHO: procurar
    no endereco inteiro faria uma barra dentro da query (?x=a/b) virar o corte e o "nome do
@@ -2649,8 +2726,11 @@ function sUrlPartes(u){
 function sLegEdit(i,v){sImgs[i].legenda=v;salvarEstado();sPreview();}
 function sRender(){
   var ul=$('s-lista');
-  /* A posicao da rolagem e guardada e reposta porque redesenhar apaga o conteudo: sem isto,
-     editar a legenda da foto 40 jogaria a lista de volta para a foto 1 a cada tecla. */
+  /* A posicao da rolagem e guardada e reposta porque redesenhar apaga o conteudo, e a lista
+     zerada volta com scrollTop 0. Quem precisa disto sao sDel e sMove, os dois caminhos que
+     chamam sRender com a lista rolada: sem a guarda, remover ou mover a foto 40 devolveria a
+     lista para a foto 1 e o operador perderia de vista o trecho em que estava trabalhando.
+     Editar legenda NAO passa por aqui -- sLegEdit so grava e remonta a previa. */
   var rolagem=ul.scrollTop;
   ul.innerHTML='';
   $('s-vazio').style.display=sImgs.length?'none':'block';
@@ -2662,7 +2742,19 @@ function sRender(){
     var img=document.createElement('img');img.src=im.url;img.alt='';
     var info=document.createElement('div');info.className='info';
     var partes=sUrlPartes(im.url);
-    var url=document.createElement('div');url.className='url';url.title=im.url;
+    var url=document.createElement('div');url.className='url partida';url.title=im.url;
+    /* O host so aparece quando NAO e um dos enderecos esperados da Alboom. Com o corte no
+       meio, a pasta encolhe ate virar "..." -- e junto com ela some o host, que era o unico
+       lugar da tela onde dava para ver que uma foto vinha de outro servidor. Mostrar o host em
+       TODAS as linhas devolveria o ruido que o corte no meio veio tirar (as 46 repetem o mesmo
+       host); mostrar so nas estranhas faz o contrario do que acontecia antes desta marca, em
+       que a foto de fora se disfarcava de foto normal. */
+    if(!sHostEsperado(im.url)){
+      var host=document.createElement('span');host.className='host';
+      host.textContent=sUrlHost(im.url);
+      host.title='Esta foto não está no storage da Alboom.';
+      url.appendChild(host);
+    }
     var pasta=document.createElement('span');pasta.className='pasta';pasta.textContent=partes.pasta;
     var arq=document.createElement('span');arq.className='arq';arq.textContent=partes.arq;
     url.appendChild(pasta);url.appendChild(arq);
@@ -2767,14 +2859,18 @@ function sImpNormal(fonte){return String(fonte||'').replace(/\\\//g,'/');}
    ('127.0.0.1:8979') e host vazio ('https:///...'). Comparar por sufixo -- "termina em
    alboom.ninja" -- aceitaria 'evil-alboom.ninja' e 'alboom.ninja.evil.example'.
    sUrlOk NAO serve para isto: ela e agnostica a host de proposito, porque o cadastro manual
-   aceita foto de qualquer lugar. Esta lista vale so para o importador, onde o endereco nao
-   foi digitado pelo operador e sim colhido de um texto de terceiro. */
-var S_IMP_HOSTS=['storage.alboom.ninja','alfred.alboompro.com'];
+   aceita foto de qualquer lugar. Como TRAVA, esta lista vale so para o importador, onde o
+   endereco nao foi digitado pelo operador e sim colhido de um texto de terceiro.
+   A MESMA lista tem um segundo uso, e por isso o nome nao e mais S_IMP_HOSTS: sHostEsperado a
+   consulta para decidir se o cartao da lista mostra o host em destaque. La ela nao recusa
+   nada -- so separa o comum do estranho. Manter uma lista so evita o pior caso, que e um host
+   entrar na trava do importador e continuar marcado como estranho na lista (ou o contrario). */
+var S_HOSTS_ALBOOM=['storage.alboom.ninja','alfred.alboompro.com'];
 function sImpHostOk(url){
   var m=String(url).match(/^https:\/\/([^\/?#]*)/),h,i;
   if(!m)return false;
   h=m[1].toLowerCase();
-  for(i=0;i<S_IMP_HOSTS.length;i++)if(h===S_IMP_HOSTS[i])return true;
+  for(i=0;i<S_HOSTS_ALBOOM.length;i++)if(h===S_HOSTS_ALBOOM[i])return true;
   return false;
 }
 /* A classe de caracteres da extracao para em ', <, >, ) ou espaco. Um nome de arquivo com um
@@ -2848,7 +2944,7 @@ function sImpExtrai(fonte,pasta){
    Descarte que nao aparece em lugar nenhum e a falha muda que motivou tres destes itens. */
 function sImpDescartes(a){
   var p=[];
-  if(a.forasteiras)p.push('<b>'+a.forasteiras+'</b> por não estarem no storage da Alboom (<i>'+S_IMP_HOSTS.join('</i>, <i>')+'</i>)');
+  if(a.forasteiras)p.push('<b>'+a.forasteiras+'</b> por não estarem no storage da Alboom (<i>'+S_HOSTS_ALBOOM.join('</i>, <i>')+'</i>)');
   if(a.quebradas)p.push('<b>'+a.quebradas+'</b> por terem o nome do arquivo cortado, o que daria foto quebrada na página publicada');
   if(a.invalidas)p.push('<b>'+a.invalidas+'</b> por não formarem um endereço válido');
   if(!p.length)return '';
@@ -3051,6 +3147,7 @@ function sImpAplicar(){
   sImpAchado=null;
   sImpToggles();
   sRender();salvarEstado();sPreview();
+  if(ok)sSaidaVence();
   var msg='Pronto: <b>'+ok+(ok===1?' foto':' fotos')+'</b> d'+artigo+' '+escHtml(rotulo)+(ok?' na lista ao lado':'')+'. A lista agora tem <b>'+sImgs.length+'</b>.';
   if(modo==='900')msg+=' Tamanho: reduzidas para '+S_IMP_LARG+' px.';
   if(leg)msg+=' Legenda: “'+escHtml(leg)+'”.';

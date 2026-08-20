@@ -48,6 +48,15 @@ O tempo real é medido pelo **relógio dos commits**: do início do trabalho da 
 - **Regressão:** as **9 saídas** dos seis geradores byte a byte idênticas às de `main`, com o mesmo `localStorage` (SHA-256 do estado semeado igual dos dois lados) e as duas versões servidas pelo mesmo `localhost`. Varredura de IDs repetidos: `[]`, com 369 IDs (367 antes; os dois novos são `s-conta` e `s-lista-limpar`).
 - **O que a fase não fez, de propósito:** largura da ferramenta e número de colunas continuam onde estavam. É o achado D do dono, e ele vai na fase 5 junto com o painel consolidado — decidir o envelope de layout agora seria decidi-lo às cegas e refazê-lo depois.
 
+#### Rodada de correção da fase 2.5 (revisão de 20/08/2026)
+
+Zero Critical, dois Important, cinco Minor. Os dois Important são as duas metades de um mesmo erro: **a correção olhou só para a lista que estava sendo consertada.**
+
+- **A correção do vazamento quebrou as outras três listas.** Mover `white-space/overflow/text-overflow` de `.url` para `.url span` só funciona onde existem `span` — e só `sRender` os cria. Nas opções de Leads e nas duas caixas de mensagem da Contagem o texto vai direto no `<div>`, que virou `display:flex`: o texto passou a **item de flex anônimo**, que não aceita `text-overflow`. Medido a 1280 px com 113 caracteres sem espaço: **672 px de conteúdo em caixa de 417** (255 px pintados fora do cartão) e rolagem horizontal na página (1342 contra 1265); com espaços, quebrava em duas linhas. A correção separa as duas coisas — corte de uma linha no `.url` (as quatro listas), `display:flex` só na variante `.partida` (o slideshow). Depois: as **quatro** listas cortam em **uma linha**, **0 px** pintados fora, fieldset de 507 px e página sem rolagem horizontal, a 1600, 1280 e 700 px. (A 700 px resta 11 px de estouro **da barra de abas**, `aba-cnt` terminando em 696 contra 685 — idêntico em `main`, portanto pré-existente e alheio às listas.)
+- **Esconder o host tirou o único lugar onde ele era legível.** A justificativa original — “o cadastro manual já garante o host” — era falsa: `sAdd` chama só `sUrlOk`. Registrado por inteiro na documentação; a decisão foi **avisar em vez de recusar**, e marcar o host **só** quando ele não é esperado.
+- **Minor.** O “corte no meio” era nominal (a pasta colapsava a 0 px, sem sinal de que havia texto antes) — `min-width:1.1em` devolve o `…` à esquerda, e o limite dos prefixos longos ficou escrito. Dois comentários descreviam caso inexistente (“dois vizinhos de cada lado”, quando `sListaVer` alinha pela borda; e `sLegEdit` como motivo da guarda de `scrollTop`, quando ela não chama `sRender`) — corrigidos para o que é verdade. Janela baixa: duas `@media` derrubam o teto, e o limite que resta (~388 px) está escrito. Caixa de código vencida: `sSaidaVence` nas cinco portas de mudança da lista.
+- **Regressão da rodada:** as **9 saídas** byte a byte idênticas às de `main` (`4d8d57d`), pelo SHA-256 de cada uma, com o mesmo `localStorage` semeado (46 fotos, dois produtos, PayPal e Pix preenchidos) e as duas versões servidas pelo mesmo `localhost`.
+
 ---
 
 ## Referência: as seis fases anteriores
