@@ -160,6 +160,16 @@
   .l-pv-moldura iframe{border:0;display:block;background:#fff}
   .l-alerta{background:#FFF6DF;border:1px solid #E3B23C;color:#6B5210}
   .l-alerta b{color:#6B5210}
+
+  /* Previa do checkout: mesma tecnica da Contagem, do Slideshow e do Leads -- o bloco gerado
+     roda dentro de um iframe de mesma origem. Nao ha estilo de carrinho aqui de proposito:
+     quem pinta o carrinho e o CSS que o proprio gerador emite. */
+  .u-pv-modos{display:flex;gap:8px;align-items:center;margin:0 0 10px}
+  .u-pv-modos .rotulo{font-size:12px;color:var(--tinta-suave)}
+  .u-pv-moldura{overflow:hidden;margin:0 auto;background:#fff;border:1px solid var(--linha);border-radius:8px}
+  .u-pv-moldura iframe{border:0;display:block;background:#fff}
+  .u-alerta{background:#FFF6DF;border:1px solid #E3B23C;color:#6B5210}
+  .u-alerta b{color:#6B5210}
 </style>
 </head>
 <body>
@@ -934,12 +944,19 @@
   <div class="secao"><span class="secao-n">4</span> Prévia e código gerado</div>
   <div class="acoes" style="margin-bottom:14px">
     <button class="botao" id="u-gerar">Gerar código</button>
+    <button class="botao claro" id="u-atualizar">Atualizar prévia</button>
   </div>
   <div class="grade">
     <div>
       <div class="pv-area">
+        <div class="u-pv-modos">
+          <span class="rotulo">Ver como:</span>
+          <button type="button" class="botao mini" id="u-pv-desk" aria-pressed="true">Computador</button>
+          <button type="button" class="botao mini claro" id="u-pv-cel" aria-pressed="false">Celular</button>
+        </div>
         <div id="u-pv-box"></div>
       </div>
+      <p class="ajuda">A prévia roda o código gerado de verdade: é o mesmo bloco que sai na saída ao lado, executando dentro de um quadro isolado — dá para marcar produtos, mudar quantidade, aplicar cupom e gerar o Pix. O que ainda <b>difere da página publicada</b>: no lugar dos botões do PayPal aparece um retângulo tracejado, porque a prévia não carrega o SDK do PayPal (isso evitaria mandar seu Client ID para fora a cada tecla digitada e evitaria uma mensagem de erro falsa enquanto o campo está vazio); o QR Code é real, mas depende da biblioteca do cdnjs — sem internet ele some e só o Copia e Cola aparece; o quadro não carrega o CSS do tema do site; e o botão "Já paguei" abre o WhatsApp de verdade se você clicar.</p>
     </div>
     <div>
       <div class="saida">
@@ -3896,82 +3913,151 @@ document.addEventListener('change',function(e){
   if(e.target.name&&e.target.name.indexOf('u-')===0)uToggles();
 });
 
-/* ===== previa ===== */
-function uPreview(){
+/* ===== previa =====
+   A previa EXECUTA o bloco gerado dentro de um iframe de mesma origem, como a Contagem
+   regressiva, o Slideshow e a Captacao de leads. A versao anterior redesenhava o carrinho com
+   codigo proprio: uma segunda implementacao, que ja tinha divergido uma vez -- ela mostrava o
+   primeiro produto marcado e um total enquanto o carrinho publicado abria zerado. Com sinal,
+   quantidade e resumo entrando na conta, manter duas implementacoes seria multiplicar por tres
+   o numero de lugares onde a divergencia pode nascer. Agora ha um gerador so: uBloco. */
+
+/* Duas trocas, as duas do AMBIENTE da previa -- o bloco entregue nao muda nem um byte.
+   1. localStorage/sessionStorage viram objetos em memoria. O carrinho de hoje nao grava nada,
+      mas o shim entra pelo mesmo motivo das outras abas: a previa nunca pode sujar as chaves
+      reais da origem da ferramenta, e a conferencia abaixo avisa em vermelho se a troca nao
+      pegar (setItem no Storage real nao lanca, entao a falha seria muda).
+   2. O SDK do PayPal nao e baixado. Carrega-lo de verdade mandaria o Client ID do operador
+      para fora a cada remontagem da previa e, com o campo ainda vazio, o carrinho mostraria a
+      mensagem de erro de pagamento -- um erro falso. No lugar dele entra o mesmo desenho que a
+      previa antiga ja usava (mockPP), com etiqueta dizendo que e desenho. O bloco continua
+      pedindo o SDK exatamente como na pagina publicada; quem responde e o ambiente. */
+function uPvShim(cfg){
+  var s='';
+  s+='<scr'+'ipt>\n(function(){\n';
+  s+='  function memoria(){\n';
+  s+='    var d={};\n';
+  s+='    return {\n';
+  s+='      getItem:function(k){k=String(k);return Object.prototype.hasOwnProperty.call(d,k)?d[k]:null;},\n';
+  s+='      setItem:function(k,v){d[String(k)]=String(v);},\n';
+  s+='      removeItem:function(k){delete d[String(k)];},\n';
+  s+='      clear:function(){d={};},\n';
+  s+='      key:function(i){var ks=Object.keys(d);return i<ks.length?ks[i]:null;},\n';
+  s+='      get length(){return Object.keys(d).length;},\n';
+  s+='      fcPvMemoria:true\n';
+  s+='    };\n  }\n';
+  s+='  function trocar(nome){\n';
+  s+='    var falso=memoria();\n';
+  s+='    try{Object.defineProperty(window,nome,{value:falso,configurable:true});return;}catch(e){}\n';
+  s+='    try{Object.defineProperty(Object.getPrototypeOf(window),nome,{value:falso,configurable:true});}catch(e){}\n';
+  s+='  }\n';
+  s+='  function instalado(nome){\n';
+  s+='    try{return !!(window[nome]&&window[nome].fcPvMemoria===true);}catch(e){return false;}\n';
+  s+='  }\n';
+  s+="  trocar('localStorage');trocar('sessionStorage');\n";
+  s+='  var falhou=[];\n';
+  s+="  if(!instalado('localStorage'))falhou.push('localStorage');\n";
+  s+="  if(!instalado('sessionStorage'))falhou.push('sessionStorage');\n";
+  s+='  if(falhou.length){\n';
+  s+="    var av=document.createElement('div');\n";
+  s+="    av.id='u-pv-aviso-shim';\n";
+  s+='    av.setAttribute(\'style\',\'background:#8C1D18;color:#FDFBF6;font:600 12px/1.45 -apple-system,BlinkMacSystemFont,sans-serif;padding:8px 12px\');\n';
+  s+="    av.textContent='Aviso da previa: nao foi possivel isolar o '+falhou.join(' e ')+" +
+     "' deste quadro. A previa esta gravando nas chaves reais do navegador. O codigo gerado ao lado nao e afetado.';\n";
+  s+='    document.body.appendChild(av);\n';
+  s+='  }\n';
+  if(cfg.usaPP){
+    s+="  var DESENHO_PP='"+escJs(mockPP(cfg.ppcor))+"';\n";
+    s+='  var inserir=document.head.appendChild;\n';
+    s+='  document.head.appendChild=function(n){\n';
+    s+="    if(n&&n.tagName==='SCRIPT'&&/paypal\\.com/.test(String(n.src||''))){\n";
+    s+='      window.paypal={Buttons:function(){return {render:function(alvo){\n';
+    s+='        if(!alvo)return;\n';
+    s+="        alvo.innerHTML='<div style=\"border:1px dashed #b9b3a4;border-radius:8px;padding:6px 8px 10px\">'+\n";
+    s+="          '<div style=\"font:600 10px/1.4 -apple-system,BlinkMacSystemFont,sans-serif;color:#8a8375;text-align:center;text-transform:uppercase;letter-spacing:.06em\">desenho: o SDK do PayPal nao roda na previa</div>'+\n";
+    s+="          DESENHO_PP+'</div>';\n";
+    s+='      }};}};\n';
+    s+='      setTimeout(function(){if(n.onload)n.onload();},0);\n';
+    s+='      return n;\n';
+    s+='    }\n';
+    s+='    return inserir.call(document.head,n);\n';
+    s+='  };\n';
+  }
+  s+='})();\n</scr'+'ipt>\n';
+  return s;
+}
+/* Sem conteudo abaixo do carrinho nao da para ver onde ele termina nem rolar ate a area do Pix
+   depois de gerar. Blocos cinzentos e mudos, de proposito. */
+function uPvEnchimento(){
+  var s='',i;
+  for(i=0;i<8;i++)s+='<div class="u-pv-falso">conteudo da sua pagina</div>';
+  return s;
+}
+function uPvDoc(cfg){
+  var h='';
+  h+='<!DOCTYPE html>\n<html lang="pt-br">\n<head>\n<meta charset="utf-8">\n';
+  h+='<meta name="viewport" content="width=device-width,initial-scale=1">\n';
+  h+='<sty'+'le>\n';
+  h+='html,body{margin:0;padding:0}\n';
+  h+='body{background:#FFFFFF;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Ubuntu,sans-serif;padding:16px 12px}\n';
+  h+='.u-pv-falso{background:#EDEAE1;color:#A9A294;border-radius:6px;margin:10px 0;padding:0 14px;';
+  h+='height:70px;display:flex;align-items:center;font-size:12px;letter-spacing:.04em}\n';
+  h+='</sty'+'le>\n</head>\n<body>\n';
+  h+=uPvShim(cfg);
+  h+=uBloco(cfg);
+  h+=uPvEnchimento();
+  h+='\n</body>\n</html>';
+  return h;
+}
+/* O carrinho nao tem media query propria: quem manda na largura e o max-width do card. As duas
+   larguras logicas existem para o operador ver o card no espaco de um celular (onde ele ocupa
+   a tela inteira) e no espaco de um monitor (onde ele para no max-width configurado). */
+function uPvLargura(cfg){
+  if(uPvModo==='cel')return 380;
+  return Math.max(920,cfg.larg+240);
+}
+var uPvTimer=null,uPvModo='desk';
+var U_PV_ALTURA=560;
+function uPvMontar(){
   var box=$('u-pv-box');if(!box)return;
-  var m=radio('u-metodo')||'ambos';
-  var usaPP=(m!=='pix'),usaPix=(m!=='paypal');
-  var c1=$('u-c1-t').value;if(!corValida(c1))c1='#075E54';
-  var c2=$('u-c2-t').value;if(!corValida(c2))c2='#ffffff';
-  var c3=$('u-c3-t').value;if(!corValida(c3))c3='#333333';
-  var larg=parseInt($('u-largura').value,10);if(isNaN(larg)||larg<240)larg=420;
-  var descpix=parseFloat(String($('u-descpix').value).replace(',','.'));if(isNaN(descpix)||descpix<0)descpix=0;if(descpix>90)descpix=90;
-  if(m!=='ambos')descpix=0;
-  var zap=(radio('u-zap')==='sim')&&usaPix;
-  var multi=(uProds.length>1);
-  var selprod=radio('u-selprod')||'unico';
-  var total=0;
-
-  function marca(checada,redondo){
-    return '<span style="display:inline-block;width:16px;height:16px;min-width:16px;border:2px solid '+(checada?c1:'#b9b3a4')+';border-radius:'+(redondo?'50%':'4px')+';margin-right:8px;vertical-align:-3px;box-sizing:border-box;'+(checada?('background:'+c1):'background:#fff')+'"></span>';
-  }
-
-  var h='<div style="max-width:'+Math.min(larg,380)+'px;margin:0 auto;background:'+c2+';border:1px solid #e3ddcc;border-radius:16px;padding:18px 20px;color:'+c3+';box-shadow:0 6px 20px rgba(0,0,0,.08);text-align:left">';
-  h+='<div style="font-size:17px;font-weight:700;color:'+c1+';margin-bottom:10px">'+escHtml($('u-t1').value)+'</div>';
-
-  if(!uProds.length){
-    h+='<div style="font-size:13px;color:#999;padding:10px 0">Cadastre ao menos um produto para ver a previa.</div>';
-  }else{
-    if(multi)h+='<div style="font-size:13px;font-weight:600;margin:0 0 4px">'+escHtml($('u-t7').value)+'</div>';
-    uProds.forEach(function(p,i){
-      var preco=parseFloat(String(p.preco).replace(',','.'))||0;
-      /* O ternario que estava aqui tinha os dois ramos identicos -- residuo de uma intencao
-         que so ficou de pe na previa: pre-marcar o primeiro produto nos dois modos. O bloco
-         gerado so pre-marcava no modo radio, e por isso a previa mostrava 1 marcado e
-         R$ 420,00 enquanto o carrinho publicado abria com 0 marcados e R$ 0,00. Quem mudou
-         foi o GERADO (ver uGerar): carrinho que abre zerado nao e so infidelidade da previa,
-         e o estado inicial que levava total zero para o PayPal. Agora os dois concordam. */
-      var ativo=multi?(i===0):true;
-      h+='<div style="padding:8px 0;border-bottom:1px solid #eee">';
-      h+='<div style="display:flex;justify-content:space-between;gap:10px;font-weight:600;align-items:center"><span>'+(multi?marca(ativo,selprod!=='multiplo'):'')+escHtml(p.nome)+'</span><span>'+uFmt(preco)+'</span></div>';
-      if(p.desc)h+='<div style="font-size:12px;color:#777;margin-left:'+(multi?'24px':'0')+'">'+escHtml(p.desc)+'</div>';
-      if(ativo)total+=preco;
-      var itens=(p.ops||[]).map(function(o){return {nome:o.nome,preco:parseFloat(String(o.preco).replace(',','.'))||0};});
-      if(p.opsel!=='multiplo'&&p.opnenhum==='sim'&&itens.length)itens.unshift({nome:'Sem opcional',preco:0,nenhum:true});
-      if(itens.length&&ativo){
-        h+='<div style="margin:6px 0 2px 0;padding-left:'+(multi?'24px':'0')+'">';
-        h+='<div style="font-size:12px;font-weight:600;margin-bottom:2px">'+escHtml($('u-t2').value)+'</div>';
-        itens.forEach(function(op,j){
-          var opAtivo=(p.opsel!=='multiplo')&&(j===0);
-          h+='<div style="display:flex;justify-content:space-between;gap:10px;padding:3px 0;font-size:13px;align-items:center"><span>'+marca(opAtivo,p.opsel!=='multiplo')+escHtml(op.nome)+'</span><span>'+(op.nenhum?'':('+ '+uFmt(op.preco)))+'</span></div>';
-          if(opAtivo&&!op.nenhum)total+=op.preco;
-        });
-        h+='</div>';
-      }
-      h+='</div>';
-    });
-  }
-
-  if(uCps.length){
-    h+='<div style="margin:10px 0"><div style="font-size:13px;font-weight:600;margin-bottom:4px">Cupom de desconto</div>';
-    h+='<div style="display:flex;gap:8px"><span style="flex:1;border:1px solid #ccc;border-radius:8px;padding:8px 10px;font-size:13px;color:#999">'+escHtml(uCps[0].codigo||'CUPOM')+'</span><span style="background:'+c1+';color:#fff;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:600">Aplicar</span></div></div>';
-  }
-  h+='<div style="display:flex;justify-content:space-between;padding:10px 0;border-top:2px solid '+c1+';font-size:16px;font-weight:700;color:'+c1+';margin-top:8px"><span>'+escHtml($('u-t3').value)+'</span><span>'+uFmt(total)+'</span></div>';
-  if(descpix>0)h+='<div style="display:flex;justify-content:space-between;gap:10px;padding:4px 0 0;font-size:14px;color:#1e7e34;font-weight:700"><span>Pagando via Pix (-'+descpix+'%)</span><span>'+uFmt(Math.round(total*(1-descpix/100)*100)/100)+'</span></div>';
-  if(usaPP)h+=mockPP(radio('u-ppcor')||'gold');
-  if(usaPix){
-    if(usaPP)h+='<div style="display:flex;align-items:center;gap:10px;margin:12px 0 8px;font-size:12px;color:#999"><span style="flex:1;height:1px;background:#e0e0e0"></span>ou pague com Pix'+(descpix>0?(' com '+descpix+'% de desconto'):'')+'<span style="flex:1;height:1px;background:#e0e0e0"></span></div>';
-    h+='<div style="'+(usaPP?'':'margin-top:12px;')+'background:'+c1+';border-radius:8px;padding:12px;text-align:center;font-weight:700;color:#fff">'+escHtml($('u-t4').value)+'</div>';
-    h+='<div style="margin-top:10px;text-align:center"><span style="display:inline-block;width:100px;height:100px;background:repeating-conic-gradient(#333 0 25%,#fff 0 50%) 0 0/20px 20px;border:5px solid #fff;box-shadow:0 0 0 1px #ddd"></span>';
-    h+='<div style="font-size:11px;color:#999;margin-top:4px">QR Code e Pix Copia e Cola aparecem aqui apos gerar</div></div>';
-    if(zap)h+='<div style="margin-top:8px;background:#25D366;border-radius:8px;padding:10px;text-align:center;font-weight:600;color:#fff;font-size:13px">Ja paguei \u2014 avisar no WhatsApp</div>';
-  }
-  /* Legenda no formato novo: declara o que ainda difere da pagina publicada, em vez de
-     descrever o que a previa faz. A frase antiga ("o total considera a primeira opcao
-     marcada") era verdadeira na previa e falsa no bloco entregue -- a previa afirmava o
-     contrario do que o codigo fazia. */
-  h+='</div><p style="font-size:12px;color:var(--tinta-suave);text-align:center;margin:10px 0 0">Prévia do carrinho. <b>Ainda difere da página publicada:</b> os botões do PayPal são desenhos, não os botões reais; o QR é um quadriculado falso; a largura está limitada a 380 px para caber nesta coluna; e o campo de cupom é ilustrativo (aqui ele não aplica desconto nenhum). O que <b>confere</b> com o código gerado: os produtos e opcionais pré-marcados, o total inicial e as cores.</p>';
-  box.innerHTML=h;
+  var cfg=uCfg();
+  var larg=uPvLargura(cfg);
+  var disp=box.clientWidth||440;
+  var k=Math.min(1,disp/larg);
+  /* trocar o iframe inteiro e o jeito barato de parar o bloco anterior: os listeners dele e o
+     script do QR Code morrem junto com o documento. */
+  box.innerHTML='';
+  var moldura=document.createElement('div');
+  moldura.className='u-pv-moldura';
+  moldura.style.width=Math.round(larg*k)+'px';
+  moldura.style.height=U_PV_ALTURA+'px';
+  var ifr=document.createElement('iframe');
+  ifr.id='u-pv-frame';
+  ifr.setAttribute('title','Previa do carrinho de checkout');
+  ifr.style.width=larg+'px';
+  ifr.style.height=Math.round(U_PV_ALTURA/k)+'px';
+  ifr.style.transform='scale('+k+')';
+  ifr.style.transformOrigin='top left';
+  moldura.appendChild(ifr);
+  box.appendChild(moldura);
+  var doc=ifr.contentDocument||(ifr.contentWindow&&ifr.contentWindow.document);
+  if(!doc)return;
+  doc.open();doc.write(uPvDoc(cfg));doc.close();
+}
+/* Remontar o iframe a cada tecla digitada custa caro e pisca. O debounce segura as mudancas de
+   campo; "Atualizar previa", a troca de modo e o botao de gerar passam direto. O timer e UNICO
+   e sempre cancelado antes de agendar outro. */
+function uPreview(imediato){
+  if(uPvTimer){clearTimeout(uPvTimer);uPvTimer=null;}
+  if(imediato){uPvMontar();return;}
+  uPvTimer=setTimeout(function(){uPvTimer=null;uPvMontar();},400);
+}
+function uPvBotoes(){
+  var d=$('u-pv-desk'),c=$('u-pv-cel');
+  if(d){d.className='botao mini'+(uPvModo==='desk'?'':' claro');d.setAttribute('aria-pressed',uPvModo==='desk'?'true':'false');}
+  if(c){c.className='botao mini'+(uPvModo==='cel'?'':' claro');c.setAttribute('aria-pressed',uPvModo==='cel'?'true':'false');}
+}
+function uPvModoSet(m){
+  uPvModo=m;uPvBotoes();uPreview(true);
 }
 document.addEventListener('input',function(e){
   var al=(e.target.id&&e.target.id.indexOf('u-')===0)||(e.target.name&&e.target.name.indexOf('u-')===0);
@@ -4031,14 +4117,42 @@ function uChaveErro(chave,bruta){
   return '';
 }
 
+/* ===== configuracao da aba =====
+   Uma leitura so da interface, ja presa nas faixas. E o que uGerar valida, e e o que uBloco
+   monta -- e como a previa passou a executar o retorno de uBloco, nao sobrou nenhuma segunda
+   implementacao do carrinho para divergir do bloco entregue. */
+function uCfg(){
+  var m=radio('u-metodo')||'ambos';
+  var usaPix=(m!=='paypal');
+  var descpix=parseFloat(String($('u-descpix').value).replace(',','.'));
+  if(isNaN(descpix)||descpix<0)descpix=0;if(descpix>90)descpix=90;
+  if(m!=='ambos')descpix=0;
+  var larg=parseInt($('u-largura').value,10);if(isNaN(larg)||larg<240)larg=420;
+  return {
+    m:m, usaPP:(m!=='pix'), usaPix:usaPix,
+    client:$('u-client').value.trim(),
+    moeda:usaPix?'BRL':(radio('u-moeda')||'BRL'),
+    chave:$('u-chave').value,
+    nomer:$('u-nomer').value.trim(),
+    cidade:$('u-cidade').value.trim(),
+    cod:$('u-cod').value.trim(),
+    zap:usaPix&&(radio('u-zap')==='sim'),
+    zapnum:String($('u-zapnum').value).replace(/\D/g,''),
+    larg:larg, ppcor:radio('u-ppcor')||'gold', descpix:descpix,
+    selprod:radio('u-selprod')||'unico',
+    prods:uProds, cps:uCps,
+    c1:corSegura('u-c1','#075E54'), c2:corSegura('u-c2','#ffffff'), c3:corSegura('u-c3','#333333'),
+    t1:$('u-t1').value, t2:$('u-t2').value, t3:$('u-t3').value, t4:$('u-t4').value,
+    t5:$('u-t5').value, t6:$('u-t6').value, t7:$('u-t7').value
+  };
+}
+
 /* ===== gerador ===== */
 function uGerar(){
   var m=radio('u-metodo')||'ambos';
   var usaPP=(m!=='pix'),usaPix=(m!=='paypal');
   if(!uProds.length){alert('Cadastre ao menos um produto.');return;}
-  var client=escJs($('u-client').value.trim()||'COLE_AQUI_SEU_CLIENT_ID');
   if(usaPP&&!$('u-client').value.trim()){alert('Informe o Client ID do PayPal.');return;}
-  var moeda=usaPix?'BRL':(radio('u-moeda')||'BRL');
   var chaveBruta=$('u-chave').value;
   uChaveAjustar();
   var chave=$('u-chave').value;
@@ -4049,15 +4163,9 @@ function uGerar(){
     if(erroChave){alert(erroChave);return;}
   }
   if(usaPix&&(!chave||!nomer||!cidade)){alert('Preencha a chave Pix, o nome do recebedor e a cidade.');return;}
-  var cod=escJs($('u-cod').value.trim()||'PEDIDO');
   var zap=usaPix&&(radio('u-zap')==='sim');
   var zapnum=String($('u-zapnum').value).replace(/\D/g,'');
   if(zap&&!zapnum){alert('Informe o numero do WhatsApp de destino.');return;}
-  var larg=parseInt($('u-largura').value,10);if(isNaN(larg)||larg<240)larg=420;
-  var ppcor=radio('u-ppcor')||'gold';
-  var descpix=parseFloat(String($('u-descpix').value).replace(',','.'));if(isNaN(descpix)||descpix<0)descpix=0;if(descpix>90)descpix=90;
-  if(m!=='ambos')descpix=0;
-  var selprod=radio('u-selprod')||'unico';
 
   /* Os cupons sao conferidos AQUI, e nao so no formulario de cadastro: o campo de valor
      DENTRO da lista de cupons nao valida nada, entao apagar o numero de um cupom ja cadastrado
@@ -4075,11 +4183,27 @@ function uGerar(){
     if(cpe){alert('Cupom "'+cpc+'": '+cpe);return;}
   }
 
+  $('u-out').value=uBloco(uCfg());
+  uPreview(true);
+}
+
+/* Fonte unica do bloco entregue, no padrao que a Contagem regressiva firmou e que o Slideshow
+   e o Leads seguiram: uGerar escreve o retorno na textarea e uPvMontar escreve o MESMO retorno
+   dentro do iframe da previa. Nao existe segunda formatacao em lugar nenhum -- e por isso que
+   a previa nao tem como divergir do que o operador vai colar. */
+function uBloco(cfg){
+  var m=cfg.m,usaPP=cfg.usaPP,usaPix=cfg.usaPix;
+  var client=escJs(cfg.client||'COLE_AQUI_SEU_CLIENT_ID');
+  var moeda=cfg.moeda,chave=cfg.chave,nomer=cfg.nomer,cidade=cfg.cidade;
+  var cod=escJs(cfg.cod||'PEDIDO');
+  var zap=cfg.zap,zapnum=cfg.zapnum,larg=cfg.larg,ppcor=cfg.ppcor;
+  var descpix=cfg.descpix,selprod=cfg.selprod;
+
   /* Nome, descricao, opcional, cupom e validade sao texto livre e viram strings JS do array
      PRODUTOS/CUPONS: escJs. Uma descricao colada de um e-mail com comentario HTML fazia o
      carrinho inteiro sumir da pagina publicada, em silencio. No bloco entregue todos saem por
      textContent -- escHtml deixaria "&amp;" a vista do cliente. */
-  var prods=uProds.map(function(p){
+  var prods=cfg.prods.map(function(p){
     var ops=(p.ops||[]).map(function(o){
       var v=parseFloat(String(o.preco).replace(',','.'))||0;
       return "{nome:'"+escJs(o.nome)+"', preco:"+v.toFixed(2)+"}";
@@ -4088,7 +4212,7 @@ function uGerar(){
            "   selecaoOpcionais:'"+p.opsel+"', permitirNenhum:"+(p.opnenhum==='sim'?'true':'false')+",\n"+
            "   opcionais:["+ops+"]}";
   }).join(',\n');
-  var cps=uCps.map(function(cp){
+  var cps=cfg.cps.map(function(cp){
     var v=parseFloat(String(cp.valor).replace(',','.'))||0;
     return "  {codigo:'"+escJs(String(cp.codigo).trim().toUpperCase())+"', tipo:'"+cp.tipo+"', valor:"+v+", validade:'"+escJs(cp.validade||'')+"'}";
   }).join(',\n');
@@ -4193,18 +4317,18 @@ function uGerar(){
   }
   c+='/* ===== APARENCIA ===== */\n';
   c+="var LARGURA_CARRINHO='"+larg+"px';   /* largura maxima do carrinho, ex: '420px' ou '100%' */\n";
-  c+="var COR_DESTAQUE='"+corSegura('u-c1','#075E54')+"';          /* titulo, linha do total e botoes */\n";
-  c+="var COR_FUNDO='"+corSegura('u-c2','#ffffff')+"';             /* fundo do card */\n";
-  c+="var COR_TEXTO='"+corSegura('u-c3','#333333')+"';             /* texto geral */\n\n";
+  c+="var COR_DESTAQUE='"+cfg.c1+"';          /* titulo, linha do total e botoes */\n";
+  c+="var COR_FUNDO='"+cfg.c2+"';             /* fundo do card */\n";
+  c+="var COR_TEXTO='"+cfg.c3+"';             /* texto geral */\n\n";
   c+='/* ===== TEXTOS ===== */\n';
-  c+="var TXT_TITULO='"+escJs($('u-t1').value)+"';\n";
-  c+="var TXT_PRODUTOS='"+escJs($('u-t7').value)+"';   /* rotulo da lista, so aparece com 2+ produtos */\n";
-  c+="var TXT_OPCIONAIS='"+escJs($('u-t2').value)+"';\n";
-  c+="var TXT_TOTAL='"+escJs($('u-t3').value)+"';\n";
+  c+="var TXT_TITULO='"+escJs(cfg.t1)+"';\n";
+  c+="var TXT_PRODUTOS='"+escJs(cfg.t7)+"';   /* rotulo da lista, so aparece com 2+ produtos */\n";
+  c+="var TXT_OPCIONAIS='"+escJs(cfg.t2)+"';\n";
+  c+="var TXT_TOTAL='"+escJs(cfg.t3)+"';\n";
   c+="var TXT_SEM_OPCIONAL='Sem opcional';\n";
   if(usaPP){
-    c+="var TXT_SUCESSO='"+escJs($('u-t5').value)+"';\n";
-    c+="var TXT_ERRO='"+escJs($('u-t6').value)+"';\n";
+    c+="var TXT_SUCESSO='"+escJs(cfg.t5)+"';\n";
+    c+="var TXT_ERRO='"+escJs(cfg.t6)+"';\n";
     c+="var TXT_TOTAL_ZERO='Escolha ao menos um item: o pedido esta em zero.';\n";
   }
   if(usaPix){
@@ -4212,7 +4336,7 @@ function uGerar(){
       c+="var TXT_OU='ou pague com Pix';\n";
       c+="var TXT_OU_DESC='ou pague com Pix com {PCT}% de desconto';\n";
     }
-    c+="var TXT_BOTAO_PIX='"+escJs($('u-t4').value)+"';\n";
+    c+="var TXT_BOTAO_PIX='"+escJs(cfg.t4)+"';\n";
     c+="var TXT_INSTRUCAO='Abra o app do seu banco e pague pelo QR Code ou Pix Copia e Cola';\n";
     c+="var TXT_PIXVAL='Valor no Pix';\n";
     c+="var TXT_COPIAR='Copiar codigo Pix';\n";
@@ -4535,7 +4659,7 @@ function uGerar(){
   c+="if(document.getElementById('fcuni'))montar();\n";
   c+="else document.addEventListener('DOMContentLoaded',montar);\n";
   c+='})();\n</scr'+'ipt>';
-  $('u-out').value=c;
+  return c;
 }
 
 /* ============================================================
@@ -6024,7 +6148,9 @@ prep('Barra de abas','',function(){
   liga('aba-slide',function(){trocarAba('slide');sPreview(true);});
   liga('aba-leads',function(){trocarAba('leads');lPreview(true);});
   liga('aba-tidy',function(){trocarAba('tidy');});
-  liga('aba-uni',function(){trocarAba('uni');});
+  /* enquanto o painel esta escondido o box mede 0: a previa e remontada ao abrir a aba, ja com
+     a largura real da coluna, senao o iframe nasceria na largura de emergencia. */
+  liga('aba-uni',function(){trocarAba('uni');uPreview(true);});
   liga('aba-bor',function(){trocarAba('bor');});
   /* enquanto o painel esta escondido o box mede 0: a previa e remontada ao abrir a aba, ja com
      a largura real da coluna, senao o iframe nasceria na largura de emergencia. */
@@ -6095,12 +6221,15 @@ prep('Checkout','uni',function(){
   liga('u-prod-cancelar',uProdLimpar);
   liga('u-cp-add',uCpAdd);
   liga('u-gerar',uGerar);
+  liga('u-atualizar',function(){uPreview(true);});
+  liga('u-pv-desk',function(){uPvModoSet('desk');});
+  liga('u-pv-cel',function(){uPvModoSet('cel');});
   liga('u-copy',function(){copiar('u-out','u-cop');});
   parearCor('u-c1');parearCor('u-c2');parearCor('u-c3');
   var el=$('u-chave');
   if(el){
     el.addEventListener('change',function(){if(uChaveAjustar())salvarEstado();});
-    el.addEventListener('blur',function(){if(uChaveAjustar()){salvarEstado();uPreview();}});
+    el.addEventListener('blur',function(){if(uChaveAjustar()){salvarEstado();uPreview(true);}});
   }
 });
 prep('Bordas com efeito','bor',function(){
@@ -6150,7 +6279,7 @@ prep('Correcao a vista das cores livres','leads uni',function(){
     var t=$(par[0]+'-t');if(!t)return;
     function redesenhar(){
       salvarEstado();
-      if(par[0].indexOf('l-')===0){lBtnPreview();lPreview(true);}else{uPreview();}
+      if(par[0].indexOf('l-')===0){lBtnPreview();lPreview(true);}else{uPreview(true);}
     }
     t.addEventListener('change',function(){if(corAjustar(par[0],par[1]))salvarEstado();});
     t.addEventListener('blur',function(){if(corAjustar(par[0],par[1]))redesenhar();});
@@ -6207,7 +6336,11 @@ prep('Checkout','uni',function(){
   uProdRender();
   uCpRender();
   uToggles();
-  uPreview();
+  /* A previa NAO e montada aqui. Montar na carga executaria o bloco gerado -- inclusive o
+     pedido do script do QR Code -- em toda abertura da ferramenta, mesmo para quem nunca abre
+     esta aba, e ainda com o painel escondido (clientWidth zero, largura de emergencia). A
+     montagem fica para o clique da aba, que ja chama uPreview(true). */
+  uPvBotoes();
 },'desenhar a aba com o estado restaurado');
 prep('Bordas com efeito','bor',function(){
   /* mesmo motivo do c-mob e das cores livres: estado gravado antes desta regra pode trazer
