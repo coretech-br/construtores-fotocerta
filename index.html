@@ -150,6 +150,16 @@
      enxergar o que ela custa antes de publicar. */
   .s-alerta{background:#FFF6DF;border:1px solid #E3B23C;color:#6B5210}
   .s-alerta b{color:#6B5210}
+  /* Resultado bom do importador de galeria: mesma caixa do aviso, cor de confirmacao. A classe
+     e trocada em vez de o texto mudar de lugar, para o operador ler sempre no mesmo ponto. */
+  .s-ok{background:#EAF3E9;border:1px solid #7FA97A;color:#294B24}
+  .s-ok b{color:#294B24}
+  /* O campo do codigo-fonte recebe centenas de milhares de caracteres colados de uma vez:
+     monoespacado e baixo de proposito -- ninguem le esse texto, so confere que colou algo. */
+  #s-imp-fonte{height:110px;resize:vertical;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;line-height:1.4}
+  .botao[disabled]{opacity:.45;cursor:not-allowed}
+  .botao[disabled]:hover{background:var(--verde)}
+  .botao.claro[disabled]:hover{background:transparent}
 
   /* Previa da captacao de leads: mesma tecnica da Contagem regressiva e do Slideshow -- o
      bloco gerado roda dentro de um iframe de mesma origem. Nao ha estilo de pop-up aqui de
@@ -196,7 +206,7 @@
 
 <!-- ==================== CONSTRUTOR: SLIDESHOW ==================== -->
 <div class="painel ativo" id="painel-slide" role="tabpanel">
-  <p class="descricao"><b>Slideshow de fotos</b> — gera o código de uma apresentação de imagens para colar em um componente HTML de qualquer página. Aceita fotos horizontais e verticais juntas (a foto inteira aparece sobre um fundo desfocado dela mesma), com setas de navegação e bolinhas indicadoras (cada uma pode ser desligada), legenda individual por foto, looping automático e três transições à escolha (fade, deslizar ou zoom). Também dá para usar outra proporção de quadro no celular, embaralhar a ordem a cada visita, arrastar para trocar de foto no toque e pausar enquanto o visitante olha. Ideal para mostrar ensaios anteriores nas páginas de campanha.</p>
+  <p class="descricao"><b>Slideshow de fotos</b> — gera o código de uma apresentação de imagens para colar em um componente HTML de qualquer página. Aceita fotos horizontais e verticais juntas (a foto inteira aparece sobre um fundo desfocado dela mesma), com setas de navegação e bolinhas indicadoras (cada uma pode ser desligada), legenda individual por foto, looping automático e três transições à escolha (fade, deslizar ou zoom). Também dá para usar outra proporção de quadro no celular, embaralhar a ordem a cada visita, arrastar para trocar de foto no toque e pausar enquanto o visitante olha. Ideal para mostrar ensaios anteriores nas páginas de campanha. As fotos podem ser cadastradas uma a uma ou <b>importadas de uma galeria inteira do site</b>, colando o link dela e o código-fonte da página.</p>
 
   <div class="secao primeira"><span class="secao-n">1</span> Imagens</div>
   <div class="grade">
@@ -214,7 +224,44 @@
       <fieldset>
       <legend>Imagens do slideshow</legend>
       <ul class="lista-imgs" id="s-lista"></ul>
-      <p class="vazio" id="s-vazio">Nenhuma imagem ainda. Adicione os links acima, na ordem de exibição — depois dá para reordenar com as setas.</p>
+      <p class="vazio" id="s-vazio">Nenhuma imagem ainda. Adicione os links acima, uma a uma, ou traga uma galeria inteira no bloco abaixo — depois dá para reordenar com as setas.</p>
+      </fieldset>
+    </div>
+  </div>
+  <div class="grade">
+    <div>
+      <fieldset>
+      <legend>Importar uma galeria inteira</legend>
+      <p class="ajuda"><b>Por que duas colagens:</b> o navegador não deixa esta ferramenta abrir uma página do fotocerta.com.br por conta própria (política de origem cruzada — medido: <i>Failed to fetch</i>). Então você traz a página até aqui. <b>Como fazer:</b> abra a galeria no navegador, aperte <b>Cmd&nbsp;⌥&nbsp;U</b> (ver código-fonte), depois <b>Cmd&nbsp;A</b> (selecionar tudo) e <b>Cmd&nbsp;C</b> (copiar). Cole o link da galeria no primeiro campo e o código-fonte no segundo. Vale para galerias (<i>/gallery/…</i>) e para portfólios (<i>/portfolio/…</i>).</p>
+      <label for="s-imp-link">Link da galeria <small>(o endereço da barra do navegador)</small></label>
+      <input type="text" id="s-imp-link" placeholder="https://www.fotocerta.com.br/gallery/121894-estudio-tematico">
+      <label for="s-imp-fonte">Código-fonte da página <small>(Cmd ⌥ U, Cmd A, Cmd C — cole aqui)</small></label>
+      <textarea id="s-imp-fonte" spellcheck="false" placeholder="Cole aqui o codigo-fonte inteiro da pagina da galeria."></textarea>
+      <div class="acoes"><button class="botao claro" id="s-imp-conferir">Conferir a galeria</button></div>
+      <p class="ajuda">O código-fonte traz <b>mais fotos que a tela</b>: na galeria de exemplo, o navegador tinha 10 fotos carregadas e o código-fonte trazia 46. As fotos entram <b>na mesma ordem em que aparecem na página</b>, inclusive a de capa, que na página não é a primeira. Só entram endereços do storage da Alboom: qualquer outro é descartado com a contagem à vista. Nada do que você cola aqui é salvo — a ferramenta só lê os endereços das fotos e esquece o resto.</p>
+      </fieldset>
+    </div>
+    <div>
+      <fieldset>
+      <legend>Como as fotos entram na lista</legend>
+      <label>Legenda das fotos</label>
+      <div class="radios" id="s-imp-legmodo">
+      <label><input type="radio" name="s-impleg" value="nao" checked><span>Sem legenda</span></label>
+      <label><input type="radio" name="s-impleg" value="padrao"><span>Uma legenda igual para todas</span></label>
+      </div>
+      <p class="ajuda">Não dá para trazer uma legenda por foto: medido nas duas galerias, todas as fotos compartilham o mesmo texto de descrição, escrito para buscadores. O que serve é o <b>título da galeria</b> — ao conferir, ele aparece preenchido abaixo como sugestão, e você pode trocar. Conferir outra galeria troca a sugestão — <b>a menos que você já tenha digitado a sua</b>, que nunca é sobrescrita.</p>
+      <div id="s-imp-leg-campo">
+      <label for="s-imp-leg">Legenda para todas as fotos importadas</label>
+      <input type="text" id="s-imp-leg" placeholder="Estúdio Temático">
+      </div>
+      <label>Tamanho das fotos</label>
+      <div class="radios" id="s-imp-tamanho">
+      <label><input type="radio" name="s-imptam" value="orig" checked><span>Como a galeria entrega (1200 px)</span></label>
+      <label><input type="radio" name="s-imptam" value="900"><span>Reduzir para 900 px</span></label>
+      </div>
+      <p class="ajuda"><b>Sobre o tamanho:</b> medi as 104 fotos das duas galerias de exemplo e o site <b>já entrega tudo com 1200 px de largura</b> (de 157 a 868 KB por foto; metade delas abaixo de 340 KB, e seis acima de 610 KB). Pedir 1400 px ao redimensionador da Alboom funciona, mas só <b>estica</b> a foto de 1200: arquivo maior, nenhum detalhe a mais. Por isso a escolha aqui é entre o que a galeria entrega e uma redução de verdade para 900 px — a largura padrão do slideshow —, que economizou de 15% a 55% por foto nas fotos medidas.</p>
+      <div class="acoes"><button class="botao" id="s-imp-aplicar" disabled>Adicionar à lista</button></div>
+      <p class="ajuda s-alerta" id="s-imp-resultado" style="display:none"></p>
       </fieldset>
     </div>
   </div>
@@ -2133,6 +2180,388 @@ function sRender(){
     ul.appendChild(li);
   });
 }
+/* ---------- importador de galeria ----------
+   Cadastrar foto a foto e proibitivo: a galeria de exemplo tem 46 fotos e o portfolio, 58.
+   O importador NAO substitui o cadastro manual -- ele so acrescenta um caminho de entrada
+   para a MESMA lista sImgs, e por isso nada abaixo dele (sCfg, sBloco, sGerar) mudou.
+
+   Por que o operador precisa colar DUAS coisas (o link e o codigo-fonte) em vez de a
+   ferramenta simplesmente ler a pagina: medido de http://localhost:8977 contra
+   https://www.fotocerta.com.br/natal-2026 -- TypeError: Failed to fetch. E a politica de
+   origem cruzada, nao defeito, e so um servidor a contornaria. A ferramenta nao tem servidor
+   por decisao de projeto.
+
+   Do link sai o NUMERO da galeria; do codigo-fonte saem os enderecos. Os dois juntos sao o
+   que permite recusar com explicacao quando o operador cola a fonte de uma galeria e o link
+   de outra -- que e o erro mais provavel deste fluxo, porque as duas colagens vem de janelas
+   diferentes. */
+
+/* Os dois tipos de galeria do Prosite. O numero esta no proprio link nos dois casos, e a
+   pasta das fotos no storage deriva dele:
+     /gallery/121894-estudio-tematico                  -> /sites/4555/galleries/121894/
+     /portfolio/ensaio-casal/1518588-fernanda-ricardo  -> /sites/4555/albuns/1518588/
+   O numero do site (4555) NAO entra no criterio de proposito: casar so por
+   '/galleries/<numero>/' mantem o importador funcionando se um dia a Foto Certa publicar de
+   outro site da Alboom, e a chance de colisao e nula (o numero da galeria ja e unico). */
+/* Os dois tipos tem genero diferente em portugues ("a galeria", "o portfolio"), e as frases
+   abaixo emendam artigo + rotulo. Guardar o artigo junto e o que evita "Nenhuma foto da
+   portfolio 1518588" -- texto errado que o operador le na hora exata em que ja esta
+   confuso com um link que nao bate com a fonte. */
+var S_IMP_PORT='portfólio';
+function sImpAlvo(link){
+  var v=String(link||'').replace(/[\u0000-\u0020]/g,''),m;
+  if(!v)return null;
+  m=v.match(/\/gallery\/(\d+)/i);
+  if(m)return {num:m[1],pasta:'/galleries/'+m[1]+'/',rotulo:'galeria '+m[1],artigo:'a'};
+  m=v.match(/\/portfolio\/[^\/]+\/(\d+)/i);
+  if(m)return {num:m[1],pasta:'/albuns/'+m[1]+'/',rotulo:S_IMP_PORT+' '+m[1],artigo:'o'};
+  m=v.match(/\/portfolio\/(\d+)/i);
+  if(m)return {num:m[1],pasta:'/albuns/'+m[1]+'/',rotulo:S_IMP_PORT+' '+m[1],artigo:'o'};
+  return null;
+}
+var S_IMP_ENT={'amp':'&','lt':'<','gt':'>','quot':'"','apos':"'",'nbsp':' '};
+/* O codigo-fonte e HTML: o titulo e os enderecos podem trazer entidades ('&amp;' no lugar de
+   '&'). Sem decodificar, a legenda sugerida sairia com '&amp;' na cara do visitante e um
+   endereco com parametro composto quebraria. Decodifica as cinco nomeadas de sempre mais as
+   numericas; o que nao reconhece fica como esta, em vez de sumir. */
+function sImpEntidades(t){
+  return String(t).replace(/&(#[xX]?[0-9a-fA-F]+|[a-zA-Z]+);/g,function(todo,nome){
+    var n=null;
+    if(Object.prototype.hasOwnProperty.call(S_IMP_ENT,nome))return S_IMP_ENT[nome];
+    if(/^#[xX]/.test(nome))n=parseInt(nome.slice(2),16);
+    else if(/^#/.test(nome))n=parseInt(nome.slice(1),10);
+    if(n===null||isNaN(n)||n<32||n>65535)return todo;
+    try{return String.fromCharCode(n);}catch(e){return todo;}
+  });
+}
+/* O codigo-fonte tambem traz enderecos dentro de strings JSON, onde a barra vem escapada
+   ('storage.alboom.ninja\/sites\/...'). Desescapar antes de procurar e o que impede que
+   esses percam a metade final do caminho e sejam descartados em silencio. */
+function sImpNormal(fonte){return String(fonte||'').replace(/\\\//g,'/');}
+
+/* A regra de desembrulho, deliberadamente agnostica ao formato do redimensionador: tudo
+   depois de '/url/', prefixado com 'https://'. Os dois formatos medidos sao
+     .../crop/width/600/height/400/mode/jpeg/url/storage.alboom.ninja/...
+     .../resize/width/480/height/720/url/storage.alboom.ninja/...
+   e ha ainda 'resize/width/1200/scale/2/url/...' na mesma pagina. Casar 'crop' ou 'resize'
+   explicitamente deixaria o importador quebrar no dia em que a Alboom acrescentasse um
+   terceiro verbo; casar so o '/url/' nao.
+   Cada foto aparece VARIAS vezes, em recortes diferentes: 139 enderecos para 46 fotos na
+   galeria de exemplo. A juncao acontece DEPOIS de desembrulhar (antes, os recortes teriam
+   enderecos diferentes e nenhuma repetida seria encontrada) e a chave e o endereco SEM a
+   parte de consulta, porque o mesmo arquivo pode aparecer com '?t=' diferente entre um
+   recorte e outro. O endereco guardado e o da primeira aparicao, com o '?t=' preservado --
+   ele e o que faz o navegador buscar de novo quando a galeria e republicada. */
+/* LISTA DE PERMISSAO DE HOST. O filtro de pasta ('/galleries/121894/') diz de QUE galeria a
+   foto e -- nao diz de que servidor. O host e tudo que vem logo depois de '/url/', e quem
+   escreveu a pagina colada escolhe esse texto. Medido, entrando na lista antes desta trava:
+     /url/evil.example/galleries/121894/a.jpg                     -> aceito
+     /url/storage.alboom.ninja@evil.example/galleries/121894/b.jpg -> aceito, e a lista EXIBIA
+        o endereco comecando por 'storage.alboom.ninja', passando por legitimo para quem
+        confere 46 linhas de uma vez
+     /url/127.0.0.1:8979/galleries/121894/l.jpg                   -> aceito
+     /url/evil&#46;example/galleries/121894/e.jpg (entidade)      -> aceito
+   Esses enderecos iriam para dentro do bloco publicado no site do cliente. Explorar exige
+   texto hostil na pagina colada, entao e defesa em profundidade e nao buraco aberto -- mas
+   nada no importador conferia host.
+   A comparacao e com a AUTORIDADE INTEIRA (tudo entre 'https://' e a primeira /, ? ou #), por
+   IGUALDADE EXATA. E a igualdade da autoridade inteira que recusa 'usuario@host' (a
+   autoridade e 'storage.alboom.ninja@evil.example', que nao bate com nada), porta
+   ('127.0.0.1:8979') e host vazio ('https:///...'). Comparar por sufixo -- "termina em
+   alboom.ninja" -- aceitaria 'evil-alboom.ninja' e 'alboom.ninja.evil.example'.
+   sUrlOk NAO serve para isto: ela e agnostica a host de proposito, porque o cadastro manual
+   aceita foto de qualquer lugar. Esta lista vale so para o importador, onde o endereco nao
+   foi digitado pelo operador e sim colhido de um texto de terceiro. */
+var S_IMP_HOSTS=['storage.alboom.ninja','alfred.alboompro.com'];
+function sImpHostOk(url){
+  var m=String(url).match(/^https:\/\/([^\/?#]*)/),h,i;
+  if(!m)return false;
+  h=m[1].toLowerCase();
+  for(i=0;i<S_IMP_HOSTS.length;i++)if(h===S_IMP_HOSTS[i])return true;
+  return false;
+}
+/* A classe de caracteres da extracao para em ', <, >, ) ou espaco. Um nome de arquivo com um
+   desses sairia CORTADO -- '.../galleries/121894/it' de "it's a photo.jpg" --, e o toco
+   continua sendo um https valido: passava por sUrlOk e entrava na lista como foto que da 404
+   na pagina publicada, sem ser contada em lugar nenhum. Hoje e latente (a Alboom normaliza os
+   nomes), mas e exatamente a falha muda que este projeto recusa.
+   Medidas as 104 fotos das duas galerias, TODAS terminam em '.jpg' e todas trazem '?t=';
+   exigir extensao de imagem no fim do caminho (ja sem a parte de consulta) detecta o corte
+   sem recusar nada legitimo. Recusa contando, como o resto da aba. */
+function sImpArquivoOk(chave){return /\.(jpe?g|png|gif|webp|avif)$/i.test(String(chave));}
+/* Chave de comparacao com a lista que ja existe. O MESMO arquivo pode estar la em outro
+   tamanho -- o operador importou a 1200 px e reimporta a 900 px, ou o contrario --, e comparar
+   o endereco cru diria "nenhuma repetida" enquanto a lista ficaria com a foto duas vezes.
+   Desembrulha quantas camadas de redimensionador houver (fica com o trecho depois do ULTIMO
+   '/url/') e corta a parte de consulta, que e o mesmo criterio da juncao das repetidas.
+   Nao rebaixa a caixa: no storage o caminho e sensivel a maiuscula, e dois nomes que so
+   diferem nisso sao dois arquivos. */
+function sImpChave(u){
+  var v=String(u||''),i=v.lastIndexOf('/url/');
+  if(i>=0)v='https://'+v.slice(i+5);
+  return v.split('?')[0];
+}
+/* ORDEM: a da GRADE da pagina, que e a que o operador reconhece -- e nao a da primeira
+   aparicao no codigo-fonte. A foto de CAPA aparece antes da grade (no <meta itemprop="image">
+   da galeria, no <picture> do topo do portfolio) e, guardando a primeira aparicao, ela pulava
+   da posicao 22 (galeria) ou 34 (portfolio) para o comeco. Conjunto certo, ordem errada.
+   Medido nos dois codigos-fonte: cada foto aparece 2 vezes, a capa 3, e a unica aparicao
+   anterior a grade e a extra da capa (1 de 93 e 1 de 117). As duas aparicoes de dentro da
+   grade sao vizinhas (data-retina e data-original do mesmo item). Entao ordenar pela ULTIMA
+   aparicao devolve a ordem da grade -- conferido item a item contra a marcacao do tema
+   (cgc__item e acg__item): 46 de 46 e 58 de 58, identicas.
+   O ENDERECO guardado continua sendo o da primeira aparicao, com o '?t=' preservado: medido,
+   o endereco completo nao varia entre as aparicoes da mesma foto (0 de 46 e 0 de 58), entao
+   trocar a ordem nao troca nenhum endereco -- so a posicao.
+   Limite honesto: se um dia a Alboom repetisse uma foto DEPOIS da grade, essa foto iria para
+   o fim. E o mesmo defeito na direcao contraria, e a conferencia continuaria mostrando o
+   numero certo de fotos. */
+function sImpExtrai(fonte,pasta){
+  var src=sImpNormal(fonte),re=/\/url\/([^"'\s\\),<>]+)/g,m,vistos={},ordem=[],out=[];
+  var alvo,chave,i,forasteiras=0,quebradas=0,invalidas=0;
+  while((m=re.exec(src))){
+    alvo='https://'+sImpEntidades(m[1]);
+    if(alvo.indexOf(pasta)<0)continue;
+    chave=alvo.split('?')[0];
+    if(Object.prototype.hasOwnProperty.call(vistos,chave)){
+      /* ja decidida: se foi aceita, so adianta a posicao para a ultima aparicao */
+      if(vistos[chave].ok)vistos[chave].pos=m.index;
+      continue;
+    }
+    /* As tres recusas contam ENDERECOS DISTINTOS, nunca aparicoes: contar aparicoes
+       anunciaria "117 descartadas" numa pagina de 58 fotos -- numero errado justamente para
+       mais, o mesmo defeito que sImpPastas ja teve. */
+    if(!sImpHostOk(alvo)){vistos[chave]={ok:0};forasteiras++;continue;}
+    if(!sImpArquivoOk(chave)){vistos[chave]={ok:0};quebradas++;continue;}
+    /* A MESMA validacao que sImpAplicar aplica, rodada aqui -- e nos DOIS enderecos finais
+       possiveis, o de 1200 px e o embrulhado de 900 px, porque o tamanho so e escolhido
+       depois. Antes disso sUrlOk so rodava na aplicacao: a conferencia dizia "Encontrei 1
+       foto" e a aplicacao somava 0, dois numeros discordando na mesma tela. Conferindo os
+       dois aqui, a rede que continua em sImpAplicar nao tem mais como recusar nada. */
+    if(!sUrlOk(alvo)||!sUrlOk(sImpTamanho(alvo,'900'))){vistos[chave]={ok:0};invalidas++;continue;}
+    vistos[chave]={ok:1,url:alvo,pos:m.index};
+    ordem.push(chave);
+  }
+  /* posicoes sao todas distintas, entao nao ha empate para a ordenacao desfazer */
+  ordem.sort(function(a,b){return vistos[a].pos-vistos[b].pos;});
+  for(i=0;i<ordem.length;i++)out.push(vistos[ordem[i]].url);
+  return {urls:out,forasteiras:forasteiras,quebradas:quebradas,invalidas:invalidas};
+}
+/* Frase unica dos descartes, usada nas duas saidas da conferencia (com e sem foto achada).
+   Descarte que nao aparece em lugar nenhum e a falha muda que motivou tres destes itens. */
+function sImpDescartes(a){
+  var p=[];
+  if(a.forasteiras)p.push('<b>'+a.forasteiras+'</b> por não estarem no storage da Alboom (<i>'+S_IMP_HOSTS.join('</i>, <i>')+'</i>)');
+  if(a.quebradas)p.push('<b>'+a.quebradas+'</b> por terem o nome do arquivo cortado, o que daria foto quebrada na página publicada');
+  if(a.invalidas)p.push('<b>'+a.invalidas+'</b> por não formarem um endereço válido');
+  if(!p.length)return '';
+  return ' Descartei '+p.join(', ')+'.';
+}
+/* Diagnostico do caso zero. Sem ele a recusa seria muda ("nenhuma foto"), e o operador nao
+   teria como saber que colou a fonte de uma galeria com o link de outra -- que e exatamente
+   o que este levantamento revela, nomeando as galerias que a fonte REALMENTE contem, da mais
+   numerosa para a menos.
+   A contagem junta as repetidas pela MESMA regra de sImpExtrai (chave sem a parte de
+   consulta). A primeira versao contava ocorrencias cruas e anunciava "portfolio 1518588
+   (117 fotos)" para uma pagina de 58 -- numero errado na unica frase que existe para
+   orientar um operador ja confuso, e errado justamente para mais, o que faria a galeria
+   parecer outra. */
+function sImpPastas(fonte){
+  var src=sImpNormal(fonte),re=/\/url\/([^"'\s\\),<>]*?\/(galleries|albuns)\/(\d+)\/[^"'\s\\),<>]*)/g,m,cont={},vistos={},ordem=[],k,ch,i,out=[];
+  while((m=re.exec(src))){
+    /* mesma lista de permissao da extracao: sem ela o diagnostico nomearia galerias que o
+       importador jamais aceitaria, mandando o operador procurar defeito onde nao ha */
+    if(!sImpHostOk('https://'+sImpEntidades(m[1])))continue;
+    k=(m[2]==='galleries'?'galeria ':S_IMP_PORT+' ')+m[3];
+    ch=k+'|'+m[1].split('?')[0];
+    if(Object.prototype.hasOwnProperty.call(vistos,ch))continue;
+    vistos[ch]=1;
+    if(!Object.prototype.hasOwnProperty.call(cont,k)){cont[k]=0;ordem.push(k);}
+    cont[k]++;
+  }
+  for(i=0;i<ordem.length;i++)out.push({rotulo:ordem[i],n:cont[ordem[i]]});
+  out.sort(function(a,b){return b.n-a.n;});
+  return out;
+}
+/* O titulo da pagina serve de legenda; a descricao das fotos, nao (medido nas duas galerias:
+   todas compartilham o mesmo texto de buscador). O <h1> vem antes do <title> de proposito:
+   no portfolio medido o <h1> e "Fernanda & Ricardo {Pre.Casamento}" enquanto o <title> traz
+   o nome do ensaio, o local, a cidade e o estado emendados -- legenda ruim. Nas galerias os
+   dois coincidem, entao o <title> so entra quando nao ha <h1>. */
+function sImpTitulo(fonte){
+  var m=String(fonte).match(/<h1[^>]*>([\s\S]*?)<\/h1>/i),t=m?m[1]:'';
+  if(!String(t).replace(/<[^>]*>/g,'').replace(/\s/g,'')){
+    m=String(fonte).match(/<title[^>]*>([\s\S]*?)<\/title>/i);
+    t=m?m[1]:'';
+  }
+  return sImpEntidades(String(t).replace(/<[^>]*>/g,' ')).replace(/\s+/g,' ').trim();
+}
+/* Largura da opcao "reduzir". 900 px e a largura padrao do slideshow -- nao um numero
+   escolhido no ar. MEDIDO nas 104 fotos das duas galerias: o storage ja entrega TUDO com
+   1200 px de largura (85 fotos 1200x~800, 19 retratos 1200x~1800). Pedir 1400 px ao
+   redimensionador responde 200 e devolve imagem, mas 1400x933 a partir de um original de
+   1200x800 -- upscale puro, e em 3 das 5 fotos medidas o arquivo ficou MAIOR que o original.
+   Por isso a opcao "1400 px" nao existe aqui: seria um endereco que so piora as duas contas
+   que importam (bytes e nitidez). A reducao para 900 px, essa sim, e real: de 15% a 55% menos
+   bytes por foto nas medidas.
+   Medido tambem que o '?t=' do original NAO atrapalha ao ser embrulhado: o redimensionador
+   devolveu byte a byte o mesmo arquivo com e sem ele. */
+var S_IMP_LARG=900;
+function sImpTamanho(url,modo){
+  if(modo!=='900')return url;
+  return 'https://alfred.alboompro.com/resize/width/'+S_IMP_LARG+'/url/'+String(url).replace(/^https?:\/\//i,'');
+}
+
+/* Resultado da conferencia, ainda NAO aplicado. Enquanto for null o botao de adicionar fica
+   desligado: e ele que separa "descobrir o que tem" de "mexer na lista", que e a confirmacao
+   que o operador precisa ter antes de 46 linhas entrarem de uma vez. */
+var sImpAchado=null;
+/* O texto que a conferencia ANTERIOR pos no campo de legenda. Sem guarda-lo nao havia como
+   distinguir "o operador digitou isto" de "nos preenchemos isto da ultima vez", e a sugestao
+   envelhecia entre galerias: importava a galeria (campo virava "Estudio Tematico"), conferia
+   o portfolio, e a mensagem anunciava "Fernanda & Ricardo" enquanto o campo ainda dizia
+   "Estudio Tematico" -- as 58 fotos recebendo a legenda da galeria anterior, com a
+   contradicao a uma linha de distancia na mesma tela.
+   Guardando o proprio texto (e nao um booleano), a regra fica: so sobrescreve o campo se ele
+   estiver vazio OU se contiver exatamente o que nos mesmos escrevemos. Qualquer coisa
+   digitada a mao passa a nao bater e fica intocada. */
+var sImpLegAuto='';
+function sImpAviso(txt,ok){
+  var el=$('s-imp-resultado');if(!el)return;
+  if(!txt){el.style.display='none';el.innerHTML='';return;}
+  el.className='ajuda '+(ok?'s-ok':'s-alerta');
+  el.style.display='block';
+  el.innerHTML=txt;
+}
+function sImpToggles(){
+  var campo=$('s-imp-leg-campo'),bt=$('s-imp-aplicar');
+  if(campo)campo.style.display=(radio('s-impleg')==='padrao')?'block':'none';
+  if(!bt)return;
+  if(sImpAchado){
+    bt.disabled=false;
+    bt.textContent='Adicionar '+sImpAchado.urls.length+(sImpAchado.urls.length===1?' foto':' fotos')+' à lista';
+  }else{
+    bt.disabled=true;
+    bt.textContent='Adicionar à lista';
+  }
+}
+/* Mudou o link ou a fonte depois de conferir: o que esta na tela nao corresponde mais ao que
+   seria adicionado. Aplicar assim mesmo entregaria as fotos da galeria ANTERIOR sem nada na
+   tela dizendo isso -- defeito invisivel. So fala quando havia mesmo um resultado pendente,
+   para nao virar ruido a cada tecla. */
+function sImpInvalidar(){
+  if(!sImpAchado)return;
+  sImpAchado=null;
+  sImpToggles();
+  sImpAviso('O link ou o código-fonte mudaram depois da conferência. Clique em <b>Conferir a galeria</b> de novo antes de adicionar — senão o que entraria na lista seria o resultado antigo.',false);
+}
+var S_IMP_AJUDA_FONTE='Abra a galeria no navegador, aperte <b>Cmd&nbsp;⌥&nbsp;U</b>, depois <b>Cmd&nbsp;A</b> e <b>Cmd&nbsp;C</b>, e cole aqui.';
+function sImpConferir(){
+  sImpAchado=null;sImpToggles();
+  var alvo=sImpAlvo($('s-imp-link').value);
+  if(!alvo){
+    sImpAviso('Não reconheci o link da galeria. Ele precisa ser o endereço de uma galeria (<i>…/gallery/121894-estudio-tematico</i>) ou de um portfólio (<i>…/portfolio/ensaio-casal/1518588-fernanda-ricardo-pre-casamento</i>). É de dentro dele que sai o número da galeria.',false);
+    return;
+  }
+  var fonte=$('s-imp-fonte').value;
+  if(!String(fonte).replace(/\s/g,'')){
+    sImpAviso('Falta o código-fonte da página. '+S_IMP_AJUDA_FONTE,false);
+    return;
+  }
+  var achado=sImpExtrai(fonte,alvo.pasta),urls=achado.urls,descartes=sImpDescartes(achado);
+  if(!urls.length){
+    var outras=sImpPastas(fonte),i,lista=[];
+    /* A contagem ao lado de cada nome e o que transforma a lista em diagnostico: a galeria
+       de verdade e a que tem dezenas de fotos, e as de uma ou duas sao as miniaturas de
+       "galerias relacionadas" que toda pagina do Prosite traz no rodape. Sem os numeros, as
+       quatro pareceriam candidatas iguais. */
+    /* A galeria ALVO sai do levantamento: ela e a que o operador pediu, e nomea-la aqui
+       produzia mensagem que se contradizia em duas frases -- "Nenhuma foto da galeria 121894
+       no codigo-fonte colado (...) o que esse codigo-fonte tem e: galeria 121894 (2 fotos)".
+       O levantamento existe para nomear as OUTRAS. Quando o alvo esta la mas nao entrou, quem
+       explica e a frase dos descartes, que diz o motivo. */
+    for(i=0;i<outras.length&&lista.length<3;i++){
+      if(outras[i].rotulo===alvo.rotulo)continue;
+      lista.push('<b>'+escHtml(outras[i].rotulo)+'</b> ('+outras[i].n+(outras[i].n===1?' foto':' fotos')+')');
+    }
+    /* Ordem das explicacoes, da mais proxima para a mais distante: se houve descarte, ele e o
+       motivo direto de a lista ter ficado vazia; a hipotese de "colou a fonte de outra
+       galeria" so entra depois, e como complemento. */
+    if(descartes){
+      var extra=lista.length?(' O código-fonte também traz: '+lista.join(', ')+'.'):'';
+      sImpAviso('Nenhum endereço d'+alvo.artigo+' <b>'+escHtml(alvo.rotulo)+'</b> pôde entrar na lista.'+descartes+extra+' Endereço de foto só é aceito se estiver no storage da Alboom e vier inteiro — o resto viraria foto que não carrega na página publicada.',false);
+    }else if(lista.length){
+      sImpAviso('Nenhuma foto d'+alvo.artigo+' <b>'+escHtml(alvo.rotulo)+'</b> no código-fonte colado. O que esse código-fonte tem é: '+lista.join(', ')+'. Provavelmente o link e o código-fonte são de galerias diferentes — abra a página do link, veja o código-fonte <b>dela</b> e cole de novo.',false);
+    }else{
+      sImpAviso('Não encontrei nenhum endereço de foto de galeria no código-fonte colado. Confira se copiou o código-fonte <b>inteiro</b>: o endereço da página, o texto visível da página ou um pedaço do código não servem. '+S_IMP_AJUDA_FONTE,false);
+    }
+    return;
+  }
+  var titulo=sImpTitulo(fonte);
+  var leg=$('s-imp-leg');
+  /* Atualiza a sugestao quando muda a galeria, sem nunca passar por cima do que foi digitado
+     a mao -- ver o comentario de sImpLegAuto. Titulo vazio limpa a sugestao antiga em vez de
+     deixar na tela a legenda de outra galeria. */
+  if(leg&&(!leg.value.trim()||leg.value===sImpLegAuto)){leg.value=titulo;sImpLegAuto=titulo;}
+  /* Sobreposicao com o que ja esta na lista. Antes a conferencia dizia quantas a lista TEM,
+     nunca quantas dela JA ESTAO nela: reimportar a mesma galeria anunciava so "ficando 92 no
+     total" e entregava 46 duplicadas. Contar aqui e recontar em sImpAplicar (e nao guardar o
+     numero) porque a lista pode mudar entre um clique e outro -- remover uma foto nao
+     invalida a conferencia. */
+  var jaTem={},novas=0,repetidas=0,i2;
+  for(i2=0;i2<sImgs.length;i2++)jaTem[sImpChave(sImgs[i2].url)]=1;
+  for(i2=0;i2<urls.length;i2++){
+    if(Object.prototype.hasOwnProperty.call(jaTem,sImpChave(urls[i2])))repetidas++;else novas++;
+  }
+  sImpAchado={urls:urls,rotulo:alvo.rotulo,artigo:alvo.artigo,titulo:titulo};
+  sImpToggles();
+  var msg='Encontrei <b>'+urls.length+(urls.length===1?' foto':' fotos')+'</b> n'+alvo.artigo+' <b>'+escHtml(alvo.rotulo)+'</b>';
+  if(titulo)msg+=' — “'+escHtml(titulo)+'”';
+  msg+='.'+descartes+' ';
+  /* Nunca substitui em silencio: a lista atual e dita antes, com o total resultante. */
+  if(!sImgs.length)msg+='Elas entram na <b>ordem da galeria</b>. ';
+  else if(repetidas===urls.length)msg+='A lista já tem <b>'+sImgs.length+'</b>, e <b>todas estas '+urls.length+'</b> já estão nela — adicionando, cada uma fica <b>repetida</b>, e a lista vai a <b>'+(sImgs.length+urls.length)+'</b>. ';
+  else if(repetidas)msg+='A lista já tem <b>'+sImgs.length+'</b>. Destas, <b>'+novas+'</b> '+(novas===1?'é nova':'são novas')+' e <b>'+repetidas+'</b> já '+(repetidas===1?'está':'estão')+' na lista (entraria'+(repetidas===1?'':'m')+' <b>repetida'+(repetidas===1?'':'s')+'</b>). Todas entram <b>no fim</b>, na ordem da galeria, ficando <b>'+(sImgs.length+urls.length)+'</b> no total. ';
+  else msg+='A lista já tem <b>'+sImgs.length+'</b>, e <b>nenhuma</b> destas está nela; entram <b>no fim</b>, na ordem da galeria, ficando <b>'+(sImgs.length+urls.length)+'</b> no total. ';
+  msg+='Confira a legenda e o tamanho ao lado e clique no botão abaixo.';
+  sImpAviso(msg,true);
+}
+function sImpAplicar(){
+  if(!sImpAchado){
+    sImpAviso('Clique em <b>Conferir a galeria</b> antes: é a conferência que diz quantas fotos e de qual galeria seriam adicionadas.',false);
+    return;
+  }
+  var modo=radio('s-imptam');
+  var leg=(radio('s-impleg')==='padrao')?String($('s-imp-leg').value).trim():'';
+  var urls=sImpAchado.urls,rotulo=sImpAchado.rotulo,artigo=sImpAchado.artigo,i,u,ok=0,recusadas=0,repetidas=0;
+  /* Retrato da lista ANTES de acrescentar: comparar contra a lista que cresce contaria como
+     repetida a segunda copia que este mesmo clique acabou de pôr la. */
+  var jaTem={};
+  for(i=0;i<sImgs.length;i++)jaTem[sImpChave(sImgs[i].url)]=1;
+  for(i=0;i<urls.length;i++){
+    u=sImpTamanho(urls[i],modo);
+    /* Mesma trava do cadastro manual. Nao deveria recusar nada -- os enderecos saem do
+       proprio codigo-fonte da Alboom --, mas endereco torto que passasse aqui viraria foto
+       que nunca carrega na pagina publicada, descoberta depois de publicar. Recusa contando,
+       nunca em silencio. */
+    if(!sUrlOk(u)){recusadas++;continue;}
+    if(Object.prototype.hasOwnProperty.call(jaTem,sImpChave(u)))repetidas++;
+    sImgs.push({url:u,legenda:leg});
+    ok++;
+  }
+  /* zera o resultado: sem isso, um segundo clique no mesmo botao duplicaria a galeria
+     inteira sem nenhum aviso */
+  sImpAchado=null;
+  sImpToggles();
+  sRender();salvarEstado();sPreview();
+  var msg='Pronto: <b>'+ok+(ok===1?' foto':' fotos')+'</b> d'+artigo+' '+escHtml(rotulo)+(ok?' na lista ao lado':'')+'. A lista agora tem <b>'+sImgs.length+'</b>.';
+  if(modo==='900')msg+=' Tamanho: reduzidas para '+S_IMP_LARG+' px.';
+  if(leg)msg+=' Legenda: “'+escHtml(leg)+'”.';
+  if(repetidas)msg+=' <b>'+repetidas+(repetidas===1?'</b> dela já estava':'</b> delas já estavam')+' na lista e agora aparece'+(repetidas===1?'':'m')+' <b>duas vezes</b> — use o ✕ da lista para tirar o que sobrar.';
+  if(recusadas)msg+=' <b>'+recusadas+'</b> foram descartadas por não terem endereço válido.';
+  sImpAviso(msg,(recusadas||repetidas)?false:true);
+}
+
 function sLimpar(){
   if(!confirm('Limpar todas as imagens e configuracoes do slideshow?'))return;
   /* O agendamento da previa precisa morrer AQUI. Na versao anterior era um setInterval que
@@ -2147,6 +2576,12 @@ function sLimpar(){
   setRadio('s-pm','nao');$('s-mob').value=600;setRadio('s-ordem','cadastro');
   setRadio('s-setas','sim');setRadio('s-dots','sim');setRadio('s-arrastar','nao');setRadio('s-pausar','nao');
   sToggles();
+  /* O importador tambem volta ao ponto de partida: "Limpar tudo" que deixasse na tela o
+     codigo-fonte e o resultado de uma conferencia anterior conviveria com uma lista vazia --
+     o botao diria "Adicionar 46 fotos" ao lado de "Nenhuma imagem ainda". */
+  $('s-imp-link').value='';$('s-imp-fonte').value='';$('s-imp-leg').value='';
+  setRadio('s-impleg','nao');setRadio('s-imptam','orig');
+  sImpAchado=null;sImpLegAuto='';sImpToggles();sImpAviso('',false);
   $('s-out').value='';$('s-pv-box').innerHTML='<p class="pv-vazia">A prévia do slideshow aparece aqui.</p>';
   salvarEstado();
 }
@@ -2338,6 +2773,13 @@ function sCampoMudou(e){
   var alvo=e.target;if(!alvo)return;
   var chave=alvo.name||alvo.id||'';
   if(!/^s-/.test(chave))return;
+  /* Nenhum campo do importador (s-imp-link, s-imp-fonte, s-imp-leg, s-impleg, s-imptam)
+     entra na previa: eles nao configuram o slideshow, so descrevem o que sera acrescentado
+     a lista -- e quem redesenha, depois de acrescentar, e sImpAplicar. Sem esta saida, colar
+     o codigo-fonte (centenas de milhares de caracteres de uma vez) remontaria o iframe e
+     mandaria o navegador baixar todas as fotos de novo, sem nada mudar na tela. O ramo
+     tambem serve para ligar/desligar o campo da legenda padrao e o botao de adicionar. */
+  if(/^s-imp/.test(chave)){sImpToggles();return;}
   if(S_PV_IGNORA[chave])return;
   sToggles();sPreview();
 }
@@ -6861,6 +7303,16 @@ prep('Slideshow','slide',function(){
   liga('s-previewbtn',function(){sPreview(true);});
   liga('s-pv-desk',function(){sPvModoSet('desk');});
   liga('s-pv-cel',function(){sPvModoSet('cel');});
+  liga('s-imp-conferir',sImpConferir);
+  liga('s-imp-aplicar',sImpAplicar);
+  /* Ouvintes no proprio elemento, e nao no ramo de document: sImpInvalidar precisa saber
+     que mudou o LINK ou a FONTE (que invalidam a conferencia) e nao a legenda ou o tamanho
+     (que sao lidos so na hora de aplicar e nao mudam quantas fotos entram). */
+  ['s-imp-link','s-imp-fonte'].forEach(function(id){
+    var el=$(id);if(!el)return;
+    el.addEventListener('input',sImpInvalidar);
+    el.addEventListener('change',sImpInvalidar);
+  });
   /* a previa mostra o ritmo das fotos e o corte do celular, entao o 'blur' redesenha com o
      valor ja preso -- imediato, porque 'blur' e um gesto deliberado e nao uma tecla */
   fcLigarFaixa(S_NUMS,function(){sPreview(true);});
@@ -7004,6 +7456,11 @@ prep('Slideshow','slide',function(){
      prende na carga, para o campo nunca exibir um numero diferente do que o gerador vai usar. */
   if(fcAjustarTodos(S_NUMS))salvarEstado();
   sToggles();
+  /* O importador nao tem estado salvo de proposito: o codigo-fonte colado chega a centenas
+     de milhares de caracteres e nao pode disputar o espaco de fcConstrutores com a
+     configuracao das seis abas. Entao aqui so o desenho inicial -- campo da legenda padrao
+     escondido e botao de adicionar desligado, que e o estado sem conferencia feita. */
+  sImpToggles();
   sPvBotoes();
   /* a previa NAO e montada aqui. Ela custa um iframe com as fotos da galeria, e o operador
      pode abrir a ferramenta so para mexer em outra aba. A montagem fica para o clique na aba
