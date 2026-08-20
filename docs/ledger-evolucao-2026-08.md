@@ -5,17 +5,49 @@ Spec: `docs/specs/2026-08-20-preset-geral-e-painel-design.md`.
 
 O tempo real é medido pelo **relógio dos commits**: do início do trabalho da fase até o merge dela na `main`. Inclui as rodadas de revisão e correção, que é onde as estimativas erraram nas seis fases anteriores.
 
-## Tabela
+## Tabela — FINAL
 
 | # | Fase | Estimado | Real | Situação |
 |---|---|---|---|---|
-| 1 | Importador de galeria | 2–3h | **56 min** | ✅ mesclada (`0041655`) |
-| 2 | Presets de aba nas seis abas | 2–3h | 42 min até a branch | 🔄 branch `evolucao/2-presets-aba`, aguardando revisão e merge |
-| 2.5 | Interface da lista de imagens (A, B, C) + cores livres (D) | 45–75 min | 47 min até a branch | 🔄 branch `evolucao/2.5-interface-lista`, aguardando revisão e merge |
-| 3 | Preset geral | 4–5h | 43 min até a branch | 🔄 branch `evolucao/3-preset-geral`, aguardando revisão e merge |
-| 4 | Exportar e importar JSON | 2–3h | 52 min até a branch | 🔄 branch `evolucao/4-exportar-importar`, aguardando revisão e merge |
-| 5 | Painel consolidado | 3–4h | 63 min até a branch | 🔄 branch `evolucao/5-painel-consolidado`, aguardando revisão e merge |
-| | **Total** | **13–18h + 2.5** | **4h59 até aqui** | |
+| 1 | Importador de galeria | 2–3h | **56 min** | ✅ mesclada |
+| 2 | Presets de aba nas seis abas | 2–3h | **85 min** | ✅ mesclada |
+| 2.5 | Interface da lista de imagens | 45–75 min | **81 min** | ✅ mesclada |
+| 3 | Preset geral | 4–5h | **127 min** | ✅ mesclada |
+| 4 | Exportar e importar JSON | 2–3h | **126 min** | ✅ mesclada |
+| 5 | Painel consolidado e largura | 3–4h | **115 min** | ✅ mesclada |
+| | **Total** | **13h45 – 19h15** | **9h50** | **abaixo do piso** |
+
+Início 20/08/2026 às 11:07, fim às 20:57. Tempo medido pelo relógio dos commits, do início de cada fase ao merge dela — inclui as rodadas de revisão e correção.
+
+### Por que fechou abaixo do piso, e o que isso ensina
+
+As estimativas traziam 40% somados por causa da lição das seis fases anteriores (subestimar o tempo de *corrigir o que a revisão acha*). Nesta rodada essa margem **não foi consumida**, por três razões medidas:
+
+1. **A fase 2 construiu a costura certa e as fases 3, 4 e 5 consumiram em vez de reconstruir.** O carimbo de versão, a comparação canônica e o registro `ABAS` estavam prontos e testados. A fase 3, a maior estimada (4–5h), fechou em 2h07.
+2. **A regra de regressão byte a byte transformou "acho que não quebrou" em prova**, seis vezes seguidas. Nenhuma rodada de correção precisou reabrir uma fase anterior.
+3. **Medir antes de despachar.** A galeria foi medida antes da fase 1 existir; as incógnitas foram mandadas medir explicitamente. Duas decisões do plano caíram por medição — e cair cedo é barato.
+
+### Placar das revisões
+
+| Fase | Critical | Important | Minor |
+|---|---|---|---|
+| 1 | 0 | 1 | 5 |
+| 2 | **1** | 1 | 2 |
+| 2.5 | 0 | 2 | 5 |
+| 3 | 0 | 4 | 4 |
+| 4 | 0 | 0 | 4 |
+| 5 | 0 | 2 | 4 |
+| **Total** | **1** | **10** | **24** |
+
+**35 achados, todos fechados antes do merge.** Nenhuma fase foi mesclada com achado aberto.
+
+O único Critical: na fase 2, o campo de nome do preset colidiu com o *Nome do produto* do Checkout. Salvar um preset com o formulário de produto preenchido nomeava o preset com o nome do produto e **apagava o campo, sem aviso**.
+
+### A lição de método desta rodada
+
+**Verificação que simula o operador acha o que verificação por dentro não acha.** O roteiro automatizado da revisão da fase 2 *passou* no Critical, porque escrevia via `getElementById` e acertava o mesmo campo que o código lia. A falha só apareceu ao digitar no campo da tela. A partir dali, toda fase exigiu prova como operador — e os quatro Important da fase 3 e os dois da fase 5 vieram por esse caminho.
+
+**Corolário operacional:** `alert()` nativo congela o protocolo do navegador. Neutralizar `window.alert` a partir da página é o que torna a verificação automatizada viável — e deixa as mensagens legíveis para conferência.
 
 ## Registro por fase
 
