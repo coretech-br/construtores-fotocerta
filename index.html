@@ -284,6 +284,19 @@
   .fcg-painel textarea{height:110px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
     font-size:11.5px;line-height:1.45}
 
+  /* ===== backup: exportar e importar (fase 4) =====
+     Espaco de nomes 'fcx-', pelo mesmo motivo de 'fcp-' e 'fcg-': campo de aba comeca por
+     prefixo de UMA letra, entao 'fcx-...' nao colide com campo nenhum e nao e alcancado pelos
+     listeners de "mudou alguma coisa nesta aba". 'fcx-' e nao 'fcb-' de proposito: 'fcb-' e o
+     prefixo das classes que a Contagem regressiva escreve no CODIGO GERADO, e um grep por ele
+     traria as duas coisas misturadas.
+     A caixa ocupa a largura inteira do painel (as duas colunas): os tres botoes e o texto de
+     ajuda formam uma linha so, e espremer isso numa coluna de 1080/2 px quebraria os botoes
+     em tres linhas. Abaixo de 840 px a .grade ja e de coluna unica e a regra nao muda nada. */
+  .fcx-largo{grid-column:1/-1}
+  .fcx-aviso{display:none;margin-top:10px;font-size:12.5px;line-height:1.5;padding:9px 12px;
+    border-radius:8px;border:1px solid #7FA97A;background:#EAF3E9;color:#294B24}
+
   /* Interruptor no topo de cada aba (montado por fcgIntMontar). Amarelo quando a aba esta
      FORA da pagina: e o estado que precisa saltar aos olhos, porque e o padrao de todo preset
      geral novo e porque uma aba fora nao entra no painel consolidado da fase 5. */
@@ -376,6 +389,26 @@
           <label for="fcg-body">Tag Body <small>(idem, para o campo Tag Body)</small></label>
           <textarea id="fcg-body" spellcheck="false"></textarea>
           <p class="ajuda">Estes dois campos ficam guardados <b>por página</b>, dentro do preset geral — ao trocar de preset, eles trocam junto. <b>Nunca vêm de outra página:</b> um preset geral criado a partir de outro nasce com os dois vazios, e sair para o Rascunho também os esvazia. É a mesma proteção que faz as abas nascerem fora — só que aqui, sem interruptor, a proteção é não copiar. <b>Ainda não são usados por nada</b>: quem vai juntá-los aos blocos gerados é o painel consolidado, na próxima etapa. Por enquanto eles servem para você não perder esse código de vista.</p>
+        </fieldset>
+      </div>
+      <!-- ===== backup em arquivo (fase 4) =====
+           Exportar leva a configuração para fora do navegador (é o único jeito de ela
+           sobreviver a uma limpeza de dados do site ou de acompanhar outro computador);
+           importar traz de volta, sempre depois de um resumo e de uma confirmação. -->
+      <div class="fcx-largo">
+        <fieldset>
+          <legend>Backup em arquivo</legend>
+          <div class="acoes">
+            <button class="botao" type="button" id="fcx-tudo">Exportar tudo</button>
+            <button class="botao" type="button" id="fcx-um">Exportar este preset geral</button>
+            <button class="botao claro" type="button" id="fcx-importar">Importar de um arquivo…</button>
+          </div>
+          <input type="file" id="fcx-arquivo" accept="application/json,.json" style="display:none">
+          <div class="fcx-aviso" id="fcx-aviso"></div>
+          <p class="ajuda"><b>Exportar tudo</b> gera um arquivo <b>.json</b> com os presets gerais, as bibliotecas de presets das seis abas e o rascunho (o que está na tela). É o backup completo — a configuração desta ferramenta vive só no armazenamento deste navegador, e some se você limpar os dados do site. <b>Exportar este preset geral</b> leva só a campanha e a página selecionadas na barra, para repassar a alguém.</p>
+          <p class="ajuda"><b>Os dados de contato e pagamento são escolha na hora de exportar, e o nome do arquivo diz qual é:</b> <i>…-com-dados.json</i> ou <i>…-sem-dados.json</i>. Confira o nome antes de enviar o arquivo a alguém — é ele que diz se o número do WhatsApp, a chave Pix e o Client ID do PayPal estão lá dentro.</p>
+          <p class="ajuda"><b>Importar mostra um resumo antes e pede confirmação</b> — quantos presets são novos, quantos já existem aqui e o que se perde ao substituí-los. Quando o nome já existe, você escolhe entre <b>substituir</b> e <b>importar como cópia</b>. Um arquivo <i>sem dados</i> <b>não apaga</b> os dados que já estão neste navegador: os campos que ele não traz mantêm o valor atual.</p>
+          <p class="ajuda"><b>Arquivo de outra pessoa é código que vai para a sua página.</b> A ferramenta confere a forma do arquivo e descarta o que não reconhece, dizendo quantos itens foram — mas as caixas “Outros códigos meus” são texto livre e viajam como estão. Se o arquivo não veio de você, leia esse trecho antes de usar o que ele trouxer.</p>
         </fieldset>
       </div>
   </div>
@@ -2162,10 +2195,16 @@ function prep(nome,abaId,fn,fase){
                   passo que a partida ja executa "com o estado restaurado".
      antesDeSalvar  devolve texto de recusa (ou '') antes de congelar a configuracao.
      presetOk     conferencia extra do formato guardado, quando a aba tem uma.
-     aposPresets  passo da aba depois de a lista ser desenhada. */
+     aposPresets  passo da aba depois de a lista ser desenhada.
+     importar     limpeza extra dos valores que vem de ARQUIVO (fase 4). O arquivo importado e
+                  entrada nao confiavel, e a limpeza generica so sabe de forma (tipo, tamanho,
+                  profundidade); o que exige conhecimento da aba mora aqui. Recebe o fragmento
+                  ja saneado e um contador, e devolve o fragmento. Hoje so o Slideshow tem uma
+                  (endereco de foto que nao passa em sUrlOk nao entra na lista). */
 var ABAS=[
   {id:'slide',nome:'Slideshow',           chaves:['imgs','s'],  coleta:sColeta,restaura:sRestaura,
    pref:'s',fora:[],operacionais:[],resumo:sPresetResumo,redesenhar:sPresetDepois,antesDeSalvar:sPresetAntes,
+   importar:sImportarLimpar,
    exemplo:'ex.: Natal 2026 - galeria do hero',
    guarda:'tudo o que está configurado nesta aba — a <b>lista de imagens</b> (links, legendas e a ordem), a transição, o tempo, a largura, a proporção, o corte de celular, a ordem de exibição e os controles do visitante. Não guarda o que está no importador de galeria, que não é configuração e sim uma colagem de trabalho.'},
   {id:'tidy', nome:'Agendamento TidyCal', chaves:['t'],         coleta:tColeta,restaura:tRestaura,
@@ -2198,7 +2237,12 @@ var ABAS=[
 var fcFrag={};       /* ultimo pedaco bom de cada aba, para nao apagar o que a aba quebrada tinha */
 var fcSoLeitura={};  /* abas que falharam ao restaurar: param de coletar do DOM ate recarregar */
 
-function salvarEstado(){
+/* O estado das seis abas, montado exatamente como ele vai para o armazenamento. Extraido de
+   salvarEstado na fase 4 porque a exportacao precisa do MESMO objeto: reconstrui-lo por fora
+   seria uma segunda montagem do estado, e duas montagens divergem -- e a divergencia aqui
+   apareceria como "o backup nao traz o que a ferramenta tem", que e a pior classe de defeito
+   possivel num backup. Uma implementacao, dois chamadores. */
+function fcEstadoAtual(){
   var st={},i,k,a,frag;
   for(i=0;i<ABAS.length;i++){
     a=ABAS[i];
@@ -2221,6 +2265,10 @@ function salvarEstado(){
     }
     if(frag){for(k in frag){if(Object.prototype.hasOwnProperty.call(frag,k))st[k]=frag[k];}}
   }
+  return st;
+}
+function salvarEstado(){
+  var st=fcEstadoAtual();
   try{localStorage.setItem('fcConstrutores',JSON.stringify(st));}
   catch(e){fcFalha('Ferramenta','gravar as configuracoes -- armazenamento do navegador indisponivel, nada esta sendo salvo',e,'');}
   /* A barra do preset geral (fase 3) diz se a tela ainda confere com o preset selecionado, e
@@ -2409,11 +2457,17 @@ function fcValoresIguais(a,b){return fcCanon(a)===fcCanon(b);}
 
 function fcAba(id){var i;for(i=0;i<ABAS.length;i++){if(ABAS[i].id===id)return ABAS[i];}return null;}
 
-/* O que um preset desta aba guarda, lido pelo coleta() dela -- caminho unico. */
-function fcPresetCapturar(a){
+/* O que um preset desta aba guarda, lido pelo coleta() dela -- caminho unico.
+   'manterFora' existe para a fase 4 e tem UM chamador: o molde com que a importacao confere o
+   RASCUNHO vindo de arquivo. O rascunho e o estado inteiro da aba, e ali os campos 'fora'
+   (hoje so b.consol) fazem parte do que estava gravado -- tira-los do molde faria a conferencia
+   descartar 'consol' como chave desconhecida, e o codigo 1 das Bordas voltaria de um backup
+   sem a consolidacao que tinha. Quem guarda PRESET (de aba ou geral) nao passa o sinalizador e
+   continua sem os campos 'fora', como sempre. */
+function fcPresetCapturar(a,manterFora){
   var frag=fcClone(a.coleta()),o=frag?frag[a.pref]:null,i;
   /* a biblioteca nao entra: quem a injeta no fragmento e o salvarEstado, depois do coleta */
-  if(o&&a.fora){for(i=0;i<a.fora.length;i++)delete o[a.fora[i]];}
+  if(o&&a.fora&&!manterFora){for(i=0;i<a.fora.length;i++)delete o[a.fora[i]];}
   return frag;
 }
 /* nomes sao comparados sem diferenca de caixa e sem espaco nas pontas: "Natal 2026" e
@@ -3553,6 +3607,730 @@ function fcgIniciar(){
   fcgAtualizar();
 }
 
+/* ============ backup: exportar e importar (fase 4) ============ */
+/* O QUE E. Dois botoes de exportar e um de importar, no painel de detalhes do preset geral.
+   "Exportar tudo" leva os presets gerais, as seis bibliotecas de presets de aba e o rascunho
+   (o estado das seis abas). "Exportar este preset geral" leva UMA campanha-pagina, para
+   repassar. Em cada um, o operador escolhe na hora se os dados de contato e pagamento vao
+   junto -- e O NOME DO ARQUIVO DIZ QUAL E ('-com-dados' / '-sem-dados'). O nome e a
+   salvaguarda: e por ele que se decide de relance se aquele arquivo pode ser enviado a alguem.
+
+   O RISCO QUE MANDA NO DESENHO DESTE BLOCO. O arquivo importado e ENTRADA NAO CONFIAVEL --
+   a mais perigosa que esta ferramenta ja teve, porque um JSON vira configuracao, e a
+   configuracao vira codigo publicado no site do cliente. Ele nao pode ser tratado como o
+   armazenamento local (que e do proprio operador). Tres camadas, nesta ordem:
+     1. FORMA: fcxSanear/fcxConformar. Tipo, tamanho, profundidade, quantidade de chaves e
+        nomes de chave. Chave desconhecida nao entra -- e o molde do que se conhece e o
+        coleta() da propria aba, nao uma segunda lista de campos.
+     2. REGRA DA ABA: o gancho 'importar' do registro ABAS (hoje so o Slideshow, que recusa
+        endereco de foto reprovado por sUrlOk).
+     3. TRAVAS QUE JA EXISTEM: aplicar passa pelo restaura() da aba (corValida) e pelo
+        redesenhar() (fcAjustarTodos), e gerar passa por corSegura, urlLimpa, escHtml, escAttr
+        e escJs. Este bloco NAO cria um caminho novo de escrita de campo -- ele entrega valores
+        aos mesmos caminhos da biblioteca de presets e do preset geral.
+   Nada do que e descartado some calado: tudo e CONTADO e o numero aparece na confirmacao e no
+   aviso final.
+
+   O QUE NAO E. Nao ha servidor e nao ha rede: baixar e Blob + createObjectURL + <a download>,
+   ler e <input type="file"> + FileReader. Nada sai do navegador a nao ser pelo arquivo que o
+   proprio operador salva.
+
+   VERSAO NO ARQUIVO. 'formato' e 'versao' vem primeiro no arquivo e sao conferidos primeiro na
+   leitura: um arquivo de versao MAIS NOVA e recusado com explicacao, em vez de importado torto
+   -- meia configuracao entrando em silencio e o defeito que este projeto mais evita. */
+var FCX_FORMATO='construtores-fotocerta';
+var FCX_VERSAO=1;
+/* Tetos. Existem para que arquivo enorme, fundo ou hostil nao trave a ferramenta, e sao
+   folgados o bastante para nao alcancar uso real: a maior configuracao medida (46 fotos,
+   produtos, cupons e mensagens, com as seis bibliotecas) da ~120 KB de JSON. */
+var FCX_BYTES_MAX=8*1024*1024;   /* o arquivo inteiro */
+var FCX_TEXTO_MAX=200000;        /* um campo "Outros codigos meus" */
+var FCX_STR_MAX=20000;           /* qualquer texto dentro de um fragmento de aba */
+var FCX_ARR_MAX=1000;            /* itens de uma lista (fotos, produtos, cupons, mensagens) */
+var FCX_CHAVES_MAX=200;          /* chaves de um objeto */
+var FCX_PROF_MAX=7;              /* profundidade de aninhamento */
+var FCX_NOS_MAX=60000;           /* nos visitados na conferencia inteira */
+var FCX_CHAVE_OK=/^[A-Za-z0-9_]{1,40}$/;
+
+/* ---- conferencia de forma ---- */
+function fcxConta(){return {descartados:0,ajustados:0,herdados:0,nos:0};}
+/* '__proto__' e parentes ficam de fora antes de qualquer outra coisa: este bloco copia valores
+   com atribuicao por chave em varios lugares, e atribuir '__proto__' num objeto comum troca o
+   prototipo dele em vez de criar um campo. O resto da regra e simples de proposito -- toda
+   chave desta ferramenta e uma palavra curta sem sinal nenhum. */
+function fcxChaveMa(k){
+  return k==='__proto__'||k==='constructor'||k==='prototype'||!FCX_CHAVE_OK.test(k);
+}
+/* Saneamento GENERICO, para onde nao ha molde (o interior de um item de lista quando a lista
+   local esta vazia). Devolve {ok:true, v:...} ou {ok:false}: quem chama conta o descarte. */
+function fcxSanear(v,prof,conta){
+  var i,k,out,n,q;
+  if(++conta.nos>FCX_NOS_MAX)return {ok:false};
+  if(v===null)return {ok:true,v:null};
+  if(typeof v==='string')return (v.length>FCX_STR_MAX)?{ok:false}:{ok:true,v:v};
+  if(typeof v==='number')return isFinite(v)?{ok:true,v:v}:{ok:false};
+  if(typeof v==='boolean')return {ok:true,v:v};
+  if(prof>=FCX_PROF_MAX)return {ok:false};
+  if(fcEhArray(v)){
+    if(v.length>FCX_ARR_MAX)return {ok:false};
+    out=[];
+    for(i=0;i<v.length;i++){n=fcxSanear(v[i],prof+1,conta);if(n.ok)out.push(n.v);else conta.descartados++;}
+    return {ok:true,v:out};
+  }
+  if(fcEhObjeto(v)){
+    out={};q=0;
+    for(k in v){
+      if(!Object.prototype.hasOwnProperty.call(v,k))continue;
+      if(++q>FCX_CHAVES_MAX){conta.descartados++;break;}
+      if(fcxChaveMa(k)){conta.descartados++;continue;}
+      n=fcxSanear(v[k],prof+1,conta);
+      if(n.ok)out[k]=n.v;else conta.descartados++;
+    }
+    return {ok:true,v:out};
+  }
+  return {ok:false};   /* funcao, undefined, e o que mais o JSON.parse nao produz */
+}
+/* Conferencia CONTRA MOLDE. O molde e o que o coleta() da aba devolve agora -- a mesma fonte
+   unica que grava o estado e a biblioteca de presets. Nao existe uma segunda lista de campos
+   para divergir da primeira: campo que entra no estado entra aqui pela mesma linha, e campo
+   que nao existe na aba nao entra de jeito nenhum.
+   Onde o molde nao alcanca -- o interior de um item de lista, quando a lista local esta vazia
+   e nao ha item de exemplo --, cai no saneamento generico e depois no gancho 'importar' da
+   aba, que e onde mora o que exige conhecer a aba. */
+function fcxConformar(tpl,v,prof,conta){
+  var i,k,out,n,t,q;
+  if(tpl===undefined||tpl===null)return fcxSanear(v,prof,conta);
+  if(++conta.nos>FCX_NOS_MAX)return {ok:false};
+  t=typeof tpl;
+  if(t==='string'||t==='number'||t==='boolean'){
+    if(typeof v!==t)return {ok:false};
+    if(t==='string'&&v.length>FCX_STR_MAX)return {ok:false};
+    if(t==='number'&&!isFinite(v))return {ok:false};
+    return {ok:true,v:v};
+  }
+  if(prof>=FCX_PROF_MAX)return {ok:false};
+  if(fcEhArray(tpl)){
+    if(!fcEhArray(v)||v.length>FCX_ARR_MAX)return {ok:false};
+    out=[];
+    for(i=0;i<v.length;i++){
+      n=fcxConformar(tpl.length?tpl[0]:undefined,v[i],prof+1,conta);
+      if(n.ok)out.push(n.v);else conta.descartados++;
+    }
+    return {ok:true,v:out};
+  }
+  if(fcEhObjeto(tpl)){
+    if(!fcEhObjeto(v))return {ok:false};
+    out={};q=0;
+    for(k in v){
+      if(!Object.prototype.hasOwnProperty.call(v,k))continue;
+      if(++q>FCX_CHAVES_MAX){conta.descartados++;break;}
+      if(fcxChaveMa(k)||!Object.prototype.hasOwnProperty.call(tpl,k)){conta.descartados++;continue;}
+      n=fcxConformar(tpl[k],v[k],prof+1,conta);
+      if(n.ok)out[k]=n.v;else conta.descartados++;
+    }
+    return {ok:true,v:out};
+  }
+  return {ok:false};
+}
+function fcxChaveDaAba(a,c){var j;for(j=0;j<a.chaves.length;j++){if(a.chaves[j]===c)return true;}return false;}
+/* Chave de topo que nao pertence a ABA NENHUMA. So o que vem embrulhado como "valores de uma
+   aba" e conferido assim: o RASCUNHO e o estado das seis juntas, e ali as chaves das outras
+   cinco sao esperadas -- conta-las como sobra daria cinco descartes por aba a cada importacao,
+   um numero falso justamente na linha que existe para o operador confiar no numero. */
+function fcxContarEstranhas(a,valores,conta){
+  var c;
+  for(c in valores){
+    if(!Object.prototype.hasOwnProperty.call(valores,c))continue;
+    if(!fcxChaveDaAba(a,c))conta.descartados++;
+  }
+}
+/* Cache do molde, valido durante UMA leitura de arquivo (fcxPlano cria e destroi). Sem ele,
+   um backup com dezenas de presets gerais mandaria fazer um coleta() clonado das seis abas por
+   preset -- com 46 fotos na lista do slideshow, e o tipo de custo que trava a ferramenta na
+   hora em que ela mais precisa parecer confiavel. O molde nao muda durante a leitura: nada e
+   escrito na tela antes de as duas confirmacoes terem resposta. */
+var fcxTpl=null;
+function fcxMolde(a,manterFora){
+  var ch=a.id+(manterFora?'|+fora':'');
+  if(fcxTpl&&fcxTpl[ch])return fcxTpl[ch];
+  var t=fcPresetCapturar(a,manterFora)||{};
+  if(fcxTpl)fcxTpl[ch]=t;
+  return t;
+}
+/* Um fragmento de aba vindo de arquivo, conferido e limpo. 'manterFora' so e verdade para o
+   RASCUNHO -- ver o comentario de fcPresetCapturar. */
+function fcxLimparValores(a,valores,conta,manterFora){
+  var tpl,frag={},j,c,n,o;
+  if(!fcEhObjeto(valores))return frag;
+  tpl=fcxMolde(a,manterFora);
+  for(j=0;j<a.chaves.length;j++){
+    c=a.chaves[j];
+    if(!Object.prototype.hasOwnProperty.call(valores,c))continue;
+    n=fcxConformar(tpl[c],valores[c],1,conta);
+    if(n.ok)frag[c]=n.v;else conta.descartados++;
+  }
+  o=frag[a.pref];
+  if(fcEhObjeto(o)){
+    /* a biblioteca viaja no seu proprio lugar do arquivo, nunca dentro de 'valores' */
+    if(o.presets!==undefined){delete o.presets;conta.descartados++;}
+    if(!manterFora&&a.fora){for(j=0;j<a.fora.length;j++){if(o[a.fora[j]]!==undefined){delete o[a.fora[j]];conta.descartados++;}}}
+  }
+  if(a.importar)frag=a.importar(frag,conta);
+  return frag;
+}
+/* Arquivo "sem dados" NAO apaga o que o navegador tem (garantia 5 do R4). O que o "sem dados"
+   faz e OMITIR os campos de 'operacionais'; aqui, campo omitido herda o valor que ja existe --
+   do preset que esta sendo substituido, ou da tela, quando o preset e novo. Campo PRESENTE e
+   vazio nao herda nada: vazio e escolha, e a regra de texto livre desta ferramenta e honrar o
+   vazio. E o que separa "o arquivo nao trouxe" de "o arquivo trouxe vazio" e a AUSENCIA da
+   chave -- por isso a exportacao sem dados apaga a chave em vez de gravar ''. */
+function fcxHerdarOperacionais(a,frag,base,conta){
+  var o,b,i,ch;
+  if(!a.operacionais||!a.operacionais.length)return frag;
+  o=frag&&frag[a.pref];
+  b=(fcEhObjeto(base)&&fcEhObjeto(base[a.pref]))?base[a.pref]:null;
+  if(!fcEhObjeto(o)||!b)return frag;
+  for(i=0;i<a.operacionais.length;i++){
+    ch=a.operacionais[i][0];
+    if(o[ch]===undefined&&b[ch]!==undefined){o[ch]=b[ch];conta.herdados++;}
+  }
+  return frag;
+}
+
+/* ---- exportar ---- */
+/* Apaga de um fragmento os campos declarados em 'operacionais' -- a MESMA lista que alimenta o
+   aviso das abas Leads e Checkout e a comparacao entre as duas paginas da campanha. Uma lista
+   so: uma segunda lista aqui divergiria da primeira no dia em que um campo fosse acrescentado,
+   e o arquivo "sem dados" sairia com dado dentro, com o nome dizendo que nao tinha. */
+function fcxSemDados(a,frag){
+  var o=frag&&frag[a.pref],i;
+  if(!fcEhObjeto(o)||!a.operacionais)return frag;
+  for(i=0;i<a.operacionais.length;i++)delete o[a.operacionais[i][0]];
+  return frag;
+}
+function fcxGeralParaArquivo(p,comDados){
+  var q=fcClone(p),i,a;
+  for(i=0;i<ABAS.length;i++){
+    a=ABAS[i];
+    if(q.abas&&q.abas[a.id]&&!comDados)fcxSemDados(a,q.abas[a.id].valores);
+  }
+  return q;
+}
+function fcxAbasParaArquivo(comDados){
+  var out={},i,j,a,lista,arr,it;
+  for(i=0;i<ABAS.length;i++){
+    a=ABAS[i];lista=fcPresets[a.id]||[];arr=[];
+    for(j=0;j<lista.length;j++){
+      it=fcClone(lista[j]);
+      if(!comDados)fcxSemDados(a,it.valores);
+      arr.push(it);
+    }
+    out[a.id]=arr;
+  }
+  return out;
+}
+/* O rascunho sai do MESMO fcEstadoAtual() que grava o armazenamento -- nao de uma segunda
+   montagem. A biblioteca de presets e retirada daqui porque ela viaja em 'presetsDeAba': duas
+   copias da mesma coisa no mesmo arquivo divergem no dia em que uma delas for filtrada. */
+function fcxRascunhoParaArquivo(comDados){
+  var st=fcClone(fcEstadoAtual())||{},i,a;
+  for(i=0;i<ABAS.length;i++){
+    a=ABAS[i];
+    if(fcEhObjeto(st[a.pref]))delete st[a.pref].presets;
+    if(!comDados)fcxSemDados(a,st);
+  }
+  return st;
+}
+/* O estado de trabalho da camada do preset geral: qual esta selecionado, quais abas estao
+   ligadas, as marcas de origem e os "Outros codigos meus" da tela. Anda junto do RASCUNHO,
+   porque e a mesma coisa que ele -- o que esta na tela agora --, e por isso so e restaurado
+   quando o operador manda aplicar o rascunho. */
+function fcxGeralDaTelaParaArquivo(){
+  var i,a,at={},og={};
+  for(i=0;i<ABAS.length;i++){
+    a=ABAS[i];
+    at[a.id]=!!FCG.ativas[a.id];
+    og[a.id]=FCG.origens[a.id]?{preset:FCG.origens[a.id].preset,carimbo:FCG.origens[a.id].carimbo}:null;
+  }
+  return {ativo:FCG.ativo||null,ativas:at,origens:og,codigos:{head:FCG.codigos.head,body:FCG.codigos.body}};
+}
+function fcxData(){
+  var d=new Date(),m=d.getMonth()+1,x=d.getDate();
+  return d.getFullYear()+'-'+(m<10?'0':'')+m+'-'+(x<10?'0':'')+x;
+}
+/* Pedaco de nome de arquivo a partir de um texto do operador. E rotulo, nao identificador: o
+   que nao for letra sem acento ou numero vira hifen, e o resultado e cortado. */
+function fcxSlug(s){
+  var t=String(s==null?'':s);
+  /* A faixa dos acentos separados que a decomposicao produz vai em escape: faixa de
+     caracteres em expressao regular e um dos tres casos em que este arquivo usa \uXXXX. */
+  if(t.normalize)t=t.normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  t=t.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+/,'').replace(/-+$/,'');
+  if(t.length>40)t=t.substring(0,40).replace(/-+$/,'');
+  return t||'sem-nome';
+}
+function fcxSufixo(comDados){return comDados?'-com-dados':'-sem-dados';}
+function fcxNomeTudo(comDados){return 'construtores-fotocerta-'+fcxData()+fcxSufixo(comDados)+'.json';}
+function fcxNomeUm(p,comDados){return 'preset-'+fcxSlug(p.campanha)+'-'+fcxSlug(p.pagina)+fcxSufixo(comDados)+'.json';}
+/* Download sem servidor: Blob + createObjectURL + <a download>, e o endereco temporario e
+   devolvido depois. O <a> entra e sai do documento porque o Safari nao dispara o clique de um
+   elemento que nao esta na pagina. */
+function fcxBaixar(nome,texto){
+  var b,u,el;
+  try{
+    b=new Blob([texto],{type:'application/json'});
+    u=URL.createObjectURL(b);
+    el=document.createElement('a');
+    el.href=u;el.setAttribute('download',nome);el.style.display='none';
+    (document.body||document.documentElement).appendChild(el);
+    el.click();
+    setTimeout(function(){
+      try{if(el.parentNode)el.parentNode.removeChild(el);}catch(e){}
+      try{URL.revokeObjectURL(u);}catch(e){}
+    },2000);
+    return true;
+  }catch(e){
+    fcFalha('Backup','gerar o arquivo para download',e,'');
+    alert('Não foi possível gerar o arquivo neste navegador. O aviso vermelho no topo tem o detalhe.');
+    return false;
+  }
+}
+/* A pergunta que decide o conteudo E o nome do arquivo. Os dois nomes aparecem escritos nos
+   botoes, porque o nome e a salvaguarda: e olhando para ele que o operador decide se aquele
+   arquivo pode ser enviado a alguem. */
+function fcxPerguntarDados(titulo,linhas,nomeCom,nomeSem,cb){
+  var ops=[],ls=linhas.slice(0);
+  ls.push('Com os dados: o arquivo leva o número do WhatsApp, a chave Pix, o Client ID do PayPal e o nome e a cidade do recebedor, como estão. É o que serve de backup para você mesmo.');
+  ls.push('Sem os dados: esses campos ficam de fora do arquivo. É o que serve para repassar a configuração a outra pessoa. Atenção: as caixas “Outros códigos meus” vão como estão nos dois casos — o que fica de fora são os campos de contato e pagamento, e nada mais.');
+  ls.push('O nome do arquivo diz qual é: '+nomeCom+' ou '+nomeSem+'.');
+  ops.push({rotulo:'Com os dados',valor:'com'});
+  ops.push({rotulo:'Sem os dados',valor:'sem'});
+  ops.push({rotulo:'Cancelar',valor:null,claro:true});
+  fcgPerguntar(titulo,ls,ops,function(v){
+    if(v==='com')cb(true);
+    else if(v==='sem')cb(false);
+  });
+}
+function fcxExportarTudo(){
+  fcxPerguntarDados('Exportar tudo',
+    ['O arquivo leva TUDO o que a ferramenta guarda neste navegador: os presets gerais, as bibliotecas de presets das seis abas e o rascunho (a configuração que está na tela agora). É o backup completo.'],
+    fcxNomeTudo(true),fcxNomeTudo(false),
+    function(comDados){
+      var o;
+      try{
+        o={formato:FCX_FORMATO,versao:FCX_VERSAO,tipo:'tudo',dados:!!comDados,
+           geradoEm:(new Date()).toISOString(),
+           presetsGerais:[],presetsDeAba:fcxAbasParaArquivo(comDados),
+           rascunho:fcxRascunhoParaArquivo(comDados),rascunhoGeral:fcxGeralDaTelaParaArquivo()};
+        for(var i=0;i<FCG.presets.length;i++)o.presetsGerais.push(fcxGeralParaArquivo(FCG.presets[i],comDados));
+      }catch(e){
+        fcFalha('Backup','montar o arquivo de exportação',e,'');
+        alert('Não foi possível montar o arquivo. O aviso vermelho no topo tem o detalhe.');
+        return;
+      }
+      if(fcxBaixar(fcxNomeTudo(comDados),JSON.stringify(o,null,2)))
+        fcxAviso('Arquivo gerado: '+fcxNomeTudo(comDados)+' — '+FCG.presets.length+' preset(s) geral(is), as seis bibliotecas de aba e o rascunho.');
+    });
+}
+function fcxExportarUm(){
+  var p=fcgAtivo();
+  if(!p){alert('Nenhum preset geral selecionado. Selecione a campanha e a página na barra acima, ou use “Exportar tudo” para levar o backup completo.');return;}
+  fcxPerguntarDados('Exportar “'+fcgNome(p)+'”',
+    ['O arquivo leva SÓ este preset geral — a configuração das seis abas para a página '+fcgPaginaRotulo(p.pagina)+' da campanha “'+p.campanha+'”, com as caixas “Outros códigos meus” dela. É o que serve para repassar uma campanha.',
+     'Não leva as bibliotecas de presets das abas nem o rascunho. Se uma aba deste preset veio de um preset de aba, a marca de origem viaja junto e, no computador que receber, ela vai dizer que a origem não existe ali — os valores continuam inteiros de qualquer jeito, porque o preset geral guarda uma cópia.'],
+    fcxNomeUm(p,true),fcxNomeUm(p,false),
+    function(comDados){
+      var o;
+      try{
+        o={formato:FCX_FORMATO,versao:FCX_VERSAO,tipo:'preset',dados:!!comDados,
+           geradoEm:(new Date()).toISOString(),
+           presetsGerais:[fcxGeralParaArquivo(p,comDados)]};
+      }catch(e){
+        fcFalha('Backup','montar o arquivo de exportação',e,'');
+        alert('Não foi possível montar o arquivo. O aviso vermelho no topo tem o detalhe.');
+        return;
+      }
+      if(fcxBaixar(fcxNomeUm(p,comDados),JSON.stringify(o,null,2)))
+        fcxAviso('Arquivo gerado: '+fcxNomeUm(p,comDados)+' — só o preset geral “'+fcgNome(p)+'”.');
+    });
+}
+/* Linha de recado abaixo dos botoes. Texto por no de texto, nunca innerHTML: parte do que ela
+   diz vem do arquivo importado. */
+function fcxAviso(txt){
+  var el=$('fcx-aviso');
+  if(!el)return;
+  fcgTexto(el,txt||'');
+  el.style.display=txt?'block':'none';
+}
+
+/* ---- importar ---- */
+function fcxImportarClique(){
+  var el=$('fcx-arquivo');
+  if(!el){alert('O seletor de arquivo não está disponível nesta página.');return;}
+  el.value='';       /* sem isto, escolher o MESMO arquivo duas vezes seguidas nao dispara nada */
+  el.click();
+}
+function fcxArquivoEscolhido(){
+  var el=$('fcx-arquivo'),f=el&&el.files&&el.files[0],r,nome;
+  if(!f)return;
+  nome=String(f.name||'arquivo');
+  if(f.size>FCX_BYTES_MAX){
+    el.value='';
+    alert('Este arquivo tem '+Math.round(f.size/1024)+' KB e o limite é '+Math.round(FCX_BYTES_MAX/1024)+' KB. Um backup completo desta ferramenta não passa de algumas centenas de KB — um arquivo muito maior que isso não é um backup dela.');
+    return;
+  }
+  r=new FileReader();
+  r.onerror=function(){el.value='';alert('Não foi possível ler o arquivo “'+nome+'”. Confira se ele ainda está no lugar e tente de novo.');};
+  r.onload=function(){
+    var txt=String(r.result==null?'':r.result);
+    el.value='';
+    try{fcxImportarTexto(txt,nome);}
+    catch(e){
+      fcFalha('Backup','conferir o arquivo importado',e,'');
+      alert('Não foi possível entender este arquivo, e nada foi alterado. O aviso vermelho no topo tem o detalhe.');
+    }
+  };
+  try{r.readAsText(f);}
+  catch(e){el.value='';fcFalha('Backup','abrir o arquivo escolhido',e,'');alert('Não foi possível abrir o arquivo. O aviso vermelho no topo tem o detalhe.');}
+}
+/* Porta de entrada do conteudo. Confere FORMATO e VERSAO antes de olhar qualquer valor: um
+   arquivo de outra ferramenta, ou de uma versao mais nova desta, e recusado com explicacao --
+   nunca lido pela metade. */
+function fcxImportarTexto(txt,nomeArq){
+  var obj,plano;
+  if(txt.length>FCX_BYTES_MAX){alert('O conteúdo deste arquivo é grande demais para ser um backup desta ferramenta. Nada foi alterado.');return;}
+  try{obj=JSON.parse(txt);}
+  catch(e){alert('“'+nomeArq+'” não é um arquivo JSON válido — ele está truncado, corrompido ou não é um arquivo de configuração. Nada foi alterado.');return;}
+  if(!fcEhObjeto(obj)){alert('“'+nomeArq+'” é um JSON válido, mas não tem a forma de um arquivo de configuração desta ferramenta. Nada foi alterado.');return;}
+  if(obj.formato!==FCX_FORMATO){
+    alert('“'+nomeArq+'” não foi gerado pelos Construtores Foto Certa (ele não traz a marca “'+FCX_FORMATO+'”). Nada foi alterado.');return;
+  }
+  if(typeof obj.versao!=='number'||!isFinite(obj.versao)||obj.versao<1){
+    alert('“'+nomeArq+'” não diz em que versão do formato foi gerado, então não dá para saber como lê-lo. Nada foi alterado.');return;
+  }
+  if(obj.versao>FCX_VERSAO){
+    alert('“'+nomeArq+'” foi gerado por uma versão MAIS NOVA da ferramenta (formato '+obj.versao+'; esta versão lê até o '+FCX_VERSAO+').\n\nImportar assim traria a configuração pela metade, sem avisar qual metade. Atualize a ferramenta (recarregue construtores.fotocerta.com.br) e tente de novo. Nada foi alterado.');return;
+  }
+  plano=fcxPlano(obj);
+  if(!plano.gerais.length&&!plano.abas.length&&!plano.rascunho){
+    alert('“'+nomeArq+'” tem a marca certa, mas não sobrou nada legível dentro dele'+
+      (plano.conta.descartados?(' ('+plano.conta.descartados+' item(ns) não foram reconhecidos e ficaram de fora)'):'')+
+      '. Nada foi alterado.');
+    return;
+  }
+  fcxConfirmar(plano,nomeArq);
+}
+/* A data de geracao e ECOADA na confirmacao, entao ela e texto de arquivo aparecendo na tela.
+   Vai por no de texto (fcgPerguntar nunca usa innerHTML), o que fecha a marcacao -- mas nao
+   fecha o resto: um arquivo hostil poria ali uma FRASE, e uma frase no meio de uma confirmacao
+   que o operador esta lendo para decidir e capaz de mentir ("nenhum preset sera substituido").
+   Por isso o campo e aceito so na forma de data ISO; qualquer outra coisa vira 'em data
+   desconhecida'. O arquivo pode escolher a data, nunca o texto. */
+function fcxDataDoArquivo(v){
+  if(typeof v!=='string')return '';
+  if(!/^[0-9]{4}\-[0-9]{2}\-[0-9]{2}([T ][0-9:.]{1,12}(Z|[+\-][0-9:]{1,6})?)?$/.test(v))return '';
+  return v.substring(0,10);
+}
+/* Monta o PLANO: o que o arquivo traz, o que ja existe aqui, o que foi descartado. Nada e
+   escrito nesta funcao -- ela so le e conta, para a confirmacao poder dizer a verdade ANTES. */
+function fcxPlano(obj){
+  var conta=fcxConta(),
+      plano={tipo:(obj.tipo==='preset')?'preset':'tudo',dados:obj.dados!==false,
+             geradoEm:fcxDataDoArquivo(obj.geradoEm),
+             gerais:[],abas:[],rascunho:null,rascunhoGeral:null,
+             travadas:[],codHead:0,codBody:0,conta:conta};
+  fcxTpl={};
+  try{return fcxPlanoMiolo(obj,conta,plano);}finally{fcxTpl=null;}
+}
+function fcxPlanoMiolo(obj,conta,plano){
+  var i,j,k,a,p,x,lista,item,vals,ok,vazio;
+  /* abas que pararam de gravar nesta sessao nao recebem nada: o DOM delas nao representa o que
+     o operador tinha, entao nem serve de molde nem pode ser escrito. E a mesma regra que a
+     biblioteca de presets ja aplica. */
+  for(i=0;i<ABAS.length;i++){if(fcSoLeitura[ABAS[i].id])plano.travadas.push(ABAS[i].nome);}
+
+  if(fcEhArray(obj.presetsGerais)){
+    for(i=0;i<obj.presetsGerais.length;i++){
+      p=fcgLerPreset(obj.presetsGerais[i]);
+      if(!p){conta.descartados++;continue;}
+      if(p.campanha.length>FCG_CAMPANHA_MAX){p.campanha=p.campanha.substring(0,FCG_CAMPANHA_MAX);conta.ajustados++;}
+      for(j=0;j<ABAS.length;j++){
+        a=ABAS[j];
+        if(fcSoLeitura[a.id]){p.abas[a.id].valores={};continue;}
+        fcxContarEstranhas(a,p.abas[a.id].valores,conta);
+        p.abas[a.id].valores=fcxLimparValores(a,p.abas[a.id].valores,conta,false);
+      }
+      if(p.codigos.head.length>FCX_TEXTO_MAX){p.codigos.head='';conta.descartados++;}
+      if(p.codigos.body.length>FCX_TEXTO_MAX){p.codigos.body='';conta.descartados++;}
+      plano.codHead+=p.codigos.head.length;
+      plano.codBody+=p.codigos.body.length;
+      plano.gerais.push({p:p,existente:fcgAcharPor(p.campanha,p.pagina)});
+    }
+  }else if(obj.presetsGerais!==undefined&&obj.presetsGerais!==null)conta.descartados++;
+
+  if(fcEhObjeto(obj.presetsDeAba)){
+    for(i=0;i<ABAS.length;i++){
+      a=ABAS[i];
+      lista=obj.presetsDeAba[a.id];
+      if(lista===undefined||lista===null)continue;
+      if(!fcEhArray(lista)){conta.descartados++;continue;}
+      if(fcSoLeitura[a.id]){conta.descartados+=lista.length;continue;}
+      for(j=0;j<lista.length;j++){
+        item=fcPresetConverter(a,lista[j]);
+        if(!item){conta.descartados++;continue;}
+        if(item.nome.length>FC_PRESET_NOME_MAX){item.nome=item.nome.substring(0,FC_PRESET_NOME_MAX);conta.ajustados++;}
+        fcxContarEstranhas(a,item.valores,conta);
+        vals=fcxLimparValores(a,item.valores,conta,false);
+        /* a conferencia extra da aba roda DE NOVO depois da limpeza: ela julgou o formato bruto,
+           e o que sobrou da limpeza pode ja nao passar (bPresetOk exige o objeto 'b' inteiro) */
+        ok=!a.presetOk||a.presetOk(vals);
+        if(!ok||!fcEhObjeto(vals[a.pref])){conta.descartados++;continue;}
+        plano.abas.push({a:a,item:{nome:item.nome,carimbo:item.carimbo,valores:vals},colide:fcPresetIndice(a,item.nome)>=0});
+      }
+    }
+  }else if(obj.presetsDeAba!==undefined&&obj.presetsDeAba!==null)conta.descartados++;
+
+  if(plano.tipo==='tudo'&&fcEhObjeto(obj.rascunho)){
+    plano.rascunho={};vazio=true;
+    for(i=0;i<ABAS.length;i++){
+      a=ABAS[i];
+      if(fcSoLeitura[a.id])continue;
+      x=fcxLimparValores(a,obj.rascunho,conta,true);
+      for(k in x){if(Object.prototype.hasOwnProperty.call(x,k)){plano.rascunho[k]=x[k];vazio=false;}}
+    }
+    /* rascunho que nao sobreviveu a conferencia nao vira pergunta: perguntar "substituo a tela
+       por isto?" sobre um objeto vazio faria a tela ser esvaziada em nome de um backup que nao
+       trazia nada */
+    if(vazio)plano.rascunho=null;
+    else plano.rascunhoGeral=fcxPlanoGeralDaTela(obj.rascunhoGeral,conta);
+  }else if(plano.tipo==='tudo'&&obj.rascunho!==undefined&&obj.rascunho!==null)conta.descartados++;
+  return plano;
+}
+function fcxPlanoGeralDaTela(x,conta){
+  var out={ativo:null,ativas:{},origens:{},codigos:{head:'',body:''}},i,a;
+  if(!fcEhObjeto(x))return out;
+  if(typeof x.ativo==='string'&&x.ativo)out.ativo=x.ativo;
+  for(i=0;i<ABAS.length;i++){
+    a=ABAS[i];
+    out.ativas[a.id]=!!(fcEhObjeto(x.ativas)&&x.ativas[a.id]);
+    out.origens[a.id]=fcgLerOrigem(fcEhObjeto(x.origens)?x.origens[a.id]:null);
+  }
+  if(fcEhObjeto(x.codigos)){
+    if(typeof x.codigos.head==='string'&&x.codigos.head.length<=FCX_TEXTO_MAX)out.codigos.head=x.codigos.head;
+    else if(x.codigos.head!==undefined){conta.descartados++;}
+    if(typeof x.codigos.body==='string'&&x.codigos.body.length<=FCX_TEXTO_MAX)out.codigos.body=x.codigos.body;
+    else if(x.codigos.body!==undefined){conta.descartados++;}
+  }
+  return out;
+}
+/* NUNCA SOBRESCREVE CALADO. Duas perguntas, nesta ordem, e so depois de as duas terem resposta
+   e que alguma coisa e escrita: assim cancelar no meio nao deixa metade importada.
+     1. o resumo e, quando ha colisao de nome, a escolha entre SUBSTITUIR e IMPORTAR COMO COPIA;
+     2. o rascunho, que substitui a TELA -- a decisao mais destrutiva do fluxo. */
+function fcxConfirmar(plano,nomeArq){
+  var novosG=0,colidemG=0,nomesG=[],novosA=0,colidemA=0,i,linhas,ops;
+  for(i=0;i<plano.gerais.length;i++){
+    if(plano.gerais[i].existente){colidemG++;if(nomesG.length<6)nomesG.push(fcgNome(plano.gerais[i].existente));}
+    else novosG++;
+  }
+  for(i=0;i<plano.abas.length;i++){if(plano.abas[i].colide)colidemA++;else novosA++;}
+
+  linhas=[];
+  linhas.push('Arquivo: “'+nomeArq+'” — '+(plano.tipo==='preset'?'um preset geral':'backup completo')+
+    ', gerado '+(plano.geradoEm?('em '+plano.geradoEm):'em data desconhecida')+', '+
+    (plano.dados?'COM':'SEM')+' os dados de contato e pagamento.');
+  var itens=[];
+  itens.push(novosG+' preset(s) geral(is) novo(s)');
+  itens.push(colidemG+' preset(s) geral(is) que já existem aqui'+(nomesG.length?(': '+fcLista(nomesG)):''));
+  itens.push(novosA+' preset(s) de aba novo(s)');
+  itens.push(colidemA+' preset(s) de aba com nome já usado');
+  if(plano.rascunho)itens.push('o rascunho — a configuração das seis abas que estava na tela quando o backup foi feito');
+  if(plano.conta.descartados)itens.push(plano.conta.descartados+' item(ns) do arquivo NÃO foram reconhecidos e ficam de fora');
+  if(plano.conta.ajustados)itens.push(plano.conta.ajustados+' nome(s) longo(s) demais foram encurtados');
+  linhas.push(itens);
+  if(!plano.dados)
+    linhas.push('Como o arquivo é “sem dados”, os campos de contato e pagamento que ele não traz mantêm o valor que já está aqui — importar este arquivo não esvazia nenhum campo preenchido.');
+  if(plano.codHead||plano.codBody)
+    linhas.push('Atenção: o arquivo traz código manual nas caixas “Outros códigos meus” (Tag Head: '+plano.codHead+' caracteres; Tag Body: '+plano.codBody+'). Esse texto é guardado como está e vai para a sua página quando você o colar. Se o arquivo veio de outra pessoa, leia esse código antes de usar.');
+  if(plano.travadas.length)
+    linhas.push('Estas abas pararam de gravar nesta sessão e NÃO recebem nada deste arquivo: '+fcLista(plano.travadas)+'. Recarregue a página e importe de novo para incluí-las.');
+
+  ops=[];
+  if(colidemG||colidemA){
+    linhas.push('O que fazer com os que já existem aqui? “Substituir” apaga a configuração atual deles e põe a do arquivo — isso não volta. “Importar como cópia” não mexe em nada do que existe: os do arquivo entram com um número no fim do nome.');
+    ops.push({rotulo:'Substituir os que já existem',valor:'substituir'});
+    ops.push({rotulo:'Importar como cópia',valor:'copia'});
+  }else{
+    ops.push({rotulo:'Importar',valor:'substituir'});
+  }
+  ops.push({rotulo:'Cancelar',valor:null,claro:true});
+  fcgPerguntar('Importar este arquivo?',linhas,ops,function(politica){
+    if(!politica)return;
+    if(!plano.rascunho){fcxAplicar(plano,politica,false);return;}
+    fcxPerguntarRascunho(plano,politica);
+  });
+}
+function fcxPerguntarRascunho(plano,politica){
+  var p=fcgAtivo(),motivos=p?fcgMotivos():[],linhas=[];
+  linhas.push('O arquivo também traz o RASCUNHO: a configuração das seis abas como estava na tela quando o backup foi feito.');
+  linhas.push('Aplicar substitui o que está na tela agora, nas seis abas — e também qual preset geral está selecionado, quais abas estão ligadas nele e as caixas “Outros códigos meus”.');
+  if(p&&motivos.length){
+    linhas.push('A tela tem alterações que ainda não foram salvas em “'+fcgNome(p)+'”, e elas não voltam:');
+    linhas.push(motivos);
+  }else if(p){
+    linhas.push('A tela confere com “'+fcgNome(p)+'”, então o que está nela continua guardado nesse preset geral.');
+  }else{
+    linhas.push('A tela é o rascunho e não está guardada em nenhum preset geral: o que estiver nela agora se perde.');
+  }
+  linhas.push('Os presets do arquivo entram do mesmo jeito nas duas escolhas — a pergunta aqui é só sobre a tela.');
+  fcgPerguntar('E o rascunho do arquivo?',linhas,
+    [{rotulo:'Substituir a tela pelo rascunho do arquivo',valor:'sim'},
+     {rotulo:'Não mexer na tela',valor:'nao',claro:true},
+     {rotulo:'Cancelar tudo',valor:null,claro:true}],
+    function(v){
+      if(!v)return;
+      fcxAplicar(plano,politica,v==='sim');
+    });
+}
+/* Nome de preset de aba que ainda nao esteja em uso. Mesmo desenho de fcgCampanhaLivre, e pelo
+   mesmo motivo: importar como copia nao pode produzir dois itens com o mesmo nome, porque a
+   lista identifica o preset PELO nome e dois iguais deixariam de dizer qual e qual. */
+function fcxNomeLivre(a,base){
+  var n=2,nome;
+  base=String(base==null?'':base).trim();
+  if(base.length>FC_PRESET_NOME_MAX-6)base=base.substring(0,FC_PRESET_NOME_MAX-6);
+  for(;;){
+    nome=base+' ('+n+')';
+    if(fcPresetIndice(a,nome)<0)return nome;
+    n++;
+    if(n>999)return base+' ('+fcgNovoId()+')';
+  }
+}
+/* A escrita, depois de as duas perguntas terem resposta. */
+function fcxAplicar(plano,politica,comRascunho){
+  var conta=plano.conta,i,j,a,it,lista,idx,g,p,alvo,mapa={},novos=0,subs=0,copias=0,
+      novosA=0,subsA=0,copiasA=0,travou=[],caiuNoRascunho=false;
+
+  /* 1. bibliotecas de presets de aba */
+  for(i=0;i<plano.abas.length;i++){
+    a=plano.abas[i].a;it=plano.abas[i].item;
+    lista=fcPresets[a.id]||(fcPresets[a.id]=[]);
+    idx=fcPresetIndice(a,it.nome);
+    if(idx>=0&&politica==='copia'){
+      it={nome:fcxNomeLivre(a,it.nome),carimbo:it.carimbo,valores:it.valores};
+      idx=-1;copiasA++;
+    }else if(idx>=0)subsA++;
+    else novosA++;
+    fcxHerdarOperacionais(a,it.valores,(idx>=0)?lista[idx].valores:fcgValoresDaAba(a),conta);
+    if(idx>=0)lista[idx]=it;else lista.push(it);
+  }
+
+  /* 2. presets gerais. A copia RENOMEIA A CAMPANHA -- e o mesmo conserto que a leitura do
+        armazenamento faz com um par (campanha, pagina) repetido, e por isso nao nasce daqui o
+        par invisivel e indelevel que a fase 3 teve de tratar. */
+  for(i=0;i<plano.gerais.length;i++){
+    g=plano.gerais[i].p;
+    alvo=fcgAcharPor(g.campanha,g.pagina);   /* relido: uma copia anterior pode ter mudado a lista */
+    if(alvo&&politica==='copia'){g.campanha=fcgCampanhaLivre(g.campanha,g.pagina);alvo=null;copias++;}
+    p={id:alvo?alvo.id:(fcgAchar(g.id)?fcgNovoId():g.id),
+       campanha:g.campanha,pagina:g.pagina,abas:{},
+       codigos:{head:g.codigos.head,body:g.codigos.body},
+       atualizadoEm:g.atualizadoEm||fcAgora()};
+    for(j=0;j<ABAS.length;j++){
+      a=ABAS[j];
+      /* Aba que parou de gravar nesta sessao nao pode ser conferida contra molde nenhum (o DOM
+         dela nao representa nada), entao a leitura a deixou VAZIA. Escrever esse vazio por cima
+         de um preset que ja existe apagaria a configuracao dela dentro dele -- perda de trabalho
+         por causa de um defeito de outra aba, e sem ninguem nomear. Substituindo, o que estava
+         guardado fica exatamente como estava; num preset novo nao ha o que preservar, e a
+         confirmacao ja disse que estas abas nao recebem nada deste arquivo. */
+      if(fcSoLeitura[a.id]&&alvo&&alvo.abas[a.id]){p.abas[a.id]=alvo.abas[a.id];continue;}
+      it=g.abas[a.id]||{ativa:false,valores:{},origem:null};
+      fcxHerdarOperacionais(a,it.valores,
+        (alvo&&alvo.abas[a.id])?alvo.abas[a.id].valores:fcgValoresDaAba(a),conta);
+      p.abas[a.id]={ativa:!!it.ativa,valores:it.valores,origem:it.origem};
+    }
+    mapa[g.id]=p.id;
+    if(alvo){
+      for(j=0;j<FCG.presets.length;j++){if(FCG.presets[j].id===alvo.id){FCG.presets[j]=p;break;}}
+      subs++;
+    }else FCG.presets.push(p);
+  }
+  /* o que nao foi substituido nem virou copia entrou como novo */
+  novos=plano.gerais.length-subs-copias;
+
+  /* 3. o rascunho (a tela), so se o operador mandou */
+  if(comRascunho&&plano.rascunho){
+    for(i=0;i<ABAS.length;i++){
+      a=ABAS[i];
+      if(fcSoLeitura[a.id]){travou.push(a.nome);continue;}
+      try{
+        a.restaura(plano.rascunho);
+        if(a.redesenhar)a.redesenhar();
+      }catch(e){
+        /* mesma regra do estado gravado: o DOM ficou meio escrito e ja nao representa nada */
+        fcSoLeitura[a.id]=true;
+        fcFalha(a.nome,'aplicar o rascunho de um arquivo importado -- o que ja estava gravado foi mantido, e esta aba nao grava nada ate a pagina ser recarregada',e,a.id);
+        travou.push(a.nome);
+      }
+    }
+    if(plano.rascunhoGeral){
+      for(i=0;i<ABAS.length;i++){
+        a=ABAS[i];
+        FCG.ativas[a.id]=!!plano.rascunhoGeral.ativas[a.id];
+        FCG.origens[a.id]=plano.rascunhoGeral.origens[a.id];
+      }
+      FCG.codigos={head:plano.rascunhoGeral.codigos.head,body:plano.rascunhoGeral.codigos.body};
+      /* o id do preset selecionado pode ter mudado (copia, ou colisao com um id daqui): o mapa
+         traduz. Sem tradutor, cair no Rascunho -- e DIZER, e nao fingir que estava selecionado */
+      FCG.ativo=(plano.rascunhoGeral.ativo&&mapa[plano.rascunhoGeral.ativo]&&fcgAchar(mapa[plano.rascunhoGeral.ativo]))
+        ?mapa[plano.rascunhoGeral.ativo]:null;
+      if(!FCG.ativo&&plano.rascunhoGeral.ativo){
+        /* O arquivo dizia estar numa PAGINA e a pagina nao chegou junto. Deixar os "Outros
+           codigos meus" dela na tela quebraria a regra da fase 3 -- o Rascunho nao e uma pagina,
+           e dali estes dois campos seriam levados para a proxima pagina criada, que e o
+           vazamento entre campanhas que a fase 3 fechou. Se o arquivo ja vinha do Rascunho
+           (ativo nulo), eles ficam: ali foram digitados sem pagina nenhuma. */
+        FCG.codigos={head:'',body:''};
+        caiuNoRascunho=true;
+      }
+    }
+  }
+
+  fcgGravar();
+  salvarEstado();
+  for(i=0;i<ABAS.length;i++){
+    (function(a){try{fcPresetsRender(a);}catch(e){fcFalha(a.nome,'desenhar a biblioteca de presets depois de importar',e,a.id);}})(ABAS[i]);
+  }
+  fcgSincronizarCampos();
+  fcgAtualizar();
+
+  var r='Importação concluída. Presets gerais: '+novos+' novo(s), '+subs+' substituído(s), '+copias+' como cópia. '+
+        'Presets de aba: '+novosA+' novo(s), '+subsA+' substituído(s), '+copiasA+' como cópia.';
+  /* As duas linhas do rascunho sao UM par de opostos e precisam continuar sendo: com a linha do
+     "caiu no Rascunho" no meio delas, o 'senao' passava a pertencer a ela, e a mesma mensagem
+     dizia que o rascunho foi aplicado E que nao foi. Medido. A linha do caiuNoRascunho e um
+     acrescimo independente e fica DEPOIS do par. */
+  if(comRascunho&&plano.rascunho)r+=' O rascunho do arquivo foi aplicado na tela.';
+  else if(plano.rascunho)r+=' O rascunho do arquivo NÃO foi aplicado: a tela ficou como estava.';
+  if(caiuNoRascunho)r+=' O arquivo dizia estar num preset geral que não veio junto: a barra ficou em Rascunho, e as caixas “Outros códigos meus” ficaram vazias porque elas são de uma página e o Rascunho não é uma página.';
+  if(conta.herdados)r+=' '+conta.herdados+' campo(s) de contato e pagamento que o arquivo não trazia mantiveram o valor que já estava aqui.';
+  if(conta.descartados)r+=' '+conta.descartados+' item(ns) não reconhecido(s) ficaram de fora.';
+  if(travou.length)r+=' Estas abas não receberam o rascunho: '+fcLista(travou)+'.';
+  fcxAviso(r);
+  alert(r);
+}
+
+function fcxIniciar(){
+  var el;
+  liga('fcx-tudo',fcxExportarTudo);
+  liga('fcx-um',fcxExportarUm);
+  liga('fcx-importar',fcxImportarClique);
+  el=$('fcx-arquivo');
+  if(el)el.addEventListener('change',fcxArquivoEscolhido);
+  fcxAviso('');
+}
+
 /* ============================================================
    SLIDESHOW
    ============================================================ */
@@ -3716,6 +4494,26 @@ function sAdd(){
   sImgs.push({url:url,legenda:$('s-leg').value.trim()});
   $('s-url').value='';$('s-leg').value='';
   sRender();salvarEstado();sPreview();sSaidaVence();
+}
+/* Limpeza dos valores desta aba quando eles vem de ARQUIVO (fase 4; registrada em ABAS como
+   'importar'). O saneamento generico da importacao cuida de forma -- tipo, tamanho, profundidade,
+   chaves conhecidas --, e nao tem como saber que 'url' precisa ser um endereco: essa regra e
+   desta aba e ja tem dono (sUrlOk). Sem isto, um arquivo hostil poria 'javascript:...' na lista
+   de fotos, o cartao mostraria um nome de arquivo qualquer e o endereco sairia no bloco entregue
+   dentro de IMAGENS[].url -- o mesmo campo que o cadastro manual recusa desde a fase 4 anterior.
+   Item que nao e objeto, ou cujo endereco nao passa, NAO entra e e CONTADO: a importacao mostra
+   o numero na tela, nunca descarta calado. A legenda vira texto porque e assim que a lista e o
+   gerador a tratam (textContent no cartao, escJs no bloco). */
+function sImportarLimpar(frag,conta){
+  var i,im,out=[];
+  if(!frag||!fcEhArray(frag.imgs))return frag;
+  for(i=0;i<frag.imgs.length;i++){
+    im=frag.imgs[i];
+    if(!fcEhObjeto(im)||typeof im.url!=='string'||!sUrlOk(im.url)){conta.descartados++;continue;}
+    out.push({url:im.url,legenda:(typeof im.legenda==='string')?im.legenda:''});
+  }
+  frag.imgs=out;
+  return frag;
 }
 /* Traz de volta para dentro da area de rolagem o cartao da posicao i. Sem isto, subir ou
    descer uma foto que esta na borda visivel a manda para fora do quadro e o operador perde de
@@ -9238,6 +10036,9 @@ prep('Contagem regressiva','cnt',function(){
    Lendo antes, a barra compararia uma tela ainda por corrigir com o preset gravado e diria
    "alterado" numa ferramenta recem-aberta em que ninguem mexeu. */
 prep('Preset geral','',fcgIniciar,'preparar a barra do preset geral');
+/* Passo proprio, com rotulo proprio: se ligar os botoes de backup falhar, a barra vermelha
+   precisa dizer que foi o backup -- e nao o preset geral, que continua funcionando. */
+prep('Backup em arquivo','',fcxIniciar,'preparar os botoes de exportar e importar');
 })();
 </script>
 </body>
