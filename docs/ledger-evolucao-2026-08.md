@@ -14,8 +14,8 @@ O tempo real é medido pelo **relógio dos commits**: do início do trabalho da 
 | 2.5 | Interface da lista de imagens (A, B, C) + cores livres (D) | 45–75 min | 47 min até a branch | 🔄 branch `evolucao/2.5-interface-lista`, aguardando revisão e merge |
 | 3 | Preset geral | 4–5h | 43 min até a branch | 🔄 branch `evolucao/3-preset-geral`, aguardando revisão e merge |
 | 4 | Exportar e importar JSON | 2–3h | 52 min até a branch | 🔄 branch `evolucao/4-exportar-importar`, aguardando revisão e merge |
-| 5 | Painel consolidado | 3–4h | — | não iniciada |
-| | **Total** | **13–18h + 2.5** | **3h56 até aqui** | |
+| 5 | Painel consolidado | 3–4h | 63 min até a branch | 🔄 branch `evolucao/5-painel-consolidado`, aguardando revisão e merge |
+| | **Total** | **13–18h + 2.5** | **4h59 até aqui** | |
 
 ## Registro por fase
 
@@ -122,6 +122,59 @@ Exportar/importar JSON (fase 4) e o painel consolidado (fase 5). Os campos de "O
 #### O que a fase não fez, de propósito
 
 O painel consolidado (fase 5). Os dois campos de "Outros códigos meus" continuam **guardados e não consumidos** — agora eles também viajam no arquivo, e o texto de ajuda continua dizendo que quem vai juntá-los aos blocos gerados é a próxima etapa.
+
+### Fase 5 — Painel consolidado, e a largura da ferramenta
+
+- **Início:** 20/08/2026, 18:37. **Branch pronta para revisão:** 20/08/2026, 19:40 (**63 min**; o real da tabela só fecha no merge).
+- **Base:** `main` = `0b62f25` (fases 1, 2, 2.5, 3 e 4 mescladas). **Branch:** `evolucao/5-painel-consolidado`. **Não mesclada.**
+- **O que foi construído:** o painel consolidado (R5, R6 e a seção 4 da spec) na faixa à direita das abas, e o achado D do dono — largura, número de colunas e a lista de imagens em largura inteira. Espaço de nomes `fcc-`, **um** ID novo escrito no HTML (`fcc-corpo`); o resto do painel é desenhado por `fccRender`.
+- **O que a fase consumiu, sem nada refeito:** `FCG.ativas` (só aba ligada contribui — é o R2 pagando o preço dele), `FCG.codigos` (os dois "Outros códigos meus", que a fase 3 guardou e declarou **sem consumidor**), `fcgValoresDaAba`/`fcgValoresDaAbaLer` (é dali que saem os dois radios que mudam destino, e não do DOM: aba em só-leitura entrega o que estava gravado), `fcCanon` (a assinatura de "gerado antes de a aba mudar"), `copiar`/`fcAvisoCopia` (os botões do painel são os mesmos das abas) e `fcFalha`/`prep`.
+- **O painel não formata código.** Ele lê as nove caixas que os geradores escreveram e as junta. O único acréscimo dentro dos geradores são **sete linhas** de `fccMarcar(abaId)`, nos caminhos em que a caixa foi escrita — anotação ao lado, que não muda um byte do que sai.
+- **Regressão:** as **9 saídas** dos seis geradores byte a byte idênticas às de `main` (`0b62f25`) pelo **SHA-256 completo** de cada uma, em **dois cenários** (preset geral *Natal 2026 · Hospedeira* com as seis abas ligadas e os dois códigos manuais preenchidos; e Rascunho), com as duas versões servidas pelo **mesmo `localhost`** e o mesmo `localStorage` (SHA-256 do estado semeado igual dos dois lados, `3eb0d1db…`). **18 de 18.** O `fcConstrutores` sai com o **mesmo hash** depois de a `main` gerar por cima dele. ES5 confirmado por AST (`acorn --ecma5`), `<script>` único, IIFE única. Varredura de IDs repetidos: `[]` — 424 no DOM com o painel montado e os dois presets gerais, 368 escritos no HTML (367 antes; o único novo é `fcc-corpo`).
+
+#### O que a verificação como operador provou
+
+- **Aba fora não contribui.** Com o Checkout **fora** e 22 107 caracteres na caixa dele, o painel não o menciona; ligado o interruptor, ele aparece na lista de componentes. É o R2 pagando o preço dele.
+- **Contagem regressiva nos dois lados.** No modo *fixa no topo*, o bloco entra na Tag Body (24 241 caracteres montados); trocado para *no fluxo* e regerado, ele sai da Tag Body (15 514) e aparece em "Saídas por componente".
+- **TidyCal embutido é de duas páginas.** Em *Hospedeira*: saída 3 na lista de componentes, saídas 1 e 2 em "É de outra página desta campanha". Criada a *Embutida* e ligada só a aba TidyCal: a saída 2 vira a Tag Body dela (`pagina EMBUTIDA` na linha de identificação), a 1 vira componente e a 3 é que passa a ser "de outra página".
+- **Falta gerar, não monta.** Recarregada a página com as seis abas ligadas, o painel recusa montar os dois campos e nomeia o que falta ("Falta gerar o código de 2 abas: Captação de leads, Contagem regressiva"). Mudado o código da página na aba Leads sem regerar, o campo **é** montado e o aviso âmbar diz que o código é anterior à mudança.
+- **Sem preset geral, o painel diz o que falta.** E volta a dizê-lo ao sair de um preset para o Rascunho.
+- **Colisão de bordas visível.** `fc-borda-giro` colado à mão contra `fc-borda-brilho` gerado: nenhum aviso, corretamente. Trocado o colado para `fc-borda-brilho`: caixa vermelha nomeando a animação e os dois blocos onde ela aparece.
+- **Copiar funciona do painel**, tanto no campo montado quanto numa saída por componente — e o texto da saída por componente é **idêntico** ao da caixa da aba.
+- **O nome da campanha não escapa do comentário.** Renomeada para `Páscoa --> <b>x</b> -- 2027`, a linha sai `<!-- Construtores Foto Certa -- Pascoa - bx/b - 2027 -- pagina HOSPEDEIRA -- Tag Head -->` e o analisador do navegador devolve **um** comentário seguido só de espaço e dos `<style>`.
+
+#### Os dois defeitos que a verificação achou
+
+- **A linha de fronteira prometia conteúdo inexistente.** Com código manual e nenhuma aba ligada, o campo terminava em *"daqui para baixo, gerado pelos Construtores Foto Certa"* com nada embaixo. A fronteira passou a sair só quando existe bloco depois dela.
+- **A lista do que falta dizia o nome duas vezes.** "Bordas com efeito — Bordas com efeito — código 1": o rótulo já nomeia a aba. Ficou só o rótulo.
+
+#### A decisão que a spec pediu de um jeito e a medição mandou de outro
+
+A spec escreveu a linha de identificação e a de fronteira como comentário de **CSS** (`/* … */`). Os campos Tag Head e Tag Body do Prosite recebem **HTML**. Medido com o analisador do navegador: `/* Construtores Foto Certa -- … */` no começo de um corpo vira **nó de texto** (`nodeType` 3) — sairia **impresso na página publicada**. Na forma `<!-- … -->` vira comentário (`nodeType` 8). As duas linhas foram para comentário de HTML, e o nome da campanha entra por `fccSeguro` (sem `<`, sem `>`, sem hifens repetidos, sem acento) para que nenhuma sequência de fechamento possa se formar dentro dele.
+
+#### A largura, e a restrição do dono
+
+*"O ajuste já passará a contar com o painel consolidado usando parte da área à direita das abas."* Foi assim:
+
+- Faixa `.app` de até **1980 px**, painel de **380 px**, abas com o que sobra (**1536 px** em 2000 e em 2560). A margem lateral num monitor 2K cai de **732 px de cada lado para 290**.
+- Abaixo de **1400 px** a faixa deixa de ser dividida e o painel cai **abaixo** das abas. O painel é o segundo filho de `.app` para que isso não precise de regra de reordenação.
+- **O número de colunas virou conta do container**, não da janela: `repeat(auto-fit, minmax(min(360px,100%),1fr))`. A `@media (max-width:840px)` saiu — ela media a janela, e com o painel à direita a janela deixou de ser a largura da aba.
+- **Continuam duas colunas, e está medido por quê.** Toda `.grade` das abas tem exatamente dois filhos, então `auto-fit` nunca abre uma terceira. Reagrupar os fieldsets das seis abas para caber três daria **~470 px** por coluna contra os **735** de duas — mais estreito que os **507** de antes. O espaço foi para o painel e para a lista de imagens.
+- **Colunas medidas nas quatro larguras, nas seis abas:** 580 px a 1280 (empilhado), 538 a 1600, 735 a 2000 e a 2560. Zero vazamento (nenhum elemento pintado além da borda do painel) e `scrollWidth` = `clientWidth` em todas — e também a 700, 685 e 380 px.
+- **A lista de imagens em largura inteira**, fora de qualquer `.grade`. O teto de 520 px sobreviveu **com a justificativa refeita, não copiada**: com a lista em 1460 px o cartão continua com **96 px** (a altura vem da miniatura de 64×44, não da quebra do texto), então 520 continua sendo 5 cartões inteiros, e da contagem até a base do botão *Limpar lista* vão os mesmos **596 px** = 520 + 76 de moldura.
+- **Texto corrido ganhou teto de 1100 px** (`.descricao`, `.instrucoes`): a 1536 px a linha passaria de 250 caracteres.
+
+#### O estouro de 11 px: já estava fechado, e a prova ficou
+
+Reproduzido no commit da fase 2.5 (`a77c16a`): a 685 px de largura útil, `aba-cnt` terminava em **696** e o `scrollWidth` ia a 696 contra 685. Quem fechou foi o `flex-wrap:wrap` que a **fase 3** acrescentou a `.abas` por causa dos selos "fora" — a fase 2.5 mediu antes disso. Em `main` e na fase 5, a 700 e a 685 px, com e sem selos: `scrollWidth` = `clientWidth`, e o último botão termina dentro da caixa (620 de 680; 610 de 665 com cinco selos e três linhas).
+
+#### Um defeito pré-existente que a fase trouxe para largura de uso
+
+A largura das quatro molduras de prévia é escrita em pixels na montagem, e a prévia só é remontada ao abrir a aba. Encolher a janela depois disso deixava a moldura maior que a coluna e a **página inteira** ganhava rolagem horizontal — medido em `main`: prévia montada a 2560 px, janela levada a 400, `scrollWidth` 513 contra `clientWidth` 400. Alcançável em `main` só em janela muito estreita; com as colunas mais largas da fase 5 passou a acontecer a **700 px**. `max-width:100%` nas quatro molduras: a moldura encolhe junto e o excesso é cortado pelo `overflow:hidden` que já estava lá.
+
+#### O que a fase não fez, de propósito
+
+Não reagrupou os fieldsets das seis abas para abrir uma terceira coluna (a medição acima diz por quê), e não mexeu em nenhum gerador além das sete linhas de `fccMarcar`.
 
 ---
 

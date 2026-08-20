@@ -9,12 +9,23 @@
     --areia:#E9E3D3; --papel:#FDFBF6; --tinta:#2E2A22; --tinta-suave:#6B6455;
     --verde:#1F5C4D; --verde-escuro:#0F3A30; --linha:#D8D0BC; --escuro:#23281F;
     --codigo-texto:#CFE3C7;
+    /* Largura da ferramenta (fase 5). Ate aqui tudo era 1080 px fixos e centrados: num
+       monitor 2K sobravam 732 px de areia em CADA lado, que foi o achado D do dono. A faixa
+       agora acompanha a janela ate --larg, e dentro dela a area das abas e o que sobra depois
+       do painel consolidado -- a restricao que o dono enunciou: "o ajuste ja passara a contar
+       com o painel consolidado usando parte da area a direita das abas".
+       Por que 1980 e nao "sem limite": com --consol de 380 px e os 20 px de folga de cada
+       lado, 1980 deixa a area das abas em 1536 px e cada coluna de fieldsets em 735 px. Acima
+       disso as colunas so ficam mais largas sem caber uma terceira (ver o comentario de
+       .grade), entao o ganho pararia e as linhas de texto so ficariam mais dificeis de ler. */
+    --larg:1980px;
+    --consol:380px;
   }
   *{box-sizing:border-box}
   body{margin:0;background:var(--areia);color:var(--tinta);
     font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Ubuntu,sans-serif;
     font-size:15px;line-height:1.5}
-  .topo{max-width:1080px;margin:0 auto;padding:28px 20px 8px;display:flex;align-items:center;gap:14px}
+  .topo{max-width:var(--larg);margin:0 auto;padding:28px 20px 8px;display:flex;align-items:center;gap:14px}
   .topo svg{width:40px;height:48px;flex-shrink:0}
   .topo h1{font-size:22px;font-weight:600;margin:0;letter-spacing:.3px}
   .topo p{margin:2px 0 0;color:var(--tinta-suave);font-size:13px}
@@ -22,23 +33,57 @@
   /* flex-wrap: os botoes ganharam um selo "fora" (preset geral, fase 3) e a barra passou a
      poder nao caber. Sem quebrar linha ela estouraria a largura da pagina -- o que ja
      acontecia em janela estreita antes desta fase (medido: 11 px em 700 px). */
-  .abas{max-width:1080px;margin:18px auto 0;padding:0 20px;display:flex;gap:8px;flex-wrap:wrap}
+  .abas{margin:18px 0 0;padding:0 20px;display:flex;gap:8px;flex-wrap:wrap}
   .aba{border:1px solid var(--linha);border-bottom:none;background:transparent;color:var(--tinta-suave);
     padding:10px 18px;border-radius:10px 10px 0 0;cursor:pointer;font-size:14px;font-weight:600}
   .aba.ativa{background:var(--papel);color:var(--verde)}
   .aba:focus-visible{outline:2px solid var(--verde);outline-offset:2px}
 
-  .painel{max-width:1080px;margin:0 auto 40px;background:var(--papel);border:1px solid var(--linha);
+  .painel{margin:0 0 40px;background:var(--papel);border:1px solid var(--linha);
     border-radius:0 12px 12px 12px;padding:24px 20px;display:none}
   .painel.ativo{display:block}
 
-  .grade{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px}
-  /* minmax(0,1fr) tambem aqui, e nao 1fr: o minimo automatico de uma faixa 1fr e o min-content
-     dela, e o min-content de um cartao da lista e o endereco inteiro da foto (150+ caracteres
-     sem um unico ponto de quebra). Medido com as 46 fotos da galeria 121894 numa janela de
-     700 px: a faixa saia com 1299 px e a pagina inteira ganhava barra de rolagem horizontal.
-     A regra de duas colunas ja usava minmax(0,1fr); esta tinha ficado para tras. */
-  @media (max-width:840px){.grade{grid-template-columns:minmax(0,1fr)}}
+  /* ===== a faixa da ferramenta (fase 5) =====
+     .app e a faixa inteira; dentro dela, .app-esq leva a barra de abas e os seis paineis e
+     .app-dir leva o painel consolidado. A ordem importa: o painel e o SEGUNDO filho, entao
+     quando a faixa deixa de ser lado a lado (janela estreita) ele cai naturalmente ABAIXO das
+     abas, sem nenhuma regra de reordenacao.
+     .app-esq leva flex:1 1 auto e min-width:0 -- o mesmo min-width:0 que a fase 2.5 provou ser
+     necessario nos fieldsets, aqui pelo mesmo motivo: sem ele o minimo automatico de um item
+     de flex e o min-content do conteudo, e um endereco de foto sem ponto de quebra empurraria
+     a coluna inteira e comeria o painel da direita. */
+  .app{max-width:var(--larg);margin:0 auto;padding:0 20px;display:flex;gap:24px;align-items:flex-start}
+  .app-esq{flex:1 1 auto;min-width:0}
+  /* O painel gruda enquanto se rola: ele e a caixa de onde se copia, e a aba que alimenta a
+     copia costuma estar rolada. top:70px porque a linha do preset geral ja gruda em top:0 e
+     tem ~55 px; a rolagem propria (max-height + overflow) impede que um painel alto empurre
+     a propria area de rolagem para fora da janela. */
+  .app-dir{flex:0 0 var(--consol);min-width:0;margin-top:18px;
+    position:sticky;top:70px;max-height:calc(100vh - 90px);overflow:auto}
+  /* Abaixo desta largura o painel deixa de dividir a faixa e passa a ficar ABAIXO das abas.
+     O corte nao e redondo por acaso: em faixa dividida a area das abas mede
+     janela - 40 (folga) - 24 (vao) - 380 (painel), e a coluna de fieldsets e metade disso
+     menos a moldura. A 1400 px isso da 445 px por coluna -- ainda acima do minimo de 360 px
+     que .grade declara. Abaixo de 1400 a segunda coluna comecaria a ser espremida, e o painel
+     empilhado devolve a largura inteira as abas. */
+  @media (max-width:1399px){
+    .app{display:block}
+    .app-dir{position:static;max-height:none;overflow:visible;margin:0 0 40px;flex:none}
+  }
+
+  /* Quantas colunas cabem e conta do CONTAINER, nao da janela: repeat(auto-fit, ...) mede a
+     largura disponivel da propria .grade, que na faixa dividida ja e "o que sobra depois do
+     painel". Era isto que a media query de 840 px nao sabia fazer -- ela media a janela, e com
+     o painel ocupando a direita a janela deixou de ser a largura da aba.
+     min(360px,100%) e nao 360px: numa janela muito estreita a faixa minima de 360 px estouraria
+     o container e devolveria a barra de rolagem horizontal que a fase 2.5 acabou de tirar.
+     Todas as .grade das abas tem exatamente DOIS filhos, entao auto-fit nunca abre uma
+     terceira coluna: as faixas vazias colapsam e os dois cartoes dividem a largura. Uma
+     terceira coluna exigiria reagrupar os fieldsets das seis abas (hoje distribuidos em duas
+     caixas, com a altura equilibrada a mao) e, na largura desta faixa, mediria ~470 px contra
+     os 735 px de duas -- por isso o espaco que sobrou foi para o painel consolidado e para a
+     lista de imagens em largura inteira, e nao para uma coluna a mais. */
+  .grade{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(360px,100%),1fr));gap:24px}
 
   /* min-width:0 desfaz o min-inline-size:min-content que o navegador da de presente a todo
      <fieldset>. Com ele, um texto sem espaco (o endereco de uma foto do storage tem 150+
@@ -151,10 +196,16 @@
   .vazio{color:var(--tinta-suave);font-size:13px;font-style:italic;margin:12px 0 0}
   .ajuda{font-size:12px;color:var(--tinta-suave);background:#F5F1E6;border:1px dashed var(--linha);border-radius:8px;padding:10px 12px;margin:10px 0 0;line-height:1.55}
   .ajuda b{color:var(--verde)}
-  .instrucoes{margin-top:18px}
+  /* Texto corrido nao acompanha a largura da faixa. Com a ferramenta em 1080 px fixos a
+     descricao e as instrucoes tinham ~1038 px de linha; na faixa larga elas iriam a 1536 px,
+     que a 13 px de fonte da mais de 250 caracteres por linha -- o olho perde a linha na volta.
+     O teto de 1100 px mantem a medida de antes. Vale so para os dois blocos de texto corrido:
+     os fieldsets continuam usando a largura inteira, porque ali a linha e curta por natureza
+     (rotulo, campo, ajuda dentro de uma coluna). */
+  .instrucoes{margin-top:18px;max-width:1100px}
   .instrucoes h3{font-size:14px;font-weight:700;margin:0 0 4px;color:var(--verde)}
   .instrucoes .ajuda{margin-top:8px}
-  .descricao{font-size:13px;color:var(--tinta-suave);line-height:1.6;margin:0 0 18px;padding:0 0 14px;border-bottom:1px solid var(--linha)}
+  .descricao{font-size:13px;color:var(--tinta-suave);line-height:1.6;margin:0 0 18px;padding:0 0 14px;border-bottom:1px solid var(--linha);max-width:1100px}
   .descricao b{color:var(--verde)}
 
   .saida{margin-top:4px}
@@ -193,20 +244,29 @@
   .fc-presets .resumo{font-size:11px;color:var(--tinta-suave);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .fc-presets .ctrl{display:flex;gap:6px;flex-shrink:0}
 
-  .rodape{max-width:1080px;margin:0 auto 30px;padding:0 20px;font-size:12px;color:var(--tinta-suave)}
+  .rodape{max-width:var(--larg);margin:0 auto 30px;padding:0 20px;font-size:12px;color:var(--tinta-suave)}
 
   /* Previa da contagem regressiva: o bloco gerado roda dentro de um iframe de mesma origem.
-     Nao ha estilo de barra aqui -- quem pinta a barra e o CSS que o proprio gerador emite. */
+     Nao ha estilo de barra aqui -- quem pinta a barra e o CSS que o proprio gerador emite.
+     max-width:100% nas quatro molduras de previa (fase 5): a largura da moldura e escrita em
+     PIXELS na hora de montar, com a largura que a coluna tinha naquele instante, e a previa so
+     e remontada ao abrir a aba ou ao clicar em "Atualizar previa". Encolher a janela depois
+     disso deixava a moldura maior que a coluna e a PAGINA INTEIRA ganhava rolagem horizontal --
+     medido na main, com a previa montada a 2560 px e a janela levada a 400: scrollWidth 513
+     contra clientWidth 400. E pre-existente, mas a fase 5 alargou as colunas e trouxe o mesmo
+     defeito para 700 px, que e largura de uso. Com o teto, a moldura encolhe junto e o excesso
+     e cortado pelo overflow:hidden que ja estava aqui: previa cortada em vez de pagina torta.
+     Em uso normal a moldura ja cabe na coluna e a regra nao muda nada. */
   .c-pv-modos{display:flex;gap:8px;align-items:center;margin:0 0 10px}
   .c-pv-modos .rotulo{font-size:12px;color:var(--tinta-suave)}
-  .c-pv-moldura{overflow:hidden;margin:0 auto;background:#fff;border:1px solid var(--linha);border-radius:8px}
+  .c-pv-moldura{overflow:hidden;max-width:100%;margin:0 auto;background:#fff;border:1px solid var(--linha);border-radius:8px}
   .c-pv-moldura iframe{border:0;display:block;background:#fff}
 
   /* Previa do slideshow: mesma tecnica da Contagem regressiva -- o bloco gerado roda dentro
      de um iframe de mesma origem. Nao ha estilo de slideshow aqui de proposito. */
   .s-pv-modos{display:flex;gap:8px;align-items:center;margin:0 0 10px}
   .s-pv-modos .rotulo{font-size:12px;color:var(--tinta-suave)}
-  .s-pv-moldura{overflow:hidden;margin:0 auto;background:#fff;border:1px solid var(--linha);border-radius:8px}
+  .s-pv-moldura{overflow:hidden;max-width:100%;margin:0 auto;background:#fff;border:1px solid var(--linha);border-radius:8px}
   .s-pv-moldura iframe{border:0;display:block;background:#fff}
   /* Aviso de configuracao (nao e erro): a combinacao e legitima, mas o operador precisa
      enxergar o que ela custa antes de publicar. */
@@ -228,7 +288,7 @@
      proposito: quem pinta o pop-up e o CSS que o proprio gerador emite. */
   .l-pv-modos{display:flex;gap:8px;align-items:center;margin:0 0 10px}
   .l-pv-modos .rotulo{font-size:12px;color:var(--tinta-suave)}
-  .l-pv-moldura{overflow:hidden;margin:0 auto;background:#fff;border:1px solid var(--linha);border-radius:8px}
+  .l-pv-moldura{overflow:hidden;max-width:100%;margin:0 auto;background:#fff;border:1px solid var(--linha);border-radius:8px}
   .l-pv-moldura iframe{border:0;display:block;background:#fff}
   .l-alerta{background:#FFF6DF;border:1px solid #E3B23C;color:#6B5210}
   .l-alerta b{color:#6B5210}
@@ -238,7 +298,7 @@
      quem pinta o carrinho e o CSS que o proprio gerador emite. */
   .u-pv-modos{display:flex;gap:8px;align-items:center;margin:0 0 10px}
   .u-pv-modos .rotulo{font-size:12px;color:var(--tinta-suave)}
-  .u-pv-moldura{overflow:hidden;margin:0 auto;background:#fff;border:1px solid var(--linha);border-radius:8px}
+  .u-pv-moldura{overflow:hidden;max-width:100%;margin:0 auto;background:#fff;border:1px solid var(--linha);border-radius:8px}
   .u-pv-moldura iframe{border:0;display:block;background:#fff}
   /* aviso ambar de recurso que nao vale agora: nasceu no desconto Pix da aba Checkout e
      passou a servir tambem a Contagem regressiva (pulsar x alternar deslizando). Uma regra so,
@@ -267,7 +327,7 @@
      pagina em 1200 px, a linha ficava em top:-547 -- fora da tela, sem grudar em nada. */
   .fcg-fixa{position:sticky;top:0;z-index:50;background:var(--papel);
     border-bottom:1px solid var(--linha);box-shadow:0 1px 6px rgba(0,0,0,.08)}
-  .fcg-linha{max-width:1080px;margin:0 auto;padding:10px 20px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .fcg-linha{max-width:var(--larg);margin:0 auto;padding:10px 20px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
   .fcg-linha label{margin:0;font-size:13px;white-space:nowrap}
   .fcg-linha select{width:auto;min-width:190px;max-width:100%;padding:7px 10px;font-size:13px}
   .fcg-nome{font-size:13px;font-weight:700;color:var(--verde);min-width:0;
@@ -329,6 +389,44 @@
   .fcg-cx h2{margin:0 0 8px;font-size:16px;color:var(--verde)}
   .fcg-cx p{margin:0 0 8px;font-size:14px;line-height:1.55}
   .fcg-cx ul{margin:0 0 12px;padding-left:20px;font-size:13px;line-height:1.6}
+
+  /* ===== painel consolidado (fase 5) =====
+     Espaco de nomes 'fcc-', pelo mesmo motivo de 'fcp-', 'fcg-' e 'fcx-': campo de aba comeca
+     por prefixo de UMA letra (s-, t-, l-, u-, b-, c-), entao 'fcc-...' nao colide com campo
+     nenhum e nao e alcancado pelos listeners de "mudou alguma coisa nesta aba". 'fcc-' e nao
+     'fcb-'/'fcw-'/'fcu-' de proposito: esses tres sao prefixos que os geradores escrevem no
+     CODIGO GERADO, e um grep por eles traria as duas coisas misturadas. */
+  .fcc-caixa{background:var(--papel);border:1px solid var(--linha);border-radius:12px;padding:16px}
+  .fcc-caixa h2{font-size:12px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;
+    color:var(--verde);margin:0 0 4px}
+  .fcc-caixa h3{font-size:13px;font-weight:700;margin:0 0 6px;color:var(--verde)}
+  .fcc-caixa p{margin:0 0 8px;font-size:12px;line-height:1.55;color:var(--tinta-suave)}
+  .fcc-caixa .ajuda{margin:8px 0 0}
+  .fcc-alvo{margin-top:16px;border-top:1px solid var(--linha);padding-top:12px}
+  .fcc-caixa textarea{width:100%;height:170px;background:var(--escuro);color:var(--codigo-texto);
+    border:none;border-radius:10px;padding:12px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    font-size:11px;line-height:1.45;white-space:pre;resize:vertical;display:block}
+  .fcc-linha{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 6px}
+  .fcc-linha h3{margin:0}
+  .fcc-cresce{flex:1 1 10px;min-width:0}
+  /* O aviso do R5 fica ao LADO do botao de copiar, e nao na documentacao: o painel entrega o
+     campo inteiro, entao quem tiver codigo manual fora da caixa perde esse codigo ao colar.
+     Vermelho, dentro da mesma caixa do botao -- e o unico risco desta fase que nao tem
+     conserto automatico. */
+  .fcc-perigo{font-size:11.5px;line-height:1.5;padding:8px 10px;border-radius:8px;
+    border:1px solid #E7B9B4;background:#FBEAE8;color:#5E1310;margin:8px 0 0}
+  .fcc-perigo b{color:#8C1D18}
+  .fcc-falta{font-size:12px;line-height:1.55;padding:9px 11px;border-radius:8px;
+    border:1px solid #E3B23C;background:#FFF6DF;color:#6B5210;margin:8px 0 0}
+  .fcc-falta b{color:#6B5210}
+  .fcc-falta ul,.fcc-perigo ul{margin:6px 0 0;padding-left:18px}
+  .fcc-ok{font-size:12px;padding:8px 10px;border-radius:8px;border:1px solid #7FA97A;
+    background:#EAF3E9;color:#294B24;margin:8px 0 0}
+  .fcc-comp{border:1px solid var(--linha);border-radius:8px;background:#fff;padding:8px 10px;margin-top:8px}
+  .fcc-comp .fcc-linha{margin:0}
+  .fcc-comp .destino{font-size:11px;color:var(--tinta-suave)}
+  .fcc-comp textarea{height:90px;margin-top:6px}
+  .fcc-vazio{font-size:12px;font-style:italic;color:var(--tinta-suave)}
 </style>
 </head>
 <body>
@@ -388,7 +486,7 @@
           <textarea id="fcg-head" spellcheck="false"></textarea>
           <label for="fcg-body">Tag Body <small>(idem, para o campo Tag Body)</small></label>
           <textarea id="fcg-body" spellcheck="false"></textarea>
-          <p class="ajuda">Estes dois campos ficam guardados <b>por página</b>, dentro do preset geral — ao trocar de preset, eles trocam junto. <b>Nunca vêm de outra página:</b> um preset geral criado a partir de outro nasce com os dois vazios, e sair para o Rascunho também os esvazia. É a mesma proteção que faz as abas nascerem fora — só que aqui, sem interruptor, a proteção é não copiar. <b>Ainda não são usados por nada</b>: quem vai juntá-los aos blocos gerados é o painel consolidado, na próxima etapa. Por enquanto eles servem para você não perder esse código de vista.</p>
+          <p class="ajuda">Estes dois campos ficam guardados <b>por página</b>, dentro do preset geral — ao trocar de preset, eles trocam junto. <b>Nunca vêm de outra página:</b> um preset geral criado a partir de outro nasce com os dois vazios, e sair para o Rascunho também os esvazia. É a mesma proteção que faz as abas nascerem fora — só que aqui, sem interruptor, a proteção é não copiar. <b>É o painel consolidado que os usa</b>: no painel à direita das abas, o que estiver aqui aparece <b>primeiro</b> no campo montado, antes dos blocos gerados, separado deles por uma linha de fronteira.</p>
         </fieldset>
       </div>
       <!-- ===== backup em arquivo (fase 4) =====
@@ -414,6 +512,13 @@
   </div>
 </div>
 
+<!-- ==================== A FAIXA DA FERRAMENTA (fase 5) ====================
+     A esquerda, a barra de abas e os seis paineis; a direita, o painel consolidado. O painel
+     e o segundo filho de proposito: em janela estreita a faixa deixa de ser dividida e ele
+     cai abaixo das abas sem nenhuma regra de reordenacao. -->
+<div class="app">
+<div class="app-esq">
+
 <div class="abas" role="tablist">
   <button class="aba ativa" id="aba-slide" role="tab" aria-selected="true">Slideshow</button>
   <button class="aba" id="aba-leads" role="tab" aria-selected="false">Captação de leads</button>
@@ -438,19 +543,6 @@
       <input type="text" id="s-leg" placeholder="Ensaio de Natal — família Silva">
       <div class="acoes"><button class="botao claro" id="s-add">Adicionar imagem</button></div>
       </fieldset>
-    </div>
-    <div>
-      <fieldset>
-      <legend>Imagens do slideshow</legend>
-      <p class="lista-conta" id="s-conta"></p>
-      <ul class="lista-imgs lista-rolagem" id="s-lista"></ul>
-      <p class="vazio" id="s-vazio">Nenhuma imagem ainda. Adicione os links acima, uma a uma, ou traga uma galeria inteira no bloco abaixo — depois dá para reordenar com as setas.</p>
-      <div class="acoes"><button class="botao claro" id="s-lista-limpar">Limpar lista</button></div>
-      </fieldset>
-    </div>
-  </div>
-  <div class="grade">
-    <div>
       <fieldset>
       <legend>Importar uma galeria inteira</legend>
       <p class="ajuda"><b>Por que duas colagens:</b> o navegador não deixa esta ferramenta abrir uma página do fotocerta.com.br por conta própria (política de origem cruzada — medido: <i>Failed to fetch</i>). Então você traz a página até aqui. <b>Como fazer:</b> abra a galeria no navegador, aperte <b>Cmd&nbsp;⌥&nbsp;U</b> (ver código-fonte), depois <b>Cmd&nbsp;A</b> (selecionar tudo) e <b>Cmd&nbsp;C</b> (copiar). Cole o link da galeria no primeiro campo e o código-fonte no segundo. Vale para galerias (<i>/gallery/…</i>) e para portfólios (<i>/portfolio/…</i>).</p>
@@ -485,6 +577,20 @@
       <p class="ajuda s-alerta" id="s-imp-resultado" style="display:none"></p>
       </fieldset>
     </div>
+  </div>
+  <!-- A lista de imagens ocupa a LARGURA INTEIRA da aba, abaixo dos parametros da secao 1
+       (pedido do dono, ago/2026). Fora de qualquer .grade: um <div> solto ja e um bloco de
+       largura cheia, sem depender de span de grade nem de faixa vazia. Com o endereco de
+       uma foto do storage cortado no meio, largura a mais e legibilidade a mais -- e a
+       lista e o unico cartao desta aba que cresce sem limite. -->
+  <div>
+      <fieldset>
+      <legend>Imagens do slideshow</legend>
+      <p class="lista-conta" id="s-conta"></p>
+      <ul class="lista-imgs lista-rolagem" id="s-lista"></ul>
+      <p class="vazio" id="s-vazio">Nenhuma imagem ainda. Adicione os links acima, uma a uma, ou traga uma galeria inteira pelo bloco de importação — depois dá para reordenar com as setas.</p>
+      <div class="acoes"><button class="botao claro" id="s-lista-limpar">Limpar lista</button></div>
+      </fieldset>
   </div>
 
   <div class="secao"><span class="secao-n">2</span> Configurações da apresentação</div>
@@ -1823,6 +1929,23 @@
   <p class="ajuda"><b>Conversão:</b> prefira a <b>urgência progressiva</b> aos efeitos contínuos. Uma barra que só muda quando o prazo aperta comunica algo; uma que pisca o tempo todo vira ruído e o visitante para de enxergar.</p>
   </div>
 </div>
+
+</div><!-- /app-esq -->
+
+<!-- ==================== PAINEL CONSOLIDADO (fase 5) ====================
+     Junta, num campo so, tudo o que vai para a Tag Head e para a Tag Body DESTA pagina, para
+     o operador selecionar tudo e colar em vez de procurar onde um bloco comeca e termina no
+     meio do campo. As demais saidas vao para componentes individuais, cada um com o campo so
+     dele: o painel as LISTA, com o botao de copiar de cada uma, e nunca as junta.
+     O corpo inteiro e desenhado por fccRender; aqui fica so a casca. -->
+<div class="app-dir">
+  <div class="fcc-caixa">
+    <h2>Painel consolidado</h2>
+    <div id="fcc-corpo"></div>
+  </div>
+</div>
+
+</div><!-- /app -->
 
 <p class="rodape">Ferramenta interna Foto Certa. Novos construtores podem ser adicionados como novas abas.</p>
 
@@ -3615,6 +3738,13 @@ function fcgAtualizar(){
         catch(e){fcFalha('Preset geral','desenhar o interruptor da aba '+a.nome,e,a.id);}
       })(ABAS[i]);
     }
+    /* O painel consolidado (fase 5) entra DENTRO deste try, e nao num listener proprio, por
+       dois motivos: ele le as mesmas seis abas (aproveita o cache fcgVals desta passagem) e
+       depende exatamente do mesmo gatilho -- quem acorda a barra e o salvarEstado, por onde
+       toda mudanca de valor desta ferramenta passa. Try proprio: um defeito no painel nao
+       pode derrubar o desenho da barra nem dos interruptores. */
+    try{if(fccTimer){clearTimeout(fccTimer);fccTimer=null;}fccRender();}
+    catch(e){fcFalha('Painel consolidado','desenhar o painel consolidado',e,'');}
   }finally{fcgVals=null;}
 }
 /* Timer UNICO, cancelado antes de reagendar. Chamado por salvarEstado, entao cobre toda
@@ -5399,6 +5529,7 @@ function sGerar(){
      desliga -- nao existe configuracao aqui que prenda o visitante na primeira foto. */
   $('s-out').value=sBloco(sCfg());
   sPreview(true);
+  fccMarcar('slide');
 }
 
 /* Fonte unica do bloco entregue, no padrao que a aba Contagem regressiva firmou: sGerar escreve
@@ -6041,6 +6172,7 @@ function lGerar(){
   }
   $('l-out').value=lBloco(v);
   lPreview(true);
+  fccMarcar('leads');
 }
 
 /* Fonte unica do bloco entregue, no padrao que a Contagem regressiva firmou e o Slideshow
@@ -6920,6 +7052,7 @@ function tGerar(){
     $('t-out2').value='';$('t-out3').value='';
   }
   tArqToggle();
+  fccMarcar('tidy');
 }
 
 /* ============================================================
@@ -7709,6 +7842,7 @@ function uGerar(){
   if(recusa){alert(recusa);return;}
   $('u-out').value=uBloco(cfg);
   uPreview(true);
+  fccMarcar('uni');
 }
 
 /* Fonte unica do bloco entregue, no padrao que a Contagem regressiva firmou e que o Slideshow
@@ -8877,6 +9011,7 @@ function bGerar(){
     c1+='/* Cole apenas o codigo 2 no campo CSS Customizado do componente. */';
     $('b-out1').value=c1;
     $('b-out2').value=m.props;
+    fccMarcar('bor');
     return;
   }
   /* Validacao ANTES de escrever qualquer coisa: recusar no meio deixaria a textarea com o
@@ -8911,6 +9046,7 @@ function bGerar(){
   c1+='</sty'+'le>';
   $('b-out1').value=c1;
   $('b-out2').value=m.props;
+  fccMarcar('bor');
 }
 
 /* ============================================================
@@ -9246,6 +9382,7 @@ function cGerar(){
   }
   $('c-out1').value=cBloco(cfg);
   cTitulo();
+  fccMarcar('cnt');
 }
 /* Fonte unica do bloco entregue. cGerar escreve o retorno na textarea; cPvMontar escreve o
    MESMO retorno dentro do iframe da previa. Nao existe segunda formatacao em lugar nenhum --
@@ -9897,6 +10034,312 @@ function cPvModoSet(m){
   cPvModo=m;cPvBotoes();cPreview(true);
 }
 
+/* ============ painel consolidado (fase 5) ============ */
+/* O QUE E. Um so lugar que junta, para a pagina selecionada na barra do preset geral, tudo o
+   que vai para a Tag Head e tudo o que vai para a Tag Body -- os dois campos DA PAGINA. O
+   operador seleciona tudo e cola, em vez de procurar onde um bloco comeca e termina no meio
+   do campo. Errar essa procura apaga o bloco vizinho, e foi o que custou tempo real na
+   correcao das bordas da landing de Natal.
+
+   O QUE ELE NAO JUNTA. Slideshow, Checkout, TidyCal (saidas 1 e 3) e o codigo 2 das Bordas vao
+   para COMPONENTES individuais, cada um com o campo so dele: nao ha o que consolidar. O painel
+   os lista, com o botao de copiar de cada um, e nunca os junta. A Contagem regressiva cai nos
+   dois lados, conforme o radio "fixa no topo" (Tag Body) ou "no fluxo" (componente).
+
+   O QUE ELE NAO E. Nao e um gerador. Ele LE as caixas de codigo que os seis geradores
+   escreveram e as junta; nenhuma linha daqui monta bloco. Se o painel pudesse formatar codigo,
+   seria uma segunda implementacao do gerador, e este projeto ja pagou duas vezes por isso na
+   previa da Contagem regressiva.
+
+   SO ABAS ATIVAS. Aba FORA da pagina (R2 da fase 3) nao contribui com nada. E a razao de ser
+   do R2: sem ele, selecionar "Natal - Embutida" montaria uma Tag Body com o bloco de captacao
+   de leads dentro, numa pagina que nao deveria te-lo -- o painel pareceria funcionar e
+   entregaria errado.
+
+   FALTA CODIGO, NAO MONTA. Se uma aba ligada ainda nao gerou o codigo dela, o campo NAO e
+   montado: o painel diz qual aba e qual botao apertar. Montar sem o bloco entregaria um campo
+   incompleto que parece completo. Codigo gerado ANTES de a aba mudar e caso diferente: ai o
+   campo e montado e o aviso ambar diz que ele envelheceu.
+
+   POR QUE COMENTARIO DE HTML, E NAO DE CSS. A especificacao escreveu a linha de identificacao
+   e a linha de fronteira no formato de comentario de CSS. Os campos Tag Head e Tag Body do
+   Prosite recebem HTML (a propria documentacao registra que a Tag Body aceita <sty'+'le> e
+   <scr'+'ipt>): o que estiver fora dessas tags e texto, e um comentario de CSS ali sairia
+   IMPRESSO na pagina publicada. Por isso as duas linhas vao como comentario de HTML. */
+var FCC_MARCA='Construtores Foto Certa';
+var FCC_FRONTEIRA='<!-- daqui para baixo, gerado pelos Construtores Foto Certa -->';
+var fccGerado={};   /* abaId -> assinatura dos valores da aba quando o codigo dela foi gerado */
+var fccAssin=null;  /* ultimo desenho, para nao redesenhar a toa (e nao roubar uma selecao) */
+var fccTimer=null;  /* timer UNICO do redesenho adiado, cancelado antes de reagendar */
+
+/* Chamada no fim de cada gerador, e SO no caminho em que a caixa de codigo foi escrita. Ela
+   guarda a assinatura dos valores da aba naquele instante; e comparando essa assinatura com a
+   de agora que o painel sabe dizer "este bloco foi gerado antes de voce mexer na aba".
+   Nao toca em nada do que o gerador emite: e uma anotacao ao lado. */
+function fccMarcar(abaId){
+  var a=fcAba(abaId);
+  try{fccGerado[abaId]=a?fcCanon(fcgValoresDaAbaLer(a)):null;}
+  catch(e){fccGerado[abaId]=null;}
+  fccAgendar();
+}
+function fccAgendar(){
+  if(fccTimer)clearTimeout(fccTimer);
+  fccTimer=setTimeout(function(){fccTimer=null;try{fccRender();}catch(e){fcFalha('Painel consolidado','desenhar o painel consolidado',e,'');}},250);
+}
+/* Texto do operador entrando num comentario de HTML. Duas regras, e as duas sao de seguranca,
+   nao de gosto:
+     - '<' e '>' saem: sem '>' nenhuma sequencia de fechamento de comentario pode se formar
+       dentro do nome da campanha, entao o comentario nao pode terminar antes da hora e
+       despejar o resto como texto visivel na pagina;
+     - hifens repetidos viram um so, pela mesma razao.
+   E os acentos saem porque a regra 10 do Manual do Prosite vale para todo codigo colado. */
+function fccSeguro(s){
+  var t=String(s==null?'':s);
+  /* faixa de caracteres em expressao regular: um dos tres casos em que este arquivo usa \uXXXX */
+  if(t.normalize)t=t.normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  t=t.replace(/[^\x20-\x7E]/g,'').replace(/[<>]/g,'').replace(/-{2,}/g,'-');
+  t=t.replace(/\s+/g,' ').replace(/^\s+/,'').replace(/\s+$/,'');
+  return t||'sem nome';
+}
+function fccIdent(p,qual){
+  return '<!-- '+FCC_MARCA+' -- '+fccSeguro(p.campanha)+' -- pagina '+
+    (p.pagina==='hospedeira'?'HOSPEDEIRA':'EMBUTIDA')+' -- '+
+    (qual==='head'?'Tag Head':'Tag Body')+' -->';
+}
+function fccFim(s){return String(s==null?'':s).replace(/\s+$/,'');}
+function fccVazio(s){return !String(s==null?'':s).replace(/^\s+/,'').replace(/\s+$/,'');}
+
+/* ---- o mapa das saidas ----
+   Onde cada caixa de codigo vai, e por que. As duas escolhas que MUDAM o destino sao lidas dos
+   valores da aba (o mesmo fcgValoresDaAbaLer que o preset geral usa), e nao do DOM direto:
+   assim uma aba em so-leitura entrega o que estava gravado, em vez de o DOM meio restaurado.
+     Contagem  -> c.fixa === 'fixa'  : Tag Body      | 'fluxo': componente
+     TidyCal   -> t.arq  === 'embutida': as tres saidas se dividem entre DUAS paginas, e por
+                  isso o destino depende de qual pagina esta selecionada:
+                    saida 1 (componente do TidyCal) e saida 2 (Tag Body) sao da EMBUTIDA;
+                    saida 3 (o iframe) e da HOSPEDEIRA.
+                  A saida que nao e desta pagina nao some: vai para uma lista propria, dizendo
+                  a qual pagina pertence. Juntar a Tag Body da intermediaria dentro da Tag Body
+                  da hospedeira e exatamente o erro que a linha de identificacao existe para
+                  denunciar depois -- aqui ele nem chega a acontecer. */
+function fccItem(a,idOut,rotulo,destino,nota){
+  var el=$(idOut),txt=el?el.value:'';
+  return {aba:a,id:idOut,rotulo:rotulo,destino:destino,nota:nota||'',
+    texto:txt,vazio:!txt,alvo:'fcc-o-'+idOut};
+}
+function fccDaAba(a,p,plano,vals){
+  var v=vals||{},emb,fixa;
+  if(a.id==='slide'){
+    plano.comps.push(fccItem(a,'s-out','Slideshow','Componente HTML desta página'));
+  }else if(a.id==='leads'){
+    plano.body.push(fccItem(a,'l-out','Captação de leads','Tag Body'));
+  }else if(a.id==='uni'){
+    plano.comps.push(fccItem(a,'u-out','Checkout','Componente HTML desta página'));
+  }else if(a.id==='bor'){
+    plano.head.push(fccItem(a,'b-out1','Bordas com efeito — código 1','Tag Head',
+      'O código 1 é o bloco global das animações. Se você já o mantém no cabeçalho do site (Configurações \u2192 Códigos personalizados), não cole nos dois lugares: dois <code>@keyframes</code> de mesmo nome colidem.'));
+    plano.comps.push(fccItem(a,'b-out2','Bordas com efeito — código 2','Campo CSS Customizado do componente'));
+  }else if(a.id==='cnt'){
+    fixa=(v.c&&v.c.fixa)||radio('c-fixa');
+    if(fixa==='fixa')plano.body.push(fccItem(a,'c-out1','Contagem regressiva','Tag Body'));
+    else plano.comps.push(fccItem(a,'c-out1','Contagem regressiva','Componente HTML desta página'));
+  }else if(a.id==='tidy'){
+    emb=(((v.t&&v.t.arq)||radio('t-arq'))==='embutida');
+    if(!emb){
+      plano.comps.push(fccItem(a,'t-out1','Agendamento TidyCal','Componente HTML desta página'));
+    }else if(p.pagina==='embutida'){
+      plano.comps.push(fccItem(a,'t-out1','TidyCal — saída 1','Componente HTML desta página'));
+      plano.body.push(fccItem(a,'t-out2','TidyCal — saída 2','Tag Body'));
+      plano.outra.push(fccItem(a,'t-out3','TidyCal — saída 3','Componente HTML da página Hospedeira'));
+    }else{
+      plano.comps.push(fccItem(a,'t-out3','TidyCal — saída 3','Componente HTML desta página (o iframe)'));
+      plano.outra.push(fccItem(a,'t-out1','TidyCal — saída 1','Componente HTML da página Embutida'));
+      plano.outra.push(fccItem(a,'t-out2','TidyCal — saída 2','Tag Body da página Embutida'));
+    }
+  }
+}
+function fccPlano(){
+  var p=fcgAtivo(),plano,i,a,vals;
+  if(!p)return null;
+  plano={campanha:p.campanha,pagina:p.pagina,nome:fcgNome(p),
+    head:[],body:[],comps:[],outra:[],velhas:[],ligadas:0};
+  for(i=0;i<ABAS.length;i++){
+    a=ABAS[i];
+    if(!FCG.ativas[a.id])continue;
+    plano.ligadas++;
+    vals=null;
+    try{vals=fcgValoresDaAba(a);}catch(e){vals=null;}
+    fccDaAba(a,p,plano,vals);
+    /* "gerado antes de a aba mudar": comparacao de assinatura, o mesmo criterio que a marca de
+       origem da fase 3 usa. Aba nunca gerada nesta sessao nao entra aqui -- ela cai no caso
+       "ainda nao gerou", que e mais forte e ja aparece no proprio campo. */
+    if(fccGerado[a.id]&&vals&&fccGerado[a.id]!==fcCanon(vals))plano.velhas.push(a.nome);
+  }
+  return plano;
+}
+/* ---- montagem de um campo ----
+   Ordem: linha de identificacao, "Outros codigos meus", linha de fronteira, blocos gerados.
+   Os codigos manuais vem PRIMEIRO (R5) porque e o que o operador ja tinha; a fronteira diz de
+   onde para baixo o conteudo e reproduzivel pela ferramenta. */
+function fccMontar(plano,qual){
+  var itens=plano[qual],manual=(qual==='head'?FCG.codigos.head:FCG.codigos.body),
+      falta=[],i,t;
+  for(i=0;i<itens.length;i++)if(itens[i].vazio)falta.push(itens[i]);
+  if(falta.length)return {falta:falta};
+  if(!itens.length&&fccVazio(manual))return {nada:true};
+  t=fccIdent(plano,qual)+'\n';
+  /* A linha de fronteira so sai quando ha bloco gerado depois dela. Sem essa guarda, um campo
+     com codigo manual e nenhuma aba ligada terminava anunciando "daqui para baixo, gerado
+     pelos Construtores" com nada embaixo -- uma linha que promete conteudo inexistente. */
+  if(!fccVazio(manual)){
+    t+='\n'+fccFim(manual)+'\n';
+    if(itens.length)t+='\n'+FCC_FRONTEIRA+'\n';
+  }
+  for(i=0;i<itens.length;i++)t+='\n'+fccFim(itens[i].texto)+'\n';
+  return {texto:t};
+}
+/* ---- colisao de animacao ----
+   Dois componentes com o MESMO efeito de borda e parametros diferentes colidem: as duas
+   animacoes se chamam igual e vale a ultima. A consolidacao do codigo 1 (aba Bordas) recusa o
+   caso que ela enxerga -- dois presets desta ferramenta. O que ela nao enxerga e o bloco que o
+   operador colou a mao e guardou em "Outros codigos meus": com o painel, esse bloco e o
+   gerado ficam lado a lado no mesmo campo, e a colisao passa a ser detectavel aqui.
+   Criterio: um nome de animacao declarado em DOIS blocos diferentes colide. Dentro de um mesmo
+   bloco, duas declaracoes do mesmo nome sao normais -- e o par "animacao + redefinicao sob
+   prefers-reduced-motion" que todos os blocos desta ferramenta emitem; a partir da terceira,
+   nao ha leitura inocente e o painel avisa igual. */
+function fccKeys(txt){
+  var re=/@keyframes\s+([A-Za-z_-][A-Za-z0-9_-]*)/g,m,r={};
+  while((m=re.exec(String(txt||''))))r[m[1]]=(r[m[1]]||0)+1;
+  return r;
+}
+function fccColisao(blocos){
+  var conta={},i,k,ks,achados=[];
+  for(i=0;i<blocos.length;i++){
+    ks=fccKeys(blocos[i].texto);
+    for(k in ks){
+      if(!Object.prototype.hasOwnProperty.call(ks,k))continue;
+      if(!conta[k])conta[k]={onde:[],max:0};
+      conta[k].onde.push(blocos[i].rotulo);
+      if(ks[k]>conta[k].max)conta[k].max=ks[k];
+    }
+  }
+  for(k in conta){
+    if(!Object.prototype.hasOwnProperty.call(conta,k))continue;
+    if(conta[k].onde.length>1||conta[k].max>2)achados.push({nome:k,onde:conta[k].onde,max:conta[k].max});
+  }
+  return achados;
+}
+function fccBlocosDoCampo(plano,qual){
+  var itens=plano[qual],manual=(qual==='head'?FCG.codigos.head:FCG.codigos.body),r=[],i;
+  if(!fccVazio(manual))r.push({rotulo:'Outros códigos meus',texto:manual});
+  for(i=0;i<itens.length;i++)if(!itens[i].vazio)r.push({rotulo:itens[i].rotulo,texto:itens[i].texto});
+  return r;
+}
+
+/* ---- desenho ---- */
+function fccCampoHTML(plano,qual,vals){
+  var titulo=(qual==='head'?'Tag Head':'Tag Body'),
+      m=fccMontar(plano,qual),itens=plano[qual],h='',i,col,manual;
+  manual=(qual==='head'?FCG.codigos.head:FCG.codigos.body);
+  h+='<div class="fcc-alvo">';
+  h+='<div class="fcc-linha"><h3>'+titulo+'</h3><span class="fcc-cresce"></span>';
+  if(m.texto){
+    h+='<button class="botao mini" type="button" data-fcc-copiar="fcc-'+qual+'" data-fcc-aviso="fcc-cop-'+qual+'">Copiar</button>'+
+       '<span class="aviso-copiado" id="fcc-cop-'+qual+'">Copiado!</span>';
+  }
+  h+='</div>';
+  if(m.nada){
+    h+='<p class="fcc-vazio">Nenhuma aba ligada escreve neste campo, e a caixa “Outros códigos meus — '+titulo+'” está vazia. Não há o que colar aqui.</p>';
+  }else if(m.falta){
+    h+='<div class="fcc-falta"><b>Falta gerar o código de '+(m.falta.length===1?'uma aba':(m.falta.length+' abas'))+'.</b> Este campo não foi montado — um campo incompleto que parece completo é pior do que campo nenhum. Abra a aba e clique em <b>Gerar código</b>:<ul>';
+    /* so o rotulo: ele ja nomeia a aba ("Captacao de leads", "Bordas com efeito - codigo 1"),
+       e repetir o nome antes dele dava "Bordas com efeito - Bordas com efeito - codigo 1" */
+    for(i=0;i<m.falta.length;i++)h+='<li>'+escHtml(m.falta[i].rotulo)+'</li>';
+    h+='</ul></div>';
+  }else{
+    h+='<textarea id="fcc-'+qual+'" readonly spellcheck="false"></textarea>';
+    h+='<p class="fcc-perigo"><b>Este painel só conhece o que está aqui.</b> Se a sua '+titulo+' tiver código que você colou à mão e não está na caixa de códigos manuais, colar isto apaga aquilo.</p>';
+    col=fccColisao(fccBlocosDoCampo(plano,qual));
+    if(col.length){
+      h+='<div class="fcc-perigo"><b>Duas animações com o mesmo nome neste campo.</b> Elas não convivem: vale a que estiver por último, para os dois componentes. Confira antes de colar.<ul>';
+      for(i=0;i<col.length;i++){
+        h+='<li><code>'+escHtml(col[i].nome)+'</code> — '+
+           (col[i].onde.length>1?('em '+escHtml(fcLista(col[i].onde))):('declarada '+col[i].max+' vezes em '+escHtml(col[i].onde[0])))+'</li>';
+      }
+      h+='</ul></div>';
+    }
+    h+='<p class="ajuda"><b>Nesta ordem:</b> a linha que identifica campanha e página'+
+       (fccVazio(manual)?'':(', os seus “Outros códigos meus”'+(itens.length?', a linha de fronteira':'')))+
+       (itens.length?(', e '+(itens.length===1?'o bloco de ':'os blocos de ')+escHtml(fcLista(fccRotulos(itens)))):'')+'.</p>';
+  }
+  for(i=0;i<itens.length;i++)if(itens[i].nota)h+='<p class="ajuda">'+itens[i].nota+'</p>';
+  h+='</div>';
+  if(m.texto)vals.push(['fcc-'+qual,m.texto]);
+  return h;
+}
+function fccRotulos(itens){var r=[],i;for(i=0;i<itens.length;i++)r.push(itens[i].rotulo);return r;}
+function fccListaHTML(titulo,itens,explica,vals){
+  var h='',i,it;
+  if(!itens.length)return '';
+  h+='<div class="fcc-alvo"><h3>'+titulo+'</h3><p>'+explica+'</p>';
+  for(i=0;i<itens.length;i++){
+    it=itens[i];
+    h+='<div class="fcc-comp"><div class="fcc-linha"><b>'+escHtml(it.rotulo)+'</b><span class="fcc-cresce"></span>';
+    if(!it.vazio){
+      h+='<button class="botao mini claro" type="button" data-fcc-copiar="'+it.alvo+'" data-fcc-aviso="'+it.alvo+'-cop">Copiar</button>'+
+         '<span class="aviso-copiado" id="'+it.alvo+'-cop">Copiado!</span>';
+    }
+    h+='</div><div class="destino">'+escHtml(it.destino)+'</div>';
+    if(it.vazio){
+      h+='<div class="fcc-falta">Ainda não gerado. Abra a aba <b>'+escHtml(it.aba.nome)+'</b> e clique em <b>Gerar código</b>.</div>';
+    }else{
+      h+='<textarea id="'+it.alvo+'" readonly spellcheck="false"></textarea>';
+      vals.push([it.alvo,it.texto]);
+    }
+    h+='</div>';
+  }
+  h+='</div>';
+  return h;
+}
+function fccRender(){
+  var box=$('fcc-corpo'),plano,h='',vals=[],i,assin,bts,el;
+  if(!box)return;
+  plano=FCG.pronto?fccPlano():null;
+  if(!plano){
+    h+='<p><b>Sem preset geral selecionado, não há o que consolidar.</b></p>';
+    h+='<p class="fcc-falta"><b>Falta escolher a página.</b> Este painel entrega o conteúdo inteiro da Tag Head e da Tag Body <i>de uma página</i>. Sem saber qual página é, ele juntaria blocos de páginas diferentes — que é justamente o erro que ele existe para evitar.<br><br>Na barra acima: escolha um preset geral na lista, ou abra <b>Detalhes</b>, preencha campanha e página e clique em <b>Salvar como preset geral</b>. Depois ligue, no topo de cada aba, as que esta página usa.</p>';
+  }else{
+    h+='<p><b>'+escHtml(plano.nome)+'</b> — '+plano.ligadas+' de '+ABAS.length+' abas nesta página.</p>';
+    if(!plano.ligadas){
+      h+='<p class="fcc-falta"><b>Nenhuma aba foi ligada nesta página.</b> Todo preset geral nasce com as seis abas fora — ligue, no interruptor no topo de cada aba, as que esta página realmente usa. Aba fora não entra aqui.</p>';
+    }
+    if(plano.velhas.length){
+      h+='<p class="fcc-falta"><b>Código gerado antes da última mudança.</b> '+
+         escHtml(fcLista(plano.velhas))+(plano.velhas.length===1?' mudou':' mudaram')+
+         ' depois de o código ter sido gerado. O que está abaixo é o código antigo. Volte à aba e clique em <b>Gerar código</b>.</p>';
+    }
+    h+=fccCampoHTML(plano,'head',vals);
+    h+=fccCampoHTML(plano,'body',vals);
+    h+=fccListaHTML('Saídas por componente',plano.comps,
+      'Cada uma vai para o campo de <b>um componente</b>, e por isso não são juntadas: não há campo comum onde elas caibam.',vals);
+    h+=fccListaHTML('É de outra página desta campanha',plano.outra,
+      'Estas saídas o TidyCal produz para a <b>outra</b> página. Não entram nos campos acima: selecione o preset geral daquela página para consolidá-las lá.',vals);
+  }
+  /* assinatura = desenho + conteudo das caixas. Sem ela, cada tecla digitada em qualquer aba
+     refaria o innerHTML e mataria uma selecao em andamento -- e selecionar tudo para copiar e
+     justamente o gesto que este painel existe para servir. */
+  assin=h+' '+JSON.stringify(vals);
+  if(assin===fccAssin)return;
+  fccAssin=assin;
+  box.innerHTML=h;
+  for(i=0;i<vals.length;i++){el=$(vals[i][0]);if(el)el.value=vals[i][1];}
+  bts=box.querySelectorAll('[data-fcc-copiar]');
+  for(i=0;i<bts.length;i++){
+    (function(b){b.addEventListener('click',function(){copiar(b.getAttribute('data-fcc-copiar'),b.getAttribute('data-fcc-aviso'));});})(bts[i]);
+  }
+}
+
 /* ============ inicialização ============ */
 function liga(id,fn){var el=$(id);if(el)el.addEventListener('click',fn);}
 
@@ -10180,6 +10623,11 @@ prep('Preset geral','',fcgIniciar,'preparar a barra do preset geral');
 /* Passo proprio, com rotulo proprio: se ligar os botoes de backup falhar, a barra vermelha
    precisa dizer que foi o backup -- e nao o preset geral, que continua funcionando. */
 prep('Backup em arquivo','',fcxIniciar,'preparar os botoes de exportar e importar');
+/* O painel consolidado ja e desenhado por fcgAtualizar, no fim de fcgIniciar. Este passo
+   existe para o caso em que a barra do preset geral falha: sem ele, o painel ficaria em
+   branco, sem uma linha dizendo por que. Desenhar duas vezes nao custa nada -- a assinatura
+   de fccRender reconhece o desenho igual e nao mexe no DOM. */
+prep('Painel consolidado','',fccRender,'desenhar o painel consolidado');
 })();
 </script>
 </body>
