@@ -168,8 +168,11 @@
   .u-pv-modos .rotulo{font-size:12px;color:var(--tinta-suave)}
   .u-pv-moldura{overflow:hidden;margin:0 auto;background:#fff;border:1px solid var(--linha);border-radius:8px}
   .u-pv-moldura iframe{border:0;display:block;background:#fff}
-  .u-alerta{background:#FFF6DF;border:1px solid #E3B23C;color:#6B5210}
-  .u-alerta b{color:#6B5210}
+  /* aviso ambar de recurso que nao vale agora: nasceu no desconto Pix da aba Checkout e
+     passou a servir tambem a Contagem regressiva (pulsar x alternar deslizando). Uma regra so,
+     sem prefixo de aba, porque o visual e o mesmo nos dois lugares. */
+  .alerta{background:#FFF6DF;border:1px solid #E3B23C;color:#6B5210}
+  .alerta b{color:#6B5210}
 </style>
 </head>
 <body>
@@ -612,7 +615,7 @@
       <label for="l-anc">Âncora do botão <small>(# seguido de letra e depois letras, números, hífen ou sublinhado — ex.: #reserva, #secao-2)</small></label>
       <input type="text" id="l-anc" value="#reserva">
       <label for="l-resp">Respiro ao chegar no calendário <small>(pixels de folga acima dele)</small></label>
-      <input type="number" id="l-resp" value="24" min="0" step="4">
+      <input type="number" id="l-resp" value="24" min="0" max="400" step="4">
       </div>
       </fieldset>
     </div>
@@ -655,7 +658,8 @@
 
   <div class="instrucoes">
   <h3>Instrução de uso do código gerado</h3>
-  <p class="ajuda"><b>Onde colar:</b> no campo <b>Tag Body</b> da página hospedeira (configurações da página no Prosite). <b>Substitua todo o conteúdo</b> do campo — não cole por cima do que já existe, para não duplicar o botão flutuante.</p>
+  <p class="ajuda"><b>Onde colar:</b> no campo <b>Tag Body</b> da página hospedeira (configurações da página no Prosite). Se já houver ali uma versão anterior <b>deste</b> bloco (ela começa com o comentário <code>FOTO CERTA - BOTAO FLUTUANTE</code>), <b>substitua esse bloco inteiro</b> — colar a versão nova por cima da antiga duplica o botão flutuante. O que estiver no campo e for de <b>outro</b> construtor — a barra de contagem regressiva, por exemplo — <b>fica onde está</b>: os blocos convivem no mesmo campo, um embaixo do outro. Apagar o campo inteiro derrubaria a barra de contagem sem nenhum aviso.</p>
+  <p class="ajuda"><b>Primeira troca, quando o bloco antigo não tem cabeçalho:</b> versões geradas antes de ago/2026 saíam sem o cometário de identificação, então não há o que procurar. Nesse caso, o bloco antigo é <b>o trecho do WhatsApp inteiro</b>: começa no <code>&lt;style&gt;</code> que abre as regras <code>.fcw-</code> e termina no <b>último</b> <code>&lt;/script&gt;</code> desse trecho. Apague dessa abertura até esse fechamento e cole o novo no lugar. O que vier antes ou depois é de outro construtor e fica. Da próxima vez o cabeçalho já estará lá.</p>
   <p class="ajuda"><b>Pré-requisitos no Prosite (só se a âncora estiver incluída):</b> 1) o botão/link da página (ex.: o do hero) deve ter a URL igual à âncora configurada (ex.: <b>#reserva</b>); 2) a coluna que contém o componente HTML do iframe da página intermediária deve ter, na aba <b>Avançado</b>, o campo <b>ID Html</b> preenchido com o nome da âncora sem o # (ex.: <b>reserva</b>). O botão flutuante e o pop-up não exigem nenhuma configuração extra.</p>
   <p class="ajuda"><b>Depois de colar:</b> salve, <b>publique</b> e teste na página publicada: botão da coruja único no canto, pop-up abrindo e enviando ao WhatsApp, e clique do hero rolando até o calendário.</p>
   </div>
@@ -838,7 +842,7 @@
         <legend>Desconto para pagamento via Pix</legend>
         <label for="u-descpix">Percentual de desconto no Pix <small>(0 = sem desconto; aplica sobre o total já com cupom)</small></label>
         <input type="number" id="u-descpix" value="10" min="0" max="90" step="0.5">
-        <p class="ajuda u-alerta" id="u-descpix-aviso"><b>Com a cobrança de sinal ligada este campo não vale.</b> O Pix passa a cobrar o sinal, e o desconto do Pix não se aplica sobre o sinal — seria desconto dobrado, porque o sinal já sai de um total que pode ter cupom. O número acima fica guardado, mas <b>não entra no código gerado</b> nem aparece no carrinho enquanto o sinal estiver ligado. Para usar o desconto do Pix, volte a cobrar o valor cheio.</p>
+        <p class="ajuda alerta" id="u-descpix-aviso"><b>Com a cobrança de sinal ligada este campo não vale.</b> O Pix passa a cobrar o sinal, e o desconto do Pix não se aplica sobre o sinal — seria desconto dobrado, porque o sinal já sai de um total que pode ter cupom. O número acima fica guardado, mas <b>não entra no código gerado</b> nem aparece no carrinho enquanto o sinal estiver ligado. Para usar o desconto do Pix, volte a cobrar o valor cheio.</p>
         <p class="ajuda">Com desconto ativo, o carrinho mostra a linha verde <b>"Pagando via Pix (-10%)"</b> abaixo do total, o separador vira <b>"ou pague com Pix com 10% de desconto"</b> e o Pix é gerado já com o valor reduzido. O PayPal continua cobrando o total sem esse desconto.</p>
       </fieldset>
 
@@ -985,7 +989,7 @@
       <fieldset>
         <legend>Aparência do carrinho</legend>
         <label for="u-largura">Largura máxima <small>(pixels; o carrinho encolhe sozinho em telas menores)</small></label>
-        <input type="number" id="u-largura" value="420" min="240" step="10">
+        <input type="number" id="u-largura" value="420" min="240" max="2000" step="10">
         <label>Cor de destaque <small>(título, linha do total e botões Pix)</small></label>
         <div class="cor-linha"><input type="color" id="u-c1" value="#075E54"><input type="text" id="u-c1-t" value="#075E54"></div>
         <label>Fundo do card</label>
@@ -1239,7 +1243,7 @@
       <label for="c-dias">Duração — dias</label>
       <input type="number" id="c-dias" value="0" min="0" max="365" step="1">
       <label for="c-horas">Duração — horas</label>
-      <input type="number" id="c-horas" value="48" min="0" max="23" step="1">
+      <input type="number" id="c-horas" value="48" min="0" step="1">
       <label for="c-mins">Duração — minutos</label>
       <input type="number" id="c-mins" value="0" min="0" max="59" step="1">
       <p class="ajuda">Cada visitante tem o próprio prazo, contado da primeira vez que abriu a página naquele navegador.</p>
@@ -1383,6 +1387,7 @@
       <label for="c-z">z-index</label>
       <input type="number" id="c-z" value="99980" min="1" max="2147483647" step="10">
       <p class="ajuda">Em landing page, que não tem menu, <b>empurrar</b> é o certo: a barra reserva o próprio espaço e nada do topo fica coberto. Use <b>sobrepor</b> só se quiser a barra flutuando por cima do hero. O z-index raramente precisa ser tocado — ele existe para o caso de a página ter algum outro elemento fixo disputando o topo.</p>
+      <p class="ajuda"><b>Faixa reservada pelos blocos desta ferramenta:</b> barra de contagem <b>99980</b> (este campo), botão flutuante de WhatsApp <b>99990</b> e pop-up de captação <b>99991</b>. Subir este número <b>acima de 99989</b> põe a barra por cima do pop-up: ele deixa de ser modal e o visitante consegue clicar na página atrás dele. Se precisar subir mesmo assim, suba para ficar abaixo de 99990 — e teste com o pop-up aberto.</p>
       </div>
       </fieldset>
       <fieldset>
@@ -1495,6 +1500,7 @@
       <label><input type="checkbox" id="c-ef-piscar"><span>Separador piscando</span></label>
       <label><input type="checkbox" id="c-ef-tremor"><span>Tremor</span></label>
       </div>
+      <p class="ajuda alerta" id="c-pulsar-aviso"><b>Com “Alternância deslizando” ligada, o efeito Pulsar não vale.</b> Os dois animam o mesmo elemento pela mesma propriedade (o <code>transform</code> do miolo da barra), e animação em execução vence a transição do deslize: com os dois ligados, o deslize simplesmente não acontece e a troca de mensagem vira um fade. A marcação acima fica guardada, mas <b>não entra no código gerado</b> enquanto o movimento for “deslizando”. Para usar o pulsar, escolha outro movimento (estático, rolagem ou alternância com fade).</p>
       <p class="ajuda">O <b>separador piscando</b> só aparece no formato compacto (é o <code>:</code> entre os números). Efeitos contínuos chamam atenção o tempo todo e cansam — na dúvida, prefira a urgência progressiva ao lado, que só age quando o prazo aperta.</p>
       </fieldset>
       <fieldset>
@@ -1513,6 +1519,7 @@
       <label><input type="radio" name="c-urgpulsar" value="sim" checked><span>Sim</span></label>
       <label><input type="radio" name="c-urgpulsar" value="nao"><span>Não</span></label>
       </div>
+      <p class="ajuda alerta" id="c-urgpulsar-aviso"><b>Com “Alternância deslizando” ligada, este pulsar não vale.</b> É o mesmo conflito do efeito Pulsar ao lado: durante a urgência, a animação tomaria o <code>transform</code> do miolo da barra e o deslize da troca de mensagem pararia de acontecer. A escolha fica guardada, mas <b>não entra no código gerado</b> enquanto o movimento for “deslizando”. A cor de urgência continua valendo normalmente.</p>
       </div>
       </fieldset>
     </div>
@@ -1549,7 +1556,7 @@
 
   <div class="instrucoes">
   <h3>Instrução de uso do código gerado</h3>
-  <p class="ajuda"><b>Onde colar:</b> o título da saída avisa. Com <b>fixa no topo</b>, o código vai no campo <b>Tag Body</b> da página (substituindo ou somando ao que já estiver lá). Com <b>rola com a página</b>, vai num <b>componente HTML</b> que você posiciona no topo da landing pelo editor. Não há nada para colar na Tag Head.</p>
+  <p class="ajuda"><b>Onde colar:</b> o título da saída avisa. Com <b>fixa no topo</b>, o código vai no campo <b>Tag Body</b> da página. Se já houver ali uma versão anterior <b>deste</b> bloco (ela começa com o comentário <code>FOTO CERTA - BARRA DE CONTAGEM REGRESSIVA</code>), <b>substitua esse bloco inteiro</b>. O que estiver no campo e for de <b>outro</b> construtor — o botão flutuante de WhatsApp, por exemplo — <b>fica onde está</b>: os blocos convivem no mesmo campo, um embaixo do outro. Nunca apague o campo inteiro. Com <b>rola com a página</b>, vai num <b>componente HTML</b> que você posiciona no topo da landing pelo editor. Não há nada para colar na Tag Head.</p>
   <p class="ajuda"><b>Por que fixa exige a Tag Body:</b> componentes HTML do Prosite vivem dentro de um iframe, e um elemento fixo dentro do iframe gruda no iframe, não na página. A Tag Body é o mesmo lugar onde mora o botão flutuante de WhatsApp, que já funciona fixo.</p>
   <p class="ajuda"><b>A contagem não reinicia:</b> na primeira visita o código grava o horário no navegador do visitante, na chave <code>fcbar:SEU-CODIGO</code>, e todas as visitas seguintes contam a partir dali. <b>Trocar o código da campanha zera a contagem de todos</b> — é assim que se recomeça uma promoção.</p>
   <p class="ajuda"><b>Limites que nenhum código resolve:</b> a contagem usa o relógio do aparelho do visitante, então quem estiver com a hora errada vê o tempo errado. O carimbo é por navegador: o mesmo visitante no celular e no computador começa duas contagens; aba anônima recomeça; limpar dados zera. O Safari pode descartar o registro depois de cerca de 7 dias sem visita — irrelevante para campanhas de dois ou três dias, relevante para campanhas de semanas.</p>
@@ -1611,6 +1618,21 @@ function bHexRgb(h){
   if(isNaN(n))return '255, 201, 74';
   return ((n>>16)&255)+', '+((n>>8)&255)+', '+(n&255);
 }
+/* Limpeza compartilhada pelos DOIS validadores de endereco -- cUrlOk (botao de acao da
+   Contagem regressiva) e tUrlOk (pagina intermediaria do TidyCal). Ela faz o que o NAVEGADOR
+   faz antes de resolver a URL, para o teste enxergar o mesmo endereco que o clique vai abrir:
+   1. Controle e espaco somem: sem isso, um caractere de controle no meio de "javascript:"
+      passaria pelo teste e viraria javascript: no clique.
+   2. Barra invertida vira barra. Medido: href="/\evil.com/x" e resolvido pelo navegador como
+      http://evil.com/x -- OUTRO host --, e passava pelos dois validadores, porque o segundo
+      caractere nao era "/". Alinhar as duas abas fechou a coerencia entre elas, mas nao a
+      classe do defeito; a classe fecha aqui, num lugar so. Nenhum caminho legitimo do site
+      leva barra invertida, entao normalizar nao recusa nada que devesse passar.
+   A limpeza vale so para o TESTE: o que sai no codigo continua sendo o que o operador digitou
+   -- e, quando o teste recusa, nada sai. */
+function urlLimpa(v){
+  return String(v).replace(/[\u0000-\u0020]/g,'').replace(/\\/g,'/');
+}
 /* ===== faixa declarada dos campos numericos, compartilhada por quatro abas =====
    Cada aba declara uma tabela de linhas [id, padrao, min, max, inteiro] e nada mais. A MESMA
    linha alimenta os dois lados -- o gerador (fcPreso, o numero que sai no codigo) e a interface
@@ -1621,8 +1643,12 @@ function bHexRgb(h){
    "1500", porque o "1" viraria o minimo antes do resto chegar.
    Isto comecou como duas copias quase iguais (Bordas e TidyCal) e viraria quatro ao alcancar
    Slideshow e Leads; a quarta copia foi o momento de ter uma implementacao so. A Contagem
-   regressiva NAO entra aqui: o c-mob dela e um campo unico com clamp tambem dentro da cCfg, e a
-   aba e a referencia desta fase -- nao se mexe nela. */
+   regressiva entrou por ultimo, na revisao final de ago/2026: hoje as SEIS abas usam esta
+   mecanica, e a tabela dela (C_NUMS) tem os catorze campos numericos da aba. Ficou escrito
+   aqui, por tres fases, que ela nao entrava porque "o c-mob dela e um campo unico" --
+   afirmacao falsa que sozinha manteve a lacuna aberta, e justamente no comentario que se le
+   primeiro ao mexer em fcPreso/fcAjustar. Excluir uma aba desta tabela exige contar os campos
+   dela antes. */
 function fcFaixa(tabela,id){var i;for(i=0;i<tabela.length;i++){if(tabela[i][0]===id)return tabela[i];}return null;}
 /* O clamp em si, separado da origem do valor. Ele nasceu dentro de fcPreso, que le do campo;
    a biblioteca de presets da aba Bordas (fase 5) precisou prender numeros que NAO tem campo na
@@ -2382,7 +2408,13 @@ function sBloco(cfg){
      operador as desliga. */
   c+='@media (prefers-reduced-motion: reduce){\n';
   c+='  .fc-slideshow[data-transicao] .fc-slide{transition:none}\n';
-  if(t==='zoom')c+='  .fc-slideshow[data-transicao="zoom"] .fc-slide.fc-ativa img{animation:none}\n';
+  /* O desligamento do zoom sai SEMPRE, porque a regra que LIGA o zoom tambem sai sempre
+     (ela nao depende de t). Com duas galerias na mesma pagina isso importa: o bloco da
+     galeria em zoom desligava a animacao, mas o bloco da outra galeria vinha depois no
+     documento, reemitia a regra do zoom e nao trazia o desligamento -- e a mesma
+     especificidade, com a regra de baixo vencendo, devolvia o zoom animado a quem pediu
+     menos movimento. Uma linha condicional para uma regra incondicional nao fecha. */
+  c+='  .fc-slideshow[data-transicao="zoom"] .fc-slide.fc-ativa img{animation:none}\n';
   c+='  .fc-legenda{transition:none}\n';
   if(cfg.setas)c+='  .fc-seta{transition:none}\n';
   if(cfg.dots)c+='  .fc-dots button{transition:none}\n';
@@ -2559,8 +2591,13 @@ function sBloco(cfg){
    'bottom' no CSS do botao flutuante (negativo o jogaria para fora da tela) e l-vel vira a
    duracao da animacao de rolagem (zero ou negativo faz o trilho piscar em vez de rolar). A
    MESMA linha alimenta o gerador e a correcao a vista do campo. */
+/* l-resp entra por ultimo, pelo mesmo motivo dos outros quatro: o clamp dele morava dentro da
+   lCfg, so por baixo e em silencio -- -5 virava 24 (nem o valor digitado, nem o piso) e 999999
+   passava inteiro, virando RESPIRO=999999 e jogando a rolagem para muito acima do calendario.
+   O teto de 400px acompanha o do l-btnbaixo: e folga acima de um elemento, nao uma altura de
+   pagina. Declarado tambem no HTML. */
 var L_NUMS=[['l-segauto',8,1,300,true],['l-segef',10,3,300,true],
-  ['l-btnbaixo',92,0,400,true],['l-vel',18,2,60,true]];
+  ['l-btnbaixo',92,0,400,true],['l-vel',18,2,60,true],['l-resp',24,0,400,true]];
 function lPreso(id){return fcPreso(L_NUMS,id);}
 
 /* Opcoes da pergunta de qualificacao. Lista vazia = recurso desligado (o campo nao aparece no
@@ -2849,7 +2886,7 @@ function lCfg(){
     if(anc&&anc.charAt(0)!=='#')anc='#'+anc;
     if(!anc)anc='#reserva';
     ancOk=lAncOk(anc);
-    resp=parseInt($('l-resp').value,10);if(isNaN(resp)||resp<0)resp=24;
+    resp=lPreso('l-resp');if(resp==null)resp=24;
   }
   return {
     num:$('l-num').value.replace(/\D/g,''),cod:escJs($('l-cod').value),pag:escJs($('l-pag').value),
@@ -2918,6 +2955,18 @@ function lGerar(){
    e o que nao esta ligado nao pesa no que o visitante baixa. */
 function lBloco(v){
   var c='';
+  /* Cabecalho de identificacao, no mesmo formato do bloco da Contagem regressiva. Ele existe
+     para a instrucao de uso poder ser cumprida: os dois blocos moram no MESMO campo Tag Body,
+     entao "substitua" precisa dizer o que substituir. Sem esta linha, "substitua todo o
+     conteudo do campo" era a unica instrucao possivel -- e seguir essa instrucao apagava a
+     barra de contagem sem nenhum aviso. */
+  c+='<!-- ============================================================\n';
+  c+='     FOTO CERTA - BOTAO FLUTUANTE + POP-UP DE CAPTACAO (WhatsApp)\n';
+  c+='     ONDE COLAR: campo Tag Body da pagina hospedeira\n';
+  c+='     Substitua apenas o bloco anterior COM ESTE MESMO cabecalho.\n';
+  c+='     Outros blocos da ferramenta (ex.: a barra de contagem) convivem aqui.\n';
+  c+='     Gerado pela ferramenta em construtores.fotocerta.com.br\n';
+  c+='     ============================================================ -->\n\n';
   c+=lCss(v);
   c+=lJs(v);
   if(v.anc.ativo)c+=lAncora(v);
@@ -2928,6 +2977,11 @@ function lBloco(v){
    ACUMULADAS na regra que ja existia, nunca emitidas numa segunda regra. Shorthand
    (background, animation, transition) nao se funde entre duas regras de mesma especificidade --
    a de baixo vence por inteiro --, e e assim que um recurso apagaria o outro em silencio. */
+/* Faixa de z-index reservada pelos blocos desta ferramenta, declarada aqui porque e aqui que
+   os dois maiores numeros sao cravados: 99980 e o padrao da barra de contagem regressiva
+   (campo c-z, ajustavel), 99990 e o botao flutuante e 99991 o pop-up. Quem mexer em qualquer
+   um dos tres precisa manter a barra ABAIXO de 99990, senao ela passa por cima do pop-up e o
+   pop-up deixa de ser modal (medido: com c-z=99998, o topo do modal fica clicavel por baixo). */
 function lCss(v){
   var c='',i;
   var lado=(v.btnLado==='esq')?'left':'right';
@@ -3319,6 +3373,14 @@ function lAncora(v){
   c+='        return topoIframe+dentroIframe-RESPIRO;\n';
   c+='      }catch(e){/* iframe de outro dominio: ignora */}\n';
   c+='    }\n    return null;\n  }\n\n';
+  c+='  /* Movimento reduzido: quem pediu menos movimento no sistema recebe o salto seco. A\n';
+  c+='     conferencia e feita no clique, e nao uma vez so, para acompanhar a mudanca da\n';
+  c+='     preferencia sem recarregar a pagina. */\n';
+  c+='  function comoRolar(){\n';
+  c+='    try{\n';
+  c+="      if(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches)return 'auto';\n";
+  c+='    }catch(e){}\n';
+  c+="    return 'smooth';\n  }\n\n";
   c+="  document.addEventListener('click',function(e){\n";
   c+='    var el=e.target;\n';
   c+="    while(el&&el.tagName!=='A'){el=el.parentElement;}\n";
@@ -3326,15 +3388,23 @@ function lAncora(v){
   c+="    var href=el.getAttribute('href')||'';\n";
   c+='    if(href!==ANCORA)return;\n';
   c+='    var y=alvoY();\n';
-  c+='    if(y===null)return;         /* nao achou o calendario: deixa a ancora nativa agir */\n';
+  c+='    if(y===null){\n';
+  c+='      /* Plano B: o calendario ainda nao carregou. Rola ate a propria ancora, com o mesmo\n';
+  c+='         respiro. So esta rolagem e suavizada -- a pagina inteira NAO ganha rolagem suave\n';
+  c+='         no elemento raiz, que suavizaria tambem as ancoras do tema Alboom. */\n';
+  c+='      var destino=document.querySelector(ANCORA);\n';
+  c+='      if(!destino)return;      /* nem calendario nem ancora: deixa a ancora nativa agir */\n';
+  c+='      y=destino.getBoundingClientRect().top+window.pageYOffset-RESPIRO;\n';
+  c+='    }\n';
   c+='    e.preventDefault();\n';
-  c+="    window.scrollTo({top:y,behavior:'smooth'});\n";
+  c+='    window.scrollTo({top:y,behavior:comoRolar()});\n';
   c+='  });\n})();\n</scr'+'ipt>\n\n';
-  c+='<!-- Rolagem suave + respiro da ancora nativa (plano B) -->\n';
+  c+='<!-- Respiro da ancora nativa (plano B do plano B) -->\n';
   c+='<sty'+'le>\n';
-  c+='/* scroll-behavior: rolagem suave em toda ancora nativa da pagina */\n';
   c+='/* scroll-margin-top: folga em px quando a ancora nativa cai no '+anc+' */\n';
-  c+='html { scroll-behavior: smooth; }\n';
+  c+='/* Nao ha rolagem suave declarada no elemento raiz aqui, de proposito: ela alcancaria TODA\n';
+  c+='   ancora do site, inclusive as do tema Alboom, e nao teria como respeitar quem pediu menos\n';
+  c+='   movimento no sistema. A suavidade fica no script acima, so para esta ancora. */\n';
   c+=anc+' { scroll-margin-top: '+resp+'px; }\n';
   c+='</sty'+'le>';
   return c;
@@ -3444,11 +3514,14 @@ function lPvDoc(v){
   return h;
 }
 /* O corte do pop-up e fixo em 480px dentro do proprio bloco (a @media que reposiciona o card e
-   o botao), entao aqui nao ha campo para derivar: a largura estreita fica abaixo de 480 e a
-   larga acima. Como a coluna da previa e mais estreita que um desktop, a larga e reduzida por
+   o botao), entao aqui nao ha campo para derivar: 380 fica abaixo desse corte e 920 acima, que
+   e tudo o que a previa precisa para mostrar os dois lados da media query. Havia uma constante
+   L_PV_CORTE=480 declarada aqui e nunca lida por ninguem, ao lado destes dois numeros cravados:
+   uma constante que nao e usada nao documenta nada, so parece documentar. O 480 vive agora
+   neste comentario, que e onde ele de fato estava sendo lido.
+   Como a coluna da previa e mais estreita que um desktop, a larga e reduzida por
    transform:scale -- o scale fica do lado de FORA do iframe, entao a viewport que o bloco
    enxerga continua sendo a largura logica, que e o que a media query le. */
-var L_PV_CORTE=480;
 function lPvLargura(){
   if(lPvModo==='cel')return 380;
   return 920;
@@ -3559,9 +3632,9 @@ function tPreso(id){return fcPreso(T_NUMS,id);}
    de ancora. Vazio tambem e recusado: o codigo 3 saia com src="" e o operador colava na
    hospedeira um iframe que nunca carregava nada, sem nenhum aviso. */
 function tUrlOk(v){
-  /* controle e espaco saem antes do teste porque o navegador tambem os ignora ao resolver
-     a URL -- sem isso, um caractere de controle no meio de "javascript:" passaria pelo teste */
-  var limpo=String(v).replace(/[\u0000-\u0020]/g,'');
+  /* urlLimpa aplica o que o navegador aplica antes de resolver a URL: tira controle/espaco e
+     normaliza barra invertida. Ver o comentario dela no bloco compartilhado. */
+  var limpo=urlLimpa(v);
   if(!limpo)return false;
   if(/^https?:\/\//i.test(limpo))return true;
   /* caminho do proprio site: UMA barra. Com duas o endereco e protocol-relative --
@@ -3680,7 +3753,13 @@ function tGerar(){
   var c='';
   c+='<div class="tidycal-embed" data-path="'+escAttr(path)+'"></div>\n';
   c+='<scr'+'ipt src="https://asset-tidycal.b-cdn.net/js/embed.js" async></scr'+'ipt>\n\n';
-  c+='<sty'+'le>\n  iframe.tidycal-embed { transition: min-height 0.25s ease; }\n</sty'+'le>\n\n';
+  /* Movimento reduzido: desliga o que ESTE bloco criou e nada mais -- a unica animacao daqui
+     e a transicao de altura do iframe quando o modal do TidyCal abre e fecha. Era a unica das
+     seis abas sem esta guarda. O seletor repete a especificidade da regra de cima e vem
+     depois, entao vence sem !important. Com a transicao desligada o modal continua abrindo:
+     o que some e a passagem animada da altura. */
+  c+='<sty'+'le>\n  iframe.tidycal-embed { transition: min-height 0.25s ease; }\n'+
+     '  @media (prefers-reduced-motion: reduce) {\n    iframe.tidycal-embed { transition: none; }\n  }\n</sty'+'le>\n\n';
   c+='<scr'+'ipt>\n(function () {\n';
   c+="  var ALTURA_DESKTOP = '"+desk+"px';\n";
   c+="  var ALTURA_MOBILE  = '"+mob+"px';   /* calibrar no aparelho se o modal cortar */\n";
@@ -3784,12 +3863,17 @@ function uRestaura(st){
 /* Faixa declarada dos campos numericos desta aba, no formato de S_NUMS/B_NUMS:
    [id, padrao, min, max, inteiro]. A MESMA linha alimenta o gerador (fcPreso) e a interface
    (fcAjustar), entao nao ha como a saida ser presa numa faixa e o campo mostrar outra.
-   Os dois campos antigos (largura e desconto Pix) NAO entraram: o clamp deles e outro -- uma
-   largura abaixo de 240 vira 420, e nao 240 --, e move-los mudaria numero cobrado sem que
-   nenhum recurso desta fase pedisse. */
-var U_NUMS=[['u-qtdmax',10,2,99,true],['u-sinalpct',30,1,99,false],['u-sinalfixo',100,0.01,999999,false]];
+   Os dois campos antigos (largura e desconto Pix) ficaram de fora por uma fase, com o
+   argumento de que o clamp deles era outro. Era mesmo -- e era um clamp SILENCIOSO, que e o
+   anti-padrao que esta ferramenta nomeou e recusou varias vezes. Medido: 95 no desconto virava
+   90 e -10 virava 0 com o campo continuando a exibir 95 e -10; 200 na largura virava 420, que
+   nao e nem o valor digitado nem o piso declarado. Agora os dois entram na tabela e se corrigem
+   a vista: abaixo de 240 a largura vira 240 (o piso, no proprio campo), e o desconto e preso
+   entre 0 e 90 na frente do operador. O teto de 2000px da largura so pega erro de digitacao
+   (mesmo criterio do s-larg no Slideshow) e esta declarado tambem no HTML. */
+var U_NUMS=[['u-qtdmax',10,2,99,true],['u-sinalpct',30,1,99,false],['u-sinalfixo',100,0.01,999999,false],
+  ['u-descpix',10,0,90,false],['u-largura',420,240,2000,true]];
 function uPreso(id){return fcPreso(U_NUMS,id);}
-function uNum(id,def){var v=parseFloat(String($(id).value).replace(',','.'));return (isNaN(v)||v<0)?def:v;}
 /* Quantos itens DESTE produto (ele proprio e seus opcionais) foram marcados como vendidos por
    quantidade. Serve a lista da aba e, somado, decide se o recurso inteiro esta ligado. */
 function uQtdItens(p){
@@ -4342,10 +4426,12 @@ function uChaveErro(chave,bruta){
 function uCfg(){
   var m=radio('u-metodo')||'ambos';
   var usaPix=(m!=='paypal');
-  var descpix=parseFloat(String($('u-descpix').value).replace(',','.'));
-  if(isNaN(descpix)||descpix<0)descpix=0;if(descpix>90)descpix=90;
+  /* Desconto e largura vem presos por U_NUMS, a MESMA linha que corrige o campo na tela --
+     antes o clamp morava so aqui e mudava o numero em silencio. O zeramento por forma de
+     pagamento e por sinal continua sendo outra coisa: nao e faixa, e regra de negocio. */
+  var descpix=uPreso('u-descpix');if(descpix==null)descpix=10;
   if(m!=='ambos')descpix=0;
-  var larg=parseInt($('u-largura').value,10);if(isNaN(larg)||larg<240)larg=420;
+  var larg=uPreso('u-largura');if(larg==null)larg=420;
   /* Sinal e desconto Pix nao convivem: o Pix passa a cobrar o sinal, e o desconto do Pix sobre
      o sinal seria desconto dobrado (o sinal ja sai de um total que pode ter cupom). O spec
      manda nao aplicar; aqui ele e zerado na origem, pelo mesmo mecanismo que ja zerava o
@@ -5731,6 +5817,17 @@ function cToggles(){
   el=$('c-alt-campo');if(el)el.style.display=(mov==='altfade'||mov==='altdesliza')?'block':'none';
   el=$('c-entrada-campo');if(el)el.style.display=(radio('c-entrada')==='aposrolar')?'block':'none';
   el=$('c-urg-campos');if(el)el.style.display=(radio('c-urg')==='sim')?'block':'none';
+  /* "Alternancia deslizando" x os dois pulsares: mesmo elemento, mesma propriedade. Os campos
+     NAO somem -- some so o efeito. Esconder faria a marcacao ja feita desaparecer sem
+     explicacao, que e trocar defeito visivel por invisivel; o padrao da casa (desconto Pix x
+     sinal, na aba Checkout) e deixar a vista, desabilitado e com aviso ambar. Quem tira o
+     "deslizando" recupera os dois na hora, com a escolha anterior intacta. */
+  var choqueDesliza=(mov==='altdesliza');
+  el=$('c-ef-pulsar');if(el)el.disabled=choqueDesliza;
+  el=$('c-pulsar-aviso');if(el)el.style.display=choqueDesliza?'block':'none';
+  var rp=document.querySelectorAll('input[name="c-urgpulsar"]'),ip;
+  for(ip=0;ip<rp.length;ip++)rp[ip].disabled=choqueDesliza;
+  el=$('c-urgpulsar-aviso');if(el)el.style.display=choqueDesliza?'block':'none';
   cTitulo();
 }
 document.addEventListener('change',function(e){
@@ -5865,7 +5962,6 @@ function cMsgRender(){
   });
 }
 
-function cNum(id,def){var v=parseInt($(id).value,10);return isNaN(v)?def:v;}
 function cCor(id,def){var v=$(id+'-t').value;return corValida(v)?v:def;}
 function cAlvoIso(){
   var v=$('c-alvo').value;
@@ -5878,36 +5974,42 @@ function cAlvoIso(){
      segundos. */
   return partes[0]+'T'+partes[1].slice(0,5)+':00-03:00';
 }
-/* O clamp da cCfg protege a saida, mas sozinho ele corrigia o codigo entregue em silencio: o
-   operador digitava 100, lia 100 na tela e copiava um bloco com max-width:320px. Esta aba ja
-   decidiu duas vezes o contrario disso -- no limiar de urgencia, avisar e bloquear em vez de
-   clampar calado, porque mudar sem avisar um numero que o operador esta lendo troca um defeito
-   visivel por um invisivel. Aqui o campo se corrige na propria interface: o valor preso volta
-   para o input, entao o que esta na tela e o que sai no codigo sao sempre o MESMO numero e a
-   correcao acontece na frente do operador. O clamp da cCfg fica como rede -- e ele que segura
-   estado restaurado do localStorage gravado antes desta regra existir.
-   So em 'change'/'blur', nunca em 'input': corrigir a cada tecla impediria digitar "320",
-   porque o "3" viraria 320 antes do resto chegar. */
-function cMobAjustar(){
-  var el=$('c-mob');if(!el)return false;
-  var bruto=parseInt(el.value,10);
-  var preso=isNaN(bruto)?640:Math.max(320,Math.min(1024,bruto));
-  if(String(preso)===String(el.value))return false;
-  el.value=String(preso);
-  return true;
-}
-/* Faixa declarada dos campos numericos desta aba que precisam se corrigir a vista, no mesmo
-   formato de B_NUMS: [id, padrao, min, max, inteiro]. O teto da coruja entrou aqui porque ele
-   deixou de ser so "a altura do desenho" e passou a gerar tambem a LARGURA do quadro
-   (teto*32/38). Teto zero ou negativo produziria quadro de largura zero, ou seja, coruja
-   ligada e invisivel -- defeito mudo. Preso na mesma tabela que alimenta a tela e a geracao,
-   os dois lados leem sempre o mesmo numero.
-   c-mob nao entra aqui: ele tem cMobAjustar proprio, com o clamp repetido dentro da cCfg. */
-var C_NUMS=[['c-corujaalt',26,14,60,true]];
+/* Faixa declarada de TODOS os campos numericos desta aba, no mesmo formato de B_NUMS:
+   [id, padrao, min, max, inteiro]. A MESMA linha alimenta o gerador (fcPreso, o numero que sai
+   no codigo) e a interface (fcAjustar, o numero que fica na tela), entao nao ha como a saida
+   ser presa numa faixa e o campo mostrar outra.
+   Esta aba foi a primeira a exigir "corrigir a vista, nunca em silencio" (o c-mob) e foi a
+   ultima a aplicar a regra a si mesma: durante tres fases so o c-mob e o teto da coruja tinham
+   faixa, e os outros doze campos passavam por um cNum que trocava NaN pelo padrao e nada mais.
+   Medido antes desta correcao, tudo sem aviso e com o campo continuando a exibir o que foi
+   digitado: c-largmax=0 gerava max-width:0px (barra de largura zero), c-tam=0 gerava
+   font-size:0px, c-vel=0 gerava "animation:fcb-rola 0s" (a rolagem configurada nunca acontece)
+   e c-urglim=-5 fazia a urgencia nunca disparar.
+   Sobre o c-horas: o padrao do campo e 48 (e o que o HTML traz e o que cLimpar devolve), mas o
+   proprio input declara max="23". Os dois nao podem estar certos ao mesmo tempo, e decidir qual
+   deles vale nao e desta rodada -- e pendencia registrada. Enquanto ela nao for decidida, o teto
+   aqui fica ABERTO (null): inventar 23 clamparia o padrao 48 para 23 e encurtaria em silencio a
+   duracao de quem ja tem campanha salva; inventar outro numero seria decidir por conta propria.
+   O piso 0 entra porque negativo nao tem leitura nenhuma numa duracao. */
+var C_NUMS=[
+  ['c-dias',0,0,365,true],['c-horas',48,0,null,true],['c-mins',0,0,59,true],
+  ['c-tam',15,10,32,true],['c-pad',10,0,40,true],['c-largmax',1100,320,1920,true],
+  ['c-mob',640,320,1024,true],['c-z',99980,1,2147483647,true],['c-gap',16,0,60,true],
+  ['c-corujaalt',26,14,60,true],['c-vel',18,2,60,true],['c-alt',5,2,30,true],
+  ['c-entradapx',300,50,3000,true],['c-urglim',60,1,10080,true]];
+/* Le o campo ja preso na faixa. O segundo argumento so cobre o campo ausente do DOM (fcPreso
+   devolve null nesse caso); valor invalido no campo ja cai no padrao declarado na tabela. */
+function cPreso(id,def){var v=fcPreso(C_NUMS,id);return v==null?def:v;}
 function cCfg(){
-  var dias=cNum('c-dias',0),horas=cNum('c-horas',0),mins=cNum('c-mins',0);
+  var dias=cPreso('c-dias',0),horas=cPreso('c-horas',48),mins=cPreso('c-mins',0);
   var cpos=radio('c-coruja');
-  var calt=fcPreso(C_NUMS,'c-corujaalt');if(calt==null)calt=26;
+  var calt=cPreso('c-corujaalt',26);
+  /* "Alternar deslizando" e os dois pulsares animam o transform do MESMO .fcb-conteudo, e
+     animacao em execucao vence transicao na cascata: com os dois ligados o deslize nunca
+     acontecia e o operador via fade, sem erro nenhum. Os pulsares sao zerados aqui, na origem,
+     pelo mesmo mecanismo que ja zera o desconto Pix quando o sinal esta ligado -- e, como la, o
+     campo NAO some da tela: fica desabilitado, com aviso ambar dizendo por que nao vale. */
+  var movsel=radio('c-mov'),deslizaAlt=(movsel==='altdesliza');
   return {
     modo:radio('c-modo'),
     duracaoMs:((dias*24+horas)*60+mins)*60000,
@@ -5920,23 +6022,21 @@ function cCfg(){
       borda:cCor('c-cborda','#FFC94A'),urg:cCor('c-curg','#8C1D18'),
       ctaFundo:cCor('c-ctafundo','#FFC94A'),ctaTexto:cCor('c-ctatexto','#23281F'),
       prog:cCor('c-cprog','#FFC94A'),corujaCorpo:cCor('c-corujacorpo','#FDFBF6'),corujaDet:cCor('c-corujadet','#FFC94A')},
-    fonte:radio('c-fonte'),tam:cNum('c-tam',15),peso:radio('c-peso'),
+    fonte:radio('c-fonte'),tam:cPreso('c-tam',15),peso:radio('c-peso'),
     formato:radio('c-formato'),
     rotulos:{d:$('c-rd').value,h:$('c-rh').value,m:$('c-rm').value,s:$('c-rs').value},
-    pad:cNum('c-pad',10),largmax:cNum('c-largmax',1100),alinha:radio('c-alinha'),
-    /* O corte do celular e preso a faixa declarada no campo (min=320, max=1024) AQUI, na
-       fonte da configuracao, e nao so na largura do iframe da previa. O input number nao
-       impoe min/max a valor digitado e cNum e parseInt sem limite, entao "100" chegava
-       inteiro ate o @media. Prender so a largura da previa NAO resolve: o iframe iria para
-       320px enquanto o CSS gerado continuaria com max-width:100px, a media query nao casaria
-       e o modo Celular mostraria layout de computador calado -- exatamente a previa que
-       mente em silencio. Preso na cCfg, os dois lados leem o mesmo numero e nao ha como
-       divergirem. Valor dentro da faixa passa intacto: a saida gerada nao muda. */
-    borda:radio('c-borda')==='sim',mob:Math.max(320,Math.min(1024,cNum('c-mob',640))),
-    fixa:radio('c-fixa')==='fixa',empurrar:radio('c-empurrar')==='empurrar',z:cNum('c-z',99980),
+    pad:cPreso('c-pad',10),largmax:cPreso('c-largmax',1100),alinha:radio('c-alinha'),
+    /* O corte do celular sai da faixa declarada em C_NUMS (320 a 1024) AQUI, na fonte da
+       configuracao, e nao so na largura do iframe da previa. Prender so a largura da previa
+       NAO resolve: o iframe iria para 320px enquanto o CSS gerado continuaria com
+       max-width:100px, a media query nao casaria e o modo Celular mostraria layout de
+       computador calado -- exatamente a previa que mente em silencio. Vindo da tabela, o
+       campo, a previa e o codigo leem sempre o mesmo numero. */
+    borda:radio('c-borda')==='sim',mob:cPreso('c-mob',640),
+    fixa:radio('c-fixa')==='fixa',empurrar:radio('c-empurrar')==='empurrar',z:cPreso('c-z',99980),
     cta:{ativo:radio('c-cta')==='sim',txt:$('c-ctatxt').value,url:$('c-ctaurl').value},
     fechar:radio('c-fechar'),prog:radio('c-prog')==='sim',
-    gap:cNum('c-gap',16),
+    gap:cPreso('c-gap',16),
     /* escondermob, e nao mob: o nome antigo ('mob') dizia so "celular" e ficava a um passo de
        ser lido como "aparece no celular", que e o contrario do que ele valia. */
     /* pos e a escolha crua; esq/dir dizem qual ponta recebe o desenho e ativo continua sendo
@@ -5945,11 +6045,11 @@ function cCfg(){
     coruja:{pos:cpos,ativo:cpos!=='nao',
       esq:(cpos==='esq'||cpos==='ambos'),dir:(cpos==='dir'||cpos==='ambos'),
       alt:calt,escondermob:radio('c-corujamostrarmob')==='nao'},
-    mov:radio('c-mov'),vel:cNum('c-vel',18),alt:Math.max(2,cNum('c-alt',5)),
-    efeitos:{pulsar:$('c-ef-pulsar').checked,brilho:$('c-ef-brilho').checked,degrade:$('c-ef-degrade').checked,
+    mov:movsel,vel:cPreso('c-vel',18),alt:cPreso('c-alt',5),
+    efeitos:{pulsar:$('c-ef-pulsar').checked&&!deslizaAlt,brilho:$('c-ef-brilho').checked,degrade:$('c-ef-degrade').checked,
       piscar:$('c-ef-piscar').checked,tremor:$('c-ef-tremor').checked},
-    urg:{ativo:radio('c-urg')==='sim',lim:cNum('c-urglim',60),pulsar:radio('c-urgpulsar')==='sim'},
-    dig:radio('c-dig'),entrada:radio('c-entrada'),entradapx:cNum('c-entradapx',300),
+    urg:{ativo:radio('c-urg')==='sim',lim:cPreso('c-urglim',60),pulsar:radio('c-urgpulsar')==='sim'&&!deslizaAlt},
+    dig:radio('c-dig'),entrada:radio('c-entrada'),entradapx:cPreso('c-entradapx',300),
     msgs:cMsgs.length?cMsgs:[{texto:'Oferta por tempo limitado {contador}',curta:''}]
   };
 }
@@ -5962,17 +6062,32 @@ function cCfg(){
 /* escAttr protege a ESTRUTURA do atributo (aspas), nao o esquema: href="javascript:..."
    continua sendo um atributo bem formado e executa ao clique. Aceita ancora, caminho
    relativo e http(s); recusa qualquer outro esquema. Os caracteres de controle e o espaco
-   sao removidos antes do teste porque o navegador tambem os ignora ao resolver a URL --
-   sem isso, "jav\tascript:alert(1)" passaria pelo teste e viraria javascript: no clique. */
+   sao removidos antes do teste, por urlLimpa, porque o navegador tambem os ignora ao resolver
+   a URL. A mesma urlLimpa normaliza a barra invertida, que o navegador tambem trata como
+   barra: sem isso, "/\evil.com/x" chegava ao href como endereco de outro host. */
 function cUrlOk(v){
-  var limpo=String(v).replace(/[\u0000-\u0020]/g,'');
+  /* mesma limpeza do tUrlOk, pela mesma funcao: as duas abas tem de recusar o mesmo conjunto */
+  var limpo=urlLimpa(v);
   if(!limpo)return false;
   if(limpo.charAt(0)==='#')return true;
   if(/^https?:\/\//i.test(limpo))return true;
   if(/^[a-zA-Z][a-zA-Z0-9+.\-]*:/.test(limpo))return false;
-  return true;
+  /* caminho do proprio site: UMA barra. O criterio e o mesmo do tUrlOk da aba TidyCal, e por um
+     motivo medido: a versao anterior terminava em "return true" e recusava so o que tivesse
+     ESQUEMA, entao "//evil.exemplo.com/x" passava sem aviso e saia no href. Duas barras nao sao
+     caminho do site -- o endereco e protocol-relative e resolve para OUTRO host, herdando so o
+     esquema da pagina --, enquanto o alerta da cGerar promete ancora, caminho do site ou
+     http(s). Duas abas com a mesma decisao nao podem responder coisas opostas. Caminho sem
+     barra inicial ("natal-2026") tambem passa a ser recusado, pelo mesmo motivo: o alerta nunca
+     o ofereceu, e ele muda de destino conforme a pasta da pagina onde o bloco for colado. */
+  if(limpo.charAt(0)==='/'&&limpo.charAt(1)!=='/')return true;
+  return false;
 }
 function cGerar(){
+  /* Os catorze campos numericos se corrigem na tela ANTES de qualquer conferencia -- assim o
+     que o operador esta lendo e o que vai ser conferido e gerado. Mesmo passo que as outras
+     cinco abas ja davam. */
+  if(fcAjustarTodos(C_NUMS))salvarEstado();
   var cfg=cCfg();
   if(cfg.modo==='data'&&!$('c-alvo').value){alert('Informe a data e hora do encerramento.');return;}
   if(cfg.modo==='abertura'&&cfg.duracaoMs<=0){alert('Informe uma duração maior que zero.');return;}
@@ -5996,6 +6111,10 @@ function cBloco(cfg){
   c+='<!-- ============================================================\n';
   c+='     FOTO CERTA - BARRA DE CONTAGEM REGRESSIVA\n';
   c+='     ONDE COLAR: '+(cfg.fixa?'campo Tag Body da pagina':'componente HTML no topo da pagina')+'\n';
+  if(cfg.fixa){
+    c+='     Substitua apenas o bloco anterior COM ESTE MESMO cabecalho.\n';
+    c+='     Outros blocos da ferramenta (ex.: o botao flutuante) convivem aqui.\n';
+  }
   c+='     Gerado pela ferramenta em construtores.fotocerta.com.br\n';
   c+='     ============================================================ -->\n\n';
   c+='<sty'+'le>\n'+cCssBase(cfg)+'</sty'+'le>\n\n';
@@ -6183,8 +6302,13 @@ function cCssEfeitos(cfg){
      deslizava/alternava/virava/a barra de progresso avancava com movimento continuo
      mesmo para quem pediu menos movimento no sistema. O bloco agora sai sempre que
      houver movimento, por animation OU por transition, e neutraliza os dois. */
+  /* A urgencia entra nesta lista: com ela ligada, a regra base de .fcb-barra ganha
+     transition:background-color, e a barra troca de cor com passagem animada. Sem o pulsar de
+     urgencia marcado, anim ficava vazio, temTransMov nao via a urgencia e o bloco inteiro de
+     movimento reduzido deixava de sair -- com uma transicao viva no CSS entregue. */
   var temTransMov=(cfg.entrada==='deslizar'||cfg.entrada==='aposrolar')||
-    (cfg.mov==='altfade'||cfg.mov==='altdesliza')||(cfg.dig==='fade'||cfg.dig==='flip')||cfg.prog;
+    (cfg.mov==='altfade'||cfg.mov==='altdesliza')||(cfg.dig==='fade'||cfg.dig==='flip')||
+    cfg.prog||cfg.urg.ativo;
   if(anim.length||temTransMov){
     s+='@media (prefers-reduced-motion: reduce){\n';
     if(anim.length)s+='  '+anim.join(',')+'{animation:none}\n';
@@ -6765,15 +6889,12 @@ prep('Contagem regressiva','cnt',function(){
   parearCor('c-ctafundo');parearCor('c-ctatexto');parearCor('c-cprog');
   parearCor('c-corujacorpo');parearCor('c-corujadet');
   parearCor('c-curg');
-  /* O listener do proprio elemento corre ANTES dos de document (fase de bolha, alvo primeiro),
-     entao quando o cPreview() global rodar o valor ja esta preso -- por isso o ramo de 'change'
-     nao redesenha, senao montaria o iframe duas vezes. 'blur' nao borbulha e nao aciona nenhum
-     listener de document, entao esse redesenha por conta propria. */
-  var el=$('c-mob');
-  if(el){
-    el.addEventListener('change',function(){if(cMobAjustar())salvarEstado();});
-    el.addEventListener('blur',function(){if(cMobAjustar()){salvarEstado();cPreview(true);}});
-  }
+  /* Os catorze campos numericos da aba (c-mob inclusive) se corrigem a vista pelo mesmo
+     mecanismo compartilhado das outras cinco abas. O listener do proprio elemento corre ANTES
+     dos de document (fase de bolha, alvo primeiro), entao quando o cPreview() global rodar o
+     valor ja esta preso -- por isso o ramo de 'change' nao redesenha, senao montaria o iframe
+     duas vezes. 'blur' nao borbulha e nao aciona nenhum listener de document, entao esse
+     redesenha por conta propria. */
   fcLigarFaixa(C_NUMS,function(){cPreview(true);});
 });
 /* Cores de texto livre das abas Leads e Checkout: o campo se corrige a vista, como o c-mob.
@@ -6862,10 +6983,10 @@ prep('Bordas com efeito','bor',function(){
   bPreview();
 },'desenhar a aba com o estado restaurado');
 prep('Contagem regressiva','cnt',function(){
-  /* estado gravado antes desta regra pode trazer c-mob fora da faixa: prende na carga, para o
-     campo nunca exibir um numero diferente do que a cCfg vai usar, e regrava para o valor velho
-     nao ressurgir na proxima sessao. */
-  if(cMobAjustar())salvarEstado();
+  /* estado gravado antes desta regra pode trazer qualquer dos catorze numeros fora da faixa
+     (ate esta rodada so o c-mob e o teto da coruja eram presos): prende na carga, para o campo
+     nunca exibir um numero diferente do que a cCfg vai usar, e regrava para o valor velho nao
+     ressurgir na proxima sessao. A correcao acontece a vista, no proprio campo. */
   if(fcAjustarTodos(C_NUMS))salvarEstado();
   cToggles();
   cMsgRender();
