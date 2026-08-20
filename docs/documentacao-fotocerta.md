@@ -1,6 +1,6 @@
 # Documentação — Foto Certa: Site Prosite e Construtores
 
-> Documento de contexto para a base de conhecimento do projeto. Resume tudo que foi construído e as regras técnicas aprendidas. Última atualização: 18/08/2026.
+> Documento de contexto para a base de conhecimento do projeto. Resume tudo que foi construído e as regras técnicas aprendidas. Última atualização: 20/08/2026.
 
 ## 1. Visão geral
 
@@ -56,7 +56,7 @@ Os códigos completos estão nos arquivos anexos do projeto e podem ser regenera
 
 ## 4. Ferramenta de construtores (arquivo `index.html`, em construtores.fotocerta.com.br)
 
-Ferramenta de geração de códigos com **6 abas**, estado persistido em localStorage (chave `fcConstrutores`, por navegador/domínio).
+Ferramenta de geração de códigos com **6 abas**, estado persistido em localStorage (chave `fcConstrutores`, por navegador/domínio). Cada aba tem também uma **biblioteca de presets** — configurações salvas com nome, para aplicar depois (ago/2026, fase 2 da evolução).
 
 ### Isolamento por aba (ago/2026) — cada aba salva, restaura e parte sozinha
 
@@ -75,14 +75,50 @@ O arquivo continua único (a separação em vários arquivos foi avaliada e recu
 - **A barra compensa a própria altura** (`body.style.paddingTop`), senão cresceria a cada falha nova até cobrir os botões das abas — inclusive a marca `(!)` para onde ela aponta.
 - **Falha ao restaurar diz que a aba parou de gravar**, não só que falhou. **Falha do próprio armazenamento** (indisponível, corrompido) usa a mesma barra, com texto que diz explicitamente que nada está sendo salvo.
 
+### Biblioteca de presets por aba (ago/2026, fase 2 da evolução) — um preset é a fotografia do `coleta()`
+
+Cada uma das **seis** abas tem a sua biblioteca: salvar a configuração da tela com um nome, aplicar um preset salvo, remover. A aba Bordas tinha isso desde a fase 5 anterior, com mecânica própria; a mecânica agora é **uma só, compartilhada**, e a das Bordas foi removida — duas implementações do mesmo recurso é o defeito que este projeto mais pagou para aprender.
+
+**A costura é o registro `ABAS`.** Um preset guarda o que o `coleta()` daquela aba devolve, e aplicar chama o `restaura()` dela — o mesmo caminho do estado gravado. Não existe um segundo caminho de leitura ou de escrita de campos, e é isso que garante que "Aplicar" devolva a aba **inteira**: campo que entra no estado entra no preset pela mesma linha. Cada entrada de `ABAS` ganhou:
+
+| Campo | Para que serve |
+|---|---|
+| `pref` | prefixo dos campos (`s-`, `l-`, …). É também a chave do fragmento (`s`, `l`, …) e onde a biblioteca fica gravada: `<pref>.presets` |
+| `fora` | campos do fragmento que **não** entram num preset porque descrevem *outro* componente (hoje só `b.consol`, a consolidação do código 1). Ao aplicar, conservam o que está na tela |
+| `operacionais` | `[chave, como aparece na interface]` dos campos de contato/pagamento. Fonte única: alimenta o aviso na aba, o "sem dados" da exportação (fase 4) e a comparação entre páginas da mesma campanha (fase 3) |
+| `resumo` | a linha curta que descreve o preset na lista |
+| `redesenhar` | o que refazer depois de aplicar — é o mesmo passo que a partida já executa "com o estado restaurado" |
+| `antesDeSalvar` | recusa antes de congelar a configuração (prende os números à vista; nas Bordas, também recusa configuração que não gera código) |
+| `presetOk` / `aposPresets` | conferência extra de formato e passo próprio da aba depois da lista (nas Bordas, repovoar a caixa de consolidação) |
+
+**Onde e como fica gravado.** Dentro do fragmento da própria aba (`b.presets` já era assim antes, então a Bordas não mudou de lugar). Não há chave de topo nova, e por isso o isolamento por aba vale também para a biblioteca. Cada item:
+
+```
+{nome: '...', carimbo: <ms>, valores: {<fragmento da aba, sem a biblioteca e sem os campos 'fora'>}}
+```
+
+- **`carimbo` existe para a fase 3.** O preset geral vai guardar uma cópia dos valores mais uma marca de origem `{preset, carimbo}`; sem carimbo não haveria como avisar *"veio de 'X', que mudou depois"*. É a data de modificação em milissegundos. Regravar o mesmo preset com os **mesmos** valores **não** avança o carimbo (comparação por `fcValoresIguais`) — se avançasse, todo preset geral copiado dele se diria desatualizado sem nada ter mudado, e aviso falso gasta a confiança dos verdadeiros.
+- **`fcCanon` / `fcValoresIguais`** são a forma de comparar dois conjuntos de valores da mesma aba: serialização canônica com as chaves ordenadas, então a mesma configuração dá a mesma string mesmo quando um lado veio do disco em outra ordem. É a peça que a fase 3 consome.
+- **Compatibilidade.** Preset da Bordas no formato antigo (`{nome, cfg}`) é traduzido **na leitura** (`fcPresetConverter`) para `{nome, carimbo: 0, valores: {b: cfg}}` — carimbo 0 significa "data desconhecida" e é **estável** (usar a data de hoje faria o preset parecer modificado a cada abertura). A tradução é de mão única: uma versão anterior da ferramenta não lê o formato novo. Provado: com a biblioteca gravada no formato antigo e a consolidação apontando para um preset dela, o código 1 saiu **byte a byte idêntico** ao da versão anterior.
+- **Leitura defensiva**, no mesmo critério que a Bordas já usava: item a item, e o que fica de fora é **anunciado na própria aba** ("2 itens da biblioteca estavam ilegíveis e ficaram de fora"), nunca some calado.
+
+**Dados operacionais entram no preset — decisão consciente.** WhatsApp, chave Pix, Client ID, recebedor e cidade fazem parte da fotografia da aba; tirá-los faria "Aplicar" devolver a aba pela metade, em silêncio. O preset não sai do navegador: vive no mesmo `localStorage` onde esses campos já vivem, e as abas Leads e Checkout **dizem isso na tela**, nomeando os campos. O `resumo` da lista, ao contrário, **nunca** mostra esses valores — a lista fica à vista e sai numa captura de tela. Para a fase 4, a lista `operacionais` é o que a exportação "sem dados" vai limpar.
+
+**Travas.** Aplicar passa pelo `restaura()` (onde `corValida` já atua) e depois pelo `redesenhar()`, que roda `fcAjustarTodos` — então preset com número fora da faixa **se corrige à vista** no campo, e tela e código gerado continuam mostrando o mesmo número. Medido com preset adulterado à mão: `mob` 99 → 320, `tam` 999 → 32, `vel` 0 → 2, com o `@media` do código saindo em 320px.
+
+**Aba em só-leitura não opera presets.** A aba que falhou ao restaurar parou de coletar do DOM até a página ser recarregada; ali salvar leria campos que não representam nada, aplicar escreveria numa tela que não está sendo gravada e remover não seria persistido. Os três recusam com a mesma explicação, em vez de parecerem funcionar — e as outras cinco abas continuam salvando presets normalmente.
+
+**Aparência.** Os dois fieldsets (salvar à esquerda, lista à direita) são montados por `fcPresetsMontar` a partir do registro — uma implementação de marcação e de texto para as seis abas, em vez de seis cópias que divergem na redação. A classe da lista virou `.fc-presets` (era `.b-presets`).
+
 ### Padrão de layout das abas (seguir sempre, inclusive em abas novas)
 
 Toda aba tem o mesmo fluxo linear, de cima para baixo:
 
 1. **Descrição** (`<p class="descricao">`) — o que o construtor faz, em um parágrafo.
 2. **Seções numeradas de configuração** — cada uma abre com `<div class="secao"><span class="secao-n">N</span> Título</div>` (a primeira leva `class="secao primeira"`, que remove a linha divisória do topo) e é seguida por `<div class="grade">` com duas colunas de `<fieldset>`. Agrupar por tema, distribuindo os fieldsets entre as colunas para equilibrar a altura; quando houver formulário de cadastro + lista (imagens, produtos, cupons), o formulário fica à esquerda e a lista à direita.
-3. **Última seção: "Prévia e código gerado"** — botões de ação (`Gerar código` e afins) numa `<div class="acoes">` logo abaixo do cabeçalho da seção, depois uma `grade` com a prévia (`<div class="pv-area">`) à esquerda e a(s) saída(s) (`<div class="saida">` com textarea + botão Copiar) à direita. Abas sem prévia (TidyCal) usam a mesma seção só com as saídas.
-4. **Instruções ao final** (`<div class="instrucoes">`), em largura total: onde colar, pré-requisitos, como funciona e o que fazer depois de publicar.
+3. **Penúltima seção: "Biblioteca de presets"** — só o cabeçalho e um `<div class="grade" id="<pref>-presets"></div>` vazio ficam no HTML; os dois fieldsets são montados por `fcPresetsMontar`, igual nas seis abas (ver a seção seguinte).
+4. **Última seção: "Prévia e código gerado"** — botões de ação (`Gerar código` e afins) numa `<div class="acoes">` logo abaixo do cabeçalho da seção, depois uma `grade` com a prévia (`<div class="pv-area">`) à esquerda e a(s) saída(s) (`<div class="saida">` com textarea + botão Copiar) à direita. Abas sem prévia (TidyCal) usam a mesma seção só com as saídas.
+5. **Instruções ao final** (`<div class="instrucoes">`), em largura total: onde colar, pré-requisitos, como funciona e o que fazer depois de publicar.
 
 Dentro dos fieldsets: `radios` para valores de lista fechada, campos com `<small>` explicando unidade/limites, e `<p class="ajuda">` para orientações. Prefixo de ID por aba (`s-`, `l-`, `t-`, `u-`, `b-`, `c-`) em todos os campos, e o mesmo prefixo nas funções JS correspondentes.
 

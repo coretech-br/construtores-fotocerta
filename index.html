@@ -123,13 +123,13 @@
   /* Biblioteca de presets da aba Bordas. Lista propria em vez de reaproveitar .lista-imgs:
      la os botoes de controle sao quadradinhos de 28x24 para setas e X, e aqui eles levam
      texto ("Aplicar", "Remover"). */
-  .b-presets{list-style:none;margin:10px 0 0;padding:0}
-  .b-presets li{display:flex;align-items:center;gap:10px;border:1px solid var(--linha);border-radius:8px;
+  .fc-presets{list-style:none;margin:10px 0 0;padding:0}
+  .fc-presets li{display:flex;align-items:center;gap:10px;border:1px solid var(--linha);border-radius:8px;
     padding:8px 10px;margin-bottom:8px;background:#fff}
-  .b-presets .info{flex:1;min-width:0}
-  .b-presets .nome{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .b-presets .resumo{font-size:11px;color:var(--tinta-suave);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .b-presets .ctrl{display:flex;gap:6px;flex-shrink:0}
+  .fc-presets .info{flex:1;min-width:0}
+  .fc-presets .nome{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .fc-presets .resumo{font-size:11px;color:var(--tinta-suave);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .fc-presets .ctrl{display:flex;gap:6px;flex-shrink:0}
 
   .rodape{max-width:1080px;margin:0 auto 30px;padding:0 20px;font-size:12px;color:var(--tinta-suave)}
 
@@ -351,7 +351,10 @@
     </div>
   </div>
 
-  <div class="secao"><span class="secao-n">3</span> Prévia e código gerado</div>
+  <div class="secao"><span class="secao-n">3</span> Biblioteca de presets</div>
+  <div class="grade" id="s-presets"></div>
+
+  <div class="secao"><span class="secao-n">4</span> Prévia e código gerado</div>
   <div class="acoes" style="margin-bottom:14px">
     <button class="botao" id="s-gerar">Gerar código</button>
     <button class="botao claro" id="s-previewbtn">Atualizar prévia</button>
@@ -667,7 +670,10 @@
     </div>
   </div>
 
-  <div class="secao"><span class="secao-n">8</span> Prévia e código gerado</div>
+  <div class="secao"><span class="secao-n">8</span> Biblioteca de presets</div>
+  <div class="grade" id="l-presets"></div>
+
+  <div class="secao"><span class="secao-n">9</span> Prévia e código gerado</div>
   <div class="acoes">
     <button class="botao" id="l-gerar">Gerar código</button>
     <button class="botao claro" id="l-atualizar">Atualizar prévia</button>
@@ -751,7 +757,10 @@
     </div>
   </div>
 
-  <div class="secao"><span class="secao-n">2</span> Códigos gerados</div>
+  <div class="secao"><span class="secao-n">2</span> Biblioteca de presets</div>
+  <div class="grade" id="t-presets"></div>
+
+  <div class="secao"><span class="secao-n">3</span> Códigos gerados</div>
   <div class="acoes" style="margin-bottom:14px"><button class="botao" id="t-gerar">Gerar código</button></div>
   <div class="grade">
     <div>
@@ -1040,7 +1049,10 @@
     </div>
   </div>
 
-  <div class="secao"><span class="secao-n">4</span> Prévia e código gerado</div>
+  <div class="secao"><span class="secao-n">4</span> Biblioteca de presets</div>
+  <div class="grade" id="u-presets"></div>
+
+  <div class="secao"><span class="secao-n">5</span> Prévia e código gerado</div>
   <div class="acoes" style="margin-bottom:14px">
     <button class="botao" id="u-gerar">Gerar código</button>
     <button class="botao claro" id="u-atualizar">Atualizar prévia</button>
@@ -1189,26 +1201,7 @@
   </div>
 
   <div class="secao"><span class="secao-n">3</span> Biblioteca de presets</div>
-  <div class="grade">
-    <div>
-      <fieldset>
-      <legend>Salvar a configuração atual</legend>
-      <label for="b-pnome">Nome do preset <small>(o nome da campanha e do lugar onde o efeito é usado)</small></label>
-      <input type="text" id="b-pnome" value="" placeholder="ex.: Natal 2026 - card do plano">
-      <div class="acoes"><button class="botao" type="button" id="b-psalvar">Salvar preset</button></div>
-      <p class="ajuda"><b>O que o preset guarda:</b> tudo o que está configurado nesta aba — efeito, fundo, cores, espessura, halo, texto, espaçamento e também o <b>fundo da prévia</b>, que é como você confere o resultado. Não guarda a própria biblioteca nem a escolha de consolidação, que é sobre <i>outro</i> componente.</p>
-      <p class="ajuda"><b>Onde eles ficam:</b> no <b>armazenamento deste navegador</b>, junto com o resto da configuração da ferramenta — mesma regra do estado das seis abas. <b>Não acompanham outro computador</b>, nem outro navegador no mesmo computador, e somem se você limpar os dados do site. Para levar uma identidade adiante, o que viaja é o <b>código gerado</b>, não o preset.</p>
-      <p class="ajuda"><b>Nome repetido:</b> salvar com o nome de um preset que já existe <b>substitui</b> aquele preset, depois de confirmar. Não se criam dois com o mesmo nome — a lista e a consolidação identificam o preset pelo nome, e dois iguais deixariam de dizer qual é qual.</p>
-      </fieldset>
-    </div>
-    <div>
-      <fieldset>
-      <legend>Presets salvos</legend>
-      <div id="b-plista"></div>
-      <p class="ajuda"><b>Aplicar</b> substitui o que está na tela pela configuração do preset (a prévia acompanha na hora). <b>Remover</b> apaga o preset — não mexe em nenhum código já colado no site.</p>
-      </fieldset>
-    </div>
-  </div>
+  <div class="grade" id="b-presets"></div>
 
   <div class="secao"><span class="secao-n">4</span> Prévia e códigos gerados</div>
   <div class="acoes" style="margin-bottom:14px"><button class="botao" id="b-gerar">Gerar código</button></div>
@@ -1565,7 +1558,10 @@
     </div>
   </div>
 
-  <div class="secao"><span class="secao-n">5</span> Prévia e código gerado</div>
+  <div class="secao"><span class="secao-n">5</span> Biblioteca de presets</div>
+  <div class="grade" id="c-presets"></div>
+
+  <div class="secao"><span class="secao-n">6</span> Prévia e código gerado</div>
   <div class="acoes" style="margin-bottom:14px">
     <button class="botao" id="c-gerar">Gerar código</button>
     <button class="botao claro" id="c-atualizar">Atualizar prévia</button>
@@ -1943,13 +1939,50 @@ function prep(nome,abaId,fn,fase){
    campos. O que a ordem antiga compra e diff limpo em comparacoes de regressao, porque o
    texto gravado sai identico ao da versao anterior. Reordenar e seguro; so custa um diff
    ruidoso no proximo teste que comparar o JSON como texto. */
+/* Cada entrada tambem descreve a BIBLIOTECA DE PRESETS daquela aba (ver o bloco
+   "biblioteca de presets por aba"), pelo mesmo motivo de as chaves morarem aqui: um lugar so
+   sabe o que pertence a quem.
+     pref         prefixo dos campos da aba ('s-', 'l-', ...). E TAMBEM a chave do fragmento
+                  que carrega a configuracao (s, t, l, u, b, c) e onde a biblioteca fica
+                  gravada (<pref>.presets) -- as duas coisas sempre coincidiram.
+     fora         campos do fragmento que NAO entram num preset (escolhas sobre outro
+                  componente). Ao aplicar, eles conservam o que esta na tela.
+     operacionais [chave, como aparece na interface] dos campos de contato/pagamento. Fonte
+                  unica: alimenta o aviso da aba hoje, o "sem dados" da exportacao na fase 4
+                  e a comparacao entre paginas da mesma campanha na fase 3.
+     resumo       a linha curta que descreve o preset na lista.
+     redesenhar   o que a aba precisa refazer depois que um preset e aplicado -- e o mesmo
+                  passo que a partida ja executa "com o estado restaurado".
+     antesDeSalvar  devolve texto de recusa (ou '') antes de congelar a configuracao.
+     presetOk     conferencia extra do formato guardado, quando a aba tem uma.
+     aposPresets  passo da aba depois de a lista ser desenhada. */
 var ABAS=[
-  {id:'slide',nome:'Slideshow',           chaves:['imgs','s'],  coleta:sColeta,restaura:sRestaura},
-  {id:'tidy', nome:'Agendamento TidyCal', chaves:['t'],         coleta:tColeta,restaura:tRestaura},
-  {id:'leads',nome:'Captacao de leads',   chaves:['l'],         coleta:lColeta,restaura:lRestaura},
-  {id:'uni',  nome:'Checkout',            chaves:['u'],         coleta:uColeta,restaura:uRestaura},
-  {id:'bor',  nome:'Bordas com efeito',   chaves:['b'],         coleta:bColeta,restaura:bRestaura},
-  {id:'cnt',  nome:'Contagem regressiva', chaves:['cmsgs','c'], coleta:cColeta,restaura:cRestaura}
+  {id:'slide',nome:'Slideshow',           chaves:['imgs','s'],  coleta:sColeta,restaura:sRestaura,
+   pref:'s',fora:[],operacionais:[],resumo:sPresetResumo,redesenhar:sPresetDepois,antesDeSalvar:sPresetAntes,
+   exemplo:'ex.: Natal 2026 - galeria do hero',
+   guarda:'tudo o que est\u00e1 configurado nesta aba \u2014 a <b>lista de imagens</b> (links, legendas e a ordem), a transi\u00e7\u00e3o, o tempo, a largura, a propor\u00e7\u00e3o, o corte de celular, a ordem de exibi\u00e7\u00e3o e os controles do visitante. N\u00e3o guarda o que est\u00e1 no importador de galeria, que n\u00e3o \u00e9 configura\u00e7\u00e3o e sim uma colagem de trabalho.'},
+  {id:'tidy', nome:'Agendamento TidyCal', chaves:['t'],         coleta:tColeta,restaura:tRestaura,
+   pref:'t',fora:[],operacionais:[],resumo:tPresetResumo,redesenhar:tPresetDepois,antesDeSalvar:tPresetAntes,
+   exemplo:'ex.: Natal 2026 - ensaio tematico',
+   guarda:'tudo o que est\u00e1 configurado nesta aba \u2014 o caminho do agendamento no TidyCal, as duas alturas, a largura de corte, o modo (direto ou embutido), o endere\u00e7o da p\u00e1gina intermedi\u00e1ria e a altura inicial do iframe.'},
+  {id:'leads',nome:'Captacao de leads',   chaves:['l'],         coleta:lColeta,restaura:lRestaura,
+   pref:'l',fora:[],operacionais:[['num','o n\u00famero do WhatsApp']],resumo:lPresetResumo,redesenhar:lPresetDepois,antesDeSalvar:lPresetAntes,
+   exemplo:'ex.: Natal 2026 - hospedeira',
+   guarda:'tudo o que est\u00e1 configurado nesta aba \u2014 modo de exibi\u00e7\u00e3o, \u00edcone, formato, cores e posi\u00e7\u00e3o do bot\u00e3o, os quatro trechos da mensagem, os textos do pop-up, o cabe\u00e7alho (coruja, movimento e efeitos), o hor\u00e1rio de atendimento, a pergunta de qualifica\u00e7\u00e3o com as op\u00e7\u00f5es cadastradas e a \u00e2ncora.'},
+  {id:'uni',  nome:'Checkout',            chaves:['u'],         coleta:uColeta,restaura:uRestaura,
+   pref:'u',fora:[],operacionais:[['client','o Client ID do PayPal'],['chave','a chave Pix'],['nomer','o nome do recebedor'],['cidade','a cidade do recebedor'],['zapnum','o WhatsApp do \u201cJ\u00e1 paguei\u201d']],
+   resumo:uPresetResumo,redesenhar:uPresetDepois,antesDeSalvar:uPresetAntes,
+   exemplo:'ex.: Natal 2026 - pacotes',
+   guarda:'tudo o que est\u00e1 configurado nesta aba \u2014 formas de pagamento, moeda, <b>produtos com os opcionais de cada um</b>, cupons, c\u00f3digo do pedido, sinal, desconto Pix, textos, largura e cores.'},
+  {id:'bor',  nome:'Bordas com efeito',   chaves:['b'],         coleta:bColeta,restaura:bRestaura,
+   pref:'b',fora:['consol'],operacionais:[],resumo:bPresetResumo,redesenhar:bPresetDepois,antesDeSalvar:bPresetAntes,
+   presetOk:bPresetOk,aposPresets:bConsolRender,
+   exemplo:'ex.: Natal 2026 - card do plano',
+   guarda:'tudo o que est\u00e1 configurado nesta aba \u2014 efeito, fundo, cores, espessura, halo, texto, espa\u00e7amento e tamb\u00e9m o <b>fundo da pr\u00e9via</b>, que \u00e9 como voc\u00ea confere o resultado. N\u00e3o guarda a escolha de consolida\u00e7\u00e3o do c\u00f3digo 1, que \u00e9 sobre <i>outro</i> componente.'},
+  {id:'cnt',  nome:'Contagem regressiva', chaves:['cmsgs','c'], coleta:cColeta,restaura:cRestaura,
+   pref:'c',fora:[],operacionais:[],resumo:cPresetResumo,redesenhar:cPresetDepois,antesDeSalvar:cPresetAntes,
+   exemplo:'ex.: Natal 2026 - barra do topo',
+   guarda:'tudo o que est\u00e1 configurado nesta aba \u2014 modo e dura\u00e7\u00e3o da contagem, o c\u00f3digo da campanha, as <b>mensagens cadastradas</b>, apar\u00eancia, posi\u00e7\u00e3o, extras, coruja, efeitos, movimento, urg\u00eancia e entrada.'}
 ];
 var fcFrag={};       /* ultimo pedaco bom de cada aba, para nao apagar o que a aba quebrada tinha */
 var fcSoLeitura={};  /* abas que falharam ao restaurar: param de coletar do DOM ate recarregar */
@@ -1963,7 +1996,16 @@ function salvarEstado(){
          entao o que vale e o pedaco lido do armazenamento */
       frag=fcFrag[a.id];
     }else{
-      try{frag=a.coleta();fcFrag[a.id]=frag;}
+      try{
+        frag=a.coleta();
+        /* A biblioteca de presets da aba entra AQUI, e nao dentro do coleta de cada uma:
+           assim nenhuma aba precisa saber que presets existem, e "aplicar um preset" (que
+           passa pelo restaura da aba) nao tem como apagar a biblioteca sem querer. Ela mora
+           no fragmento da propria aba -- <pref>.presets --, entao continua protegida pelo
+           mesmo isolamento do resto: aba que falha ao coletar preserva os presets junto. */
+        if(frag&&frag[a.pref])frag[a.pref].presets=fcPresets[a.id]||[];
+        fcFrag[a.id]=frag;
+      }
       catch(e){frag=fcFrag[a.id];fcFalha(a.nome,'salvar as configuracoes',e,a.id);}
     }
     if(frag){for(k in frag){if(Object.prototype.hasOwnProperty.call(frag,k))st[k]=frag[k];}}
@@ -1988,6 +2030,13 @@ function restaurarEstado(){
       c=a.chaves[j];
       if(st[c]!==undefined)fcFrag[a.id][c]=st[c];
     }
+    /* A biblioteca de presets e lida ANTES do restaura da aba, por dois motivos: ela nao
+       depende de nada que o restaura escreva, e a aba Bordas repovoa a caixa de consolidacao
+       do codigo 1 de dentro do proprio restaura -- as opcoes precisam existir antes de o
+       valor gravado ser marcado. Try proprio: biblioteca ilegivel nao derruba a restauracao
+       dos campos, que e o que o operador tem a perder. */
+    try{fcPresets[a.id]=fcPresetsLer(a,(st[a.pref]&&st[a.pref].presets));}
+    catch(e){fcPresets[a.id]=[];fcFalha(a.nome,'ler a biblioteca de presets -- os campos da aba nao foram afetados',e,a.id);}
     try{a.restaura(st);}
     catch(e){
       fcSoLeitura[a.id]=true;
@@ -2033,6 +2082,293 @@ function parearCor(idCor){
   var c=$(idCor),t=$(idCor+'-t');
   c.addEventListener('input',function(){t.value=c.value;salvarEstado();lBtnPreview();if(/^c-/.test(idCor))cPreview();});
   t.addEventListener('input',function(){if(corValida(t.value)){c.value=t.value;lBtnPreview();if(/^c-/.test(idCor))cPreview();}});
+}
+
+/* ============ biblioteca de presets por aba ============ */
+/* Um preset e uma FOTOGRAFIA do que o coleta() da aba devolve -- nao existe um segundo
+   caminho de leitura de campos. Isso e o que garante que "Aplicar" devolva a aba INTEIRA:
+   se um campo entra no estado gravado, ele entra no preset pela mesma linha; se sair, sai
+   dos dois. A aba Bordas ja funcionava assim por dentro (bCampos servia ao estado e ao
+   preset); esta versao generaliza o mesmo desenho para as seis, e a Bordas passou a usa-lo
+   em vez de ter o proprio -- duas mecanicas de preset seriam exatamente a duplicacao que
+   este projeto vem desfazendo.
+
+   Onde ficam: dentro do fragmento da PROPRIA aba, em <chave>.presets (b.presets ja era
+   assim antes desta fase, entao a Bordas nem migra de lugar). Nao ha chave de topo nova,
+   e por isso o isolamento por aba continua valendo tambem para a biblioteca: se a coleta
+   de uma aba falhar, os presets dela sao preservados junto com o resto do fragmento dela.
+
+   Formato de cada item:
+     {nome:'...', carimbo:<ms>, valores:{<fragmento da aba>}}
+   - 'carimbo' e a data de modificacao em milissegundos. Ele existe para a FASE 3: o preset
+     geral vai guardar uma COPIA dos valores mais uma marca de origem {preset, carimbo}, e
+     sem carimbo nao haveria como avisar "veio de 'X', que mudou depois". Preset vindo do
+     formato antigo da Bordas ({nome,cfg}) recebe carimbo 0 -- data desconhecida, valor
+     ESTAVEL (usar a data de hoje faria o mesmo preset parecer modificado a cada abertura).
+   - 'valores' e o fragmento da aba MENOS a propria biblioteca (senao um preset guardaria
+     todos os outros) e menos os campos declarados em 'fora' (escolhas que sao sobre OUTRO
+     componente, como a consolidacao do codigo 1 da Bordas).
+
+   Dados operacionais (WhatsApp, chave Pix, Client ID, recebedor, cidade): ENTRAM no preset,
+   por decisao consciente. Motivo: um preset e a fotografia da aba, e tirar campos dele faria
+   "Aplicar" devolver a aba pela metade, em silencio -- o defeito que este projeto mais evita.
+   O preset nao sai do navegador: mora no mesmo localStorage onde esses campos ja moram, e a
+   aba diz isso na tela. A lista 'operacionais' de cada aba existe para a FASE 4 (exportar
+   arquivo "sem dados" precisa saber quais campos limpar) e para o aviso de divergencia da
+   fase 3 -- ela e a fonte unica desses nomes, inclusive do texto que aparece na interface. */
+var fcPresets={};          /* abaId -> [ {nome,carimbo,valores}, ... ] */
+var fcPresetsFora={};      /* abaId -> quantos itens ilegiveis ficaram de fora da leitura */
+var FC_PRESET_NOME_MAX=60;
+
+function fcAgora(){return (new Date()).getTime();}
+function fcEhArray(v){return Object.prototype.toString.call(v)==='[object Array]';}
+function fcEhObjeto(v){return !!v&&typeof v==='object'&&!fcEhArray(v);}
+/* copia profunda por JSON: alem de desligar o preset das listas VIVAS da aba (sImgs, uProds,
+   cMsgs e cia. sao passadas por referencia pelos coleta), garante que o que entra na
+   biblioteca e serializavel -- que e o mesmo requisito do arquivo de backup da fase 4. */
+function fcClone(v){
+  if(v===undefined)return undefined;
+  return JSON.parse(JSON.stringify(v));
+}
+/* Serializacao canonica: mesmas chaves e mesmos valores dao a MESMA string, independente da
+   ordem em que as chaves foram escritas. Existe para a fase 3 poder responder "estes dois
+   conjuntos de valores da mesma aba sao iguais?" -- comparar JSON.stringify direto diria
+   "diferente" so porque um veio do formato antigo e tem as chaves em outra ordem.
+   'undefined' e tratado como ausente, igualzinho ao que o JSON.stringify faz, senao dois
+   objetos que gravam identico compareriam como diferentes. */
+function fcCanon(v){
+  var i,k,ks,partes;
+  if(v===undefined)return 'undefined';
+  if(v===null||typeof v!=='object')return JSON.stringify(v);
+  if(fcEhArray(v)){
+    partes=[];
+    for(i=0;i<v.length;i++)partes.push(fcCanon(v[i]));
+    return '['+partes.join(',')+']';
+  }
+  ks=[];
+  for(k in v){if(Object.prototype.hasOwnProperty.call(v,k)&&v[k]!==undefined)ks.push(k);}
+  ks.sort();
+  partes=[];
+  for(i=0;i<ks.length;i++)partes.push(JSON.stringify(ks[i])+':'+fcCanon(v[ks[i]]));
+  return '{'+partes.join(',')+'}';
+}
+function fcValoresIguais(a,b){return fcCanon(a)===fcCanon(b);}
+
+function fcAba(id){var i;for(i=0;i<ABAS.length;i++){if(ABAS[i].id===id)return ABAS[i];}return null;}
+
+/* O que um preset desta aba guarda, lido pelo coleta() dela -- caminho unico. */
+function fcPresetCapturar(a){
+  var frag=fcClone(a.coleta()),o=frag?frag[a.pref]:null,i;
+  /* a biblioteca nao entra: quem a injeta no fragmento e o salvarEstado, depois do coleta */
+  if(o&&a.fora){for(i=0;i<a.fora.length;i++)delete o[a.fora[i]];}
+  return frag;
+}
+/* nomes sao comparados sem diferenca de caixa e sem espaco nas pontas: "Natal 2026" e
+   "natal 2026 " sao o mesmo preset para quem esta olhando a lista, entao sao o mesmo aqui */
+function fcPresetIndice(a,nome){
+  var lista=fcPresets[a.id]||[],alvo=String(nome).trim().toLowerCase(),i;
+  for(i=0;i<lista.length;i++){
+    if(String(lista[i].nome).trim().toLowerCase()===alvo)return i;
+  }
+  return -1;
+}
+/* Leitura defensiva da biblioteca gravada, no criterio que a aba Bordas ja usava: checar so
+   "e um Array?" era raso -- um TEXTO tambem tem .length e passaria por duck typing, e um
+   Array com lixo dentro passava inteiro (["texto"] desenhava resumo de undefined, [null]
+   estourava TypeError e jogava a aba em so-leitura). Item a item, e o que ficou de fora e
+   ANUNCIADO na propria aba em vez de sumir calado.
+   Aqui tambem mora a compatibilidade com o formato antigo da Bordas ({nome,cfg}): ele e
+   traduzido UMA vez para {nome,carimbo,valores}, do mesmo jeito que cRestaura traduz
+   'coruja' para 'corujapos'. Carimbo 0 = data de modificacao desconhecida. */
+function fcPresetsLer(a,v){
+  var out=[],i,x,conv;
+  fcPresetsFora[a.id]=0;
+  if(v===undefined||v===null)return out;        /* versao anterior: nunca houve biblioteca */
+  if(!fcEhArray(v)){
+    fcPresetsFora[a.id]=1;                      /* nem lista e: o que estivesse ali e ilegivel */
+    return out;
+  }
+  for(i=0;i<v.length;i++){
+    x=v[i];
+    conv=fcPresetConverter(a,x);
+    if(conv)out.push(conv);
+    else fcPresetsFora[a.id]++;
+  }
+  return out;
+}
+function fcPresetConverter(a,x){
+  var valores;
+  if(!fcEhObjeto(x))return null;
+  if(typeof x.nome!=='string'||!x.nome.trim())return null;
+  if(fcEhObjeto(x.valores))valores=x.valores;
+  else if(fcEhObjeto(x.cfg)){valores={};valores[a.pref]=x.cfg;}   /* formato antigo da Bordas */
+  else return null;
+  if(!fcEhObjeto(valores[a.pref]))return null;
+  if(a.presetOk&&!a.presetOk(valores))return null;
+  return {nome:x.nome,carimbo:(typeof x.carimbo==='number'&&isFinite(x.carimbo))?x.carimbo:0,valores:valores};
+}
+
+/* A aba que falhou ao restaurar parou de coletar do DOM ate a pagina ser recarregada (ver
+   fcSoLeitura): salvar leria campos que nao representam o que o operador tinha, aplicar
+   escreveria numa tela cujo conteudo nao esta sendo gravado, e remover nao seria persistido.
+   Os tres param com a mesma explicacao, em vez de parecerem funcionar. */
+function fcPresetBloqueado(a){
+  if(!fcSoLeitura[a.id])return false;
+  alert('Esta aba parou de gravar nesta sessao (o aviso vermelho no topo diz por que), entao a biblioteca de presets dela esta so para leitura. Recarregue a pagina para voltar a salvar, aplicar e remover presets aqui.');
+  return true;
+}
+function fcPresetSalvar(a){
+  var campo=$(a.pref+'-pnome'),nome=campo?campo.value.trim():'',lista,i,erro;
+  if(fcPresetBloqueado(a))return;
+  if(!nome){alert('De um nome ao preset antes de salvar. E por ele que a lista identifica a configuracao.');return;}
+  if(nome.length>FC_PRESET_NOME_MAX){alert('O nome do preset passa de '+FC_PRESET_NOME_MAX+' caracteres. Um nome curto (campanha + onde a configuracao e usada) e o que cabe na lista.');return;}
+  /* prende os numeros A VISTA antes de congelar a configuracao: um preset guardado com valor
+     fora da faixa devolveria, meses depois, um numero que o proprio campo ja nao aceita */
+  if(a.antesDeSalvar){
+    erro=a.antesDeSalvar();
+    if(erro){alert(erro);return;}
+  }
+  lista=fcPresets[a.id]||(fcPresets[a.id]=[]);
+  i=fcPresetIndice(a,nome);
+  if(i>=0&&!confirm('Ja existe um preset chamado "'+lista[i].nome+'". Substituir a configuracao dele pela que esta na tela? A anterior nao volta.'))return;
+  var valores=fcPresetCapturar(a);
+  /* O carimbo e a data em que o preset MUDOU, e a fase 3 vai usar exatamente isso para avisar
+     "veio de 'X', que mudou depois". Regravar o mesmo preset com os mesmos valores nao e
+     mudanca: se o carimbo avancasse aqui, todo preset geral copiado dele passaria a se dizer
+     desatualizado sem nada ter mudado -- aviso falso, que gasta a confianca dos avisos
+     verdadeiros. Por isso a comparacao canonica (fcValoresIguais): ela ignora a ordem das
+     chaves, que pode diferir entre um preset recem-lido do disco e um recem-coletado. */
+  var carimbo=(i>=0&&fcValoresIguais(valores,lista[i].valores))?lista[i].carimbo:fcAgora();
+  var novo={nome:nome,carimbo:carimbo,valores:valores};
+  if(i>=0)lista[i]=novo;else lista.push(novo);
+  if(campo)campo.value='';
+  fcPresetsRender(a);salvarEstado();
+}
+/* Aplicar passa pelo restaura() da propria aba -- o MESMO caminho do estado gravado --, entao
+   as travas que ja existem continuam valendo: as cores passam por corValida dentro do
+   restaura de cada aba, e os numeros sao presos a vista pelo fcAjustarTodos do redesenhar,
+   logo abaixo. Nao ha um segundo caminho de escrita de campos. */
+function fcPresetAplicar(a,i){
+  var lista=fcPresets[a.id]||[],p=lista[i],frag,atual,cur,o,k;
+  if(!p)return;
+  if(fcPresetBloqueado(a))return;
+  frag=fcClone(p.valores)||{};
+  /* campos 'fora' do preset conservam o que esta na tela: eles descrevem OUTRO componente
+     (a consolidacao do codigo 1 da Bordas), e um preset nao tem o que dizer sobre isso */
+  if(a.fora&&a.fora.length){
+    atual=a.coleta();cur=atual[a.pref]||{};
+    o=frag[a.pref]||(frag[a.pref]={});
+    for(k=0;k<a.fora.length;k++)o[a.fora[k]]=cur[a.fora[k]];
+  }
+  try{a.restaura(frag);}
+  catch(e){
+    /* mesma regra do estado gravado: o DOM ficou meio escrito e ja nao representa nada, entao
+       a aba para de coletar ate recarregar em vez de sobrescrever o que estava salvo */
+    fcSoLeitura[a.id]=true;
+    fcFalha(a.nome,'aplicar um preset -- o que ja estava gravado foi mantido, e esta aba nao grava nada ate a pagina ser recarregada',e,a.id);
+    alert('Nao foi possivel aplicar o preset "'+p.nome+'" nesta aba. O que estava gravado foi mantido; recarregue a pagina. O aviso vermelho no topo tem o detalhe.');
+    return;
+  }
+  try{if(a.redesenhar)a.redesenhar();}
+  catch(e){fcFalha(a.nome,'redesenhar a aba depois de aplicar um preset',e,a.id);}
+  salvarEstado();
+}
+function fcPresetRemover(a,i){
+  var lista=fcPresets[a.id]||[],p=lista[i];
+  if(!p)return;
+  if(fcPresetBloqueado(a))return;
+  if(!confirm('Remover o preset "'+p.nome+'"? Isto apaga so o preset -- nenhum codigo ja colado no site e afetado.'))return;
+  lista.splice(i,1);
+  fcPresetsRender(a);salvarEstado();
+}
+function fcPresetsRender(a){
+  var lista=$(a.pref+'-plista'),arr=fcPresets[a.id]||[],fora=fcPresetsFora[a.id]||0,i,h,btns,aviso='';
+  if(fora>0){
+    aviso='<p class="ajuda" style="border-color:#8C1D18;color:#8C1D18"><b>'+fora+
+      (fora===1?' item da biblioteca estava ilegivel e ficou de fora.'
+               :' itens da biblioteca estavam ilegiveis e ficaram de fora.')+
+      '</b> Isso acontece quando o armazenamento do navegador e editado a mao ou corrompe. '+
+      'O que estava legivel continua na lista; o que nao aparece aqui precisa ser salvo de novo.</p>';
+  }
+  if(lista){
+    if(!arr.length){
+      lista.innerHTML=aviso+'<p class="vazio">Nenhum preset salvo neste navegador.</p>';
+    }else{
+      h=aviso+'<ul class="fc-presets">';
+      for(i=0;i<arr.length;i++){
+        /* escHtml no nome: e texto livre do operador e aqui ele nao vira marcacao */
+        h+='<li><div class="info"><div class="nome">'+escHtml(arr[i].nome)+'</div>'+
+           '<div class="resumo">'+escHtml(fcPresetResumo(a,arr[i]))+'</div></div>'+
+           '<div class="ctrl"><button type="button" class="botao mini" data-fc-aplicar="'+i+'">Aplicar</button>'+
+           '<button type="button" class="botao mini claro" data-fc-remover="'+i+'">Remover</button></div></li>';
+      }
+      lista.innerHTML=h+'</ul>';
+      /* addEventListener, nunca onclick no HTML: e a regra do projeto e aqui a lista e
+         redesenhada a cada mudanca, entao os listeners nascem junto com os botoes */
+      btns=lista.querySelectorAll('[data-fc-aplicar]');
+      for(i=0;i<btns.length;i++){
+        (function(n,el){el.addEventListener('click',function(){fcPresetAplicar(a,n);});})(parseInt(btns[i].getAttribute('data-fc-aplicar'),10),btns[i]);
+      }
+      btns=lista.querySelectorAll('[data-fc-remover]');
+      for(i=0;i<btns.length;i++){
+        (function(n,el){el.addEventListener('click',function(){fcPresetRemover(a,n);});})(parseInt(btns[i].getAttribute('data-fc-remover'),10),btns[i]);
+      }
+    }
+  }
+  /* passo proprio da aba depois da lista (a Bordas repovoa a caixa de consolidacao aqui) */
+  if(a.aposPresets)a.aposPresets();
+}
+/* Uma linha curta descrevendo o preset. Cada aba tem a sua (o que importa num slideshow nao e
+   o que importa num checkout), mas NENHUMA mostra dado operacional: o resumo fica a vista na
+   lista, e numero de WhatsApp ou chave Pix ali nao acrescenta nada e vaza numa captura de
+   tela. Quando a aba nao souber resumir, o nome ja identifica. */
+function fcPresetResumo(a,p){
+  var t='';
+  try{if(a.resumo)t=a.resumo(p.valores||{});}catch(e){t='';}
+  return t||'configuracao salva desta aba';
+}
+
+/* A secao "Biblioteca de presets" das seis abas e desenhada por esta funcao, e nao copiada
+   seis vezes no HTML: mesma mecanica, mesma aparencia, mesmas palavras -- e uma correcao de
+   texto conserta as seis. O que muda por aba vem do registro ABAS (exemplo de nome, o que a
+   aba guarda, campos operacionais). */
+function fcPresetsMontar(a){
+  var box=$(a.pref+'-presets'),h,i,ops;
+  if(!box)return;
+  h='<div><fieldset>';
+  h+='<legend>Salvar a configuração atual</legend>';
+  h+='<label for="'+a.pref+'-pnome">Nome do preset <small>(o nome da campanha e do lugar onde a configuração é usada)</small></label>';
+  h+='<input type="text" id="'+a.pref+'-pnome" value="" placeholder="'+escAttr(a.exemplo||'ex.: Natal 2026')+'">';
+  h+='<div class="acoes"><button class="botao" type="button" id="'+a.pref+'-psalvar">Salvar preset</button></div>';
+  h+='<p class="ajuda"><b>O que o preset guarda:</b> '+a.guarda+'</p>';
+  if(a.operacionais&&a.operacionais.length){
+    ops=[];
+    for(i=0;i<a.operacionais.length;i++)ops.push(a.operacionais[i][1]);
+    h+='<p class="ajuda"><b>Dados de contato e pagamento:</b> este preset guarda também '+fcLista(ops)+
+       ', como estão na tela. Eles continuam apenas no <b>armazenamento deste navegador</b>, onde já ficam hoje — nada é enviado para lugar nenhum. Se for aplicar este preset numa campanha de outro recebedor, confira esses campos depois de aplicar.</p>';
+  }
+  h+='<p class="ajuda"><b>Onde eles ficam:</b> no <b>armazenamento deste navegador</b>, junto com o resto da configuração da ferramenta — mesma regra do estado das seis abas. <b>Não acompanham outro computador</b>, nem outro navegador no mesmo computador, e somem se você limpar os dados do site. Para levar uma configuração adiante, o que viaja é o <b>código gerado</b>, não o preset.</p>';
+  h+='<p class="ajuda"><b>Nome repetido:</b> salvar com o nome de um preset que já existe <b>substitui</b> aquele preset, depois de confirmar. Não se criam dois com o mesmo nome — a lista identifica o preset pelo nome, e dois iguais deixariam de dizer qual é qual.</p>';
+  h+='</fieldset></div>';
+  h+='<div><fieldset>';
+  h+='<legend>Presets salvos</legend>';
+  h+='<div id="'+a.pref+'-plista"></div>';
+  h+='<p class="ajuda"><b>Aplicar</b> substitui o que está na tela pela configuração do preset — <b>todos</b> os campos desta aba, não só alguns (a prévia acompanha na hora). <b>Remover</b> apaga o preset — não mexe em nenhum código já colado no site.</p>';
+  h+='</fieldset></div>';
+  box.innerHTML=h;
+  liga(a.pref+'-psalvar',function(){fcPresetSalvar(a);});
+}
+/* O campo do nome do preset comeca com o prefixo da aba, entao ele casa com os listeners de
+   "mudou alguma coisa nesta aba" e cada tecla digitada ali remontaria a previa. No Slideshow
+   isso manda o navegador baixar todas as fotos de novo -- que e exatamente o motivo de s-url
+   e s-leg ja terem excecao. Nomear um preset nao muda configuracao nenhuma, entao as cinco
+   previas ignoram este campo. */
+function fcCampoDePreset(chave){return /^[stlubc]-pnome$/.test(chave);}
+/* "a, b e c" -- so para o texto da interface */
+function fcLista(v){
+  if(!v.length)return '';
+  if(v.length===1)return v[0];
+  return v.slice(0,v.length-1).join(', ')+' e '+v[v.length-1];
 }
 
 /* ============================================================
@@ -2082,6 +2418,25 @@ function sRestaura(st){
     setRadio('s-pausar',st.s.pausar||'nao');
   }
   sToggles();
+}
+
+/* ===== O que esta aba poe na biblioteca de presets (ver o bloco compartilhado) =====
+   O preset guarda o fragmento que sColeta devolve -- lista de imagens inclusive --, e
+   "Aplicar" o devolve pelo sRestaura, que e o mesmo caminho do estado gravado. */
+function sPresetResumo(v){
+  var S=v.s||{},n=(v.imgs&&v.imgs.length)||0;
+  return n+(n===1?' foto':' fotos')+' \u2014 '+String(S.t||'')+', '+S.int+' ms, '+S.larg+' px';
+}
+function sPresetAntes(){
+  if(fcAjustarTodos(S_NUMS))salvarEstado();
+  return '';
+}
+/* Depois de aplicar: o mesmo passo que a partida da aba executa com o estado restaurado,
+   mais a previa -- que aqui monta na hora, porque aplicar um preset so acontece com a aba
+   aberta e o operador precisa ver o que acabou de entrar. */
+function sPresetDepois(){
+  if(fcAjustarTodos(S_NUMS))salvarEstado();
+  sToggles();sPvBotoes();sPreview(true);
 }
 
 /* Campos que so fazem sentido acompanhados, e o aviso do caso R6.
@@ -2780,6 +3135,7 @@ function sCampoMudou(e){
      mandaria o navegador baixar todas as fotos de novo, sem nada mudar na tela. O ramo
      tambem serve para ligar/desligar o campo da legenda padrao e o botao de adicionar. */
   if(/^s-imp/.test(chave)){sImpToggles();return;}
+  if(fcCampoDePreset(chave))return;
   if(S_PV_IGNORA[chave])return;
   sToggles();sPreview();
 }
@@ -3168,6 +3524,34 @@ function lRestaura(st){
   $('l-c3-t').value=L.c3;$('l-c3').value=corValida(L.c3)?L.c3:'#25D366';
   $('l-c4-t').value=L.c4;$('l-c4').value=corValida(L.c4)?L.c4:'#333333';
   if(L.anc){setRadio('l-ancora',L.anc);$('l-anc').value=L.ancv;$('l-resp').value=L.resp;}
+}
+
+/* ===== O que esta aba poe na biblioteca de presets (ver o bloco compartilhado) =====
+   O resumo NAO mostra o numero do WhatsApp: ele fica guardado no preset (decisao registrada
+   no bloco compartilhado), mas a lista e o que aparece na tela e numa captura dela. */
+function lPresetResumo(v){
+  var L=v.l||{},n=(L.qops&&L.qops.length)||0;
+  var t=(L.modo==='automatico'?'abre sozinho':'abre no clique')+' \u2014 icone '+String(L.icone||'');
+  t+=', '+(L.hor==='sim'?'com horario':'sem horario');
+  if(n)t+=', '+n+(n===1?' opcao de pergunta':' opcoes de pergunta');
+  return t;
+}
+function lPresetAntes(){
+  if(fcAjustarTodos(L_NUMS))salvarEstado();
+  return '';
+}
+/* Depois de aplicar: o mesmo passo que a partida da aba executa com o estado restaurado.
+   As cores de texto livre passam pela mesma correcao a vista que a carga faz -- um preset
+   antigo pode trazer cor invalida, e o campo nao pode exibir algo diferente do que o gerador
+   vai usar. */
+function lPresetDepois(){
+  var mudou=false,i;
+  if(fcAjustarTodos(L_NUMS))mudou=true;
+  for(i=0;i<CORES_LIVRES.length;i++){
+    if(CORES_LIVRES[i][0].indexOf('l-')===0&&corAjustar(CORES_LIVRES[i][0],CORES_LIVRES[i][1]))mudou=true;
+  }
+  if(mudou)salvarEstado();
+  lBtnPreview();lQRender();lToggles();lPvBotoes();lPreview(true);
 }
 
 function lPadroes(){
@@ -4054,6 +4438,7 @@ function lCampoMudou(e){
   var alvo=e.target;if(!alvo)return;
   var chave=alvo.name||alvo.id||'';
   if(chave.indexOf('l-')!==0)return;
+  if(fcCampoDePreset(chave))return;
   if(L_PV_IGNORA[chave])return;
   lToggles();lPreview();
 }
@@ -4084,6 +4469,26 @@ function tRestaura(st){
      deixar o radio no padrao do HTML (que diria "formulario padrao" sobre alturas que podem
      ser outras), a marca e deduzida das alturas restauradas. */
   setRadio('t-preset',st.t.preset||tPresetInferir());
+}
+
+/* ===== O que esta aba poe na biblioteca de presets (ver o bloco compartilhado) =====
+   Nao confundir com os presets de ALTURA (T_PRESETS, logo abaixo): aqueles sao tres pares de
+   numeros calibrados que a ferramenta ja traz; estes sao configuracoes inteiras da aba,
+   salvas pelo operador. */
+function tPresetResumo(v){
+  var T=v.t||{};
+  return (T.arq==='embutida'?'embutido na intermediaria':'direto na pagina')+' \u2014 '+T.desk+'/'+T.mob+' px, corte '+T.larg+' px';
+}
+function tPresetAntes(){
+  if(fcAjustarTodos(T_NUMS))salvarEstado();
+  return '';
+}
+function tPresetDepois(){
+  if(fcAjustarTodos(T_NUMS))salvarEstado();
+  /* a prensa da faixa pode ter mudado uma altura DEPOIS de tRestaura marcar o preset de
+     altura: sem isto o rotulo diria "formulario padrao" sobre um numero que a faixa trocou */
+  if(radio('t-preset')!==tPresetInferir())setRadio('t-preset','custom');
+  tArqToggle();
 }
 
 /* Faixa declarada de cada campo numerico da aba: [id, padrao, min, max].
@@ -4333,6 +4738,33 @@ function uRestaura(st){
   $('u-c1-t').value=U.c1;$('u-c1').value=corValida(U.c1)?U.c1:'#075E54';
   $('u-c2-t').value=U.c2;$('u-c2').value=corValida(U.c2)?U.c2:'#ffffff';
   $('u-c3-t').value=U.c3;$('u-c3').value=corValida(U.c3)?U.c3:'#333333';
+}
+
+/* ===== O que esta aba poe na biblioteca de presets (ver o bloco compartilhado) =====
+   O resumo NAO mostra chave Pix, Client ID nem recebedor: eles ficam guardados no preset
+   (decisao registrada no bloco compartilhado), mas a lista fica a vista na tela. */
+var U_METODO_NOME={ambos:'PayPal e Pix',paypal:'somente PayPal',pix:'somente Pix'};
+function uPresetResumo(v){
+  var U=v.u||{},np=(U.prods&&U.prods.length)||0,nc=(U.cps&&U.cps.length)||0;
+  var t=np+(np===1?' produto':' produtos');
+  if(nc)t+=', '+nc+(nc===1?' cupom':' cupons');
+  return t+' \u2014 '+(U_METODO_NOME[U.metodo]||String(U.metodo||''));
+}
+function uPresetAntes(){
+  if(fcAjustarTodos(U_NUMS))salvarEstado();
+  return '';
+}
+function uPresetDepois(){
+  var mudou=false,i;
+  if(fcAjustarTodos(U_NUMS))mudou=true;
+  for(i=0;i<CORES_LIVRES.length;i++){
+    if(CORES_LIVRES[i][0].indexOf('u-')===0&&corAjustar(CORES_LIVRES[i][0],CORES_LIVRES[i][1]))mudou=true;
+  }
+  /* a chave Pix guardada num preset antigo pode trazer invisiveis do copiar-e-colar: mesma
+     limpeza a vista que a carga faz */
+  if(uChaveAjustar())mudou=true;
+  if(mudou)salvarEstado();
+  uProdRender();uCpRender();uToggles();uPvBotoes();uPreview(true);
 }
 
 /* Faixa declarada dos campos numericos desta aba, no formato de S_NUMS/B_NUMS:
@@ -4872,11 +5304,11 @@ function uPvModoSet(m){
 }
 document.addEventListener('input',function(e){
   var al=(e.target.id&&e.target.id.indexOf('u-')===0)||(e.target.name&&e.target.name.indexOf('u-')===0);
-  if(al)uPreview();
+  if(al&&!fcCampoDePreset(e.target.id))uPreview();
 });
 document.addEventListener('change',function(e){
   var al=(e.target.id&&e.target.id.indexOf('u-')===0)||(e.target.name&&e.target.name.indexOf('u-')===0);
-  if(al)uPreview();
+  if(al&&!fcCampoDePreset(e.target.id))uPreview();
 });
 
 /* ===== chave Pix: limpeza e limites do padrao BR Code =====
@@ -5759,10 +6191,16 @@ function uBloco(cfg){
 /* ============================================================
    BORDAS COM EFEITO (CSS puro: head + CSS do componente)
    ============================================================ */
-/* A biblioteca de presets desta aba (R19). Cada item e {nome, cfg}, com cfg no formato de
-   bCampos(). Vive dentro do fragmento 'b' do estado gravado -- nao ganha chave de topo
-   propria, entao a lista ABAS e a estrutura de isolamento por aba ficam como estao. */
-var bPresets=[];
+/* A biblioteca de presets desta aba (R19) mora em fcPresets.bor e e operada pelo bloco
+   compartilhado "biblioteca de presets por aba" -- ate esta fase ela tinha mecanica propria
+   (bPresets, bPresetsLer, bPresetIndice, bPresetSalvar/Aplicar/Remover/Render), e desde que
+   as outras cinco abas ganharam presets manter as duas seria manter duas implementacoes da
+   mesma coisa, que e o defeito que este projeto mais pagou para aprender. O que ficou aqui e
+   so o que e desta aba: o resumo, a conferencia de formato, a caixa de consolidacao do
+   codigo 1 e o que fazer depois de aplicar.
+   Continua gravada onde sempre esteve, em b.presets do estado -- o formato antigo
+   ({nome,cfg}) e traduzido na leitura (ver fcPresetConverter), entao quem ja tinha presets
+   de borda salvos os encontra na lista ao abrir esta versao. */
 
 /* Salvamento e restauracao desta aba (registradas em ABAS). */
 /* Os campos da aba num objeto so. Isto e o que a aba GRAVA e tambem o que um preset GUARDA:
@@ -5783,8 +6221,9 @@ function bCampos(){
 }
 function bColeta(){
   var o=bCampos();
-  o.presets=bPresets;            /* a biblioteca; um preset nao guarda a biblioteca */
-  o.consol=$('b-consol').value;  /* escolha sobre OUTRO componente; tambem nao entra no preset */
+  /* a biblioteca de presets NAO e lida aqui: quem a acrescenta ao fragmento e o salvarEstado,
+     para as seis abas ao mesmo tempo (ver o comentario la) */
+  o.consol=$('b-consol').value;  /* escolha sobre OUTRO componente; nao entra no preset (ver 'fora' em ABAS) */
   return {b:o};
 }
 /* Escreve na tela um objeto no formato de bCampos(). Serve ao estado gravado E ao "Aplicar"
@@ -5811,10 +6250,10 @@ function bAplicarCampos(B){
 function bRestaura(st){
   if(!st.b)return;
   bAplicarCampos(st.b);
-  bPresets=bPresetsLer(st.b.presets);
-  bPresetsRender();
+  /* a biblioteca ja foi lida pelo restaurarEstado antes desta chamada; aqui so as OPCOES da
+     caixa de consolidacao, que precisam existir antes de o valor gravado ser marcado */
+  bConsolRender();
   var sel=$('b-consol');
-  /* depois de bPresetsRender: as opcoes precisam existir antes de o valor ser marcado */
   if(sel)sel.value=st.b.consol||'';
 }
 
@@ -5846,7 +6285,7 @@ function bPadOk(v){
 /* fcPreso le o valor do PROPRIO campo, e um preset nao tem campo na tela: aqui o valor vem do
    preset e a faixa continua vindo de B_NUMS. O clamp e o de fcPrender -- o MESMO que fcPreso
    usa --, entao a tela e o preset nao podem divergir nem na faixa nem na aritmetica.
-   Na pratica ele quase nunca prende nada: bPresetSalvar roda fcAjustarTodos antes de congelar
+   Na pratica ele quase nunca prende nada: bPresetAntes roda fcAjustarTodos antes de congelar
    os numeros, entao um preset nasce dentro da faixa. Ele pega o caso do armazenamento
    adulterado a mao, que sem isto sairia como CSS com numero absurdo dentro do codigo de OUTRO
    componente -- o mais dificil de rastrear que esta aba pode produzir. */
@@ -5906,129 +6345,55 @@ function bPvTinta(hex){
   return lum>140?'#6B6455':'#C9C3B4';
 }
 
-/* ===== Biblioteca de presets (R19) ===== */
-/* Leitura defensiva da biblioteca gravada. Checar so "e um Array?" era raso: um TEXTO no lugar
-   da lista tambem tem .length e passaria por duck typing, e um Array com lixo dentro passava
-   inteiro -- ["texto"] desenhava "undefined -- borda undefinedpx" e [null] estourava um
-   TypeError que jogava a aba inteira em so-leitura. A rede da fase 2 segurava (falha visivel,
-   outras abas intactas), mas a aba parava por causa de um item podre. Agora a lista e filtrada
-   item a item e o que sobra e usavel; o que foi deixado de fora e ANUNCIADO na propria aba, em
-   vez de sumir calado. */
-function bPresetValido(x){
-  return !!(x&&typeof x==='object'&&Object.prototype.toString.call(x)!=='[object Array]'&&
-    typeof x.nome==='string'&&x.nome.trim()&&
-    x.cfg&&typeof x.cfg==='object'&&typeof x.cfg.efeito==='string');
-}
-var bPresetsDescartados=0;
-function bPresetsLer(v){
-  var out=[],i;
-  bPresetsDescartados=0;
-  if(v===undefined||v===null)return out;        /* versao anterior: nunca houve biblioteca */
-  if(Object.prototype.toString.call(v)!=='[object Array]'){
-    bPresetsDescartados=1;                       /* nem lista e: o que estivesse ali e ilegivel */
-    return out;
-  }
-  for(i=0;i<v.length;i++){
-    if(bPresetValido(v[i]))out.push(v[i]);
-    else bPresetsDescartados++;
-  }
-  return out;
-}
+/* ===== O que esta aba poe na biblioteca compartilhada (R19) ===== */
 var B_EFEITO_NOME={brilho:'brilho giratorio',gradiente:'degrade continuo',pulso:'halo pulsante',
   listras:'listras em movimento',fixa:'borda fixa'};
-function bPresetResumo(C){
+function bPresetResumo(v){
+  var C=v.b||{};
   var t=B_EFEITO_NOME[C.efeito]||String(C.efeito||'');
   t+=' \u2014 borda '+C.esp+'px, cantos '+C.raio+'px';
   if(C.efeito!=='fixa')t+=', ciclo '+C.vel+'s';
   return t;
 }
-/* nomes sao comparados sem diferenca de caixa e sem espaco nas pontas: "Natal 2026" e
-   "natal 2026 " sao o mesmo preset para quem esta olhando a lista, entao sao o mesmo aqui */
-function bPresetIndice(nome){
-  var alvo=String(nome).trim().toLowerCase(),i;
-  for(i=0;i<bPresets.length;i++){
-    if(String(bPresets[i].nome).trim().toLowerCase()===alvo)return i;
-  }
-  return -1;
+/* Conferencia extra desta aba, no criterio que a leitura defensiva ja usava antes desta fase:
+   sem 'efeito' nao ha configuracao de borda nenhuma ali dentro -- o resumo diria "undefined"
+   e a caixa de consolidacao ofereceria um preset que nao gera codigo. */
+function bPresetOk(valores){
+  return typeof valores.b.efeito==='string';
 }
-function bPresetSalvar(){
-  var nome=$('b-pnome').value.trim();
-  if(!nome){alert('De um nome ao preset antes de salvar. E por ele que a lista e a consolidacao do codigo 1 identificam a configuracao.');return;}
-  if(nome.length>60){alert('O nome do preset passa de 60 caracteres. Um nome curto (campanha + onde o efeito e usado) e o que cabe na lista e na caixa de consolidacao.');return;}
-  /* prende os numeros A VISTA antes de congelar a configuracao: um preset guardado com valor
-     fora da faixa devolveria, meses depois, um numero que o proprio campo ja nao aceita */
+/* Prende os numeros A VISTA antes de congelar a configuracao (um preset guardado com valor
+   fora da faixa devolveria, meses depois, um numero que o proprio campo ja nao aceita) e
+   recusa salvar o que nao gera codigo -- as duas coisas que esta aba ja fazia. */
+function bPresetAntes(){
   if(fcAjustarTodos(B_NUMS))salvarEstado();
   var m=bMontar(bCfgDom());
-  if(m.erro){alert('A configuracao atual nao gera codigo, entao nao ha o que salvar: '+m.erro);return;}
-  var i=bPresetIndice(nome);
-  if(i>=0&&!confirm('Ja existe um preset chamado "'+bPresets[i].nome+'". Substituir a configuracao dele pela que esta na tela? A anterior nao volta.'))return;
-  var novo={nome:nome,cfg:bCampos()};
-  if(i>=0)bPresets[i]=novo;else bPresets.push(novo);
-  $('b-pnome').value='';
-  bPresetsRender();salvarEstado();
+  if(m.erro)return 'A configuracao atual nao gera codigo, entao nao ha o que salvar: '+m.erro;
+  return '';
 }
-function bPresetAplicar(i){
-  var p=bPresets[i];
-  if(!p||!p.cfg)return;
-  bAplicarCampos(p.cfg);
-  bToggles();bPreview();salvarEstado();
+/* Depois de aplicar: o mesmo passo que a partida da aba executa com o estado restaurado. */
+function bPresetDepois(){
+  if(fcAjustarTodos(B_NUMS))salvarEstado();
+  bToggles();bPreview();
 }
-function bPresetRemover(i){
-  var p=bPresets[i];
-  if(!p)return;
-  if(!confirm('Remover o preset "'+p.nome+'"? Isto apaga so o preset -- nenhum codigo ja colado no site e afetado.'))return;
-  bPresets.splice(i,1);
-  bPresetsRender();salvarEstado();
-}
-function bPresetsRender(){
-  var lista=$('b-plista'),sel=$('b-consol'),i,h,li,btns,aviso='';
-  if(bPresetsDescartados>0){
-    aviso='<p class="ajuda" style="border-color:#8C1D18;color:#8C1D18"><b>'+bPresetsDescartados+
-      (bPresetsDescartados===1?' item da biblioteca estava ilegivel e ficou de fora.'
-                              :' itens da biblioteca estavam ilegiveis e ficaram de fora.')+
-      '</b> Isso acontece quando o armazenamento do navegador e editado a mao ou corrompe. '+
-      'O que estava legivel continua na lista; o que nao aparece aqui precisa ser salvo de novo.</p>';
+/* A caixa de consolidacao do codigo 1 lista os presets desta aba, entao ela e repovoada
+   sempre que a lista muda (ver 'aposPresets' em ABAS) e tambem pelo bRestaura. */
+function bConsolRender(){
+  var sel=$('b-consol'),arr=fcPresets.bor||[],antes,o,i;
+  if(!sel)return;
+  antes=sel.value;
+  sel.innerHTML='';
+  o=document.createElement('option');o.value='';o.text='N\u00e3o incluir \u2014 s\u00f3 o efeito desta tela';sel.appendChild(o);
+  for(i=0;i<arr.length;i++){
+    /* preset de borda fixa nao tem animacao: nao ha o que consolidar, entao nem aparece */
+    if(!arr[i].valores.b||arr[i].valores.b.efeito==='fixa')continue;
+    o=document.createElement('option');
+    /* .text, e nao innerHTML: o nome e texto do operador e aqui ele nao vira marcacao */
+    o.value=arr[i].nome;o.text=arr[i].nome;
+    sel.appendChild(o);
   }
-  if(lista){
-    if(!bPresets.length){
-      lista.innerHTML=aviso+'<p class="vazio">Nenhum preset salvo neste navegador.</p>';
-    }else{
-      h=aviso+'<ul class="b-presets">';
-      for(i=0;i<bPresets.length;i++){
-        h+='<li><div class="info"><div class="nome">'+escHtml(bPresets[i].nome)+'</div>'+
-           '<div class="resumo">'+escHtml(bPresetResumo(bPresets[i].cfg||{}))+'</div></div>'+
-           '<div class="ctrl"><button type="button" class="botao mini" data-b-aplicar="'+i+'">Aplicar</button>'+
-           '<button type="button" class="botao mini claro" data-b-remover="'+i+'">Remover</button></div></li>';
-      }
-      lista.innerHTML=h+'</ul>';
-      /* addEventListener, nunca onclick no HTML: e a regra do projeto e aqui a lista e
-         redesenhada a cada mudanca, entao os listeners nascem junto com os botoes */
-      btns=lista.querySelectorAll('[data-b-aplicar]');
-      for(i=0;i<btns.length;i++){
-        (function(n,el){el.addEventListener('click',function(){bPresetAplicar(n);});})(parseInt(btns[i].getAttribute('data-b-aplicar'),10),btns[i]);
-      }
-      btns=lista.querySelectorAll('[data-b-remover]');
-      for(i=0;i<btns.length;i++){
-        (function(n,el){el.addEventListener('click',function(){bPresetRemover(n);});})(parseInt(btns[i].getAttribute('data-b-remover'),10),btns[i]);
-      }
-    }
-  }
-  if(sel){
-    var antes=sel.value,o;
-    sel.innerHTML='';
-    o=document.createElement('option');o.value='';o.text='N\u00e3o incluir \u2014 s\u00f3 o efeito desta tela';sel.appendChild(o);
-    for(i=0;i<bPresets.length;i++){
-      /* preset de borda fixa nao tem animacao: nao ha o que consolidar, entao nem aparece */
-      if(!bPresets[i].cfg||bPresets[i].cfg.efeito==='fixa')continue;
-      o=document.createElement('option');
-      /* .text, e nao innerHTML: o nome e texto do operador e aqui ele nao vira marcacao */
-      o.value=bPresets[i].nome;o.text=bPresets[i].nome;
-      sel.appendChild(o);
-    }
-    sel.value=antes;
-    /* preset removido enquanto estava escolhido: a caixa volta para "nao incluir" sozinha */
-    if(sel.value!==antes)sel.value='';
-  }
+  sel.value=antes;
+  /* preset removido enquanto estava escolhido: a caixa volta para "nao incluir" sozinha */
+  if(sel.value!==antes)sel.value='';
 }
 
 function bToggles(){
@@ -6215,11 +6580,11 @@ function bPreview(){
 }
 document.addEventListener('input',function(e){
   var al=(e.target.id&&e.target.id.indexOf('b-')===0)||(e.target.name&&e.target.name.indexOf('b-')===0);
-  if(al)bPreview();
+  if(al&&!fcCampoDePreset(e.target.id))bPreview();
 });
 document.addEventListener('change',function(e){
   var al=(e.target.id&&e.target.id.indexOf('b-')===0)||(e.target.name&&e.target.name.indexOf('b-')===0);
-  if(al)bPreview();
+  if(al&&!fcCampoDePreset(e.target.id))bPreview();
 });
 
 /* ===== Consolidacao do codigo 1 (R20) =====
@@ -6238,10 +6603,11 @@ document.addEventListener('change',function(e){
 function bConsolidar(mAtual){
   var nome=$('b-consol')?$('b-consol').value:'';
   if(!nome)return null;
-  var i=bPresetIndice(nome);
+  var a=fcAba('bor');
+  var i=fcPresetIndice(a,nome);
   if(i<0)return {erro:'O preset "'+nome+'" nao esta mais salvo neste navegador, entao nao ha de onde tirar a segunda animacao. Escolha outro na caixa de consolidacao do codigo 1.'};
-  var p=bPresets[i];
-  var m2=bMontar(bCfgPreset(p.cfg||{}));
+  var p=fcPresets.bor[i];
+  var m2=bMontar(bCfgPreset(p.valores.b||{}));
   if(m2.erro)return {erro:'O preset "'+p.nome+'" nao gera codigo com a configuracao que esta guardada nele: '+m2.erro};
   if(!m2.keys)return {erro:'O preset "'+p.nome+'" usa a borda fixa, que nao tem animacao: nao ha nada para consolidar no codigo 1.'};
   if(m2.anim===mAtual.anim)return {erro:'O preset "'+p.nome+'" usa o MESMO efeito desta tela ('+(B_EFEITO_NOME[m2.efeito]||m2.efeito)+'). As duas animacoes se chamariam "'+m2.anim+'" e a segunda apagaria a primeira -- valeria a que estivesse por ultimo, para os dois componentes. Consolidar so faz sentido entre efeitos DIFERENTES; dois componentes com o mesmo efeito precisam dos mesmos parametros de animacao.'};
@@ -6335,11 +6701,13 @@ function cToggles(){
   cTitulo();
 }
 document.addEventListener('change',function(e){
+  if(e.target&&fcCampoDePreset(e.target.id||''))return;
   if(e.target&&/^c-/.test(e.target.name||e.target.id||'')){cToggles();cPreview();}
 });
 /* 'change' so dispara quando o campo perde o foco: sem este 'input', a previa so acordava
    depois de o operador clicar fora. A aba de bordas ja ouvia os dois. */
 document.addEventListener('input',function(e){
+  if(e.target&&fcCampoDePreset(e.target.id||''))return;
   if(e.target&&/^c-/.test(e.target.name||e.target.id||'')){cToggles();cPreview();}
 });
 
@@ -6429,6 +6797,23 @@ function cRestaura(st){
    ['c-curg',C.curg,'#8C1D18']].forEach(function(p){
     $(p[0]+'-t').value=p[1];$(p[0]).value=corValida(p[1])?p[1]:p[2];
   });
+}
+
+/* ===== O que esta aba poe na biblioteca de presets (ver o bloco compartilhado) ===== */
+function cPresetResumo(v){
+  var C=v.c||{},n=(v.cmsgs&&v.cmsgs.length)||0;
+  var t=(C.modo==='data'?'ate uma data':'a partir da abertura')+' \u2014 '+(C.formato==='blocos'?'blocos':'compacto');
+  t+=', '+(C.fixa==='fixa'?'barra fixa no topo':'no fluxo da pagina');
+  if(n)t+=', '+n+(n===1?' mensagem':' mensagens');
+  return t;
+}
+function cPresetAntes(){
+  if(fcAjustarTodos(C_NUMS))salvarEstado();
+  return '';
+}
+function cPresetDepois(){
+  if(fcAjustarTodos(C_NUMS))salvarEstado();
+  cToggles();cMsgRender();cPvBotoes();cPreview(true);
 }
 function cMsgAdd(){
   var t=$('c-msg').value.trim();
@@ -7386,7 +7771,6 @@ prep('Checkout','uni',function(){
 });
 prep('Bordas com efeito','bor',function(){
   liga('b-gerar',bGerar);
-  liga('b-psalvar',bPresetSalvar);
   liga('b-copy1',function(){copiar('b-out1','b-cop1');});
   liga('b-copy2',function(){copiar('b-out2','b-cop2');});
   parearCor('b-f1');parearCor('b-f2');parearCor('b-c1');parearCor('b-c2');parearCor('b-c3');parearCor('b-c4');
@@ -7438,6 +7822,16 @@ prep('Correcao a vista das cores livres','leads uni',function(){
 /* restaurarEstado ja isola aba por aba por dentro: a aba que falhar ao restaurar nao
    impede as outras cinco de voltar, e o aviso aparece na tela. */
 restaurarEstado();
+
+/* A secao "Biblioteca de presets" das seis abas: montada uma vez (mesma mecanica, mesma
+   aparencia, mesmas palavras nas seis -- ver fcPresetsMontar) e ja desenhada com a
+   biblioteca lida do estado gravado. Um prep por aba, pelo motivo de sempre: a biblioteca
+   ilegivel de uma aba nao pode deixar as outras cinco sem a secao. */
+for(var iAba=0;iAba<ABAS.length;iAba++){
+  (function(a){
+    prep(a.nome,a.id,function(){fcPresetsMontar(a);fcPresetsRender(a);},'desenhar a biblioteca de presets');
+  })(ABAS[iAba]);
+}
 
 /* Estado gravado antes desta regra pode trazer cor invalida ou chave com invisivel: prende na
    carga, para o campo nunca exibir algo diferente do que o gerador vai usar, e regrava para o
@@ -7503,9 +7897,6 @@ prep('Bordas com efeito','bor',function(){
   /* mesmo motivo do c-mob e das cores livres: estado gravado antes desta regra pode trazer
      numeros fora da faixa, e o campo nao pode exibir algo diferente do que bMontar vai usar. */
   if(fcAjustarTodos(B_NUMS))salvarEstado();
-  /* sem estado gravado, bRestaura nem roda: a lista precisa ser desenhada aqui para a aba
-     nascer dizendo que nao ha preset salvo, em vez de mostrar um espaco vazio */
-  bPresetsRender();
   bToggles();
   bPreview();
 },'desenhar a aba com o estado restaurado');

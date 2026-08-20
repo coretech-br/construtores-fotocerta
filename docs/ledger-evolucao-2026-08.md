@@ -10,7 +10,7 @@ O tempo real é medido pelo **relógio dos commits**: do início do trabalho da 
 | # | Fase | Estimado | Real | Situação |
 |---|---|---|---|---|
 | 1 | Importador de galeria | 2–3h | **56 min** | ✅ mesclada (`0041655`) |
-| 2 | Presets de aba nas seis abas | 2–3h | — | 🔄 em execução (início 20/08 12:03) |
+| 2 | Presets de aba nas seis abas | 2–3h | 42 min até a branch | 🔄 branch `evolucao/2-presets-aba`, aguardando revisão e merge |
 | 3 | Preset geral | 4–5h | — | não iniciada |
 | 4 | Exportar e importar JSON | 2–3h | — | não iniciada |
 | 5 | Painel consolidado | 3–4h | — | não iniciada |
@@ -27,12 +27,14 @@ O tempo real é medido pelo **relógio dos commits**: do início do trabalho da 
 - **Por que fechou rápido:** escopo pequeno e bem medido antes de despachar. As duas incógnitas ("o endereço de 1400 px funciona?", "o `?t=` atrapalha?") foram mandadas medir explicitamente, em vez de supostas — e uma delas derrubou uma decisão do plano.
 
 ### Fase 2 — Presets de aba
-- **Início:** 20/08/2026, 12:03
-- **Base:** `main` = `0041655`
-- **Base:** `main` = `88ee159`
-- **Alvo de prova:** 46 fotos em `/gallery/121894-estudio-tematico`, 59 em `/portfolio/ensaio-casal/1518588-fernanda-ricardo-pre-casamento`, sem logotipo, imagens do tema ou miniaturas de galerias relacionadas.
-- **A medir, não supor:** se o endereço de 1400 px do redimensionador funciona; se o `?t=` atrapalha ao embrulhar.
-- **Regressão:** `s-out` byte a byte idêntica à de `main` para configuração igual.
+- **Início:** 20/08/2026, 12:03. **Branch pronta para revisão:** 20/08/2026, 12:45 (**42 min** de implementação e provas; o real da tabela só fecha no merge).
+- **Base:** `main` = `49d9e4a` (o `0041655` mais o commit do ledger, que não toca o `index.html`).
+- **Branch:** `evolucao/2-presets-aba`. **Não mesclada.**
+- **O que foi construído:** biblioteca de presets nas seis abas, com mecânica única. A das Bordas foi **absorvida** — `bPresets`, `bPresetsLer`, `bPresetIndice`, `bPresetSalvar/Aplicar/Remover/Render` saíram; sobraram só as partes que são daquela aba (resumo, conferência de formato, caixa de consolidação do código 1).
+- **Pronto para a fase 3:** `carimbo` por preset (data de modificação; 0 = veio do formato antigo), `fcCanon`/`fcValoresIguais` para comparar dois conjuntos de valores da mesma aba, e `operacionais` declarado por aba (o que a fase 4 vai limpar no arquivo "sem dados").
+- **Decisão registrada:** dados operacionais **entram** no preset — é a fotografia da aba, e tirá-los devolveria a aba pela metade em silêncio. Não saem do navegador, e as abas Leads e Checkout dizem isso na tela, nomeando os campos. O resumo da lista nunca os mostra.
+- **Regressão:** as **9 saídas** dos seis geradores byte a byte idênticas às de `main` para configuração igual (mesmo `localStorage`, duas versões servidas pelo mesmo `localhost`), rodada duas vezes — a segunda com preset salvo nas seis abas, para provar que preset é entrada e não muda o que sai.
+- **Compatibilidade provada com estado antigo montado à mão:** presets de Bordas em `{nome,cfg}` aparecem na lista, e o código 1 **consolidado a partir de um deles** saiu byte a byte igual ao da versão anterior. A tradução é de mão única (versão anterior não lê o formato novo) — registrado de propósito.
 
 ---
 
