@@ -13,9 +13,9 @@ O tempo real é medido pelo **relógio dos commits**: do início do trabalho da 
 | 2 | Presets de aba nas seis abas | 2–3h | 42 min até a branch | 🔄 branch `evolucao/2-presets-aba`, aguardando revisão e merge |
 | 2.5 | Interface da lista de imagens (A, B, C) + cores livres (D) | 45–75 min | 47 min até a branch | 🔄 branch `evolucao/2.5-interface-lista`, aguardando revisão e merge |
 | 3 | Preset geral | 4–5h | 43 min até a branch | 🔄 branch `evolucao/3-preset-geral`, aguardando revisão e merge |
-| 4 | Exportar e importar JSON | 2–3h | — | não iniciada |
+| 4 | Exportar e importar JSON | 2–3h | 52 min até a branch | 🔄 branch `evolucao/4-exportar-importar`, aguardando revisão e merge |
 | 5 | Painel consolidado | 3–4h | — | não iniciada |
-| | **Total** | **13–18h + 2.5** | **3h04 até aqui** | |
+| | **Total** | **13–18h + 2.5** | **3h56 até aqui** | |
 
 ## Registro por fase
 
@@ -93,6 +93,35 @@ Zero Critical — a revisão não construiu nenhum caminho em que valores sumam 
 #### O que a fase não fez, de propósito
 
 Exportar/importar JSON (fase 4) e o painel consolidado (fase 5). Os campos de "Outros códigos meus" são **guardados e não consumidos**, e o texto de ajuda ao lado deles diz isso — campo que parece fazer algo que ainda não faz é a mesma mentira de tela que este projeto vem desfazendo.
+
+### Fase 4 — Exportar e importar JSON
+
+- **Início:** 20/08/2026, 15:38. **Branch pronta para revisão:** 20/08/2026, 16:30 (**52 min**; o real da tabela só fecha no merge).
+- **Base:** `main` = `6d5db6a` (fases 1, 2, 2.5 e 3 mescladas). **Branch:** `evolucao/4-exportar-importar`. **Não mesclada.**
+- **O que foi construído:** o R4 literal — dois botões de exportar (tudo / este preset geral), escolha *com dados* ou *sem dados* na hora, com o nome do arquivo dizendo qual é; e a importação com as cinco garantias. Espaço de nomes `fcx-`, cinco IDs novos, uma seção de largura inteira no painel de detalhes da barra do preset geral.
+- **O que a fase consumiu, sem nada refeito:** `ABAS.operacionais` (é a fonte única do que o "sem dados" limpa — não existe segunda lista), `fcPresetCapturar` como molde da conferência, `fcgLerPreset`/`fcgLerOrigem`/`fcPresetConverter` como leitura defensiva, `fcgCampanhaLivre` e `fcgPerguntar` (a pergunta de três saídas da fase 3, aqui com duas e três botões), `fcgMotivos` para nomear o que se perde ao substituir a tela, e as travas `corValida`/`fcAjustarTodos`/`corSegura`/`urlLimpa`/`escJs` onde elas já estavam.
+- **Duas peças novas na base compartilhada, as duas por recusa a duplicar:** `fcEstadoAtual()` foi **extraída** de `salvarEstado` (montar o estado por fora para exportar seria uma segunda montagem, e a divergência apareceria como *"o backup não traz o que a ferramenta tem"*); e `fcPresetCapturar` ganhou o sinalizador `manterFora`, com **um** chamador — o molde do rascunho, onde `b.consol` faz parte do que estava gravado.
+- **Risco tratado como o principal:** o arquivo importado é entrada não confiável, e o que ele vira é código publicado. Três camadas na entrada, `__proto__`/`constructor`/`prototype` fora antes de tudo, e o molde do que se conhece vindo do `coleta()` de cada aba. Arquivo hostil de 342 KB — `javascript:` na lista de fotos, `<img onerror>` no nome da campanha, poluição de protótipo, lista de 5000 itens, texto de 24 000 caracteres, aninhamento de 40 níveis, chaves desconhecidas, tipos trocados, itens `null` — produziu **zero** execução, **zero** poluição, **zero** `<img>` injetado no DOM, **24 descartes contados à vista** e a ferramenta inteira de pé (nenhuma linha na barra vermelha). Nove arquivos de recusa (não-JSON, truncado, vazio, de outra ferramenta, sem versão, versão futura, versão 0, array, marca certa e miolo vazio) recusam com explicação e deixam os dois armazenamentos **byte a byte** intactos. Arquivo de 9 MB é recusado pelo tamanho antes de ser lido.
+- **Colisão "importar como cópia" não recria o defeito da fase 3:** a cópia troca a **campanha** por `fcgCampanhaLivre` (`Natal 2026 (2)`) antes de entrar, então o par `(campanha, página)` continua único por construção — o preset invisível e indelével que a fase 3 fechou não pode nascer daqui. Preset de aba colidente ganha o mesmo tratamento no nome (`fcxNomeLivre`).
+- **Garantia 5 provada com o campo que muda ao lado:** preset geral substituído por um arquivo *sem dados*, com um campo **não** operacional alterado dentro do arquivo para provar que a substituição realmente aconteceu — os **seis** campos de contato e pagamento ficaram como estavam, e a mensagem final disse quantos herdaram.
+- **Regressão:** as **9 saídas** dos seis geradores byte a byte idênticas às de `main` (`6d5db6a`) pelo SHA-256 de cada uma, nos dois cenários pedidos (Rascunho e preset geral com as seis abas ligadas), com as duas versões servidas pelo mesmo `localhost` e o mesmo `localStorage`. O `fcConstrutores` sai com o **mesmo hash** depois de a `main` gerar por cima dele. **Ida-e-volta:** exportar tudo → `localStorage.clear()` → importar de volta → as **9** saídas idênticas e o `fcConstrutores` com o **mesmo hash** (`a0b43ee1…`), com o preset geral selecionado de novo, 6 de 6 abas ligadas, selo *salvo* e os dois "Outros códigos meus" no lugar. `b.consol` sobrevive à ida-e-volta (é o que o `manterFora` existe para garantir). ES5 confirmado por AST (`acorn --ecma5`), `<script>` único, IIFE única, varredura de IDs repetidos `[]` com 403 IDs no armazenamento limpo (398 antes; os cinco novos são todos `fcx-`). A 700 px de largura a página não ganha rolagem horizontal (`scrollWidth` = 700) e os três botões cabem numa linha.
+
+#### Os dois defeitos que a verificação como operador achou
+
+- **A data do arquivo é ecoada na confirmação, e podia mentir.** `geradoEm` é texto do arquivo aparecendo dentro da caixa que o operador está lendo **para decidir**. Vai por nó de texto, então marcação não passa — mas frase passa: com `geradoEm: "ATENCAO: nenhum preset sera substituido, pode confirmar"`, a confirmação exibia essa frase no meio dos números verdadeiros. O campo passou a ser aceito só na forma de data ISO; qualquer outra coisa vira *"em data desconhecida"*. **O arquivo pode escolher a data, nunca o texto.**
+- **A mesma mensagem dizia que o rascunho foi aplicado E que não foi.** As duas linhas são um par `se`/`senão`, e a linha nova do "caiu no Rascunho" foi inserida **entre** elas: o `senão` passou a pertencer à linha nova. Só apareceu clicando — o caso exige um arquivo cujo `rascunhoGeral.ativo` aponte para um preset que não veio junto, e ainda mandar aplicar o rascunho. O acréscimo independente foi para depois do par.
+
+#### Decisões tomadas dentro do escopo
+
+- **O que "sem dados" NÃO tira está dito na própria pergunta.** As caixas "Outros códigos meus" são texto livre e viajam como estão nos dois casos. Prometer "sem dados" e deixar passar um número de WhatsApp que o operador tenha colado ali seria a mentira mais cara que este recurso pode contar, então a pergunta nomeia o limite antes da escolha — e a confirmação da importação diz quantos caracteres de código manual o arquivo traz, com o aviso de ler antes se ele veio de outra pessoa.
+- **A biblioteca de presets não viaja duas vezes.** Ela é retirada do `rascunho` porque vai em `presetsDeAba`. Duas cópias da mesma coisa no mesmo arquivo divergem no dia em que uma delas for filtrada.
+- **`rascunhoGeral` anda junto do rascunho, e só é restaurado com ele.** Qual preset está selecionado, quais abas estão ligadas e os códigos manuais são *a tela*, não a biblioteca. Quem responde "não mexer na tela" não tem a barra mexida.
+- **Aba em só-leitura: ao substituir um preset, o que ela já tinha guardado dentro dele fica.** Escrever o vazio por cima apagaria a configuração dela por causa de um defeito de outra aba, sem ninguém nomear.
+- **Cache de molde por leitura (`fcxTpl`).** Sem ele, um backup com dezenas de presets gerais mandaria fazer um `coleta()` clonado das seis abas por preset — com 46 fotos na lista, o tipo de custo que trava a ferramenta na hora em que ela mais precisa parecer confiável. O arquivo hostil de 342 KB é lido em menos de meio segundo.
+
+#### O que a fase não fez, de propósito
+
+O painel consolidado (fase 5). Os dois campos de "Outros códigos meus" continuam **guardados e não consumidos** — agora eles também viajam no arquivo, e o texto de ajuda continua dizendo que quem vai juntá-los aos blocos gerados é a próxima etapa.
 
 ---
 
