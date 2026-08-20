@@ -43,6 +43,11 @@
   input[type=color]{width:44px;height:32px;border:1px solid var(--linha);border-radius:6px;padding:2px;background:#fff;cursor:pointer;vertical-align:middle}
   .cor-linha{display:flex;align-items:center;gap:10px}
   .cor-linha input[type=text]{width:110px}
+  /* mesma aparencia dos campos de texto: o unico <select> da ferramenta e o da consolidacao
+     do codigo 1 na aba Bordas, e a lista dele cresce com os presets salvos */
+  select{width:100%;border:1px solid var(--linha);border-radius:8px;padding:9px 11px;font-size:14px;
+    font-family:inherit;background:#fff;color:var(--tinta)}
+  select:focus{outline:none;border-color:var(--verde)}
 
   .radios{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
   .radios input{position:absolute;opacity:0;pointer-events:none}
@@ -114,6 +119,17 @@
   .btn-pv svg{width:30px;height:30px}
   .pv-btn-linha{display:flex;align-items:center;gap:14px;margin-top:6px}
   .pv-btn-linha p{margin:0;font-size:12px;color:var(--tinta-suave)}
+
+  /* Biblioteca de presets da aba Bordas. Lista propria em vez de reaproveitar .lista-imgs:
+     la os botoes de controle sao quadradinhos de 28x24 para setas e X, e aqui eles levam
+     texto ("Aplicar", "Remover"). */
+  .b-presets{list-style:none;margin:10px 0 0;padding:0}
+  .b-presets li{display:flex;align-items:center;gap:10px;border:1px solid var(--linha);border-radius:8px;
+    padding:8px 10px;margin-bottom:8px;background:#fff}
+  .b-presets .info{flex:1;min-width:0}
+  .b-presets .nome{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .b-presets .resumo{font-size:11px;color:var(--tinta-suave);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .b-presets .ctrl{display:flex;gap:6px;flex-shrink:0}
 
   .rodape{max-width:1080px;margin:0 auto 30px;padding:0 20px;font-size:12px;color:var(--tinta-suave)}
 
@@ -645,6 +661,16 @@
       <legend>Agendamento</legend>
       <label for="t-path">Caminho do booking type <small>(o que vem depois de tidycal.com/)</small></label>
       <input type="text" id="t-path" value="" placeholder="usuario/nome-do-agendamento">
+      <div class="acoes"><button type="button" class="botao mini claro" id="t-testar">Abrir a página de teste</button></div>
+      <p class="ajuda"><b>Antes de gerar:</b> o botão abre <b>tidycal.com/</b> + o caminho digitado numa aba nova. É a mesma página que o código embute — se ela não existir aqui, também não vai existir no site publicado. Descobrir agora custa um clique; descobrir depois custa publicar, testar e voltar.</p>
+      <label>Tipo de agendamento <small>(preenche as duas alturas abaixo)</small></label>
+      <div class="radios">
+      <label><input type="radio" name="t-preset" value="curto"><span>Conversa rápida <small>(só data, hora e nome)</small></span></label>
+      <label><input type="radio" name="t-preset" value="padrao" checked><span>Ensaio com formulário padrão <small>(nome, e-mail, telefone)</small></span></label>
+      <label><input type="radio" name="t-preset" value="longo"><span>Formulário longo <small>(perguntas adicionais)</small></span></label>
+      <label><input type="radio" name="t-preset" value="custom"><span>Ajuste fino <small>(valores manuais)</small></span></label>
+      </div>
+      <p class="ajuda"><b>O preset não substitui a calibragem, adianta o ponto de partida.</b> Só o <b>formulário padrão</b> (2350 / 2700) foi medido em produção, na campanha de Natal; os outros dois são esse mesmo par deslocado para menos e para mais, e continuam precisando da conferência na página publicada. Escolher um preset <b>escreve os dois números nos campos abaixo</b> — nada fica escondido. Mexer num deles devolve a marca para <b>ajuste fino</b> na hora, para o rótulo nunca dizer uma coisa e o campo outra. A <b>largura de corte</b> não entra no preset: ela é o tamanho da tela, não o tamanho do formulário.</p>
       <label for="t-desk">Altura com o modal aberto — desktop <small>(pixels; medir com o formulário aberto)</small></label>
       <input type="number" id="t-desk" value="2350" min="500" max="20000" step="50">
       <label for="t-mob">Altura com o modal aberto — celular <small>(pixels; no mobile o modal fica mais alto)</small></label>
@@ -663,6 +689,7 @@
       <div id="t-emb" style="display:none">
       <label for="t-url">Endereço da página intermediária</label>
       <input type="text" id="t-url" value="https://www.fotocerta.com.br/iframe-agendamento-natal">
+      <div class="acoes"><button type="button" class="botao mini claro" id="t-testar-url">Abrir a página intermediária</button></div>
       <label for="t-alt0">Altura inicial do iframe na página hospedeira <small>(pixels)</small></label>
       <input type="number" id="t-alt0" value="1600" min="400" max="20000" step="100">
       </div>
@@ -705,7 +732,8 @@
   <p class="ajuda"><b>Modo "Componente direto na página final":</b> cole o <b>código 1</b> em um <b>componente HTML</b> da própria página onde o calendário deve aparecer. Nada mais é necessário.</p>
   <p class="ajuda"><b>Modo "Página intermediária embutida por iframe" (3 códigos):</b> 1) <b>código 1</b> → componente HTML da <b>página intermediária</b>; 2) <b>código 2</b> → campo <b>Tag Body</b> da <b>página intermediária</b>; 3) <b>código 3</b> → componente HTML da <b>página hospedeira</b> (é o iframe que embute a intermediária).</p>
   <p class="ajuda"><b>Pré-requisitos no Prosite:</b> o caminho do booking type deve existir no TidyCal; se for usar âncora de botão até o calendário (gerada na aba Captação de leads), a coluna do componente do código 3 deve ter o <b>ID Html</b> da âncora sem o # (ex.: <b>reserva</b>) na aba <b>Avançado</b>.</p>
-  <p class="ajuda"><b>Calibragem das alturas:</b> abra a página publicada, escolha data e horário e confira se o formulário abre inteiro, sem barra de rolagem interna — no computador e no celular. Se cortar, aumente a altura correspondente (desktop ou mobile) e gere novamente.</p>
+  <p class="ajuda"><b>Calibragem das alturas:</b> comece pelo <b>tipo de agendamento</b>, que preenche as duas alturas, e confirme na página publicada: escolha data e horário e veja se o formulário abre inteiro, sem barra de rolagem interna — no computador e no celular. Se cortar, aumente a altura correspondente (a marca vira "ajuste fino" sozinha) e gere novamente.</p>
+  <p class="ajuda"><b>Os dois botões de teste não geram nada:</b> abrem numa aba nova o endereço montado com o que está nos campos — <b>tidycal.com/</b> + caminho, e a página intermediária. Servem para conferir o endereço antes de publicar. O botão da intermediária só aceita endereço <b>http(s) completo</b>: um caminho começando com barra é resolvido no domínio do site publicado, que não é o desta ferramenta, e abriria a página errada.</p>
   </div>
 </div>
 
@@ -1042,15 +1070,58 @@
     </div>
   </div>
 
-  <div class="secao"><span class="secao-n">3</span> Prévia e códigos gerados</div>
+  <div class="secao"><span class="secao-n">3</span> Biblioteca de presets</div>
+  <div class="grade">
+    <div>
+      <fieldset>
+      <legend>Salvar a configuração atual</legend>
+      <label for="b-pnome">Nome do preset <small>(o nome da campanha e do lugar onde o efeito é usado)</small></label>
+      <input type="text" id="b-pnome" value="" placeholder="ex.: Natal 2026 - card do plano">
+      <div class="acoes"><button class="botao" type="button" id="b-psalvar">Salvar preset</button></div>
+      <p class="ajuda"><b>O que o preset guarda:</b> tudo o que está configurado nesta aba — efeito, fundo, cores, espessura, halo, texto, espaçamento e também o <b>fundo da prévia</b>, que é como você confere o resultado. Não guarda a própria biblioteca nem a escolha de consolidação, que é sobre <i>outro</i> componente.</p>
+      <p class="ajuda"><b>Onde eles ficam:</b> no <b>armazenamento deste navegador</b>, junto com o resto da configuração da ferramenta — mesma regra do estado das seis abas. <b>Não acompanham outro computador</b>, nem outro navegador no mesmo computador, e somem se você limpar os dados do site. Para levar uma identidade adiante, o que viaja é o <b>código gerado</b>, não o preset.</p>
+      <p class="ajuda"><b>Nome repetido:</b> salvar com o nome de um preset que já existe <b>substitui</b> aquele preset, depois de confirmar. Não se criam dois com o mesmo nome — a lista e a consolidação identificam o preset pelo nome, e dois iguais deixariam de dizer qual é qual.</p>
+      </fieldset>
+    </div>
+    <div>
+      <fieldset>
+      <legend>Presets salvos</legend>
+      <div id="b-plista"></div>
+      <p class="ajuda"><b>Aplicar</b> substitui o que está na tela pela configuração do preset (a prévia acompanha na hora). <b>Remover</b> apaga o preset — não mexe em nenhum código já colado no site.</p>
+      </fieldset>
+    </div>
+  </div>
+
+  <div class="secao"><span class="secao-n">4</span> Prévia e códigos gerados</div>
   <div class="acoes" style="margin-bottom:14px"><button class="botao" id="b-gerar">Gerar código</button></div>
   <div class="grade">
     <div>
-      <div class="pv-area">
+      <fieldset>
+      <legend>Fundo da prévia <small>(não entra no código gerado)</small></legend>
+      <div class="radios">
+      <label><input type="radio" name="b-pvfundo" value="papel" checked><span>Papel da ferramenta</span></label>
+      <label><input type="radio" name="b-pvfundo" value="claro"><span>Página clara</span></label>
+      <label><input type="radio" name="b-pvfundo" value="escuro"><span>Página escura</span></label>
+      <label><input type="radio" name="b-pvfundo" value="cor"><span>Cor da minha página</span></label>
+      </div>
+      <div id="b-pvcor-campo">
+      <label>Cor de fundo da prévia <small>(capture com o conta-gotas a cor real da seção onde o componente vai ficar)</small></label>
+      <div class="cor-linha"><input type="color" id="b-pvcor" value="#23281F"><input type="text" id="b-pvcor-t" value="#23281F"></div>
+      </div>
+      <p class="ajuda"><b>Por que isto existe:</b> cor renderizada muda de percepção conforme o que está atrás dela — o halo é semitransparente e se mistura com o fundo, e um facho que brilha sobre papel claro pode sumir sobre uma seção escura. Sobre o fundo real da página, dá para ver isso <b>antes</b> de publicar. Esta escolha é só da prévia: os códigos 1 e 2 saem exatamente iguais com qualquer fundo aqui.</p>
+      </fieldset>
+      <div class="pv-area" id="b-pv-area">
       <div id="b-pv-box"></div>
       </div>
     </div>
     <div>
+      <fieldset id="b-consol-campo">
+      <legend>Código 1 para dois efeitos no mesmo site</legend>
+      <label for="b-consol">Incluir também a animação de um preset salvo</label>
+      <select id="b-consol"><option value="">Não incluir — só o efeito desta tela</option></select>
+      <p class="ajuda"><b>Para que serve:</b> o código 1 é colado <b>uma vez</b> no cabeçalho do site e vale para o site inteiro. Quando o site usa dois efeitos diferentes — na mesma página ou em páginas diferentes —, em vez de colar dois blocos concorrentes nesse campo, escolha aqui o preset do outro componente e o código 1 sai com as <b>duas</b> animações e as duas regras de movimento reduzido, num bloco só.</p>
+      <p class="ajuda"><b>O que ele não resolve:</b> efeitos <b>diferentes</b> têm nomes de animação diferentes e convivem; o <b>mesmo</b> efeito com parâmetros diferentes colide — os dois se chamariam <code>fc-borda-listras</code> e valeria o último. Por isso a ferramenta <b>recusa</b> consolidar um preset do mesmo efeito da tela, em vez de emitir dois <code>@keyframes</code> de mesmo nome. Dois componentes com o mesmo efeito precisam dos <b>mesmos</b> parâmetros de animação.</p>
+      </fieldset>
       <div class="saida">
       <h3>1) Código global — Tag Head do site
       <button class="botao mini" id="b-copy1" style="margin-left:8px">Copiar</button>
@@ -1070,11 +1141,11 @@
 
   <div class="instrucoes">
   <h3>Instrução de uso do código gerado</h3>
-  <p class="ajuda"><b>Onde colar o código 1 (global):</b> em <b>Configurações → Códigos personalizados → campo do cabeçalho (head)</b> do site, com a tag style inclusa. Cola-se <b>uma única vez</b>: ele define a animação e vale para o site inteiro. Se usar efeitos diferentes em componentes diferentes, cole os blocos de cada efeito no mesmo campo (cada um tem nome próprio e não conflita).</p>
+  <p class="ajuda"><b>Onde colar o código 1 (global):</b> em <b>Configurações → Códigos personalizados → campo do cabeçalho (head)</b> do site, com a tag style inclusa. Cola-se <b>uma única vez</b>: ele define a animação e vale para o site inteiro. Se usar efeitos diferentes em componentes diferentes, salve o primeiro como <b>preset</b> e use a <b>consolidação do código 1</b> (seção 4): sai um bloco só com as duas animações, em vez de dois blocos concorrentes no mesmo campo. Colar os dois blocos separados continua funcionando — cada efeito tem nome próprio e não conflita —, mas aí são dois trechos para manter.</p>
   <p class="ajuda"><b>A regra de acessibilidade que vem junto:</b> ela desliga <b>apenas esta animação</b> para quem escolheu "reduzir movimento" no sistema — redefinindo a própria animação com um único quadro. A borda para de se mexer e continua visível (o degradê fica parado, o halo vira um anel estático). Nada mais do site é afetado: a versão anterior deste código usava <code>*</code> e apagava a animação de todas as páginas, inclusive as do tema. Se o efeito escolhido for <b>borda fixa</b>, não há animação nenhuma e o código 1 não existe.</p>
   <p class="ajuda"><b>Onde colar o código 2 (componente):</b> no campo <b>CSS Customizado</b> do próprio componente, no editor. São propriedades soltas, sem seletor — o Prosite as aplica direto no elemento do componente, então <b>não é preciso ID Html nem classe</b>. Se em algum componente o campo não aceitar propriedades soltas, inspecione o elemento publicado, pegue a classe que a Alboom gera e envolva tudo em <code>.classe { ... }</code> — nesse caso, coloque a regra completa no head.</p>
   <p class="ajuda"><b>Regra de ouro:</b> at-rules (<code>@keyframes</code>, <code>@media</code>) <b>só funcionam no head</b>; o campo do componente aceita apenas propriedades. Se a borda aparecer parada, é quase sempre porque o código 1 não foi colado no head — ou porque o nome da animação foi alterado em um dos dois lugares.</p>
-  <p class="ajuda"><b>Depois de colar:</b> salve, <b>publique</b> e confira em <b>aba anônima</b> (evita cache). Verifique se a borda aparece e se está se movendo, e teste no celular. Cores mudam de percepção conforme o contexto da página — vale calibrar na página real, não só na prévia.</p>
+  <p class="ajuda"><b>Depois de colar:</b> salve, <b>publique</b> e confira em <b>aba anônima</b> (evita cache). Verifique se a borda aparece e se está se movendo, e teste no celular. Cores mudam de percepção conforme o contexto da página — antes de publicar, ponha a prévia sobre o <b>fundo real da seção</b> (seção 4); depois de publicar, confirme na página, que é onde entram também a tipografia e o que estiver em volta.</p>
   <p class="ajuda"><b>Dica de conversão:</b> use a borda animada em <b>um único</b> elemento por página — normalmente o card do plano recomendado ou o bloco da oferta principal. Ela também substitui bem um selo do tipo "O mais escolhido" quando a plataforma não permite badge flutuante (nesse caso, escreva o texto na primeira linha do card).</p>
   </div>
 </div>
@@ -1479,14 +1550,24 @@ function bHexRgb(h){
    regressiva NAO entra aqui: o c-mob dela e um campo unico com clamp tambem dentro da cCfg, e a
    aba e a referencia desta fase -- nao se mexe nela. */
 function fcFaixa(tabela,id){var i;for(i=0;i<tabela.length;i++){if(tabela[i][0]===id)return tabela[i];}return null;}
-function fcPreso(tabela,id){
-  var f=fcFaixa(tabela,id),el=$(id);
-  if(!f||!el)return null;
-  var v=parseFloat(String(el.value).replace(',','.'));
+/* O clamp em si, separado da origem do valor. Ele nasceu dentro de fcPreso, que le do campo;
+   a biblioteca de presets da aba Bordas (fase 5) precisou prender numeros que NAO tem campo na
+   tela, e a primeira versao copiou estas sete linhas para um bPresoDe proprio -- duas copias do
+   mesmo clamp, exatamente o que esta serie vem desfazendo. Aqui o algoritmo passa a ter um dono
+   so: fcPreso continua sendo a porta de quem le do DOM (assinatura e comportamento intactos), e
+   quem tem o valor na mao chama fcPrender direto. */
+function fcPrender(f,valor){
+  if(!f)return null;
+  var v=parseFloat(String(valor).replace(',','.'));
   if(isNaN(v))v=f[1];
   if(f[2]!=null&&v<f[2])v=f[2];
   if(f[3]!=null&&v>f[3])v=f[3];
   return f[4]?Math.round(v):v;
+}
+function fcPreso(tabela,id){
+  var f=fcFaixa(tabela,id),el=$(id);
+  if(!f||!el)return null;
+  return fcPrender(f,el.value);
 }
 function fcAjustar(tabela,id){
   var el=$(id);if(!el)return false;
@@ -3369,13 +3450,18 @@ document.addEventListener('change',function(e){
 function tColeta(){
   return {
     t:{path:$('t-path').value,desk:$('t-desk').value,mob:$('t-mob').value,larg:$('t-larg').value,
-      arq:radio('t-arq'),url:$('t-url').value,alt0:$('t-alt0').value}
+      arq:radio('t-arq'),url:$('t-url').value,alt0:$('t-alt0').value,preset:radio('t-preset')}
   };
 }
 function tRestaura(st){
   if(!st.t)return;
   $('t-path').value=st.t.path;$('t-desk').value=st.t.desk;$('t-mob').value=st.t.mob;
   $('t-larg').value=st.t.larg;setRadio('t-arq',st.t.arq);$('t-url').value=st.t.url;$('t-alt0').value=st.t.alt0;
+  /* O preset e marca das alturas, nao dono delas: quem manda sao os dois campos acima, ja
+     restaurados. Estado gravado antes desta versao nao tem a chave 'preset' -- em vez de
+     deixar o radio no padrao do HTML (que diria "formulario padrao" sobre alturas que podem
+     ser outras), a marca e deduzida das alturas restauradas. */
+  setRadio('t-preset',st.t.preset||tPresetInferir());
 }
 
 /* Faixa declarada de cada campo numerico da aba: [id, padrao, min, max].
@@ -3410,6 +3496,83 @@ function tUrlOk(v){
   if(limpo.charAt(0)==='/'&&limpo.charAt(1)!=='/')return true;
   return false;
 }
+/* ===== Presets de altura por tipo de agendamento (R17) =====
+   O operador nao sabe de quantos pixels o calendario dele precisa; sabe que tipo de
+   agendamento esta montando. Cada linha e [altura desktop, altura celular].
+   Procedencia dos numeros, para nao virar precisao inventada: 'padrao' e o par calibrado na
+   campanha de Natal, medido em producao. 'curto' e 'longo' sao esse par deslocado -- para
+   menos quando o formulario tem so o nome, para mais quando tem perguntas extras --, e a
+   ajuda do campo diz isso com todas as letras. Sao pontos de partida, e a conferencia na
+   pagina publicada continua sendo o que decide.
+   A largura de corte (t-larg) NAO entra: ela descreve o tamanho da TELA, nao o tamanho do
+   formulario, e 700 e o valor validado independentemente do tipo de agendamento.
+   O preset nao e um modo: escolher um so ESCREVE os dois numeros nos campos, que continuam
+   editaveis. Quem edita um deles volta para 'custom' na hora (ver tPresetInferir e a partida
+   da aba) -- senao o rotulo diria "formulario padrao" sobre um par que ja nao e o dele, que e
+   o mesmo defeito de rotulo que esta fase corrigiu no halo da aba Bordas. */
+var T_PRESETS={curto:[2000,2300],padrao:[2350,2700],longo:[2800,3200]};
+function tPresetAplicar(){
+  var k=radio('t-preset'),p=T_PRESETS[k];
+  if(!p)return false;   /* 'custom': o operador manda nos campos, nada e escrito por cima */
+  $('t-desk').value=p[0];$('t-mob').value=p[1];
+  return true;
+}
+/* Qual preset descreve o que esta nos campos AGORA. Devolve 'custom' quando nenhum descreve. */
+function tPresetInferir(){
+  var d=String($('t-desk').value),m=String($('t-mob').value),k;
+  for(k in T_PRESETS){
+    if(!Object.prototype.hasOwnProperty.call(T_PRESETS,k))continue;
+    if(String(T_PRESETS[k][0])===d&&String(T_PRESETS[k][1])===m)return k;
+  }
+  return 'custom';
+}
+
+/* ===== Botao "abrir a pagina de teste" (R15) =====
+   O caminho digitado vira "https://tidycal.com/"+caminho e abre numa aba nova. O charset e
+   restrito de proposito: sem isso um ":" ou um "//" digitado no campo transformaria o prefixo
+   em parte de OUTRO endereco -- "..//evil.com/x" resolve para outro host. Aqui o campo so
+   aceita segmentos de caminho, entao o host nunca sai de tidycal.com.
+   A validacao vale para o BOTAO, nao para tGerar: o gerador continua exatamente como estava,
+   porque este recurso e sobre conferir o endereco antes de publicar, e nao sobre recusar
+   caminhos que hoje geram codigo. */
+function tPathNorm(){
+  return $('t-path').value.trim().replace(/^https?:\/\/tidycal\.com\//,'').replace(/^\//,'');
+}
+function tPathOk(v){
+  /* segmento "." ou ".." e navegacao de caminho, nao nome de booking type: com o host preso em
+     tidycal.com ele nao sai do dominio, mas monta um endereco que nao e o que o operador leu no
+     campo -- e o botao existe justamente para ele conferir o que vai ser embutido. */
+  if(/(^|\/)\.{1,2}(\/|$)/.test(String(v)))return false;
+  return /^[A-Za-z0-9._~-]+(\/[A-Za-z0-9._~-]+)*$/.test(String(v));
+}
+/* aba nova sem herdar o window desta ferramenta; se o navegador bloquear, o operador fica
+   sabendo em vez de achar que o endereco esta errado */
+function tAbrir(url){
+  var w=null;
+  try{w=window.open(url,'_blank');}catch(e){w=null;}
+  if(w){try{w.opener=null;}catch(e2){}return;}
+  alert('O navegador bloqueou a aba nova. Libere os pop-ups desta pagina e clique de novo. O endereco montado e: '+url);
+}
+function tTestar(){
+  var p=tPathNorm();
+  if(!p){alert('Informe o caminho do booking type antes de abrir a pagina de teste.');return;}
+  if(!tPathOk(p)){alert('O caminho do booking type aceita apenas letras, numeros, ponto, hifen, sublinhado e barra separando os segmentos (ex.: usuario/nome-do-agendamento). O valor digitado ("'+p+'") tem outro caractere: com ele, o endereco montado deixaria de apontar para tidycal.com.');return;}
+  tAbrir('https://tidycal.com/'+p);
+}
+function tTestarUrl(){
+  var u=$('t-url').value.trim();
+  /* dois avisos, porque sao dois problemas diferentes: campo em branco e campo preenchido com
+     endereco que o tUrlOk recusa. Um texto so descrevia o vazio e deixava quem digitou algo
+     torto procurando um campo que ja esta preenchido. */
+  if(!u){alert('Informe o endereco da pagina intermediaria antes de abrir: um endereco http(s) completo (https://www.fotocerta.com.br/iframe-agendamento-natal).');return;}
+  if(!tUrlOk(u)){alert('O endereco digitado ("'+u+'") nao e um endereco que este botao possa abrir. Sao aceitos apenas http(s) completos (https://www.fotocerta.com.br/iframe-agendamento-natal); outros esquemas, como javascript:, e endereco comecando com duas barras, que resolve para OUTRO host, nao sao.');return;}
+  /* O caminho relativo e valido para o codigo 3 -- la ele e resolvido no dominio do SITE --,
+     mas aqui seria resolvido no dominio desta ferramenta, e o botao abriria uma pagina que
+     nao existe. Recusar e dizer por que vale mais do que abrir a pagina errada. */
+  if(u.charAt(0)==='/'){alert('Este botao so abre endereco http(s) completo. O caminho relativo ("'+u+'") e resolvido no dominio do site publicado, que nao e o desta ferramenta -- abrir daqui levaria a uma pagina que nao existe. Para testar, cole o endereco completo da pagina intermediaria.');return;}
+  tAbrir(u);
+}
+
 function tArqToggle(){
   var emb=radio('t-arq')==='embutida';
   $('t-emb').style.display=emb?'block':'none';
@@ -3421,7 +3584,9 @@ document.addEventListener('change',function(e){
 });
 
 function tGerar(){
-  var path=$('t-path').value.trim().replace(/^https?:\/\/tidycal\.com\//,'').replace(/^\//,'');
+  /* mesma normalizacao que o botao de teste usa: uma implementacao so, senao o endereco
+     conferido no botao e o endereco embutido no codigo poderiam divergir. */
+  var path=tPathNorm();
   if(!path){alert('Informe o caminho do booking type.');return;}
   var emb=radio('t-arq')==='embutida';
   var u=$('t-url').value.trim();
@@ -4376,21 +4541,37 @@ function uGerar(){
 /* ============================================================
    BORDAS COM EFEITO (CSS puro: head + CSS do componente)
    ============================================================ */
+/* A biblioteca de presets desta aba (R19). Cada item e {nome, cfg}, com cfg no formato de
+   bCampos(). Vive dentro do fragmento 'b' do estado gravado -- nao ganha chave de topo
+   propria, entao a lista ABAS e a estrutura de isolamento por aba ficam como estao. */
+var bPresets=[];
+
 /* Salvamento e restauracao desta aba (registradas em ABAS). */
-function bColeta(){
-  return {
-    b:{efeito:radio('b-efeito'),fundo:radio('b-fundo'),f1:$('b-f1-t').value,f2:$('b-f2-t').value,
-      fang:$('b-fang').value,fallback:radio('b-fallback'),
-      esp:$('b-esp').value,raio:$('b-raio').value,
-      c1:$('b-c1-t').value,c2:$('b-c2-t').value,c3:$('b-c3-t').value,
-      facholarg:$('b-facholarg').value,listra:$('b-listra').value,vel:$('b-vel').value,
-      halo:radio('b-halo'),haloraio:$('b-haloraio').value,haloop:$('b-haloop').value,
-      txt:radio('b-txt'),c4:$('b-c4-t').value,pad:$('b-pad').value}
-  };
+/* Os campos da aba num objeto so. Isto e o que a aba GRAVA e tambem o que um preset GUARDA:
+   uma leitura so. Com duas, um campo novo entraria no estado e nao no preset (ou o
+   contrario), e aplicar um preset devolveria a aba pela metade, sem nada avisando. */
+function bCampos(){
+  return {efeito:radio('b-efeito'),fundo:radio('b-fundo'),f1:$('b-f1-t').value,f2:$('b-f2-t').value,
+    fang:$('b-fang').value,fallback:radio('b-fallback'),
+    esp:$('b-esp').value,raio:$('b-raio').value,
+    c1:$('b-c1-t').value,c2:$('b-c2-t').value,c3:$('b-c3-t').value,
+    facholarg:$('b-facholarg').value,listra:$('b-listra').value,vel:$('b-vel').value,
+    halo:radio('b-halo'),haloraio:$('b-haloraio').value,haloop:$('b-haloop').value,
+    txt:radio('b-txt'),c4:$('b-c4-t').value,pad:$('b-pad').value,
+    /* o fundo da previa entra: e como o operador confere aquele efeito, e um preset que
+       volta com o fundo errado esconde justamente o que o R18 veio mostrar. Nao sai no
+       codigo gerado -- ver bPvFundo. */
+    pvfundo:radio('b-pvfundo'),pvcor:$('b-pvcor-t').value};
 }
-function bRestaura(st){
-  if(!st.b)return;
-  var B=st.b;
+function bColeta(){
+  var o=bCampos();
+  o.presets=bPresets;            /* a biblioteca; um preset nao guarda a biblioteca */
+  o.consol=$('b-consol').value;  /* escolha sobre OUTRO componente; tambem nao entra no preset */
+  return {b:o};
+}
+/* Escreve na tela um objeto no formato de bCampos(). Serve ao estado gravado E ao "Aplicar"
+   de um preset -- pelo mesmo motivo de bCampos: uma implementacao so. */
+function bAplicarCampos(B){
   setRadio('b-efeito',B.efeito);setRadio('b-fundo',B.fundo);setRadio('b-fallback',B.fallback);
   setRadio('b-halo',B.halo);setRadio('b-txt',B.txt);
   $('b-f1-t').value=B.f1;$('b-f1').value=corValida(B.f1)?B.f1:'#8A4A32';
@@ -4403,6 +4584,20 @@ function bRestaura(st){
   $('b-haloraio').value=B.haloraio;$('b-haloop').value=B.haloop;
   $('b-c4-t').value=B.c4;$('b-c4').value=corValida(B.c4)?B.c4:'#F7EFDF';
   $('b-pad').value=B.pad;
+  /* Campos da fase 5: estado gravado antes dela nao os tem. Sem o "||" o campo exibiria a
+     palavra "undefined" -- e o padrao do HTML e o mesmo que bPvFundo assume. */
+  setRadio('b-pvfundo',B.pvfundo||'papel');
+  var pc=corValida(B.pvcor)?B.pvcor:'#23281F';
+  $('b-pvcor-t').value=pc;$('b-pvcor').value=pc;
+}
+function bRestaura(st){
+  if(!st.b)return;
+  bAplicarCampos(st.b);
+  bPresets=bPresetsLer(st.b.presets);
+  bPresetsRender();
+  var sel=$('b-consol');
+  /* depois de bPresetsRender: as opcoes precisam existir antes de o valor ser marcado */
+  if(sel)sel.value=st.b.consol||'';
 }
 
 /* Faixa declarada de cada campo numerico da aba: [id, padrao, min, max, inteiro].
@@ -4431,6 +4626,193 @@ function bPadOk(v){
   return true;
 }
 function bCor(id,def){var v=$(id+'-t').value;return corValida(v)?v:def;}
+/* fcPreso le o valor do PROPRIO campo, e um preset nao tem campo na tela: aqui o valor vem do
+   preset e a faixa continua vindo de B_NUMS. O clamp e o de fcPrender -- o MESMO que fcPreso
+   usa --, entao a tela e o preset nao podem divergir nem na faixa nem na aritmetica.
+   Na pratica ele quase nunca prende nada: bPresetSalvar roda fcAjustarTodos antes de congelar
+   os numeros, entao um preset nasce dentro da faixa. Ele pega o caso do armazenamento
+   adulterado a mao, que sem isto sairia como CSS com numero absurdo dentro do codigo de OUTRO
+   componente -- o mais dificil de rastrear que esta aba pode produzir. */
+function bPresoDe(id,v){
+  return fcPrender(fcFaixa(B_NUMS,id),v);
+}
+/* A configuracao que bMontar consome, lida da tela. Antes bMontar lia o DOM por dentro, e
+   por isso so sabia montar o componente que estava na tela; a consolidacao do codigo 1 (R20)
+   precisa montar tambem o de um preset salvo, que nao esta em campo nenhum. Duas entradas,
+   um gerador so -- mesmo desenho do cBloco(cfg) da Contagem regressiva. */
+function bCfgDom(){
+  var ef=radio('b-efeito');
+  return {efeito:ef,fundo:radio('b-fundo'),
+    esp:bPreso('b-esp'),raio:bPreso('b-raio'),
+    c1:bCor('b-c1','#9C5638'),c2:bCor('b-c2','#FFC94A'),c3:bCor('b-c3','#FFF6D8'),
+    L:bPreso('b-facholarg'),listra:bPreso('b-listra'),vel:bPreso('b-vel'),
+    /* No efeito "pulso" o halo e o proprio efeito: os campos valem sempre, sem o radio. */
+    halo:(ef==='pulso')||(radio('b-halo')==='sim'),
+    haloraio:bPreso('b-haloraio'),haloop:bPreso('b-haloop'),
+    f1:bCor('b-f1','#8A4A32'),f2:bCor('b-f2','#B5674A'),fang:bPreso('b-fang'),
+    fallback:(radio('b-fallback')==='sim'),
+    comTexto:(radio('b-txt')==='sim'),corTexto:bCor('b-c4','#F7EFDF'),
+    pad:$('b-pad').value.trim()};
+}
+/* A mesma configuracao, vinda de um preset salvo (formato de bCampos). */
+function bCfgPreset(C){
+  function cor(v,def){return corValida(v)?v:def;}
+  var ef=C.efeito;
+  return {efeito:ef,fundo:C.fundo,
+    esp:bPresoDe('b-esp',C.esp),raio:bPresoDe('b-raio',C.raio),
+    c1:cor(C.c1,'#9C5638'),c2:cor(C.c2,'#FFC94A'),c3:cor(C.c3,'#FFF6D8'),
+    L:bPresoDe('b-facholarg',C.facholarg),listra:bPresoDe('b-listra',C.listra),vel:bPresoDe('b-vel',C.vel),
+    halo:(ef==='pulso')||(C.halo==='sim'),
+    haloraio:bPresoDe('b-haloraio',C.haloraio),haloop:bPresoDe('b-haloop',C.haloop),
+    f1:cor(C.f1,'#8A4A32'),f2:cor(C.f2,'#B5674A'),fang:bPresoDe('b-fang',C.fang),
+    fallback:(C.fallback==='sim'),
+    comTexto:(C.txt==='sim'),corTexto:cor(C.c4,'#F7EFDF'),
+    pad:String(C.pad||'').trim()};
+}
+
+/* ===== Fundo da previa (R18) =====
+   So a previa. Nao passa por bMontar, nao entra em cfg, nao aparece no codigo 1 nem no 2 --
+   e por isso o bloco entregue sai igual com qualquer fundo escolhido aqui. */
+/* cabecalho da regra de movimento reduzido: uma string so para o codigo 1 e para a previa,
+   senao as duas poderiam passar a casar condicoes diferentes sem ninguem notar */
+var B_MEDIA_RM='@media (prefers-reduced-motion: reduce) {';
+var B_PV_FUNDOS={papel:'#F5F1E6',claro:'#FFFFFF',escuro:'#141414'};
+function bPvFundo(){
+  var k=radio('b-pvfundo');
+  if(k==='cor')return corValida($('b-pvcor-t').value)?$('b-pvcor-t').value:'#23281F';
+  return B_PV_FUNDOS[k]||B_PV_FUNDOS.papel;
+}
+/* legenda legivel sobre fundo escuro: a cor da tinta acompanha a luminancia do fundo */
+function bPvTinta(hex){
+  var r=bHexRgb(hex).split(', ');
+  var lum=(0.299*parseInt(r[0],10)+0.587*parseInt(r[1],10)+0.114*parseInt(r[2],10));
+  return lum>140?'#6B6455':'#C9C3B4';
+}
+
+/* ===== Biblioteca de presets (R19) ===== */
+/* Leitura defensiva da biblioteca gravada. Checar so "e um Array?" era raso: um TEXTO no lugar
+   da lista tambem tem .length e passaria por duck typing, e um Array com lixo dentro passava
+   inteiro -- ["texto"] desenhava "undefined -- borda undefinedpx" e [null] estourava um
+   TypeError que jogava a aba inteira em so-leitura. A rede da fase 2 segurava (falha visivel,
+   outras abas intactas), mas a aba parava por causa de um item podre. Agora a lista e filtrada
+   item a item e o que sobra e usavel; o que foi deixado de fora e ANUNCIADO na propria aba, em
+   vez de sumir calado. */
+function bPresetValido(x){
+  return !!(x&&typeof x==='object'&&Object.prototype.toString.call(x)!=='[object Array]'&&
+    typeof x.nome==='string'&&x.nome.trim()&&
+    x.cfg&&typeof x.cfg==='object'&&typeof x.cfg.efeito==='string');
+}
+var bPresetsDescartados=0;
+function bPresetsLer(v){
+  var out=[],i;
+  bPresetsDescartados=0;
+  if(v===undefined||v===null)return out;        /* versao anterior: nunca houve biblioteca */
+  if(Object.prototype.toString.call(v)!=='[object Array]'){
+    bPresetsDescartados=1;                       /* nem lista e: o que estivesse ali e ilegivel */
+    return out;
+  }
+  for(i=0;i<v.length;i++){
+    if(bPresetValido(v[i]))out.push(v[i]);
+    else bPresetsDescartados++;
+  }
+  return out;
+}
+var B_EFEITO_NOME={brilho:'brilho giratorio',gradiente:'degrade continuo',pulso:'halo pulsante',
+  listras:'listras em movimento',fixa:'borda fixa'};
+function bPresetResumo(C){
+  var t=B_EFEITO_NOME[C.efeito]||String(C.efeito||'');
+  t+=' \u2014 borda '+C.esp+'px, cantos '+C.raio+'px';
+  if(C.efeito!=='fixa')t+=', ciclo '+C.vel+'s';
+  return t;
+}
+/* nomes sao comparados sem diferenca de caixa e sem espaco nas pontas: "Natal 2026" e
+   "natal 2026 " sao o mesmo preset para quem esta olhando a lista, entao sao o mesmo aqui */
+function bPresetIndice(nome){
+  var alvo=String(nome).trim().toLowerCase(),i;
+  for(i=0;i<bPresets.length;i++){
+    if(String(bPresets[i].nome).trim().toLowerCase()===alvo)return i;
+  }
+  return -1;
+}
+function bPresetSalvar(){
+  var nome=$('b-pnome').value.trim();
+  if(!nome){alert('De um nome ao preset antes de salvar. E por ele que a lista e a consolidacao do codigo 1 identificam a configuracao.');return;}
+  if(nome.length>60){alert('O nome do preset passa de 60 caracteres. Um nome curto (campanha + onde o efeito e usado) e o que cabe na lista e na caixa de consolidacao.');return;}
+  /* prende os numeros A VISTA antes de congelar a configuracao: um preset guardado com valor
+     fora da faixa devolveria, meses depois, um numero que o proprio campo ja nao aceita */
+  if(fcAjustarTodos(B_NUMS))salvarEstado();
+  var m=bMontar(bCfgDom());
+  if(m.erro){alert('A configuracao atual nao gera codigo, entao nao ha o que salvar: '+m.erro);return;}
+  var i=bPresetIndice(nome);
+  if(i>=0&&!confirm('Ja existe um preset chamado "'+bPresets[i].nome+'". Substituir a configuracao dele pela que esta na tela? A anterior nao volta.'))return;
+  var novo={nome:nome,cfg:bCampos()};
+  if(i>=0)bPresets[i]=novo;else bPresets.push(novo);
+  $('b-pnome').value='';
+  bPresetsRender();salvarEstado();
+}
+function bPresetAplicar(i){
+  var p=bPresets[i];
+  if(!p||!p.cfg)return;
+  bAplicarCampos(p.cfg);
+  bToggles();bPreview();salvarEstado();
+}
+function bPresetRemover(i){
+  var p=bPresets[i];
+  if(!p)return;
+  if(!confirm('Remover o preset "'+p.nome+'"? Isto apaga so o preset -- nenhum codigo ja colado no site e afetado.'))return;
+  bPresets.splice(i,1);
+  bPresetsRender();salvarEstado();
+}
+function bPresetsRender(){
+  var lista=$('b-plista'),sel=$('b-consol'),i,h,li,btns,aviso='';
+  if(bPresetsDescartados>0){
+    aviso='<p class="ajuda" style="border-color:#8C1D18;color:#8C1D18"><b>'+bPresetsDescartados+
+      (bPresetsDescartados===1?' item da biblioteca estava ilegivel e ficou de fora.'
+                              :' itens da biblioteca estavam ilegiveis e ficaram de fora.')+
+      '</b> Isso acontece quando o armazenamento do navegador e editado a mao ou corrompe. '+
+      'O que estava legivel continua na lista; o que nao aparece aqui precisa ser salvo de novo.</p>';
+  }
+  if(lista){
+    if(!bPresets.length){
+      lista.innerHTML=aviso+'<p class="vazio">Nenhum preset salvo neste navegador.</p>';
+    }else{
+      h=aviso+'<ul class="b-presets">';
+      for(i=0;i<bPresets.length;i++){
+        h+='<li><div class="info"><div class="nome">'+escHtml(bPresets[i].nome)+'</div>'+
+           '<div class="resumo">'+escHtml(bPresetResumo(bPresets[i].cfg||{}))+'</div></div>'+
+           '<div class="ctrl"><button type="button" class="botao mini" data-b-aplicar="'+i+'">Aplicar</button>'+
+           '<button type="button" class="botao mini claro" data-b-remover="'+i+'">Remover</button></div></li>';
+      }
+      lista.innerHTML=h+'</ul>';
+      /* addEventListener, nunca onclick no HTML: e a regra do projeto e aqui a lista e
+         redesenhada a cada mudanca, entao os listeners nascem junto com os botoes */
+      btns=lista.querySelectorAll('[data-b-aplicar]');
+      for(i=0;i<btns.length;i++){
+        (function(n,el){el.addEventListener('click',function(){bPresetAplicar(n);});})(parseInt(btns[i].getAttribute('data-b-aplicar'),10),btns[i]);
+      }
+      btns=lista.querySelectorAll('[data-b-remover]');
+      for(i=0;i<btns.length;i++){
+        (function(n,el){el.addEventListener('click',function(){bPresetRemover(n);});})(parseInt(btns[i].getAttribute('data-b-remover'),10),btns[i]);
+      }
+    }
+  }
+  if(sel){
+    var antes=sel.value,o;
+    sel.innerHTML='';
+    o=document.createElement('option');o.value='';o.text='N\u00e3o incluir \u2014 s\u00f3 o efeito desta tela';sel.appendChild(o);
+    for(i=0;i<bPresets.length;i++){
+      /* preset de borda fixa nao tem animacao: nao ha o que consolidar, entao nem aparece */
+      if(!bPresets[i].cfg||bPresets[i].cfg.efeito==='fixa')continue;
+      o=document.createElement('option');
+      /* .text, e nao innerHTML: o nome e texto do operador e aqui ele nao vira marcacao */
+      o.value=bPresets[i].nome;o.text=bPresets[i].nome;
+      sel.appendChild(o);
+    }
+    sel.value=antes;
+    /* preset removido enquanto estava escolhido: a caixa volta para "nao incluir" sozinha */
+    if(sel.value!==antes)sel.value='';
+  }
+}
 
 function bToggles(){
   var ef=radio('b-efeito');
@@ -4452,6 +4834,11 @@ function bToggles(){
   el=$('b-halo-aviso');if(el)el.style.display=pulso?'block':'none';
   el=$('b-halo-campos');if(el)el.style.display=(pulso||radio('b-halo')==='sim')?'block':'none';
   el=$('b-txt-campo');if(el)el.style.display=(radio('b-txt')==='sim')?'block':'none';
+  /* a cor livre do fundo da previa so vale na opcao "cor da minha pagina" */
+  el=$('b-pvcor-campo');if(el)el.style.display=(radio('b-pvfundo')==='cor')?'block':'none';
+  /* Consolidacao do codigo 1: na borda fixa nao existe codigo 1 (nao ha animacao), entao a
+     caixa some em vez de ficar na tela oferecendo consolidar com um bloco que nao sai. */
+  el=$('b-consol-campo');if(el)el.style.display=(ef==='fixa')?'none':'block';
 }
 document.addEventListener('change',function(e){
   if(e.target.name&&e.target.name.indexOf('b-')===0)bToggles();
@@ -4473,30 +4860,32 @@ function bStops(base,facho,nucleo,L){
   return s.join(', ');
 }
 
-/* monta {anim, keyframes, props} a partir do formulario */
-function bMontar(){
-  var ef=radio('b-efeito');
-  var fu=radio('b-fundo');
-  /* Todos os numeros vem de bPreso, que le a MESMA faixa que a correcao devolve ao campo. */
-  var esp=bPreso('b-esp');
-  var raio=bPreso('b-raio');
-  var c1=bCor('b-c1','#9C5638');
-  var c2=bCor('b-c2','#FFC94A');
-  var c3=bCor('b-c3','#FFF6D8');
-  var L=bPreso('b-facholarg');
-  var listra=bPreso('b-listra');
-  var vel=bPreso('b-vel');
-  /* No efeito "pulso" o halo e o proprio efeito: os campos valem sempre, sem o radio. */
-  var halo=(ef==='pulso')||(radio('b-halo')==='sim');
-  var haloraio=bPreso('b-haloraio');
-  var haloop=bPreso('b-haloop');
-  var f1=bCor('b-f1','#8A4A32');
-  var f2=bCor('b-f2','#B5674A');
-  var fang=bPreso('b-fang');
-  var fallback=(radio('b-fallback')==='sim');
-  var comTexto=(radio('b-txt')==='sim');
-  var corTexto=bCor('b-c4','#F7EFDF');
-  var pad=$('b-pad').value.trim();
+/* monta {anim, keyframes, props} a partir de uma configuracao.
+   A configuracao vem de bCfgDom (o que esta na tela) ou de bCfgPreset (um preset salvo): o
+   gerador e o mesmo para os dois, e por isso a animacao consolidada no codigo 1 sai pelas
+   mesmas linhas que geraram a do componente da tela -- nao por uma segunda copia. */
+function bMontar(cfg){
+  var ef=cfg.efeito;
+  var fu=cfg.fundo;
+  /* Todos os numeros ja chegam presos na faixa de B_NUMS (bPreso na tela, bPresoDe no preset). */
+  var esp=cfg.esp;
+  var raio=cfg.raio;
+  var c1=cfg.c1;
+  var c2=cfg.c2;
+  var c3=cfg.c3;
+  var L=cfg.L;
+  var listra=cfg.listra;
+  var vel=cfg.vel;
+  var halo=cfg.halo;
+  var haloraio=cfg.haloraio;
+  var haloop=cfg.haloop;
+  var f1=cfg.f1;
+  var f2=cfg.f2;
+  var fang=cfg.fang;
+  var fallback=cfg.fallback;
+  var comTexto=cfg.comTexto;
+  var corTexto=cfg.corTexto;
+  var pad=cfg.pad;
   var camadas=(ef==='brilho'||ef==='gradiente'||ef==='listras');
 
   if(camadas&&fu==='manter'){
@@ -4573,19 +4962,39 @@ function bMontar(){
   return {anim:anim,keys:keys,keysRm:keysRm,props:props.join('\n'),efeito:ef};
 }
 
+/* Esta previa NAO foi convertida para o iframe das abas Slideshow, Leads e Contagem, e a
+   razao e que aqui nao existe a duplicacao que aquele padrao veio desfazer: nao ha uma
+   segunda implementacao do efeito. bPreview chama bMontar -- a MESMA funcao que bGerar chama
+   -- e aplica no elemento exatamente a string do codigo 2 (m.props), com exatamente o
+   @keyframes do codigo 1 (m.keys) num <style>. Se o gerador mudar, a previa muda junto,
+   porque so existe um gerador. Um iframe traria um shim de storage para proteger chaves que
+   esta aba nunca escreve (o bloco entregue e CSS puro, sem uma linha de JavaScript) e um
+   debounce para uma montagem que custa uma atribuicao de cssText.
+   O que continua diferindo da pagina publicada esta escrito na legenda abaixo do quadro. */
 function bPreview(){
   var box=$('b-pv-box');if(!box)return;
-  var m=bMontar();
+  /* o fundo escolhido vale mesmo quando a configuracao esta invalida: o operador continua
+     enxergando qual fundo esta selecionado enquanto conserta o campo */
+  var fundo=bPvFundo(),tinta=bPvTinta(fundo),area=$('b-pv-area');
+  if(area)area.style.background=fundo;
+  var m=bMontar(bCfgDom());
   if(m.erro){
     box.innerHTML='<p style="font-size:13px;color:#c0392b;text-align:center;margin:0;padding:18px">'+escHtml(m.erro)+'</p>';
     return;
   }
   var st=document.getElementById('fc-b-anim');
   if(!st){st=document.createElement('style');st.id='fc-b-anim';document.head.appendChild(st);}
-  st.textContent=m.keys||'';
-  box.innerHTML='<div class="b-alvo"><div style="font-size:15px;font-weight:700;margin-bottom:6px">Presenteie uma familia</div><div style="font-size:13px;opacity:.9">Este e o componente destacado pela borda. O efeito roda ao vivo aqui.</div></div><p style="font-size:12px;color:var(--tinta-suave);text-align:center;margin:12px 0 0">Previa do efeito (na pagina real, o efeito se aplica ao componente inteiro)</p>';
+  /* O @media de movimento reduzido entra JUNTO, e nao so o @keyframes: sem ele, num aparelho
+     com "reduzir movimento" ligado o operador via a borda girando na previa e a borda parada
+     na pagina publicada -- a previa mentia justamente para quem a regra de acessibilidade
+     atende. As duas strings sao as do codigo 1 (m.keys e m.keysRm), e o cabecalho do @media e
+     a mesma constante que bGerar emite. */
+  st.textContent=(m.keys||'')+(m.keysRm?('\n'+B_MEDIA_RM+'\n'+m.keysRm+'\n}\n'):'');
+  box.innerHTML='<div class="b-alvo"><div style="font-size:15px;font-weight:700;margin-bottom:6px">Presenteie uma familia</div><div style="font-size:13px;opacity:.9">Este e o componente destacado pela borda. O efeito roda ao vivo aqui.</div></div><p class="b-pv-legenda" style="font-size:12px;text-align:center;margin:12px 0 0">Previa do efeito sobre o fundo escolhido (na pagina real, o efeito se aplica ao componente inteiro, e a tipografia e a vizinhanca sao as da pagina). Com "reduzir movimento" ligado no sistema, aqui o efeito congela igual a pagina publicada.</p>';
   var alvo=box.querySelector('.b-alvo');
   alvo.style.cssText='max-width:340px;margin:0 auto;box-sizing:border-box;text-align:left;'+m.props;
+  var leg=box.querySelector('.b-pv-legenda');
+  if(leg)leg.style.color=tinta;
 }
 document.addEventListener('input',function(e){
   var al=(e.target.id&&e.target.id.indexOf('b-')===0)||(e.target.name&&e.target.name.indexOf('b-')===0);
@@ -4596,9 +5005,35 @@ document.addEventListener('change',function(e){
   if(al)bPreview();
 });
 
+/* ===== Consolidacao do codigo 1 (R20) =====
+   Dois efeitos DIFERENTES na mesma pagina tem nomes de animacao diferentes e convivem no
+   mesmo <style>; o MESMO efeito com parametros diferentes colide, porque os dois se chamam
+   igual e vale o ultimo colado. Essa limitacao ja existia com dois blocos colados a mao, e
+   este recurso nao a resolve nem a piora: consolidar um preset do mesmo efeito da tela e
+   RECUSADO com aviso, em vez de emitir dois @keyframes de mesmo nome e deixar a pagina
+   escolher em silencio.
+   Os parametros do segundo efeito vem do preset, e nao da tela: as listras dependem da
+   espessura da listra e o pulso depende do alcance, da intensidade e da cor. Gerar o segundo
+   bloco com os numeros do componente que esta na tela produziria uma animacao que nao e a
+   daquele outro componente -- exatamente o tipo de erro calado que esta fase existe para
+   fechar.
+   Devolve {keys, keysRm, nome, efeito}, ou {erro}, ou null quando nao ha o que consolidar. */
+function bConsolidar(mAtual){
+  var nome=$('b-consol')?$('b-consol').value:'';
+  if(!nome)return null;
+  var i=bPresetIndice(nome);
+  if(i<0)return {erro:'O preset "'+nome+'" nao esta mais salvo neste navegador, entao nao ha de onde tirar a segunda animacao. Escolha outro na caixa de consolidacao do codigo 1.'};
+  var p=bPresets[i];
+  var m2=bMontar(bCfgPreset(p.cfg||{}));
+  if(m2.erro)return {erro:'O preset "'+p.nome+'" nao gera codigo com a configuracao que esta guardada nele: '+m2.erro};
+  if(!m2.keys)return {erro:'O preset "'+p.nome+'" usa a borda fixa, que nao tem animacao: nao ha nada para consolidar no codigo 1.'};
+  if(m2.anim===mAtual.anim)return {erro:'O preset "'+p.nome+'" usa o MESMO efeito desta tela ('+(B_EFEITO_NOME[m2.efeito]||m2.efeito)+'). As duas animacoes se chamariam "'+m2.anim+'" e a segunda apagaria a primeira -- valeria a que estivesse por ultimo, para os dois componentes. Consolidar so faz sentido entre efeitos DIFERENTES; dois componentes com o mesmo efeito precisam dos mesmos parametros de animacao.'};
+  return {keys:m2.keys,keysRm:m2.keysRm,nome:p.nome,efeito:m2.efeito};
+}
+
 function bGerar(){
   if(fcAjustarTodos(B_NUMS))salvarEstado();
-  var m=bMontar();
+  var m=bMontar(bCfgDom());
   if(m.erro){alert(m.erro);return;}
   var c1='';
   if(!m.keys){
@@ -4611,8 +5046,19 @@ function bGerar(){
     $('b-out2').value=m.props;
     return;
   }
+  /* Validacao ANTES de escrever qualquer coisa: recusar no meio deixaria a textarea com o
+     bloco anterior enquanto o alerta diz que nao gerou. */
+  var extra=bConsolidar(m);
+  if(extra&&extra.erro){alert(extra.erro);return;}
   c1+='<sty'+'le>\n';
   c1+='/* Animacao da borda com efeito - cole uma vez no head do site */\n'+m.keys+'\n';
+  if(extra){
+    /* O nome do preset NAO entra no comentario: e texto livre do operador, e a sequencia que
+       fecha comentario CSS (asterisco + barra) digitada ali fecharia este comentario mais
+       cedo, e o resto do nome viraria propriedade solta dentro do style. O que identifica o
+       bloco e o efeito, que sai de uma lista fechada nossa e nao tem acento. */
+    c1+='/* Segunda animacao, do outro componente desta pagina - efeito "'+extra.efeito+'" */\n'+extra.keys+'\n';
+  }
   /* Acessibilidade ESCOPADA. O bloco antigo era "* { animation-duration: 0.01ms !important;
      animation-iteration-count: 1 !important; }": como este codigo vai para o head do SITE,
      ele matava toda animacao de todas as paginas para quem tem movimento reduzido --
@@ -4628,7 +5074,7 @@ function bGerar(){
   c1+='/* Acessibilidade: para quem pediu menos movimento no sistema, a MESMA animacao e\n';
   c1+='   redefinida com um unico quadro -- a borda para de se mexer e continua visivel.\n';
   c1+='   Vale so para esta animacao; o resto do site nao e afetado. */\n';
-  c1+='@media (prefers-reduced-motion: reduce) {\n'+m.keysRm+'\n}\n';
+  c1+=B_MEDIA_RM+'\n'+m.keysRm+(extra?'\n'+extra.keysRm:'')+'\n}\n';
   c1+='</sty'+'le>';
   $('b-out1').value=c1;
   $('b-out2').value=m.props;
@@ -5613,13 +6059,35 @@ prep('Captacao de leads','leads',function(){
 });
 prep('Agendamento TidyCal','tidy',function(){
   liga('t-gerar',tGerar);
+  liga('t-testar',tTestar);
+  liga('t-testar-url',tTestarUrl);
   liga('t-copy1',function(){copiar('t-out1','t-cop1');});
   liga('t-copy2',function(){copiar('t-out2','t-cop2');});
   liga('t-copy3',function(){copiar('t-out3','t-cop3');});
+  /* Os listeners ficam nos PROPRIOS elementos, e nao em document: os de elemento correm antes
+     dos de document (fase de bolha, alvo primeiro), entao o salvarEstado global ja grava as
+     alturas escritas pelo preset e a marca ja recalculada. Em document eles correriam depois
+     do salvarEstado, e o gravado ficaria uma tecla atras. */
+  var i,rs=document.querySelectorAll('input[name="t-preset"]');
+  for(i=0;i<rs.length;i++){
+    rs[i].addEventListener('change',function(){if(tPresetAplicar())salvarEstado();});
+  }
+  /* Mexer numa altura reconsulta a tabela: sai de 'formulario padrao' assim que o numero deixa
+     de ser o do preset, e volta sozinho se o operador digitar de novo o par exato. Em 'input',
+     e nao so em 'change', para o rotulo nao passar a digitacao inteira mentindo. */
+  function tMarcaPreset(){
+    var k=tPresetInferir();
+    if(k!==radio('t-preset'))setRadio('t-preset',k);
+  }
+  ['t-desk','t-mob'].forEach(function(id){
+    var el=$(id);if(!el)return;
+    el.addEventListener('input',tMarcaPreset);
+    el.addEventListener('change',tMarcaPreset);
+  });
   /* Correcao a vista das alturas e do corte de celular, no padrao do c-mob: o listener fica no
      proprio campo (roda antes dos de document, entao o salvarEstado global ja le o valor
      preso); 'blur' nao borbulha e por isso grava por conta propria. */
-  fcLigarFaixa(T_NUMS);
+  fcLigarFaixa(T_NUMS,tMarcaPreset);
 });
 prep('Checkout','uni',function(){
   liga('u-op-add',uOpAdd);
@@ -5637,9 +6105,13 @@ prep('Checkout','uni',function(){
 });
 prep('Bordas com efeito','bor',function(){
   liga('b-gerar',bGerar);
+  liga('b-psalvar',bPresetSalvar);
   liga('b-copy1',function(){copiar('b-out1','b-cop1');});
   liga('b-copy2',function(){copiar('b-out2','b-cop2');});
   parearCor('b-f1');parearCor('b-f2');parearCor('b-c1');parearCor('b-c2');parearCor('b-c3');parearCor('b-c4');
+  /* a cor do fundo da previa e pareada como as outras; quem redesenha e o listener de
+     'input' de document que ja atende tudo que comeca com 'b-' */
+  parearCor('b-pvcor');
   /* Correcao a vista dos oito campos numericos, no padrao do c-mob. O listener do proprio
      elemento roda antes dos de document, entao o bPreview global ja desenha com o valor
      preso -- por isso o ramo de 'change' nao redesenha. 'blur' nao borbulha e redesenha
@@ -5726,6 +6198,9 @@ prep('Agendamento TidyCal','tidy',function(){
   /* estado gravado antes desta regra pode trazer altura ou corte fora da faixa: prende na
      carga, para o campo nunca exibir um numero diferente do que o gerador vai usar. */
   if(fcAjustarTodos(T_NUMS))salvarEstado();
+  /* a prensa da faixa pode ter mudado uma altura DEPOIS de tRestaura marcar o preset: sem
+     isto o rotulo diria "formulario padrao" sobre um numero que a faixa acabou de trocar. */
+  if(radio('t-preset')!==tPresetInferir())setRadio('t-preset','custom');
   tArqToggle();
 },'desenhar a aba com o estado restaurado');
 prep('Checkout','uni',function(){
@@ -5738,6 +6213,9 @@ prep('Bordas com efeito','bor',function(){
   /* mesmo motivo do c-mob e das cores livres: estado gravado antes desta regra pode trazer
      numeros fora da faixa, e o campo nao pode exibir algo diferente do que bMontar vai usar. */
   if(fcAjustarTodos(B_NUMS))salvarEstado();
+  /* sem estado gravado, bRestaura nem roda: a lista precisa ser desenhada aqui para a aba
+     nascer dizendo que nao ha preset salvo, em vez de mostrar um espaco vazio */
+  bPresetsRender();
   bToggles();
   bPreview();
 },'desenhar a aba com o estado restaurado');
