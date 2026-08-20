@@ -645,6 +645,16 @@
       <legend>Agendamento</legend>
       <label for="t-path">Caminho do booking type <small>(o que vem depois de tidycal.com/)</small></label>
       <input type="text" id="t-path" value="" placeholder="usuario/nome-do-agendamento">
+      <div class="acoes"><button type="button" class="botao mini claro" id="t-testar">Abrir a página de teste</button></div>
+      <p class="ajuda"><b>Antes de gerar:</b> o botão abre <b>tidycal.com/</b> + o caminho digitado numa aba nova. É a mesma página que o código embute — se ela não existir aqui, também não vai existir no site publicado. Descobrir agora custa um clique; descobrir depois custa publicar, testar e voltar.</p>
+      <label>Tipo de agendamento <small>(preenche as duas alturas abaixo)</small></label>
+      <div class="radios">
+      <label><input type="radio" name="t-preset" value="curto"><span>Conversa rápida <small>(só data, hora e nome)</small></span></label>
+      <label><input type="radio" name="t-preset" value="padrao" checked><span>Ensaio com formulário padrão <small>(nome, e-mail, telefone)</small></span></label>
+      <label><input type="radio" name="t-preset" value="longo"><span>Formulário longo <small>(perguntas adicionais)</small></span></label>
+      <label><input type="radio" name="t-preset" value="custom"><span>Ajuste fino <small>(valores manuais)</small></span></label>
+      </div>
+      <p class="ajuda"><b>O preset não substitui a calibragem, adianta o ponto de partida.</b> Só o <b>formulário padrão</b> (2350 / 2700) foi medido em produção, na campanha de Natal; os outros dois são esse mesmo par deslocado para menos e para mais, e continuam precisando da conferência na página publicada. Escolher um preset <b>escreve os dois números nos campos abaixo</b> — nada fica escondido. Mexer num deles devolve a marca para <b>ajuste fino</b> na hora, para o rótulo nunca dizer uma coisa e o campo outra. A <b>largura de corte</b> não entra no preset: ela é o tamanho da tela, não o tamanho do formulário.</p>
       <label for="t-desk">Altura com o modal aberto — desktop <small>(pixels; medir com o formulário aberto)</small></label>
       <input type="number" id="t-desk" value="2350" min="500" max="20000" step="50">
       <label for="t-mob">Altura com o modal aberto — celular <small>(pixels; no mobile o modal fica mais alto)</small></label>
@@ -663,6 +673,7 @@
       <div id="t-emb" style="display:none">
       <label for="t-url">Endereço da página intermediária</label>
       <input type="text" id="t-url" value="https://www.fotocerta.com.br/iframe-agendamento-natal">
+      <div class="acoes"><button type="button" class="botao mini claro" id="t-testar-url">Abrir a página intermediária</button></div>
       <label for="t-alt0">Altura inicial do iframe na página hospedeira <small>(pixels)</small></label>
       <input type="number" id="t-alt0" value="1600" min="400" max="20000" step="100">
       </div>
@@ -705,7 +716,8 @@
   <p class="ajuda"><b>Modo "Componente direto na página final":</b> cole o <b>código 1</b> em um <b>componente HTML</b> da própria página onde o calendário deve aparecer. Nada mais é necessário.</p>
   <p class="ajuda"><b>Modo "Página intermediária embutida por iframe" (3 códigos):</b> 1) <b>código 1</b> → componente HTML da <b>página intermediária</b>; 2) <b>código 2</b> → campo <b>Tag Body</b> da <b>página intermediária</b>; 3) <b>código 3</b> → componente HTML da <b>página hospedeira</b> (é o iframe que embute a intermediária).</p>
   <p class="ajuda"><b>Pré-requisitos no Prosite:</b> o caminho do booking type deve existir no TidyCal; se for usar âncora de botão até o calendário (gerada na aba Captação de leads), a coluna do componente do código 3 deve ter o <b>ID Html</b> da âncora sem o # (ex.: <b>reserva</b>) na aba <b>Avançado</b>.</p>
-  <p class="ajuda"><b>Calibragem das alturas:</b> abra a página publicada, escolha data e horário e confira se o formulário abre inteiro, sem barra de rolagem interna — no computador e no celular. Se cortar, aumente a altura correspondente (desktop ou mobile) e gere novamente.</p>
+  <p class="ajuda"><b>Calibragem das alturas:</b> comece pelo <b>tipo de agendamento</b>, que preenche as duas alturas, e confirme na página publicada: escolha data e horário e veja se o formulário abre inteiro, sem barra de rolagem interna — no computador e no celular. Se cortar, aumente a altura correspondente (a marca vira "ajuste fino" sozinha) e gere novamente.</p>
+  <p class="ajuda"><b>Os dois botões de teste não geram nada:</b> abrem numa aba nova o endereço montado com o que está nos campos — <b>tidycal.com/</b> + caminho, e a página intermediária. Servem para conferir o endereço antes de publicar. O botão da intermediária só aceita endereço <b>http(s) completo</b>: um caminho começando com barra é resolvido no domínio do site publicado, que não é o desta ferramenta, e abriria a página errada.</p>
   </div>
 </div>
 
@@ -3369,13 +3381,18 @@ document.addEventListener('change',function(e){
 function tColeta(){
   return {
     t:{path:$('t-path').value,desk:$('t-desk').value,mob:$('t-mob').value,larg:$('t-larg').value,
-      arq:radio('t-arq'),url:$('t-url').value,alt0:$('t-alt0').value}
+      arq:radio('t-arq'),url:$('t-url').value,alt0:$('t-alt0').value,preset:radio('t-preset')}
   };
 }
 function tRestaura(st){
   if(!st.t)return;
   $('t-path').value=st.t.path;$('t-desk').value=st.t.desk;$('t-mob').value=st.t.mob;
   $('t-larg').value=st.t.larg;setRadio('t-arq',st.t.arq);$('t-url').value=st.t.url;$('t-alt0').value=st.t.alt0;
+  /* O preset e marca das alturas, nao dono delas: quem manda sao os dois campos acima, ja
+     restaurados. Estado gravado antes desta versao nao tem a chave 'preset' -- em vez de
+     deixar o radio no padrao do HTML (que diria "formulario padrao" sobre alturas que podem
+     ser outras), a marca e deduzida das alturas restauradas. */
+  setRadio('t-preset',st.t.preset||tPresetInferir());
 }
 
 /* Faixa declarada de cada campo numerico da aba: [id, padrao, min, max].
@@ -3410,6 +3427,75 @@ function tUrlOk(v){
   if(limpo.charAt(0)==='/'&&limpo.charAt(1)!=='/')return true;
   return false;
 }
+/* ===== Presets de altura por tipo de agendamento (R17) =====
+   O operador nao sabe de quantos pixels o calendario dele precisa; sabe que tipo de
+   agendamento esta montando. Cada linha e [altura desktop, altura celular].
+   Procedencia dos numeros, para nao virar precisao inventada: 'padrao' e o par calibrado na
+   campanha de Natal, medido em producao. 'curto' e 'longo' sao esse par deslocado -- para
+   menos quando o formulario tem so o nome, para mais quando tem perguntas extras --, e a
+   ajuda do campo diz isso com todas as letras. Sao pontos de partida, e a conferencia na
+   pagina publicada continua sendo o que decide.
+   A largura de corte (t-larg) NAO entra: ela descreve o tamanho da TELA, nao o tamanho do
+   formulario, e 700 e o valor validado independentemente do tipo de agendamento.
+   O preset nao e um modo: escolher um so ESCREVE os dois numeros nos campos, que continuam
+   editaveis. Quem edita um deles volta para 'custom' na hora (ver tPresetInferir e a partida
+   da aba) -- senao o rotulo diria "formulario padrao" sobre um par que ja nao e o dele, que e
+   o mesmo defeito de rotulo que esta fase corrigiu no halo da aba Bordas. */
+var T_PRESETS={curto:[2000,2300],padrao:[2350,2700],longo:[2800,3200]};
+function tPresetAplicar(){
+  var k=radio('t-preset'),p=T_PRESETS[k];
+  if(!p)return false;   /* 'custom': o operador manda nos campos, nada e escrito por cima */
+  $('t-desk').value=p[0];$('t-mob').value=p[1];
+  return true;
+}
+/* Qual preset descreve o que esta nos campos AGORA. Devolve 'custom' quando nenhum descreve. */
+function tPresetInferir(){
+  var d=String($('t-desk').value),m=String($('t-mob').value),k;
+  for(k in T_PRESETS){
+    if(!Object.prototype.hasOwnProperty.call(T_PRESETS,k))continue;
+    if(String(T_PRESETS[k][0])===d&&String(T_PRESETS[k][1])===m)return k;
+  }
+  return 'custom';
+}
+
+/* ===== Botao "abrir a pagina de teste" (R15) =====
+   O caminho digitado vira "https://tidycal.com/"+caminho e abre numa aba nova. O charset e
+   restrito de proposito: sem isso um ":" ou um "//" digitado no campo transformaria o prefixo
+   em parte de OUTRO endereco -- "..//evil.com/x" resolve para outro host. Aqui o campo so
+   aceita segmentos de caminho, entao o host nunca sai de tidycal.com.
+   A validacao vale para o BOTAO, nao para tGerar: o gerador continua exatamente como estava,
+   porque este recurso e sobre conferir o endereco antes de publicar, e nao sobre recusar
+   caminhos que hoje geram codigo. */
+function tPathNorm(){
+  return $('t-path').value.trim().replace(/^https?:\/\/tidycal\.com\//,'').replace(/^\//,'');
+}
+function tPathOk(v){
+  return /^[A-Za-z0-9._~-]+(\/[A-Za-z0-9._~-]+)*$/.test(String(v));
+}
+/* aba nova sem herdar o window desta ferramenta; se o navegador bloquear, o operador fica
+   sabendo em vez de achar que o endereco esta errado */
+function tAbrir(url){
+  var w=null;
+  try{w=window.open(url,'_blank');}catch(e){w=null;}
+  if(w){try{w.opener=null;}catch(e2){}return;}
+  alert('O navegador bloqueou a aba nova. Libere os pop-ups desta pagina e clique de novo. O endereco montado e: '+url);
+}
+function tTestar(){
+  var p=tPathNorm();
+  if(!p){alert('Informe o caminho do booking type antes de abrir a pagina de teste.');return;}
+  if(!tPathOk(p)){alert('O caminho do booking type aceita apenas letras, numeros, ponto, hifen, sublinhado e barra separando os segmentos (ex.: usuario/nome-do-agendamento). O valor digitado ("'+p+'") tem outro caractere: com ele, o endereco montado deixaria de apontar para tidycal.com.');return;}
+  tAbrir('https://tidycal.com/'+p);
+}
+function tTestarUrl(){
+  var u=$('t-url').value.trim();
+  if(!tUrlOk(u)){alert('Informe o endereco da pagina intermediaria antes de abrir: um endereco http(s) completo (https://www.fotocerta.com.br/iframe-agendamento-natal).');return;}
+  /* O caminho relativo e valido para o codigo 3 -- la ele e resolvido no dominio do SITE --,
+     mas aqui seria resolvido no dominio desta ferramenta, e o botao abriria uma pagina que
+     nao existe. Recusar e dizer por que vale mais do que abrir a pagina errada. */
+  if(u.charAt(0)==='/'){alert('Este botao so abre endereco http(s) completo. O caminho relativo ("'+u+'") e resolvido no dominio do site publicado, que nao e o desta ferramenta -- abrir daqui levaria a uma pagina que nao existe. Para testar, cole o endereco completo da pagina intermediaria.');return;}
+  tAbrir(u);
+}
+
 function tArqToggle(){
   var emb=radio('t-arq')==='embutida';
   $('t-emb').style.display=emb?'block':'none';
@@ -3421,7 +3507,9 @@ document.addEventListener('change',function(e){
 });
 
 function tGerar(){
-  var path=$('t-path').value.trim().replace(/^https?:\/\/tidycal\.com\//,'').replace(/^\//,'');
+  /* mesma normalizacao que o botao de teste usa: uma implementacao so, senao o endereco
+     conferido no botao e o endereco embutido no codigo poderiam divergir. */
+  var path=tPathNorm();
   if(!path){alert('Informe o caminho do booking type.');return;}
   var emb=radio('t-arq')==='embutida';
   var u=$('t-url').value.trim();
@@ -5613,13 +5701,35 @@ prep('Captacao de leads','leads',function(){
 });
 prep('Agendamento TidyCal','tidy',function(){
   liga('t-gerar',tGerar);
+  liga('t-testar',tTestar);
+  liga('t-testar-url',tTestarUrl);
   liga('t-copy1',function(){copiar('t-out1','t-cop1');});
   liga('t-copy2',function(){copiar('t-out2','t-cop2');});
   liga('t-copy3',function(){copiar('t-out3','t-cop3');});
+  /* Os listeners ficam nos PROPRIOS elementos, e nao em document: os de elemento correm antes
+     dos de document (fase de bolha, alvo primeiro), entao o salvarEstado global ja grava as
+     alturas escritas pelo preset e a marca ja recalculada. Em document eles correriam depois
+     do salvarEstado, e o gravado ficaria uma tecla atras. */
+  var i,rs=document.querySelectorAll('input[name="t-preset"]');
+  for(i=0;i<rs.length;i++){
+    rs[i].addEventListener('change',function(){if(tPresetAplicar())salvarEstado();});
+  }
+  /* Mexer numa altura reconsulta a tabela: sai de 'formulario padrao' assim que o numero deixa
+     de ser o do preset, e volta sozinho se o operador digitar de novo o par exato. Em 'input',
+     e nao so em 'change', para o rotulo nao passar a digitacao inteira mentindo. */
+  function tMarcaPreset(){
+    var k=tPresetInferir();
+    if(k!==radio('t-preset'))setRadio('t-preset',k);
+  }
+  ['t-desk','t-mob'].forEach(function(id){
+    var el=$(id);if(!el)return;
+    el.addEventListener('input',tMarcaPreset);
+    el.addEventListener('change',tMarcaPreset);
+  });
   /* Correcao a vista das alturas e do corte de celular, no padrao do c-mob: o listener fica no
      proprio campo (roda antes dos de document, entao o salvarEstado global ja le o valor
      preso); 'blur' nao borbulha e por isso grava por conta propria. */
-  fcLigarFaixa(T_NUMS);
+  fcLigarFaixa(T_NUMS,tMarcaPreset);
 });
 prep('Checkout','uni',function(){
   liga('u-op-add',uOpAdd);
@@ -5726,6 +5836,9 @@ prep('Agendamento TidyCal','tidy',function(){
   /* estado gravado antes desta regra pode trazer altura ou corte fora da faixa: prende na
      carga, para o campo nunca exibir um numero diferente do que o gerador vai usar. */
   if(fcAjustarTodos(T_NUMS))salvarEstado();
+  /* a prensa da faixa pode ter mudado uma altura DEPOIS de tRestaura marcar o preset: sem
+     isto o rotulo diria "formulario padrao" sobre um numero que a faixa acabou de trocar. */
+  if(radio('t-preset')!==tPresetInferir())setRadio('t-preset','custom');
   tArqToggle();
 },'desenhar a aba com o estado restaurado');
 prep('Checkout','uni',function(){
