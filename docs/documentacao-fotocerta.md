@@ -110,17 +110,38 @@ Cada uma das **seis** abas tem a sua biblioteca: salvar a configuração da tela
 
 **Aparência.** Os dois fieldsets (salvar à esquerda, lista à direita) são montados por `fcPresetsMontar` a partir do registro — uma implementação de marcação e de texto para as seis abas, em vez de seis cópias que divergem na redação. A classe da lista virou `.fc-presets` (era `.b-presets`).
 
+**Esquema de ID: `fcp-<pref>-<papel>`, e a varredura de IDs repetidos virou parte da verificação.** A primeira versão de `fcPresetsMontar` gerava `<pref>-pnome`. No Checkout isso deu `u-pnome` — **ID que a aba já usava** no campo *Nome do produto*. Dois elementos com o mesmo ID não produzem erro nenhum: `getElementById` devolve o primeiro do documento, que era o do produto. O estrago, medido pelo caminho real (digitando no campo e clicando no botão):
+
+- o operador digitava o nome do preset na caixa da seção de presets e recebia *"De um nome ao preset antes de salvar"* — **a única das seis abas onde a biblioteca não podia ser criada pela interface**;
+- com o formulário de produto preenchido, o preset nascia com o nome **do produto**, o nome digitado era ignorado e o campo do produto era **apagado**, deixando preço sem nome, **sem um único aviso**.
+
+A correção não é trocar um nome, é escolher um espaço de nomes que não possa colidir de novo: tudo o que a biblioteca gera vive em **`fcp-`** (`fcp-<pref>-box`, `-nome`, `-salvar`, `-lista`). Campo de aba, por convenção deste arquivo, começa pelo prefixo de **uma letra** (`s-`, `t-`, `l-`, `u-`, `b-`, `c-`); nenhum pode se chamar `fcp-…` sem quebrar a própria convenção, então a coincidência de prefixo com nome de campo não volta. De quebra, `fcp-…` não casa com os listeners de "mudou alguma coisa nesta aba", e a exceção que existia só para isso (`fcCampoDePreset`) saiu — ela também estava desligando a prévia do Checkout ao digitar o *Nome do produto*.
+
+**Verificação obrigatória a partir daqui:** com a página servida por `localhost`, rodar a varredura de IDs repetidos no documento inteiro e exigir **zero**:
+
+```js
+var t=document.querySelectorAll('[id]'),v={},d=[];
+for(var i=0;i<t.length;i++){ if(v[t[i].id]) d.push(t[i].id); else v[t[i].id]=1; }
+d;   // tem de sair []
+```
+
+A varredura não é cerimônia: rodada no commit anterior ela aponta exatamente `u-pnome`, e no atual sai vazia com os mesmos 364 IDs. E o teste tem de ser feito **digitando no campo que está dentro da seção de presets** — roteiro automatizado que escreve por `getElementById` acerta o mesmo elemento errado que o código lia e **passa** com o defeito de pé.
+
+**Texto livre vazio é escolha, não campo ausente.** `uRestaura` lia `t7`..`t10` (os quatro rótulos livres do Checkout: *Escolha seu ensaio*, *Sinal agora*, *Restante na entrega*, *Resumo para conferencia*) com guarda de verdade — `if(U.t7)` —, enquanto `uColeta` os grava sempre. Como nenhum é número, o clamp não os alcançava: esvaziar os quatro e aplicar um preset **devolvia a aba pela metade**, em silêncio, e o operador publicava um checkout com os rótulos da campanha errada. A guarda passou a ser `!=null`: estado gravado por versão anterior (que não tem a chave) continua deixando o padrão do HTML de pé, e o vazio passa a ser honrado. **Honrar** foi a escolha, e não corrigir para o padrão à vista, porque o gerador **já aceita o vazio** — `uGerar` lê o campo direto e emite `TXT_PRODUTOS=''` sem quebrar nada; tela e código gerado já concordavam, era só a restauração que discordava dos dois. A regra geral que fica: **campo numérico e cor se corrigem à vista** (não existe vazio que faça sentido neles); **texto livre honra o vazio**. Varridas as outras cinco abas, nenhuma outra guarda de verdade sobre texto livre foi encontrada, e o ida-e-volta com todos os campos de texto vazios volta idêntico nas seis.
+
 ### Padrão de layout das abas (seguir sempre, inclusive em abas novas)
 
 Toda aba tem o mesmo fluxo linear, de cima para baixo:
 
 1. **Descrição** (`<p class="descricao">`) — o que o construtor faz, em um parágrafo.
 2. **Seções numeradas de configuração** — cada uma abre com `<div class="secao"><span class="secao-n">N</span> Título</div>` (a primeira leva `class="secao primeira"`, que remove a linha divisória do topo) e é seguida por `<div class="grade">` com duas colunas de `<fieldset>`. Agrupar por tema, distribuindo os fieldsets entre as colunas para equilibrar a altura; quando houver formulário de cadastro + lista (imagens, produtos, cupons), o formulário fica à esquerda e a lista à direita.
-3. **Penúltima seção: "Biblioteca de presets"** — só o cabeçalho e um `<div class="grade" id="<pref>-presets"></div>` vazio ficam no HTML; os dois fieldsets são montados por `fcPresetsMontar`, igual nas seis abas (ver a seção seguinte).
+3. **Penúltima seção: "Biblioteca de presets"** — só o cabeçalho e um `<div class="grade" id="fcp-<pref>-box"></div>` vazio ficam no HTML; os dois fieldsets são montados por `fcPresetsMontar`, igual nas seis abas (ver a seção seguinte). O `fcp-` não é enfeite: é o espaço de nomes que impede a biblioteca de colidir com campo de aba (ver "Esquema de ID" na seção anterior).
 4. **Última seção: "Prévia e código gerado"** — botões de ação (`Gerar código` e afins) numa `<div class="acoes">` logo abaixo do cabeçalho da seção, depois uma `grade` com a prévia (`<div class="pv-area">`) à esquerda e a(s) saída(s) (`<div class="saida">` com textarea + botão Copiar) à direita. Abas sem prévia (TidyCal) usam a mesma seção só com as saídas.
 5. **Instruções ao final** (`<div class="instrucoes">`), em largura total: onde colar, pré-requisitos, como funciona e o que fazer depois de publicar.
 
 Dentro dos fieldsets: `radios` para valores de lista fechada, campos com `<small>` explicando unidade/limites, e `<p class="ajuda">` para orientações. Prefixo de ID por aba (`s-`, `l-`, `t-`, `u-`, `b-`, `c-`) em todos os campos, e o mesmo prefixo nas funções JS correspondentes.
+
+**Acentos no texto de interface: uma convenção só.** O `index.html` é UTF-8 e declara `<meta charset="UTF-8">`; o texto que a **ferramenta** mostra ao operador vai com o **caractere literal**, acento e travessão inclusive. Não é gosto: é o que o bloco de script já fazia em 142 das 147 letras acentuadas e em 13 dos 16 travessões. O motivo de estar escrito é prático — com as duas convenções convivendo, quem procura por `configuração` acha metade das ocorrências, porque as outras estão escritas com a letra acentuada em escape (`configura` + `\u00e7` + `\u00e3` + `o`) e nenhuma busca de texto as alcança. O escape `\uXXXX` fica reservado a três casos: faixa de caracteres em expressão regular; sinal que se confunde a olho no código-fonte (`•`, `·`, `€`, aspas curvas, setas, `✕`); e string concatenada **dentro do código gerado**, onde o fonte da ferramenta se mantém ASCII (hoje só o desenho do botão PayPal em `mockPP`). Vale lembrar que isso é sobre o código da **ferramenta**: o código **gerado** continua sem acento nenhum, pela regra do Manual do Prosite (§3).
 
 **Prévia: rodar o gerador, não imitá-lo.** Prévia que redesenha o resultado com código próprio é uma segunda implementação do gerador, e duas implementações divergem — na aba Contagem regressiva divergiram duas vezes antes de a duplicação ser removida (escape de HTML presente num lado e ausente no outro; urgência sem ramo de saída no código gerado, com o ramo correto na prévia). O padrão para abas com prévia dinâmica é: a função que monta o bloco entregue (`cBloco` na contagem regressiva) é **fonte única**, e a prévia executa o retorno dela dentro de um `<iframe>` de mesma origem, montado por `document.write`. Ganha-se fidelidade por construção — não por esforço de cópia. Três cuidados que vêm junto:
 

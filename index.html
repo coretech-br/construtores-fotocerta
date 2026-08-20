@@ -352,7 +352,7 @@
   </div>
 
   <div class="secao"><span class="secao-n">3</span> Biblioteca de presets</div>
-  <div class="grade" id="s-presets"></div>
+  <div class="grade" id="fcp-s-box"></div>
 
   <div class="secao"><span class="secao-n">4</span> Prévia e código gerado</div>
   <div class="acoes" style="margin-bottom:14px">
@@ -671,7 +671,7 @@
   </div>
 
   <div class="secao"><span class="secao-n">8</span> Biblioteca de presets</div>
-  <div class="grade" id="l-presets"></div>
+  <div class="grade" id="fcp-l-box"></div>
 
   <div class="secao"><span class="secao-n">9</span> Prévia e código gerado</div>
   <div class="acoes">
@@ -758,7 +758,7 @@
   </div>
 
   <div class="secao"><span class="secao-n">2</span> Biblioteca de presets</div>
-  <div class="grade" id="t-presets"></div>
+  <div class="grade" id="fcp-t-box"></div>
 
   <div class="secao"><span class="secao-n">3</span> Códigos gerados</div>
   <div class="acoes" style="margin-bottom:14px"><button class="botao" id="t-gerar">Gerar código</button></div>
@@ -1050,7 +1050,7 @@
   </div>
 
   <div class="secao"><span class="secao-n">4</span> Biblioteca de presets</div>
-  <div class="grade" id="u-presets"></div>
+  <div class="grade" id="fcp-u-box"></div>
 
   <div class="secao"><span class="secao-n">5</span> Prévia e código gerado</div>
   <div class="acoes" style="margin-bottom:14px">
@@ -1201,7 +1201,7 @@
   </div>
 
   <div class="secao"><span class="secao-n">3</span> Biblioteca de presets</div>
-  <div class="grade" id="b-presets"></div>
+  <div class="grade" id="fcp-b-box"></div>
 
   <div class="secao"><span class="secao-n">4</span> Prévia e códigos gerados</div>
   <div class="acoes" style="margin-bottom:14px"><button class="botao" id="b-gerar">Gerar código</button></div>
@@ -1559,7 +1559,7 @@
   </div>
 
   <div class="secao"><span class="secao-n">5</span> Biblioteca de presets</div>
-  <div class="grade" id="c-presets"></div>
+  <div class="grade" id="fcp-c-box"></div>
 
   <div class="secao"><span class="secao-n">6</span> Prévia e código gerado</div>
   <div class="acoes" style="margin-bottom:14px">
@@ -1608,6 +1608,24 @@
 'use strict';
 (function(){
 /* Escopo isolado: o $ abaixo e privado e nao conflita com o jQuery da Alboom */
+
+/* ============ acentos no texto de interface: UMA convencao ============
+   O arquivo e UTF-8 e declara <meta charset="UTF-8">, e o texto que a FERRAMENTA mostra ao
+   operador vai com o caractere LITERAL -- letra acentuada e travessao inclusive. Nao e
+   preferencia: e o que este bloco ja fazia em 142 das 147 letras acentuadas e em 13 dos 16
+   travessoes. A regra existe escrita porque a alternativa nao e "feio", e sim: com as duas
+   convencoes convivendo, quem procurar a palavra configuracao acentuada acha metade das
+   ocorrencias -- as outras estao escritas caractere por caractere em barra-u-zero-zero-e-sete
+   e busca de texto nenhuma as alcanca.
+   O escape barra-u fica reservado a tres casos, e so a eles:
+     1. faixa de caracteres em expressao regular (os invisiveis que pixLimpar remove);
+     2. sinal que se confunde a olho no codigo-fonte -- bullet, ponto medio, aspas curvas,
+        setas, x de fechar, simbolo de moeda;
+     3. string concatenada DENTRO do codigo gerado, onde o fonte da ferramenta se mantem em
+        ASCII (o unico caso hoje e o desenho do botao PayPal em mockPP).
+   Lembrete que vale para os dois lados: isto e sobre o codigo da FERRAMENTA. O codigo
+   GERADO continua sem acento nenhum, pela regra do Manual do Prosite. */
+
 /* ============ utilidades ============ */
 function $(id){return document.getElementById(id);}
 function radio(nome){var r=document.querySelector('input[name="'+nome+'"]:checked');return r?r.value:'';}
@@ -1960,29 +1978,29 @@ var ABAS=[
   {id:'slide',nome:'Slideshow',           chaves:['imgs','s'],  coleta:sColeta,restaura:sRestaura,
    pref:'s',fora:[],operacionais:[],resumo:sPresetResumo,redesenhar:sPresetDepois,antesDeSalvar:sPresetAntes,
    exemplo:'ex.: Natal 2026 - galeria do hero',
-   guarda:'tudo o que est\u00e1 configurado nesta aba \u2014 a <b>lista de imagens</b> (links, legendas e a ordem), a transi\u00e7\u00e3o, o tempo, a largura, a propor\u00e7\u00e3o, o corte de celular, a ordem de exibi\u00e7\u00e3o e os controles do visitante. N\u00e3o guarda o que est\u00e1 no importador de galeria, que n\u00e3o \u00e9 configura\u00e7\u00e3o e sim uma colagem de trabalho.'},
+   guarda:'tudo o que está configurado nesta aba — a <b>lista de imagens</b> (links, legendas e a ordem), a transição, o tempo, a largura, a proporção, o corte de celular, a ordem de exibição e os controles do visitante. Não guarda o que está no importador de galeria, que não é configuração e sim uma colagem de trabalho.'},
   {id:'tidy', nome:'Agendamento TidyCal', chaves:['t'],         coleta:tColeta,restaura:tRestaura,
    pref:'t',fora:[],operacionais:[],resumo:tPresetResumo,redesenhar:tPresetDepois,antesDeSalvar:tPresetAntes,
    exemplo:'ex.: Natal 2026 - ensaio tematico',
-   guarda:'tudo o que est\u00e1 configurado nesta aba \u2014 o caminho do agendamento no TidyCal, as duas alturas, a largura de corte, o modo (direto ou embutido), o endere\u00e7o da p\u00e1gina intermedi\u00e1ria e a altura inicial do iframe.'},
+   guarda:'tudo o que está configurado nesta aba — o caminho do agendamento no TidyCal, as duas alturas, a largura de corte, o modo (direto ou embutido), o endereço da página intermediária e a altura inicial do iframe.'},
   {id:'leads',nome:'Captacao de leads',   chaves:['l'],         coleta:lColeta,restaura:lRestaura,
-   pref:'l',fora:[],operacionais:[['num','o n\u00famero do WhatsApp']],resumo:lPresetResumo,redesenhar:lPresetDepois,antesDeSalvar:lPresetAntes,
+   pref:'l',fora:[],operacionais:[['num','o número do WhatsApp']],resumo:lPresetResumo,redesenhar:lPresetDepois,antesDeSalvar:lPresetAntes,
    exemplo:'ex.: Natal 2026 - hospedeira',
-   guarda:'tudo o que est\u00e1 configurado nesta aba \u2014 modo de exibi\u00e7\u00e3o, \u00edcone, formato, cores e posi\u00e7\u00e3o do bot\u00e3o, os quatro trechos da mensagem, os textos do pop-up, o cabe\u00e7alho (coruja, movimento e efeitos), o hor\u00e1rio de atendimento, a pergunta de qualifica\u00e7\u00e3o com as op\u00e7\u00f5es cadastradas e a \u00e2ncora.'},
+   guarda:'tudo o que está configurado nesta aba — modo de exibição, ícone, formato, cores e posição do botão, os quatro trechos da mensagem, os textos do pop-up, o cabeçalho (coruja, movimento e efeitos), o horário de atendimento, a pergunta de qualificação com as opções cadastradas e a âncora.'},
   {id:'uni',  nome:'Checkout',            chaves:['u'],         coleta:uColeta,restaura:uRestaura,
-   pref:'u',fora:[],operacionais:[['client','o Client ID do PayPal'],['chave','a chave Pix'],['nomer','o nome do recebedor'],['cidade','a cidade do recebedor'],['zapnum','o WhatsApp do \u201cJ\u00e1 paguei\u201d']],
+   pref:'u',fora:[],operacionais:[['client','o Client ID do PayPal'],['chave','a chave Pix'],['nomer','o nome do recebedor'],['cidade','a cidade do recebedor'],['zapnum','o WhatsApp do \u201cJá paguei\u201d']],
    resumo:uPresetResumo,redesenhar:uPresetDepois,antesDeSalvar:uPresetAntes,
    exemplo:'ex.: Natal 2026 - pacotes',
-   guarda:'tudo o que est\u00e1 configurado nesta aba \u2014 formas de pagamento, moeda, <b>produtos com os opcionais de cada um</b>, cupons, c\u00f3digo do pedido, sinal, desconto Pix, textos, largura e cores.'},
+   guarda:'tudo o que está configurado nesta aba — formas de pagamento, moeda, <b>produtos com os opcionais de cada um</b>, cupons, código do pedido, sinal, desconto Pix, textos, largura e cores.'},
   {id:'bor',  nome:'Bordas com efeito',   chaves:['b'],         coleta:bColeta,restaura:bRestaura,
    pref:'b',fora:['consol'],operacionais:[],resumo:bPresetResumo,redesenhar:bPresetDepois,antesDeSalvar:bPresetAntes,
    presetOk:bPresetOk,aposPresets:bConsolRender,
    exemplo:'ex.: Natal 2026 - card do plano',
-   guarda:'tudo o que est\u00e1 configurado nesta aba \u2014 efeito, fundo, cores, espessura, halo, texto, espa\u00e7amento e tamb\u00e9m o <b>fundo da pr\u00e9via</b>, que \u00e9 como voc\u00ea confere o resultado. N\u00e3o guarda a escolha de consolida\u00e7\u00e3o do c\u00f3digo 1, que \u00e9 sobre <i>outro</i> componente.'},
+   guarda:'tudo o que está configurado nesta aba — efeito, fundo, cores, espessura, halo, texto, espaçamento e também o <b>fundo da prévia</b>, que é como você confere o resultado. Não guarda a escolha de consolidação do código 1, que é sobre <i>outro</i> componente.'},
   {id:'cnt',  nome:'Contagem regressiva', chaves:['cmsgs','c'], coleta:cColeta,restaura:cRestaura,
    pref:'c',fora:[],operacionais:[],resumo:cPresetResumo,redesenhar:cPresetDepois,antesDeSalvar:cPresetAntes,
    exemplo:'ex.: Natal 2026 - barra do topo',
-   guarda:'tudo o que est\u00e1 configurado nesta aba \u2014 modo e dura\u00e7\u00e3o da contagem, o c\u00f3digo da campanha, as <b>mensagens cadastradas</b>, apar\u00eancia, posi\u00e7\u00e3o, extras, coruja, efeitos, movimento, urg\u00eancia e entrada.'}
+   guarda:'tudo o que está configurado nesta aba — modo e duração da contagem, o código da campanha, as <b>mensagens cadastradas</b>, aparência, posição, extras, coruja, efeitos, movimento, urgência e entrada.'}
 ];
 var fcFrag={};       /* ultimo pedaco bom de cada aba, para nao apagar o que a aba quebrada tinha */
 var fcSoLeitura={};  /* abas que falharam ao restaurar: param de coletar do DOM ate recarregar */
@@ -2218,7 +2236,7 @@ function fcPresetBloqueado(a){
   return true;
 }
 function fcPresetSalvar(a){
-  var campo=$(a.pref+'-pnome'),nome=campo?campo.value.trim():'',lista,i,erro;
+  var campo=$('fcp-'+a.pref+'-nome'),nome=campo?campo.value.trim():'',lista,i,erro;
   if(fcPresetBloqueado(a))return;
   if(!nome){alert('De um nome ao preset antes de salvar. E por ele que a lista identifica a configuracao.');return;}
   if(nome.length>FC_PRESET_NOME_MAX){alert('O nome do preset passa de '+FC_PRESET_NOME_MAX+' caracteres. Um nome curto (campanha + onde a configuracao e usada) e o que cabe na lista.');return;}
@@ -2282,7 +2300,7 @@ function fcPresetRemover(a,i){
   fcPresetsRender(a);salvarEstado();
 }
 function fcPresetsRender(a){
-  var lista=$(a.pref+'-plista'),arr=fcPresets[a.id]||[],fora=fcPresetsFora[a.id]||0,i,h,btns,aviso='';
+  var lista=$('fcp-'+a.pref+'-lista'),arr=fcPresets[a.id]||[],fora=fcPresetsFora[a.id]||0,i,h,btns,aviso='';
   if(fora>0){
     aviso='<p class="ajuda" style="border-color:#8C1D18;color:#8C1D18"><b>'+fora+
       (fora===1?' item da biblioteca estava ilegivel e ficou de fora.'
@@ -2331,15 +2349,34 @@ function fcPresetResumo(a,p){
 /* A secao "Biblioteca de presets" das seis abas e desenhada por esta funcao, e nao copiada
    seis vezes no HTML: mesma mecanica, mesma aparencia, mesmas palavras -- e uma correcao de
    texto conserta as seis. O que muda por aba vem do registro ABAS (exemplo de nome, o que a
-   aba guarda, campos operacionais). */
+   aba guarda, campos operacionais).
+
+   ESQUEMA DE ID -- 'fcp-<prefixo da aba>-<papel>', e nunca '<prefixo>-<papel>'.
+   A primeira versao desta funcao gerava '<pref>-pnome', que no Checkout dava 'u-pnome' --
+   ID que a aba JA usava no campo "Nome do produto". Dois elementos com o mesmo ID nao dao
+   erro nenhum: getElementById devolve o primeiro do documento, e o primeiro era o do
+   produto. Resultado medido: a biblioteca do Checkout nao podia ser criada pela interface
+   (o nome digitado na secao de presets nunca era lido, e o alerta pedia um nome que estava
+   ali na tela), e quem tivesse o formulario de produto preenchido salvava um preset com o
+   nome DO PRODUTO enquanto o campo do produto era apagado, sem um unico aviso.
+   O prefixo 'fcp-' e a correcao estrutural, nao so a troca de um nome: nenhum campo de aba
+   pode se chamar assim sem quebrar a propria convencao das abas (campo de aba comeca pelo
+   prefixo de UMA letra -- s-, t-, l-, u-, b-, c-), entao a colisao nao pode voltar pela
+   coincidencia de um prefixo com um nome de campo. O container tambem entra no espaco de
+   nomes ('fcp-<pref>-box'), e assim "tudo o que e da biblioteca de presets" se confere com
+   um grep so. A varredura de IDs repetidos no documento inteiro passou a fazer parte da
+   verificacao desta ferramenta (ver docs/documentacao-fotocerta.md).
+   Efeito colateral bem-vindo: como 'fcp-...' nao comeca pelo prefixo de aba nenhuma, os
+   listeners de "mudou alguma coisa nesta aba" ja nao alcancam estes campos, e a excecao que
+   existia para eles (fcCampoDePreset) deixou de ser necessaria e saiu. */
 function fcPresetsMontar(a){
-  var box=$(a.pref+'-presets'),h,i,ops;
+  var box=$('fcp-'+a.pref+'-box'),h,i,ops;
   if(!box)return;
   h='<div><fieldset>';
   h+='<legend>Salvar a configuração atual</legend>';
-  h+='<label for="'+a.pref+'-pnome">Nome do preset <small>(o nome da campanha e do lugar onde a configuração é usada)</small></label>';
-  h+='<input type="text" id="'+a.pref+'-pnome" value="" placeholder="'+escAttr(a.exemplo||'ex.: Natal 2026')+'">';
-  h+='<div class="acoes"><button class="botao" type="button" id="'+a.pref+'-psalvar">Salvar preset</button></div>';
+  h+='<label for="fcp-'+a.pref+'-nome">Nome do preset <small>(o nome da campanha e do lugar onde a configuração é usada)</small></label>';
+  h+='<input type="text" id="fcp-'+a.pref+'-nome" value="" placeholder="'+escAttr(a.exemplo||'ex.: Natal 2026')+'">';
+  h+='<div class="acoes"><button class="botao" type="button" id="fcp-'+a.pref+'-salvar">Salvar preset</button></div>';
   h+='<p class="ajuda"><b>O que o preset guarda:</b> '+a.guarda+'</p>';
   if(a.operacionais&&a.operacionais.length){
     ops=[];
@@ -2352,18 +2389,12 @@ function fcPresetsMontar(a){
   h+='</fieldset></div>';
   h+='<div><fieldset>';
   h+='<legend>Presets salvos</legend>';
-  h+='<div id="'+a.pref+'-plista"></div>';
+  h+='<div id="fcp-'+a.pref+'-lista"></div>';
   h+='<p class="ajuda"><b>Aplicar</b> substitui o que está na tela pela configuração do preset — <b>todos</b> os campos desta aba, não só alguns (a prévia acompanha na hora). <b>Remover</b> apaga o preset — não mexe em nenhum código já colado no site.</p>';
   h+='</fieldset></div>';
   box.innerHTML=h;
-  liga(a.pref+'-psalvar',function(){fcPresetSalvar(a);});
+  liga('fcp-'+a.pref+'-salvar',function(){fcPresetSalvar(a);});
 }
-/* O campo do nome do preset comeca com o prefixo da aba, entao ele casa com os listeners de
-   "mudou alguma coisa nesta aba" e cada tecla digitada ali remontaria a previa. No Slideshow
-   isso manda o navegador baixar todas as fotos de novo -- que e exatamente o motivo de s-url
-   e s-leg ja terem excecao. Nomear um preset nao muda configuracao nenhuma, entao as cinco
-   previas ignoram este campo. */
-function fcCampoDePreset(chave){return /^[stlubc]-pnome$/.test(chave);}
 /* "a, b e c" -- so para o texto da interface */
 function fcLista(v){
   if(!v.length)return '';
@@ -2425,7 +2456,7 @@ function sRestaura(st){
    "Aplicar" o devolve pelo sRestaura, que e o mesmo caminho do estado gravado. */
 function sPresetResumo(v){
   var S=v.s||{},n=(v.imgs&&v.imgs.length)||0;
-  return n+(n===1?' foto':' fotos')+' \u2014 '+String(S.t||'')+', '+S.int+' ms, '+S.larg+' px';
+  return n+(n===1?' foto':' fotos')+' — '+String(S.t||'')+', '+S.int+' ms, '+S.larg+' px';
 }
 function sPresetAntes(){
   if(fcAjustarTodos(S_NUMS))salvarEstado();
@@ -3135,7 +3166,6 @@ function sCampoMudou(e){
      mandaria o navegador baixar todas as fotos de novo, sem nada mudar na tela. O ramo
      tambem serve para ligar/desligar o campo da legenda padrao e o botao de adicionar. */
   if(/^s-imp/.test(chave)){sImpToggles();return;}
-  if(fcCampoDePreset(chave))return;
   if(S_PV_IGNORA[chave])return;
   sToggles();sPreview();
 }
@@ -3531,7 +3561,7 @@ function lRestaura(st){
    no bloco compartilhado), mas a lista e o que aparece na tela e numa captura dela. */
 function lPresetResumo(v){
   var L=v.l||{},n=(L.qops&&L.qops.length)||0;
-  var t=(L.modo==='automatico'?'abre sozinho':'abre no clique')+' \u2014 icone '+String(L.icone||'');
+  var t=(L.modo==='automatico'?'abre sozinho':'abre no clique')+' — icone '+String(L.icone||'');
   t+=', '+(L.hor==='sim'?'com horario':'sem horario');
   if(n)t+=', '+n+(n===1?' opcao de pergunta':' opcoes de pergunta');
   return t;
@@ -4438,7 +4468,6 @@ function lCampoMudou(e){
   var alvo=e.target;if(!alvo)return;
   var chave=alvo.name||alvo.id||'';
   if(chave.indexOf('l-')!==0)return;
-  if(fcCampoDePreset(chave))return;
   if(L_PV_IGNORA[chave])return;
   lToggles();lPreview();
 }
@@ -4477,7 +4506,7 @@ function tRestaura(st){
    salvas pelo operador. */
 function tPresetResumo(v){
   var T=v.t||{};
-  return (T.arq==='embutida'?'embutido na intermediaria':'direto na pagina')+' \u2014 '+T.desk+'/'+T.mob+' px, corte '+T.larg+' px';
+  return (T.arq==='embutida'?'embutido na intermediaria':'direto na pagina')+' — '+T.desk+'/'+T.mob+' px, corte '+T.larg+' px';
 }
 function tPresetAntes(){
   if(fcAjustarTodos(T_NUMS))salvarEstado();
@@ -4724,15 +4753,28 @@ function uRestaura(st){
   $('u-zapnum').value=U.zapnum||'';
   $('u-descpix').value=(U.descpix!=null&&U.descpix!=='')?U.descpix:10;
   $('u-t1').value=U.t1;$('u-t2').value=U.t2;$('u-t3').value=U.t3;$('u-t4').value=U.t4;$('u-t5').value=U.t5;$('u-t6').value=U.t6;
-  if(U.t7)$('u-t7').value=U.t7;
+  /* '!=null' e nao "e verdade": t7..t10 sao TEXTO LIVRE, e texto livre vazio e uma escolha,
+     nao um campo ausente. Os quatro nasceram depois do resto da aba, e a guarda existia para
+     que estado gravado por versao anterior (que nao tem a chave) deixasse o padrao do HTML de
+     pe -- isso continua valendo com '!=null'. O que muda e o vazio: uColeta grava '' sempre,
+     e com a guarda de verdade o '' era LIDO e descartado, entao restaurar (ou aplicar um
+     preset) devolvia a aba pela metade, em silencio -- o operador esvaziava "Escolha seu
+     ensaio", aplicava um preset da outra campanha e publicava um checkout com o rotulo
+     errado. Honrar o vazio em vez de corrigi-lo a vista foi a escolha porque o gerador JA
+     aceita o vazio: uGerar le o campo direto e emite TXT_PRODUTOS='' sem nada quebrar. Ou
+     seja, tela e codigo gerado ja concordavam no vazio; era so a restauracao que discordava
+     dos dois. Um clamp para o padrao (o caminho usado nos numeros e nas cores, onde nao ha
+     valor vazio que faca sentido) mudaria o que a aba entrega hoje para quem esvaziou o
+     campo de proposito. */
+  if(U.t7!=null)$('u-t7').value=U.t7;
   $('u-largura').value=U.larg||420;
   $('u-qtdmax').value=(U.qtdmax!=null&&U.qtdmax!=='')?U.qtdmax:10;
   setRadio('u-sinal',U.sinal||'nao');setRadio('u-sinaltipo',U.sinaltipo||'pct');
   $('u-sinalpct').value=(U.sinalpct!=null&&U.sinalpct!=='')?U.sinalpct:30;
   $('u-sinalfixo').value=(U.sinalfixo!=null&&U.sinalfixo!=='')?U.sinalfixo:100;
-  if(U.t8)$('u-t8').value=U.t8;
-  if(U.t9)$('u-t9').value=U.t9;
-  if(U.t10)$('u-t10').value=U.t10;
+  if(U.t8!=null)$('u-t8').value=U.t8;   /* mesma regra do t7, logo acima */
+  if(U.t9!=null)$('u-t9').value=U.t9;
+  if(U.t10!=null)$('u-t10').value=U.t10;
   setRadio('u-resumo',U.resumo||'nao');
   setRadio('u-ppcor',U.ppcor||'gold');
   $('u-c1-t').value=U.c1;$('u-c1').value=corValida(U.c1)?U.c1:'#075E54';
@@ -4748,7 +4790,7 @@ function uPresetResumo(v){
   var U=v.u||{},np=(U.prods&&U.prods.length)||0,nc=(U.cps&&U.cps.length)||0;
   var t=np+(np===1?' produto':' produtos');
   if(nc)t+=', '+nc+(nc===1?' cupom':' cupons');
-  return t+' \u2014 '+(U_METODO_NOME[U.metodo]||String(U.metodo||''));
+  return t+' — '+(U_METODO_NOME[U.metodo]||String(U.metodo||''));
 }
 function uPresetAntes(){
   if(fcAjustarTodos(U_NUMS))salvarEstado();
@@ -4972,7 +5014,7 @@ function uProdRender(){
     txt.style.fontSize='13px';
     var qtd=(p.ops&&p.ops.length)?(' \u00b7 '+p.ops.length+' opcional'+(p.ops.length>1?'is':'')):' \u00b7 sem opcionais';
     var nq=uQtdItens(p);
-    txt.textContent=p.nome+' \u2014 '+uFmt(parseFloat(p.preco)||0)+qtd+(nq?(' \u00b7 '+nq+' com quantidade'):'');
+    txt.textContent=p.nome+' — '+uFmt(parseFloat(p.preco)||0)+qtd+(nq?(' \u00b7 '+nq+' com quantidade'):'');
     info.appendChild(txt);
     var ctrl=document.createElement('div');ctrl.className='ctrl';
     [['\u2191',function(){uProdMove(i,-1);},'Subir'],['\u2193',function(){uProdMove(i,1);},'Descer'],
@@ -5304,11 +5346,11 @@ function uPvModoSet(m){
 }
 document.addEventListener('input',function(e){
   var al=(e.target.id&&e.target.id.indexOf('u-')===0)||(e.target.name&&e.target.name.indexOf('u-')===0);
-  if(al&&!fcCampoDePreset(e.target.id))uPreview();
+  if(al)uPreview();
 });
 document.addEventListener('change',function(e){
   var al=(e.target.id&&e.target.id.indexOf('u-')===0)||(e.target.name&&e.target.name.indexOf('u-')===0);
-  if(al&&!fcCampoDePreset(e.target.id))uPreview();
+  if(al)uPreview();
 });
 
 /* ===== chave Pix: limpeza e limites do padrao BR Code =====
@@ -6351,7 +6393,7 @@ var B_EFEITO_NOME={brilho:'brilho giratorio',gradiente:'degrade continuo',pulso:
 function bPresetResumo(v){
   var C=v.b||{};
   var t=B_EFEITO_NOME[C.efeito]||String(C.efeito||'');
-  t+=' \u2014 borda '+C.esp+'px, cantos '+C.raio+'px';
+  t+=' — borda '+C.esp+'px, cantos '+C.raio+'px';
   if(C.efeito!=='fixa')t+=', ciclo '+C.vel+'s';
   return t;
 }
@@ -6382,7 +6424,7 @@ function bConsolRender(){
   if(!sel)return;
   antes=sel.value;
   sel.innerHTML='';
-  o=document.createElement('option');o.value='';o.text='N\u00e3o incluir \u2014 s\u00f3 o efeito desta tela';sel.appendChild(o);
+  o=document.createElement('option');o.value='';o.text='Não incluir — só o efeito desta tela';sel.appendChild(o);
   for(i=0;i<arr.length;i++){
     /* preset de borda fixa nao tem animacao: nao ha o que consolidar, entao nem aparece */
     if(!arr[i].valores.b||arr[i].valores.b.efeito==='fixa')continue;
@@ -6580,11 +6622,11 @@ function bPreview(){
 }
 document.addEventListener('input',function(e){
   var al=(e.target.id&&e.target.id.indexOf('b-')===0)||(e.target.name&&e.target.name.indexOf('b-')===0);
-  if(al&&!fcCampoDePreset(e.target.id))bPreview();
+  if(al)bPreview();
 });
 document.addEventListener('change',function(e){
   var al=(e.target.id&&e.target.id.indexOf('b-')===0)||(e.target.name&&e.target.name.indexOf('b-')===0);
-  if(al&&!fcCampoDePreset(e.target.id))bPreview();
+  if(al)bPreview();
 });
 
 /* ===== Consolidacao do codigo 1 (R20) =====
@@ -6701,13 +6743,11 @@ function cToggles(){
   cTitulo();
 }
 document.addEventListener('change',function(e){
-  if(e.target&&fcCampoDePreset(e.target.id||''))return;
   if(e.target&&/^c-/.test(e.target.name||e.target.id||'')){cToggles();cPreview();}
 });
 /* 'change' so dispara quando o campo perde o foco: sem este 'input', a previa so acordava
    depois de o operador clicar fora. A aba de bordas ja ouvia os dois. */
 document.addEventListener('input',function(e){
-  if(e.target&&fcCampoDePreset(e.target.id||''))return;
   if(e.target&&/^c-/.test(e.target.name||e.target.id||'')){cToggles();cPreview();}
 });
 
@@ -6802,7 +6842,7 @@ function cRestaura(st){
 /* ===== O que esta aba poe na biblioteca de presets (ver o bloco compartilhado) ===== */
 function cPresetResumo(v){
   var C=v.c||{},n=(v.cmsgs&&v.cmsgs.length)||0;
-  var t=(C.modo==='data'?'ate uma data':'a partir da abertura')+' \u2014 '+(C.formato==='blocos'?'blocos':'compacto');
+  var t=(C.modo==='data'?'ate uma data':'a partir da abertura')+' — '+(C.formato==='blocos'?'blocos':'compacto');
   t+=', '+(C.fixa==='fixa'?'barra fixa no topo':'no fluxo da pagina');
   if(n)t+=', '+n+(n===1?' mensagem':' mensagens');
   return t;
