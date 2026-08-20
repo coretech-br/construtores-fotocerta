@@ -178,14 +178,7 @@
 <body>
 
 <div class="topo">
-  <svg viewBox="0 0 32 38" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-    <ellipse cx="16" cy="25" rx="8.5" ry="11" fill="#1F5C4D"/>
-    <path fill="none" stroke="#E9E3D3" stroke-width="1.2" d="M9 22 Q11 30 14 35 M23 22 Q21 30 18 35"/>
-    <path fill="#1F5C4D" d="M16 3.8 C13.7 1.6 8 2.3 7.6 8 C7.3 12.9 11 18 16 21 C21 18 24.7 12.9 24.4 8 C24 2.3 18.3 1.6 16 3.8 Z"/>
-    <circle cx="12.6" cy="9.6" r="1.6" fill="#E9E3D3"/><circle cx="19.4" cy="9.6" r="1.6" fill="#E9E3D3"/>
-    <path fill="#E9E3D3" d="M16 11 L15.2 14.4 Q16 15.5 16.8 14.4 Z"/>
-    <path stroke="#1F5C4D" stroke-width="1.4" stroke-linecap="round" fill="none" d="M13 35.5 L13 37.2 M16 36 L16 37.8 M19 35.5 L19 37.2"/>
-  </svg>
+  <span id="topo-coruja"></span>
   <div>
     <h1>Construtores Foto Certa</h1>
     <p>Gere o código dos componentes do Prosite preenchendo os parâmetros. Os valores ficam salvos neste navegador.</p>
@@ -1242,8 +1235,8 @@
       <div id="c-abertura-campos">
       <label for="c-dias">Duração — dias</label>
       <input type="number" id="c-dias" value="0" min="0" max="365" step="1">
-      <label for="c-horas">Duração — horas</label>
-      <input type="number" id="c-horas" value="48" min="0" step="1">
+      <label for="c-horas">Duração — horas <small>(somam-se aos dias, então não param em 23; de 0 a 8760, que é um ano)</small></label>
+      <input type="number" id="c-horas" value="48" min="0" max="8760" step="1">
       <label for="c-mins">Duração — minutos</label>
       <input type="number" id="c-mins" value="0" min="0" max="59" step="1">
       <p class="ajuda">Cada visitante tem o próprio prazo, contado da primeira vez que abriu a página naquele navegador.</p>
@@ -1633,6 +1626,51 @@ function bHexRgb(h){
 function urlLimpa(v){
   return String(v).replace(/[\u0000-\u0020]/g,'').replace(/\\/g,'/');
 }
+/* ===== desenho da coruja: fonte unica =====
+   O mesmo desenho aparecia em CINCO lugares: o logotipo desta ferramenta, a previa do botao da
+   aba Captacao de leads, as DUAS variantes que o bloco de Leads escreve (cor automatica e cores
+   livres) e a que o bloco da Contagem regressiva escreve. Eram cinco copias das mesmas sete
+   formas, e todas concordavam -- nao havia defeito nenhum. O risco e o dia em que o desenho for
+   ajustado em quatro lugares e o quinto ficar para tras: nada quebra, nada avisa, e a coruja da
+   barra passa a ser outra ave. E a mesma classe de falha que esta ferramenta ja pagou caro na
+   previa que imitava o gerador.
+   O bloco COLADO NO SITE continua autossuficiente: ele leva a propria copia do desenho, escrita
+   por corujaJs no momento de gerar. O que se unificou foi a fonte que ESCREVE as copias, nunca
+   a saida -- nenhum bloco entregue passa a depender desta ferramenta.
+   {C} = cor do corpo, {D} = cor dos detalhes; sao os dois unicos pontos variaveis do desenho. */
+var CORUJA_PECAS=[
+  '<svg viewBox="0 0 32 38" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">',
+  '<ellipse cx="16" cy="25" rx="8.5" ry="11" fill="{C}"/>',
+  '<path fill="none" stroke="{D}" stroke-width="1.2" d="M9 22 Q11 30 14 35 M23 22 Q21 30 18 35"/>',
+  '<path fill="{C}" d="M16 3.8 C13.7 1.6 8 2.3 7.6 8 C7.3 12.9 11 18 16 21 C21 18 24.7 12.9 24.4 8 C24 2.3 18.3 1.6 16 3.8 Z"/>',
+  '<circle cx="12.6" cy="9.6" r="1.6" fill="{D}"/>',
+  '<circle cx="19.4" cy="9.6" r="1.6" fill="{D}"/>',
+  '<path fill="{D}" d="M16 11 L15.2 14.4 Q16 15.5 16.8 14.4 Z"/>',
+  '<path stroke="{D}" stroke-width="1.4" stroke-linecap="round" fill="none" d="M13 35.5 L13 37.2 M16 36 L16 37.8 M19 35.5 L19 37.2"/>',
+  '</svg>'
+];
+/* A troca vai por FUNCAO de substituicao, e nao por string: em replace(), um "$&" ou "$1" na
+   string de substituicao seria reinterpretado, e a cor chega de campo do operador. */
+function corujaTroca(t,corpo,det){
+  return t.replace(/\{C\}/g,function(){return corpo;}).replace(/\{D\}/g,function(){return det;});
+}
+/* Desenho pronto para usar AQUI DENTRO: o logotipo do topo e a previa do botao da aba Leads. */
+function corujaSvg(corpo,det){
+  return corujaTroca(CORUJA_PECAS.join(''),corpo,det);
+}
+/* O "return" que vai DENTRO do bloco entregue. corpo e det chegam como o pedaco de codigo que o
+   bloco vai avaliar, e e so nisso que as tres variantes diferem: pode ser uma cor literal
+   (#fff, que fica dentro das aspas) ou uma saida de string seguida de variavel ('+c+'). ind e a
+   indentacao da linha do return, ind2 a das linhas seguintes -- a Contagem indenta o bloco
+   dela, as duas de Leads escrevem na margem. */
+function corujaJs(ind,ind2,corpo,det){
+  var j=ind+'return ',i;
+  for(i=0;i<CORUJA_PECAS.length;i++){
+    j+=(i?ind2:'')+"'"+corujaTroca(CORUJA_PECAS[i],corpo,det)+"'";
+    j+=(i<CORUJA_PECAS.length-1)?"+\n":";\n";
+  }
+  return j;
+}
 /* ===== faixa declarada dos campos numericos, compartilhada por quatro abas =====
    Cada aba declara uma tabela de linhas [id, padrao, min, max, inteiro] e nada mais. A MESMA
    linha alimenta os dois lados -- o gerador (fcPreso, o numero que sai no codigo) e a interface
@@ -1916,7 +1954,11 @@ function corValida(v){return /^#[0-9a-fA-F]{6}$/.test(v);}
    bloco entregue -- um apostrofo bastava para fechar a string e emendar codigo arbitrario no
    carrinho publicado, e a previa (que ja validava) mostrava a cor certa enquanto o codigo
    levava a errada. Helper novo em vez de mexer em corValida, que as seis abas compartilham.
-   bCor e cCor fazem o mesmo nas abas Bordas e Contagem; nao sao tocadas. */
+   Ago/2026: as abas Bordas e Contagem tinham cada uma a SUA copia desta funcao (bCor e cCor),
+   de corpo identico. As tres concordavam, entao nao havia defeito nenhum -- e por isso mesmo
+   uma delas podia ganhar uma regra nova (outro formato de cor, outra rede) e as outras duas
+   continuarem como estavam, sem nada quebrar e sem ninguem perceber. Ficou esta, que e a de
+   nome mais descritivo; bCor e cCor sairam e as chamadas apontam para ca. */
 function corSegura(idBase,def){var v=$(idBase+'-t').value;return corValida(v)?v:def;}
 /* Correcao a vista, no padrao do c-mob da Contagem: em vez de o gerador cair no padrao em
    silencio (o operador continuaria lendo 'naoehcor' na tela e publicando '#075E54'), o proprio
@@ -1931,7 +1973,8 @@ function corAjustar(idBase,def){
   return true;
 }
 /* Cores de texto livre das abas Leads e Checkout (as de Bordas e Contagem ja eram validadas
-   na origem por bCor/cCor). Padroes identicos aos do HTML e aos das respectivas previas. */
+   na origem, pela mesma corSegura). Padroes identicos aos do HTML e aos das respectivas
+   previas. */
 var CORES_LIVRES=[['l-corbtn','#25D366'],['l-c1','#075E54'],['l-c2','#ffffff'],['l-c3','#25D366'],['l-c4','#333333'],
   ['l-corujacorpo','#ffffff'],['l-corujadet','#075E54'],
   ['u-c1','#075E54'],['u-c2','#ffffff'],['u-c3','#333333']];
@@ -2772,16 +2815,10 @@ function lQRender(){
   });
 }
 
+/* Coruja do botao flutuante, do jeito que a previa desta aba precisa dela: corpo branco
+   cravado, detalhes na cor escolhida. Mesmo desenho de CORUJA_PECAS, sem segunda copia. */
 function svgCorujaStr(cor){
-  return '<svg viewBox="0 0 32 38" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">'+
-    '<ellipse cx="16" cy="25" rx="8.5" ry="11" fill="#fff"/>'+
-    '<path fill="none" stroke="'+cor+'" stroke-width="1.2" d="M9 22 Q11 30 14 35 M23 22 Q21 30 18 35"/>'+
-    '<path fill="#fff" d="M16 3.8 C13.7 1.6 8 2.3 7.6 8 C7.3 12.9 11 18 16 21 C21 18 24.7 12.9 24.4 8 C24 2.3 18.3 1.6 16 3.8 Z"/>'+
-    '<circle cx="12.6" cy="9.6" r="1.6" fill="'+cor+'"/>'+
-    '<circle cx="19.4" cy="9.6" r="1.6" fill="'+cor+'"/>'+
-    '<path fill="'+cor+'" d="M16 11 L15.2 14.4 Q16 15.5 16.8 14.4 Z"/>'+
-    '<path stroke="'+cor+'" stroke-width="1.4" stroke-linecap="round" fill="none" d="M13 35.5 L13 37.2 M16 36 L16 37.8 M19 35.5 L19 37.2"/>'+
-    '</svg>';
+  return corujaSvg('#fff',cor);
 }
 function svgRecadoStr(){
   return '<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" fill="#fff" aria-hidden="true"><path d="M16 4C9.37 4 4 8.7 4 14.5c0 3.28 1.73 6.2 4.44 8.12-.15 1.42-.65 3.06-1.9 4.38-.25.27-.06.71.31.68 2.6-.2 4.63-1.22 6-2.28 1 .2 2.05.3 3.15.3 6.63 0 12-4.7 12-10.5S22.63 4 16 4zm-5.5 12.25c-.97 0-1.75-.78-1.75-1.75s.78-1.75 1.75-1.75 1.75.78 1.75 1.75-.78 1.75-1.75 1.75zm5.5 0c-.97 0-1.75-.78-1.75-1.75s.78-1.75 1.75-1.75 1.75.78 1.75 1.75-.78 1.75-1.75 1.75zm5.5 0c-.97 0-1.75-.78-1.75-1.75s.78-1.75 1.75-1.75 1.75.78 1.75 1.75-.78 1.75-1.75 1.75z"/></svg>';
@@ -3099,15 +3136,8 @@ function lSvgCorujaTopo(v){
   var j='';
   j+='function svgCorujaTopo(){\n';
   j+="var corpo='"+v.corujaCorpo+"',det='"+v.corujaDet+"';\n";
-  j+="return '<svg viewBox=\"0 0 32 38\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">'+\n";
-  j+="'<ellipse cx=\"16\" cy=\"25\" rx=\"8.5\" ry=\"11\" fill=\"'+corpo+'\"/>'+\n";
-  j+="'<path fill=\"none\" stroke=\"'+det+'\" stroke-width=\"1.2\" d=\"M9 22 Q11 30 14 35 M23 22 Q21 30 18 35\"/>'+\n";
-  j+="'<path fill=\"'+corpo+'\" d=\"M16 3.8 C13.7 1.6 8 2.3 7.6 8 C7.3 12.9 11 18 16 21 C21 18 24.7 12.9 24.4 8 C24 2.3 18.3 1.6 16 3.8 Z\"/>'+\n";
-  j+="'<circle cx=\"12.6\" cy=\"9.6\" r=\"1.6\" fill=\"'+det+'\"/>'+\n";
-  j+="'<circle cx=\"19.4\" cy=\"9.6\" r=\"1.6\" fill=\"'+det+'\"/>'+\n";
-  j+="'<path fill=\"'+det+'\" d=\"M16 11 L15.2 14.4 Q16 15.5 16.8 14.4 Z\"/>'+\n";
-  j+="'<path stroke=\"'+det+'\" stroke-width=\"1.4\" stroke-linecap=\"round\" fill=\"none\" d=\"M13 35.5 L13 37.2 M16 36 L16 37.8 M19 35.5 L19 37.2\"/>'+\n";
-  j+="'</svg>';\n}\n\n";
+  j+=corujaJs('','',"'+corpo+'","'+det+'");
+  j+='}\n\n';
   return j;
 }
 
@@ -3179,7 +3209,10 @@ function lJs(v){
     c+="var PERGUNTA_OPCOES=['"+v.q.ops.join("','")+"'];\n\n";
   }
   c+='/* ============================================================\n   Daqui para baixo nao precisa mexer\n   ============================================================ */\n\n';
-  c+="function svgCoruja(c){\nreturn '<svg viewBox=\"0 0 32 38\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">'+\n'<ellipse cx=\"16\" cy=\"25\" rx=\"8.5\" ry=\"11\" fill=\"#fff\"/>'+\n'<path fill=\"none\" stroke=\"'+c+'\" stroke-width=\"1.2\" d=\"M9 22 Q11 30 14 35 M23 22 Q21 30 18 35\"/>'+\n'<path fill=\"#fff\" d=\"M16 3.8 C13.7 1.6 8 2.3 7.6 8 C7.3 12.9 11 18 16 21 C21 18 24.7 12.9 24.4 8 C24 2.3 18.3 1.6 16 3.8 Z\"/>'+\n'<circle cx=\"12.6\" cy=\"9.6\" r=\"1.6\" fill=\"'+c+'\"/>'+\n'<circle cx=\"19.4\" cy=\"9.6\" r=\"1.6\" fill=\"'+c+'\"/>'+\n'<path fill=\"'+c+'\" d=\"M16 11 L15.2 14.4 Q16 15.5 16.8 14.4 Z\"/>'+\n'<path stroke=\"'+c+'\" stroke-width=\"1.4\" stroke-linecap=\"round\" fill=\"none\" d=\"M13 35.5 L13 37.2 M16 36 L16 37.8 M19 35.5 L19 37.2\"/>'+\n'</svg>';\n}\n\n";
+  /* A coruja que este bloco leva junto: corpo branco cravado, detalhes na cor que a funcao
+     receber. Escrita a partir de CORUJA_PECAS -- o bloco entregue continua autossuficiente,
+     porque o desenho vai COPIADO para dentro dele. */
+  c+='function svgCoruja(c){\n'+corujaJs('','','#fff',"'+c+'")+'}\n\n';
   if(v.corujaCor==='livre')c+=lSvgCorujaTopo(v);
   c+="function iconeBotao(){\nif(ICONE_BOTAO==='identidade')return svgCoruja(COR_BOTAO_FLUTUANTE);\n";
   c+="if(ICONE_BOTAO==='recado')return '"+svgRecadoStr().replace(/'/g,"\\'")+"';\n";
@@ -3907,12 +3940,46 @@ function uQtdLigada(prods){
   for(i=0;i<prods.length;i++)if(uQtdItens(prods[i]))return true;
   return false;
 }
+/* ===== formatacao de preco: fonte unica =====
+   A regra vivia em dois lugares de corpo equivalente: uFmt (o que ESTA ferramenta mostra na
+   lista de produtos e nos avisos de sinal) e a moedaFmt que ela ESCREVE dentro do carrinho.
+   Os dois concordavam, entao nao havia defeito; o risco e a proxima moeda entrar so num deles
+   e a tela passar a discordar do carrinho publicado -- sem erro, sem aviso.
+   O bloco entregue continua AUTOSSUFICIENTE: ele leva a propria moedaFmt, escrita por
+   uMoedaFmtGer a partir desta tabela. Unificou-se a fonte que escreve, nunca a saida.
+   Cada linha e [codigo, prefixo]. O real fica FORA da tabela de proposito: ele e o padrao
+   (vale para qualquer codigo que nao esteja listado) e e o unico com virgula decimal. */
+var PRECO_MOEDAS=[['EUR','\u20AC '],['USD','$ ']];
+var PRECO_PADRAO='R$ ';
+function precoFmt(moeda,v){
+  var s=v.toFixed(2),i;
+  for(i=0;i<PRECO_MOEDAS.length;i++)if(moeda===PRECO_MOEDAS[i][0])return PRECO_MOEDAS[i][1]+s;
+  return PRECO_PADRAO+s.replace('.',',');
+}
+/* O codigo colado no Prosite e escrito sem acento e sem caractere fora do ASCII (manual do
+   Prosite, item 10), entao o simbolo do euro sai de la como sequencia \u. Ela e DERIVADA do
+   proprio simbolo, e nao guardada como segunda coluna da tabela: duas grafias do mesmo
+   simbolo sao duas coisas para divergir, que e justamente o que esta unificacao desfaz. */
+function precoJsTexto(t){
+  return String(t).replace(/[^\u0020-\u007E]/g,function(ch){
+    var h=ch.charCodeAt(0).toString(16).toUpperCase();
+    return '\\u'+'0000'.slice(h.length)+h;
+  });
+}
+/* Lado da ferramenta. So o Checkout escolhe moeda, e so quando o PayPal e a UNICA forma de
+   pagamento -- com Pix junto, o pedido e sempre em real. */
 function uFmt(v){
-  var mo=(radio('u-metodo')==='paypal')?radio('u-moeda'):'BRL';
-  var s=v.toFixed(2);
-  if(mo==='EUR')return '\u20AC '+s;
-  if(mo==='USD')return '$ '+s;
-  return 'R$ '+s.replace('.',',');
+  return precoFmt((radio('u-metodo')==='paypal')?radio('u-moeda'):'BRL',v);
+}
+/* Lado do bloco entregue: a MESMA tabela, escrita como codigo dentro do carrinho. */
+function uMoedaFmtGer(){
+  var c='',i;
+  c+='function moedaFmt(v){\n';
+  c+='var s=v.toFixed(2);\n';
+  for(i=0;i<PRECO_MOEDAS.length;i++)
+    c+="if(MOEDA==='"+PRECO_MOEDAS[i][0]+"')return '"+precoJsTexto(PRECO_MOEDAS[i][1])+"'+s;\n";
+  c+="return '"+PRECO_PADRAO+"'+s.replace('.',',');\n}\n\n";
+  return c;
 }
 
 /* ===== opcionais do produto em edicao ===== */
@@ -4744,11 +4811,7 @@ function uBloco(cfg){
   c+="var TXT_DESCONTO='Desconto';\n\n";
 
   c+='/* ============================================================\n   Daqui para baixo nao precisa mexer\n   ============================================================ */\n\n';
-  c+='function moedaFmt(v){\n';
-  c+='var s=v.toFixed(2);\n';
-  c+="if(MOEDA==='EUR')return '\\u20AC '+s;\n";
-  c+="if(MOEDA==='USD')return '$ '+s;\n";
-  c+="return 'R$ '+s.replace('.',',');\n}\n\n";
+  c+=uMoedaFmtGer();
 
   if(usaPix){
     c+='function semAcento(t,max){\n';
@@ -5338,7 +5401,6 @@ function bPadOk(v){
   }
   return true;
 }
-function bCor(id,def){var v=$(id+'-t').value;return corValida(v)?v:def;}
 /* fcPreso le o valor do PROPRIO campo, e um preset nao tem campo na tela: aqui o valor vem do
    preset e a faixa continua vindo de B_NUMS. O clamp e o de fcPrender -- o MESMO que fcPreso
    usa --, entao a tela e o preset nao podem divergir nem na faixa nem na aritmetica.
@@ -5357,14 +5419,14 @@ function bCfgDom(){
   var ef=radio('b-efeito');
   return {efeito:ef,fundo:radio('b-fundo'),
     esp:bPreso('b-esp'),raio:bPreso('b-raio'),
-    c1:bCor('b-c1','#9C5638'),c2:bCor('b-c2','#FFC94A'),c3:bCor('b-c3','#FFF6D8'),
+    c1:corSegura('b-c1','#9C5638'),c2:corSegura('b-c2','#FFC94A'),c3:corSegura('b-c3','#FFF6D8'),
     L:bPreso('b-facholarg'),listra:bPreso('b-listra'),vel:bPreso('b-vel'),
     /* No efeito "pulso" o halo e o proprio efeito: os campos valem sempre, sem o radio. */
     halo:(ef==='pulso')||(radio('b-halo')==='sim'),
     haloraio:bPreso('b-haloraio'),haloop:bPreso('b-haloop'),
-    f1:bCor('b-f1','#8A4A32'),f2:bCor('b-f2','#B5674A'),fang:bPreso('b-fang'),
+    f1:corSegura('b-f1','#8A4A32'),f2:corSegura('b-f2','#B5674A'),fang:bPreso('b-fang'),
     fallback:(radio('b-fallback')==='sim'),
-    comTexto:(radio('b-txt')==='sim'),corTexto:bCor('b-c4','#F7EFDF'),
+    comTexto:(radio('b-txt')==='sim'),corTexto:corSegura('b-c4','#F7EFDF'),
     pad:$('b-pad').value.trim()};
 }
 /* A mesma configuracao, vinda de um preset salvo (formato de bCampos). */
@@ -5962,7 +6024,6 @@ function cMsgRender(){
   });
 }
 
-function cCor(id,def){var v=$(id+'-t').value;return corValida(v)?v:def;}
 function cAlvoIso(){
   var v=$('c-alvo').value;
   if(!v)return '';
@@ -5985,14 +6046,17 @@ function cAlvoIso(){
    digitado: c-largmax=0 gerava max-width:0px (barra de largura zero), c-tam=0 gerava
    font-size:0px, c-vel=0 gerava "animation:fcb-rola 0s" (a rolagem configurada nunca acontece)
    e c-urglim=-5 fazia a urgencia nunca disparar.
-   Sobre o c-horas: o padrao do campo e 48 (e o que o HTML traz e o que cLimpar devolve), mas o
-   proprio input declara max="23". Os dois nao podem estar certos ao mesmo tempo, e decidir qual
-   deles vale nao e desta rodada -- e pendencia registrada. Enquanto ela nao for decidida, o teto
-   aqui fica ABERTO (null): inventar 23 clamparia o padrao 48 para 23 e encurtaria em silencio a
-   duracao de quem ja tem campanha salva; inventar outro numero seria decidir por conta propria.
-   O piso 0 entra porque negativo nao tem leitura nenhuma numa duracao. */
+   Sobre o c-horas, DECIDIDO pelo dono (ago/2026): o teto e 8760, um ano em horas. O max="23"
+   original e que estava errado, e o motivo esta na aritmetica logo abaixo -- duracaoMs monta
+   ((dias*24+horas)*60+mins)*60000, ou seja, os tres campos se SOMAM. "Horas" ali significa
+   horas ADICIONAIS, nao hora dentro de um dia, entao nao ha por que parar em 23: o padrao de
+   fabrica 48 sempre foi legitimo, e era o teto que o contradizia. 8760 preserva a liberdade
+   real de quem quer contar em horas e barra so o numero absurdo (digitacao de mais um zero).
+   O piso 0 entra porque negativo nao tem leitura nenhuma numa duracao.
+   O mesmo 8760 esta no atributo max do input, para os dois lados concordarem: o max sozinho
+   nao impede valor digitado, e a tabela sozinha deixaria a seta do teclado passar do teto. */
 var C_NUMS=[
-  ['c-dias',0,0,365,true],['c-horas',48,0,null,true],['c-mins',0,0,59,true],
+  ['c-dias',0,0,365,true],['c-horas',48,0,8760,true],['c-mins',0,0,59,true],
   ['c-tam',15,10,32,true],['c-pad',10,0,40,true],['c-largmax',1100,320,1920,true],
   ['c-mob',640,320,1024,true],['c-z',99980,1,2147483647,true],['c-gap',16,0,60,true],
   ['c-corujaalt',26,14,60,true],['c-vel',18,2,60,true],['c-alt',5,2,30,true],
@@ -6018,10 +6082,10 @@ function cCfg(){
     unidades:{d:$('c-un-d').checked,h:$('c-un-h').checked,m:$('c-un-m').checked,s:$('c-un-s').checked},
     diaszero:radio('c-diaszero')==='sim',
     fim:radio('c-fim'),fimtxt:$('c-fimtxt').value,
-    cores:{fundo:cCor('c-cfundo','#0F3A30'),texto:cCor('c-ctexto','#FDFBF6'),destaque:cCor('c-cdestaque','#FFC94A'),
-      borda:cCor('c-cborda','#FFC94A'),urg:cCor('c-curg','#8C1D18'),
-      ctaFundo:cCor('c-ctafundo','#FFC94A'),ctaTexto:cCor('c-ctatexto','#23281F'),
-      prog:cCor('c-cprog','#FFC94A'),corujaCorpo:cCor('c-corujacorpo','#FDFBF6'),corujaDet:cCor('c-corujadet','#FFC94A')},
+    cores:{fundo:corSegura('c-cfundo','#0F3A30'),texto:corSegura('c-ctexto','#FDFBF6'),destaque:corSegura('c-cdestaque','#FFC94A'),
+      borda:corSegura('c-cborda','#FFC94A'),urg:corSegura('c-curg','#8C1D18'),
+      ctaFundo:corSegura('c-ctafundo','#FFC94A'),ctaTexto:corSegura('c-ctatexto','#23281F'),
+      prog:corSegura('c-cprog','#FFC94A'),corujaCorpo:corSegura('c-corujacorpo','#FDFBF6'),corujaDet:corSegura('c-corujadet','#FFC94A')},
     fonte:radio('c-fonte'),tam:cPreso('c-tam',15),peso:radio('c-peso'),
     formato:radio('c-formato'),
     rotulos:{d:$('c-rd').value,h:$('c-rh').value,m:$('c-rm').value,s:$('c-rs').value},
@@ -6582,15 +6646,8 @@ function cSvgCorujaGer(cfg){
   var j='';
   j+='  function svgCoruja(){\n';
   j+="    var corpo='"+cfg.cores.corujaCorpo+"',det='"+cfg.cores.corujaDet+"';\n";
-  j+="    return '<svg viewBox=\"0 0 32 38\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\">'+\n";
-  j+="      '<ellipse cx=\"16\" cy=\"25\" rx=\"8.5\" ry=\"11\" fill=\"'+corpo+'\"/>'+\n";
-  j+="      '<path fill=\"none\" stroke=\"'+det+'\" stroke-width=\"1.2\" d=\"M9 22 Q11 30 14 35 M23 22 Q21 30 18 35\"/>'+\n";
-  j+="      '<path fill=\"'+corpo+'\" d=\"M16 3.8 C13.7 1.6 8 2.3 7.6 8 C7.3 12.9 11 18 16 21 C21 18 24.7 12.9 24.4 8 C24 2.3 18.3 1.6 16 3.8 Z\"/>'+\n";
-  j+="      '<circle cx=\"12.6\" cy=\"9.6\" r=\"1.6\" fill=\"'+det+'\"/>'+\n";
-  j+="      '<circle cx=\"19.4\" cy=\"9.6\" r=\"1.6\" fill=\"'+det+'\"/>'+\n";
-  j+="      '<path fill=\"'+det+'\" d=\"M16 11 L15.2 14.4 Q16 15.5 16.8 14.4 Z\"/>'+\n";
-  j+="      '<path stroke=\"'+det+'\" stroke-width=\"1.4\" stroke-linecap=\"round\" fill=\"none\" d=\"M13 35.5 L13 37.2 M16 36 L16 37.8 M19 35.5 L19 37.2\"/>'+\n";
-  j+="      '</svg>';\n  }\n\n";
+  j+=corujaJs('    ','      ',"'+corpo+'","'+det+'");
+  j+='  }\n\n';
   return j;
 }
 
@@ -6782,6 +6839,19 @@ prep('Barra de abas','',function(){
   /* enquanto o painel esta escondido o box mede 0: a previa e remontada ao abrir a aba, ja com
      a largura real da coluna, senao o iframe nasceria na largura de emergencia. */
   liga('aba-cnt',function(){trocarAba('cnt');cPreview(true);});
+});
+/* O logotipo do topo deixou de ser SVG colado no corpo da pagina e passa a ser desenhado a
+   partir de CORUJA_PECAS, a mesma fonte que alimenta os blocos gerados. Passo proprio, e nao
+   um pedaco do passo da barra de abas: se ele falhar, quem tem de morrer e o logotipo, nao a
+   navegacao entre as abas. Sem aba associada, como a propria barra de abas -- nao ha botao
+   para marcar com (!), e a barra vermelha ja diz o que parou.
+   O span vazio e substituido pelo SVG (e nao usado como caixa em volta) para o desenho
+   continuar sendo filho direto de .topo: e ".topo svg" que lhe da 40x48 e o flex-shrink. */
+prep('Logotipo do topo','',function(){
+  var alvo=$('topo-coruja');
+  if(!alvo)return;
+  alvo.insertAdjacentHTML('beforebegin',corujaSvg('#1F5C4D','#E9E3D3'));
+  alvo.parentNode.removeChild(alvo);
 });
 prep('Slideshow','slide',function(){
   liga('s-add',sAdd);
