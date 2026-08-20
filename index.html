@@ -1851,7 +1851,28 @@
 /* ============ utilidades ============ */
 function $(id){return document.getElementById(id);}
 function radio(nome){var r=document.querySelector('input[name="'+nome+'"]:checked');return r?r.value:'';}
-function setRadio(nome,val){var r=document.querySelector('input[name="'+nome+'"][value="'+val+'"]');if(r)r.checked=true;}
+/* O VALOR NAO ENTRA NUM SELETOR. O nome do grupo e sempre literal do proprio arquivo, mas o
+   valor vem do estado gravado, do preset guardado e -- desde a fase 4 -- do ARQUIVO IMPORTADO.
+   Uma unica aspa dupla dentro dele fechava a string do seletor e o querySelector lancava
+   SyntaxError: medido com um arquivo cujo unico campo envenenado era c.fonte = neutra" i],
+   o cRestaura parava no meio, a Contagem caia em so-leitura e a aba ficava ESCRITA PELA
+   METADE -- c-cod exibindo o codigo da campanha na tela enquanto o armazenamento ainda tinha
+   o valor antigo, que e a divergencia entre tela e estado que este projeto mais evita. E, com
+   o valor envenenado dentro de um preset geral, a excecao voltava a cada selecao daquele
+   preset.
+   O conserto e no AJUDANTE, nao no chamador: um lugar so, e os grupos de radio das seis abas
+   (mais os do preset geral) ficam todos protegidos pela mesma linha. getElementsByName com
+   comparacao em JavaScript nao interpreta nada -- o valor volta a ser so texto.
+   Comparacao pela propriedade .value, e nao pelo atributo: para os radios desta ferramenta e a
+   mesma coisa (todos declaram value="..."), e a propriedade e o que o resto do arquivo ja le.
+   Valor desconhecido continua nao mexendo em nada, de proposito -- ver o comentario do
+   l-corujapos, que depende disso. */
+function setRadio(nome,val){
+  var els=document.getElementsByName(nome),v=String(val),i;
+  for(i=0;i<els.length;i++){
+    if(els[i].tagName==='INPUT'&&els[i].value===v){els[i].checked=true;return;}
+  }
+}
 function esc(s){return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'");}
 /* Compartilhadas pelas seis abas. Estavam declaradas dentro do bloco de uma aba
    especifica e so funcionavam por hoisting: escHtml nascia na aba Captacao de leads e
@@ -2200,11 +2221,34 @@ function prep(nome,abaId,fn,fase){
                   entrada nao confiavel, e a limpeza generica so sabe de forma (tipo, tamanho,
                   profundidade); o que exige conhecimento da aba mora aqui. Recebe o fragmento
                   ja saneado e um contador, e devolve o fragmento. Hoje so o Slideshow tem uma
-                  (endereco de foto que nao passa em sUrlOk nao entra na lista). */
+                  (endereco de foto que nao passa em sUrlOk nao entra na lista, e foto de host
+                  fora da Alboom e CONTADA para a confirmacao poder dizer quantas sao).
+     listas       [caminho, molde de UM item, chave essencial] de cada lista desta aba, para
+                  a conferencia do arquivo importado.
+                  Existe porque o molde real e o que a aba tem AGORA: com a
+                  lista da tela vazia, fcxConformar nao tinha item de exemplo, caia no
+                  saneamento generico e ACEITAVA qualquer coisa dentro dela. Medido com
+                  l.qops = [null, 1, {texto:"obj"}, ["a"], "opcao boa"]: 0 descartes anunciados
+                  e ["null","1","[object Object]","a","opcao boa"] gravado -- o [object Object]
+                  aparecia como opcao de resposta no bloco publicado da Captacao de leads,
+                  escapado e inofensivo, mas viajando do arquivo ate a pagina sem ser contado.
+                  Com o molde declarado, item que nao tem a forma do item e recusado e SOMADO,
+                  nas seis abas e nao so na do Slideshow. O caminho e por ponto e atravessa
+                  lista ('u.prods.ops'), porque o produto real do operador pode nao ter nenhum
+                  opcional e deixar o molde de dentro vazio pelo mesmo motivo.
+                  O TERCEIRO elemento (so onde o item e objeto) e a chave sem a qual o item nao
+                  e um item: 'nome' num produto, 'texto' numa mensagem. Ele existe porque a
+                  conferencia contra molde e generosa de proposito com CHAVE AUSENTE -- toda
+                  esta ferramenta assume que estado gravado por versao anterior nao tem as
+                  chaves novas --, e essa generosidade deixava passar a casca: {"texto":"obj"}
+                  dentro da lista de opcionais perdia a unica chave que tinha e sobrava {},
+                  que o gerador escreveria como um opcional chamado 'undefined'. Item sem a
+                  chave essencial e recusado e SOMADO, como todo o resto. */
 var ABAS=[
   {id:'slide',nome:'Slideshow',           chaves:['imgs','s'],  coleta:sColeta,restaura:sRestaura,
    pref:'s',fora:[],operacionais:[],resumo:sPresetResumo,redesenhar:sPresetDepois,antesDeSalvar:sPresetAntes,
    importar:sImportarLimpar,
+   listas:[['imgs',{url:'',legenda:''},'url']],
    exemplo:'ex.: Natal 2026 - galeria do hero',
    guarda:'tudo o que está configurado nesta aba — a <b>lista de imagens</b> (links, legendas e a ordem), a transição, o tempo, a largura, a proporção, o corte de celular, a ordem de exibição e os controles do visitante. Não guarda o que está no importador de galeria, que não é configuração e sim uma colagem de trabalho.'},
   {id:'tidy', nome:'Agendamento TidyCal', chaves:['t'],         coleta:tColeta,restaura:tRestaura,
@@ -2217,11 +2261,15 @@ var ABAS=[
      mostraria as duas. */
   {id:'leads',nome:'Captação de leads',   chaves:['l'],         coleta:lColeta,restaura:lRestaura,
    pref:'l',fora:[],operacionais:[['num','o número do WhatsApp']],resumo:lPresetResumo,redesenhar:lPresetDepois,antesDeSalvar:lPresetAntes,
+   listas:[['l.qops',''],['l.hordias',0]],
    exemplo:'ex.: Natal 2026 - hospedeira',
    guarda:'tudo o que está configurado nesta aba — modo de exibição, ícone, formato, cores e posição do botão, os quatro trechos da mensagem, os textos do pop-up, o cabeçalho (coruja, movimento e efeitos), o horário de atendimento, a pergunta de qualificação com as opções cadastradas e a âncora.'},
   {id:'uni',  nome:'Checkout',            chaves:['u'],         coleta:uColeta,restaura:uRestaura,
    pref:'u',fora:[],operacionais:[['client','o Client ID do PayPal'],['chave','a chave Pix'],['nomer','o nome do recebedor'],['cidade','a cidade do recebedor'],['zapnum','o WhatsApp do \u201cJá paguei\u201d']],
    resumo:uPresetResumo,redesenhar:uPresetDepois,antesDeSalvar:uPresetAntes,
+   listas:[['u.prods',{nome:'',desc:'',preco:0,opsel:'unico',opnenhum:'nao',qtd:false,ops:[{nome:'',preco:0,qtd:false}]},'nome'],
+           ['u.prods.ops',{nome:'',preco:0,qtd:false},'nome'],
+           ['u.cps',{codigo:'',tipo:'pct_total',valor:0,validade:''},'codigo']],
    exemplo:'ex.: Natal 2026 - pacotes',
    guarda:'tudo o que está configurado nesta aba — formas de pagamento, moeda, <b>produtos com os opcionais de cada um</b>, cupons, código do pedido, sinal, desconto Pix, textos, largura e cores.'},
   {id:'bor',  nome:'Bordas com efeito',   chaves:['b'],         coleta:bColeta,restaura:bRestaura,
@@ -2231,6 +2279,7 @@ var ABAS=[
    guarda:'tudo o que está configurado nesta aba — efeito, fundo, cores, espessura, halo, texto, espaçamento e também o <b>fundo da prévia</b>, que é como você confere o resultado. Não guarda a escolha de consolidação do código 1, que é sobre <i>outro</i> componente.'},
   {id:'cnt',  nome:'Contagem regressiva', chaves:['cmsgs','c'], coleta:cColeta,restaura:cRestaura,
    pref:'c',fora:[],operacionais:[],resumo:cPresetResumo,redesenhar:cPresetDepois,antesDeSalvar:cPresetAntes,
+   listas:[['cmsgs',{texto:'',curta:''},'texto']],
    exemplo:'ex.: Natal 2026 - barra do topo',
    guarda:'tudo o que está configurado nesta aba — modo e duração da contagem, o código da campanha, as <b>mensagens cadastradas</b>, aparência, posição, extras, coruja, efeitos, movimento, urgência e entrada.'}
 ];
@@ -3641,8 +3690,13 @@ function fcgIniciar(){
 var FCX_FORMATO='construtores-fotocerta';
 var FCX_VERSAO=1;
 /* Tetos. Existem para que arquivo enorme, fundo ou hostil nao trave a ferramenta, e sao
-   folgados o bastante para nao alcancar uso real: a maior configuracao medida (46 fotos,
-   produtos, cupons e mensagens, com as seis bibliotecas) da ~120 KB de JSON. */
+   folgados o bastante para nao alcancar uso real: a maior configuracao medida -- 46 fotos,
+   6 produtos com 18 opcionais, 5 cupons, 5 mensagens e tres presets em cada uma das seis
+   bibliotecas -- da ~91 KB de JSON (o armazenamento dela sao 59 KB; o arquivo e maior porque
+   sai indentado). O numero vem acompanhado do que ha dentro dele de proposito: "a maior
+   configuracao" sem dizer qual e um numero que nao da para conferir, e foi assim que esta
+   linha e a documentacao chegaram a dizer ~120 KB e ~25 KB sobre o mesmo backup. Medido de
+   novo: um numero so, nos dois lugares. */
 var FCX_BYTES_MAX=8*1024*1024;   /* o arquivo inteiro */
 var FCX_TEXTO_MAX=200000;        /* um campo "Outros codigos meus" */
 var FCX_STR_MAX=20000;           /* qualquer texto dentro de um fragmento de aba */
@@ -3653,7 +3707,12 @@ var FCX_NOS_MAX=60000;           /* nos visitados na conferencia inteira */
 var FCX_CHAVE_OK=/^[A-Za-z0-9_]{1,40}$/;
 
 /* ---- conferencia de forma ---- */
-function fcxConta(){return {descartados:0,ajustados:0,herdados:0,nos:0};}
+/* 'forasteiras' conta ENDERECOS DISTINTOS de foto fora do storage da Alboom, e 'forVistas' e
+   quem garante o distinto -- a mesma foto pode estar no rascunho, num preset geral e num preset
+   de aba do mesmo arquivo, e contar aparicoes anunciaria tres fotos de fora onde ha uma. E o
+   mesmo criterio que o importador de galeria ja usa nos descartes dele. A chave leva prefixo
+   para nunca coincidir com um nome de campo herdado do prototipo. */
+function fcxConta(){return {descartados:0,ajustados:0,herdados:0,nos:0,forasteiras:0,forVistas:{}};}
 /* '__proto__' e parentes ficam de fora antes de qualquer outra coisa: este bloco copia valores
    com atribuicao por chave em varios lugares, e atribuir '__proto__' num objeto comum troca o
    prototipo dele em vez de criar um campo. O resto da regra e simples de proposito -- toda
@@ -3750,10 +3809,76 @@ function fcxContarEstranhas(a,valores,conta){
    hora em que ela mais precisa parecer confiavel. O molde nao muda durante a leitura: nada e
    escrito na tela antes de as duas confirmacoes terem resposta. */
 var fcxTpl=null;
+/* LISTA VAZIA NAO PODE VIRAR PORTA ABERTA. fcxConformar julga cada item pelo PRIMEIRO item do
+   molde; com a lista da tela vazia nao havia primeiro item, e a conferencia caia no saneamento
+   generico -- que so sabe de tipo, tamanho e profundidade e por isso aceitava null, numero,
+   objeto e lista dentro de uma lista de textos, sem contar nada. Aqui o molde recebe, em cada
+   lista declarada em ABAS, UM item de exemplo quando o do operador esta vazio. Depois disso a
+   conferencia e a de sempre: item que nao tem a forma do item e recusado e somado.
+   O caminho e percorrido segmento a segmento e ATRAVESSA lista: 'u.prods.ops' entra em cada
+   produto real do molde, porque um produto sem opcionais deixaria o molde de dentro vazio
+   exatamente como a lista de fora. Por isso a ordem declarada importa -- 'u.prods' vem antes
+   de 'u.prods.ops', e o produto de exemplo ja nasce com um opcional dentro.
+   O molde e uma copia (fcPresetCapturar ja clona, e cada semeadura clona de novo): nada disto
+   toca as listas vivas da aba. */
+function fcxSemearNo(no,partes,i,molde){
+  var k,j;
+  if(!fcEhObjeto(no))return;
+  k=partes[i];
+  if(i===partes.length-1){
+    if(!fcEhArray(no[k])||!no[k].length)no[k]=[fcClone(molde)];
+    return;
+  }
+  if(fcEhArray(no[k])){for(j=0;j<no[k].length;j++)fcxSemearNo(no[k][j],partes,i+1,molde);return;}
+  fcxSemearNo(no[k],partes,i+1,molde);
+}
+function fcxSemearListas(a,tpl){
+  var i,l=a.listas;
+  if(!l)return;
+  for(i=0;i<l.length;i++)fcxSemearNo(tpl,String(l[i][0]).split('.'),0,l[i][1]);
+}
+/* CASCA NAO E ITEM. Gemea da semeadura, e pelos MESMOS caminhos declarados -- so que esta anda
+   pelo fragmento ja conferido, e nao pelo molde. Existe porque a conferencia contra molde
+   perdoa chave AUSENTE de proposito (e a regra que deixa estado gravado por versao anterior
+   continuar valendo depois de a aba ganhar campo novo), e perdoando a ausencia ela deixava
+   sobrar o objeto vazio: {"texto":"obj"} na lista de opcionais perdia 'texto' por ser chave
+   desconhecida e virava {}, que sobreviveria ate o bloco publicado como um opcional de nome
+   'undefined'. A chave essencial declarada em ABAS e o que separa item de casca -- e o
+   descarte e contado, como todo o resto deste bloco. */
+function fcxItemVivo(v,essencial){
+  if(!essencial)return true;                 /* lista de texto ou de numero: nao ha casca */
+  if(!fcEhObjeto(v))return false;
+  return v[essencial]!==undefined&&v[essencial]!==null&&v[essencial]!=='';
+}
+function fcxPodarNo(no,partes,i,essencial,conta){
+  var k,j,out;
+  if(!fcEhObjeto(no))return;
+  k=partes[i];
+  if(i===partes.length-1){
+    if(!fcEhArray(no[k]))return;
+    out=[];
+    for(j=0;j<no[k].length;j++){
+      if(fcxItemVivo(no[k][j],essencial))out.push(no[k][j]);else conta.descartados++;
+    }
+    no[k]=out;
+    return;
+  }
+  if(fcEhArray(no[k])){for(j=0;j<no[k].length;j++)fcxPodarNo(no[k][j],partes,i+1,essencial,conta);return;}
+  fcxPodarNo(no[k],partes,i+1,essencial,conta);
+}
+function fcxPodarListas(a,frag,conta){
+  var i,l=a.listas;
+  if(!l)return;
+  for(i=0;i<l.length;i++){
+    if(!l[i][2])continue;
+    fcxPodarNo(frag,String(l[i][0]).split('.'),0,l[i][2],conta);
+  }
+}
 function fcxMolde(a,manterFora){
   var ch=a.id+(manterFora?'|+fora':'');
   if(fcxTpl&&fcxTpl[ch])return fcxTpl[ch];
   var t=fcPresetCapturar(a,manterFora)||{};
+  fcxSemearListas(a,t);
   if(fcxTpl)fcxTpl[ch]=t;
   return t;
 }
@@ -3775,6 +3900,7 @@ function fcxLimparValores(a,valores,conta,manterFora){
     if(o.presets!==undefined){delete o.presets;conta.descartados++;}
     if(!manterFora&&a.fora){for(j=0;j<a.fora.length;j++){if(o[a.fora[j]]!==undefined){delete o[a.fora[j]];conta.descartados++;}}}
   }
+  fcxPodarListas(a,frag,conta);
   if(a.importar)frag=a.importar(frag,conta);
   return frag;
 }
@@ -4150,6 +4276,8 @@ function fcxConfirmar(plano,nomeArq){
   linhas.push(itens);
   if(!plano.dados)
     linhas.push('Como o arquivo é “sem dados”, os campos de contato e pagamento que ele não traz mantêm o valor que já está aqui — importar este arquivo não esvazia nenhum campo preenchido.');
+  if(plano.conta.forasteiras)
+    linhas.push('Atenção: '+plano.conta.forasteiras+' foto(s) deste arquivo não está(ão) no storage da Alboom ('+S_HOSTS_ALBOOM.join(', ')+') — elas serão carregadas do servidor de outra pessoa na sua página publicada. Isso é permitido, mas se o arquivo veio de fora, confira esses endereços: na lista da aba Slideshow eles aparecem com o host em destaque.');
   if(plano.codHead||plano.codBody)
     linhas.push('Atenção: o arquivo traz código manual nas caixas “Outros códigos meus” (Tag Head: '+plano.codHead+' caracteres; Tag Body: '+plano.codBody+'). Esse texto é guardado como está e vai para a sua página quando você o colar. Se o arquivo veio de outra pessoa, leia esse código antes de usar.');
   if(plano.travadas.length)
@@ -4316,6 +4444,8 @@ function fcxAplicar(plano,politica,comRascunho){
   if(caiuNoRascunho)r+=' O arquivo dizia estar num preset geral que não veio junto: a barra ficou em Rascunho, e as caixas “Outros códigos meus” ficaram vazias porque elas são de uma página e o Rascunho não é uma página.';
   if(conta.herdados)r+=' '+conta.herdados+' campo(s) de contato e pagamento que o arquivo não trazia mantiveram o valor que já estava aqui.';
   if(conta.descartados)r+=' '+conta.descartados+' item(ns) não reconhecido(s) ficaram de fora.';
+  /* repetido aqui de proposito: a confirmacao some com o clique, e esta linha fica na tela */
+  if(conta.forasteiras)r+=' '+conta.forasteiras+' foto(s) do arquivo vêm de fora do storage da Alboom; na aba Slideshow elas aparecem com o host em destaque.';
   if(travou.length)r+=' Estas abas não receberam o rascunho: '+fcLista(travou)+'.';
   fcxAviso(r);
   alert(r);
@@ -4504,12 +4634,23 @@ function sAdd(){
    Item que nao e objeto, ou cujo endereco nao passa, NAO entra e e CONTADO: a importacao mostra
    o numero na tela, nunca descarta calado. A legenda vira texto porque e assim que a lista e o
    gerador a tratam (textContent no cartao, escJs no bloco). */
+/* HOST DE FORA E AVISADO, NAO RECUSADO -- a mesma decisao que sAdd tomou no cadastro manual, e
+   pelo mesmo motivo: sUrlOk e agnostica a host de proposito, porque o operador pode ter uma
+   foto legitima hospedada em outro lugar. O que muda aqui e de quem veio o endereco: num
+   arquivo de preset recebido de outra pessoa, ele nao foi digitado por ninguem desta casa, e
+   um endereco de terceiro no meio de 46 passa por foto normal. Entao ele entra -- e e CONTADO,
+   para a confirmacao poder dizer quantos sao ANTES de o operador decidir. Na lista da aba
+   Slideshow o host continua aparecendo em destaque, que e a marca que fica. */
 function sImportarLimpar(frag,conta){
-  var i,im,out=[];
+  var i,im,ch,out=[];
   if(!frag||!fcEhArray(frag.imgs))return frag;
   for(i=0;i<frag.imgs.length;i++){
     im=frag.imgs[i];
     if(!fcEhObjeto(im)||typeof im.url!=='string'||!sUrlOk(im.url)){conta.descartados++;continue;}
+    if(conta.forVistas&&!sHostEsperado(im.url)){
+      ch='u:'+im.url;
+      if(!Object.prototype.hasOwnProperty.call(conta.forVistas,ch)){conta.forVistas[ch]=1;conta.forasteiras++;}
+    }
     out.push({url:im.url,legenda:(typeof im.legenda==='string')?im.legenda:''});
   }
   frag.imgs=out;
