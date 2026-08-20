@@ -14,12 +14,25 @@
        agora acompanha a janela ate --larg, e dentro dela a area das abas e o que sobra depois
        do painel consolidado -- a restricao que o dono enunciou: "o ajuste ja passara a contar
        com o painel consolidado usando parte da area a direita das abas".
-       Por que 1980 e nao "sem limite": com --consol de 380 px e os 20 px de folga de cada
-       lado, 1980 deixa a area das abas em 1536 px e cada coluna de fieldsets em 735 px. Acima
-       disso as colunas so ficam mais largas sem caber uma terceira (ver o comentario de
-       .grade), entao o ganho pararia e as linhas de texto so ficariam mais dificeis de ler. */
-    --larg:1980px;
+
+       QUEM TEM TETO E A COLUNA, NAO A FAIXA. A primeira versao desta fase pos o teto na FAIXA
+       (--larg:1980px) e mediu as colunas dentro dele. Estava errado pelo mesmo motivo do
+       achado D: no monitor do dono (2560) sobravam 283 px de areia de CADA lado -- medido. O
+       teto agora e da area das abas (--abas), e o que passa disso vai para o painel
+       consolidado (ate --consol-max) em vez de virar areia. O painel e codigo: 380 px cabem
+       ~54 caracteres por linha de <textarea> em 11 px monoespacado e obrigam a rolar de lado
+       justamente na caixa de onde se COPIA; 900 px cabem ~140 e a rolagem quase some.
+       Por que --abas:1536px: e a largura que ja estava medida e equilibrada -- duas colunas de
+       fieldsets de 735 px. Deixar a coluna passar disso nao encurta a pagina (medido: sem teto
+       nenhum, a coluna vai a 1017 px e a aba mais alta encolhe 2,5%, de 5300 para 5170 px) e
+       estica para ~170 caracteres as linhas dos blocos <p class="ajuda"> dentro dos fieldsets,
+       que nao tem teto proprio como .descricao e .instrucoes tem.
+       --larg e a soma: 20 + 1536 + 24 (vao) + 900 + 20 = 2500. Ate 2500 px de janela nao ha
+       areia nenhuma; o monitor do dono tem 2560 e sobram 23 px de cada lado, contra 283. */
+    --larg:2500px;
+    --abas:1536px;
     --consol:380px;
+    --consol-max:900px;
   }
   *{box-sizing:border-box}
   body{margin:0;background:var(--areia);color:var(--tinta);
@@ -54,11 +67,21 @@
      a coluna inteira e comeria o painel da direita. */
   .app{max-width:var(--larg);margin:0 auto;padding:0 20px;display:flex;gap:24px;align-items:flex-start}
   .app-esq{flex:1 1 auto;min-width:0}
-  /* O painel gruda enquanto se rola: ele e a caixa de onde se copia, e a aba que alimenta a
+  /* A largura do painel e o que SOBRA depois de a area das abas chegar ao teto dela, presa
+     entre 380 e 900 px. calc(100% - ...) e a conta da sobra (100% aqui e a largura interna da
+     .app), e o clamp faz os tres regimes numa linha so, sem media query:
+       janela ate ~1960 px -> a sobra nao chega a 380, o painel fica em 380 e as abas ficam
+                              com o que restar (a 1400 px, os mesmos 941 px de antes);
+       de ~1960 a 2500     -> as abas ficam paradas em 1536 e a sobra inteira vai para o painel;
+       acima de 2500       -> o painel para em 900 e --larg centra a faixa.
+     .app-esq nao precisa de max-width: com o painel em flex:0 0 (nao encolhe), ela sempre pousa
+     em 100% - 24 - painel, e o clamp e quem garante que isso nunca passa de 1536.
+     O painel gruda enquanto se rola: ele e a caixa de onde se copia, e a aba que alimenta a
      copia costuma estar rolada. top:70px porque a linha do preset geral ja gruda em top:0 e
      tem ~55 px; a rolagem propria (max-height + overflow) impede que um painel alto empurre
      a propria area de rolagem para fora da janela. */
-  .app-dir{flex:0 0 var(--consol);min-width:0;margin-top:18px;
+  .app-dir{flex:0 0 clamp(var(--consol),calc(100% - var(--abas) - 24px),var(--consol-max));
+    min-width:0;margin-top:18px;
     position:sticky;top:70px;max-height:calc(100vh - 90px);overflow:auto}
   /* Abaixo desta largura o painel deixa de dividir a faixa e passa a ficar ABAIXO das abas.
      O corte nao e redondo por acaso: em faixa dividida a area das abas mede
@@ -71,18 +94,32 @@
     .app-dir{position:static;max-height:none;overflow:visible;margin:0 0 40px;flex:none}
   }
 
-  /* Quantas colunas cabem e conta do CONTAINER, nao da janela: repeat(auto-fit, ...) mede a
-     largura disponivel da propria .grade, que na faixa dividida ja e "o que sobra depois do
-     painel". Era isto que a media query de 840 px nao sabia fazer -- ela media a janela, e com
-     o painel ocupando a direita a janela deixou de ser a largura da aba.
+  /* DUAS COLUNAS, NUNCA TRES -- e a regra e esta, sem eufemismo: as 30 .grade das seis abas
+     tem EXATAMENTE DOIS filhos cada uma (dois cartoes que empilham os fieldsets agrupados por
+     tema), e repeat(auto-fit, ...) nunca abre mais faixas do que ha itens. Entao a conta real
+     e "1 coluna abaixo de ~744 px de container, 2 acima", em largura nenhuma 3. Dizer que o
+     numero de colunas e "conta do container" e verdade so pela metade e sugere uma
+     flexibilidade que nao existe -- o container manda em 1-ou-2, nunca em 3.
+     O que auto-fit resolve de fato, e por isso continua aqui: ele mede a propria .grade, que
+     na faixa dividida ja e "o que sobra depois do painel". Era isto que a media query de
+     840 px nao sabia fazer -- ela media a janela, e com o painel ocupando a direita a janela
+     deixou de ser a largura da aba.
      min(360px,100%) e nao 360px: numa janela muito estreita a faixa minima de 360 px estouraria
      o container e devolveria a barra de rolagem horizontal que a fase 2.5 acabou de tirar.
-     Todas as .grade das abas tem exatamente DOIS filhos, entao auto-fit nunca abre uma
-     terceira coluna: as faixas vazias colapsam e os dois cartoes dividem a largura. Uma
-     terceira coluna exigiria reagrupar os fieldsets das seis abas (hoje distribuidos em duas
-     caixas, com a altura equilibrada a mao) e, na largura desta faixa, mediria ~470 px contra
-     os 735 px de duas -- por isso o espaco que sobrou foi para o painel consolidado e para a
-     lista de imagens em largura inteira, e nao para uma coluna a mais. */
+
+     POR QUE NAO TRES, MEDIDO. Os dois cartoes de cada .grade guardam de 2 a 7 fieldsets (o
+     pior caso e a primeira secao do Checkout, com 4+3). Forcando os cartoes a display:contents
+     -- que promove cada fieldset a item da grade e libera auto-fit -- a 2545 px de janela sem
+     teto: a coluna cai de 1017 para 670 px e as abas encolhem de 5 a 14% (Leads 5170 -> 4827,
+     Contagem 4434 -> 3895, Bordas 3122 -> 2810, Checkout 4371 -> 4050, Slideshow 3187 -> 3010,
+     TidyCal inalterada). O preco medido, na mesma passagem: o numero de colunas passa a variar
+     DENTRO da mesma aba, secao a secao, porque cada .grade tem uma contagem diferente -- a
+     Contagem regressiva sai com 3, 2, 4, 5, 2 e 3 colunas, de 392 a 1017 px de largura, e a
+     secao "Previa e codigo gerado" do TidyCal desaba para UMA coluna de 2059 px, ou seja a
+     previa deixa de ficar ao lado do codigo. Trocar 8% de altura por isso nao paga; uma
+     terceira coluna honesta exigiria reagrupar a mao os fieldsets das 30 secoes, que e outra
+     tarefa. Por isso o espaco que sobra vai para o painel consolidado (ver --consol-max) e
+     para a lista de imagens em largura inteira, e nao para uma coluna a mais. */
   .grade{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(360px,100%),1fr));gap:24px}
 
   /* min-width:0 desfaz o min-inline-size:min-content que o navegador da de presente a todo
@@ -337,9 +374,18 @@
   .fcg-selo.salvo{color:#294B24;background:#EAF3E9;border-color:#7FA97A}
   .fcg-selo.alterado{color:#6B5210;background:#FFF6DF;border-color:#E3B23C}
   .fcg-cresce{flex:1 1 20px;min-width:0}
-  .fcg-painel{padding:14px 20px;display:none;border-bottom:1px solid var(--linha)}
+  .fcg-painel{padding:14px 0;display:none;border-bottom:1px solid var(--linha)}
   .fcg-painel.aberto{display:block}
-  .fcg-painel .grade{max-width:1080px;margin:0 auto}
+  /* Mesmo max-width e mesma folga de 20 px da .fcg-linha, para o conteudo de "Detalhes" comecar
+     e terminar exatamente onde comeca e termina a barra logo acima. Enquanto isto era 1080 px
+     cravados, o painel ficava centrado na JANELA e alinhado com nada: medido a 2000 px, a barra
+     ia de 3 a 1983, as abas de 23 a 1559 e os fieldsets de Detalhes de 453 a 1533.
+     A media query aqui e legitima (ao contrario da .grade das abas, que vive dentro da faixa):
+     .fcg-painel ocupa a JANELA inteira, entao a janela e mesmo o container. Ela existe porque
+     esta .grade tem TRES filhos -- os dois cartoes mais a caixa larga de exportar/importar --
+     e sem ela o auto-fit abriria uma terceira faixa vazia assim que a largura permitisse. */
+  .fcg-painel .grade{max-width:var(--larg);margin:0 auto;padding:0 20px}
+  @media (min-width:840px){.fcg-painel .grade{grid-template-columns:1fr 1fr}}
   .fcg-painel fieldset{margin-bottom:0}
   .fcg-painel textarea{height:110px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
     font-size:11.5px;line-height:1.45}
@@ -427,6 +473,18 @@
   .fcc-comp .destino{font-size:11px;color:var(--tinta-suave)}
   .fcc-comp textarea{height:90px;margin-top:6px}
   .fcc-vazio{font-size:12px;font-style:italic;color:var(--tinta-suave)}
+  /* Aviso no ALTO da area das abas, so na largura em que o painel deixa de dividir a faixa e
+     vai para o fim da pagina. Sem ele o painel some sem deixar rastro: medido a 1280 px, ele
+     comeca 3753 px abaixo do topo -- ninguem rola ate la sem saber que existe algo la. Vive
+     dentro de .app-esq (e nao do painel) porque o que ele precisa e ficar ONDE o operador ja
+     esta olhando. */
+  .fcc-atalho{display:none}
+  @media (max-width:1399px){
+    .fcc-atalho{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:18px 0 0;
+      padding:9px 12px;border-radius:8px;border:1px dashed var(--linha);background:#F5F1E6;
+      font-size:12.5px;line-height:1.5;color:var(--tinta-suave)}
+    .fcc-atalho span{flex:1 1 240px;min-width:0}
+  }
 </style>
 </head>
 <body>
@@ -518,6 +576,13 @@
      cai abaixo das abas sem nenhuma regra de reordenacao. -->
 <div class="app">
 <div class="app-esq">
+
+<!-- So aparece na largura em que o painel consolidado deixa de caber ao lado e vai para o fim
+     da pagina (ver .fcc-atalho no CSS). -->
+<div class="fcc-atalho">
+  <span>Nesta largura de janela o <b>painel consolidado</b> — onde a Tag Head e a Tag Body ficam prontas para copiar — não cabe ao lado das abas e está no <b>fim desta página</b>.</span>
+  <button class="botao mini claro" type="button" id="fcc-ir">Ir para o painel</button>
+</div>
 
 <div class="abas" role="tablist">
   <button class="aba ativa" id="aba-slide" role="tab" aria-selected="true">Slideshow</button>
@@ -10072,13 +10137,39 @@ var fccGerado={};   /* abaId -> assinatura dos valores da aba quando o codigo de
 var fccAssin=null;  /* ultimo desenho, para nao redesenhar a toa (e nao roubar uma selecao) */
 var fccTimer=null;  /* timer UNICO do redesenho adiado, cancelado antes de reagendar */
 
+/* A assinatura de frescor NAO e a mesma do preset geral, e a diferenca e proposital.
+   'fora' (hoje so b.consol) existe para o PRESET: aquele campo descreve OUTRO componente,
+   entao nao viaja com o preset nem e sobrescrito quando um preset e aplicado. Mas ele MUDA o
+   codigo que esta aba EMITE -- e ele que manda o codigo 1 das Bordas carregar tambem o
+   @keyframes do outro componente. Assinar sem ele deixava a caixa envelhecer calada: medido,
+   escolher um preset na caixa de consolidacao acrescenta 287 bytes ao codigo 1 (b-out1 vai de
+   563 para 850 bytes, e a Tag Head montada de 645 para 932), e ate esta correcao o painel
+   continuava entregando a Tag Head antiga como "conteudo completo", sem uma palavra. Colar
+   isso publica a pagina com o segundo componente sem animacao de borda.
+   Quem le o PRESET continua sem ver 'fora'; quem pergunta "este bloco ainda descreve o que
+   esta na tela?" ve. Por isso a leitura extra e por fcPresetCapturar(a,true) -- o mesmo
+   caminho unico de captura, so que sem descartar os campos 'fora' -- e nao um segundo jeito
+   de ler a aba. Ela so acontece nas abas que TEM campo 'fora' (uma), entao nao pesa nas seis.
+   Aba em so-leitura devolve null: ali o gerador leu o DOM e fcgValoresDaAbaLer devolve o
+   fragmento GUARDADO, e comparar os dois seria comparar duas coisas que nunca foram feitas
+   para bater. O painel diz o que ha para dizer nesse estado por outro caminho, o
+   plano.travadas. */
+function fccAssinar(a,vals){
+  var o,extra,i;
+  if(fcSoLeitura[a.id])return null;
+  if(!a.fora||!a.fora.length)return fcCanon(vals);
+  o=(fcPresetCapturar(a,true)||{})[a.pref]||{};
+  extra='';
+  for(i=0;i<a.fora.length;i++)extra+='|'+a.fora[i]+'='+fcCanon(o[a.fora[i]]);
+  return fcCanon(vals)+extra;
+}
 /* Chamada no fim de cada gerador, e SO no caminho em que a caixa de codigo foi escrita. Ela
    guarda a assinatura dos valores da aba naquele instante; e comparando essa assinatura com a
    de agora que o painel sabe dizer "este bloco foi gerado antes de voce mexer na aba".
    Nao toca em nada do que o gerador emite: e uma anotacao ao lado. */
 function fccMarcar(abaId){
   var a=fcAba(abaId);
-  try{fccGerado[abaId]=a?fcCanon(fcgValoresDaAbaLer(a)):null;}
+  try{fccGerado[abaId]=a?fccAssinar(a,fcgValoresDaAbaLer(a)):null;}
   catch(e){fccGerado[abaId]=null;}
   fccAgendar();
 }
@@ -10158,11 +10249,24 @@ function fccDaAba(a,p,plano,vals){
     }
   }
 }
+/* Esta aba ainda tem ALGUM codigo na tela? Existe por causa da contradicao que o aviso de
+   codigo velho criava: mexer na lista de fotos ESVAZIA a caixa do Slideshow (sSaidaVence), e
+   o painel entao mostrava "o que esta abaixo e o codigo antigo" e, logo abaixo, "Ainda nao
+   gerado". Caixa vazia nao tem codigo velho -- tem codigo nenhum, que e o caso mais forte e ja
+   e dito no proprio campo. */
+function fccTemCodigo(plano,abaId){
+  var ls=['head','body','comps','outra'],i,j,arr;
+  for(i=0;i<ls.length;i++){
+    arr=plano[ls[i]];
+    for(j=0;j<arr.length;j++)if(arr[j].aba.id===abaId&&!arr[j].vazio)return true;
+  }
+  return false;
+}
 function fccPlano(){
-  var p=fcgAtivo(),plano,i,a,vals;
+  var p=fcgAtivo(),plano,i,a,vals,assin;
   if(!p)return null;
   plano={campanha:p.campanha,pagina:p.pagina,nome:fcgNome(p),
-    head:[],body:[],comps:[],outra:[],velhas:[],ligadas:0};
+    head:[],body:[],comps:[],outra:[],velhas:[],travadas:[],ligadas:0};
   for(i=0;i<ABAS.length;i++){
     a=ABAS[i];
     if(!FCG.ativas[a.id])continue;
@@ -10170,10 +10274,17 @@ function fccPlano(){
     vals=null;
     try{vals=fcgValoresDaAba(a);}catch(e){vals=null;}
     fccDaAba(a,p,plano,vals);
+    /* Aba em so-leitura nao entra na comparacao de frescor: ver fccAssinar. Ela e ANUNCIADA,
+       que e o que faltava -- o painel mandava "abra a aba e clique em Gerar codigo" sem
+       repassar que a aba avisara que nao grava nada ate a pagina ser recarregada. */
+    if(fcSoLeitura[a.id]){plano.travadas.push(a.nome);continue;}
     /* "gerado antes de a aba mudar": comparacao de assinatura, o mesmo criterio que a marca de
        origem da fase 3 usa. Aba nunca gerada nesta sessao nao entra aqui -- ela cai no caso
-       "ainda nao gerou", que e mais forte e ja aparece no proprio campo. */
-    if(fccGerado[a.id]&&vals&&fccGerado[a.id]!==fcCanon(vals))plano.velhas.push(a.nome);
+       "ainda nao gerou", que e mais forte e ja aparece no proprio campo. Aba cuja caixa foi
+       ESVAZIADA depois de gerada tambem nao entra, pelo mesmo motivo (fccTemCodigo). */
+    assin=null;
+    try{assin=vals?fccAssinar(a,vals):null;}catch(e){assin=null;}
+    if(fccGerado[a.id]&&assin&&fccGerado[a.id]!==assin&&fccTemCodigo(plano,a.id))plano.velhas.push(a.nome);
   }
   return plano;
 }
@@ -10313,6 +10424,16 @@ function fccRender(){
     h+='<p><b>'+escHtml(plano.nome)+'</b> — '+plano.ligadas+' de '+ABAS.length+' abas nesta página.</p>';
     if(!plano.ligadas){
       h+='<p class="fcc-falta"><b>Nenhuma aba foi ligada nesta página.</b> Todo preset geral nasce com as seis abas fora — ligue, no interruptor no topo de cada aba, as que esta página realmente usa. Aba fora não entra aqui.</p>';
+    }
+    /* Vem ANTES do aviso de codigo velho de proposito: neste estado o painel nao sabe dizer se
+       o codigo envelheceu, e mandar "clique em Gerar codigo" numa aba que avisou que nao grava
+       nada ate recarregar seria mandar o operador dar um passo que nao resolve. */
+    if(plano.travadas.length){
+      h+='<p class="fcc-falta"><b>'+escHtml(fcLista(plano.travadas))+
+         (plano.travadas.length===1?' falhou':' falharam')+' ao restaurar as configurações.</b> '+
+         (plano.travadas.length===1?'Essa aba não grava nada':'Essas abas não gravam nada')+
+         ' até a página ser recarregada — o que já estava salvo foi mantido, mas o que está na tela pode não ser o que você tinha. <b>Recarregue a página</b> (e confira o console com Cmd+Option+C) antes de colar o que está aqui. Enquanto isso, este painel não consegue dizer se o código '+
+         (plano.travadas.length===1?'dessa aba':'dessas abas')+' está atualizado.</p>';
     }
     if(plano.velhas.length){
       h+='<p class="fcc-falta"><b>Código gerado antes da última mudança.</b> '+
@@ -10628,6 +10749,14 @@ prep('Backup em arquivo','',fcxIniciar,'preparar os botoes de exportar e importa
    branco, sem uma linha dizendo por que. Desenhar duas vezes nao custa nada -- a assinatura
    de fccRender reconhece o desenho igual e nao mexe no DOM. */
 prep('Painel consolidado','',fccRender,'desenhar o painel consolidado');
+/* Passo proprio e depois do desenho: o atalho so faz sentido se houver painel para onde ir, e
+   se ele falhar quem tem de morrer e o atalho, nao o painel. */
+prep('Atalho para o painel consolidado','',function(){
+  liga('fcc-ir',function(){
+    var el=document.querySelector('.app-dir');
+    if(el&&el.scrollIntoView)el.scrollIntoView(true);
+  });
+},'ligar o atalho para o painel consolidado');
 })();
 </script>
 </body>
