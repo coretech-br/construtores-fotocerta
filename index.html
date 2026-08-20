@@ -160,6 +160,16 @@
   .l-pv-moldura iframe{border:0;display:block;background:#fff}
   .l-alerta{background:#FFF6DF;border:1px solid #E3B23C;color:#6B5210}
   .l-alerta b{color:#6B5210}
+
+  /* Previa do checkout: mesma tecnica da Contagem, do Slideshow e do Leads -- o bloco gerado
+     roda dentro de um iframe de mesma origem. Nao ha estilo de carrinho aqui de proposito:
+     quem pinta o carrinho e o CSS que o proprio gerador emite. */
+  .u-pv-modos{display:flex;gap:8px;align-items:center;margin:0 0 10px}
+  .u-pv-modos .rotulo{font-size:12px;color:var(--tinta-suave)}
+  .u-pv-moldura{overflow:hidden;margin:0 auto;background:#fff;border:1px solid var(--linha);border-radius:8px}
+  .u-pv-moldura iframe{border:0;display:block;background:#fff}
+  .u-alerta{background:#FFF6DF;border:1px solid #E3B23C;color:#6B5210}
+  .u-alerta b{color:#6B5210}
 </style>
 </head>
 <body>
@@ -738,7 +748,7 @@
 </div>
 
 <div class="painel" id="painel-uni" role="tabpanel">
-  <p class="descricao"><b>Checkout</b> — carrinho de pagamento completo para colar em um componente HTML. Você escolhe as <b>formas de pagamento</b> (PayPal, Pix ou os dois juntos) e monta o pedido com <b>um ou vários produtos</b>, cada um com seus próprios itens opcionais. Inclui cupons de desconto, desconto exclusivo para Pix, largura e cores ajustáveis. O PayPal traz cartão sem login e parcelamento conforme sua conta; o Pix gera QR Code e Copia e Cola na hora, com o valor exato, e aviso de pagamento via WhatsApp. Nenhum segredo vai no código: apenas o Client ID público do PayPal e a chave Pix.</p>
+  <p class="descricao"><b>Checkout</b> — carrinho de pagamento completo para colar em um componente HTML. Você escolhe as <b>formas de pagamento</b> (PayPal, Pix ou os dois juntos) e monta o pedido com <b>um ou vários produtos</b>, cada um com seus próprios itens opcionais. Inclui <b>cobrança de sinal</b> (com o saldo na entrega), <b>quantidade por item</b>, <b>resumo copiável do pedido</b>, cupons de desconto, desconto exclusivo para Pix, largura e cores ajustáveis. O PayPal traz cartão sem login e parcelamento conforme sua conta; o Pix gera QR Code e Copia e Cola na hora, com o valor exato, e aviso de pagamento via WhatsApp. Nenhum segredo vai no código: apenas o Client ID público do PayPal e a chave Pix.</p>
 
   <div class="secao primeira"><span class="secao-n">1</span> Formas de pagamento e identificação</div>
   <div class="grade">
@@ -751,6 +761,34 @@
           <label><input type="radio" name="u-metodo" value="pix"><span>Somente Pix</span></label>
         </div>
         <p class="ajuda">O código gerado carrega apenas o necessário para as formas escolhidas. Com Pix ativo, a moeda é fixa em reais (o Pix só existe em BRL); somente com PayPal, você pode escolher a moeda.</p>
+      </fieldset>
+
+      <fieldset>
+        <legend>Cobrança de sinal</legend>
+        <div class="radios">
+          <label><input type="radio" name="u-sinal" value="nao" checked><span>Cobrar o valor cheio</span></label>
+          <label><input type="radio" name="u-sinal" value="sim"><span>Cobrar sinal agora, saldo na entrega</span></label>
+        </div>
+        <div id="u-sinal-campos">
+          <label>Como calcular o sinal</label>
+          <div class="radios">
+            <label><input type="radio" name="u-sinaltipo" value="pct" checked><span>Percentual do total</span></label>
+            <label><input type="radio" name="u-sinaltipo" value="fixo"><span>Valor fixo</span></label>
+          </div>
+          <div id="u-sinalpct-campo">
+            <label for="u-sinalpct">Percentual do sinal <small>(de 1 a 99; fora da faixa o campo se corrige sozinho)</small></label>
+            <input type="number" id="u-sinalpct" value="30" min="1" max="99" step="0.5">
+          </div>
+          <div id="u-sinalfixo-campo">
+            <label for="u-sinalfixo">Valor fixo do sinal</label>
+            <input type="number" id="u-sinalfixo" value="100" min="0.01" step="0.01">
+          </div>
+          <label for="u-t8">Rótulo do sinal <small>(a linha do que se paga agora)</small></label>
+          <input type="text" id="u-t8" value="Sinal agora">
+          <label for="u-t9">Texto do saldo <small>(a linha do que fica para depois)</small></label>
+          <input type="text" id="u-t9" value="Restante na entrega">
+        </div>
+        <p class="ajuda">Ligado, o <b>PayPal cobra o sinal</b>, o <b>Pix gera o QR do sinal</b>, a mensagem do WhatsApp declara sinal pago e saldo devido, e o carrinho passa a mostrar três linhas: total, sinal agora e saldo na entrega. A ordem da conta é <b>quantidade multiplica → cupom incide sobre o total → o sinal sai do total já com o cupom</b>. Um <b>sinal maior que o total</b> é recusado: o carrinho avisa e não deixa pagar.</p>
       </fieldset>
 
       <fieldset>
@@ -800,6 +838,7 @@
         <legend>Desconto para pagamento via Pix</legend>
         <label for="u-descpix">Percentual de desconto no Pix <small>(0 = sem desconto; aplica sobre o total já com cupom)</small></label>
         <input type="number" id="u-descpix" value="10" min="0" max="90" step="0.5">
+        <p class="ajuda u-alerta" id="u-descpix-aviso"><b>Com a cobrança de sinal ligada este campo não vale.</b> O Pix passa a cobrar o sinal, e o desconto do Pix não se aplica sobre o sinal — seria desconto dobrado, porque o sinal já sai de um total que pode ter cupom. O número acima fica guardado, mas <b>não entra no código gerado</b> nem aparece no carrinho enquanto o sinal estiver ligado. Para usar o desconto do Pix, volte a cobrar o valor cheio.</p>
         <p class="ajuda">Com desconto ativo, o carrinho mostra a linha verde <b>"Pagando via Pix (-10%)"</b> abaixo do total, o separador vira <b>"ou pague com Pix com 10% de desconto"</b> e o Pix é gerado já com o valor reduzido. O PayPal continua cobrando o total sem esse desconto.</p>
       </fieldset>
 
@@ -830,11 +869,19 @@
           <input type="text" id="u-pdesc" placeholder="Sessão em estúdio com cenário natalino">
           <label for="u-ppreco">Preço</label>
           <input type="number" id="u-ppreco" placeholder="420" min="0" step="0.01">
+          <label>Vende por quantidade? <small>(um ensaio se vende uma vez; uma foto extra se vende em várias)</small></label>
+          <div class="radios">
+            <label><input type="radio" name="u-pqtd" value="nao" checked><span>Não <small>(sim ou não)</small></span></label>
+            <label><input type="radio" name="u-pqtd" value="sim"><span>Sim <small>(com seletor de quantidade)</small></span></label>
+          </div>
 
           <label>Itens opcionais deste produto</label>
           <div class="dupla">
             <input type="text" id="u-op-nome" placeholder="Pacote com 10 fotos">
             <input type="number" id="u-op-preco" placeholder="300" min="0" step="0.01">
+          </div>
+          <div class="radios">
+            <label><input type="checkbox" id="u-op-qtd"><span>Este opcional vende por quantidade</span></label>
           </div>
           <div class="acoes"><button class="botao claro" id="u-op-add">Adicionar opcional</button></div>
           <ul class="lista-imgs" id="u-op-lista"></ul>
@@ -871,6 +918,11 @@
         </div>
         <ul class="lista-imgs" id="u-prod-lista"></ul>
         <p class="vazio" id="u-prod-vazio">Nenhum produto cadastrado ainda. Use o formulário ao lado.</p>
+        <div id="u-qtdmax-campo">
+          <label for="u-qtdmax">Quantidade máxima por item <small>(de 2 a 99; fora da faixa o campo se corrige sozinho)</small></label>
+          <input type="number" id="u-qtdmax" value="10" min="2" max="99" step="1">
+          <p class="ajuda">Vale para <b>todos</b> os itens vendidos por quantidade. O seletor vai de <b>0</b> até esse número, e <b>0 equivale a não escolher o item</b>: ele sai da conta, do resumo e da mensagem do WhatsApp. A quantidade do produto e a do opcional são <b>independentes</b> — dois ensaios com um álbum somam dois ensaios e um álbum, não dois álbuns.</p>
+        </div>
       </fieldset>
 
       <fieldset>
@@ -915,6 +967,19 @@
         <label for="u-t6">Mensagem de erro (PayPal)</label>
         <input type="text" id="u-t6" value="Nao foi possivel concluir o pagamento. Tente novamente.">
       </fieldset>
+
+      <fieldset>
+        <legend>Resumo copiável do pedido</legend>
+        <div class="radios">
+          <label><input type="radio" name="u-resumo" value="nao" checked><span>Não incluir</span></label>
+          <label><input type="radio" name="u-resumo" value="sim"><span>Incluir resumo copiável</span></label>
+        </div>
+        <div id="u-resumo-campos">
+          <label for="u-t10">Rótulo do resumo <small>(os padrões da aba são escritos sem acento, como "Nao foi possivel concluir o pagamento"; o campo aceita acento normalmente se você quiser trocar)</small></label>
+          <input type="text" id="u-t10" value="Resumo para conferencia">
+        </div>
+        <p class="ajuda">O Pix estático <b>não confirma pagamento</b> — a conferência é pelo extrato. O resumo sai no fim do carrinho, com um botão de copiar, e traz produtos, opcionais (com quantidade quando houver), cupom, subtotal, desconto, total e — com sinal ligado — sinal e saldo, tudo abaixo do <b>código do pedido</b>. O cliente cola no WhatsApp ou no e-mail e você concilia com o extrato sem redigitar nada.</p>
+      </fieldset>
     </div>
     <div>
       <fieldset>
@@ -934,12 +999,19 @@
   <div class="secao"><span class="secao-n">4</span> Prévia e código gerado</div>
   <div class="acoes" style="margin-bottom:14px">
     <button class="botao" id="u-gerar">Gerar código</button>
+    <button class="botao claro" id="u-atualizar">Atualizar prévia</button>
   </div>
   <div class="grade">
     <div>
       <div class="pv-area">
+        <div class="u-pv-modos">
+          <span class="rotulo">Ver como:</span>
+          <button type="button" class="botao mini" id="u-pv-desk" aria-pressed="true">Computador</button>
+          <button type="button" class="botao mini claro" id="u-pv-cel" aria-pressed="false">Celular</button>
+        </div>
         <div id="u-pv-box"></div>
       </div>
+      <p class="ajuda">A prévia <b>roda o código gerado de verdade</b>: é o mesmo bloco que sai na saída ao lado, executando dentro de um quadro isolado — dá para marcar produtos, mudar quantidade, aplicar cupom, gerar o Pix e ler o Copia e Cola. Ela também passa pelas <b>mesmas recusas</b> do botão "Gerar código": enquanto a configuração for recusada, o quadro mostra a recusa e o motivo, nunca um carrinho.<br><br><b>O que a prévia prova sobre o PayPal:</b> o botão é um desenho, mas logo abaixo dele a prévia mostra o <b>valor que iria na ordem</b> e a <b>decisão do clique</b> (segue para o PayPal ou recusa, com o motivo) — os dois medidos chamando o <code>createOrder</code> e o <code>onClick</code> do próprio bloco, a cada mudança do carrinho. É por isso que o valor do sinal e as recusas do lado PayPal são verificáveis aqui sem baixar o SDK e sem mandar seu Client ID para fora.<br><br><b>O que ela ainda não prova:</b> o que depende da resposta do PayPal — a janela de pagamento, a captura e as mensagens de sucesso e de erro que vêm dela; o QR Code é real, mas depende da biblioteca do cdnjs (sem internet ele some e só o Copia e Cola aparece); o quadro não carrega o CSS do tema do site; e o botão "Já paguei" abre o WhatsApp de verdade se você clicar.</p>
     </div>
     <div>
       <div class="saida">
@@ -956,6 +1028,8 @@
     <h3>Instrução de uso do código gerado</h3>
     <p class="ajuda"><b>Onde colar:</b> em um <b>componente HTML</b> da página de venda, substituindo o conteúdo do componente. Não cole dois carrinhos na mesma página.</p>
     <p class="ajuda"><b>Pré-requisitos:</b> para PayPal, o Client ID (público) da sua conta Business em developer.paypal.com — e, se quiser parcelamento, ative-o no painel do PayPal. Para Pix, conferir chave, nome (máx. 25) e cidade (máx. 15): são esses dados que aparecem no app do banco do cliente; acentos são removidos automaticamente no código Pix. O QR Code usa biblioteca do cdnjs; se ela falhar, o Copia e Cola continua funcionando.</p>
+    <p class="ajuda"><b>Cobrança de sinal:</b> ligada, o PayPal e o Pix passam a cobrar <b>só o sinal</b>, e o carrinho mostra total, sinal agora e saldo na entrega. A ordem da conta é fixa: <b>quantidade multiplica → cupom incide sobre o total → o sinal sai do total já com o cupom</b>. O <b>desconto do Pix não se aplica sobre o sinal</b> (seria desconto dobrado) e por isso ele não é emitido enquanto o sinal estiver ligado — a aba avisa em âmbar. Um sinal maior que o total é recusado: o carrinho mostra a linha vermelha e nem o PayPal nem o Pix deixam pagar. <b>Quem controla o saldo é você</b>: o carrinho não cobra a segunda parcela nem lembra ninguém dela.</p>
+    <p class="ajuda"><b>Quantidade e resumo:</b> um item vendido por quantidade ganha um seletor <b>[− n +]</b> e o preço da linha passa a mostrar o subtotal dele; quantidade <b>zero</b> equivale a não ter escolhido o item, e ele some da conta, do resumo, da descrição do PayPal e da mensagem do WhatsApp. O <b>resumo copiável</b> sai no fim do carrinho para o cliente colar no seu WhatsApp — é o que fecha a conciliação do Pix, que o QR estático não confirma sozinho.</p>
     <p class="ajuda"><b>Como funciona cada pagamento:</b> no PayPal, a cobrança é do total com cupom e a confirmação aparece na tela e no seu painel (com código do pedido e cupom). No Pix, o QR e o Copia e Cola são gerados com o total exato do momento; se o cliente alterar o pedido depois, o Pix some e precisa ser gerado de novo (proteção contra valor desatualizado). A confirmação do Pix é manual: o botão "Já paguei" abre o WhatsApp do cliente com produtos, opcionais, cupom e valor, e você confere no extrato.</p>
     <p class="ajuda"><b>Sobre os cupons:</b> a validação (existência e validade) acontece no código da página e o desconto entra no valor cobrado. Como em todo carrinho desse tipo, os códigos ficam visíveis para quem inspecionar a página — use cupons que possam ser públicos, como os de campanha.</p>
     <p class="ajuda"><b>Depois de colar:</b> salve, <b>publique</b> e teste com valor baixo cada forma ativa: um pagamento PayPal (reembolsável pelo painel) e um Pix pago por você mesmo. Teste também trocar de produto/opcional depois de gerar o Pix e confira no celular.</p>
@@ -3670,8 +3744,11 @@ function uColeta(){
     u:{prods:uProds,cps:uCps,metodo:radio('u-metodo'),client:$('u-client').value,moeda:radio('u-moeda'),
       chave:$('u-chave').value,nomer:$('u-nomer').value,cidade:$('u-cidade').value,cod:$('u-cod').value,
       selprod:radio('u-selprod'),zap:radio('u-zap'),zapnum:$('u-zapnum').value,descpix:$('u-descpix').value,
+      sinal:radio('u-sinal'),sinaltipo:radio('u-sinaltipo'),sinalpct:$('u-sinalpct').value,sinalfixo:$('u-sinalfixo').value,
+      resumo:radio('u-resumo'),
+      t8:$('u-t8').value,t9:$('u-t9').value,t10:$('u-t10').value,
       t1:$('u-t1').value,t2:$('u-t2').value,t3:$('u-t3').value,t4:$('u-t4').value,t5:$('u-t5').value,t6:$('u-t6').value,t7:$('u-t7').value,
-      larg:$('u-largura').value,ppcor:radio('u-ppcor'),
+      larg:$('u-largura').value,ppcor:radio('u-ppcor'),qtdmax:$('u-qtdmax').value,
       c1:$('u-c1-t').value,c2:$('u-c2-t').value,c3:$('u-c3-t').value}
   };
 }
@@ -3690,13 +3767,62 @@ function uRestaura(st){
   $('u-t1').value=U.t1;$('u-t2').value=U.t2;$('u-t3').value=U.t3;$('u-t4').value=U.t4;$('u-t5').value=U.t5;$('u-t6').value=U.t6;
   if(U.t7)$('u-t7').value=U.t7;
   $('u-largura').value=U.larg||420;
+  $('u-qtdmax').value=(U.qtdmax!=null&&U.qtdmax!=='')?U.qtdmax:10;
+  setRadio('u-sinal',U.sinal||'nao');setRadio('u-sinaltipo',U.sinaltipo||'pct');
+  $('u-sinalpct').value=(U.sinalpct!=null&&U.sinalpct!=='')?U.sinalpct:30;
+  $('u-sinalfixo').value=(U.sinalfixo!=null&&U.sinalfixo!=='')?U.sinalfixo:100;
+  if(U.t8)$('u-t8').value=U.t8;
+  if(U.t9)$('u-t9').value=U.t9;
+  if(U.t10)$('u-t10').value=U.t10;
+  setRadio('u-resumo',U.resumo||'nao');
   setRadio('u-ppcor',U.ppcor||'gold');
   $('u-c1-t').value=U.c1;$('u-c1').value=corValida(U.c1)?U.c1:'#075E54';
   $('u-c2-t').value=U.c2;$('u-c2').value=corValida(U.c2)?U.c2:'#ffffff';
   $('u-c3-t').value=U.c3;$('u-c3').value=corValida(U.c3)?U.c3:'#333333';
 }
 
+/* Faixa declarada dos campos numericos desta aba, no formato de S_NUMS/B_NUMS:
+   [id, padrao, min, max, inteiro]. A MESMA linha alimenta o gerador (fcPreso) e a interface
+   (fcAjustar), entao nao ha como a saida ser presa numa faixa e o campo mostrar outra.
+   Os dois campos antigos (largura e desconto Pix) NAO entraram: o clamp deles e outro -- uma
+   largura abaixo de 240 vira 420, e nao 240 --, e move-los mudaria numero cobrado sem que
+   nenhum recurso desta fase pedisse. */
+var U_NUMS=[['u-qtdmax',10,2,99,true],['u-sinalpct',30,1,99,false],['u-sinalfixo',100,0.01,999999,false]];
+function uPreso(id){return fcPreso(U_NUMS,id);}
 function uNum(id,def){var v=parseFloat(String($(id).value).replace(',','.'));return (isNaN(v)||v<0)?def:v;}
+/* Quantos itens DESTE produto (ele proprio e seus opcionais) foram marcados como vendidos por
+   quantidade. Serve a lista da aba e, somado, decide se o recurso inteiro esta ligado. */
+function uQtdItens(p){
+  var n=p.qtd?1:0,ops=p.ops||[],i;
+  for(i=0;i<ops.length;i++)if(ops[i].qtd)n++;
+  return n;
+}
+/* O MAIOR total que este carrinho consegue alcancar, ja considerando o teto da quantidade.
+   Serve a uma recusa so, e ela e a unica que nao tem como ser falso positivo: um sinal fixo
+   acima deste numero torna TODO pedido impagavel, em qualquer combinacao que o cliente monte.
+   Sinal fixo acima do pedido MINIMO nao e recusado aqui de proposito -- pode ser intencional
+   (piso de venda), e quem avisa nesse caso e o proprio carrinho, na hora, com a linha vermelha. */
+function uTotalMaximo(prods,selprod,qtdmax){
+  var soma=0,maior=0,i,j;
+  for(i=0;i<prods.length;i++){
+    var p=prods[i],ops=p.ops||[],extra=0,maiorOp=0;
+    var base=(parseFloat(String(p.preco).replace(',','.'))||0)*(p.qtd?qtdmax:1);
+    for(j=0;j<ops.length;j++){
+      var v=(parseFloat(String(ops[j].preco).replace(',','.'))||0)*(ops[j].qtd?qtdmax:1);
+      extra+=v;if(v>maiorOp)maiorOp=v;
+    }
+    var tot=base+((p.opsel==='multiplo')?extra:maiorOp);
+    soma+=tot;if(tot>maior)maior=tot;
+  }
+  return (prods.length>1&&selprod==='multiplo')?soma:maior;
+}
+/* O recurso so entra no bloco entregue se ALGUM item pedir quantidade. Com nenhum, o carrinho
+   sai byte a byte igual ao de antes desta fase -- nem CSS, nem variavel, nem seletor a mais. */
+function uQtdLigada(prods){
+  var i;
+  for(i=0;i<prods.length;i++)if(uQtdItens(prods[i]))return true;
+  return false;
+}
 function uFmt(v){
   var mo=(radio('u-metodo')==='paypal')?radio('u-moeda'):'BRL';
   var s=v.toFixed(2);
@@ -3742,6 +3868,15 @@ function uOpRender(){
     pr.addEventListener('change',function(){uOpPrecoAjustar(pr,i);});
     pr.addEventListener('blur',function(){uOpPrecoAjustar(pr,i);});
     info.appendChild(n);info.appendChild(pr);
+    /* R2: cada opcional declara se aceita quantidade. Um "album impresso" vende varios; uma
+       "hora extra de estudio" tambem; "revelacao em papel fine art" nao. Fica no proprio item
+       porque a decisao e do item, nao do carrinho. */
+    var lq=document.createElement('label');
+    lq.style.cssText='display:flex;align-items:center;gap:6px;margin:5px 0 0;font-size:12px;font-weight:400;color:var(--tinta-suave)';
+    var cq=document.createElement('input');cq.type='checkbox';cq.checked=!!op.qtd;
+    cq.addEventListener('change',function(){uEditOps[i].qtd=cq.checked;});
+    lq.appendChild(cq);lq.appendChild(document.createTextNode('vende por quantidade'));
+    info.appendChild(lq);
     var ctrl=document.createElement('div');ctrl.className='ctrl';
     [['\u2191',function(){uOpMove(i,-1);},'Subir'],['\u2193',function(){uOpMove(i,1);},'Descer'],['\u2715',function(){uOpDel(i);},'Remover']]
       .forEach(function(b){var bt=document.createElement('button');bt.textContent=b[0];bt.title=b[2];bt.setAttribute('aria-label',b[2]);bt.addEventListener('click',b[1]);ctrl.appendChild(bt);});
@@ -3754,8 +3889,8 @@ function uOpAdd(){
   if(!n){alert('Informe o nome do opcional.');return;}
   var v=parseFloat(String($('u-op-preco').value).replace(',','.'));
   if(isNaN(v)||v<0)v=0;
-  uEditOps.push({nome:n,preco:v});
-  $('u-op-nome').value='';$('u-op-preco').value='';
+  uEditOps.push({nome:n,preco:v,qtd:!!$('u-op-qtd').checked});
+  $('u-op-nome').value='';$('u-op-preco').value='';$('u-op-qtd').checked=false;
   uOpRender();
 }
 function uOpMove(i,d){var j=i+d;if(j<0||j>=uEditOps.length)return;var t=uEditOps[i];uEditOps[i]=uEditOps[j];uEditOps[j]=t;uOpRender();}
@@ -3765,7 +3900,8 @@ function uOpDel(i){uEditOps.splice(i,1);uOpRender();}
 function uProdLimpar(){
   $('u-pnome').value='';$('u-pdesc').value='';$('u-ppreco').value='';
   uEditOps=[];uEditIdx=-1;uOpRender();
-  setRadio('u-opsel','unico');setRadio('u-opnenhum','nao');
+  setRadio('u-opsel','unico');setRadio('u-opnenhum','nao');setRadio('u-pqtd','nao');
+  $('u-op-qtd').checked=false;
   $('u-prod-salvar').textContent='Adicionar produto';
   $('u-prod-cancelar').style.display='none';
   uToggles();
@@ -3777,16 +3913,18 @@ function uProdSalvar(){
   if(isNaN(v)||v<0){alert('Informe o preco do produto.');return;}
   var p={nome:n,desc:$('u-pdesc').value.trim(),preco:v,
     opsel:radio('u-opsel')||'unico',opnenhum:radio('u-opnenhum')||'nao',
-    ops:uEditOps.map(function(o){return {nome:o.nome,preco:o.preco};})};
+    qtd:radio('u-pqtd')==='sim',
+    ops:uEditOps.map(function(o){return {nome:o.nome,preco:o.preco,qtd:!!o.qtd};})};
   if(uEditIdx>=0)uProds[uEditIdx]=p;else uProds.push(p);
   uProdLimpar();uProdRender();salvarEstado();uPreview();
 }
 function uProdEditar(i){
   var p=uProds[i];
   $('u-pnome').value=p.nome;$('u-pdesc').value=p.desc||'';$('u-ppreco').value=p.preco;
-  uEditOps=(p.ops||[]).map(function(o){return {nome:o.nome,preco:o.preco};});
+  uEditOps=(p.ops||[]).map(function(o){return {nome:o.nome,preco:o.preco,qtd:!!o.qtd};});
   uEditIdx=i;uOpRender();
   setRadio('u-opsel',p.opsel);setRadio('u-opnenhum',p.opnenhum);
+  setRadio('u-pqtd',p.qtd?'sim':'nao');
   $('u-prod-salvar').textContent='Salvar alteracoes';
   $('u-prod-cancelar').style.display='inline-block';
   uToggles();
@@ -3808,7 +3946,8 @@ function uProdRender(){
     var txt=document.createElement('div');
     txt.style.fontSize='13px';
     var qtd=(p.ops&&p.ops.length)?(' \u00b7 '+p.ops.length+' opcional'+(p.ops.length>1?'is':'')):' \u00b7 sem opcionais';
-    txt.textContent=p.nome+' \u2014 '+uFmt(parseFloat(p.preco)||0)+qtd;
+    var nq=uQtdItens(p);
+    txt.textContent=p.nome+' \u2014 '+uFmt(parseFloat(p.preco)||0)+qtd+(nq?(' \u00b7 '+nq+' com quantidade'):'');
     info.appendChild(txt);
     var ctrl=document.createElement('div');ctrl.className='ctrl';
     [['\u2191',function(){uProdMove(i,-1);},'Subir'],['\u2193',function(){uProdMove(i,1);},'Descer'],
@@ -3837,16 +3976,20 @@ function uCpRender(){
     cod.addEventListener('change',function(){uCpCodAjustar(cod,i);});
     cod.addEventListener('blur',function(){uCpCodAjustar(cod,i);});
     var val=document.createElement('input');val.type='number';val.step='0.01';val.min='0';val.value=cp.valor;val.placeholder='Valor';
-    val.addEventListener('input',function(){uCps[i].valor=val.value;salvarEstado();});
+    /* Valor, tipo e validade tambem redesenham a previa. Antes so o CODIGO do cupom chamava
+       uPreview: com a previa antiga (que nem aplicava cupom) o defeito era latente; com a
+       previa viva ele virou numero errado a vista -- cupom trocado de 10% para R$ 50 fixo e a
+       previa continuava mostrando o desconto velho. Quem edita a lista tem de ver o efeito. */
+    val.addEventListener('input',function(){uCps[i].valor=val.value;salvarEstado();uPreview();});
     var sel=document.createElement('select');
     [['pct_produto','% sobre os produtos'],['pct_total','% sobre o total'],['fixo','Valor fixo no total']].forEach(function(o){
       var op=document.createElement('option');op.value=o[0];op.textContent=o[1];
       if(cp.tipo===o[0])op.selected=true;
       sel.appendChild(op);
     });
-    sel.addEventListener('change',function(){uCps[i].tipo=sel.value;salvarEstado();});
+    sel.addEventListener('change',function(){uCps[i].tipo=sel.value;salvarEstado();uPreview();});
     var dt=document.createElement('input');dt.type='date';dt.value=cp.validade||'';
-    dt.addEventListener('change',function(){uCps[i].validade=dt.value;salvarEstado();});
+    dt.addEventListener('change',function(){uCps[i].validade=dt.value;salvarEstado();uPreview();});
     info.appendChild(cod);info.appendChild(val);info.appendChild(sel);info.appendChild(dt);
     var ctrl=document.createElement('div');ctrl.className='ctrl';
     var bt=document.createElement('button');bt.textContent='\u2715';bt.title='Remover';bt.setAttribute('aria-label','Remover');
@@ -3891,87 +4034,248 @@ function uToggles(){
   el=$('u-zap-campo');if(el)el.style.display=(radio('u-zap')==='sim')?'block':'none';
   el=$('u-opnenhum-campo');if(el)el.style.display=(radio('u-opsel')==='unico')?'block':'none';
   el=$('u-selprod-campo');if(el)el.style.display=(uProds.length>1)?'block':'none';
+  el=$('u-qtdmax-campo');if(el)el.style.display=uQtdLigada(uProds)?'block':'none';
+  var sinalOn=(radio('u-sinal')==='sim');
+  el=$('u-sinal-campos');if(el)el.style.display=sinalOn?'block':'none';
+  el=$('u-sinalpct-campo');if(el)el.style.display=(radio('u-sinaltipo')!=='fixo')?'block':'none';
+  el=$('u-sinalfixo-campo');if(el)el.style.display=(radio('u-sinaltipo')==='fixo')?'block':'none';
+  /* O desconto Pix nao some da tela quando o sinal liga: ele fica a vista, desabilitado e com o
+     aviso ambar dizendo por que nao vale. Escondemos o campo e o operador que tinha configurado
+     10% veria o desconto sumir sem explicacao -- trocar defeito visivel por invisivel e o que
+     este projeto ja recusou. */
+  el=$('u-descpix-aviso');if(el)el.style.display=sinalOn?'block':'none';
+  el=$('u-descpix');if(el)el.disabled=sinalOn;
+  el=$('u-resumo-campos');if(el)el.style.display=(radio('u-resumo')==='sim')?'block':'none';
 }
 document.addEventListener('change',function(e){
   if(e.target.name&&e.target.name.indexOf('u-')===0)uToggles();
 });
 
-/* ===== previa ===== */
-function uPreview(){
+/* ===== previa =====
+   A previa EXECUTA o bloco gerado dentro de um iframe de mesma origem, como a Contagem
+   regressiva, o Slideshow e a Captacao de leads. A versao anterior redesenhava o carrinho com
+   codigo proprio: uma segunda implementacao, que ja tinha divergido uma vez -- ela mostrava o
+   primeiro produto marcado e um total enquanto o carrinho publicado abria zerado. Com sinal,
+   quantidade e resumo entrando na conta, manter duas implementacoes seria multiplicar por tres
+   o numero de lugares onde a divergencia pode nascer. Agora ha um gerador so: uBloco. */
+
+/* Duas trocas, as duas do AMBIENTE da previa -- o bloco entregue nao muda nem um byte.
+   1. localStorage/sessionStorage viram objetos em memoria. O carrinho de hoje nao grava nada,
+      mas o shim entra pelo mesmo motivo das outras abas: a previa nunca pode sujar as chaves
+      reais da origem da ferramenta, e a conferencia abaixo avisa em vermelho se a troca nao
+      pegar (setItem no Storage real nao lanca, entao a falha seria muda).
+   2. O SDK do PayPal nao e baixado. Carrega-lo de verdade mandaria o Client ID do operador
+      para fora a cada remontagem da previa e, com o campo ainda vazio, o carrinho mostraria a
+      mensagem de erro de pagamento -- um erro falso. No lugar dele entra o mesmo desenho que a
+      previa antiga ja usava (mockPP), com etiqueta dizendo que e desenho. O bloco continua
+      pedindo o SDK exatamente como na pagina publicada; quem responde e o ambiente. */
+function uPvShim(cfg){
+  var s='';
+  s+='<scr'+'ipt>\n(function(){\n';
+  s+='  function memoria(){\n';
+  s+='    var d={};\n';
+  s+='    return {\n';
+  s+='      getItem:function(k){k=String(k);return Object.prototype.hasOwnProperty.call(d,k)?d[k]:null;},\n';
+  s+='      setItem:function(k,v){d[String(k)]=String(v);},\n';
+  s+='      removeItem:function(k){delete d[String(k)];},\n';
+  s+='      clear:function(){d={};},\n';
+  s+='      key:function(i){var ks=Object.keys(d);return i<ks.length?ks[i]:null;},\n';
+  s+='      get length(){return Object.keys(d).length;},\n';
+  s+='      fcPvMemoria:true\n';
+  s+='    };\n  }\n';
+  s+='  function trocar(nome){\n';
+  s+='    var falso=memoria();\n';
+  s+='    try{Object.defineProperty(window,nome,{value:falso,configurable:true});return;}catch(e){}\n';
+  s+='    try{Object.defineProperty(Object.getPrototypeOf(window),nome,{value:falso,configurable:true});}catch(e){}\n';
+  s+='  }\n';
+  s+='  function instalado(nome){\n';
+  s+='    try{return !!(window[nome]&&window[nome].fcPvMemoria===true);}catch(e){return false;}\n';
+  s+='  }\n';
+  s+="  trocar('localStorage');trocar('sessionStorage');\n";
+  s+='  var falhou=[];\n';
+  s+="  if(!instalado('localStorage'))falhou.push('localStorage');\n";
+  s+="  if(!instalado('sessionStorage'))falhou.push('sessionStorage');\n";
+  s+='  if(falhou.length){\n';
+  s+="    var av=document.createElement('div');\n";
+  s+="    av.id='u-pv-aviso-shim';\n";
+  s+='    av.setAttribute(\'style\',\'background:#8C1D18;color:#FDFBF6;font:600 12px/1.45 -apple-system,BlinkMacSystemFont,sans-serif;padding:8px 12px\');\n';
+  s+="    av.textContent='Aviso da previa: nao foi possivel isolar o '+falhou.join(' e ')+" +
+     "' deste quadro. A previa esta gravando nas chaves reais do navegador. O codigo gerado ao lado nao e afetado.';\n";
+  s+='    document.body.appendChild(av);\n';
+  s+='  }\n';
+  if(cfg.usaPP){
+    /* O botao do PayPal e desenho, mas o que importa dele NAO e: o shim guarda a configuracao
+       que o bloco passou para paypal.Buttons e a EXERCITA a cada mudanca do carrinho --
+       chama o onClick do bloco (com reject/resolve de mentira) e o createOrder do bloco (com
+       actions.order.create devolvendo o proprio objeto), e mostra o valor que iria na ordem e
+       a decisao que o clique tomaria. Assim a previa prova o valor do sinal e as recusas do
+       lado PayPal SEM baixar o SDK e sem mandar o Client ID para fora.
+       A sonda RESTAURA o .fcu-msg que o onClick tiver escrito: uma sonda que deixa rastro
+       mostraria mensagem de recusa velha depois de o pedido voltar a ser valido. */
+    s+="  var DESENHO_PP='"+escJs(mockPP(cfg.ppcor))+"';\n";
+    s+='  var inserir=document.head.appendChild;\n';
+    s+='  document.head.appendChild=function(n){\n';
+    s+="    if(n&&n.tagName==='SCRIPT'&&/paypal\\.com/.test(String(n.src||''))){\n";
+    s+='      window.paypal={Buttons:function(bt){return {render:function(alvo){\n';
+    s+='        if(!alvo)return;\n';
+    s+="        var caixa=document.createElement('div');\n";
+    s+="        caixa.id='u-pv-pp';\n";
+    s+='        caixa.setAttribute(\'style\',\'border:1px dashed #b9b3a4;border-radius:8px;padding:6px 8px 10px\');\n';
+    s+="        alvo.innerHTML='';alvo.appendChild(caixa);\n";
+    s+='        function sondar(){\n';
+    s+="          var raiz=document.getElementById('fcuni');\n";
+    s+="          var cx=raiz?raiz.querySelector('.fcu-msg'):null;\n";
+    s+="          var antesT=cx?cx.textContent:'',antesC=cx?cx.className:'';\n";
+    s+='          var decisao=null,motivo=\'\';\n';
+    s+='          try{\n';
+    s+="            if(bt&&bt.onClick){\n";
+    s+="              var r=bt.onClick(null,{reject:function(){return 'RECUSA';},resolve:function(){return 'ACEITA';}});\n";
+    s+="              decisao=(r==='RECUSA')?'recusa':'aceita';\n";
+    s+="              if(cx&&cx.textContent!==antesT)motivo=cx.textContent;\n";
+    s+='            }\n';
+    s+='          }catch(e){decisao=\'erro\';motivo=String(e&&e.message||e);}\n';
+    s+='          if(cx){cx.textContent=antesT;cx.className=antesC;}\n';
+    s+="          var valor='',descricao='';\n";
+    s+='          try{\n';
+    s+="            var ped=bt.createOrder(null,{order:{create:function(o){return o;}}});\n";
+    s+='            var am=ped.purchase_units[0].amount;\n';
+    s+="            valor=am.value+' '+am.currency_code;\n";
+    s+='            descricao=ped.purchase_units[0].description;\n';
+    s+="          }catch(e2){valor='(erro: '+String(e2&&e2.message||e2)+')';}\n";
+    s+="          caixa.innerHTML='';\n";
+    s+="          var eti=document.createElement('div');\n";
+    s+='          eti.setAttribute(\'style\',\'font:600 10px/1.4 -apple-system,BlinkMacSystemFont,sans-serif;color:#8a8375;text-align:center;text-transform:uppercase;letter-spacing:.06em\');\n';
+    s+="          eti.textContent='desenho: o SDK do PayPal nao roda na previa';\n";
+    s+='          caixa.appendChild(eti);\n';
+    s+="          var des=document.createElement('div');des.innerHTML=DESENHO_PP;caixa.appendChild(des);\n";
+    s+="          var pai=document.createElement('div');\n";
+    s+='          pai.setAttribute(\'style\',\'margin-top:8px;border-top:1px dashed #d8d2c4;padding-top:7px;font:12px/1.5 -apple-system,BlinkMacSystemFont,sans-serif;color:#555;text-align:left\');\n';
+    s+='          function linha(rot,txt,cor){\n';
+    s+="            var l=document.createElement('div');\n";
+    s+="            var b=document.createElement('span');b.setAttribute('style','font-weight:700');b.textContent=rot;\n";
+    s+="            var v=document.createElement('span');v.textContent=' '+txt;\n";
+    s+="            if(cor)v.setAttribute('style','color:'+cor+';font-weight:700');\n";
+    s+='            l.appendChild(b);l.appendChild(v);pai.appendChild(l);\n';
+    s+='          }\n';
+    s+="          linha('Medido no proprio bloco -- valor que iria na ordem:',valor,'#1e7e34');\n";
+    s+="          linha('Ao clicar em pagar:',(decisao==='recusa')?('recusa -- '+motivo):(decisao==='aceita'?'segue para o PayPal':('erro -- '+motivo)),(decisao==='recusa')?'#c0392b':'');\n";
+    s+="          if(descricao)linha('Descricao da ordem:',descricao,'');\n";
+    s+='          caixa.appendChild(pai);\n';
+    s+='        }\n';
+    s+='        sondar();\n';
+    s+="        var r0=document.getElementById('fcuni');\n";
+    s+='        if(r0){\n';
+    s+="          r0.addEventListener('change',function(){setTimeout(sondar,0);});\n";
+    s+="          r0.addEventListener('click',function(){setTimeout(sondar,0);});\n";
+    s+='        }\n';
+    s+='      }};}};\n';
+    s+='      setTimeout(function(){if(n.onload)n.onload();},0);\n';
+    s+='      return n;\n';
+    s+='    }\n';
+    s+='    return inserir.call(document.head,n);\n';
+    s+='  };\n';
+  }
+  s+='})();\n</scr'+'ipt>\n';
+  return s;
+}
+/* Sem conteudo abaixo do carrinho nao da para ver onde ele termina nem rolar ate a area do Pix
+   depois de gerar. Blocos cinzentos e mudos, de proposito. */
+function uPvEnchimento(){
+  var s='',i;
+  for(i=0;i<8;i++)s+='<div class="u-pv-falso">conteudo da sua pagina</div>';
+  return s;
+}
+/* O que a previa mostra quando a configuracao e recusada: o quadro da RECUSA, com o motivo --
+   nunca o carrinho, e nunca o ultimo bloco valido rotulado como desatualizado. Um bloco velho
+   com etiqueta continuaria desenhando numeros que o operador le antes de ler a etiqueta, e a
+   aba inteira existe para nao trocar defeito visivel por invisivel. Aqui a previa e explicita:
+   nao ha o que provar enquanto a configuracao nao passar pelas mesmas guardas da geracao. */
+function uPvRecusaDoc(motivo){
+  var h='';
+  h+='<!DOCTYPE html>\n<html lang="pt-br">\n<head>\n<meta charset="utf-8">\n';
+  h+='<meta name="viewport" content="width=device-width,initial-scale=1">\n';
+  h+='<sty'+'le>\n';
+  h+='html,body{margin:0;padding:0}\n';
+  h+='body{background:#FFFFFF;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Ubuntu,sans-serif;padding:20px}\n';
+  h+='.u-pv-recusa{border:2px solid #8C1D18;border-radius:12px;background:#FDF2F1;color:#5E1310;padding:16px 18px;max-width:560px;margin:0 auto}\n';
+  h+='.u-pv-recusa .t{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin:0 0 8px}\n';
+  h+='.u-pv-recusa .m{font-size:13px;line-height:1.55;margin:0}\n';
+  h+='.u-pv-recusa .r{font-size:12px;line-height:1.5;margin:12px 0 0;color:#7A3B36}\n';
+  h+='</sty'+'le>\n</head>\n<body>\n';
+  h+='<div class="u-pv-recusa"><p class="t">Configuracao recusada &mdash; nao ha carrinho para mostrar</p>';
+  h+='<p class="m">'+escHtml(motivo)+'</p>';
+  h+='<p class="r">A previa executa o codigo gerado, e o gerador se recusa a produzir esta configuracao. Mostrar um carrinho aqui seria mostrar um codigo que o botao <b>Gerar codigo</b> nao entrega. Corrija o campo acima e a previa volta sozinha.</p>';
+  h+='</div>\n</body>\n</html>';
+  return h;
+}
+function uPvDoc(cfg){
+  var h='';
+  h+='<!DOCTYPE html>\n<html lang="pt-br">\n<head>\n<meta charset="utf-8">\n';
+  h+='<meta name="viewport" content="width=device-width,initial-scale=1">\n';
+  h+='<sty'+'le>\n';
+  h+='html,body{margin:0;padding:0}\n';
+  h+='body{background:#FFFFFF;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Ubuntu,sans-serif;padding:16px 12px}\n';
+  h+='.u-pv-falso{background:#EDEAE1;color:#A9A294;border-radius:6px;margin:10px 0;padding:0 14px;';
+  h+='height:70px;display:flex;align-items:center;font-size:12px;letter-spacing:.04em}\n';
+  h+='</sty'+'le>\n</head>\n<body>\n';
+  h+=uPvShim(cfg);
+  h+=uBloco(cfg);
+  h+=uPvEnchimento();
+  h+='\n</body>\n</html>';
+  return h;
+}
+/* O carrinho nao tem media query propria: quem manda na largura e o max-width do card. As duas
+   larguras logicas existem para o operador ver o card no espaco de um celular (onde ele ocupa
+   a tela inteira) e no espaco de um monitor (onde ele para no max-width configurado). */
+function uPvLargura(cfg){
+  if(uPvModo==='cel')return 380;
+  return Math.max(920,cfg.larg+240);
+}
+var uPvTimer=null,uPvModo='desk';
+var U_PV_ALTURA=560;
+function uPvMontar(){
   var box=$('u-pv-box');if(!box)return;
-  var m=radio('u-metodo')||'ambos';
-  var usaPP=(m!=='pix'),usaPix=(m!=='paypal');
-  var c1=$('u-c1-t').value;if(!corValida(c1))c1='#075E54';
-  var c2=$('u-c2-t').value;if(!corValida(c2))c2='#ffffff';
-  var c3=$('u-c3-t').value;if(!corValida(c3))c3='#333333';
-  var larg=parseInt($('u-largura').value,10);if(isNaN(larg)||larg<240)larg=420;
-  var descpix=parseFloat(String($('u-descpix').value).replace(',','.'));if(isNaN(descpix)||descpix<0)descpix=0;if(descpix>90)descpix=90;
-  if(m!=='ambos')descpix=0;
-  var zap=(radio('u-zap')==='sim')&&usaPix;
-  var multi=(uProds.length>1);
-  var selprod=radio('u-selprod')||'unico';
-  var total=0;
-
-  function marca(checada,redondo){
-    return '<span style="display:inline-block;width:16px;height:16px;min-width:16px;border:2px solid '+(checada?c1:'#b9b3a4')+';border-radius:'+(redondo?'50%':'4px')+';margin-right:8px;vertical-align:-3px;box-sizing:border-box;'+(checada?('background:'+c1):'background:#fff')+'"></span>';
-  }
-
-  var h='<div style="max-width:'+Math.min(larg,380)+'px;margin:0 auto;background:'+c2+';border:1px solid #e3ddcc;border-radius:16px;padding:18px 20px;color:'+c3+';box-shadow:0 6px 20px rgba(0,0,0,.08);text-align:left">';
-  h+='<div style="font-size:17px;font-weight:700;color:'+c1+';margin-bottom:10px">'+escHtml($('u-t1').value)+'</div>';
-
-  if(!uProds.length){
-    h+='<div style="font-size:13px;color:#999;padding:10px 0">Cadastre ao menos um produto para ver a previa.</div>';
-  }else{
-    if(multi)h+='<div style="font-size:13px;font-weight:600;margin:0 0 4px">'+escHtml($('u-t7').value)+'</div>';
-    uProds.forEach(function(p,i){
-      var preco=parseFloat(String(p.preco).replace(',','.'))||0;
-      /* O ternario que estava aqui tinha os dois ramos identicos -- residuo de uma intencao
-         que so ficou de pe na previa: pre-marcar o primeiro produto nos dois modos. O bloco
-         gerado so pre-marcava no modo radio, e por isso a previa mostrava 1 marcado e
-         R$ 420,00 enquanto o carrinho publicado abria com 0 marcados e R$ 0,00. Quem mudou
-         foi o GERADO (ver uGerar): carrinho que abre zerado nao e so infidelidade da previa,
-         e o estado inicial que levava total zero para o PayPal. Agora os dois concordam. */
-      var ativo=multi?(i===0):true;
-      h+='<div style="padding:8px 0;border-bottom:1px solid #eee">';
-      h+='<div style="display:flex;justify-content:space-between;gap:10px;font-weight:600;align-items:center"><span>'+(multi?marca(ativo,selprod!=='multiplo'):'')+escHtml(p.nome)+'</span><span>'+uFmt(preco)+'</span></div>';
-      if(p.desc)h+='<div style="font-size:12px;color:#777;margin-left:'+(multi?'24px':'0')+'">'+escHtml(p.desc)+'</div>';
-      if(ativo)total+=preco;
-      var itens=(p.ops||[]).map(function(o){return {nome:o.nome,preco:parseFloat(String(o.preco).replace(',','.'))||0};});
-      if(p.opsel!=='multiplo'&&p.opnenhum==='sim'&&itens.length)itens.unshift({nome:'Sem opcional',preco:0,nenhum:true});
-      if(itens.length&&ativo){
-        h+='<div style="margin:6px 0 2px 0;padding-left:'+(multi?'24px':'0')+'">';
-        h+='<div style="font-size:12px;font-weight:600;margin-bottom:2px">'+escHtml($('u-t2').value)+'</div>';
-        itens.forEach(function(op,j){
-          var opAtivo=(p.opsel!=='multiplo')&&(j===0);
-          h+='<div style="display:flex;justify-content:space-between;gap:10px;padding:3px 0;font-size:13px;align-items:center"><span>'+marca(opAtivo,p.opsel!=='multiplo')+escHtml(op.nome)+'</span><span>'+(op.nenhum?'':('+ '+uFmt(op.preco)))+'</span></div>';
-          if(opAtivo&&!op.nenhum)total+=op.preco;
-        });
-        h+='</div>';
-      }
-      h+='</div>';
-    });
-  }
-
-  if(uCps.length){
-    h+='<div style="margin:10px 0"><div style="font-size:13px;font-weight:600;margin-bottom:4px">Cupom de desconto</div>';
-    h+='<div style="display:flex;gap:8px"><span style="flex:1;border:1px solid #ccc;border-radius:8px;padding:8px 10px;font-size:13px;color:#999">'+escHtml(uCps[0].codigo||'CUPOM')+'</span><span style="background:'+c1+';color:#fff;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:600">Aplicar</span></div></div>';
-  }
-  h+='<div style="display:flex;justify-content:space-between;padding:10px 0;border-top:2px solid '+c1+';font-size:16px;font-weight:700;color:'+c1+';margin-top:8px"><span>'+escHtml($('u-t3').value)+'</span><span>'+uFmt(total)+'</span></div>';
-  if(descpix>0)h+='<div style="display:flex;justify-content:space-between;gap:10px;padding:4px 0 0;font-size:14px;color:#1e7e34;font-weight:700"><span>Pagando via Pix (-'+descpix+'%)</span><span>'+uFmt(Math.round(total*(1-descpix/100)*100)/100)+'</span></div>';
-  if(usaPP)h+=mockPP(radio('u-ppcor')||'gold');
-  if(usaPix){
-    if(usaPP)h+='<div style="display:flex;align-items:center;gap:10px;margin:12px 0 8px;font-size:12px;color:#999"><span style="flex:1;height:1px;background:#e0e0e0"></span>ou pague com Pix'+(descpix>0?(' com '+descpix+'% de desconto'):'')+'<span style="flex:1;height:1px;background:#e0e0e0"></span></div>';
-    h+='<div style="'+(usaPP?'':'margin-top:12px;')+'background:'+c1+';border-radius:8px;padding:12px;text-align:center;font-weight:700;color:#fff">'+escHtml($('u-t4').value)+'</div>';
-    h+='<div style="margin-top:10px;text-align:center"><span style="display:inline-block;width:100px;height:100px;background:repeating-conic-gradient(#333 0 25%,#fff 0 50%) 0 0/20px 20px;border:5px solid #fff;box-shadow:0 0 0 1px #ddd"></span>';
-    h+='<div style="font-size:11px;color:#999;margin-top:4px">QR Code e Pix Copia e Cola aparecem aqui apos gerar</div></div>';
-    if(zap)h+='<div style="margin-top:8px;background:#25D366;border-radius:8px;padding:10px;text-align:center;font-weight:600;color:#fff;font-size:13px">Ja paguei \u2014 avisar no WhatsApp</div>';
-  }
-  /* Legenda no formato novo: declara o que ainda difere da pagina publicada, em vez de
-     descrever o que a previa faz. A frase antiga ("o total considera a primeira opcao
-     marcada") era verdadeira na previa e falsa no bloco entregue -- a previa afirmava o
-     contrario do que o codigo fazia. */
-  h+='</div><p style="font-size:12px;color:var(--tinta-suave);text-align:center;margin:10px 0 0">Prévia do carrinho. <b>Ainda difere da página publicada:</b> os botões do PayPal são desenhos, não os botões reais; o QR é um quadriculado falso; a largura está limitada a 380 px para caber nesta coluna; e o campo de cupom é ilustrativo (aqui ele não aplica desconto nenhum). O que <b>confere</b> com o código gerado: os produtos e opcionais pré-marcados, o total inicial e as cores.</p>';
-  box.innerHTML=h;
+  var cfg=uCfg();
+  var recusa=uRecusa(cfg);
+  var larg=uPvLargura(cfg);
+  var disp=box.clientWidth||440;
+  var k=Math.min(1,disp/larg);
+  /* trocar o iframe inteiro e o jeito barato de parar o bloco anterior: os listeners dele e o
+     script do QR Code morrem junto com o documento. */
+  box.innerHTML='';
+  var moldura=document.createElement('div');
+  moldura.className='u-pv-moldura';
+  moldura.style.width=Math.round(larg*k)+'px';
+  moldura.style.height=U_PV_ALTURA+'px';
+  var ifr=document.createElement('iframe');
+  ifr.id='u-pv-frame';
+  ifr.setAttribute('title','Previa do carrinho de checkout');
+  ifr.style.width=larg+'px';
+  ifr.style.height=Math.round(U_PV_ALTURA/k)+'px';
+  ifr.style.transform='scale('+k+')';
+  ifr.style.transformOrigin='top left';
+  moldura.appendChild(ifr);
+  box.appendChild(moldura);
+  var doc=ifr.contentDocument||(ifr.contentWindow&&ifr.contentWindow.document);
+  if(!doc)return;
+  /* as MESMAS guardas da geracao: a previa nunca executa o que o gerador se negaria a produzir */
+  doc.open();doc.write(recusa?uPvRecusaDoc(recusa):uPvDoc(cfg));doc.close();
+}
+/* Remontar o iframe a cada tecla digitada custa caro e pisca. O debounce segura as mudancas de
+   campo; "Atualizar previa", a troca de modo e o botao de gerar passam direto. O timer e UNICO
+   e sempre cancelado antes de agendar outro. */
+function uPreview(imediato){
+  if(uPvTimer){clearTimeout(uPvTimer);uPvTimer=null;}
+  if(imediato){uPvMontar();return;}
+  uPvTimer=setTimeout(function(){uPvTimer=null;uPvMontar();},400);
+}
+function uPvBotoes(){
+  var d=$('u-pv-desk'),c=$('u-pv-cel');
+  if(d){d.className='botao mini'+(uPvModo==='desk'?'':' claro');d.setAttribute('aria-pressed',uPvModo==='desk'?'true':'false');}
+  if(c){c.className='botao mini'+(uPvModo==='cel'?'':' claro');c.setAttribute('aria-pressed',uPvModo==='cel'?'true':'false');}
+}
+function uPvModoSet(m){
+  uPvModo=m;uPvBotoes();uPreview(true);
 }
 document.addEventListener('input',function(e){
   var al=(e.target.id&&e.target.id.indexOf('u-')===0)||(e.target.name&&e.target.name.indexOf('u-')===0);
@@ -4031,33 +4335,72 @@ function uChaveErro(chave,bruta){
   return '';
 }
 
-/* ===== gerador ===== */
-function uGerar(){
+/* ===== configuracao da aba =====
+   Uma leitura so da interface, ja presa nas faixas. E o que uGerar valida, e e o que uBloco
+   monta -- e como a previa passou a executar o retorno de uBloco, nao sobrou nenhuma segunda
+   implementacao do carrinho para divergir do bloco entregue. */
+function uCfg(){
   var m=radio('u-metodo')||'ambos';
-  var usaPP=(m!=='pix'),usaPix=(m!=='paypal');
-  if(!uProds.length){alert('Cadastre ao menos um produto.');return;}
-  var client=escJs($('u-client').value.trim()||'COLE_AQUI_SEU_CLIENT_ID');
-  if(usaPP&&!$('u-client').value.trim()){alert('Informe o Client ID do PayPal.');return;}
-  var moeda=usaPix?'BRL':(radio('u-moeda')||'BRL');
-  var chaveBruta=$('u-chave').value;
-  uChaveAjustar();
-  var chave=$('u-chave').value;
-  var nomer=$('u-nomer').value.trim();
-  var cidade=$('u-cidade').value.trim();
-  if(usaPix){
-    var erroChave=uChaveErro(chave,chaveBruta);
-    if(erroChave){alert(erroChave);return;}
-  }
-  if(usaPix&&(!chave||!nomer||!cidade)){alert('Preencha a chave Pix, o nome do recebedor e a cidade.');return;}
-  var cod=escJs($('u-cod').value.trim()||'PEDIDO');
-  var zap=usaPix&&(radio('u-zap')==='sim');
-  var zapnum=String($('u-zapnum').value).replace(/\D/g,'');
-  if(zap&&!zapnum){alert('Informe o numero do WhatsApp de destino.');return;}
-  var larg=parseInt($('u-largura').value,10);if(isNaN(larg)||larg<240)larg=420;
-  var ppcor=radio('u-ppcor')||'gold';
-  var descpix=parseFloat(String($('u-descpix').value).replace(',','.'));if(isNaN(descpix)||descpix<0)descpix=0;if(descpix>90)descpix=90;
+  var usaPix=(m!=='paypal');
+  var descpix=parseFloat(String($('u-descpix').value).replace(',','.'));
+  if(isNaN(descpix)||descpix<0)descpix=0;if(descpix>90)descpix=90;
   if(m!=='ambos')descpix=0;
-  var selprod=radio('u-selprod')||'unico';
+  var larg=parseInt($('u-largura').value,10);if(isNaN(larg)||larg<240)larg=420;
+  /* Sinal e desconto Pix nao convivem: o Pix passa a cobrar o sinal, e o desconto do Pix sobre
+     o sinal seria desconto dobrado (o sinal ja sai de um total que pode ter cupom). O spec
+     manda nao aplicar; aqui ele e zerado na origem, pelo mesmo mecanismo que ja zerava o
+     desconto quando a forma de pagamento nao e "os dois". A aba avisa em ambar. */
+  var sinalOn=(radio('u-sinal')==='sim');
+  if(sinalOn)descpix=0;
+  var sinalTipo=radio('u-sinaltipo')||'pct';
+  var sinalPct=uPreso('u-sinalpct');if(sinalPct==null)sinalPct=30;
+  var sinalFixo=uPreso('u-sinalfixo');if(sinalFixo==null)sinalFixo=100;
+  return {
+    sinal:{ativo:sinalOn,tipo:sinalTipo,valor:(sinalTipo==='fixo')?(Math.round(sinalFixo*100)/100):sinalPct},
+    resumo:(radio('u-resumo')==='sim'),
+    t8:$('u-t8').value, t9:$('u-t9').value, t10:$('u-t10').value,
+    m:m, usaPP:(m!=='pix'), usaPix:usaPix,
+    client:$('u-client').value.trim(),
+    moeda:usaPix?'BRL':(radio('u-moeda')||'BRL'),
+    /* a chave ja sai LIMPA das pontas daqui: e este o valor que vai para o bloco nas duas
+       pontas (textarea e previa). uChaveAjustar continua existindo para corrigir o CAMPO, que
+       e outra coisa -- e so uGerar mexe no campo. 'chaveBruta' acompanha porque a recusa
+       precisa distinguir "campo nunca preenchido" de "so tinha invisiveis". */
+    chave:pixLimpar($('u-chave').value), chaveBruta:$('u-chave').value,
+    nomer:$('u-nomer').value.trim(),
+    cidade:$('u-cidade').value.trim(),
+    cod:$('u-cod').value.trim(),
+    zap:usaPix&&(radio('u-zap')==='sim'),
+    zapnum:String($('u-zapnum').value).replace(/\D/g,''),
+    larg:larg, ppcor:radio('u-ppcor')||'gold', descpix:descpix,
+    selprod:radio('u-selprod')||'unico',
+    prods:uProds, cps:uCps,
+    qtdLigada:uQtdLigada(uProds), qtdmax:uPreso('u-qtdmax')||10,
+    c1:corSegura('u-c1','#075E54'), c2:corSegura('u-c2','#ffffff'), c3:corSegura('u-c3','#333333'),
+    t1:$('u-t1').value, t2:$('u-t2').value, t3:$('u-t3').value, t4:$('u-t4').value,
+    t5:$('u-t5').value, t6:$('u-t6').value, t7:$('u-t7').value
+  };
+}
+
+/* ===== as guardas da geracao, sem efeito colateral =====
+   Devolve a PRIMEIRA recusa (ou '') para uma configuracao ja coletada. Existe separada de
+   uGerar porque a previa precisa das MESMAS guardas: com elas so no gerador, a previa
+   executava configuracao que o gerador se negava a produzir -- medido com a chave Pix
+   'pix@fc com.br', que a geracao recusa e a previa desenhava como QR valido. Nesse instante a
+   previa deixava de ser prova do codigo e virava outro codigo.
+   Nao mexe no DOM de proposito: a correcao a vista da chave e das faixas continua sendo de
+   uGerar, que e o gesto deliberado do operador -- a previa roda a cada tecla e nao pode
+   reescrever campo nenhum. */
+function uRecusa(cfg){
+  var i,cpv,cpc,cpe;
+  if(!cfg.prods.length)return 'Cadastre ao menos um produto.';
+  if(cfg.usaPP&&!cfg.client)return 'Informe o Client ID do PayPal.';
+  if(cfg.usaPix){
+    var erroChave=uChaveErro(cfg.chave,cfg.chaveBruta);
+    if(erroChave)return erroChave;
+    if(!cfg.chave||!cfg.nomer||!cfg.cidade)return 'Preencha a chave Pix, o nome do recebedor e a cidade.';
+  }
+  if(cfg.zap&&!cfg.zapnum)return 'Informe o numero do WhatsApp de destino.';
 
   /* Os cupons sao conferidos AQUI, e nao so no formulario de cadastro: o campo de valor
      DENTRO da lista de cupons nao valida nada, entao apagar o numero de um cupom ja cadastrado
@@ -4065,30 +4408,67 @@ function uGerar(){
      e o total nao mudava. Mesma porta para o percentual acima de 100, que zera o pedido.
      A geracao e recusada com aviso, nomeando o cupom: nao existe valor certo a assumir no lugar
      de um campo que o operador esvaziou. */
-  var ic,cpv,cpc,cpe;
-  for(ic=0;ic<uCps.length;ic++){
-    cpc=String(uCps[ic].codigo||'').trim();
-    if(!cpc){alert('O cupom na posicao '+(ic+1)+' da lista esta sem codigo. Um cupom sem codigo nunca pode ser digitado pelo cliente: preencha o codigo ou remova a linha.');return;}
-    cpv=parseFloat(String(uCps[ic].valor).replace(',','.'));
-    if(isNaN(cpv)||cpv<=0){alert('O cupom "'+cpc+'" esta com o valor do desconto vazio ou zerado. Ele seria entregue no codigo como desconto de zero: o cliente digitaria o cupom, veria "Cupom aplicado!" e "Desconto - R$ 0,00", e o total nao mudaria. Preencha o valor ou remova o cupom.');return;}
-    cpe=uCpPctErro(uCps[ic].tipo,cpv);
-    if(cpe){alert('Cupom "'+cpc+'": '+cpe);return;}
+  for(i=0;i<cfg.cps.length;i++){
+    cpc=String(cfg.cps[i].codigo||'').trim();
+    if(!cpc)return 'O cupom na posicao '+(i+1)+' da lista esta sem codigo. Um cupom sem codigo nunca pode ser digitado pelo cliente: preencha o codigo ou remova a linha.';
+    cpv=parseFloat(String(cfg.cps[i].valor).replace(',','.'));
+    if(isNaN(cpv)||cpv<=0)return 'O cupom "'+cpc+'" esta com o valor do desconto vazio ou zerado. Ele seria entregue no codigo como desconto de zero: o cliente digitaria o cupom, veria "Cupom aplicado!" e "Desconto - R$ 0,00", e o total nao mudaria. Preencha o valor ou remova o cupom.';
+    cpe=uCpPctErro(cfg.cps[i].tipo,cpv);
+    if(cpe)return 'Cupom "'+cpc+'": '+cpe;
   }
+
+  /* Sinal fixo acima do maior pedido possivel: o carrinho nasceria com todo pedido recusado.
+     Nao ha valor certo a assumir no lugar, entao a geracao e recusada com aviso -- mesmo
+     criterio do cupom acima de 100% e da chave Pix. */
+  if(cfg.sinal.ativo&&cfg.sinal.tipo==='fixo'){
+    var tmax=uTotalMaximo(cfg.prods,cfg.selprod,cfg.qtdmax);
+    if(cfg.sinal.valor>tmax)return 'O sinal fixo de '+uFmt(cfg.sinal.valor)+' e maior que o maior pedido que este carrinho consegue montar ('+uFmt(tmax)+', ja contando o teto da quantidade). Nenhum cliente conseguiria pagar: o carrinho recusaria toda tentativa. Reduza o sinal, use sinal percentual ou aumente os precos.';
+  }
+  return '';
+}
+
+/* ===== gerador ===== */
+function uGerar(){
+  /* a chave e os campos numericos se corrigem na tela ANTES de qualquer conferencia -- assim o
+     que o operador esta lendo e o que vai ser conferido e gerado */
+  uChaveAjustar();
+  if(fcAjustarTodos(U_NUMS))salvarEstado();
+  var cfg=uCfg();
+  var recusa=uRecusa(cfg);
+  if(recusa){alert(recusa);return;}
+  $('u-out').value=uBloco(cfg);
+  uPreview(true);
+}
+
+/* Fonte unica do bloco entregue, no padrao que a Contagem regressiva firmou e que o Slideshow
+   e o Leads seguiram: uGerar escreve o retorno na textarea e uPvMontar escreve o MESMO retorno
+   dentro do iframe da previa. Nao existe segunda formatacao em lugar nenhum -- e por isso que
+   a previa nao tem como divergir do que o operador vai colar. */
+function uBloco(cfg){
+  var m=cfg.m,usaPP=cfg.usaPP,usaPix=cfg.usaPix;
+  var client=escJs(cfg.client||'COLE_AQUI_SEU_CLIENT_ID');
+  var moeda=cfg.moeda,chave=cfg.chave,nomer=cfg.nomer,cidade=cfg.cidade;
+  var cod=escJs(cfg.cod||'PEDIDO');
+  var zap=cfg.zap,zapnum=cfg.zapnum,larg=cfg.larg,ppcor=cfg.ppcor;
+  var descpix=cfg.descpix,selprod=cfg.selprod;
+  var usaQtd=cfg.qtdLigada;
+  var usaSinal=cfg.sinal.ativo;
+  var usaResumo=cfg.resumo;
 
   /* Nome, descricao, opcional, cupom e validade sao texto livre e viram strings JS do array
      PRODUTOS/CUPONS: escJs. Uma descricao colada de um e-mail com comentario HTML fazia o
      carrinho inteiro sumir da pagina publicada, em silencio. No bloco entregue todos saem por
      textContent -- escHtml deixaria "&amp;" a vista do cliente. */
-  var prods=uProds.map(function(p){
+  var prods=cfg.prods.map(function(p){
     var ops=(p.ops||[]).map(function(o){
       var v=parseFloat(String(o.preco).replace(',','.'))||0;
-      return "{nome:'"+escJs(o.nome)+"', preco:"+v.toFixed(2)+"}";
+      return "{nome:'"+escJs(o.nome)+"', preco:"+v.toFixed(2)+(o.qtd?", qtd:true":"")+"}";
     }).join(', ');
     return "  {nome:'"+escJs(p.nome)+"', descricao:'"+escJs(p.desc||'')+"', preco:"+(parseFloat(p.preco)||0).toFixed(2)+",\n"+
-           "   selecaoOpcionais:'"+p.opsel+"', permitirNenhum:"+(p.opnenhum==='sim'?'true':'false')+",\n"+
+           "   selecaoOpcionais:'"+p.opsel+"', permitirNenhum:"+(p.opnenhum==='sim'?'true':'false')+(p.qtd?", quantidade:true":"")+",\n"+
            "   opcionais:["+ops+"]}";
   }).join(',\n');
-  var cps=uCps.map(function(cp){
+  var cps=cfg.cps.map(function(cp){
     var v=parseFloat(String(cp.valor).replace(',','.'))||0;
     return "  {codigo:'"+escJs(String(cp.codigo).trim().toUpperCase())+"', tipo:'"+cp.tipo+"', valor:"+v+", validade:'"+escJs(cp.validade||'')+"'}";
   }).join(',\n');
@@ -4114,6 +4494,20 @@ function uGerar(){
   c+='.fcuni input:checked+.fcu-mark{border-color:var(--fcu-destaque,#075E54);background:var(--fcu-destaque,#075E54)}\n';
   c+='.fcuni input:checked+.fcu-mark.rd:after{content:"";position:absolute;left:3px;top:3px;width:8px;height:8px;border-radius:50%;background:#fff}\n';
   c+='.fcuni input:checked+.fcu-mark.ck:after{content:"";position:absolute;left:4px;top:0;width:5px;height:10px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(40deg)}\n';
+  if(usaQtd){
+    c+='.fcuni .fcu-qtd{display:flex;align-items:center;gap:6px;flex-shrink:0}\n';
+    c+='.fcuni .fcu-qtd-b{border:1px solid #d8d2c4;border-radius:6px;background:#fff;color:inherit;width:26px;height:26px;padding:0;line-height:1;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit}\n';
+    c+='.fcuni .fcu-qtd-b:hover{border-color:var(--fcu-destaque,#075E54)}\n';
+    c+='.fcuni .fcu-qtd-v{min-width:22px;text-align:center;font-size:13px;font-weight:600}\n';
+  }
+  if(usaResumo){
+    c+='.fcuni .fcu-resumo-c{margin-top:16px;border-top:1px solid #eee;padding-top:12px}\n';
+    c+='.fcuni .fcu-resumo{width:100%;box-sizing:border-box;border:1px solid #ccc;border-radius:8px;padding:10px;font-size:11.5px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;line-height:1.55;background:#fafafa;color:#333;resize:vertical;height:150px;text-align:left;position:static;opacity:1;pointer-events:auto}\n';
+    c+='.fcuni .fcu-resumo-b{display:block;width:100%;box-sizing:border-box;margin-top:8px;border:none;border-radius:8px;background:var(--fcu-destaque,#075E54);color:#fff;font-size:14px;font-weight:600;padding:11px;cursor:pointer;font-family:inherit}\n';
+    c+='.fcuni .fcu-resumo-b:hover{filter:brightness(.92)}\n';
+    c+='.fcuni .fcu-resumo-ok{display:none;font-size:12px;color:#1e7e34;font-weight:600;margin-top:5px;text-align:center}\n';
+    c+='.fcuni .fcu-resumo-ok.on{display:block}\n';
+  }
   c+='.fcuni .fcu-cupom{margin:12px 0 2px}\n';
   c+='.fcuni .fcu-cupom-l{display:flex;gap:8px}\n';
   c+='.fcuni .fcu-cupom-l input[type="text"]{flex:1;min-width:0;border:1px solid #ccc;border-radius:8px;padding:9px 10px;font-size:14px;font-family:inherit;text-transform:uppercase;background:#fff;color:inherit;position:static;opacity:1;width:auto;height:auto;pointer-events:auto}\n';
@@ -4124,6 +4518,12 @@ function uGerar(){
   c+='.fcuni .fcu-desconto{display:none;justify-content:space-between;gap:10px;padding:6px 0;font-size:14px;color:#1e7e34;font-weight:600}\n';
   c+='.fcuni .fcu-desconto.on{display:flex}\n';
   c+='.fcuni .fcu-total{display:flex;justify-content:space-between;padding:12px 0 4px;border-top:2px solid var(--fcu-destaque,#075E54);font-size:17px;font-weight:700;color:var(--fcu-destaque,#075E54);margin-top:10px}\n';
+  if(usaSinal){
+    c+='.fcuni .fcu-sinal{display:flex;justify-content:space-between;gap:10px;padding:6px 0 0;font-size:16px;font-weight:700;color:var(--fcu-destaque,#075E54)}\n';
+    c+='.fcuni .fcu-saldo{display:flex;justify-content:space-between;gap:10px;padding:4px 0 0;font-size:13px;color:#777}\n';
+    c+='.fcuni .fcu-sinal-aviso{display:none;font-size:12px;font-weight:600;color:#c0392b;padding:7px 0 0;text-align:left}\n';
+    c+='.fcuni .fcu-sinal-aviso.on{display:block}\n';
+  }
   if(descpix>0){
     c+='.fcuni .fcu-pixlinha{display:none;justify-content:space-between;gap:10px;padding:4px 0 0;font-size:14px;color:#1e7e34;font-weight:700}\n';
     c+='.fcuni .fcu-pixlinha.on{display:flex}\n';
@@ -4175,13 +4575,28 @@ function uGerar(){
   c+='/* ===== PRODUTOS =====\n';
   c+='   Cada produto tem seus proprios opcionais.\n';
   c+="   selecaoOpcionais: 'unico' = o cliente escolhe 1 | 'multiplo' = pode marcar varios\n";
-  c+='   permitirNenhum: true = inclui a opcao "sem opcional" (so no modo unico) */\n';
+  if(usaQtd){
+    c+='   permitirNenhum: true = inclui a opcao "sem opcional" (so no modo unico)\n';
+    c+='   quantidade: true no produto, qtd: true no opcional = mostra o seletor de quantidade */\n';
+  }else{
+    c+='   permitirNenhum: true = inclui a opcao "sem opcional" (so no modo unico) */\n';
+  }
   c+='var PRODUTOS=[\n'+prods+'\n];\n';
-  c+="var SELECAO_PRODUTOS='"+selprod+"';   /* com 2+ produtos: 'unico' = escolhe 1 | 'multiplo' = pode somar varios */\n\n";
+  c+="var SELECAO_PRODUTOS='"+selprod+"';   /* com 2+ produtos: 'unico' = escolhe 1 | 'multiplo' = pode somar varios */\n";
+  if(usaQtd)c+='var QUANTIDADE_MAXIMA='+cfg.qtdmax+';   /* teto do seletor de quantidade; o seletor vai de 0 ate ele, e 0 = item nao escolhido */\n';
+  c+='\n';
   c+='/* ===== CUPONS DE DESCONTO ===== */\n';
   c+="/* tipo: 'pct_produto' = % sobre os produtos (sem opcionais) | 'pct_total' = % sobre tudo | 'fixo' = valor fixo\n";
   c+="   validade: 'AAAA-MM-DD' (vale ate o fim do dia) | '' = sem validade */\n";
   c+='var CUPONS=[\n'+(cps||'')+'\n];\n\n';
+  if(usaSinal){
+    c+='/* ===== COBRANCA DE SINAL (o saldo fica para a entrega) ===== */\n';
+    c+="var SINAL_TIPO='"+cfg.sinal.tipo+"';   /* 'pct' = percentual do total | 'fixo' = valor fixo */\n";
+    c+='var SINAL_VALOR='+cfg.sinal.valor+';   /* percentual do total (1 a 99) ou valor fixo, conforme SINAL_TIPO */\n';
+    c+='/* Ordem da conta: quantidade multiplica, o cupom incide sobre o total, e o sinal sai do\n';
+    c+='   total JA com o cupom. O desconto do Pix nao entra nesta conta: com sinal ligado ele\n';
+    c+='   nao e emitido, porque aplica-lo sobre o sinal seria desconto dobrado. */\n\n';
+  }
   if(descpix>0||m==='ambos'){
     c+='/* ===== DESCONTO PARA PAGAMENTO VIA PIX ===== */\n';
     c+='var DESCONTO_PIX='+descpix+';         /* percentual de desconto ao pagar via Pix; 0 = sem desconto (aplica sobre o total ja com cupom) */\n\n';
@@ -4193,18 +4608,25 @@ function uGerar(){
   }
   c+='/* ===== APARENCIA ===== */\n';
   c+="var LARGURA_CARRINHO='"+larg+"px';   /* largura maxima do carrinho, ex: '420px' ou '100%' */\n";
-  c+="var COR_DESTAQUE='"+corSegura('u-c1','#075E54')+"';          /* titulo, linha do total e botoes */\n";
-  c+="var COR_FUNDO='"+corSegura('u-c2','#ffffff')+"';             /* fundo do card */\n";
-  c+="var COR_TEXTO='"+corSegura('u-c3','#333333')+"';             /* texto geral */\n\n";
+  c+="var COR_DESTAQUE='"+cfg.c1+"';          /* titulo, linha do total e botoes */\n";
+  c+="var COR_FUNDO='"+cfg.c2+"';             /* fundo do card */\n";
+  c+="var COR_TEXTO='"+cfg.c3+"';             /* texto geral */\n\n";
   c+='/* ===== TEXTOS ===== */\n';
-  c+="var TXT_TITULO='"+escJs($('u-t1').value)+"';\n";
-  c+="var TXT_PRODUTOS='"+escJs($('u-t7').value)+"';   /* rotulo da lista, so aparece com 2+ produtos */\n";
-  c+="var TXT_OPCIONAIS='"+escJs($('u-t2').value)+"';\n";
-  c+="var TXT_TOTAL='"+escJs($('u-t3').value)+"';\n";
+  c+="var TXT_TITULO='"+escJs(cfg.t1)+"';\n";
+  c+="var TXT_PRODUTOS='"+escJs(cfg.t7)+"';   /* rotulo da lista, so aparece com 2+ produtos */\n";
+  c+="var TXT_OPCIONAIS='"+escJs(cfg.t2)+"';\n";
+  c+="var TXT_TOTAL='"+escJs(cfg.t3)+"';\n";
   c+="var TXT_SEM_OPCIONAL='Sem opcional';\n";
+  if(usaSinal){
+    c+="var TXT_SINAL='"+escJs(cfg.t8)+"';\n";
+    c+="var TXT_SALDO='"+escJs(cfg.t9)+"';\n";
+    c+="var TXT_SINAL_MAIOR='O sinal deste carrinho e maior que o total do pedido. Escolha mais itens, aumente a quantidade ou remova o cupom.';\n";
+    c+="var TXT_SINAL_ZERO='O sinal deste pedido arredonda para zero. Escolha mais itens ou aumente a quantidade.';\n";
+    c+="var TXT_SINAL_RECUSADO='pedido recusado';\n";
+  }
   if(usaPP){
-    c+="var TXT_SUCESSO='"+escJs($('u-t5').value)+"';\n";
-    c+="var TXT_ERRO='"+escJs($('u-t6').value)+"';\n";
+    c+="var TXT_SUCESSO='"+escJs(cfg.t5)+"';\n";
+    c+="var TXT_ERRO='"+escJs(cfg.t6)+"';\n";
     c+="var TXT_TOTAL_ZERO='Escolha ao menos um item: o pedido esta em zero.';\n";
   }
   if(usaPix){
@@ -4212,7 +4634,7 @@ function uGerar(){
       c+="var TXT_OU='ou pague com Pix';\n";
       c+="var TXT_OU_DESC='ou pague com Pix com {PCT}% de desconto';\n";
     }
-    c+="var TXT_BOTAO_PIX='"+escJs($('u-t4').value)+"';\n";
+    c+="var TXT_BOTAO_PIX='"+escJs(cfg.t4)+"';\n";
     c+="var TXT_INSTRUCAO='Abra o app do seu banco e pague pelo QR Code ou Pix Copia e Cola';\n";
     c+="var TXT_PIXVAL='Valor no Pix';\n";
     c+="var TXT_COPIAR='Copiar codigo Pix';\n";
@@ -4221,6 +4643,13 @@ function uGerar(){
     c+="var TXT_NOTA='Confira o nome do recebedor antes de confirmar o pagamento';\n";
   }
   if(descpix>0)c+="var TXT_PIX_ROTULO='Pagando via Pix';\n";
+  if(usaResumo){
+    c+="var TXT_RESUMO='"+escJs(cfg.t10)+"';\n";
+    c+="var TXT_RESUMO_BOTAO='Copiar o resumo';\n";
+    c+="var TXT_RESUMO_COPIADO='Resumo copiado!';\n";
+    c+="var TXT_RESUMO_SUBTOTAL='Subtotal';\n";
+    c+="var TXT_RESUMO_PEDIDO='Pedido';\n";
+  }
   c+="var TXT_CUPOM_ROTULO='Cupom de desconto';\n";
   c+="var TXT_CUPOM_BOTAO='Aplicar';\n";
   c+="var TXT_CUPOM_OK='Cupom aplicado!';\n";
@@ -4287,6 +4716,11 @@ function uGerar(){
   c+="h+='<div class=\"fcu-cupom\"><p class=\"fcu-rotulo fcu-cupom-t\"></p><div class=\"fcu-cupom-l\"><input type=\"text\"><button type=\"button\"></button></div><div class=\"fcu-cupom-msg\"></div></div>';\n";
   c+="h+='<div class=\"fcu-desconto\"><span class=\"fcu-desconto-t\"></span><span class=\"fcu-desconto-v\"></span></div>';\n";
   c+="h+='<div class=\"fcu-total\"><span class=\"fcu-total-t\"></span><span class=\"fcu-total-v\"></span></div>';\n";
+  if(usaSinal){
+    c+="h+='<div class=\"fcu-sinal\"><span class=\"fcu-sinal-t\"></span><span class=\"fcu-sinal-v\"></span></div>';\n";
+    c+="h+='<div class=\"fcu-saldo\"><span class=\"fcu-saldo-t\"></span><span class=\"fcu-saldo-v\"></span></div>';\n";
+    c+="h+='<div class=\"fcu-sinal-aviso\"></div>';\n";
+  }
   if(descpix>0)c+="h+='<div class=\"fcu-pixlinha\"><span class=\"fcu-pixlinha-t\"></span><span class=\"fcu-pixlinha-v\"></span></div>';\n";
   if(usaPP)c+="h+='<div class=\"fcu-botoes\"></div><div class=\"fcu-msg\"></div>';\n";
   if(usaPix){
@@ -4298,12 +4732,26 @@ function uGerar(){
     if(zap)c+="h+='<button type=\"button\" class=\"fcu-zap\"></button>';\n";
     c+="h+='<div class=\"fcu-nota\"></div></div>';\n";
   }
+  if(usaResumo){
+    c+="h+='<div class=\"fcu-resumo-c\"><p class=\"fcu-rotulo fcu-resumo-t\"></p><textarea class=\"fcu-resumo\" readonly></textarea>';\n";
+    c+="h+='<button type=\"button\" class=\"fcu-resumo-b\"></button><div class=\"fcu-resumo-ok\"></div></div>';\n";
+  }
   c+='raiz.innerHTML=h;\n\n';
   c+="raiz.querySelector('.fcu-titulo').textContent=TXT_TITULO;\n";
   c+="raiz.querySelector('.fcu-cupom-t').textContent=TXT_CUPOM_ROTULO;\n";
   c+="raiz.querySelector('.fcu-cupom-l button').textContent=TXT_CUPOM_BOTAO;\n";
   c+="raiz.querySelector('.fcu-total-t').textContent=TXT_TOTAL;\n";
+  if(usaResumo){
+    c+="raiz.querySelector('.fcu-resumo-t').textContent=TXT_RESUMO;\n";
+    c+="raiz.querySelector('.fcu-resumo-b').textContent=TXT_RESUMO_BOTAO;\n";
+    c+="raiz.querySelector('.fcu-resumo-ok').textContent=TXT_RESUMO_COPIADO;\n";
+  }
   c+="if(!CUPONS.length)raiz.querySelector('.fcu-cupom').style.display='none';\n";
+  if(usaSinal){
+    if(cfg.sinal.tipo==='pct')c+="raiz.querySelector('.fcu-sinal-t').textContent=TXT_SINAL+' ('+SINAL_VALOR+'%)';\n";
+    else c+="raiz.querySelector('.fcu-sinal-t').textContent=TXT_SINAL;\n";
+    c+="raiz.querySelector('.fcu-saldo-t').textContent=TXT_SALDO;\n";
+  }
   if(usaPix){
     c+="raiz.querySelector('.fcu-gerar').textContent=TXT_BOTAO_PIX;\n";
     c+="raiz.querySelector('.fcu-instrucao').textContent=TXT_INSTRUCAO;\n";
@@ -4325,7 +4773,30 @@ function uGerar(){
   c+='if(multiProd)rotProd.textContent=TXT_PRODUTOS;\n';
   c+="else rotProd.style.display='none';\n";
   c+="var listaProds=raiz.querySelector('.fcu-prods-l');\n";
-  c+='var blocos=[],itensProd=[];\n\n';
+  c+='var blocos=[],itensProd=[];\n';
+  if(usaQtd){
+    c+='var qtdsProd=[],qtdsOp=[],precosProd=[],precosOp=[];\n';
+    c+='function qtdProd(i){var q=qtdsProd[i];return (q==null)?1:q;}\n';
+    c+='function qtdOp(i,j){var a=qtdsOp[i];var q=a?a[j]:null;return (q==null)?1:q;}\n';
+    /* Um construtor so para os dois usos (produto e opcional): o seletor do produto e o do
+       opcional tem o mesmo comportamento, e duas copias divergiriam. */
+    c+='function fazQtd(inicial,aoMudar){\n';
+    c+="var cx=document.createElement('div');cx.className='fcu-qtd';\n";
+    c+='var atual=inicial;\n';
+    c+="var menos=document.createElement('button');menos.type='button';menos.className='fcu-qtd-b';menos.textContent='-';menos.setAttribute('aria-label','Diminuir a quantidade');\n";
+    c+="var vis=document.createElement('span');vis.className='fcu-qtd-v';vis.textContent=String(inicial);\n";
+    c+="var mais=document.createElement('button');mais.type='button';mais.className='fcu-qtd-b';mais.textContent='+';mais.setAttribute('aria-label','Aumentar a quantidade');\n";
+    c+='function por(n){\n';
+    c+='if(n<0)n=0;\n';
+    c+='if(n>QUANTIDADE_MAXIMA)n=QUANTIDADE_MAXIMA;\n';
+    c+='if(n===atual)return;\n';
+    c+='atual=n;vis.textContent=String(n);aoMudar(n);\n}\n';
+    c+="menos.addEventListener('click',function(){por(atual-1);});\n";
+    c+="mais.addEventListener('click',function(){por(atual+1);});\n";
+    c+='cx.appendChild(menos);cx.appendChild(vis);cx.appendChild(mais);\n';
+    c+='return cx;\n}\n';
+  }
+  c+='\n';
   c+='PRODUTOS.forEach(function(p,i){\n';
   c+="var bloco=document.createElement('div');bloco.className='fcu-prod';\n";
   c+="var linha=document.createElement('div');linha.className='fcu-prod-l';\n";
@@ -4347,7 +4818,12 @@ function uGerar(){
   c+='}else{\n';
   c+="var sp2=document.createElement('span');sp2.textContent=p.nome;linha.appendChild(sp2);\n";
   c+='}\n';
+  if(usaQtd){
+    c+='qtdsProd[i]=1;qtdsOp[i]=[];\n';
+    c+='if(p.quantidade)linha.appendChild(fazQtd(1,function(n){qtdsProd[i]=n;atualizar();}));\n';
+  }
   c+="var pr=document.createElement('span');pr.textContent=moedaFmt(p.preco);\n";
+  if(usaQtd)c+='precosProd[i]=p.quantidade?pr:null;\n';
   c+='linha.appendChild(pr);\n';
   c+='bloco.appendChild(linha);\n';
   c+='if(p.descricao){\n';
@@ -4372,20 +4848,30 @@ function uGerar(){
   c+="var mk2=document.createElement('span');mk2.className='fcu-mark '+(tipoOp==='checkbox'?'ck':'rd');\n";
   c+="var sp3=document.createElement('span');sp3.textContent=op.nome;\n";
   c+='lab2.appendChild(inp2);lab2.appendChild(mk2);lab2.appendChild(sp3);\n';
+  if(usaQtd){
+    c+='qtdsOp[i][j]=1;\n';
+    c+='if(op.qtd&&!op.nenhum)row.appendChild(fazQtd(1,function(n){qtdsOp[i][j]=n;atualizar();}));\n';
+  }
   c+="var pr2=document.createElement('span');pr2.textContent=op.nenhum?'':('+ '+moedaFmt(op.preco));\n";
+  if(usaQtd)c+='if(op.qtd&&!op.nenhum){precosOp[i]=precosOp[i]||[];precosOp[i][j]=pr2;}\n';
   c+='row.appendChild(lab2);row.appendChild(pr2);\n';
   c+='caixa.appendChild(row);\n});\n}\n';
   c+='bloco.appendChild(caixa);\n';
   c+='blocos.push(bloco);\n';
   c+='listaProds.appendChild(bloco);\n});\n\n';
   c+='function produtoAtivo(i){\n';
+  /* Quantidade zero equivale a item nao escolhido: sai da conta, do resumo, da descricao do
+     PayPal e da mensagem do WhatsApp. Barrar aqui, e nao em cada soma, e o que garante que os
+     quatro concordem. O seletor continua a vista para o cliente poder voltar a 1. */
+  if(usaQtd)c+='if(qtdProd(i)<1)return false;\n';
   c+='if(!multiProd)return true;\n';
   c+='var el=raiz.querySelector(\'input[name="fcu-prod"][value="\'+i+\'"]\');\n';
   c+='return !!(el&&el.checked);\n}\n\n';
   c+='var cupomAtivo=null;\n\n';
   c+='function somaProdutos(){\n';
   c+='var t=0;\n';
-  c+='PRODUTOS.forEach(function(p,i){if(produtoAtivo(i))t+=p.preco;});\n';
+  if(usaQtd)c+='PRODUTOS.forEach(function(p,i){if(produtoAtivo(i))t+=p.preco*qtdProd(i);});\n';
+  else c+='PRODUTOS.forEach(function(p,i){if(produtoAtivo(i))t+=p.preco;});\n';
   c+='return t;\n}\n\n';
   c+='function subtotal(){\n';
   c+='var t=somaProdutos();\n';
@@ -4394,7 +4880,8 @@ function uGerar(){
   c+='var sel=raiz.querySelectorAll(\'input[name="fcu-op-\'+i+\'"]:checked\');\n';
   c+='for(var k=0;k<sel.length;k++){\n';
   c+='var op=itensProd[i][parseInt(sel[k].value,10)];\n';
-  c+='if(op&&!op.nenhum)t+=op.preco;\n}\n});\n';
+  if(usaQtd)c+='if(op&&!op.nenhum)t+=op.preco*qtdOp(i,parseInt(sel[k].value,10));\n}\n});\n';
+  else c+='if(op&&!op.nenhum)t+=op.preco;\n}\n});\n';
   c+='return t;\n}\n\n';
   c+='function descontoAtual(){\n';
   c+='if(!cupomAtivo)return 0;\n';
@@ -4404,11 +4891,41 @@ function uGerar(){
   c+='else d=cupomAtivo.valor;\n';
   c+='if(d>s)d=s;\nif(d<0)d=0;\nreturn d;\n}\n\n';
   c+='function total(){\nreturn subtotal()-descontoAtual();\n}\n\n';
+  if(usaSinal){
+    c+='/* O sinal sai do total JA com o cupom aplicado. Arredondado a duas casas aqui, uma vez\n';
+    c+='   so: e este numero que vai para o PayPal, para o QR do Pix, para a tela e para a\n';
+    c+='   mensagem do WhatsApp -- quatro leituras do MESMO valor, sem recalculo em nenhuma. */\n';
+    c+='function sinalAgora(){\n';
+    c+="var v=(SINAL_TIPO==='fixo')?SINAL_VALOR:(total()*SINAL_VALOR/100);\n";
+    c+='return Math.round(v*100)/100;\n}\n\n';
+    c+='function saldoDepois(){\n';
+    c+='var d=total()-sinalAgora();\n';
+    c+='if(d<0)d=0;\n';
+    c+='return Math.round(d*100)/100;\n}\n\n';
+    c+='/* UMA recusa so para o sinal, e ela devolve o MOTIVO: a linha vermelha do carrinho, o\n';
+    c+='   clique do PayPal, o botao do Pix e o resumo copiavel leem daqui. Com quatro testes\n';
+    c+='   separados, um poderia discordar dos outros -- e foi o que aconteceu com o resumo, que\n';
+    c+='   imprimia "Total 250 / Sinal 700" enquanto as duas pontas de pagamento recusavam.\n';
+    c+='   Sinal maior que o total e recusado, nao aparado: aparar cobraria um valor que o\n';
+    c+='   operador nao configurou. Sinal que arredonda para zero tambem e recusado -- e o\n';
+    c+='   espelho da guarda de total zero, que o pedido inteiro ja tinha. Com o pedido em zero\n';
+    c+='   quem avisa e a recusa de total zero: dois avisos ao mesmo tempo se esconderiam. */\n';
+    c+='function sinalRecusa(){\n';
+    c+='if(total()<0.01)return \'\';\n';
+    c+='if(sinalAgora()>total())return TXT_SINAL_MAIOR;\n';
+    c+='if(sinalAgora()<0.01)return TXT_SINAL_ZERO;\n';
+    c+="return '';\n}\n\n";
+  }
   if(descpix>0){
     c+='function totalPix(){\n';
     c+='var t=total();\n';
     c+='if(DESCONTO_PIX>0)t=t*(1-DESCONTO_PIX/100);\n';
     c+='return Math.round(t*100)/100;\n}\n\n';
+  }else if(usaPix&&usaSinal){
+    /* O Pix cobra o SINAL. O desconto do Pix nao entra: com sinal ligado ele nem chega a ser
+       emitido (a uCfg ja o zera), porque aplica-lo sobre o sinal seria desconto dobrado -- o
+       sinal ja sai de um total que pode ter cupom. */
+    c+='function totalPix(){return sinalAgora();}\n\n';
   }else if(usaPix){
     c+='function totalPix(){return Math.round(total()*100)/100;}\n\n';
   }
@@ -4427,10 +4944,32 @@ function uGerar(){
   c+='function atualizar(){\n';
   c+='PRODUTOS.forEach(function(p,i){\n';
   c+="var caixa=blocos[i].querySelector('.fcu-ops');\n";
-  c+="if(caixa)caixa.style.display=produtoAtivo(i)?'block':'none';\n});\n";
+  c+="if(caixa)caixa.style.display=produtoAtivo(i)?'block':'none';\n";
+  /* O preco da linha passa a mostrar o subtotal do item (preco x quantidade). Mostrar o preco
+     unitario ao lado de um seletor em 3 obrigaria o cliente a fazer a conta de cabeca para
+     conferir o total -- e o total e o unico numero que ele nao pode conferir de outro jeito. */
+  if(usaQtd){
+    c+='if(precosProd[i])precosProd[i].textContent=moedaFmt(p.preco*qtdProd(i));\n';
+    c+='var pop=precosOp[i];\n';
+    c+='if(pop){for(var z=0;z<pop.length;z++){if(pop[z])pop[z].textContent=\'+ \'+moedaFmt(itensProd[i][z].preco*qtdOp(i,z));}}\n';
+  }
+  c+='});\n';
   c+="raiz.querySelector('.fcu-total-v').textContent=moedaFmt(total());\n";
+  if(usaSinal){
+    c+="raiz.querySelector('.fcu-sinal-v').textContent=moedaFmt(sinalAgora());\n";
+    c+="raiz.querySelector('.fcu-saldo-v').textContent=moedaFmt(saldoDepois());\n";
+    c+='var rec=sinalRecusa();\n';
+    c+="raiz.querySelector('.fcu-sinal-aviso').textContent=rec;\n";
+    c+="raiz.querySelector('.fcu-sinal-aviso').className='fcu-sinal-aviso'+(rec?' on':'');\n";
+  }
   if(descpix>0)c+="raiz.querySelector('.fcu-pixlinha-v').textContent=moedaFmt(totalPix());\n";
   c+='linhaDesconto();\n';
+  if(usaResumo){
+    /* o resumo e reescrito a cada mudanca, como o total: um resumo que so se atualiza no
+       clique de copiar seria um numero velho com cara de numero atual. */
+    c+="raiz.querySelector('.fcu-resumo').value=textoResumo();\n";
+    c+="raiz.querySelector('.fcu-resumo-ok').className='fcu-resumo-ok';\n";
+  }
   if(usaPix)c+='esconderPix();\n';
   c+='}\n';
   c+='atualizar();\n\n';
@@ -4452,9 +4991,65 @@ function uGerar(){
   c+='else{cupomAtivo=achado;msgCupom(TXT_CUPOM_OK,true);}\n';
   c+='atualizar();\n}\n';
   c+="raiz.querySelector('.fcu-cupom-l button').addEventListener('click',aplicarCupom);\n\n";
+  if(usaResumo){
+    /* Enumeracao UNICA dos itens escolhidos. Ela alimenta o resumo E a mensagem do WhatsApp
+       (ver mais abaixo): sao dois textos com formatos diferentes, mas uma leitura so do que o
+       cliente marcou -- com dois lacos, um poderia esquecer a regra da quantidade zero e as
+       duas listas passariam a discordar sem ninguem perceber. */
+    c+='function itensEscolhidos(){\n';
+    c+='var lista=[];\n';
+    c+='PRODUTOS.forEach(function(p,i){\n';
+    c+='if(!produtoAtivo(i))return;\n';
+    if(usaQtd)c+="lista.push({rotulo:p.nome+(p.quantidade?(' x'+qtdProd(i)):''),valor:p.preco*qtdProd(i),opcional:false});\n";
+    else c+='lista.push({rotulo:p.nome,valor:p.preco,opcional:false});\n';
+    c+='var sel=raiz.querySelectorAll(\'input[name="fcu-op-\'+i+\'"]:checked\');\n';
+    c+='for(var k=0;k<sel.length;k++){\n';
+    c+='var j=parseInt(sel[k].value,10);\n';
+    c+='var op=itensProd[i][j];\n';
+    c+='if(!op||op.nenhum)continue;\n';
+    if(usaQtd){
+      c+='if(qtdOp(i,j)<1)continue;\n';
+      c+="lista.push({rotulo:op.nome+(op.qtd?(' x'+qtdOp(i,j)):''),valor:op.preco*qtdOp(i,j),opcional:true});\n";
+    }else{
+      c+='lista.push({rotulo:op.nome,valor:op.preco,opcional:true});\n';
+    }
+    c+='}\n});\n';
+    c+='return lista;\n}\n\n';
+
+    c+='function textoResumo(){\n';
+    c+='var L=[],li=itensEscolhidos(),z;\n';
+    c+="L.push(TXT_RESUMO_PEDIDO+' '+CODIGO_PEDIDO);\n";
+    c+="for(z=0;z<li.length;z++)L.push((li[z].opcional?'   + ':'- ')+li[z].rotulo+'  '+moedaFmt(li[z].valor));\n";
+    c+="if(cupomAtivo)L.push(TXT_RESUMO_SUBTOTAL+': '+moedaFmt(subtotal()));\n";
+    c+="if(cupomAtivo)L.push(TXT_DESCONTO+' ('+cupomAtivo.codigo+'): - '+moedaFmt(descontoAtual()));\n";
+    c+="L.push(TXT_TOTAL+': '+moedaFmt(total()));\n";
+    if(usaSinal){
+      /* pedido que as duas pontas de pagamento recusam nao pode sair do resumo como pedido
+         valido: era o unico elemento visivel que nao respeitava a recusa. */
+      c+='var recR=sinalRecusa();\n';
+      c+='if(recR){\n';
+      c+="L.push(TXT_SINAL_RECUSADO.toUpperCase()+': '+recR);\n";
+      c+='}else{\n';
+      c+="L.push(TXT_SINAL+': '+moedaFmt(sinalAgora()));\n";
+      c+="L.push(TXT_SALDO+': '+moedaFmt(saldoDepois()));\n";
+      c+='}\n';
+    }
+    if(descpix>0)c+="L.push(TXT_PIX_ROTULO+' (-'+DESCONTO_PIX+'%): '+moedaFmt(totalPix()));\n";
+    c+="return L.join('\\n');\n}\n\n";
+
+    c+='function copiarResumo(){\n';
+    c+="var ta=raiz.querySelector('.fcu-resumo');\n";
+    c+='function ok(){\n';
+    c+="raiz.querySelector('.fcu-resumo-ok').className='fcu-resumo-ok on';\n}\n";
+    c+='if(navigator.clipboard&&navigator.clipboard.writeText){\n';
+    c+="navigator.clipboard.writeText(ta.value).then(ok,function(){ta.select();document.execCommand('copy');ok();});\n";
+    c+="}else{ta.select();document.execCommand('copy');ok();}\n}\n";
+    c+="raiz.querySelector('.fcu-resumo-b').addEventListener('click',copiarResumo);\n\n";
+  }
   c+='function nomesSelecionados(){\n';
   c+='var ns=[];\n';
-  c+='PRODUTOS.forEach(function(p,i){if(produtoAtivo(i))ns.push(p.nome);});\n';
+  if(usaQtd)c+="PRODUTOS.forEach(function(p,i){if(produtoAtivo(i))ns.push(p.nome+(p.quantidade?(' x'+qtdProd(i)):''));});\n";
+  else c+='PRODUTOS.forEach(function(p,i){if(produtoAtivo(i))ns.push(p.nome);});\n';
   c+='return ns;\n}\n\n';
   if(usaPP){
     c+='function msg(txt,ok){\n';
@@ -4473,11 +5068,14 @@ function uGerar(){
     c+='   nenhuma pista de que bastava marcar um item ou tirar o cupom. */\n';
     c+='onClick:function(data,actions){\n';
     c+='if(total()<0.01){msg(TXT_TOTAL_ZERO,false);return actions.reject();}\n';
+    if(usaSinal)c+='var rec=sinalRecusa();\nif(rec){msg(rec,false);return actions.reject();}\n';
     c+='return actions.resolve();\n},\n';
     c+='createOrder:function(data,actions){\n';
     c+='return actions.order.create({purchase_units:[{\n';
-    c+='amount:{value:total().toFixed(2),currency_code:MOEDA},\n';
-    c+="description:(nomesSelecionados().join(' + ')+' (cod: '+CODIGO_PEDIDO+(cupomAtivo?(' cupom:'+cupomAtivo.codigo):'')+')').substring(0,127),\n";
+    if(usaSinal)c+='amount:{value:sinalAgora().toFixed(2),currency_code:MOEDA},\n';
+    else c+='amount:{value:total().toFixed(2),currency_code:MOEDA},\n';
+    if(usaSinal)c+="description:(nomesSelecionados().join(' + ')+' (sinal - cod: '+CODIGO_PEDIDO+(cupomAtivo?(' cupom:'+cupomAtivo.codigo):'')+')').substring(0,127),\n";
+    else c+="description:(nomesSelecionados().join(' + ')+' (cod: '+CODIGO_PEDIDO+(cupomAtivo?(' cupom:'+cupomAtivo.codigo):'')+')').substring(0,127),\n";
     c+='custom_id:CODIGO_PEDIDO\n}]});\n},\n';
     c+='onApprove:function(data,actions){\n';
     c+='return actions.order.capture().then(function(){msg(TXT_SUCESSO,true);});\n},\n';
@@ -4491,7 +5089,14 @@ function uGerar(){
     c+="var payloadAtual='';\n\n";
     c+='function gerarPix(){\n';
     c+='var v=totalPix();\n';
-    c+="if(v<0.01){alert('O valor do pedido precisa ser maior que zero.');return;}\n";
+    if(usaSinal){
+      /* com sinal, o valor do Pix e o sinal: um sinal fixo continuaria acima de 0.01 com o
+         pedido vazio, entao quem manda na recusa e o TOTAL, nao o valor a cobrar. */
+      c+="if(total()<0.01){alert('O valor do pedido precisa ser maior que zero.');return;}\n";
+      c+='var rec=sinalRecusa();\nif(rec){alert(rec);return;}\n';
+    }else{
+      c+="if(v<0.01){alert('O valor do pedido precisa ser maior que zero.');return;}\n";
+    }
     c+='payloadAtual=montarPayload(v);\n';
     c+="var qr=raiz.querySelector('.fcu-qr');\n";
     c+="qr.innerHTML='';\n";
@@ -4514,18 +5119,40 @@ function uGerar(){
     if(zap){
       c+='function avisarZap(){\n';
       c+='var partes=[];\n';
-      c+="partes.push('Ola! Acabei de pagar via Pix.');\n";
+      if(usaSinal)c+="partes.push('Ola! Acabei de pagar o SINAL via Pix.');\n";
+      else c+="partes.push('Ola! Acabei de pagar via Pix.');\n";
       c+="partes.push('Pedido cod: *'+CODIGO_PEDIDO+'*');\n";
+      if(usaResumo){
+      /* uma leitura so do que o cliente marcou, compartilhada com o resumo copiavel */
+      c+='var li=itensEscolhidos(),z;\n';
+      c+="for(z=0;z<li.length;z++)partes.push(li[z].opcional?('   + '+li[z].rotulo+' '+moedaFmt(li[z].valor)):('- *'+li[z].rotulo+'* '+moedaFmt(li[z].valor)));\n";
+      }else{
       c+='PRODUTOS.forEach(function(p,i){\n';
       c+='if(!produtoAtivo(i))return;\n';
-      c+="partes.push('- *'+p.nome+'* '+moedaFmt(p.preco));\n";
+      if(usaQtd)c+="partes.push('- *'+p.nome+'*'+(p.quantidade?(' x'+qtdProd(i)):'')+' '+moedaFmt(p.preco*qtdProd(i)));\n";
+      else c+="partes.push('- *'+p.nome+'* '+moedaFmt(p.preco));\n";
       c+='var sel=raiz.querySelectorAll(\'input[name="fcu-op-\'+i+\'"]:checked\');\n';
       c+='for(var k=0;k<sel.length;k++){\n';
-      c+='var op=itensProd[i][parseInt(sel[k].value,10)];\n';
-      c+="if(op&&!op.nenhum)partes.push('   + '+op.nome+' '+moedaFmt(op.preco));\n}\n});\n";
+      if(usaQtd){
+        c+='var jz=parseInt(sel[k].value,10);\n';
+        c+='var op=itensProd[i][jz];\n';
+        /* opcional zerado sai da mensagem pelo mesmo motivo que o produto zerado: a quantidade
+           zero equivale a nao ter escolhido o item. */
+        c+="if(op&&!op.nenhum&&qtdOp(i,jz)>0)partes.push('   + '+op.nome+(op.qtd?(' x'+qtdOp(i,jz)):'')+' '+moedaFmt(op.preco*qtdOp(i,jz)));\n}\n});\n";
+      }else{
+        c+='var op=itensProd[i][parseInt(sel[k].value,10)];\n';
+        c+="if(op&&!op.nenhum)partes.push('   + '+op.nome+' '+moedaFmt(op.preco));\n}\n});\n";
+      }
+      }
       c+="if(cupomAtivo)partes.push('Cupom: '+cupomAtivo.codigo);\n";
       if(descpix>0)c+="if(DESCONTO_PIX>0)partes.push('Desconto Pix: -'+DESCONTO_PIX+'%');\n";
-      c+="partes.push('Valor pago: *'+moedaFmt(totalPix())+'*');\n";
+      if(usaSinal){
+        c+="partes.push('Total do pedido: '+moedaFmt(total()));\n";
+        c+="partes.push('Sinal pago agora: *'+moedaFmt(sinalAgora())+'*');\n";
+        c+="partes.push(TXT_SALDO+': *'+moedaFmt(saldoDepois())+'*');\n";
+      }else{
+        c+="partes.push('Valor pago: *'+moedaFmt(totalPix())+'*');\n";
+      }
       c+="var url='https://wa.me/'+ZAP_NUMERO+'?text='+encodeURIComponent(partes.join('\\n'));\n";
       c+="window.open(url,'_blank');\n}\n";
       c+="raiz.querySelector('.fcu-zap').addEventListener('click',avisarZap);\n";
@@ -4535,7 +5162,7 @@ function uGerar(){
   c+="if(document.getElementById('fcuni'))montar();\n";
   c+="else document.addEventListener('DOMContentLoaded',montar);\n";
   c+='})();\n</scr'+'ipt>';
-  $('u-out').value=c;
+  return c;
 }
 
 /* ============================================================
@@ -6024,7 +6651,9 @@ prep('Barra de abas','',function(){
   liga('aba-slide',function(){trocarAba('slide');sPreview(true);});
   liga('aba-leads',function(){trocarAba('leads');lPreview(true);});
   liga('aba-tidy',function(){trocarAba('tidy');});
-  liga('aba-uni',function(){trocarAba('uni');});
+  /* enquanto o painel esta escondido o box mede 0: a previa e remontada ao abrir a aba, ja com
+     a largura real da coluna, senao o iframe nasceria na largura de emergencia. */
+  liga('aba-uni',function(){trocarAba('uni');uPreview(true);});
   liga('aba-bor',function(){trocarAba('bor');});
   /* enquanto o painel esta escondido o box mede 0: a previa e remontada ao abrir a aba, ja com
      a largura real da coluna, senao o iframe nasceria na largura de emergencia. */
@@ -6095,12 +6724,18 @@ prep('Checkout','uni',function(){
   liga('u-prod-cancelar',uProdLimpar);
   liga('u-cp-add',uCpAdd);
   liga('u-gerar',uGerar);
+  liga('u-atualizar',function(){uPreview(true);});
+  /* a previa roda o bloco gerado e os numeros desta tabela chegam nele: o 'blur' redesenha com
+     o valor ja preso -- imediato, porque 'blur' e um gesto deliberado e nao uma tecla */
+  fcLigarFaixa(U_NUMS,function(){uPreview(true);});
+  liga('u-pv-desk',function(){uPvModoSet('desk');});
+  liga('u-pv-cel',function(){uPvModoSet('cel');});
   liga('u-copy',function(){copiar('u-out','u-cop');});
   parearCor('u-c1');parearCor('u-c2');parearCor('u-c3');
   var el=$('u-chave');
   if(el){
     el.addEventListener('change',function(){if(uChaveAjustar())salvarEstado();});
-    el.addEventListener('blur',function(){if(uChaveAjustar()){salvarEstado();uPreview();}});
+    el.addEventListener('blur',function(){if(uChaveAjustar()){salvarEstado();uPreview(true);}});
   }
 });
 prep('Bordas com efeito','bor',function(){
@@ -6150,7 +6785,7 @@ prep('Correcao a vista das cores livres','leads uni',function(){
     var t=$(par[0]+'-t');if(!t)return;
     function redesenhar(){
       salvarEstado();
-      if(par[0].indexOf('l-')===0){lBtnPreview();lPreview(true);}else{uPreview();}
+      if(par[0].indexOf('l-')===0){lBtnPreview();lPreview(true);}else{uPreview(true);}
     }
     t.addEventListener('change',function(){if(corAjustar(par[0],par[1]))salvarEstado();});
     t.addEventListener('blur',function(){if(corAjustar(par[0],par[1]))redesenhar();});
@@ -6204,10 +6839,17 @@ prep('Agendamento TidyCal','tidy',function(){
   tArqToggle();
 },'desenhar a aba com o estado restaurado');
 prep('Checkout','uni',function(){
+  /* estado gravado antes desta regra pode trazer numero fora da faixa: prende na carga, para o
+     campo nunca exibir algo diferente do que uCfg vai usar. */
+  if(fcAjustarTodos(U_NUMS))salvarEstado();
   uProdRender();
   uCpRender();
   uToggles();
-  uPreview();
+  /* A previa NAO e montada aqui. Montar na carga executaria o bloco gerado -- inclusive o
+     pedido do script do QR Code -- em toda abertura da ferramenta, mesmo para quem nunca abre
+     esta aba, e ainda com o painel escondido (clientWidth zero, largura de emergencia). A
+     montagem fica para o clique da aba, que ja chama uPreview(true). */
+  uPvBotoes();
 },'desenhar a aba com o estado restaurado');
 prep('Bordas com efeito','bor',function(){
   /* mesmo motivo do c-mob e das cores livres: estado gravado antes desta regra pode trazer
