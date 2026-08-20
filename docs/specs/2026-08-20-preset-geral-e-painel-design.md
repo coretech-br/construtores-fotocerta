@@ -197,6 +197,8 @@ O número está no link nos dois casos. O importador conhece as duas pastas.
 ### Decisões
 
 - **Tamanho:** importar em **1400 px** por padrão, com opção de trazer o original. O slideshow tem 900 px de largura; originais de vários megabytes deixam a página lenta sem ganho visível.
+
+  > **Corrigido na implementação (20/08/2026): esta decisão partia de uma premissa falsa.** Medidas as 104 fotos das duas galerias, o storage **já entrega tudo com 1200 px de largura** (85 fotos 1200×~800, 19 retratos 1200×~1800), de 150 a 610 KB — não há original de vários megabytes. Pedir 1400 px ao redimensionador funciona (responde 200, devolve 1400×933), mas **estica** a foto de 1200: nenhum detalhe a mais e, em 3 das 5 fotos medidas, arquivo **maior** que o original. O construído oferece **o que a galeria entrega (1200 px, padrão)** e uma redução real para **900 px** — a largura padrão do slideshow, 15% a 55% menos bytes por foto. Medido também que o `?t=` do original não atrapalha ao ser embrulhado no redimensionador.
 - **Ordem:** preservada como aparece na fonte.
 - **Duplicatas:** removidas após desembrulhar.
 - **Conferência antes de aplicar:** mostra quantas fotos encontrou e de qual galeria, e o operador confirma. Se encontrar zero, diz o motivo provável (link e fonte de galerias diferentes).
