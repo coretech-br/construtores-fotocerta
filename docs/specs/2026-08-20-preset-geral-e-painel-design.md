@@ -80,6 +80,10 @@ Justificativa do padrão: "fora" falha de forma **visível** (falta um bloco, el
 
 ### R3 — Cópia com marca de origem, nunca atalho
 
+> **Construído na fase 2 (20/08/2026), o que a fase 3 pode consumir.** Os presets de aba existem nas seis abas, com mecânica única (a das Bordas foi absorvida, não duplicada). Cada preset é `{nome, carimbo, valores}`, gravado em `<pref>.presets` dentro do fragmento da própria aba. `carimbo` é a data de modificação em milissegundos — **0** quando o preset veio do formato antigo das Bordas (data desconhecida, valor estável) — e **não avança** quando se regrava o mesmo preset com valores iguais, para não gerar aviso falso de "mudou depois". A comparação de dois conjuntos de valores da mesma aba é `fcValoresIguais(a, b)`, sobre a serialização canônica `fcCanon` (chaves ordenadas, `undefined` tratado como ausente), imune à ordem em que as chaves foram gravadas. Os valores de um preset são o fragmento do `coleta()` da aba **menos** a biblioteca e menos os campos declarados em `fora` (hoje só `b.consol`). Os campos de contato/pagamento estão declarados em `operacionais` de cada aba (`[chave, rótulo]`) — é a lista que a exportação "sem dados" da fase 4 precisa limpar e a que o aviso de divergência do R1 precisa comparar.
+
+
+
 **Decisão:** o preset geral guarda **os valores** (cópia), e anota de onde vieram: `origem: {preset, carimbo}`.
 
 Por que não ponteiro: editar um preset de aba mudaria em silêncio todas as campanhas que o usam, e apagá-lo quebraria os presets gerais — problema que a consolidação do código 1 das Bordas já teve de tratar explicitamente.
