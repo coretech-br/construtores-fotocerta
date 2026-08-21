@@ -1474,7 +1474,7 @@
         </div>
         <div id="u-pv-box"></div>
       </div>
-      <p class="ajuda">A prévia <b>roda o código gerado de verdade</b>: é o mesmo bloco que sai na saída ao lado, executando dentro de um quadro isolado — dá para marcar produtos, mudar quantidade, aplicar cupom, gerar o Pix e ler o Copia e Cola. Ela também passa pelas <b>mesmas recusas</b> do botão "Gerar código": enquanto a configuração for recusada, o quadro mostra a recusa e o motivo, nunca um carrinho.<br><br><b>O que a prévia prova sobre o PayPal:</b> o botão é um desenho, mas logo abaixo dele a prévia mostra o <b>valor que iria na ordem</b> e a <b>decisão do clique</b> (segue para o PayPal ou recusa, com o motivo) — os dois medidos chamando o <code>createOrder</code> e o <code>onClick</code> do próprio bloco, a cada mudança do carrinho. É por isso que o valor do sinal e as recusas do lado PayPal são verificáveis aqui sem baixar o SDK e sem mandar seu Client ID para fora.<br><br><b>O que ela ainda não prova:</b> o que depende da resposta do PayPal — a janela de pagamento, a captura e as mensagens de sucesso e de erro que vêm dela; o QR Code é real, mas depende da biblioteca do cdnjs (sem internet ele some e só o Copia e Cola aparece); o quadro não carrega o CSS do tema do site; e o botão "Já paguei" abre o WhatsApp de verdade se você clicar.</p>
+      <p class="ajuda">A prévia <b>roda o código gerado de verdade</b>: é o mesmo bloco que sai na saída ao lado, executando dentro de um quadro isolado — dá para marcar produtos, mudar quantidade, aplicar cupom, gerar o Pix e ler o Copia e Cola. Ela também passa pelas <b>mesmas recusas</b> do botão "Gerar código": enquanto a configuração for recusada, o quadro mostra a recusa e o motivo, nunca um carrinho.<br><br><b>O que a prévia prova sobre o PayPal:</b> o botão é um desenho, mas logo abaixo dele a prévia mostra o <b>valor que iria na ordem</b> e a <b>decisão do clique</b> (segue para o PayPal ou recusa, com o motivo) — os dois medidos chamando o <code>createOrder</code> e o <code>onClick</code> do próprio bloco, a cada mudança do carrinho. É por isso que o valor do sinal e as recusas do lado PayPal são verificáveis aqui sem baixar o SDK e sem mandar seu Client ID para fora.<br><br><b>O que ela ainda não prova:</b> o que depende da resposta do PayPal — a janela de pagamento, a captura e as mensagens de sucesso e de erro que vêm dela; o QR Code é real, mas depende da biblioteca do cdnjs (sem internet ele some e só o Copia e Cola aparece); o quadro não carrega o CSS do tema do site; e o botão "Já paguei" <b>não abre o WhatsApp aqui</b> — o quadro desliga a abertura de abas, e avisa em vermelho se não conseguir desligar.</p>
     </div>
     <div>
       <div class="saida">
@@ -2186,7 +2186,7 @@
       </div>
       <div id="p-pv-box"></div>
       </div>
-      <p class="ajuda">A prévia roda o código gerado de verdade: é o mesmo bloco que sai na saída ao lado, executando dentro de um quadro isolado que recebe um <b>endereço simulado</b> com os parâmetros da cobrança da seção 3. Os três botões acima trocam esse endereço — em <b>Código adulterado</b> um dígito do código Pix é trocado, exatamente como aconteceria se alguém mexesse no link. O que ainda difere da página publicada: o QR Code é desenhado por uma biblioteca baixada da internet, então no quadro ele só aparece depois que ela carrega; o botão do PayPal não é o botão de verdade (o SDK não roda na prévia) e sai como desenho; o botão “Já paguei” não abre o WhatsApp aqui; e o quadro não carrega o CSS do tema do site.</p>
+      <p class="ajuda">A prévia roda o código gerado de verdade: é o mesmo bloco que sai na saída ao lado, executando dentro de um quadro isolado que recebe um <b>endereço simulado</b> com os parâmetros da cobrança da seção 3. Os três botões acima trocam esse endereço — em <b>Código adulterado</b> um dígito do código Pix é trocado, exatamente como aconteceria se alguém mexesse no link. O que ainda difere da página publicada: o QR Code é desenhado por uma biblioteca baixada da internet, então no quadro ele só aparece depois que ela carrega; o botão do PayPal não é o botão de verdade (o SDK não roda na prévia) e sai como desenho; o botão “Já paguei” não abre o WhatsApp aqui (o quadro desliga a abertura de abas, e avisa em vermelho se não conseguir desligar); e o quadro não carrega o CSS do tema do site.</p>
     </div>
     <div>
       <div class="saida">
@@ -2449,7 +2449,7 @@
         <input type="number" id="m-imgdet" value="1000" min="400" max="1600" step="20">
         <p class="ajuda" id="m-peso" style="display:none"></p>
         <p class="ajuda"><b>Por que isto é um campo e não um detalhe.</b> As fotos do storage da Alboom saem todas com 1200 px de largura e de <b>157 a 868 KB</b> cada (medido). Cinquenta delas numa grade seriam dezenas de megabytes. A página pede cada foto ao <b>redimensionador da Alboom</b> na largura escolhida aqui, e só pede a foto grande quando alguém abre o cartão de detalhe.</p>
-        <p class="ajuda alerta"><b>Foto hospedada fora do storage da Alboom não encolhe.</b> O redimensionador é um serviço da Alboom sobre o storage dela: uma foto de outro servidor vai <b>inteira</b> para a vitrine. O cadastro avisa quando isso acontece, e na lista do catálogo essas linhas aparecem com o servidor em destaque.</p>
+        <p class="ajuda alerta"><b>Foto que não passa pelo redimensionador não encolhe.</b> O redimensionador é um serviço da Alboom sobre o storage dela, e só alcança endereços completos em <code>storage.alboom.ninja</code> ou <code>alfred.alboompro.com</code>. Qualquer outra — outro servidor, ou um caminho do próprio site como <code>/fotos/promo.jpg</code> — vai <b>inteira</b> para a vitrine. O cadastro avisa quando isso acontece, e na lista do catálogo essas linhas aparecem com a origem em destaque. Quem decide é a <b>mesma função</b> que roda dentro do código gerado, então o aviso não tem como discordar da página publicada.</p>
       </fieldset>
     </div>
   </div>
@@ -2470,7 +2470,7 @@
         <label for="m-t7">Botão de adicionar ao carrinho</label>
         <input type="text" id="m-t7" value="Adicionar ao carrinho">
         <label for="m-t11">Botão de voltar à vitrine</label>
-        <input type="text" id="m-t11" value="← Voltar à vitrine">
+        <input type="text" id="m-t11" value="Voltar para a vitrine">
         <label for="m-t4">Botão do Pix</label>
         <input type="text" id="m-t4" value="Pagar com Pix">
         <label for="m-t8">Rótulo do sinal</label>
@@ -2478,11 +2478,11 @@
         <label for="m-t9">Rótulo do saldo</label>
         <input type="text" id="m-t9" value="Restante na entrega">
         <label for="m-t12">Rótulo do resumo</label>
-        <input type="text" id="m-t12" value="Resumo para conferência">
+        <input type="text" id="m-t12" value="Resumo para conferencia">
         <label for="m-t5">Mensagem de pagamento aprovado <small>(PayPal)</small></label>
         <input type="text" id="m-t5" value="Pagamento aprovado! Em breve entramos em contato.">
         <label for="m-t6">Mensagem de erro no pagamento</label>
-        <input type="text" id="m-t6" value="Não foi possível concluir o pagamento. Tente novamente.">
+        <input type="text" id="m-t6" value="Nao foi possivel concluir o pagamento. Tente novamente.">
       </fieldset>
     </div>
     <div>
@@ -2526,7 +2526,7 @@
       </div>
       <div id="m-pv-box"></div>
       </div>
-      <p class="ajuda">A prévia <b>executa o código gerado de verdade</b>: é o mesmo bloco que sai na caixa ao lado, rodando dentro de um quadro isolado. Filtro, cartão de detalhe, carrinho, cupom e o Pix funcionam aqui como funcionarão na página. <b>O que ainda difere da página publicada:</b> o carrinho do quadro é guardado numa memória de mentira (o quadro não suja o carrinho do seu navegador, e por isso ele volta vazio a cada atualização da prévia); o QR Code é desenhado por uma biblioteca baixada da internet, então só aparece depois que ela carrega; o botão do PayPal <b>não é o botão de verdade</b> — o SDK não roda aqui e ele sai como desenho, com o <b>valor que iria na ordem</b> medido dentro do próprio bloco; o botão "Já paguei" não abre o WhatsApp; e o quadro não carrega o CSS do tema do site.</p>
+      <p class="ajuda">A prévia <b>executa o código gerado de verdade</b>: é o mesmo bloco que sai na caixa ao lado, rodando dentro de um quadro isolado. Filtro, cartão de detalhe, carrinho, cupom e o Pix funcionam aqui como funcionarão na página. <b>O que ainda difere da página publicada:</b> o carrinho do quadro é guardado numa memória de mentira (o quadro não suja o carrinho do seu navegador, e por isso ele volta vazio a cada atualização da prévia); o QR Code é desenhado por uma biblioteca baixada da internet, então só aparece depois que ela carrega; o botão do PayPal <b>não é o botão de verdade</b> — o SDK não roda aqui e ele sai como desenho, com o <b>valor que iria na ordem</b> medido dentro do próprio bloco; o botão "Já paguei" <b>não abre o WhatsApp</b> — o quadro desliga a abertura de abas, e avisa em vermelho se não conseguir desligar; e o quadro não carrega o CSS do tema do site.</p>
     </div>
     <div>
       <div class="saida">
@@ -2552,6 +2552,8 @@
   <p class="ajuda alerta"><b>O cupom não é secreto</b> — está dentro do código desta página, à vista de quem abrir o código-fonte.</p>
   <p class="ajuda alerta"><b>O carrinho não atravessa aparelhos.</b> Ele fica no armazenamento do navegador: montado no celular, no computador aparece vazio. O carrinho sobrevive a recarregar a página; <b>o cupom não</b> — o cliente digita de novo (medido). E se você regerar o bloco com o catálogo mudado, as linhas que não existem mais são <b>descartadas com aviso</b> no carrinho do cliente, em vez de virarem uma compra de outro item.</p>
   <p class="ajuda alerta"><b>O preço tem o mesmo limite do link de cobrança.</b> Tela, Pix e PayPal desta página não divergem entre si — eles leem a mesma conta. Mas o valor do PayPal é montado no navegador do cliente, e alguém determinado monta um pagamento com outro valor. A garantia é de <b>coerência</b>, não de valor: <b>confira o extrato antes de produzir</b>.</p>
+  <p class="ajuda alerta"><b>Uma Mini loja por página.</b> Dois blocos desta aba na mesma página do Prosite <b>não funcionam</b>: os dois procuram a mesma caixa (<code>id="fcmloja"</code>), então o primeiro bloco desenha o catálogo do segundo e o segundo não desenha nada. É a mesma limitação do Checkout (<code>id="fcuni"</code>), e ela é conhecida e não corrigida — corrigir mudaria o identificador dos dois blocos e de todo código já colado no site. Duas lojas, duas páginas.</p>
+  <p class="ajuda alerta"><b>Códigos de loja diferentes, mesmo em páginas diferentes.</b> O código da loja é a chave do carrinho no navegador do cliente. Se duas lojas usarem o mesmo código, o carrinho montado numa é lido pela outra — e agora ele é <b>descartado com aviso na tela do cliente</b> (cada bloco carrega a assinatura do próprio catálogo, e recusa carrinho que não seja dele). O aviso conserta o sintoma, não a causa: use códigos diferentes.</p>
   <p class="ajuda"><b>Depois de publicar:</b> abra a página em <b>aba anônima</b>, monte um carrinho, gere o Pix e confira no aplicativo do banco que o valor lido do QR Code é o mesmo que a página mostra. Depois recarregue a página e confirme que o carrinho continua lá.</p>
   </div>
 </div>
@@ -2925,6 +2927,28 @@ FC_CARRINHO_SRC.cupomVigente=
   'if(!cp.validade)return true;\n'+
   "var lim=new Date(cp.validade+'T23:59:59');\n"+
   'return new Date()<=lim;\n}\n\n';
+/* ARREDONDAMENTO EM CENTAVOS, NUM LUGAR SO -- e por que ele existe.
+   O desconto percentual produz centavo quebrado (600,00 com 5% => 570,00; 10,50 com 5% =>
+   9,975), e ate esta correcao o total saia com essa terceira casa intacta. Dai para baixo
+   cada consumidor arredondava do seu jeito: moedaFmt e o PayPal por toFixed(2), totalPix por
+   Math.round. Nos numeros terminados em meio centavo os dois discordam -- toFixed(2) de 9.975
+   devolve "9.97" (o double mais proximo de 9,975 e um fio MENOR que 9,975), Math.round devolve
+   9,98. Medido no bloco entregue: tela R$ 9,97, resumo R$ 9,97, PayPal 9.97 BRL e campo 54 do
+   Pix igual a 9.98 -- o cliente pagava um centavo a mais do que leu, e a aba prometia que isso
+   nao acontecia. Varredura de 2.002.000 combinacoes preco x cupom: 60.097 divergiam (3,00%),
+   sempre um centavo A MAIS no Pix.
+   O conserto e o mesmo padrao de sempre: arredondar na ORIGEM, uma vez, e deixar todo mundo
+   ler o mesmo numero. Duas linhas mudam:
+     descontoAtual -- porque ele TAMBEM aparece na tela e no resumo copiavel. Sem arredondar
+       aqui, o resumo imprimiria "Subtotal 10,50 / Desconto -0,53 / Total 9,98", tres numeros
+       que nao fecham entre si;
+     total -- que passa a ser sempre um valor de centavos exatos. totalPix, sinalAgora e
+       saldoDepois continuam com o Math.round deles, que a partir daqui e identidade: manter o
+       arredondamento la e barato e protege quem um dia mexer na conta acima.
+   Math.round e nao toFixed porque e a regra comercial (meio centavo sobe) e porque e o que o
+   resto deste motor ja fazia; a resposta de toFixed em ".xx5" e artefato do binario, nao regra.
+   Isto MUDA o que a aba Checkout emite, de proposito: o carrinho publicado hoje tem o mesmo
+   defeito, e a regressao byte a byte existe para pegar mudanca nao intencional -- esta e. */
 FC_CARRINHO_SRC.descontoAtual=
   'function descontoAtual(){\n'+
   'if(!cupomAtivo)return 0;\n'+
@@ -2932,9 +2956,13 @@ FC_CARRINHO_SRC.descontoAtual=
   "if(cupomAtivo.tipo==='pct_produto')d=somaProdutos()*cupomAtivo.valor/100;\n"+
   "else if(cupomAtivo.tipo==='pct_total')d=s*cupomAtivo.valor/100;\n"+
   'else d=cupomAtivo.valor;\n'+
-  'if(d>s)d=s;\nif(d<0)d=0;\nreturn d;\n}\n\n';
+  'if(d>s)d=s;\nif(d<0)d=0;\nreturn Math.round(d*100)/100;\n}\n\n';
 FC_CARRINHO_SRC.total=
-  'function total(){\nreturn subtotal()-descontoAtual();\n}\n\n';
+  '/* Em CENTAVOS EXATOS, e este e o unico lugar onde o total e arredondado: a tela, o resumo\n'+
+  '   copiavel, o QR do Pix, o Copia e Cola, o valor da ordem do PayPal, o sinal e o saldo leem\n'+
+  '   todos daqui. Sem este arredondamento, toFixed(2) e Math.round discordam em um centavo nos\n'+
+  '   totais terminados em meio centavo, e a pagina mostra um valor e o banco cobra outro. */\n'+
+  'function total(){\nreturn Math.round((subtotal()-descontoAtual())*100)/100;\n}\n\n';
 FC_CARRINHO_SRC.sinal=
   '/* O sinal sai do total JA com o cupom aplicado. Arredondado a duas casas aqui, uma vez\n'+
   '   so: e este numero que vai para o PayPal, para o QR do Pix, para a tela e para a\n'+
@@ -3105,10 +3133,23 @@ function fcPvShim(o){
   s+='  }\n';
   s+="  trocar('localStorage');trocar('sessionStorage');\n";
   s+=o.extras||'';
+  /* window.open: neutralizado em toda previa cujo bloco tenha botao que abre o WhatsApp.
+     Estava so na aba Captacao de leads, e por isso o "Ja paguei" das previas do Checkout, do
+     Link de cobranca e da Mini loja abria ABA DE VERDADE em api.whatsapp.com, com o numero do
+     operador e um pedido de mentira -- em duas das tres a propria aba afirmava por escrito que
+     isso nao acontecia. E do AMBIENTE da previa, nunca do bloco entregue: o codigo que o
+     operador cola continua abrindo o WhatsApp como sempre.
+     Entra por sinalizador, e nao para todas as abas, porque a mensagem de falha descreve uma
+     consequencia -- anunciar "pode abrir o WhatsApp numa aba nova" na previa do Slideshow, que
+     nao tem botao nenhum de WhatsApp, seria aviso sobre coisa que nao existe. */
+  if(o.semAbrir)s+='  try{window.open=function(){return null;};window.open.fcPvSemAbrir=true;}catch(e){}\n';
   s+='  var falhou=[];\n';
   s+="  if(!instalado('localStorage'))falhou.push('localStorage');\n";
   s+="  if(!instalado('sessionStorage'))falhou.push('sessionStorage');\n";
   s+=o.conferencias||'';
+  /* conferida DEPOIS das conferencias da aba, para a ordem da lista continuar a de antes na
+     unica aba que ja tinha esta troca (Captacao de leads: foco e so entao abertura). */
+  if(o.semAbrir)s+='  try{if(!window.open.fcPvSemAbrir)falhou.push(\'abertura de aba nova\');}catch(e){falhou.push(\'abertura de aba nova\');}\n';
   s+='  if(falhou.length){\n';
   s+="    var av=document.createElement('div');\n";
   s+="    av.id='"+o.pref+"-pv-aviso-shim';\n";
@@ -7768,10 +7809,9 @@ function lPvShim(){
   return fcPvShim({pref:'l',
     /* Duas trocas a mais que as outras abas: o bloco de Leads da foco ao primeiro campo do
        pop-up (roubaria o cursor do formulario da ferramenta) e abre o WhatsApp em aba nova. */
-    extras:'  try{HTMLElement.prototype.focus=function(){};HTMLElement.prototype.fcPvSemFoco=true;}catch(e){}\n'+
-           '  try{window.open=function(){return null;};window.open.fcPvSemAbrir=true;}catch(e){}\n',
-    conferencias:'  try{if(!HTMLElement.prototype.fcPvSemFoco)falhou.push(\'foco automatico\');}catch(e){falhou.push(\'foco automatico\');}\n'+
-                 '  try{if(!window.open.fcPvSemAbrir)falhou.push(\'abertura de aba nova\');}catch(e){falhou.push(\'abertura de aba nova\');}\n',
+    extras:'  try{HTMLElement.prototype.focus=function(){};HTMLElement.prototype.fcPvSemFoco=true;}catch(e){}\n',
+    conferencias:'  try{if(!HTMLElement.prototype.fcPvSemFoco)falhou.push(\'foco automatico\');}catch(e){falhou.push(\'foco automatico\');}\n',
+    semAbrir:true,
     abre:'',
     fecha:' neste quadro. A previa pode gravar nas chaves reais do navegador, roubar o cursor do formulario ao lado ou abrir o WhatsApp numa aba nova. O codigo gerado ao lado nao e afetado.'});
 }
@@ -8518,8 +8558,9 @@ function uPvShim(cfg){
      sonda em si vem de fcPvSondaPP, que a Mini loja tambem usa. */
   var s=cfg.usaPP?fcPvSondaPP({ppcor:cfg.ppcor,raizId:'fcuni',msgSel:'fcu-msg',caixaId:'u-pv-pp'}):'';
   return fcPvShim({pref:'u',
+    semAbrir:true,
     abre:'o ',
-    fecha:' deste quadro. A previa esta gravando nas chaves reais do navegador. O codigo gerado ao lado nao e afetado.',
+    fecha:' deste quadro. A previa pode estar gravando nas chaves reais do navegador ou abrindo o WhatsApp numa aba nova. O codigo gerado ao lado nao e afetado.',
     depois:s});
 }
 /* Sem conteudo abaixo do carrinho nao da para ver onde ele termina nem rolar ate a area do Pix
@@ -11543,8 +11584,9 @@ function pPvShim(busca,cfg){
            pPvPayPal(cfg),
     conferencias:'  try{if(String(location.search||\'\')!==alvo)falhou.push(\'o endereco simulado\');}catch(e){falhou.push(\'o endereco simulado\');}\n'+
       (cfg.usapp?'  try{if(!document.head.appendChild.fcPvSemPayPal)falhou.push(\'o SDK do PayPal\');}catch(e){falhou.push(\'o SDK do PayPal\');}\n':''),
+    semAbrir:true,
     abre:'',
-    fecha:' deste quadro. A previa pode estar gravando nas chaves reais do navegador, mostrando a pagina sem a cobranca simulada ou mandando o seu Client ID para o PayPal -- o que aparece abaixo nao prova nada. O codigo gerado ao lado nao e afetado.'});
+    fecha:' deste quadro. A previa pode estar gravando nas chaves reais do navegador, mostrando a pagina sem a cobranca simulada, abrindo o WhatsApp numa aba nova ou mandando o seu Client ID para o PayPal -- o que aparece abaixo nao prova nada. O codigo gerado ao lado nao e afetado.'});
 }
 /* Enchimento cinzento abaixo do cartao: sem ele nao da para ver onde a pagina termina nem
    rolar ate o QR Code em cobranca com descricao longa. */
@@ -11884,10 +11926,14 @@ function mProdSalvar(){
      em vez de deixar passar e o defeito aparecer so na pagina publicada. */
   if(!img){alert('Informe o endereco da foto do produto. A vitrine e feita de imagens: um produto sem foto sai como um retangulo vazio no meio da grade.');return;}
   if(!sUrlOk(img)){alert('O endereco da foto nao parece valido. Use um endereco completo comecando por https:// ou um caminho do proprio site comecando por barra.');return;}
-  /* Host de fora e DITO, nao recusado -- a mesma decisao da lista de imagens do Slideshow: o
-     operador pode ter motivo legitimo para hospedar uma foto em outro lugar. O que ele perde,
-     e o aviso diz, e o redimensionador da Alboom: a foto vai inteira para a vitrine. */
-  if(!sHostEsperado(img)&&!confirm('Esta foto nao esta no storage da Alboom ('+S_HOSTS_ALBOOM.join(', ')+').\n\nEla vai funcionar, mas o redimensionador da Alboom nao alcanca fotos de outros servidores: esta foto sera carregada no tamanho ORIGINAL na vitrine, e nao na miniatura. Com muitos produtos isso pesa.\n\nContinuar mesmo assim?'))return;
+  /* Foto que nao encolhe e DITA, nao recusada -- a mesma decisao da lista de imagens do
+     Slideshow: o operador pode ter motivo legitimo para hospedar uma foto em outro lugar. O que
+     ele perde, e o aviso diz, e o redimensionador da Alboom: a foto vai inteira para a vitrine.
+     A pergunta e mImgResize, e nao sHostEsperado: quem decide se a foto encolhe e a MESMA funcao
+     que o bloco entregue executa. Com sHostEsperado, '/fotos/promo.jpg' (que nao tem host) e
+     '//storage.alboom.ninja/foto.jpg' (que tem host, mas nao tem esquema) passavam calados --
+     um ia inteiro para a vitrine sem aviso nenhum. */
+  if(!mImgResize(img)&&!confirm('Esta foto nao passa pelo redimensionador da Alboom, que so alcanca enderecos completos em '+S_HOSTS_ALBOOM.join(' ou ')+'.\n\nEla vai funcionar, mas sera carregada no tamanho ORIGINAL na vitrine, e nao na miniatura. Com muitos produtos isso pesa.\n\nContinuar mesmo assim?'))return;
   var p={nome:n,desc:$('m-pdesc').value.trim(),preco:v,cat:String($('m-pcat').value).trim(),img:img,
     opsel:radio('m-opsel')||'unico',opnenhum:radio('m-opnenhum')||'nao',
     qtd:radio('m-pqtd')==='sim',
@@ -11922,8 +11968,21 @@ function mProdListaLimpar(){
   if(!confirm('Remover '+(n===1?'o único produto':'os '+n+' produtos')+' do catálogo? Isto esvazia só a lista de produtos — cupons, formas de pagamento, aparência e textos ficam como estão, e nenhum código já colado no site é afetado. Não há como desfazer.'))return;
   mProds=[];mProdLimpar();mProdRender();mCatsRender();salvarEstado();mPreview();
 }
+/* A LISTA SO E DESENHADA COM A ABA ABERTA -- e o mesmo motivo pelo qual a previa nao e montada
+   na carga. Cada linha da lista tem uma miniatura, e o navegador busca a foto assim que o src e
+   atribuido, painel escondido ou nao: medido, abrir a ferramenta baixava 250 KB de miniaturas
+   para quem nunca abre esta aba. O desenho fica PENDENTE e acontece no clique da aba. A conta
+   do peso continua saindo na carga: ela le mProds, nao o DOM, e nao custa rede nenhuma. */
+var mAbaAberta=false,mListaPendente=false;
+function mAbaAbrir(){
+  mAbaAberta=true;
+  if(mListaPendente)mProdRender();
+  mPreview(true);
+}
 function mProdRender(){
   var ul=$('m-prod-lista');if(!ul)return;
+  if(!mAbaAberta){mListaPendente=true;mPesoRender();return;}
+  mListaPendente=false;
   var rolagem=ul.scrollTop;
   ul.innerHTML='';
   $('m-prod-vazio').style.display=mProds.length?'none':'block';
@@ -11938,10 +11997,13 @@ function mProdRender(){
     t.textContent=p.nome+' — '+mFmt(parseFloat(p.preco)||0)+(p.qtd?' (por quantidade)':'');
     var partes=sUrlPartes(p.img||'');
     var url=document.createElement('div');url.className='url partida';url.title=p.img||'';
-    if(p.img&&!sHostEsperado(p.img)){
+    /* O selo marca o que o AVISO do cadastro disse: esta foto nao encolhe. A pergunta e a
+       mesma (mImgResize), para o selo nunca contradizer o aviso. Endereco sem host -- caminho
+       a partir da raiz do site -- e dito com todas as letras, senao o selo sairia vazio. */
+    if(p.img&&!mImgResize(p.img)){
       var host=document.createElement('span');host.className='host';
-      host.textContent=sUrlHost(p.img);
-      host.title='Esta foto não está no storage da Alboom: ela não passa pelo redimensionador.';
+      host.textContent=sUrlHost(p.img)||'caminho do site';
+      host.title='Esta foto não passa pelo redimensionador da Alboom: ela vai inteira para a vitrine.';
       url.appendChild(host);
     }
     var pasta=document.createElement('span');pasta.className='pasta';pasta.textContent=partes.pasta;
@@ -12034,30 +12096,70 @@ function mCpRender(){
       tamanho de dentro venceria o de fora.
    3. Largura zero ou ausente devolve o endereco original, que e o que a lista da aba usa quando
       o operador cadastra foto de fora.
-   A MESMA funcao roda na ferramenta (miniatura da lista de produtos, medicao de peso) e dentro
-   do bloco entregue -- por isso ela e emitida como texto por mImgTamanhoGer e usada aqui por
-   chamada direta. Duas implementacoes fariam a lista da aba mostrar um tamanho e a pagina
-   publicada pedir outro. */
+   A MESMA funcao roda na ferramenta (miniatura da lista de produtos, aviso do cadastro,
+   medicao de peso) e dentro do bloco entregue.
+
+   ATE ESTA CORRECAO ELA NAO ERA A MESMA -- eram duas, e ja divergiam. A ferramenta perguntava
+   sHostEsperado(v) e o bloco perguntava HOSTS_RESIZE.test(v), que respondem coisas diferentes
+   para dois formatos que o proprio cadastro aceita:
+     '//storage.alboom.ninja/foto.jpg' -> a ferramenta montava '.../url///storage...' (miniatura
+        quebrada) e o bloco nao redimensionava (foto INTEIRA na vitrine publicada);
+     '/fotos/promo.jpg'                -> a ferramenta montava '.../url//fotos/...' (miniatura
+        que nao carrega) e o bloco nao redimensionava.
+   E nenhum dos dois avisava no cadastro, porque sHostEsperado responde "e Alboom" para o
+   primeiro (o host esta la, so falta o esquema) e "sem host" para o segundo -- enquanto a aba
+   afirma por escrito que o cadastro avisa quando a foto nao encolhe.
+   O conserto e o padrao de FC_PIX_SRC: UMA fonte literal (M_IMG_SRC). A ferramenta a avalia
+   com new Function; o bloco leva o MESMO texto. Nao ha como divergirem, porque nao ha dois
+   textos. Junto vem imgResize(), a pergunta "esta foto passa pelo redimensionador?", que e a
+   pergunta que o aviso do cadastro e o selo da lista tinham de estar fazendo desde o comeco --
+   sHostEsperado responde outra ("o host e um dos conhecidos?") e continua valendo para o que
+   ela sempre serviu, o aviso de foto hospedada fora.
+   imgNorm resolve os dois formatos numa forma so ANTES de decidir: '//host/...' ganha o
+   esquema (a pagina e https, e o resize precisa do endereco absoluto) e o que ja veio
+   embrulhado pelo resize e desembrulhado. Caminho a partir da raiz do site ('/fotos/...') sai
+   inalterado e nao e redimensionado -- ele nao esta no storage da Alboom, e agora o cadastro
+   diz isso. */
 var M_RESIZE='https://alfred.alboompro.com/resize/width/';
-function mImgTamanho(u,larg){
-  var v=String(u||''),i;
-  if(!v)return '';
-  i=v.lastIndexOf('/url/');
-  if(i>=0)v='https://'+v.slice(i+5);
-  if(!larg)return v;
-  if(!sHostEsperado(v))return v;
-  return M_RESIZE+larg+'/url/'+v.replace(/^https?:\/\//i,'');
+function mHostsResizeSrc(){
+  return '/^https?:\\/\\/('+S_HOSTS_ALBOOM.map(function(h){return h.replace(/\./g,'\\.');}).join('|')+')\\//i';
 }
+var M_IMG_SRC=
+  '/* Um endereco, uma forma so: o que veio embrulhado pelo resize e desembrulhado, e o\n'+
+  '   endereco sem esquema (//host/foto.jpg) ganha o https -- os dois viram o endereco\n'+
+  '   absoluto que o redimensionador precisa receber. */\n'+
+  'function imgNorm(u){\n'+
+  "var v=String(u||''),i;\n"+
+  "if(!v)return '';\n"+
+  "i=v.lastIndexOf('/url/');\n"+
+  "if(i>=0)return 'https://'+v.slice(i+5);\n"+
+  "if(v.indexOf('//')===0)return 'https:'+v;\n"+
+  'return v;\n}\n\n'+
+  '/* Esta foto passa pelo redimensionador? E a pergunta que decide se ela chega encolhida ou\n'+
+  '   inteira na vitrine. */\n'+
+  'function imgResize(u){\n'+
+  'return HOSTS_RESIZE.test(imgNorm(u));\n}\n\n'+
+  'function imgTamanho(u,larg){\n'+
+  'var v=imgNorm(u);\n'+
+  "if(!v)return '';\n"+
+  'if(!larg)return v;\n'+
+  'if(!HOSTS_RESIZE.test(v))return v;\n'+
+  "return RESIZE_BASE+larg+'/url/'+v.replace(/^https?:\\/\\//i,'');\n}\n\n";
+/* O que o bloco entregue leva: as duas constantes e o texto acima, nesta ordem. */
 function mImgTamanhoGer(){
-  return 'function imgTamanho(u,larg){\n'+
-    "var v=String(u||''),i;\n"+
-    "if(!v)return '';\n"+
-    "i=v.lastIndexOf('/url/');\n"+
-    "if(i>=0)v='https://'+v.slice(i+5);\n"+
-    'if(!larg)return v;\n'+
-    'if(!HOSTS_RESIZE.test(v))return v;\n'+
-    "return '"+M_RESIZE+"'+larg+'/url/'+v.replace(/^https?:\\/\\//i,'');\n}\n\n";
+  return "var RESIZE_BASE='"+M_RESIZE+"';\n"+
+    'var HOSTS_RESIZE='+mHostsResizeSrc()+';\n'+
+    M_IMG_SRC;
 }
+/* O que a ferramenta usa: o MESMO texto, avaliado uma vez. Preguicoso de proposito -- assim
+   nao depende da ordem em que os 'var' deste arquivo sao inicializados. */
+var mImgApi=null;
+function mImgApiOb(){
+  if(!mImgApi)mImgApi=(new Function(mImgTamanhoGer()+'return {tamanho:imgTamanho,resize:imgResize};'))();
+  return mImgApi;
+}
+function mImgTamanho(u,larg){return mImgApiOb().tamanho(u,larg);}
+function mImgResize(u){return mImgApiOb().resize(u);}
 
 /* ===== importador de galeria: o mesmo da aba Slideshow, outro destino =====
    Colar link a link cinquenta vezes e proibitivo -- foi essa medida que criou o importador na
@@ -12265,6 +12367,9 @@ function mGerar(){
   var recusa=mRecusa(cfg);
   if(recusa){alert(recusa);return;}
   $('m-out').value=mBloco(cfg);
+  /* a conta do peso descreve o codigo que acabou de sair: gerar sem redesenha-la deixaria a
+     frase falando de uma configuracao anterior ao lado do bloco novo */
+  mPesoRender();
   mPreview(true);
   fccMarcar('loja');
 }
@@ -12427,11 +12532,20 @@ function mBloco(cfg){
   return c+mBlocoJs(cfg,prods,cps,cats,client,cod);
 }
 
+/* A assinatura do catalogo: djb2 sobre o TEXTO do catalogo que este mesmo bloco leva -- nome,
+   preco, categoria, foto, opcionais, tudo. Nao e seguranca e nao precisa ser: ninguem ganha
+   nada forjando a assinatura do proprio carrinho. E um detector de troca de catalogo, e para
+   isso 32 bits sobram. Deriva do texto ja montado, e nao de uma segunda leitura de cfg.prods,
+   porque duas leituras do catalogo sao duas coisas para divergir. */
+function mAssinatura(txt){
+  var h=5381,s=String(txt||''),i;
+  for(i=0;i<s.length;i++)h=((h*33)^s.charCodeAt(i))>>>0;
+  return h.toString(36).toUpperCase();
+}
 function mBlocoJs(cfg,prods,cps,cats,client,cod){
   var usaPP=cfg.usaPP,usaPix=cfg.usaPix,usaQtd=cfg.qtdLigada,usaSinal=cfg.sinal.ativo;
   var usaResumo=cfg.resumo,descpix=cfg.descpix,zap=cfg.zap;
   var usaCupom=cfg.cps.length>0,usaFiltro=cfg.filtro&&cfg.cats.length>0;
-  var hostsRe=S_HOSTS_ALBOOM.map(function(h){return h.replace(/\./g,'\\.');}).join('|');
   var c='';
   c+='<scr'+'ipt>\n(function(){\n';
   c+='/* ============================================================\n';
@@ -12444,7 +12558,19 @@ function mBlocoJs(cfg,prods,cps,cats,client,cod){
   c+='   Identifica o carrinho no navegador do cliente (a chave do armazenamento) e abre o\n';
   c+='   identificador de cada pedido. Duas lojas no mesmo site precisam de codigos diferentes,\n';
   c+='   senao dividem o mesmo carrinho. */\n';
-  c+="var CODIGO_LOJA='"+cod+"';\n\n";
+  c+="var CODIGO_LOJA='"+cod+"';\n";
+  c+='/* Assinatura do catalogo abaixo: gerada junto com ele, e gravada dentro do carrinho.\n';
+  c+='   AVISAR EM VEZ DE CONFIAR NO CODIGO. Duas lojas com o MESMO codigo nao apenas dividem o\n';
+  c+='   carrinho: a segunda le as linhas da primeira, encontra produto de mesmo nome na mesma\n';
+  c+='   posicao (a guarda de nome so protege quando os nomes diferem) e cobra o preco DELA.\n';
+  c+='   Medido antes desta linha existir: carrinho de R$ 21,00 montado na loja A aparecia na\n';
+  c+='   loja B como R$ 5.000,00, sem aviso nenhum e com o mesmo identificador de pedido. A aba\n';
+  c+='   avisa duas vezes que os codigos precisam ser diferentes, mas aviso na ferramenta nao\n';
+  c+='   alcanca o cliente. Com a assinatura, um carrinho de outro catalogo e DESCARTADO e a\n';
+  c+='   pagina diz o que aconteceu -- e o operador que errou o codigo descobre pelo sintoma.\n';
+  c+='   Ela muda sempre que voce reger este bloco com o catalogo alterado; quem tinha carrinho\n';
+  c+='   montado o perde com aviso, que e o mesmo tratamento do item que saiu do catalogo. */\n';
+  c+="var ASSINATURA_CATALOGO='"+mAssinatura(prods)+"';\n\n";
   c+='/* ===== PRODUTOS =====\n';
   c+='   preco: numero com ponto decimal | categoria: texto livre (vazio = so aparece em Todos)\n';
   c+='   imagem: endereco da foto; a vitrine pede a miniatura e o detalhe pede a foto grande\n';
@@ -12490,8 +12616,14 @@ function mBlocoJs(cfg,prods,cps,cats,client,cod){
   if(usaPP){
     c+='/* ===== PAYPAL ===== */\n';
     c+="var PAYPAL_CLIENT_ID='"+client+"';   /* Client ID Live -- publico por definicao */\n";
-    c+="var MOEDA='"+cfg.moeda+"';\n\n";
   }
+  /* MOEDA FORA do 'if(usaPP)', como no Checkout. A moedaFmt emitida por fcMoedaFmtGer(false) a
+     le por nome para escolher o prefixo (R$, $ ou EUR), e ela e usada em TODA loja -- inclusive
+     nas que so aceitam Pix. Declarada so quando havia PayPal, uma loja "somente Pix" morria na
+     primeira linha da vitrine com "MOEDA is not defined": nao aparecia produto nenhum, nem
+     carrinho, nem aviso. Medido executando o bloco -- a geracao do texto nunca acusaria isto,
+     e por isso a regressao de saidas passou por cima dele. */
+  c+="var MOEDA='"+cfg.moeda+"';"+(usaPix?"   /* fixa em reais: o Pix so existe em BRL */":"   /* 'BRL' | 'USD' | 'EUR' */")+"\n\n";
   c+='/* ===== APARENCIA ===== */\n';
   c+="var LARGURA_LOJA='"+cfg.larg+"px';   /* largura maxima do bloco inteiro */\n";
   c+='var IMG_VITRINE='+cfg.imgvit+';        /* largura pedida ao redimensionador para a miniatura da vitrine */\n';
@@ -12513,6 +12645,10 @@ function mBlocoJs(cfg,prods,cps,cats,client,cod){
   c+="var TXT_TODOS='Todos';\n";
   c+="var TXT_SUMIU='item do seu carrinho saiu do catalogo e foi removido.';\n";
   c+="var TXT_SUMIRAM='itens do seu carrinho sairam do catalogo e foram removidos.';\n";
+  c+="var TXT_OP_SUMIU='opcional que voce tinha escolhido saiu do catalogo e foi removido.';\n";
+  c+="var TXT_OP_SUMIRAM='opcionais que voce tinha escolhido sairam do catalogo e foram removidos.';\n";
+  c+="var TXT_CESTA_ESTRAGADA='O carrinho guardado neste navegador estava ilegivel e foi descartado. Escolha os itens de novo.';\n";
+  c+="var TXT_OUTRA_LOJA='O carrinho guardado neste navegador era de outra versao desta loja e foi descartado, para voce nao pagar um preco que nao e o que esta na tela. Escolha os itens de novo.';\n";
   if(usaSinal){
     c+="var TXT_SINAL='"+escJs(cfg.t8)+"';\n";
     c+="var TXT_SALDO='"+escJs(cfg.t9)+"';\n";
@@ -12533,9 +12669,9 @@ function mBlocoJs(cfg,prods,cps,cats,client,cod){
     c+="var TXT_BOTAO_PIX='"+escJs(cfg.t4)+"';\n";
     c+="var TXT_INSTRUCAO='Abra o app do seu banco e pague pelo QR Code ou Pix Copia e Cola';\n";
     c+="var TXT_PIXVAL='Valor no Pix';\n";
-    c+="var TXT_COPIAR='Copiar código Pix';\n";
-    c+="var TXT_COPIADO='Código copiado!';\n";
-    if(zap)c+="var TXT_ZAP='Já paguei - avisar no WhatsApp';\n";
+    c+="var TXT_COPIAR='Copiar codigo Pix';\n";
+    c+="var TXT_COPIADO='Codigo copiado!';\n";
+    if(zap)c+="var TXT_ZAP='Ja paguei - avisar no WhatsApp';\n";
     c+="var TXT_NOTA='Confira o nome do recebedor antes de confirmar o pagamento';\n";
     c+="var TXT_PEDIDO_ENVIADO='Pedido enviado. O carrinho foi esvaziado -- combine o restante pelo WhatsApp.';\n";
   }
@@ -12551,7 +12687,7 @@ function mBlocoJs(cfg,prods,cps,cats,client,cod){
     c+="var TXT_CUPOM_ROTULO='Cupom de desconto';\n";
     c+="var TXT_CUPOM_BOTAO='Aplicar';\n";
     c+="var TXT_CUPOM_OK='Cupom aplicado!';\n";
-    c+="var TXT_CUPOM_INVALIDO='Cupom inválido.';\n";
+    c+="var TXT_CUPOM_INVALIDO='Cupom invalido.';\n";
     c+="var TXT_CUPOM_EXPIRADO='Cupom expirado.';\n";
     c+="var TXT_DESCONTO='Desconto';\n";
   }
@@ -12567,7 +12703,9 @@ function mBlocoJs(cfg,prods,cps,cats,client,cod){
      montar. Declarado la dentro, ele existia so para quem estava dentro -- e o Pix quebrava com
      "CODIGO_PEDIDO is not defined" no primeiro clique, medido. */
   c+="var CODIGO_PEDIDO='';\n";
-  c+='var HOSTS_RESIZE=/^https?:\\/\\/('+hostsRe+')\\//i;\n';
+  /* RESIZE_BASE, HOSTS_RESIZE e as tres funcoes de imagem saem juntos, do mesmo texto que a
+     ferramenta avalia: a linha do HOSTS_RESIZE morava aqui e a funcao morava la, e era por ai
+     que as duas implementacoes divergiam. */
   c+=mImgTamanhoGer();
   if(usaPix){
     c+=FC_PIX_SRC.semAcento;
@@ -12682,17 +12820,36 @@ function mBlocoRuntime(cfg,usaPP,usaPix,usaQtd,usaSinal,usaResumo,descpix,zap,us
   c+='   o cliente comprar em silencio um item que nao e o que ele escolheu. */\n';
   c+="var CHAVE_CESTA='fcmloja:'+CODIGO_LOJA;\n";
   c+='var CARRINHO=[];\n';
-  c+='var sumidos=0;\n';
+  c+='/* Tres coisas diferentes podem ter acontecido com o que estava guardado, e cada uma tem\n';
+  c+='   a sua frase. Carrinho que esvazia sem dizer por que e o cliente achando que perdeu a\n';
+  c+='   escolha por defeito da pagina. */\n';
+  c+='var sumidos=0;      /* linhas de produto descartadas: o produto saiu do catalogo */\n';
+  c+='var sumidosOp=0;    /* opcionais descartados de linhas que ficaram */\n';
+  c+='var cestaEstragada=false;  /* o que estava guardado nao era um carrinho */\n';
+  c+='var cestaDeOutra=false;    /* era carrinho de OUTRO catalogo com este mesmo codigo de loja */\n';
+  /* Uma funcao so apaga os quatro estados, e ela mora AQUI, ao lado deles -- com quatro linhas
+     soltas em cada ponto de limpeza, o proximo estado a nascer seria zerado num lugar e nao no
+     outro. */
+  c+='function avisosLimpar(){sumidos=0;sumidosOp=0;cestaEstragada=false;cestaDeOutra=false;}\n';
   c+='function novoPedido(){\n';
   c+="return CODIGO_LOJA+'-'+(new Date().getTime()).toString(36).toUpperCase();\n}\n";
   c+='function cestaGravar(){\n';
-  c+='try{localStorage.setItem(CHAVE_CESTA,JSON.stringify({pedido:CODIGO_PEDIDO,itens:CARRINHO}));}catch(e){}\n}\n';
+  c+='try{localStorage.setItem(CHAVE_CESTA,JSON.stringify({pedido:CODIGO_PEDIDO,cat:ASSINATURA_CATALOGO,itens:CARRINHO}));}catch(e){}\n}\n';
   c+='function cestaLer(){\n';
   c+='var raw=null,o,i,k,it,p,op,linha,ops;\n';
   c+='try{raw=localStorage.getItem(CHAVE_CESTA);}catch(e){}\n';
   c+='if(!raw)return;\n';
-  c+='try{o=JSON.parse(raw);}catch(e){return;}\n';
-  c+='if(!o||!o.itens||!o.itens.length)return;\n';
+  /* Cada saida silenciosa virou uma saida que AVISA. Antes, JSON quebrado, texto solto e
+     'itens' que nao e array caiam todos num 'return' mudo: a pagina abria com o carrinho
+     vazio e sem uma palavra, exatamente o sintoma que o cliente leria como defeito. */
+  c+='try{o=JSON.parse(raw);}catch(e){cestaEstragada=true;return;}\n';
+  c+="if(!o||typeof o!=='object'||Object.prototype.toString.call(o.itens)!=='[object Array]'){cestaEstragada=true;return;}\n";
+  c+='if(!o.itens.length)return;\n';
+  /* A assinatura vem antes de qualquer leitura de linha: com catalogo trocado, NENHUMA linha
+     vale -- nem as que "conferem" por nome, que sao justamente as perigosas (mesmo nome,
+     preco de outra loja). O identificador de pedido tambem morre aqui: ele identificava um
+     pedido daquela outra loja. */
+  c+="if(o.cat!==ASSINATURA_CATALOGO){cestaDeOutra=true;try{localStorage.removeItem(CHAVE_CESTA);}catch(e){}return;}\n";
   c+="CODIGO_PEDIDO=(typeof o.pedido==='string')?o.pedido:'';\n";
   c+='for(i=0;i<o.itens.length;i++){\n';
   c+='it=o.itens[i];\n';
@@ -12701,7 +12858,7 @@ function mBlocoRuntime(cfg,usaPP,usaPix,usaQtd,usaSinal,usaResumo,descpix,zap,us
   c+='ops=[];\n';
   c+='for(k=0;k<(it.ops||[]).length;k++){\n';
   c+='op=(p.opcionais||[])[it.ops[k].j];\n';
-  c+='if(!op||op.nome!==it.ops[k].n)continue;\n';
+  c+='if(!op||op.nome!==it.ops[k].n){sumidosOp++;continue;}\n';
   c+='ops.push({j:it.ops[k].j,n:op.nome,q:qtdBoa(it.ops[k].q)});\n}\n';
   c+='linha={p:it.p,n:p.nome,q:qtdBoa(it.q),ops:ops};\n';
   c+='CARRINHO.push(linha);\n}\n}\n';
@@ -12915,14 +13072,14 @@ function mBlocoVitrine(cfg,usaPP,usaPix,usaQtd,usaSinal,usaResumo,descpix,zap,us
   c+='var linha={p:i,n:p.nome,q:escolha.q,ops:ops};\n';
   c+='if(pos>=0)CARRINHO[pos]=linha;else CARRINHO.push(linha);\n';
   c+='if(!CODIGO_PEDIDO)CODIGO_PEDIDO=novoPedido();\n';
-  /* O aviso de item que saiu do catalogo some quando o cliente mexe no carrinho: ele descreve
-     o que aconteceu na leitura, e depois de uma escolha nova ele descreveria o passado. */
-  c+='sumidos=0;\n';
+  /* O aviso do que aconteceu na LEITURA some quando o cliente mexe no carrinho: ele descreve
+     a abertura da pagina, e depois de uma escolha nova descreveria o passado. */
+  c+='avisosLimpar();\n';
   c+='cestaGravar();desenharCesta();atualizar();\n}\n';
   c+='function tirarDoCarrinho(pos){\n';
   c+='CARRINHO.splice(pos,1);\n';
   c+="if(!CARRINHO.length)CODIGO_PEDIDO='';\n";
-  c+='sumidos=0;\n';
+  c+='avisosLimpar();\n';
   c+='cestaGravar();desenharCesta();atualizar();\n}\n\n';
   c+='/* ===== o carrinho na tela ===== */\n';
   c+='function desenharCesta(){\n';
@@ -12930,9 +13087,16 @@ function mBlocoVitrine(cfg,usaPP,usaPix,usaQtd,usaSinal,usaResumo,descpix,zap,us
   c+="cx.innerHTML='';\n";
   c+="raiz.querySelector('.fcm-cesta-vazia').style.display=CARRINHO.length?'none':'block';\n";
   c+="var av=raiz.querySelector('.fcm-aviso-cesta');\n";
-  c+='if(sumidos){\n';
+  /* UMA caixa, varias frases: os estados nao sao exclusivos (o catalogo pode ter mudado E um
+     opcional ter sumido), e escolher so um deles para mostrar esconderia o outro. */
+  c+='var avisos=[];\n';
+  c+='if(cestaDeOutra)avisos.push(TXT_OUTRA_LOJA);\n';
+  c+='if(cestaEstragada)avisos.push(TXT_CESTA_ESTRAGADA);\n';
+  c+="if(sumidos)avisos.push(sumidos+' '+(sumidos===1?TXT_SUMIU:TXT_SUMIRAM));\n";
+  c+="if(sumidosOp)avisos.push(sumidosOp+' '+(sumidosOp===1?TXT_OP_SUMIU:TXT_OP_SUMIRAM));\n";
+  c+='if(avisos.length){\n';
   c+="av.className='fcm-aviso-cesta on';\n";
-  c+="av.textContent=sumidos+' '+(sumidos===1?TXT_SUMIU:TXT_SUMIRAM);\n";
+  c+="av.textContent=avisos.join(' ');\n";
   c+="}else{av.className='fcm-aviso-cesta';av.textContent='';}\n";
   c+='CARRINHO.forEach(function(it,pos){\n';
   c+='var p=PRODUTOS[it.p];\n';
@@ -13199,8 +13363,9 @@ function mImportarLimpar(frag,conta){
 function mPvShim(cfg){
   var s=cfg.usaPP?fcPvSondaPP({ppcor:cfg.ppcor,raizId:'fcmloja',msgSel:'fcm-msg',caixaId:'m-pv-pp'}):'';
   return fcPvShim({pref:'m',
+    semAbrir:true,
     abre:'o ',
-    fecha:' deste quadro. A previa esta gravando o carrinho nas chaves reais do navegador. O codigo gerado ao lado nao e afetado.',
+    fecha:' deste quadro. A previa pode estar gravando o carrinho nas chaves reais do navegador ou abrindo o WhatsApp numa aba nova. O codigo gerado ao lado nao e afetado.',
     depois:s});
 }
 function mPvEnchimento(){
@@ -13296,10 +13461,17 @@ document.addEventListener('input',function(e){
   if(id.indexOf('m-imp-')===0)return;
   if(id.indexOf('m-')===0||nome.indexOf('m-')===0)mPreview();
 });
+/* mPesoRender ENTRA AQUI, e nao so no 'depois' de fcLigarFaixa. O 'depois' daquela funcao so
+   corre quando o clamp MUDOU o valor -- numero digitado dentro da faixa (300 num campo de 200
+   a 1600) nunca o acionava, e a frase ao lado continuava anunciando a largura anterior: campo
+   em 300, previa pedindo width/300, codigo com IMG_VITRINE=300 e a conta do peso dizendo "900
+   px". O instrumento criado para o requisito ser conferivel era justamente o que mentia.
+   No 'change' (e nao no 'input') pelo mesmo motivo de sempre: no 'change' o valor ja passou
+   pelo clamp do proprio elemento, entao a conta descreve o numero que mCfg vai usar. */
 document.addEventListener('change',function(e){
   var id=e.target.id||'',nome=e.target.name||'';
   if(id.indexOf('m-imp-')===0)return;
-  if(id.indexOf('m-')===0||nome.indexOf('m-')===0){mToggles();mPreview();}
+  if(id.indexOf('m-')===0||nome.indexOf('m-')===0){mToggles();mPesoRender();mPreview();}
 });
 
 /* ===== peso da vitrine: a conta fica a vista do operador =====
@@ -13748,7 +13920,7 @@ prep('Barra de abas','',function(){
   liga('aba-cob',function(){trocarAba('cob');pPreview(true);});
   /* enquanto o painel esta escondido o box mede 0: a previa e remontada ao abrir a aba, ja com
      a largura real da coluna, senao o iframe nasceria na largura de emergencia. */
-  liga('aba-loja',function(){trocarAba('loja');mPreview(true);});
+  liga('aba-loja',function(){trocarAba('loja');mAbaAbrir();});
 });
 /* O logotipo do topo deixou de ser SVG colado no corpo da pagina e passa a ser desenhado a
    partir de CORUJA_PECAS, a mesma fonte que alimenta os blocos gerados. Passo proprio, e nao
