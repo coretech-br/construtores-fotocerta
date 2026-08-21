@@ -57,7 +57,7 @@
   .painel.ativo{display:block}
 
   /* ===== a faixa da ferramenta (fase 5) =====
-     .app e a faixa inteira; dentro dela, .app-esq leva a barra de abas e os seis paineis e
+     .app e a faixa inteira; dentro dela, .app-esq leva a barra de abas e os paineis das abas e
      .app-dir leva o painel consolidado. A ordem importa: o painel e o SEGUNDO filho, entao
      quando a faixa deixa de ser lado a lado (janela estreita) ele cai naturalmente ABAIXO das
      abas, sem nenhuma regra de reordenacao.
@@ -94,7 +94,7 @@
     .app-dir{position:static;max-height:none;overflow:visible;margin:0 0 40px;flex:none}
   }
 
-  /* DUAS COLUNAS, NUNCA TRES -- e a regra e esta, sem eufemismo: as 30 .grade das seis abas
+  /* DUAS COLUNAS, NUNCA TRES -- e a regra e esta, sem eufemismo: as .grade das abas
      tem EXATAMENTE DOIS filhos cada uma (dois cartoes que empilham os fieldsets agrupados por
      tema), e repeat(auto-fit, ...) nunca abre mais faixas do que ha itens. Entao a conta real
      e "1 coluna abaixo de ~744 px de container, 2 acima", em largura nenhuma 3. Dizer que o
@@ -417,7 +417,7 @@
     word-break:break-all}
 
   /* Aba fora da pagina: esmaecida e com um selo, mas CLICAVEL -- e preciso poder abri-la para
-     liga-la. O selo diz "fora" e o titulo/aria-label dizem a frase inteira: seis abas com
+     liga-la. O selo diz "fora" e o titulo/aria-label dizem a frase inteira: sete abas com
      "fora desta pagina" escrito por extenso (que e o estado inicial de todo preset geral novo)
      dariam uma barra de tres linhas. .abas ganha flex-wrap pelo mesmo motivo. */
   .aba.fcg-fora{opacity:.55}
@@ -561,7 +561,7 @@
           </div>
           <input type="file" id="fcx-arquivo" accept="application/json,.json" style="display:none">
           <div class="fcx-aviso" id="fcx-aviso"></div>
-          <p class="ajuda"><b>Exportar tudo</b> gera um arquivo <b>.json</b> com os presets gerais, as bibliotecas de presets das seis abas e o rascunho (o que está na tela). É o backup completo — a configuração desta ferramenta vive só no armazenamento deste navegador, e some se você limpar os dados do site. <b>Exportar este preset geral</b> leva só a campanha e a página selecionadas na barra, para repassar a alguém.</p>
+          <p class="ajuda"><b>Exportar tudo</b> gera um arquivo <b>.json</b> com os presets gerais, as bibliotecas de presets das sete abas e o rascunho (o que está na tela). É o backup completo — a configuração desta ferramenta vive só no armazenamento deste navegador, e some se você limpar os dados do site. <b>Exportar este preset geral</b> leva só a campanha e a página selecionadas na barra, para repassar a alguém.</p>
           <p class="ajuda"><b>Os dados de contato e pagamento são escolha na hora de exportar, e o nome do arquivo diz qual é:</b> <i>…-com-dados.json</i> ou <i>…-sem-dados.json</i>. Confira o nome antes de enviar o arquivo a alguém — é ele que diz se o número do WhatsApp, a chave Pix e o Client ID do PayPal estão lá dentro.</p>
           <p class="ajuda"><b>Importar mostra um resumo antes e pede confirmação</b> — quantos presets são novos, quantos já existem aqui e o que se perde ao substituí-los. Quando o nome já existe, você escolhe entre <b>substituir</b> e <b>importar como cópia</b>. Um arquivo <i>sem dados</i> <b>não apaga</b> os dados que já estão neste navegador: os campos que ele não traz mantêm o valor atual.</p>
           <p class="ajuda"><b>Arquivo de outra pessoa é código que vai para a sua página.</b> A ferramenta confere a forma do arquivo e descarta o que não reconhece, dizendo quantos itens foram — mas as caixas “Outros códigos meus” são texto livre e viajam como estão. Se o arquivo não veio de você, leia esse trecho antes de usar o que ele trouxer.</p>
@@ -571,7 +571,7 @@
 </div>
 
 <!-- ==================== A FAIXA DA FERRAMENTA (fase 5) ====================
-     A esquerda, a barra de abas e os seis paineis; a direita, o painel consolidado. O painel
+     A esquerda, a barra de abas e os paineis das abas; a direita, o painel consolidado. O painel
      e o segundo filho de proposito: em janela estreita a faixa deixa de ser dividida e ele
      cai abaixo das abas sem nenhuma regra de reordenacao. -->
 <div class="app">
@@ -591,6 +591,7 @@
   <button class="aba" id="aba-uni" role="tab" aria-selected="false">Checkout</button>
   <button class="aba" id="aba-bor" role="tab" aria-selected="false">Bordas com efeito</button>
   <button class="aba" id="aba-cnt" role="tab" aria-selected="false">Contagem regressiva</button>
+  <button class="aba" id="aba-cob" role="tab" aria-selected="false">Link de cobrança</button>
 </div>
 
 <!-- ==================== CONSTRUTOR: SLIDESHOW ==================== -->
@@ -1995,6 +1996,216 @@
   </div>
 </div>
 
+<!-- ==================== CONSTRUTOR: LINK DE COBRANCA ==================== -->
+<div class="painel" id="painel-cob" role="tabpanel">
+  <p class="descricao"><b>Link de cobrança</b> — para quando o serviço já foi combinado e falta receber. Você publica <b>uma vez</b> um componente HTML numa página fixa do site (por exemplo <code>/pagar</code>) e, a cada cobrança, gera aqui um <b>link diferente</b> para mandar ao cliente. A página abre com a descrição do serviço, o valor, o <b>Pix</b> (copia e cola mais QR Code) e, se você quiser, o <b>PayPal</b> — mais o botão “Já paguei”, que avisa você pelo WhatsApp. O valor mostrado na tela e o valor cobrado saem os dois <b>de dentro do próprio código Pix</b> que viaja no link: não existe um segundo lugar de onde eles possam divergir. Um código mexido no caminho é <b>recusado</b> pela página, e um código montado com a chave Pix de outra pessoa também — a página só exibe uma cobrança que ela consegue remontar a partir dos <b>seus</b> dados de recebedor.</p>
+
+  <div class="secao primeira"><span class="secao-n">1</span> Quem recebe</div>
+  <div class="grade">
+    <div>
+      <fieldset>
+      <legend>Pix</legend>
+      <label for="p-chave">Chave Pix <small>(máx. 77 caracteres; espaços e caracteres invisíveis das pontas são removidos ao sair do campo — no meio da chave eles impedem a geração, com aviso)</small></label>
+      <input type="text" id="p-chave" value="" placeholder="e-mail, telefone, CPF/CNPJ ou chave aleatoria">
+      <label for="p-nomer">Nome do recebedor <small>(máx. 25 caracteres, acentos removidos no código Pix)</small></label>
+      <input type="text" id="p-nomer" value="Foto Certa" maxlength="25" placeholder="nome que aparece no Pix">
+      <label for="p-cidade">Cidade <small>(máx. 15 caracteres, acentos removidos no código Pix)</small></label>
+      <input type="text" id="p-cidade" value="Vitoria" maxlength="15" placeholder="cidade do recebedor">
+      <p class="ajuda"><b>Estes três campos entram no bloco da página</b> e também em cada link. A página só aceita um link cujo código Pix tenha sido montado com <b>exatamente</b> esta chave, este nome e esta cidade — é assim que ela sabe que aquela cobrança é sua. Se você trocar a chave e regerar o bloco, os links antigos ainda não pagos param de abrir: gere links novos para eles.</p>
+      </fieldset>
+    </div>
+    <div>
+      <fieldset>
+      <legend>PayPal</legend>
+      <label>Oferecer PayPal na página?</label>
+      <div class="radios">
+      <label><input type="radio" name="p-usapp" value="sim" checked><span>Sim</span></label>
+      <label><input type="radio" name="p-usapp" value="nao"><span>Não — só Pix</span></label>
+      </div>
+      <div id="p-pp-campos">
+      <label for="p-client">Client ID (Live) <small>(público)</small></label>
+      <input type="text" id="p-client" value="" placeholder="Cole aqui o Client ID Live da sua conta PayPal">
+      <label>Cor do botão PayPal</label>
+      <div class="radios">
+      <label><input type="radio" name="p-ppcor" value="gold" checked><span>Dourado</span></label>
+      <label><input type="radio" name="p-ppcor" value="blue"><span>Azul</span></label>
+      <label><input type="radio" name="p-ppcor" value="silver"><span>Prata</span></label>
+      <label><input type="radio" name="p-ppcor" value="white"><span>Branco</span></label>
+      <label><input type="radio" name="p-ppcor" value="black"><span>Preto</span></label>
+      </div>
+      <p class="ajuda alerta"><b>O botão do PayPal no site é adulterável de um jeito que o Pix não é.</b> No Pix, o valor que a tela mostra é lido de dentro do mesmo código que o aplicativo do banco vai ler: os dois não têm como discordar. No botão do PayPal o valor é calculado no navegador do cliente e a tela pode dizer uma coisa enquanto a ordem leva outra. No botão do PayPal o valor é calculado no navegador do cliente: quem souber mexer paga o que quiser. Para valor alto, use o segundo modo — <b>colar um link de cobrança criado no próprio PayPal</b>, na seção 3: ali o valor fica guardado no PayPal e o cliente não alcança. A escolha é por cobrança.</p>
+      </div>
+      </fieldset>
+      <fieldset>
+      <legend>Comprovante pelo WhatsApp</legend>
+      <label>Mostrar o botão “Já paguei”?</label>
+      <div class="radios">
+      <label><input type="radio" name="p-zap" value="sim" checked><span>Sim</span></label>
+      <label><input type="radio" name="p-zap" value="nao"><span>Não</span></label>
+      </div>
+      <label for="p-zapnum">WhatsApp de destino <small>(DDI+DDD+número, só dígitos)</small></label>
+      <input type="text" id="p-zapnum" value="" placeholder="5527999999999">
+      <p class="ajuda">O botão abre o WhatsApp com a descrição, o valor e o identificador da cobrança já escritos na mensagem — assim você sabe de qual cobrança o cliente está falando. O Pix estático não avisa ninguém quando cai: <b>confira o extrato</b> antes de entregar o trabalho.</p>
+      </fieldset>
+    </div>
+  </div>
+
+  <div class="secao"><span class="secao-n">2</span> A página de pagamento</div>
+  <div class="grade">
+    <div>
+      <fieldset>
+      <legend>Endereço da página</legend>
+      <label for="p-url">Endereço onde o componente está publicado <small>(endereço completo, ou caminho do site começando com barra)</small></label>
+      <input type="text" id="p-url" value="/pagar" placeholder="https://www.fotocerta.com.br/pagar">
+      <p class="ajuda">Serve só para montar o link. A página em si não precisa saber o próprio endereço.</p>
+      </fieldset>
+      <fieldset>
+      <legend>Textos</legend>
+      <label for="p-t1">Título</label>
+      <input type="text" id="p-t1" value="Pagamento do seu ensaio">
+      <label for="p-t2">Rótulo do valor</label>
+      <input type="text" id="p-t2" value="Total a pagar">
+      <label for="p-t3">Botão de copiar o Pix</label>
+      <input type="text" id="p-t3" value="Copiar código Pix">
+      <label for="p-t4">Botão do comprovante</label>
+      <input type="text" id="p-t4" value="Já paguei">
+      <label for="p-t7">Instrução do Pix</label>
+      <input type="text" id="p-t7" value="Abra o aplicativo do seu banco, escolha Pix e use o Copia e Cola ou o QR Code.">
+      </fieldset>
+    </div>
+    <div>
+      <fieldset>
+      <legend>Aparência</legend>
+      <label for="p-larg">Largura máxima do cartão <small>(px, de 280 a 900)</small></label>
+      <input type="number" id="p-larg" value="420" min="280" max="900" step="10">
+      <label for="p-qr">Tamanho do QR Code <small>(px, de 120 a 320)</small></label>
+      <input type="number" id="p-qr" value="180" min="120" max="320" step="10">
+      <label>Cor de destaque</label>
+      <div class="cor-linha"><input type="color" id="p-c1" value="#075E54"><input type="text" id="p-c1-t" value="#075E54"></div>
+      <label>Cor do fundo do cartão</label>
+      <div class="cor-linha"><input type="color" id="p-c2" value="#ffffff"><input type="text" id="p-c2-t" value="#ffffff"></div>
+      <label>Cor do texto</label>
+      <div class="cor-linha"><input type="color" id="p-c3" value="#333333"><input type="text" id="p-c3-t" value="#333333"></div>
+      </fieldset>
+      <fieldset>
+      <legend>Coruja da identidade</legend>
+      <label>Posição no título</label>
+      <div class="radios">
+      <label><input type="radio" name="p-coruja" value="nao"><span>Não usar</span></label>
+      <label><input type="radio" name="p-coruja" value="esq" checked><span>À esquerda</span></label>
+      <label><input type="radio" name="p-coruja" value="dir"><span>À direita</span></label>
+      <label><input type="radio" name="p-coruja" value="ambos"><span>Dos dois lados</span></label>
+      </div>
+      <div id="p-coruja-campos">
+      <label for="p-corujaalt">Altura <small>(px, de 14 a 60)</small></label>
+      <input type="number" id="p-corujaalt" value="30" min="14" max="60" step="1">
+      <label>Cor do corpo</label>
+      <div class="cor-linha"><input type="color" id="p-corujacorpo" value="#ffffff"><input type="text" id="p-corujacorpo-t" value="#ffffff"></div>
+      <label>Cor dos detalhes</label>
+      <div class="cor-linha"><input type="color" id="p-corujadet" value="#075E54"><input type="text" id="p-corujadet-t" value="#075E54"></div>
+      </div>
+      </fieldset>
+      <fieldset>
+      <legend>Quando o link não traz uma cobrança</legend>
+      <label for="p-t5">Página aberta sem link de cobrança</label>
+      <input type="text" id="p-t5" value="Este endereço não está trazendo nenhuma cobrança. Peça o link de pagamento por WhatsApp que a gente manda na hora.">
+      <label for="p-t6">Código da cobrança inválido</label>
+      <input type="text" id="p-t6" value="Este link de pagamento não pôde ser conferido: o código da cobrança chegou alterado ou incompleto. Por segurança não vamos exibir nenhum valor. Peça um link novo por WhatsApp.">
+      <p class="ajuda">A página fica publicamente alcançável: quem abrir o endereço sem link algum precisa encontrar uma mensagem cordial, nunca uma página quebrada.</p>
+      </fieldset>
+    </div>
+  </div>
+
+  <div class="secao"><span class="secao-n">3</span> Esta cobrança</div>
+  <div class="grade">
+    <div>
+      <fieldset>
+      <legend>O que está sendo cobrado</legend>
+      <label for="p-desc">Descrição <small>(o cliente lê isto na página e ela volta na mensagem do WhatsApp)</small></label>
+      <input type="text" id="p-desc" value="" placeholder="Ensaio de família — pacote completo">
+      <label for="p-valor">Valor <small>(em reais; o Pix é sempre em real)</small></label>
+      <input type="text" id="p-valor" value="" placeholder="1200,00">
+      <label for="p-txid">Identificador curto <small>(opcional; só letras e números, até 25 — ajuda a conciliar no extrato)</small></label>
+      <input type="text" id="p-txid" value="" placeholder="ENSAIO2026">
+      <p class="ajuda"><b>A descrição é cosmética.</b> Ela viaja no link em campo próprio e alterá-la não muda um centavo do que é cobrado — o valor está dentro do código Pix, e é de lá que a tela o lê. Não há por que “proteger” a descrição.</p>
+      </fieldset>
+    </div>
+    <div>
+      <fieldset>
+      <legend>PayPal desta cobrança</legend>
+      <div class="radios">
+      <label><input type="radio" name="p-ppmodo" value="sdk" checked><span>Botão do PayPal na página</span></label>
+      <label><input type="radio" name="p-ppmodo" value="link"><span>Link de cobrança criado no PayPal</span></label>
+      <label><input type="radio" name="p-ppmodo" value="nao"><span>Sem PayPal nesta cobrança</span></label>
+      </div>
+      <div id="p-pplink-campo">
+      <label for="p-pplink">Endereço do link criado no PayPal <small>(https, do domínio do PayPal)</small></label>
+      <input type="text" id="p-pplink" value="" placeholder="https://www.paypal.com/ncp/payment/XXXXXXXX">
+      </div>
+      <p class="ajuda"><b>À prova de adulteração:</b> no modo “link criado no PayPal” o valor fica guardado lá, e o cliente não tem como mexer. Custa um passo manual por cobrança e é o modo recomendado para valor alto.</p>
+      </fieldset>
+      <fieldset>
+      <legend>Gerar o link</legend>
+      <div class="acoes"><button class="botao" type="button" id="p-gerarlink">Gerar link desta cobrança</button></div>
+      <p class="ajuda"><b>Mande o link individualmente</b>, nunca em grupo: a pré-visualização de link mostra a descrição e o valor para todo mundo que estiver na conversa.</p>
+      </fieldset>
+    </div>
+  </div>
+
+  <div class="secao"><span class="secao-n">4</span> Biblioteca de presets</div>
+  <div class="grade" id="fcp-p-box"></div>
+
+  <div class="secao"><span class="secao-n">5</span> Prévia e código gerado</div>
+  <div class="acoes" style="margin-bottom:14px">
+    <button class="botao" id="p-gerar">Gerar código da página</button>
+    <button class="botao claro" id="p-atualizar">Atualizar prévia</button>
+    <button class="botao claro" id="p-limpar">Limpar tudo</button>
+  </div>
+  <div class="grade">
+    <div>
+      <div class="pv-area">
+      <div class="c-pv-modos">
+      <span class="rotulo">Ver a página:</span>
+      <button type="button" class="botao mini" id="p-pv-ok" aria-pressed="true">Cobrança válida</button>
+      <button type="button" class="botao mini claro" id="p-pv-adult" aria-pressed="false">Código adulterado</button>
+      <button type="button" class="botao mini claro" id="p-pv-vazio" aria-pressed="false">Sem parâmetros</button>
+      </div>
+      <div id="p-pv-box"></div>
+      </div>
+      <p class="ajuda">A prévia roda o código gerado de verdade: é o mesmo bloco que sai na saída ao lado, executando dentro de um quadro isolado que recebe um <b>endereço simulado</b> com os parâmetros da cobrança da seção 3. Os três botões acima trocam esse endereço — em <b>Código adulterado</b> um dígito do código Pix é trocado, exatamente como aconteceria se alguém mexesse no link. O que ainda difere da página publicada: o QR Code é desenhado por uma biblioteca baixada da internet, então no quadro ele só aparece depois que ela carrega; o botão do PayPal não é o botão de verdade (o SDK não roda na prévia) e sai como desenho; o botão “Já paguei” não abre o WhatsApp aqui; e o quadro não carrega o CSS do tema do site.</p>
+    </div>
+    <div>
+      <div class="saida">
+      <h3>Código 1 — a página de pagamento <small>(componente HTML, cola-se uma vez só)</small>
+      <button class="botao mini" id="p-copy1" style="margin-left:8px">Copiar</button>
+      <span class="aviso-copiado" id="p-cop1">Copiado!</span>
+      </h3>
+      <textarea id="p-out1" readonly spellcheck="false" style="height:300px" placeholder="O código da página aparece aqui."></textarea>
+      </div>
+      <div class="saida">
+      <h3>Código 2 — o link desta cobrança <small>(muda a cada cobrança)</small>
+      <button class="botao mini" id="p-copy2" style="margin-left:8px">Copiar</button>
+      <span class="aviso-copiado" id="p-cop2">Copiado!</span>
+      </h3>
+      <textarea id="p-out2" readonly spellcheck="false" style="height:120px" placeholder="O link desta cobranca aparece aqui."></textarea>
+      <p class="ajuda"><b>As duas saídas têm vidas diferentes:</b> o <b>código 1</b> vai uma vez só para o componente HTML da página fixa; o <b>código 2</b> é gerado a cada cobrança e vai para o cliente. Mudar a descrição ou o valor <b>não</b> exige colar o código 1 de novo.</p>
+      <p class="ajuda"><b>Mexeu na cobrança, a caixa do link esvazia.</b> Trocar a descrição, o valor, o identificador, o endereço da página, o modo de PayPal ou os dados do recebedor apaga o link que estava aqui — para não existir a chance de copiar um link com o valor da cobrança anterior. Clique em <b>Gerar link desta cobrança</b> de novo. Mexer só na aparência ou nos textos do cartão não apaga nada: isso muda o <b>código 1</b>, e aí quem avisa é o painel consolidado.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="instrucoes">
+  <h3>Instrução de uso do código gerado</h3>
+  <p class="ajuda"><b>Uma vez só:</b> crie no Prosite uma página fixa (sugestão: <code>/pagar</code>), ponha nela um <b>componente HTML</b> e cole ali o <b>código 1</b>. Publique. Não há nada para colar na Tag Head nem na Tag Body.</p>
+  <p class="ajuda"><b>A cada cobrança:</b> preencha a seção 3 (descrição, valor e, se quiser, um identificador), clique em <b>Gerar link desta cobrança</b> e mande o <b>código 2</b> ao cliente. Você pode ter <b>quantas cobranças quiser abertas ao mesmo tempo</b>: a página não guarda nada, lê tudo do endereço.</p>
+  <p class="ajuda"><b>O que a página garante, dito sem exagero.</b> O link carrega o código Pix já pronto, com o valor dentro dele. A página confere a verificação interna do código, remonta o código a partir dos <b>seus</b> dados de recebedor e só exibe a cobrança se o resultado for idêntico ao que chegou. Aí ela lê o valor <b>de dentro do código</b> e usa esse mesmo valor na tela e no botão do PayPal. Disso saem três garantias e um limite:</p>
+  <p class="ajuda">1. <b>Tela, Pix e PayPal não podem divergir</b>, porque leem o mesmo lugar — não existe um segundo parâmetro de valor para ficar desatualizado.<br>2. <b>Link mexido na mão é recusado:</b> trocar um dígito quebra a verificação interna do código.<br>3. <b>Link com a chave de outra pessoa é recusado:</b> a remontagem não fecha, então ninguém usa a sua página de pagamento para receber na conta dele.</p>
+  <p class="ajuda"><b>O limite, que nenhum código sem servidor resolve:</b> quem souber recalcular a verificação interna consegue montar um link <b>seu</b> com um valor <b>menor</b>. A página vai exibir esse valor menor — e o banco vai cobrar exatamente ele, porque é o mesmo número. O que ninguém consegue é fazer a tela dizer um valor e o banco cobrar outro. Ou seja: dá para <b>tentar pagar menos</b>, não dá para <b>enganar sobre quanto pagou</b>. É por isso que a regra da casa é <b>conferir o extrato antes de entregar o trabalho</b> — detectar é o que resta onde impedir exigiria um servidor, e este projeto não tem um por decisão.</p>
+  <p class="ajuda"><b>O que continua sendo por sua conta:</b> o Pix estático não confirma pagamento sozinho — ninguém avisa a página quando o dinheiro cai. O botão “Já paguei” serve para o cliente te chamar; a conferência é sua, no extrato.</p>
+  <p class="ajuda"><b>Depois de publicar:</b> abra o endereço da página <b>sem nenhum parâmetro</b> e confirme que aparece a mensagem cordial. Depois abra um link de cobrança de verdade em <b>aba anônima</b> e confira que o valor da tela é o mesmo do aplicativo do banco ao ler o QR Code.</p>
+  </div>
+</div>
+
 </div><!-- /app-esq -->
 
 <!-- ==================== PAINEL CONSOLIDADO (fase 5) ====================
@@ -2048,7 +2259,7 @@ function radio(nome){var r=document.querySelector('input[name="'+nome+'"]:checke
    o valor antigo, que e a divergencia entre tela e estado que este projeto mais evita. E, com
    o valor envenenado dentro de um preset geral, a excecao voltava a cada selecao daquele
    preset.
-   O conserto e no AJUDANTE, nao no chamador: um lugar so, e os grupos de radio das seis abas
+   O conserto e no AJUDANTE, nao no chamador: um lugar so, e os grupos de radio das abas
    (mais os do preset geral) ficam todos protegidos pela mesma linha. getElementsByName com
    comparacao em JavaScript nao interpreta nada -- o valor volta a ser so texto.
    Comparacao pela propriedade .value, e nao pelo atributo: para os radios desta ferramenta e a
@@ -2062,7 +2273,7 @@ function setRadio(nome,val){
   }
 }
 function esc(s){return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'");}
-/* Compartilhadas pelas seis abas. Estavam declaradas dentro do bloco de uma aba
+/* Compartilhadas por todas as abas. Estavam declaradas dentro do bloco de uma aba
    especifica e so funcionavam por hoisting: escHtml nascia na aba Captacao de leads e
    servia a quatro abas; escAttr e escJs nasciam na Contagem; mockPP nascia na TidyCal e
    era chamada pelo Checkout. Aqui em cima o limite "compartilhado x da aba" fica a vista.
@@ -2072,7 +2283,7 @@ function esc(s){return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'");}
    junto (a regra do Prosite ja obriga a concatenacao), mas o trecho afetado muda de lugar
    junto com o bloco. */
 function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-/* escHtml (compartilhada pelas seis abas) so protege texto entre tags -- nao escapa
+/* escHtml (compartilhada por todas as abas) so protege texto entre tags -- nao escapa
    aspas, entao nao serve para montar valor de atributo entre aspas duplas. cfg.cta.url
    e a unica string livre do gerador que vai parar dentro de um atributo (href). Helper
    dedicado em vez de mexer em escHtml, que e usada em outra ~15 lugares como texto de
@@ -2163,6 +2374,273 @@ function corujaJs(ind,ind2,corpo,det){
   }
   return j;
 }
+/* ===== maquinaria do Pix (BR Code): fonte unica =====
+   Ate ago/2026 o payload do Pix era escrito num lugar so -- dentro do gerador do Checkout --,
+   e isso bastava. Com a aba "Link de cobranca" ele passou a ser preciso em TRES lugares: o
+   bloco do carrinho (Checkout), o bloco da pagina de pagamento (que LE o codigo em vez de
+   monta-lo) e a propria ferramenta, que monta o codigo na hora de gerar o link. Tres copias
+   do mesmo TLV e do mesmo CRC seriam tres chances de o payload divergir -- e aqui divergir
+   nao e cosmetico: e o banco recusar o QR sem explicacao, ou pior, cobrar outro valor.
+   O que se unifica e a FONTE QUE ESCREVE, nunca a saida -- mesma decisao de CORUJA_PECAS e de
+   PRECO_MOEDAS. Cada bloco entregue continua levando a propria copia do codigo e nao depende
+   desta ferramenta para nada.
+   O lado da ferramenta nao reescreve as funcoes em JavaScript "de verdade": ele AVALIA a mesma
+   fonte (fcPixApi). Assim nao existe uma segunda implementacao nem por descuido -- o codigo que
+   a ferramenta executa e, caractere por caractere, o que o bloco publicado vai executar.
+   A fonte e literal deste arquivo: nada digitado pelo operador entra nela. */
+var FC_PIX_SRC={};
+FC_PIX_SRC.semAcento=
+  'function semAcento(t,max){\n'+
+  "t=String(t||'');\n"+
+  "try{t=t.normalize('NFD').replace(/[\\u0300-\\u036f]/g,'');}catch(e){}\n"+
+  "t=t.replace(/[^A-Za-z0-9 .,-]/g,' ').replace(/ +/g,' ').trim();\n"+
+  'return t.substring(0,max);\n}\n\n';
+/* O comprimento e SEMPRE calculado do valor (v.length), nunca escrito a mao. E o que impede o
+   gerador de produzir um payload cujo comprimento declarado nao bate com o conteudo -- ver o
+   comentario de lerTlv, do outro lado da mesma moeda. */
+FC_PIX_SRC.tlv=
+  'function tlv(id,v){\n'+
+  'var l=String(v.length);\n'+
+  "if(l.length<2)l='0'+l;\n"+
+  'return id+l+v;\n}\n\n';
+FC_PIX_SRC.crc16=
+  'function crc16(s){\n'+
+  'var c=0xFFFF;\n'+
+  'for(var i=0;i<s.length;i++){\n'+
+  'c^=s.charCodeAt(i)<<8;\n'+
+  'for(var j=0;j<8;j++){c=(c&0x8000)?(((c<<1)^0x1021)&0xFFFF):((c<<1)&0xFFFF);}\n'+
+  '}\n'+
+  'var h=c.toString(16).toUpperCase();\n'+
+  "while(h.length<4)h='0'+h;\n"+
+  'return h;\n}\n\n';
+FC_PIX_SRC.montarPayload=
+  'function montarPayload(valor){\n'+
+  'var nome=semAcento(NOME_RECEBEDOR,25);\n'+
+  'var cid=semAcento(CIDADE,15);\n'+
+  "var txid=String(CODIGO_PEDIDO).replace(/[^A-Za-z0-9]/g,'').substring(0,25)||'***';\n"+
+  "var p=tlv('00','01');\n"+
+  "p+=tlv('26',tlv('00','BR.GOV.BCB.PIX')+tlv('01',CHAVE_PIX));\n"+
+  "p+=tlv('52','0000');\n"+
+  "p+=tlv('53','986');\n"+
+  "p+=tlv('54',valor.toFixed(2));\n"+
+  "p+=tlv('58','BR');\n"+
+  "p+=tlv('59',nome);\n"+
+  "p+=tlv('60',cid);\n"+
+  "p+=tlv('62',tlv('05',txid));\n"+
+  "p+='6304';\n"+
+  'return p+crc16(p);\n}\n\n';
+/* LER um BR Code e o inverso de monta-lo, e e onde mora o defeito silencioso desta aba.
+   Medido na pagina publicada: um campo 54 declarando comprimento 07 para o valor "75.00" (que
+   tem 5 caracteres) faz um leitor por posicao devolver "75.0058" -- sete caracteres, invadindo
+   o campo seguinte. Valor errado, sem erro nenhum, num numero que e dinheiro.
+   Por isso lerTlv percorre campo a campo e exige que a estrutura FECHE EXATAMENTE no fim:
+   comprimento que nao seja dois digitos, valor mais curto que o comprimento declarado ou sobra
+   de bytes no fim derrubam a leitura inteira. Nao ha "melhor esforco" aqui: payload que nao
+   fecha e payload recusado. */
+FC_PIX_SRC.lerTlv=
+  'function lerTlv(s){\n'+
+  'var i=0,out=[],dois,tam,v;\n'+
+  'while(i<s.length){\n'+
+  'if(i+4>s.length)return null;\n'+
+  'dois=s.substr(i+2,2);\n'+
+  'if(!/^[0-9]{2}$/.test(dois))return null;\n'+
+  'tam=parseInt(dois,10);\n'+
+  'v=s.substr(i+4,tam);\n'+
+  'if(v.length!==tam)return null;\n'+
+  'out.push([s.substr(i,2),v]);\n'+
+  'i+=4+tam;\n'+
+  '}\n'+
+  'if(i!==s.length)return null;\n'+
+  'return out;\n}\n\n';
+/* A conferencia inteira de um codigo recebido, em UMA funcao: forma, CRC, e o valor do campo
+   54. Devolve {erro:'...'} ou {ok:true,...}. Quem chama decide o que dizer ao visitante. */
+FC_PIX_SRC.pixLer=
+  'function pixLer(codigo){\n'+
+  "var s=String(codigo||'');\n"+
+  "if(s.length<20)return {erro:'forma'};\n"+
+  /* ASCII imprimivel INCLUINDO o espaco: o campo 59 (nome do recebedor) legitimamente tem
+     espaco -- "Foto Certa" --, e semAcento deixa passar espaco de proposito. A faixa sem
+     espaco e a da CHAVE (pixChaveErro), que e outra coisa: la o espaco no meio e defeito.
+     Trocar uma faixa pela outra recusava todo payload de recebedor com nome composto. */
+  "if(!/^[\\x20-\\x7E]+$/.test(s))return {erro:'forma'};\n"+
+  'var comId=s.substring(0,s.length-4),dado=s.substring(s.length-4);\n'+
+  "if(comId.substring(comId.length-4)!=='6304')return {erro:'forma'};\n"+
+  "if(crc16(comId).toUpperCase()!==dado.toUpperCase())return {erro:'crc'};\n"+
+  'var itens=lerTlv(comId.substring(0,comId.length-4));\n'+
+  "if(!itens)return {erro:'forma'};\n"+
+  'var i,j,mapa={},sub,txid=\'\';\n'+
+  'for(i=0;i<itens.length;i++)if(mapa[itens[i][0]]===undefined)mapa[itens[i][0]]=itens[i][1];\n'+
+  "if(mapa['62']){sub=lerTlv(mapa['62']);if(sub){for(j=0;j<sub.length;j++)if(sub[j][0]==='05')txid=sub[j][1];}}\n"+
+  "var bruto=mapa['54'];\n"+
+  "if(bruto===undefined)return {erro:'semvalor'};\n"+
+  'if(!/^[0-9]{1,10}(\\.[0-9]{1,2})?$/.test(bruto))return {erro:\'semvalor\'};\n'+
+  'var n=parseFloat(bruto);\n'+
+  "if(isNaN(n)||n<=0)return {erro:'semvalor'};\n"+
+  'return {ok:true,valor:n,txid:txid,codigo:s};\n}\n\n';
+/* O lado da FERRAMENTA: as mesmas funcoes, avaliadas a partir da mesma fonte. montar() recebe
+   os quatro valores que o bloco do Checkout le de variaveis globais e devolve a montarPayload
+   pronta -- entao a ferramenta monta o payload pelo caminho exato do carrinho publicado. */
+var fcPixFns=null;
+function fcPixApi(){
+  if(!fcPixFns){
+    fcPixFns=(new Function(
+      FC_PIX_SRC.semAcento+FC_PIX_SRC.tlv+FC_PIX_SRC.crc16+FC_PIX_SRC.lerTlv+FC_PIX_SRC.pixLer+
+      'return {semAcento:semAcento,tlv:tlv,crc16:crc16,lerTlv:lerTlv,pixLer:pixLer,'+
+      'montar:function(CHAVE_PIX,NOME_RECEBEDOR,CIDADE,CODIGO_PEDIDO){'+FC_PIX_SRC.montarPayload+
+      'return montarPayload;}};'))();
+  }
+  return fcPixFns;
+}
+/* ===== formatacao de preco: fonte unica =====
+   Ago/2026: subiu da aba Checkout para ca quando a aba Link de cobranca passou a precisar dela.
+   A regra vivia em dois lugares de corpo equivalente: uFmt (o que ESTA ferramenta mostra na
+   lista de produtos e nos avisos de sinal) e a moedaFmt que ela ESCREVE dentro do carrinho.
+   Os dois concordavam, entao nao havia defeito; o risco e a proxima moeda entrar so num deles
+   e a tela passar a discordar do carrinho publicado -- sem erro, sem aviso.
+   O bloco entregue continua AUTOSSUFICIENTE: ele leva a propria moedaFmt, escrita por
+   fcMoedaFmtGer a partir desta tabela. Unificou-se a fonte que escreve, nunca a saida.
+   Cada linha e [codigo, prefixo]. O real fica FORA da tabela de proposito: ele e o padrao
+   (vale para qualquer codigo que nao esteja listado) e e o unico com virgula decimal. */
+var PRECO_MOEDAS=[['EUR','\u20AC '],['USD','$ ']];
+var PRECO_PADRAO='R$ ';
+function precoFmt(moeda,v){
+  var s=v.toFixed(2),i;
+  for(i=0;i<PRECO_MOEDAS.length;i++)if(moeda===PRECO_MOEDAS[i][0])return PRECO_MOEDAS[i][1]+s;
+  return PRECO_PADRAO+s.replace('.',',');
+}
+/* O codigo colado no Prosite e escrito sem acento e sem caractere fora do ASCII (manual do
+   Prosite, item 10), entao o simbolo do euro sai de la como sequencia \u. Ela e DERIVADA do
+   proprio simbolo, e nao guardada como segunda coluna da tabela: duas grafias do mesmo
+   simbolo sao duas coisas para divergir, que e justamente o que esta unificacao desfaz. */
+function precoJsTexto(t){
+  return String(t).replace(/[^\u0020-\u007E]/g,function(ch){
+    var h=ch.charCodeAt(0).toString(16).toUpperCase();
+    return '\\u'+'0000'.slice(h.length)+h;
+  });
+}
+/* Lado do bloco entregue: a MESMA tabela, escrita como codigo dentro do bloco. */
+function fcMoedaFmtGer(soReal){
+  var c='',i;
+  c+='function moedaFmt(v){\n';
+  c+='var s=v.toFixed(2);\n';
+  /* 'soReal' existe para a aba Link de cobranca: la o Pix manda, o pedido e SEMPRE em real, e
+     as duas linhas de outras moedas seriam codigo morto dentro da pagina publicada. O Checkout
+     chama sem o sinalizador e continua emitindo a tabela inteira, byte a byte como antes. */
+  if(!soReal)for(i=0;i<PRECO_MOEDAS.length;i++)
+    c+="if(MOEDA==='"+PRECO_MOEDAS[i][0]+"')return '"+precoJsTexto(PRECO_MOEDAS[i][1])+"'+s;\n";
+  c+="return '"+PRECO_PADRAO+"'+s.replace('.',',');\n}\n\n";
+  return c;
+}
+
+/* ===== chave Pix: limpeza e limites do padrao BR Code =====
+   NOME_RECEBEDOR e CIDADE ja passavam por semAcento() dentro do bloco entregue; a chave ia
+   crua para o tlv('01', ...). Um espaco nao-quebravel vindo de copiar-e-colar do app do banco
+   sobrevivia ate o payload e o banco recusava o QR sem dizer por que. E o campo 01 do BR Code
+   cabe em 77 caracteres: uma chave maior desestrutura o TLV (o leitor le "01102aaa..." como
+   comprimento 10) enquanto o CRC continua sendo calculado sobre o payload torto -- o QR
+   PARECE valido e so um banco de verdade recusa.
+   Divisao adotada, por POSICAO e nao por tipo de caractere: nas PONTAS tudo que e espaco ou
+   invisivel e removido e devolvido ao campo (ninguem digita isso de proposito, e um espaco a
+   mais no fim nao muda a chave que o operador leu); NO MEIO nada e removido -- espaco comum,
+   TAB, NBSP e zero-width caem todos na mesma recusa com aviso. A primeira versao desta
+   correcao removia NBSP e TAB do meio calada e recusava o espaco comum na mesma posicao: duas
+   entradas visualmente identicas com tratamentos opostos, e a silenciosa reescrevendo no meio
+   de uma credencial de pagamento. Uma regra so, e o aviso menciona a possibilidade de
+   caractere invisivel justamente porque o operador pode nao estar vendo o que esta errado.
+   Tambem recusam: tamanho acima do limite e campo que ficou vazio depois da limpeza.
+   Nao ha regra de formato aqui de proposito: o padrao aceita e-mail, telefone, CPF/CNPJ e
+   chave aleatoria, com formatos diferentes. O limite de caracteres imprimiveis ASCII nao e
+   estetico: tlv() conta com v.length e crc16() com charCodeAt, ambos em unidades UTF-16,
+   enquanto o banco conta bytes UTF-8 -- qualquer caractere fora dessa faixa faz comprimento e
+   CRC discordarem. */
+var PIX_CHAVE_MAX=77;
+function pixLimpar(t){
+  return String(t||'')
+    .replace(/^[\u0000-\u0020\u007F-\u00A0\u00AD\u1680\u2000-\u200F\u2028\u2029\u202F\u205F\u2060\u3000\uFEFF]+/,'')
+    .replace(/[\u0000-\u0020\u007F-\u00A0\u00AD\u1680\u2000-\u200F\u2028\u2029\u202F\u205F\u2060\u3000\uFEFF]+$/,'');
+}
+/* Correcao a vista, no padrao do c-mob: o campo passa a mostrar exatamente a chave que vai
+   para o codigo. So em 'change'/'blur', nunca em 'input'.
+   Recebe o ID porque duas abas tem campo de chave Pix -- Checkout ('u-chave') e Link de
+   cobranca ('p-chave'). Uma copia por aba seria a mesma limpeza em dois lugares, e no dia em
+   que a faixa de invisiveis mudasse so uma delas mudaria. */
+function fcPixChaveAjustar(id){
+  var el=$(id);if(!el)return false;
+  var limpo=pixLimpar(el.value);
+  if(limpo===el.value)return false;
+  el.value=limpo;
+  return true;
+}
+/* 'bruta' e o valor antes da limpeza: chave que so tinha invisiveis merece aviso proprio
+   (senao o operador leria "preencha a chave" com o campo aparentemente preenchido); campo
+   nunca preenchido cai no aviso geral de campos obrigatorios, que ja existia. */
+/* Charset ANTES do tamanho: uma chave de 80 caracteres com emoji reportaria "tem 80
+   caracteres" quando o problema e o emoji -- o operador cortaria a chave certa e continuaria
+   sem QR valido. O defeito mais especifico e o que deve ser nomeado. */
+function pixChaveErro(chave,bruta){
+  if(!chave)return String(bruta||'').length?'A chave Pix so tinha espacos ou caracteres invisiveis (vindos de copiar-e-colar) e ficou vazia depois da limpeza das pontas. Digite a chave novamente.':'';
+  if(!/^[!-~]+$/.test(chave))return 'A chave Pix tem, no meio, um espaco ou um caractere fora do padrao -- pode ser um caractere invisivel que veio junto do copiar-e-colar do app do banco e que voce nao esta vendo. O codigo do QR conta os caracteres em bytes, e qualquer um fora da faixa comum (letras, numeros e sinais, sem espacos) faz o banco recusar o pagamento sem explicacao. Apague o campo e digite a chave de novo.';
+  if(chave.length>PIX_CHAVE_MAX)return 'A chave Pix tem '+chave.length+' caracteres e o padrao do Banco Central aceita no maximo '+PIX_CHAVE_MAX+' no campo da chave. Uma chave maior desmonta o codigo do QR sem que ele pareca invalido: confira se nao colou algo a mais.';
+  return '';
+}
+
+/* ===== o shim do ambiente da previa: fonte unica =====
+   Toda previa que EXECUTA o bloco gerado precisa trocar o ambiente por baixo dele: o
+   armazenamento vira objeto em memoria, para a previa nao sujar as chaves reais da origem da
+   ferramenta nem nascer com estado gasto na segunda abertura. Isso nasceu na Contagem
+   regressiva e foi copiado para Slideshow, Captacao de leads e Checkout -- quatro copias das
+   mesmas vinte e poucas linhas, todas concordando. A quinta copia seria a da aba Link de
+   cobranca, e copia numero cinco e onde uma delas ganha uma regra que as outras nao ganham.
+   Aqui a mecanica passa a ser UMA. O que muda por aba entra por parametro:
+     pref          prefixo do id do aviso ('s', 'l', 'u', 'c', 'p');
+     abre / fecha  as duas metades do texto do aviso, em volta da lista do que falhou;
+     extras        trocas adicionais do ambiente, emitidas logo depois da troca do storage
+                   (Leads: foco e window.open; Link de cobranca: o endereco simulado);
+     conferencias  os testes adicionais que alimentam a lista 'falhou';
+     depois        o que vem DEPOIS do bloco de aviso (Checkout: a sonda do botao PayPal).
+   FALHA DE SHIM TEM DE SER BARULHENTA. O try/catch do bloco gerado nao denuncia um shim que
+   nao instalou: setItem no Storage REAL funciona e nao lanca. Por isso a troca e CONFERIDA
+   (a marca fcPvMemoria, que so o objeto em memoria tem) e, se nao pegou, um aviso vermelho
+   entra no topo do quadro. O bloco entregue continua identico: o shim e do ambiente. */
+function fcPvShim(o){
+  var s='';
+  s+='<scr'+'ipt>\n(function(){\n';
+  s+='  function memoria(){\n';
+  s+='    var d={};\n';
+  s+='    return {\n';
+  s+='      getItem:function(k){k=String(k);return Object.prototype.hasOwnProperty.call(d,k)?d[k]:null;},\n';
+  s+='      setItem:function(k,v){d[String(k)]=String(v);},\n';
+  s+='      removeItem:function(k){delete d[String(k)];},\n';
+  s+='      clear:function(){d={};},\n';
+  s+='      key:function(i){var ks=Object.keys(d);return i<ks.length?ks[i]:null;},\n';
+  s+='      get length(){return Object.keys(d).length;},\n';
+  s+='      fcPvMemoria:true\n';
+  s+='    };\n  }\n';
+  s+='  function trocar(nome){\n';
+  s+='    var falso=memoria();\n';
+  s+='    try{Object.defineProperty(window,nome,{value:falso,configurable:true});return;}catch(e){}\n';
+  s+='    try{Object.defineProperty(Object.getPrototypeOf(window),nome,{value:falso,configurable:true});}catch(e){}\n';
+  s+='  }\n';
+  s+='  function instalado(nome){\n';
+  s+='    try{return !!(window[nome]&&window[nome].fcPvMemoria===true);}catch(e){return false;}\n';
+  s+='  }\n';
+  s+="  trocar('localStorage');trocar('sessionStorage');\n";
+  s+=o.extras||'';
+  s+='  var falhou=[];\n';
+  s+="  if(!instalado('localStorage'))falhou.push('localStorage');\n";
+  s+="  if(!instalado('sessionStorage'))falhou.push('sessionStorage');\n";
+  s+=o.conferencias||'';
+  s+='  if(falhou.length){\n';
+  s+="    var av=document.createElement('div');\n";
+  s+="    av.id='"+o.pref+"-pv-aviso-shim';\n";
+  s+='    av.setAttribute(\'style\',\'background:#8C1D18;color:#FDFBF6;font:600 12px/1.45 -apple-system,BlinkMacSystemFont,sans-serif;padding:8px 12px\');\n';
+  s+="    av.textContent='Aviso da previa: nao foi possivel isolar "+o.abre+"'+falhou.join(' e ')+'"+o.fecha+"';\n";
+  s+='    document.body.appendChild(av);\n';
+  s+='  }\n';
+  s+=o.depois||'';
+  s+='})();\n</scr'+'ipt>\n';
+  return s;
+}
 /* ===== faixa declarada dos campos numericos, compartilhada por quatro abas =====
    Cada aba declara uma tabela de linhas [id, padrao, min, max, inteiro] e nada mais. A MESMA
    linha alimenta os dois lados -- o gerador (fcPreso, o numero que sai no codigo) e a interface
@@ -2173,7 +2651,8 @@ function corujaJs(ind,ind2,corpo,det){
    "1500", porque o "1" viraria o minimo antes do resto chegar.
    Isto comecou como duas copias quase iguais (Bordas e TidyCal) e viraria quatro ao alcancar
    Slideshow e Leads; a quarta copia foi o momento de ter uma implementacao so. A Contagem
-   regressiva entrou por ultimo, na revisao final de ago/2026: hoje as SEIS abas usam esta
+   regressiva entrou por ultimo, na revisao final de ago/2026, e o Link de cobranca ja nasceu
+   dentro dela (P_NUMS): hoje TODAS as abas usam esta
    mecanica, e a tabela dela (C_NUMS) tem os catorze campos numericos da aba. Ficou escrito
    aqui, por tres fases, que ela nao entrava porque "o c-mob dela e um campo unico" --
    afirmacao falsa que sozinha manteve a lacuna aberta, e justamente no comentario que se le
@@ -2244,7 +2723,7 @@ function mockPP(v){
    execCommand era engolida por um catch vazio, o navigator.clipboard e assincrono e o resultado
    dele nunca era conferido, e o aviso era mostrado antes de qualquer um dos dois responder. O
    operador colava conteudo velho no Prosite achando que tinha copiado o novo -- e como isto e
-   helper compartilhado, valia para as seis abas.
+   helper compartilhado, valia para todas as abas.
    Caso realista, sem ma-fe: a ferramenta aberta por um endereco http de rede local (ou por
    file://) nao esta em contexto seguro, entao navigator.clipboard nem existe e o execCommand
    e recusado. Verificado em http://<ip-da-lan>:8865: execCommand devolveu false, clipboard
@@ -2283,8 +2762,19 @@ function copiar(idOut,idAviso){
   }
   fcAvisoCopia(av,FC_COPIA_FALHOU,false,6000);
 }
+function fcAbasIds(){var v=[],i;for(i=0;i<ABAS.length;i++)v.push(ABAS[i].id);return v;}
+/* Quantas abas existem, POR EXTENSO, para as frases da interface. A ferramenta nasceu com
+   seis e a palavra "seis" ficou escrita em catorze mensagens que o operador le -- inclusive
+   na que ele le no instante em que cria um preset geral ("as seis abas nasceram FORA desta
+   pagina") e na que descreve o que o backup leva. Com a setima aba, todas passariam a mentir
+   por um. Numero em mensagem que descreve o proprio sistema sai daqui, e nao da digitacao. */
+var FC_NUM_EXTENSO=['nenhuma','uma','duas','tres','quatro','cinco','seis','sete','oito','nove','dez'];
+function fcAbasTxt(){return FC_NUM_EXTENSO[ABAS.length]||String(ABAS.length);}
+/* A lista das abas vem de ABAS, e nao cravada aqui. Com a lista repetida, acrescentar a
+   setima aba deixava o painel dela sem nunca ser escondido nem marcado como ativo -- uma
+   lista fechada de seis e exatamente onde a setima quebra em silencio. */
 function trocarAba(qual){
-  ['slide','leads','tidy','uni','bor','cnt'].forEach(function(n){
+  fcAbasIds().forEach(function(n){
     var p=$('painel-'+n),a=$('aba-'+n);
     if(p)p.classList.toggle('ativo',n===qual);
     if(a){a.classList.toggle('ativa',n===qual);a.setAttribute('aria-selected',n===qual?'true':'false');}
@@ -2421,7 +2911,7 @@ function prep(nome,abaId,fn,fase){
                   aparecia como opcao de resposta no bloco publicado da Captacao de leads,
                   escapado e inofensivo, mas viajando do arquivo ate a pagina sem ser contado.
                   Com o molde declarado, item que nao tem a forma do item e recusado e SOMADO,
-                  nas seis abas e nao so na do Slideshow. O caminho e por ponto e atravessa
+                  em todas as abas e nao so na do Slideshow. O caminho e por ponto e atravessa
                   lista ('u.prods.ops'), porque o produto real do operador pode nao ter nenhum
                   opcional e deixar o molde de dentro vazio pelo mesmo motivo.
                   O TERCEIRO elemento (so onde o item e objeto) e a chave sem a qual o item nao
@@ -2469,12 +2959,19 @@ var ABAS=[
    pref:'c',fora:[],operacionais:[],resumo:cPresetResumo,redesenhar:cPresetDepois,antesDeSalvar:cPresetAntes,
    listas:[['cmsgs',{texto:'',curta:''},'texto']],
    exemplo:'ex.: Natal 2026 - barra do topo',
-   guarda:'tudo o que está configurado nesta aba — modo e duração da contagem, o código da campanha, as <b>mensagens cadastradas</b>, aparência, posição, extras, coruja, efeitos, movimento, urgência e entrada.'}
+   guarda:'tudo o que está configurado nesta aba — modo e duração da contagem, o código da campanha, as <b>mensagens cadastradas</b>, aparência, posição, extras, coruja, efeitos, movimento, urgência e entrada.'},
+  {id:'cob',  nome:'Link de cobrança',    chaves:['p'],         coleta:pColeta,restaura:pRestaura,
+   pref:'p',fora:[],
+   operacionais:[['chave','a chave Pix'],['nomer','o nome do recebedor'],['cidade','a cidade do recebedor'],['client','o Client ID do PayPal'],['zapnum','o WhatsApp do \u201cJá paguei\u201d']],
+   resumo:pPresetResumo,redesenhar:pPresetDepois,antesDeSalvar:pPresetAntes,
+   naoEmite:['desc','valor','txid','ppmodo','pplink'],
+   exemplo:'ex.: Foto Certa - pagina /pagar',
+   guarda:'tudo o que está configurado nesta aba — os dados de quem recebe, o endereço da página, a aparência, os textos, e também a <b>cobrança que está na tela</b> (descrição, valor e identificador). Aplicar um preset troca também essa cobrança: ele é a fotografia da aba inteira.'}
 ];
 var fcFrag={};       /* ultimo pedaco bom de cada aba, para nao apagar o que a aba quebrada tinha */
 var fcSoLeitura={};  /* abas que falharam ao restaurar: param de coletar do DOM ate recarregar */
 
-/* O estado das seis abas, montado exatamente como ele vai para o armazenamento. Extraido de
+/* O estado de todas as abas, montado exatamente como ele vai para o armazenamento. Extraido de
    salvarEstado na fase 4 porque a exportacao precisa do MESMO objeto: reconstrui-lo por fora
    seria uma segunda montagem do estado, e duas montagens divergem -- e a divergencia aqui
    apareceria como "o backup nao traz o que a ferramenta tem", que e a pior classe de defeito
@@ -2557,7 +3054,7 @@ function corValida(v){return /^#[0-9a-fA-F]{6}$/.test(v);}
    hexadecimal de 6 digitos. Sem isso o valor digitado ia cru para dentro de uma string JS do
    bloco entregue -- um apostrofo bastava para fechar a string e emendar codigo arbitrario no
    carrinho publicado, e a previa (que ja validava) mostrava a cor certa enquanto o codigo
-   levava a errada. Helper novo em vez de mexer em corValida, que as seis abas compartilham.
+   levava a errada. Helper novo em vez de mexer em corValida, que todas as abas compartilham.
    Ago/2026: as abas Bordas e Contagem tinham cada uma a SUA copia desta funcao (bCor e cCor),
    de corpo identico. As tres concordavam, entao nao havia defeito nenhum -- e por isso mesmo
    uma delas podia ganhar uma regra nova (outro formato de cor, outra rede) e as outras duas
@@ -2590,7 +3087,9 @@ var CORES_LIVRES=[['l-corbtn','#25D366'],['l-c1','#075E54'],['l-c2','#ffffff'],[
   ['b-c4','#F7EFDF'],['b-pvcor','#23281F'],
   ['c-cfundo','#0F3A30'],['c-ctexto','#FDFBF6'],['c-cdestaque','#FFC94A'],['c-cborda','#FFC94A'],
   ['c-ctafundo','#FFC94A'],['c-ctatexto','#23281F'],['c-cprog','#FFC94A'],
-  ['c-corujacorpo','#FDFBF6'],['c-corujadet','#FFC94A'],['c-curg','#8C1D18']];
+  ['c-corujacorpo','#FDFBF6'],['c-corujadet','#FFC94A'],['c-curg','#8C1D18'],
+  ['p-c1','#075E54'],['p-c2','#ffffff'],['p-c3','#333333'],
+  ['p-corujacorpo','#ffffff'],['p-corujadet','#075E54']];
 /* Corrige a vista as cores livres de UMA aba, pelo prefixo. Existe porque o mesmo laco ja
    estava copiado em lPresetDepois e uPresetDepois: com quatro abas seriam quatro copias, e
    copia numero tres e onde uma delas ganha uma regra que as outras nao ganham. */
@@ -2611,6 +3110,7 @@ function fcCorRedesenhar(idBase){
   if(p==='u-'){uPreview(true);return;}
   if(p==='b-'){bPreview();return;}
   if(p==='c-'){cPreview(true);return;}
+  if(p==='p-'){pPreview(true);return;}
 }
 document.addEventListener('input',salvarEstado);
 document.addEventListener('change',salvarEstado);
@@ -2618,8 +3118,8 @@ document.addEventListener('change',salvarEstado);
 /* pareia seletor de cor com campo de texto */
 function parearCor(idCor){
   var c=$(idCor),t=$(idCor+'-t');
-  c.addEventListener('input',function(){t.value=c.value;salvarEstado();lBtnPreview();if(/^c-/.test(idCor))cPreview();});
-  t.addEventListener('input',function(){if(corValida(t.value)){c.value=t.value;lBtnPreview();if(/^c-/.test(idCor))cPreview();}});
+  c.addEventListener('input',function(){t.value=c.value;salvarEstado();lBtnPreview();if(/^c-/.test(idCor))cPreview();if(/^p-/.test(idCor))pPreview();});
+  t.addEventListener('input',function(){if(corValida(t.value)){c.value=t.value;lBtnPreview();if(/^c-/.test(idCor))cPreview();if(/^p-/.test(idCor))pPreview();}});
 }
 
 /* ============ biblioteca de presets por aba ============ */
@@ -2882,9 +3382,9 @@ function fcPresetResumo(a,p){
   return t||'configuracao salva desta aba';
 }
 
-/* A secao "Biblioteca de presets" das seis abas e desenhada por esta funcao, e nao copiada
-   seis vezes no HTML: mesma mecanica, mesma aparencia, mesmas palavras -- e uma correcao de
-   texto conserta as seis. O que muda por aba vem do registro ABAS (exemplo de nome, o que a
+/* A secao "Biblioteca de presets" de TODAS as abas e desenhada por esta funcao, e nao copiada
+   uma vez por aba no HTML: mesma mecanica, mesma aparencia, mesmas palavras -- e uma correcao
+   de texto conserta todas. O que muda por aba vem do registro ABAS (exemplo de nome, o que a
    aba guarda, campos operacionais).
 
    ESQUEMA DE ID -- 'fcp-<prefixo da aba>-<papel>', e nunca '<prefixo>-<papel>'.
@@ -2920,7 +3420,7 @@ function fcPresetsMontar(a){
     h+='<p class="ajuda"><b>Dados de contato e pagamento:</b> este preset guarda também '+fcLista(ops)+
        ', como estão na tela. Eles continuam apenas no <b>armazenamento deste navegador</b>, onde já ficam hoje — nada é enviado para lugar nenhum. Se for aplicar este preset numa campanha de outro recebedor, confira esses campos depois de aplicar.</p>';
   }
-  h+='<p class="ajuda"><b>Onde eles ficam:</b> no <b>armazenamento deste navegador</b>, junto com o resto da configuração da ferramenta — mesma regra do estado das seis abas. <b>Não acompanham outro computador</b>, nem outro navegador no mesmo computador, e somem se você limpar os dados do site. Para levar uma configuração adiante, o que viaja é o <b>código gerado</b>, não o preset.</p>';
+  h+='<p class="ajuda"><b>Onde eles ficam:</b> no <b>armazenamento deste navegador</b>, junto com o resto da configuração da ferramenta — mesma regra do estado das '+fcAbasTxt()+' abas. <b>Não acompanham outro computador</b>, nem outro navegador no mesmo computador, e somem se você limpar os dados do site. Para levar uma configuração adiante, o que viaja é o <b>código gerado</b>, não o preset.</p>';
   h+='<p class="ajuda"><b>Nome repetido:</b> salvar com o nome de um preset que já existe <b>substitui</b> aquele preset, depois de confirmar. Não se criam dois com o mesmo nome — a lista identifica o preset pelo nome, e dois iguais deixariam de dizer qual é qual.</p>';
   h+='</fieldset></div>';
   h+='<div><fieldset>';
@@ -2939,9 +3439,9 @@ function fcLista(v){
 }
 
 /* ============ preset geral (fase 3) ============ */
-/* O QUE E. Um preset geral e a configuracao das SEIS abas para UMA pagina de UMA campanha.
-   Ele responde "para qual pagina vai este codigo?" uma vez so, em vez de seis vezes -- seis
-   chances de inconsistencia viram zero. O nome exibido e DERIVADO (campanha + pagina:
+/* O QUE E. Um preset geral e a configuracao de TODAS as abas para UMA pagina de UMA campanha.
+   Ele responde "para qual pagina vai este codigo?" uma vez so, em vez de uma vez por aba --
+   sete chances de inconsistencia viram zero. O nome exibido e DERIVADO (campanha + pagina:
    "Natal 2026 - Hospedeira"), nunca digitado: nome livre impediria a ferramenta de saber que
    duas paginas pertencem a mesma campanha, que e o que sustenta o aviso de divergencia.
 
@@ -2951,7 +3451,7 @@ function fcLista(v){
    gravado, ele entra aqui pela mesma linha.
 
    ONDE MORA, E POR QUE NUM LUGAR SEPARADO. Chave propria no armazenamento:
-   'fcConstrutoresGerais'. A chave 'fcConstrutores' -- o rascunho, o estado das seis abas --
+   'fcConstrutoresGerais'. A chave 'fcConstrutores' -- o rascunho, o estado das abas --
    NAO E TOCADA por esta fase. Isso e o que torna a migracao de risco zero: quem nunca criar um
    preset geral tem exatamente a ferramenta de antes, e um defeito aqui nao pode corromper a
    configuracao das abas, que e o que o operador tem a perder.
@@ -3034,7 +3534,7 @@ function fcgCampanhaLivre(base,pagina){
    MESMA saida que salvarEstado ja usa -- o ultimo pedaco bom lido do armazenamento --, e nao
    um segundo caminho de leitura. Sem isso, a alternativa seria recusar salvar o preset geral
    inteiro por causa de uma aba quebrada, e o operador perderia o trabalho das outras cinco. */
-/* Cache de UMA passagem de desenho: fcgAtualizar le os valores das seis abas tres vezes (selo
+/* Cache de UMA passagem de desenho: fcgAtualizar le os valores das abas tres vezes (selo
    salvo/alterado, marca de origem, divergencia), e cada leitura e um coleta() clonado -- com 46
    fotos na lista do slideshow isso pesa. O cache vive so dentro da passagem (fcgVals e criado e
    destruido por fcgAtualizar) e NUNCA atravessa uma decisao: fcgMotivos chamado por
@@ -3324,7 +3824,7 @@ function fcgPerguntar(titulo,linhas,opcoes,cb){
         tela nao esta guardado em preset geral nenhum. Sempre pergunta.
      2. Preset A -> preset B : se A esta 'salvo', a tela ja e a copia de A e nada se perde;
         troca direto. Se esta 'alterado', pergunta com as tres saidas.
-     3. Preset A -> Rascunho : as seis abas nao sao sobrescritas (a tela continua na tela), mas
+     3. Preset A -> Rascunho : as abas nao sao sobrescritas (a tela continua na tela), mas
         as alteracoes deixam de ter para onde ir. Pergunta assim mesmo, dizendo exatamente
         isso. Os dois campos "Outros codigos meus" sao a excecao e voltam a vazio: eles sao de
         UMA pagina, e o Rascunho nao e uma pagina (ver fcgAdotar). */
@@ -3334,7 +3834,7 @@ function fcgTrocarPara(id){
   if(!atual){
     if(!alvo){fcgAdotar(null);return;}
     fcgPerguntar('Trocar para “'+fcgNome(alvo)+'”?',
-      ['Isto substitui tudo o que está na tela pela configuração guardada em “'+fcgNome(alvo)+'”, nas seis abas.',
+      ['Isto substitui tudo o que está na tela pela configuração guardada em “'+fcgNome(alvo)+'”, nas '+fcAbasTxt()+' abas.',
        'O que está na tela agora é o rascunho e não está guardado em nenhum preset geral. Se quiser mantê-lo, guarde-o primeiro.'],
       [{rotulo:'Guardar a tela como preset geral primeiro',valor:'guardar'},
        {rotulo:'Substituir a tela',valor:'trocar',claro:true},
@@ -3352,7 +3852,7 @@ function fcgTrocarPara(id){
     ['Há alterações na tela que ainda não foram salvas em “'+fcgNome(atual)+'”:',
      motivos,
      alvo?('Trocar substitui a tela pela configuração de “'+fcgNome(alvo)+'”, e estas alterações não voltam.')
-         :'Sair para o Rascunho não mexe nas seis abas — o que está nelas continua lá. O que se perde é o vínculo: estas alterações deixam de ter para onde ser salvas. Os dois campos “Outros códigos meus” voltam a ficar vazios, porque são de uma página só e o Rascunho não é uma página.'],
+         :'Sair para o Rascunho não mexe nas '+fcAbasTxt()+' abas — o que está nelas continua lá. O que se perde é o vínculo: estas alterações deixam de ter para onde ser salvas. Os dois campos “Outros códigos meus” voltam a ficar vazios, porque são de uma página só e o Rascunho não é uma página.'],
     [{rotulo:'Salvar em “'+fcgNome(atual)+'” e trocar',valor:'salvar'},
      {rotulo:alvo?'Descartar e trocar':'Sair sem salvar',valor:'trocar',claro:true},
      {rotulo:'Cancelar',valor:null,claro:true}],
@@ -3506,7 +4006,7 @@ function fcgCriar(){
     FCG.presets.push(p);
     FCG.ativo=p.id;
     fcgGravar();fcgSincronizarCampos();fcgAtualizar();
-    msg='Preset geral “'+fcgNome(p)+'” criado com o que está na tela.\n\nAs seis abas nasceram FORA desta página, de propósito: ligue uma a uma as que esta página realmente usa, no interruptor no topo de cada aba. Os valores de todas continuam guardados.';
+    msg='Preset geral “'+fcgNome(p)+'” criado com o que está na tela.\n\nAs '+fcAbasTxt()+' abas nasceram FORA desta página, de propósito: ligue uma a uma as que esta página realmente usa, no interruptor no topo de cada aba. Os valores de todas continuam guardados.';
     if(limpou)msg+='\n\nOs dois campos “Outros códigos meus” nasceram VAZIOS: eles são de uma página só e não vêm da página anterior. O que estava neles continua guardado no preset geral de onde você veio.';
     alert(msg);
   }
@@ -3530,7 +4030,7 @@ function fcgApagar(){
   if(!p){alert('Nenhum preset geral selecionado.');return;}
   for(i=0;i<ABAS.length;i++){a=ABAS[i];if(p.abas[a.id]&&p.abas[a.id].ativa)ligadas.push(a.nome);}
   if(!confirm('Apagar o preset geral “'+fcgNome(p)+'”?\n\n'+
-    'Some a fotografia das seis abas guardada nele'+(ligadas.length?(', com estas ligadas nesta página: '+fcLista(ligadas)):'')+
+    'Some a fotografia das '+fcAbasTxt()+' abas guardada nele'+(ligadas.length?(', com estas ligadas nesta página: '+fcLista(ligadas)):'')+
     ', mais os “Outros códigos meus” desta página. Isto não volta.\n\n'+
     'O que está na tela agora NÃO é apagado: continua na tela, como rascunho. Nenhum código já colado no site é afetado.'))return;
   for(i=0;i<FCG.presets.length;i++){if(FCG.presets[i].id===p.id){FCG.presets.splice(i,1);break;}}
@@ -3543,7 +4043,7 @@ function fcgDescartar(){
   motivos=fcgMotivos();
   if(!motivos.length){alert('Não há alterações: a tela já confere com “'+fcgNome(p)+'”.');return;}
   if(!confirm('Descartar as alterações e voltar a “'+fcgNome(p)+'”?\n\n'+
-    'O que se perde:\n\u2022 '+motivos.join('\n\u2022 ')+'\n\nIsto reescreve as seis abas com a configuração guardada no preset. Não volta.'))return;
+    'O que se perde:\n\u2022 '+motivos.join('\n\u2022 ')+'\n\nIsto reescreve as '+fcAbasTxt()+' abas com a configuração guardada no preset. Não volta.'))return;
   fcgAdotar(p);
 }
 
@@ -3804,7 +4304,7 @@ function fcgAtualizar(){
       })(ABAS[i]);
     }
     /* O painel consolidado (fase 5) entra DENTRO deste try, e nao num listener proprio, por
-       dois motivos: ele le as mesmas seis abas (aproveita o cache fcgVals desta passagem) e
+       dois motivos: ele le as mesmas abas (aproveita o cache fcgVals desta passagem) e
        depende exatamente do mesmo gatilho -- quem acorda a barra e o salvarEstado, por onde
        toda mudanca de valor desta ferramenta passa. Try proprio: um defeito no painel nao
        pode derrubar o desenho da barra nem dos interruptores. */
@@ -3813,7 +4313,7 @@ function fcgAtualizar(){
   }finally{fcgVals=null;}
 }
 /* Timer UNICO, cancelado antes de reagendar. Chamado por salvarEstado, entao cobre toda
-   mudanca de valor da ferramenta. O redesenho le as seis abas (fcPresetCapturar em cada uma), e
+   mudanca de valor da ferramenta. O redesenho le as abas (fcPresetCapturar em cada uma), e
    fazer isso a cada tecla com 46 fotos na lista custa caro sem nada ganhar: o selo pode chegar
    250 ms depois. O que NAO pode chegar atrasado e a decisao de bloquear uma troca -- por isso
    fcgTrocarPara chama fcgMotivos() na hora, e nunca le o selo. */
@@ -3853,8 +4353,8 @@ function fcgIniciar(){
 
 /* ============ backup: exportar e importar (fase 4) ============ */
 /* O QUE E. Dois botoes de exportar e um de importar, no painel de detalhes do preset geral.
-   "Exportar tudo" leva os presets gerais, as seis bibliotecas de presets de aba e o rascunho
-   (o estado das seis abas). "Exportar este preset geral" leva UMA campanha-pagina, para
+   "Exportar tudo" leva os presets gerais, as bibliotecas de presets de cada aba e o rascunho
+   (o estado de todas elas). "Exportar este preset geral" leva UMA campanha-pagina, para
    repassar. Em cada um, o operador escolhe na hora se os dados de contato e pagamento vao
    junto -- e O NOME DO ARQUIVO DIZ QUAL E ('-com-dados' / '-sem-dados'). O nome e a
    salvaguarda: e por ele que se decide de relance se aquele arquivo pode ser enviado a alguem.
@@ -3887,6 +4387,7 @@ var FCX_VERSAO=1;
 /* Tetos. Existem para que arquivo enorme, fundo ou hostil nao trave a ferramenta, e sao
    folgados o bastante para nao alcancar uso real: a maior configuracao medida -- 46 fotos,
    6 produtos com 18 opcionais, 5 cupons, 5 mensagens e tres presets em cada uma das seis
+   bibliotecas de entao
    bibliotecas -- da ~91 KB de JSON (o armazenamento dela sao 59 KB; o arquivo e maior porque
    sai indentado). O numero vem acompanhado do que ha dentro dele de proposito: "a maior
    configuracao" sem dizer qual e um numero que nao da para conferir, e foi assim que esta
@@ -3988,7 +4489,7 @@ function fcxConformar(tpl,v,prof,conta){
 }
 function fcxChaveDaAba(a,c){var j;for(j=0;j<a.chaves.length;j++){if(a.chaves[j]===c)return true;}return false;}
 /* Chave de topo que nao pertence a ABA NENHUMA. So o que vem embrulhado como "valores de uma
-   aba" e conferido assim: o RASCUNHO e o estado das seis juntas, e ali as chaves das outras
+   aba" e conferido assim: o RASCUNHO e o estado de todas juntas, e ali as chaves das outras
    cinco sao esperadas -- conta-las como sobra daria cinco descartes por aba a cada importacao,
    um numero falso justamente na linha que existe para o operador confiar no numero. */
 function fcxContarEstranhas(a,valores,conta){
@@ -3999,7 +4500,7 @@ function fcxContarEstranhas(a,valores,conta){
   }
 }
 /* Cache do molde, valido durante UMA leitura de arquivo (fcxPlano cria e destroi). Sem ele,
-   um backup com dezenas de presets gerais mandaria fazer um coleta() clonado das seis abas por
+   um backup com dezenas de presets gerais mandaria fazer um coleta() clonado de todas as abas por
    preset -- com 46 fotos na lista do slideshow, e o tipo de custo que trava a ferramenta na
    hora em que ela mais precisa parecer confiavel. O molde nao muda durante a leitura: nada e
    escrito na tela antes de as duas confirmacoes terem resposta. */
@@ -4234,7 +4735,7 @@ function fcxPerguntarDados(titulo,linhas,nomeCom,nomeSem,cb){
 }
 function fcxExportarTudo(){
   fcxPerguntarDados('Exportar tudo',
-    ['O arquivo leva TUDO o que a ferramenta guarda neste navegador: os presets gerais, as bibliotecas de presets das seis abas e o rascunho (a configuração que está na tela agora). É o backup completo.'],
+    ['O arquivo leva TUDO o que a ferramenta guarda neste navegador: os presets gerais, as bibliotecas de presets das '+fcAbasTxt()+' abas e o rascunho (a configuração que está na tela agora). É o backup completo.'],
     fcxNomeTudo(true),fcxNomeTudo(false),
     function(comDados){
       var o;
@@ -4250,14 +4751,14 @@ function fcxExportarTudo(){
         return;
       }
       if(fcxBaixar(fcxNomeTudo(comDados),JSON.stringify(o,null,2)))
-        fcxAviso('Arquivo gerado: '+fcxNomeTudo(comDados)+' — '+FCG.presets.length+' preset(s) geral(is), as seis bibliotecas de aba e o rascunho.');
+        fcxAviso('Arquivo gerado: '+fcxNomeTudo(comDados)+' — '+FCG.presets.length+' preset(s) geral(is), as '+fcAbasTxt()+' bibliotecas de aba e o rascunho.');
     });
 }
 function fcxExportarUm(){
   var p=fcgAtivo();
   if(!p){alert('Nenhum preset geral selecionado. Selecione a campanha e a página na barra acima, ou use “Exportar tudo” para levar o backup completo.');return;}
   fcxPerguntarDados('Exportar “'+fcgNome(p)+'”',
-    ['O arquivo leva SÓ este preset geral — a configuração das seis abas para a página '+fcgPaginaRotulo(p.pagina)+' da campanha “'+p.campanha+'”, com as caixas “Outros códigos meus” dela. É o que serve para repassar uma campanha.',
+    ['O arquivo leva SÓ este preset geral — a configuração das '+fcAbasTxt()+' abas para a página '+fcgPaginaRotulo(p.pagina)+' da campanha “'+p.campanha+'”, com as caixas “Outros códigos meus” dela. É o que serve para repassar uma campanha.',
      'Não leva as bibliotecas de presets das abas nem o rascunho. Se uma aba deste preset veio de um preset de aba, a marca de origem viaja junto e, no computador que receber, ela vai dizer que a origem não existe ali — os valores continuam inteiros de qualquer jeito, porque o preset geral guarda uma cópia.'],
     fcxNomeUm(p,true),fcxNomeUm(p,false),
     function(comDados){
@@ -4465,7 +4966,7 @@ function fcxConfirmar(plano,nomeArq){
   itens.push(colidemG+' preset(s) geral(is) que já existem aqui'+(nomesG.length?(': '+fcLista(nomesG)):''));
   itens.push(novosA+' preset(s) de aba novo(s)');
   itens.push(colidemA+' preset(s) de aba com nome já usado');
-  if(plano.rascunho)itens.push('o rascunho — a configuração das seis abas que estava na tela quando o backup foi feito');
+  if(plano.rascunho)itens.push('o rascunho — a configuração das '+fcAbasTxt()+' abas que estava na tela quando o backup foi feito');
   if(plano.conta.descartados)itens.push(plano.conta.descartados+' item(ns) do arquivo NÃO foram reconhecidos e ficam de fora');
   if(plano.conta.ajustados)itens.push(plano.conta.ajustados+' nome(s) longo(s) demais foram encurtados');
   linhas.push(itens);
@@ -4495,8 +4996,8 @@ function fcxConfirmar(plano,nomeArq){
 }
 function fcxPerguntarRascunho(plano,politica){
   var p=fcgAtivo(),motivos=p?fcgMotivos():[],linhas=[];
-  linhas.push('O arquivo também traz o RASCUNHO: a configuração das seis abas como estava na tela quando o backup foi feito.');
-  linhas.push('Aplicar substitui o que está na tela agora, nas seis abas — e também qual preset geral está selecionado, quais abas estão ligadas nele e as caixas “Outros códigos meus”.');
+  linhas.push('O arquivo também traz o RASCUNHO: a configuração das '+fcAbasTxt()+' abas como estava na tela quando o backup foi feito.');
+  linhas.push('Aplicar substitui o que está na tela agora, nas '+fcAbasTxt()+' abas — e também qual preset geral está selecionado, quais abas estão ligadas nele e as caixas “Outros códigos meus”.');
   if(p&&motivos.length){
     linhas.push('A tela tem alterações que ainda não foram salvas em “'+fcgNome(p)+'”, e elas não voltam:');
     linhas.push(motivos);
@@ -4890,7 +5391,7 @@ function sDel(i){sImgs.splice(i,1);sRender();salvarEstado();sPreview();sSaidaVen
    sImpAplicar), e nao so para as que esvaziam: a lista e a unica parte desta aba que o bloco
    gerado reproduz LITERALMENTE (o vetor de url e legenda, na ordem), entao lista mudada e
    bloco que nomeia foto que nao esta mais la, ou na ordem errada. Mudar o intervalo tambem
-   deixa a caixa velha -- isso e verdade nas seis abas e nao se conserta aqui sozinho.
+   deixa a caixa velha -- isso e verdade em todas as abas e nao se conserta aqui sozinho.
    Nao mexe na previa: ela roda o gerador a cada mudanca e ja esta certa. */
 function sSaidaVence(){
   var o=$('s-out');
@@ -5413,46 +5914,9 @@ function sCfg(){
    sem ninguem notar. Trocar localStorage e sessionStorage por objetos em memoria custa nada e
    fecha a porta antes. */
 function sPvShim(){
-  var s='';
-  s+='<scr'+'ipt>\n(function(){\n';
-  s+='  function memoria(){\n';
-  s+='    var d={};\n';
-  s+='    return {\n';
-  s+='      getItem:function(k){k=String(k);return Object.prototype.hasOwnProperty.call(d,k)?d[k]:null;},\n';
-  s+='      setItem:function(k,v){d[String(k)]=String(v);},\n';
-  s+='      removeItem:function(k){delete d[String(k)];},\n';
-  s+='      clear:function(){d={};},\n';
-  s+='      key:function(i){var ks=Object.keys(d);return i<ks.length?ks[i]:null;},\n';
-  s+='      get length(){return Object.keys(d).length;},\n';
-  /* marca que so o objeto em memoria tem: e assim que a conferencia abaixo distingue o shim
-     instalado do Storage real, sem depender de instanceof nem do nome da classe. */
-  s+='      fcPvMemoria:true\n';
-  s+='    };\n  }\n';
-  s+='  function trocar(nome){\n';
-  s+='    var falso=memoria();\n';
-  s+='    try{Object.defineProperty(window,nome,{value:falso,configurable:true});return;}catch(e){}\n';
-  s+='    try{Object.defineProperty(Object.getPrototypeOf(window),nome,{value:falso,configurable:true});}catch(e){}\n';
-  s+='  }\n';
-  s+='  function instalado(nome){\n';
-  s+='    try{return !!(window[nome]&&window[nome].fcPvMemoria===true);}catch(e){return false;}\n';
-  s+='  }\n';
-  s+="  trocar('localStorage');trocar('sessionStorage');\n";
-  /* Falha silenciosa aqui e pior que falha barulhenta: setItem no Storage REAL funciona e nao
-     lanca, entao um shim que nao pegasse nao produziria erro nenhum -- so sujeira nas chaves da
-     ferramenta, descoberta tarde. A previa confere e avisa na cara do operador. */
-  s+='  var falhou=[];\n';
-  s+="  if(!instalado('localStorage'))falhou.push('localStorage');\n";
-  s+="  if(!instalado('sessionStorage'))falhou.push('sessionStorage');\n";
-  s+='  if(falhou.length){\n';
-  s+="    var av=document.createElement('div');\n";
-  s+="    av.id='s-pv-aviso-shim';\n";
-  s+='    av.setAttribute(\'style\',\'background:#8C1D18;color:#FDFBF6;font:600 12px/1.45 -apple-system,BlinkMacSystemFont,sans-serif;padding:8px 12px\');\n';
-  s+="    av.textContent='Aviso da previa: nao foi possivel isolar o '+falhou.join(' e ')+" +
-     "' deste quadro. A previa esta gravando nas chaves reais do navegador. O codigo gerado ao lado nao e afetado.';\n";
-  s+='    document.body.appendChild(av);\n';
-  s+='  }\n';
-  s+='})();\n</scr'+'ipt>\n';
-  return s;
+  return fcPvShim({pref:'s',
+    abre:'o ',
+    fecha:' deste quadro. A previa esta gravando nas chaves reais do navegador. O codigo gerado ao lado nao e afetado.'});
 }
 /* Sem conteudo abaixo do slideshow nao da para ver que a pagina continua rolando enquanto o
    dedo arrasta na diagonal -- que e justamente o que o recurso de arrastar nao pode quebrar.
@@ -6723,45 +7187,15 @@ function lAncora(v){
    Storage real nao lanca, focus() nao lanca e window.open nao lanca -- as tres falhariam
    caladas, que e o unico jeito de falhar que este projeto nao aceita. */
 function lPvShim(){
-  var s='';
-  s+='<scr'+'ipt>\n(function(){\n';
-  s+='  function memoria(){\n';
-  s+='    var d={};\n';
-  s+='    return {\n';
-  s+='      getItem:function(k){k=String(k);return Object.prototype.hasOwnProperty.call(d,k)?d[k]:null;},\n';
-  s+='      setItem:function(k,v){d[String(k)]=String(v);},\n';
-  s+='      removeItem:function(k){delete d[String(k)];},\n';
-  s+='      clear:function(){d={};},\n';
-  s+='      key:function(i){var ks=Object.keys(d);return i<ks.length?ks[i]:null;},\n';
-  s+='      get length(){return Object.keys(d).length;},\n';
-  s+='      fcPvMemoria:true\n';
-  s+='    };\n  }\n';
-  s+='  function trocar(nome){\n';
-  s+='    var falso=memoria();\n';
-  s+='    try{Object.defineProperty(window,nome,{value:falso,configurable:true});return;}catch(e){}\n';
-  s+='    try{Object.defineProperty(Object.getPrototypeOf(window),nome,{value:falso,configurable:true});}catch(e){}\n';
-  s+='  }\n';
-  s+='  function instalado(nome){\n';
-  s+='    try{return !!(window[nome]&&window[nome].fcPvMemoria===true);}catch(e){return false;}\n';
-  s+='  }\n';
-  s+="  trocar('localStorage');trocar('sessionStorage');\n";
-  s+='  try{HTMLElement.prototype.focus=function(){};HTMLElement.prototype.fcPvSemFoco=true;}catch(e){}\n';
-  s+='  try{window.open=function(){return null;};window.open.fcPvSemAbrir=true;}catch(e){}\n';
-  s+='  var falhou=[];\n';
-  s+="  if(!instalado('localStorage'))falhou.push('localStorage');\n";
-  s+="  if(!instalado('sessionStorage'))falhou.push('sessionStorage');\n";
-  s+='  try{if(!HTMLElement.prototype.fcPvSemFoco)falhou.push(\'foco automatico\');}catch(e){falhou.push(\'foco automatico\');}\n';
-  s+='  try{if(!window.open.fcPvSemAbrir)falhou.push(\'abertura de aba nova\');}catch(e){falhou.push(\'abertura de aba nova\');}\n';
-  s+='  if(falhou.length){\n';
-  s+="    var av=document.createElement('div');\n";
-  s+="    av.id='l-pv-aviso-shim';\n";
-  s+='    av.setAttribute(\'style\',\'background:#8C1D18;color:#FDFBF6;font:600 12px/1.45 -apple-system,BlinkMacSystemFont,sans-serif;padding:8px 12px\');\n';
-  s+="    av.textContent='Aviso da previa: nao foi possivel isolar '+falhou.join(' e ')+" +
-     "' neste quadro. A previa pode gravar nas chaves reais do navegador, roubar o cursor do formulario ao lado ou abrir o WhatsApp numa aba nova. O codigo gerado ao lado nao e afetado.';\n";
-  s+='    document.body.appendChild(av);\n';
-  s+='  }\n';
-  s+='})();\n</scr'+'ipt>\n';
-  return s;
+  return fcPvShim({pref:'l',
+    /* Duas trocas a mais que as outras abas: o bloco de Leads da foco ao primeiro campo do
+       pop-up (roubaria o cursor do formulario da ferramenta) e abre o WhatsApp em aba nova. */
+    extras:'  try{HTMLElement.prototype.focus=function(){};HTMLElement.prototype.fcPvSemFoco=true;}catch(e){}\n'+
+           '  try{window.open=function(){return null;};window.open.fcPvSemAbrir=true;}catch(e){}\n',
+    conferencias:'  try{if(!HTMLElement.prototype.fcPvSemFoco)falhou.push(\'foco automatico\');}catch(e){falhou.push(\'foco automatico\');}\n'+
+                 '  try{if(!window.open.fcPvSemAbrir)falhou.push(\'abertura de aba nova\');}catch(e){falhou.push(\'abertura de aba nova\');}\n',
+    abre:'',
+    fecha:' neste quadro. A previa pode gravar nas chaves reais do navegador, roubar o cursor do formulario ao lado ou abrir o WhatsApp numa aba nova. O codigo gerado ao lado nao e afetado.'});
 }
 /* Sem conteudo abaixo nao da para ver o botao flutuante se comportando como fixo enquanto a
    pagina rola -- que e justamente o que a distancia do rodape configura. Blocos cinzentos e
@@ -7065,7 +7499,7 @@ function tGerar(){
   c+='<scr'+'ipt src="https://asset-tidycal.b-cdn.net/js/embed.js" async></scr'+'ipt>\n\n';
   /* Movimento reduzido: desliga o que ESTE bloco criou e nada mais -- a unica animacao daqui
      e a transicao de altura do iframe quando o modal do TidyCal abre e fecha. Era a unica das
-     seis abas sem esta guarda. O seletor repete a especificidade da regra de cima e vem
+     seis abas de entao sem esta guarda. O seletor repete a especificidade da regra de cima e vem
      depois, entao vence sem !important. Com a transicao desligada o modal continua abrindo:
      o que some e a passagem animada da altura. */
   c+='<sty'+'le>\n  iframe.tidycal-embed { transition: min-height 0.25s ease; }\n'+
@@ -7204,7 +7638,7 @@ function uPresetDepois(){
   if(fcCoresAjustar('u-'))mudou=true;
   /* a chave Pix guardada num preset antigo pode trazer invisiveis do copiar-e-colar: mesma
      limpeza a vista que a carga faz */
-  if(uChaveAjustar())mudou=true;
+  if(fcPixChaveAjustar('u-chave'))mudou=true;
   if(mudou)salvarEstado();
   uProdRender();uCpRender();uToggles();uPvBotoes();uPreview(true);
 }
@@ -7256,48 +7690,11 @@ function uQtdLigada(prods){
   for(i=0;i<prods.length;i++)if(uQtdItens(prods[i]))return true;
   return false;
 }
-/* ===== formatacao de preco: fonte unica =====
-   A regra vivia em dois lugares de corpo equivalente: uFmt (o que ESTA ferramenta mostra na
-   lista de produtos e nos avisos de sinal) e a moedaFmt que ela ESCREVE dentro do carrinho.
-   Os dois concordavam, entao nao havia defeito; o risco e a proxima moeda entrar so num deles
-   e a tela passar a discordar do carrinho publicado -- sem erro, sem aviso.
-   O bloco entregue continua AUTOSSUFICIENTE: ele leva a propria moedaFmt, escrita por
-   uMoedaFmtGer a partir desta tabela. Unificou-se a fonte que escreve, nunca a saida.
-   Cada linha e [codigo, prefixo]. O real fica FORA da tabela de proposito: ele e o padrao
-   (vale para qualquer codigo que nao esteja listado) e e o unico com virgula decimal. */
-var PRECO_MOEDAS=[['EUR','\u20AC '],['USD','$ ']];
-var PRECO_PADRAO='R$ ';
-function precoFmt(moeda,v){
-  var s=v.toFixed(2),i;
-  for(i=0;i<PRECO_MOEDAS.length;i++)if(moeda===PRECO_MOEDAS[i][0])return PRECO_MOEDAS[i][1]+s;
-  return PRECO_PADRAO+s.replace('.',',');
-}
-/* O codigo colado no Prosite e escrito sem acento e sem caractere fora do ASCII (manual do
-   Prosite, item 10), entao o simbolo do euro sai de la como sequencia \u. Ela e DERIVADA do
-   proprio simbolo, e nao guardada como segunda coluna da tabela: duas grafias do mesmo
-   simbolo sao duas coisas para divergir, que e justamente o que esta unificacao desfaz. */
-function precoJsTexto(t){
-  return String(t).replace(/[^\u0020-\u007E]/g,function(ch){
-    var h=ch.charCodeAt(0).toString(16).toUpperCase();
-    return '\\u'+'0000'.slice(h.length)+h;
-  });
-}
 /* Lado da ferramenta. So o Checkout escolhe moeda, e so quando o PayPal e a UNICA forma de
    pagamento -- com Pix junto, o pedido e sempre em real. */
 function uFmt(v){
   return precoFmt((radio('u-metodo')==='paypal')?radio('u-moeda'):'BRL',v);
 }
-/* Lado do bloco entregue: a MESMA tabela, escrita como codigo dentro do carrinho. */
-function uMoedaFmtGer(){
-  var c='',i;
-  c+='function moedaFmt(v){\n';
-  c+='var s=v.toFixed(2);\n';
-  for(i=0;i<PRECO_MOEDAS.length;i++)
-    c+="if(MOEDA==='"+PRECO_MOEDAS[i][0]+"')return '"+precoJsTexto(PRECO_MOEDAS[i][1])+"'+s;\n";
-  c+="return '"+PRECO_PADRAO+"'+s.replace('.',',');\n}\n\n";
-  return c;
-}
-
 /* ===== opcionais do produto em edicao ===== */
 /* Correcao a vista dos dois editores em linha da aba (o de opcionais e o de cupons). Mesma regra
    do resto da ferramenta: em 'change'/'blur', nunca em 'input'. */
@@ -7537,39 +7934,10 @@ document.addEventListener('change',function(e){
       previa antiga ja usava (mockPP), com etiqueta dizendo que e desenho. O bloco continua
       pedindo o SDK exatamente como na pagina publicada; quem responde e o ambiente. */
 function uPvShim(cfg){
+  /* A sonda do botao PayPal e a unica coisa desta previa que nao e do nucleo compartilhado:
+     ela e emitida DEPOIS do bloco de aviso, por isso entra em 'depois'. O restante -- storage
+     em memoria e a conferencia barulhenta -- vem de fcPvShim, igual as outras quatro abas. */
   var s='';
-  s+='<scr'+'ipt>\n(function(){\n';
-  s+='  function memoria(){\n';
-  s+='    var d={};\n';
-  s+='    return {\n';
-  s+='      getItem:function(k){k=String(k);return Object.prototype.hasOwnProperty.call(d,k)?d[k]:null;},\n';
-  s+='      setItem:function(k,v){d[String(k)]=String(v);},\n';
-  s+='      removeItem:function(k){delete d[String(k)];},\n';
-  s+='      clear:function(){d={};},\n';
-  s+='      key:function(i){var ks=Object.keys(d);return i<ks.length?ks[i]:null;},\n';
-  s+='      get length(){return Object.keys(d).length;},\n';
-  s+='      fcPvMemoria:true\n';
-  s+='    };\n  }\n';
-  s+='  function trocar(nome){\n';
-  s+='    var falso=memoria();\n';
-  s+='    try{Object.defineProperty(window,nome,{value:falso,configurable:true});return;}catch(e){}\n';
-  s+='    try{Object.defineProperty(Object.getPrototypeOf(window),nome,{value:falso,configurable:true});}catch(e){}\n';
-  s+='  }\n';
-  s+='  function instalado(nome){\n';
-  s+='    try{return !!(window[nome]&&window[nome].fcPvMemoria===true);}catch(e){return false;}\n';
-  s+='  }\n';
-  s+="  trocar('localStorage');trocar('sessionStorage');\n";
-  s+='  var falhou=[];\n';
-  s+="  if(!instalado('localStorage'))falhou.push('localStorage');\n";
-  s+="  if(!instalado('sessionStorage'))falhou.push('sessionStorage');\n";
-  s+='  if(falhou.length){\n';
-  s+="    var av=document.createElement('div');\n";
-  s+="    av.id='u-pv-aviso-shim';\n";
-  s+='    av.setAttribute(\'style\',\'background:#8C1D18;color:#FDFBF6;font:600 12px/1.45 -apple-system,BlinkMacSystemFont,sans-serif;padding:8px 12px\');\n';
-  s+="    av.textContent='Aviso da previa: nao foi possivel isolar o '+falhou.join(' e ')+" +
-     "' deste quadro. A previa esta gravando nas chaves reais do navegador. O codigo gerado ao lado nao e afetado.';\n";
-  s+='    document.body.appendChild(av);\n';
-  s+='  }\n';
   if(cfg.usaPP){
     /* O botao do PayPal e desenho, mas o que importa dele NAO e: o shim guarda a configuracao
        que o bloco passou para paypal.Buttons e a EXERCITA a cada mudanca do carrinho --
@@ -7642,8 +8010,10 @@ function uPvShim(cfg){
     s+='    return inserir.call(document.head,n);\n';
     s+='  };\n';
   }
-  s+='})();\n</scr'+'ipt>\n';
-  return s;
+  return fcPvShim({pref:'u',
+    abre:'o ',
+    fecha:' deste quadro. A previa esta gravando nas chaves reais do navegador. O codigo gerado ao lado nao e afetado.',
+    depois:s});
 }
 /* Sem conteudo abaixo do carrinho nao da para ver onde ele termina nem rolar ate a area do Pix
    depois de gerar. Blocos cinzentos e mudos, de proposito. */
@@ -7753,55 +8123,6 @@ document.addEventListener('change',function(e){
   if(al)uPreview();
 });
 
-/* ===== chave Pix: limpeza e limites do padrao BR Code =====
-   NOME_RECEBEDOR e CIDADE ja passavam por semAcento() dentro do bloco entregue; a chave ia
-   crua para o tlv('01', ...). Um espaco nao-quebravel vindo de copiar-e-colar do app do banco
-   sobrevivia ate o payload e o banco recusava o QR sem dizer por que. E o campo 01 do BR Code
-   cabe em 77 caracteres: uma chave maior desestrutura o TLV (o leitor le "01102aaa..." como
-   comprimento 10) enquanto o CRC continua sendo calculado sobre o payload torto -- o QR
-   PARECE valido e so um banco de verdade recusa.
-   Divisao adotada, por POSICAO e nao por tipo de caractere: nas PONTAS tudo que e espaco ou
-   invisivel e removido e devolvido ao campo (ninguem digita isso de proposito, e um espaco a
-   mais no fim nao muda a chave que o operador leu); NO MEIO nada e removido -- espaco comum,
-   TAB, NBSP e zero-width caem todos na mesma recusa com aviso. A primeira versao desta
-   correcao removia NBSP e TAB do meio calada e recusava o espaco comum na mesma posicao: duas
-   entradas visualmente identicas com tratamentos opostos, e a silenciosa reescrevendo no meio
-   de uma credencial de pagamento. Uma regra so, e o aviso menciona a possibilidade de
-   caractere invisivel justamente porque o operador pode nao estar vendo o que esta errado.
-   Tambem recusam: tamanho acima do limite e campo que ficou vazio depois da limpeza.
-   Nao ha regra de formato aqui de proposito: o padrao aceita e-mail, telefone, CPF/CNPJ e
-   chave aleatoria, com formatos diferentes. O limite de caracteres imprimiveis ASCII nao e
-   estetico: tlv() conta com v.length e crc16() com charCodeAt, ambos em unidades UTF-16,
-   enquanto o banco conta bytes UTF-8 -- qualquer caractere fora dessa faixa faz comprimento e
-   CRC discordarem. */
-var PIX_CHAVE_MAX=77;
-function pixLimpar(t){
-  return String(t||'')
-    .replace(/^[\u0000-\u0020\u007F-\u00A0\u00AD\u1680\u2000-\u200F\u2028\u2029\u202F\u205F\u2060\u3000\uFEFF]+/,'')
-    .replace(/[\u0000-\u0020\u007F-\u00A0\u00AD\u1680\u2000-\u200F\u2028\u2029\u202F\u205F\u2060\u3000\uFEFF]+$/,'');
-}
-/* Correcao a vista, no padrao do c-mob: o campo passa a mostrar exatamente a chave que vai
-   para o codigo. So em 'change'/'blur', nunca em 'input'. */
-function uChaveAjustar(){
-  var el=$('u-chave');if(!el)return false;
-  var limpo=pixLimpar(el.value);
-  if(limpo===el.value)return false;
-  el.value=limpo;
-  return true;
-}
-/* 'bruta' e o valor antes da limpeza: chave que so tinha invisiveis merece aviso proprio
-   (senao o operador leria "preencha a chave" com o campo aparentemente preenchido); campo
-   nunca preenchido cai no aviso geral de campos obrigatorios, que ja existia. */
-/* Charset ANTES do tamanho: uma chave de 80 caracteres com emoji reportaria "tem 80
-   caracteres" quando o problema e o emoji -- o operador cortaria a chave certa e continuaria
-   sem QR valido. O defeito mais especifico e o que deve ser nomeado. */
-function uChaveErro(chave,bruta){
-  if(!chave)return String(bruta||'').length?'A chave Pix so tinha espacos ou caracteres invisiveis (vindos de copiar-e-colar) e ficou vazia depois da limpeza das pontas. Digite a chave novamente.':'';
-  if(!/^[!-~]+$/.test(chave))return 'A chave Pix tem, no meio, um espaco ou um caractere fora do padrao -- pode ser um caractere invisivel que veio junto do copiar-e-colar do app do banco e que voce nao esta vendo. O codigo do QR conta os caracteres em bytes, e qualquer um fora da faixa comum (letras, numeros e sinais, sem espacos) faz o banco recusar o pagamento sem explicacao. Apague o campo e digite a chave de novo.';
-  if(chave.length>PIX_CHAVE_MAX)return 'A chave Pix tem '+chave.length+' caracteres e o padrao do Banco Central aceita no maximo '+PIX_CHAVE_MAX+' no campo da chave. Uma chave maior desmonta o codigo do QR sem que ele pareca invalido: confira se nao colou algo a mais.';
-  return '';
-}
-
 /* ===== configuracao da aba =====
    Uma leitura so da interface, ja presa nas faixas. E o que uGerar valida, e e o que uBloco
    monta -- e como a previa passou a executar o retorno de uBloco, nao sobrou nenhuma segunda
@@ -7832,7 +8153,7 @@ function uCfg(){
     client:$('u-client').value.trim(),
     moeda:usaPix?'BRL':(radio('u-moeda')||'BRL'),
     /* a chave ja sai LIMPA das pontas daqui: e este o valor que vai para o bloco nas duas
-       pontas (textarea e previa). uChaveAjustar continua existindo para corrigir o CAMPO, que
+       pontas (textarea e previa). fcPixChaveAjustar continua existindo para corrigir o CAMPO, que
        e outra coisa -- e so uGerar mexe no campo. 'chaveBruta' acompanha porque a recusa
        precisa distinguir "campo nunca preenchido" de "so tinha invisiveis". */
     chave:pixLimpar($('u-chave').value), chaveBruta:$('u-chave').value,
@@ -7865,7 +8186,7 @@ function uRecusa(cfg){
   if(!cfg.prods.length)return 'Cadastre ao menos um produto.';
   if(cfg.usaPP&&!cfg.client)return 'Informe o Client ID do PayPal.';
   if(cfg.usaPix){
-    var erroChave=uChaveErro(cfg.chave,cfg.chaveBruta);
+    var erroChave=pixChaveErro(cfg.chave,cfg.chaveBruta);
     if(erroChave)return erroChave;
     if(!cfg.chave||!cfg.nomer||!cfg.cidade)return 'Preencha a chave Pix, o nome do recebedor e a cidade.';
   }
@@ -7900,7 +8221,7 @@ function uRecusa(cfg){
 function uGerar(){
   /* a chave e os campos numericos se corrigem na tela ANTES de qualquer conferencia -- assim o
      que o operador esta lendo e o que vai ser conferido e gerado */
-  uChaveAjustar();
+  fcPixChaveAjustar('u-chave');
   if(fcAjustarTodos(U_NUMS))salvarEstado();
   var cfg=uCfg();
   var recusa=uRecusa(cfg);
@@ -8128,42 +8449,17 @@ function uBloco(cfg){
   c+="var TXT_DESCONTO='Desconto';\n\n";
 
   c+='/* ============================================================\n   Daqui para baixo nao precisa mexer\n   ============================================================ */\n\n';
-  c+=uMoedaFmtGer();
+  c+=fcMoedaFmtGer(false);
 
   if(usaPix){
-    c+='function semAcento(t,max){\n';
-    c+="t=String(t||'');\n";
-    c+="try{t=t.normalize('NFD').replace(/[\\u0300-\\u036f]/g,'');}catch(e){}\n";
-    c+="t=t.replace(/[^A-Za-z0-9 .,-]/g,' ').replace(/ +/g,' ').trim();\n";
-    c+='return t.substring(0,max);\n}\n\n';
-    c+='function tlv(id,v){\n';
-    c+='var l=String(v.length);\n';
-    c+="if(l.length<2)l='0'+l;\n";
-    c+='return id+l+v;\n}\n\n';
-    c+='function crc16(s){\n';
-    c+='var c=0xFFFF;\n';
-    c+='for(var i=0;i<s.length;i++){\n';
-    c+='c^=s.charCodeAt(i)<<8;\n';
-    c+='for(var j=0;j<8;j++){c=(c&0x8000)?(((c<<1)^0x1021)&0xFFFF):((c<<1)&0xFFFF);}\n';
-    c+='}\n';
-    c+='var h=c.toString(16).toUpperCase();\n';
-    c+="while(h.length<4)h='0'+h;\n";
-    c+='return h;\n}\n\n';
-    c+='function montarPayload(valor){\n';
-    c+='var nome=semAcento(NOME_RECEBEDOR,25);\n';
-    c+='var cid=semAcento(CIDADE,15);\n';
-    c+="var txid=String(CODIGO_PEDIDO).replace(/[^A-Za-z0-9]/g,'').substring(0,25)||'***';\n";
-    c+="var p=tlv('00','01');\n";
-    c+="p+=tlv('26',tlv('00','BR.GOV.BCB.PIX')+tlv('01',CHAVE_PIX));\n";
-    c+="p+=tlv('52','0000');\n";
-    c+="p+=tlv('53','986');\n";
-    c+="p+=tlv('54',valor.toFixed(2));\n";
-    c+="p+=tlv('58','BR');\n";
-    c+="p+=tlv('59',nome);\n";
-    c+="p+=tlv('60',cid);\n";
-    c+="p+=tlv('62',tlv('05',txid));\n";
-    c+="p+='6304';\n";
-    c+='return p+crc16(p);\n}\n\n';
+    /* A maquinaria do BR Code vem da fonte unica (FC_PIX_SRC, no bloco de utilidades). Antes
+       ela era escrita linha a linha AQUI, e a aba "Link de cobranca" precisaria das mesmas
+       linhas -- duas copias do mesmo TLV e do mesmo CRC. O bloco entregue nao mudou: sao os
+       mesmos bytes, so que emitidos de um lugar que a ferramenta tambem consegue executar. */
+    c+=FC_PIX_SRC.semAcento;
+    c+=FC_PIX_SRC.tlv;
+    c+=FC_PIX_SRC.crc16;
+    c+=FC_PIX_SRC.montarPayload;
     c+='var qrPronto=false;\n';
     c+="var qrsrc=document.createElement('script');\n";
     c+="qrsrc.src='https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';\n";
@@ -8665,7 +8961,7 @@ function bCampos(){
 function bColeta(){
   var o=bCampos();
   /* a biblioteca de presets NAO e lida aqui: quem a acrescenta ao fragmento e o salvarEstado,
-     para as seis abas ao mesmo tempo (ver o comentario la) */
+     para todas as abas ao mesmo tempo (ver o comentario la) */
   o.consol=$('b-consol').value;  /* escolha sobre OUTRO componente; nao entra no preset (ver 'fora' em ABAS) */
   return {b:o};
 }
@@ -9972,48 +10268,9 @@ function cLimpar(){
    ou ja vencida. O shim troca localStorage e sessionStorage do DOCUMENTO DA PREVIA por
    objetos em memoria, que morrem junto com o iframe. A previa sempre comeca do zero. */
 function cPvShim(){
-  var s='';
-  s+='<scr'+'ipt>\n(function(){\n';
-  s+='  function memoria(){\n';
-  s+='    var d={};\n';
-  s+='    return {\n';
-  s+='      getItem:function(k){k=String(k);return Object.prototype.hasOwnProperty.call(d,k)?d[k]:null;},\n';
-  s+='      setItem:function(k,v){d[String(k)]=String(v);},\n';
-  s+='      removeItem:function(k){delete d[String(k)];},\n';
-  s+='      clear:function(){d={};},\n';
-  s+='      key:function(i){var ks=Object.keys(d);return i<ks.length?ks[i]:null;},\n';
-  s+='      get length(){return Object.keys(d).length;},\n';
-  /* marca que so o objeto em memoria tem: e' assim que a conferencia abaixo distingue o
-     shim instalado do Storage real, sem depender de instanceof nem do nome da classe. */
-  s+='      fcPvMemoria:true\n';
-  s+='    };\n  }\n';
-  s+='  function trocar(nome){\n';
-  s+='    var falso=memoria();\n';
-  s+='    try{Object.defineProperty(window,nome,{value:falso,configurable:true});return;}catch(e){}\n';
-  s+='    try{Object.defineProperty(Object.getPrototypeOf(window),nome,{value:falso,configurable:true});}catch(e){}\n';
-  s+='  }\n';
-  s+='  function instalado(nome){\n';
-  s+='    try{return !!(window[nome]&&window[nome].fcPvMemoria===true);}catch(e){return false;}\n';
-  s+='  }\n';
-  s+="  trocar('localStorage');trocar('sessionStorage');\n";
-  /* Falha silenciosa aqui e' pior que falha barulhenta: o try/catch do bloco gerado nao
-     denuncia nada, porque setItem no Storage REAL funciona e nao lanca. O sintoma so
-     apareceria na segunda abertura da aba, como contagem ja vencida, sem sinal nenhum.
-     Hoje funciona, mas a garantia depende de o navegador continuar deixando localStorage
-     configuravel -- entao a previa confere e avisa na cara do operador se nao conferir. */
-  s+="  var falhou=[];\n";
-  s+="  if(!instalado('localStorage'))falhou.push('localStorage');\n";
-  s+="  if(!instalado('sessionStorage'))falhou.push('sessionStorage');\n";
-  s+='  if(falhou.length){\n';
-  s+="    var av=document.createElement('div');\n";
-  s+="    av.id='c-pv-aviso-shim';\n";
-  s+='    av.setAttribute(\'style\',\'background:#8C1D18;color:#FDFBF6;font:600 12px/1.45 -apple-system,BlinkMacSystemFont,sans-serif;padding:8px 12px\');\n';
-  s+="    av.textContent='Aviso da previa: nao foi possivel isolar o '+falhou.join(' e ')+" +
-     "' deste quadro. A previa esta gravando nas chaves reais do navegador e pode nascer com a contagem ja vencida. O codigo gerado ao lado nao e afetado.';\n";
-  s+='    document.body.appendChild(av);\n';
-  s+='  }\n';
-  s+='})();\n</scr'+'ipt>\n';
-  return s;
+  return fcPvShim({pref:'c',
+    abre:'o ',
+    fecha:' deste quadro. A previa esta gravando nas chaves reais do navegador e pode nascer com a contagem ja vencida. O codigo gerado ao lado nao e afetado.'});
 }
 /* Sem conteudo abaixo da barra nao da para ver o padding-top empurrando a pagina, nem a
    entrada "depois de rolar", nem a barra fixa se comportando como fixa. Blocos cinzentos e
@@ -10099,6 +10356,824 @@ function cPvModoSet(m){
   cPvModo=m;cPvBotoes();cPreview(true);
 }
 
+/* ============================================================
+   ABA: LINK DE COBRANCA
+   ============================================================ */
+/* O QUE ELA RESOLVE. Servico ja combinado, falta receber. O dono publica UMA VEZ um componente
+   HTML numa pagina fixa (ex.: /pagar) e, a cada cobranca, gera um LINK diferente para mandar
+   ao cliente. Duas saidas com vidas diferentes -- e e por isso que a interface as separa.
+
+   A DECISAO QUE MANDA NO DESENHO. Nao existe servidor neste projeto, entao qualquer conferencia
+   roda no computador do cliente e pode ser desligada por ele. O objetivo nao e IMPEDIR a
+   alteracao: e fazer com que alterar NAO ADIANTE. As duas formas de pagamento se comportam de
+   maneira oposta nisso -- no Pix o valor mora dentro do proprio codigo que o app do banco le, e
+   o banco trava nele; no botao do PayPal o valor e calculado no navegador e e adulteravel.
+   Daqui sai a regra inteira desta aba: O VALOR EXIBIDO E O VALOR COBRADO SAEM OS DOIS DE DENTRO
+   DO CODIGO PIX QUE VIAJA NO LINK, nunca de um parametro separado. Uma fonte, nao duas que
+   podem divergir -- o mesmo principio que rege as previas deste projeto.
+
+   AS TRES CONFERENCIAS DA PAGINA, nesta ordem, e por que sao tres e nao uma:
+     1. FORMA + CRC (pixLer). Diagnostico barato e preciso para o caso comum: o link chegou
+        truncado, com um caractere trocado, ou o campo 54 declara um comprimento que nao bate
+        com o conteudo -- medido na pagina publicada, um 54 declarando 07 para "75.00" faz um
+        leitor frouxo devolver "75.0058", valor errado sem erro nenhum.
+     2. CAMPO 54 presente e bem formado. Pix SEM valor deixaria o pagador digitar o que
+        quisesse, que e exatamente o que esta aba existe para impedir.
+     3. REMONTAGEM. A pagina remonta o payload a partir dos SEUS PROPRIOS dados de recebedor
+        (chave, nome, cidade) mais o valor e o txid lidos, e exige igualdade byte a byte com o
+        codigo recebido. Quem sabe recalcular o CRC passa pela conferencia 1; nao passa por
+        esta, porque nao tem a chave desta pagina. E ela tambem recusa, de graca, um link
+        montado com a chave Pix de OUTRA pessoa.
+   Preco desta terceira, dito por inteiro nas instrucoes da aba: trocar a chave Pix e regerar o
+   bloco invalida os links ainda nao pagos. E o comportamento certo -- um link que nao pertence
+   mais a esta pagina nao deveria abrir --, mas custa gerar links novos.
+
+   O LIMITE, MEDIDO E DITO SEM EXAGERO -- e ele esta tambem nas instrucoes da aba, porque uma
+   justificativa que afirma mais do que entrega e o defeito que este projeto ja pagou caro.
+   A chave Pix e PUBLICA por definicao, entao quem souber recalcular o CRC consegue montar um
+   payload legitimo do PROPRIO dono com um valor MENOR, e as tres conferencias passam -- medido:
+   o valor trocado de 1200.50 para 1200.90 com o CRC refeito e exibido normalmente. Isso NAO e
+   um furo do desenho, e sim o que ele promete: a pagina garante que a tela, o Pix e o PayPal
+   digam o MESMO numero, nunca que esse numero seja o que o dono queria. Dito de outro jeito: da
+   para tentar pagar menos, nao da para enganar sobre quanto se pagou. Impedir exigiria um
+   segredo que o cliente nao lesse, ou seja um servidor -- que este projeto nao tem por decisao.
+   E por isso que a premissa registrada na spec e operacional: o dono confere o valor recebido
+   antes de entregar o trabalho.
+
+   A DESCRICAO E COSMETICA e viaja em parametro proprio: altera-la nao muda um centavo. Esta
+   dito na interface para ninguem tentar "proteger" o que nao precisa. Ela tambem nunca entra no
+   codigo-fonte do bloco -- chega em tempo de execucao e vai para textContent --, entao texto
+   hostil na descricao nao tem por onde quebrar o bloco publicado. */
+
+/* Faixa declarada dos campos numericos desta aba, no mesmo formato de B_NUMS/C_NUMS:
+   [id, padrao, min, max, inteiro]. O VALOR DA COBRANCA NAO ESTA AQUI de proposito: prender um
+   campo vazio ao minimo transformaria "o operador nao digitou o valor" em "cobranca de um
+   centavo", em silencio. Nao ha valor certo a assumir no lugar de um valor que falta, entao a
+   geracao e RECUSADA com aviso -- mesma regra do cupom zerado e da chave Pix. */
+var P_NUMS=[['p-larg',420,280,900,true],['p-qr',180,120,320,true],['p-corujaalt',30,14,60,true]];
+function pPreso(id,def){var v=fcPreso(P_NUMS,id);return v==null?def:v;}
+
+/* ===== o valor da cobranca =====
+   Aceita "1200", "1200,00", "1200.00" e "1.200,00". O separador decimal e o ULTIMO sinal que
+   aparecer; o outro e agrupamento de milhar. Ponto sozinho em grupos de tres ("1.200") tambem
+   e agrupamento -- sem essa regra, quem digita o milhar a brasileira cobraria R$ 1,20. */
+function pValorNum(t){
+  var s=String(t==null?'':t).replace(/[\s ]/g,''),ip,iv;
+  if(!s)return NaN;
+  s=s.replace(/^R\$/i,'');
+  ip=s.lastIndexOf('.');iv=s.lastIndexOf(',');
+  if(ip>=0&&iv>=0){
+    if(iv>ip)s=s.replace(/\./g,'').replace(',','.');
+    else s=s.replace(/,/g,'');
+  }else if(iv>=0){
+    s=s.replace(',','.');
+  }else if(ip>=0&&/^[0-9]{1,3}(\.[0-9]{3})+$/.test(s)){
+    s=s.replace(/\./g,'');
+  }
+  if(!/^[0-9]*\.?[0-9]+$/.test(s))return NaN;
+  return Math.round(parseFloat(s)*100)/100;
+}
+var P_VALOR_MAX=999999.99;
+/* Correcao a vista, no padrao do c-mob: o campo passa a exibir o valor exatamente como ele vai
+   entrar no codigo Pix. So em 'change'/'blur', nunca em 'input'. Valor que NAO da para
+   interpretar fica como esta -- reescrever o que nao se entendeu seria assumir, e quem recusa
+   com nome e a geracao. */
+function pValorAjustar(){
+  var el=$('p-valor');if(!el)return false;
+  if(!String(el.value).replace(/\s/g,''))return false;
+  var n=pValorNum(el.value);
+  if(isNaN(n)||n<=0||n>P_VALOR_MAX)return false;
+  var novo=n.toFixed(2).replace('.',',');
+  if(novo===el.value)return false;
+  el.value=novo;
+  return true;
+}
+/* Identificador curto: o campo 62>05 do BR Code so aceita letras e numeros, ate 25. A limpeza
+   acontece A VISTA, senao o operador leria "ENSAIO-2026" na tela e conciliaria por
+   "ENSAIO2026" no extrato. */
+function pTxidLimpo(t){return String(t==null?'':t).replace(/[^A-Za-z0-9]/g,'').substring(0,25);}
+function pTxidAjustar(){
+  var el=$('p-txid');if(!el)return false;
+  var v=pTxidLimpo(el.value);
+  if(v===el.value)return false;
+  el.value=v;
+  return true;
+}
+
+/* Endereco da pagina de pagamento. Mesmo criterio de cUrlOk e tUrlOk, pela mesma urlLimpa:
+   ancora nao serve aqui (a pagina precisa de um endereco de verdade), entao sao aceitos
+   http(s) e caminho do proprio site comecando com UMA barra. */
+function pUrlOk(v){
+  var limpo=urlLimpa(v);
+  if(!limpo)return false;
+  if(/^https?:\/\//i.test(limpo))return true;
+  if(/^[a-zA-Z][a-zA-Z0-9+.\-]*:/.test(limpo))return false;
+  return limpo.charAt(0)==='/'&&limpo.charAt(1)!=='/';
+}
+/* Lista de permissao do link de cobranca do PayPal. O endereco viaja NO LINK, entao ele e
+   escolhido por quem monta o link -- e um link de pagamento apontando para outro lugar e um
+   desvio de dinheiro com a cara da pagina do dono. Igualdade EXATA da autoridade inteira
+   (tudo entre o esquema e a primeira barra), a mesma regra de S_HOSTS_ALBOOM: e a autoridade
+   inteira que recusa "usuario@host", porta e host vazio, e comparar por sufixo aceitaria
+   "evil-paypal.com". A MESMA lista roda aqui e dentro do bloco entregue -- uma so, para nao
+   existir host aceito num lado e recusado no outro. */
+var P_PP_HOSTS=['www.paypal.com','paypal.com','www.paypal.me','paypal.me'];
+function pPpHostOk(v){
+  var s=urlLimpa(v),resto,corte,aut,i;
+  if(!/^https:\/\//i.test(s))return false;
+  resto=s.substring(8);
+  corte=resto.search(/[\/?#]/);
+  aut=(corte<0?resto:resto.substring(0,corte)).toLowerCase();
+  for(i=0;i<P_PP_HOSTS.length;i++)if(aut===P_PP_HOSTS[i])return true;
+  return false;
+}
+/* A mesma lista, escrita como codigo dentro do bloco. Unifica-se a fonte que escreve. */
+function pPpHostsJs(){
+  var j='',i;
+  for(i=0;i<P_PP_HOSTS.length;i++)j+=(i?',':'')+"'"+P_PP_HOSTS[i]+"'";
+  return j;
+}
+
+/* ===== configuracao da aba =====
+   Uma leitura so da interface, ja presa nas faixas. E o que pGerar valida, e e o que pBloco
+   monta -- e como a previa executa o retorno de pBloco, nao sobra nenhuma segunda
+   implementacao da pagina de pagamento para divergir do bloco entregue. */
+function pCfg(){
+  var cpos=radio('p-coruja')||'esq';
+  var usapp=(radio('p-usapp')!=='nao');
+  var ppmodo=radio('p-ppmodo')||'sdk';
+  return {
+    chave:pixLimpar($('p-chave').value), chaveBruta:$('p-chave').value,
+    nomer:$('p-nomer').value.trim(),
+    cidade:$('p-cidade').value.trim(),
+    usapp:usapp,
+    client:$('p-client').value.trim(),
+    ppcor:radio('p-ppcor')||'gold',
+    zap:(radio('p-zap')!=='nao'),
+    zapnum:String($('p-zapnum').value).replace(/\D/g,''),
+    url:$('p-url').value.trim(),
+    larg:pPreso('p-larg',420), qr:pPreso('p-qr',180),
+    c1:corSegura('p-c1','#075E54'), c2:corSegura('p-c2','#ffffff'), c3:corSegura('p-c3','#333333'),
+    coruja:{pos:cpos,ativo:cpos!=='nao',esq:(cpos==='esq'||cpos==='ambos'),dir:(cpos==='dir'||cpos==='ambos'),
+      alt:pPreso('p-corujaalt',30),
+      corpo:corSegura('p-corujacorpo','#ffffff'),det:corSegura('p-corujadet','#075E54')},
+    t1:$('p-t1').value, t2:$('p-t2').value, t3:$('p-t3').value, t4:$('p-t4').value,
+    t5:$('p-t5').value, t6:$('p-t6').value, t7:$('p-t7').value,
+    /* daqui para baixo: ESTA cobranca -- entra no link, nunca no bloco */
+    desc:$('p-desc').value, valor:pValorNum($('p-valor').value), valorBruto:$('p-valor').value,
+    txid:pTxidLimpo($('p-txid').value),
+    ppmodo:(usapp?ppmodo:'nao'), pplink:$('p-pplink').value.trim()
+  };
+}
+
+/* ===== as guardas, sem efeito colateral =====
+   Separadas em duas porque as duas saidas tem vidas diferentes: o BLOCO nao sabe nada da
+   cobranca, entao gerar o bloco nao pode exigir descricao nem valor; e o LINK precisa das
+   duas coisas. Nenhuma das duas mexe no DOM -- a previa roda a cada tecla e nao pode
+   reescrever campo nenhum; a correcao a vista e dos botoes, que sao gesto do operador. */
+function pRecusaBloco(cfg){
+  var erroChave=pixChaveErro(cfg.chave,cfg.chaveBruta);
+  if(erroChave)return erroChave;
+  if(!cfg.chave||!cfg.nomer||!cfg.cidade)return 'Preencha a chave Pix, o nome do recebedor e a cidade. Sao eles que a pagina usa para conferir se um link de cobranca e mesmo seu.';
+  if(cfg.usapp&&!cfg.client)return 'Informe o Client ID do PayPal, ou marque "Nao -- so Pix" em PayPal.';
+  if(cfg.zap&&!cfg.zapnum)return 'Informe o numero do WhatsApp de destino, ou desligue o botao "Ja paguei".';
+  return '';
+}
+function pRecusaCobranca(cfg){
+  var r=pRecusaBloco(cfg);
+  if(r)return r;
+  if(!cfg.url||!pUrlOk(cfg.url))return 'Informe o endereco da pagina de pagamento: um endereco http(s) completo, ou um caminho do proprio site comecando com barra (/pagar).';
+  if(!String(cfg.desc).replace(/\s/g,''))return 'Escreva a descricao do que esta sendo cobrado. E o que o cliente le na pagina e o que volta na mensagem do WhatsApp.';
+  if(!String(cfg.valorBruto).replace(/\s/g,''))return 'Informe o valor da cobranca. Um codigo Pix sem valor deixa o pagador digitar o que quiser -- que e exatamente o que esta aba existe para impedir.';
+  if(isNaN(cfg.valor)||cfg.valor<=0)return 'Nao entendi o valor "'+cfg.valorBruto+'". Escreva so o numero, com virgula ou ponto nos centavos: 1200 ou 1200,00.';
+  if(cfg.valor>P_VALOR_MAX)return 'O valor passa de '+precoFmt('BRL',P_VALOR_MAX)+'. Confira se nao sobrou um zero.';
+  if(cfg.ppmodo==='link'&&!cfg.pplink)return 'Cole o endereco do link de cobranca criado no PayPal, ou escolha outro modo de PayPal para esta cobranca.';
+  if(cfg.ppmodo==='link'&&!pPpHostOk(cfg.pplink))return 'O link de cobranca do PayPal precisa comecar com https:// e ser de um endereco do proprio PayPal ('+P_PP_HOSTS.join(', ')+'). Um link de pagamento apontando para outro lugar e dinheiro indo para outro lugar.';
+  return '';
+}
+
+/* ===== o codigo Pix desta cobranca =====
+   Monta pelo MESMO caminho do carrinho publicado: fcPixApi avalia a fonte unica FC_PIX_SRC, a
+   mesma que os dois blocos entregues levam dentro. Nao ha uma segunda montagem de payload
+   nesta ferramenta -- nem podia haver, porque e o payload que carrega o valor. */
+function pPayload(cfg){
+  return fcPixApi().montar(cfg.chave,cfg.nomer,cfg.cidade,cfg.txid)(cfg.valor);
+}
+/* A conferencia que o gerador faz em cima do que ele mesmo produziu. Parece redundante e nao
+   e: e ela que garante que NENHUM link saia daqui sem o campo 54, com o campo 54 ilegivel, ou
+   com um valor diferente do que o operador digitou. Roda a MESMA pixLer que a pagina publicada
+   vai rodar, entao o que passa aqui passa la. */
+function pConferir(cfg,codigo){
+  var api=fcPixApi(),lido=api.pixLer(codigo);
+  if(!lido.ok)return 'O codigo Pix montado para esta cobranca nao passou na propria conferencia ('+lido.erro+'). Nenhum link foi gerado. Confira a chave, o nome e a cidade.';
+  if(Math.abs(lido.valor-cfg.valor)>0.0001)return 'O valor dentro do codigo Pix ('+precoFmt('BRL',lido.valor)+') nao bate com o valor digitado ('+precoFmt('BRL',cfg.valor)+'). Nenhum link foi gerado.';
+  return '';
+}
+function pLinkDe(cfg,codigo){
+  var u=String(cfg.url).replace(/[?#].*$/,'');
+  var q='?c='+encodeURIComponent(codigo)+'&d='+encodeURIComponent(cfg.desc);
+  if(cfg.ppmodo==='link')q+='&pp='+encodeURIComponent(cfg.pplink);
+  else if(cfg.ppmodo==='nao')q+='&pp=nao';
+  return u+q;
+}
+
+/* ===== o bloco entregue: fonte unica =====
+   pGerar escreve o retorno na textarea; pPvMontar escreve o MESMO retorno dentro do iframe da
+   previa. Nao existe segunda formatacao em lugar nenhum, e e por isso que a previa nao tem
+   como divergir do que o operador vai colar. */
+function pBloco(cfg){
+  var c='';
+  c+='<!-- ============================================================\n';
+  c+='     FOTO CERTA - PAGINA DE COBRANCA (PIX + PAYPAL)\n';
+  c+='     ONDE COLAR: componente HTML de uma pagina fixa do site (ex.: /pagar)\n';
+  c+='     COLA-SE UMA VEZ SO. O que muda a cada cobranca e o LINK, gerado na ferramenta.\n';
+  c+='     Gerado pela ferramenta em construtores.fotocerta.com.br\n';
+  c+='     ============================================================ -->\n\n';
+  c+='<sty'+'le>\n'+pCss(cfg)+'</sty'+'le>\n\n';
+  c+='<div class="fcpg-caixa" id="fcpg-caixa"></div>\n\n';
+  c+='<scr'+'ipt>\n(function () {\n'+pJs(cfg)+'})();\n</scr'+'ipt>\n';
+  return c;
+}
+function pCss(cfg){
+  var s='';
+  /* text-align:left forcado no cartao e nos filhos: o tema do Prosite centraliza o texto
+     dentro dos componentes (manual, item 8). */
+  s+='#fcpg-caixa{max-width:'+cfg.larg+'px;margin:0 auto;text-align:left;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Ubuntu,sans-serif;color:'+cfg.c3+'}\n';
+  s+='#fcpg-caixa *{text-align:left;box-sizing:border-box}\n';
+  s+='.fcpg-cartao{background:'+cfg.c2+';border:1px solid rgba(0,0,0,.10);border-radius:14px;padding:18px 18px 20px;box-shadow:0 2px 12px rgba(0,0,0,.06)}\n';
+  s+='.fcpg-topo{display:flex;align-items:center;gap:10px;margin:0 0 14px}\n';
+  s+='.fcpg-topo svg{height:'+cfg.coruja.alt+'px;width:auto;flex:0 0 auto;display:block}\n';
+  s+='.fcpg-titulo{font-size:17px;font-weight:700;line-height:1.3;color:'+cfg.c1+';flex:1 1 auto;min-width:0}\n';
+  s+='.fcpg-desc{font-size:14px;line-height:1.5;margin:0 0 14px;word-wrap:break-word;overflow-wrap:break-word}\n';
+  s+='.fcpg-valor-rot{font-size:12px;letter-spacing:.06em;text-transform:uppercase;opacity:.7;margin:0 0 2px}\n';
+  s+='.fcpg-valor{font-size:30px;font-weight:800;line-height:1.1;color:'+cfg.c1+';margin:0 0 4px}\n';
+  s+='.fcpg-ref{font-size:12px;opacity:.65;margin:0 0 16px}\n';
+  s+='.fcpg-bloco{border-top:1px solid rgba(0,0,0,.10);padding-top:14px;margin-top:14px}\n';
+  s+='.fcpg-rot{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:'+cfg.c1+';margin:0 0 8px}\n';
+  s+='.fcpg-ajuda{font-size:12px;line-height:1.5;opacity:.75;margin:8px 0 0}\n';
+  s+='.fcpg-cod{width:100%;height:74px;font:11px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace;';
+  s+='border:1px solid rgba(0,0,0,.18);border-radius:8px;padding:8px;resize:none;background:#fff;color:#333}\n';
+  s+='.fcpg-bt{display:inline-block;border:0;border-radius:8px;padding:11px 16px;font-size:14px;font-weight:700;';
+  s+='cursor:pointer;background:'+cfg.c1+';color:'+cfg.c2+';margin:8px 8px 0 0;text-decoration:none}\n';
+  s+='.fcpg-bt2{background:transparent;color:'+cfg.c1+';border:1px solid '+cfg.c1+'}\n';
+  s+='.fcpg-qr{margin:12px 0 0;min-height:'+cfg.qr+'px}\n';
+  s+='.fcpg-qr img,.fcpg-qr canvas{display:block;max-width:100%;height:auto}\n';
+  s+='.fcpg-aviso{font-size:12px;margin:8px 0 0;color:#8C1D18;font-weight:700}\n';
+  s+='.fcpg-recado{font-size:15px;line-height:1.6;margin:0}\n';
+  s+='.fcpg-pp{margin-top:10px}\n';
+  return s;
+}
+function pJs(cfg){
+  var j='';
+  j+='  /* ===== CONFIGURACAO ===== */\n';
+  j+="  var CHAVE_PIX='"+escJs(cfg.chave)+"';\n";
+  j+="  var NOME_RECEBEDOR='"+escJs(cfg.nomer)+"';\n";
+  j+="  var CIDADE='"+escJs(cfg.cidade)+"';\n";
+  j+="  var MOEDA='BRL';\n";
+  if(cfg.usapp)j+="  var CLIENT_ID='"+escJs(cfg.client)+"';\n";
+  if(cfg.usapp)j+="  var COR_BOTAO_PAYPAL='"+escJs(cfg.ppcor)+"';\n";
+  if(cfg.zap)j+="  var WHATSAPP='"+escJs(cfg.zapnum)+"';\n";
+  j+='  var TAMANHO_QR='+cfg.qr+';\n';
+  j+="  var TXT_TITULO='"+escJs(cfg.t1)+"';\n";
+  j+="  var TXT_VALOR='"+escJs(cfg.t2)+"';\n";
+  j+="  var TXT_COPIAR='"+escJs(cfg.t3)+"';\n";
+  if(cfg.zap)j+="  var TXT_ZAP='"+escJs(cfg.t4)+"';\n";
+  j+="  var TXT_SEM_COBRANCA='"+escJs(cfg.t5)+"';\n";
+  j+="  var TXT_CODIGO_RUIM='"+escJs(cfg.t6)+"';\n";
+  j+="  var TXT_INSTRUCAO_PIX='"+escJs(cfg.t7)+"';\n";
+  j+="  var TXT_COPIADO='Codigo copiado! Cole no aplicativo do seu banco.';\n";
+  j+="  var TXT_NAO_COPIOU='Nao consegui copiar. Selecione o codigo acima e copie na mao.';\n";
+  j+="  var TXT_REF='Identificador da cobranca: ';\n";
+  j+='\n  /* ============================================================\n     Daqui para baixo nao precisa mexer\n     ============================================================ */\n\n';
+  /* A maquinaria do BR Code vem da FONTE UNICA. Aqui ela e usada ao contrario do Checkout: em
+     vez de montar um payload para o carrinho, o bloco LE o payload que chegou no endereco --
+     e depois remonta, para exigir igualdade. Por isso as cinco pecas entram: montarPayload e a
+     terceira conferencia. */
+  j+=pInd(FC_PIX_SRC.semAcento);
+  j+=pInd(FC_PIX_SRC.tlv);
+  j+=pInd(FC_PIX_SRC.crc16);
+  j+=pInd(FC_PIX_SRC.lerTlv);
+  j+=pInd(FC_PIX_SRC.pixLer);
+  /* montarPayload le CODIGO_PEDIDO; aqui o txid nao e fixo, ele vem do codigo recebido */
+  j+='  var CODIGO_PEDIDO=\'\';\n';
+  j+=pInd(FC_PIX_SRC.montarPayload);
+  j+=pInd(fcMoedaFmtGer(true));
+  j+='  /* le um parametro do endereco, em ES5 -- sem URLSearchParams */\n';
+  j+='  function param(nome){\n';
+  j+="    var q=String(location.search||''),ps,i,ig;\n";
+  j+="    if(q.charAt(0)==='?')q=q.substring(1);\n";
+  j+="    ps=q.split('&');\n";
+  j+='    for(i=0;i<ps.length;i++){\n';
+  j+="      ig=ps[i].indexOf('=');\n";
+  j+='      if(ig<0)continue;\n';
+  j+="      if(ps[i].substring(0,ig)!==nome)continue;\n";
+  j+="      try{return decodeURIComponent(ps[i].substring(ig+1).replace(/\\+/g,' '));}catch(e){return '';}\n";
+  j+='    }\n';
+  j+="    return '';\n";
+  j+='  }\n';
+  j+='  /* texto sempre por no de texto, nunca por innerHTML: a descricao vem do ENDERECO, que e\n';
+  j+='     entrada de fora, e nenhuma marcacao dela pode virar marcacao desta pagina */\n';
+  j+='  function texto(el,t){while(el.firstChild)el.removeChild(el.firstChild);el.appendChild(document.createTextNode(t));return el;}\n';
+  j+='  function novo(tag,cls,t){\n';
+  j+='    var e=document.createElement(tag);\n';
+  j+='    if(cls)e.className=cls;\n';
+  j+='    if(t!=null)texto(e,t);\n';
+  j+='    return e;\n';
+  j+='  }\n';
+  if(cfg.usapp){
+    j+='  var PAYPAL_HOSTS=['+pPpHostsJs()+'];\n';
+    j+='  /* o endereco do link de cobranca do PayPal viaja NO LINK, entao ele e escolhido por\n';
+    j+='     quem monta o link: igualdade exata da autoridade inteira, nunca sufixo */\n';
+    j+='  function paypalLinkOk(u){\n';
+    j+="    var s=String(u||''),resto,corte,aut,i;\n";
+    j+='    if(/[\\u0000-\\u0020\\\\]/.test(s))return false;\n';
+    j+='    if(!/^https:\\/\\//i.test(s))return false;\n';
+    j+='    resto=s.substring(8);\n';
+    j+='    corte=resto.search(/[\\/?#]/);\n';
+    j+='    aut=(corte<0?resto:resto.substring(0,corte)).toLowerCase();\n';
+    j+='    for(i=0;i<PAYPAL_HOSTS.length;i++)if(aut===PAYPAL_HOSTS[i])return true;\n';
+    j+='    return false;\n';
+    j+='  }\n';
+  }
+  if(cfg.coruja.ativo){
+    j+='  function coruja(){\n';
+    j+=corujaJs('    ','      ',cfg.coruja.corpo,cfg.coruja.det);
+    j+='  }\n';
+  }
+  j+='  var raiz=document.getElementById(\'fcpg-caixa\');\n';
+  j+='  function cartao(){\n';
+  j+="    var c=novo('div','fcpg-cartao'),topo=novo('div','fcpg-topo');\n";
+  if(cfg.coruja.esq)j+='    topo.insertAdjacentHTML(\'beforeend\',coruja());\n';
+  j+="    topo.appendChild(novo('div','fcpg-titulo',TXT_TITULO));\n";
+  if(cfg.coruja.dir)j+='    topo.insertAdjacentHTML(\'beforeend\',coruja());\n';
+  j+='    c.appendChild(topo);\n';
+  j+='    raiz.appendChild(c);\n';
+  j+='    return c;\n';
+  j+='  }\n';
+  j+='  /* o unico caminho de saida sem cobranca: um recado, nunca uma pagina quebrada -- este\n';
+  j+='     endereco fica publicamente alcancavel */\n';
+  j+='  function recado(t){\n';
+  j+="    var c=cartao();\n";
+  j+="    c.appendChild(novo('div','fcpg-recado',t));\n";
+  j+='  }\n';
+  j+='  function montar(){\n';
+  j+='    if(!raiz)return;\n';
+  j+="    raiz.innerHTML='';\n";
+  j+="    var codigo=param('c');\n";
+  j+='    if(!codigo){recado(TXT_SEM_COBRANCA);return;}\n';
+  j+='    /* 1. forma e verificacao interna (CRC) */\n';
+  j+='    var lido=pixLer(codigo);\n';
+  j+='    if(!lido.ok){recado(TXT_CODIGO_RUIM);return;}\n';
+  j+='    /* 2. o valor sai do campo 54 do proprio codigo, e de lugar nenhum mais */\n';
+  j+='    var valor=lido.valor;\n';
+  j+='    /* 3. remontagem com os dados DESTA pagina: quem recalcula o CRC passa na 1, mas nao\n';
+  j+='       tem a chave daqui, entao nao passa nesta */\n';
+  j+='    CODIGO_PEDIDO=lido.txid;\n';
+  j+='    if(montarPayload(valor)!==codigo){recado(TXT_CODIGO_RUIM);return;}\n';
+  j+="    var desc=param('d');\n";
+  j+='    var c=cartao();\n';
+  j+="    if(desc)c.appendChild(novo('div','fcpg-desc',desc));\n";
+  j+="    c.appendChild(novo('div','fcpg-valor-rot',TXT_VALOR));\n";
+  j+="    c.appendChild(novo('div','fcpg-valor',moedaFmt(valor)));\n";
+  j+="    if(lido.txid&&lido.txid!=='***')c.appendChild(novo('div','fcpg-ref',TXT_REF+lido.txid));\n";
+  j+='    pix(c,codigo);\n';
+  if(cfg.usapp)j+='    paypal(c,valor,desc);\n';
+  if(cfg.zap)j+='    zap(c,valor,desc,lido.txid);\n';
+  j+='  }\n';
+  j+='  function pix(c,codigo){\n';
+  j+="    var b=novo('div','fcpg-bloco');\n";
+  j+="    b.appendChild(novo('div','fcpg-rot','Pix'));\n";
+  j+="    var ta=document.createElement('textarea');\n";
+  j+="    ta.className='fcpg-cod';\n";
+  j+="    ta.setAttribute('readonly','readonly');\n";
+  j+='    ta.value=codigo;\n';
+  j+='    b.appendChild(ta);\n';
+  j+="    var bt=novo('button','fcpg-bt',TXT_COPIAR);\n";
+  j+="    bt.setAttribute('type','button');\n";
+  j+="    var av=novo('div','fcpg-ajuda','');\n";
+  j+="    bt.addEventListener('click',function(){\n";
+  j+='      var ok=false;\n';
+  j+='      ta.select();\n';
+  j+='      try{ta.setSelectionRange(0,99999);}catch(e){}\n';
+  j+="      try{ok=document.execCommand('copy');}catch(e2){ok=false;}\n";
+  j+='      texto(av,ok?TXT_COPIADO:TXT_NAO_COPIOU);\n';
+  j+='    });\n';
+  j+='    b.appendChild(bt);\n';
+  j+='    b.appendChild(av);\n';
+  j+="    var qr=novo('div','fcpg-qr');\n";
+  j+='    b.appendChild(qr);\n';
+  j+="    b.appendChild(novo('div','fcpg-ajuda',TXT_INSTRUCAO_PIX));\n";
+  j+='    c.appendChild(b);\n';
+  j+='    desenharQr(qr,codigo);\n';
+  j+='  }\n';
+  j+='  /* o QR e desenhado a partir do MESMO codigo que esta na caixa de copiar: um segundo\n';
+  j+='     lugar de onde tirar o payload seria um segundo valor possivel */\n';
+  j+='  function desenharQr(alvo,codigo){\n';
+  j+='    function faz(){\n';
+  j+='      try{new QRCode(alvo,{text:codigo,width:TAMANHO_QR,height:TAMANHO_QR,correctLevel:QRCode.CorrectLevel.M});}\n';
+  j+='      catch(e){}\n';
+  j+='    }\n';
+  j+="    if(window.QRCode){faz();return;}\n";
+  j+="    var s=document.createElement('script');\n";
+  j+="    s.src='https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';\n";
+  j+='    s.onload=faz;\n';
+  j+='    document.head.appendChild(s);\n';
+  j+='  }\n';
+  if(cfg.usapp){
+    j+='  function paypal(c,valor,desc){\n';
+    j+="    var modo=param('pp');\n";
+    j+="    if(modo==='nao')return;\n";
+    j+="    var b=novo('div','fcpg-bloco');\n";
+    j+="    b.appendChild(novo('div','fcpg-rot','PayPal, cartao de credito ou debito'));\n";
+    j+='    if(modo){\n';
+    j+='      if(!paypalLinkOk(modo)){c.appendChild(b);return;}\n';
+    j+="      var a=novo('a','fcpg-bt','Pagar no PayPal');\n";
+    j+="      a.setAttribute('href',modo);\n";
+    j+="      a.setAttribute('target','_blank');\n";
+    j+="      a.setAttribute('rel','noopener noreferrer');\n";
+    j+='      b.appendChild(a);\n';
+    j+='      c.appendChild(b);\n';
+    j+='      return;\n';
+    j+='    }\n';
+    j+="    var alvo=novo('div','fcpg-pp');\n";
+    j+="    alvo.id='fcpg-pp';\n";
+    j+='    b.appendChild(alvo);\n';
+    j+='    c.appendChild(b);\n';
+    j+="    var s=document.createElement('script');\n";
+    j+="    s.src='https://www.paypal.com/sdk/js?client-id='+encodeURIComponent(CLIENT_ID)+'&currency=BRL';\n";
+    j+='    s.onload=function(){\n';
+    j+='      if(!window.paypal)return;\n';
+    j+='      window.paypal.Buttons({\n';
+    j+='        style:{color:COR_BOTAO_PAYPAL,layout:"vertical"},\n';
+    j+='        createOrder:function(d,actions){\n';
+    j+='          return actions.order.create({purchase_units:[{\n';
+    j+='            amount:{value:valor.toFixed(2),currency_code:"BRL"},\n';
+    j+='            description:String(desc).substring(0,127)\n';
+    j+='          }]});\n';
+    j+='        },\n';
+    j+='        onApprove:function(d,actions){\n';
+    j+='          return actions.order.capture().then(function(){\n';
+    j+="            texto(alvo,'Pagamento aprovado. Obrigado!');\n";
+    j+='          });\n';
+    j+='        }\n';
+    j+="      }).render('#fcpg-pp');\n";
+    j+='    };\n';
+    j+='    document.head.appendChild(s);\n';
+    j+='  }\n';
+  }
+  if(cfg.zap){
+    j+='  function zap(c,valor,desc,txid){\n';
+    j+="    var b=novo('div','fcpg-bloco');\n";
+    j+="    var msg='Ola! Acabei de pagar: '+desc+' -- '+moedaFmt(valor);\n";
+    j+="    if(txid&&txid!=='***')msg+=' ('+txid+')';\n";
+    j+="    var a=novo('a','fcpg-bt fcpg-bt2',TXT_ZAP);\n";
+    j+="    a.setAttribute('href','https://wa.me/'+WHATSAPP+'?text='+encodeURIComponent(msg));\n";
+    j+="    a.setAttribute('target','_blank');\n";
+    j+="    a.setAttribute('rel','noopener noreferrer');\n";
+    j+='    b.appendChild(a);\n';
+    j+='    c.appendChild(b);\n';
+    j+='  }\n';
+  }
+  j+='  /* uma falha aqui nao pode deixar a pagina em branco: o recado ainda sai */\n';
+  j+='  try{montar();}catch(e){try{recado(TXT_CODIGO_RUIM);}catch(e2){}}\n';
+  return j;
+}
+/* Indenta em dois espacos as pecas que a fonte unica escreve na margem. So estetica: o bloco
+   desta aba vive dentro de uma IIFE indentada, como o da Contagem regressiva. */
+function pInd(t){
+  return String(t).replace(/^(?!$)/gm,'  ');
+}
+
+/* MUDOU A COBRANCA, A CAIXA DO LINK ESVAZIA -- mesma regra do sSaidaVence do Slideshow, e
+   pelo mesmo criterio: a caixa esvazia quando o que mudou e reproduzido LITERALMENTE na saida.
+   O link reproduz a descricao, o valor e o identificador; e o payload dentro dele reproduz a
+   chave, o nome e a cidade. Trocar qualquer um deles e ficar com o link antigo na caixa e o
+   defeito mais caro que esta aba poderia ter: o operador copiaria, sem nada na tela indicando
+   isso, um link com o valor da cobranca ANTERIOR.
+   O criterio nao vale para a aparencia nem para os textos do cartao: eles mudam o BLOCO, nao o
+   link, e ali continua valendo a regra das outras abas (a caixa fica, e o painel consolidado
+   avisa que o codigo e mais velho que a aba). Esta e exatamente a lista 'naoEmite' do registro
+   ABAS mais os tres campos do recebedor -- o que nao entra no bloco, entra no link. */
+var P_LINK_CAMPOS=['p-chave','p-nomer','p-cidade','p-url','p-desc','p-valor','p-txid','p-ppmodo','p-pplink'];
+function pSaidaVence(alvo){
+  var i,ta=$('p-out2');
+  if(!ta||!ta.value)return;
+  for(i=0;i<P_LINK_CAMPOS.length;i++)if(alvo===P_LINK_CAMPOS[i]){ta.value='';return;}
+}
+/* Os dois eventos, como na Contagem regressiva: 'change' sozinho so dispararia ao sair do
+   campo, e a previa ficaria parada enquanto o operador digita. */
+function pMexeu(e){
+  var alvo=(e.target&&(e.target.name||e.target.id))||'';
+  if(!/^p-/.test(alvo))return;
+  pSaidaVence(alvo);
+  pToggles();
+  pPreview();
+}
+document.addEventListener('input',pMexeu);
+document.addEventListener('change',pMexeu);
+
+/* ===== os dois geradores ===== */
+function pGerar(){
+  var mudou=false;
+  if(fcAjustarTodos(P_NUMS))mudou=true;
+  if(fcPixChaveAjustar('p-chave'))mudou=true;
+  if(fcCoresAjustar('p-'))mudou=true;
+  if(mudou)salvarEstado();
+  var cfg=pCfg(),r=pRecusaBloco(cfg);
+  if(r){alert(r);return;}
+  $('p-out1').value=pBloco(cfg);
+  fccMarcar('cob');
+}
+function pGerarLink(){
+  var mudou=false;
+  if(fcAjustarTodos(P_NUMS))mudou=true;
+  if(fcPixChaveAjustar('p-chave'))mudou=true;
+  if(pValorAjustar())mudou=true;
+  if(pTxidAjustar())mudou=true;
+  if(mudou)salvarEstado();
+  var cfg=pCfg(),r=pRecusaCobranca(cfg);
+  if(r){alert(r);return;}
+  var codigo=pPayload(cfg),erro=pConferir(cfg,codigo);
+  if(erro){alert(erro);return;}
+  $('p-out2').value=pLinkDe(cfg,codigo);
+  pPreview(true);
+}
+function pLimpar(){
+  if(!confirm('Isto devolve a aba inteira aos padroes de fabrica: os dados do recebedor, a aparencia da pagina, os textos e a cobranca que esta na tela. Nenhum codigo ja colado no site e afetado, e os links ja enviados continuam funcionando. Continuar?'))return;
+  $('p-chave').value='';$('p-nomer').value='Foto Certa';$('p-cidade').value='Vitoria';
+  $('p-client').value='';$('p-zapnum').value='';$('p-url').value='/pagar';
+  setRadio('p-usapp','sim');setRadio('p-ppcor','gold');setRadio('p-zap','sim');
+  setRadio('p-coruja','esq');setRadio('p-ppmodo','sdk');
+  $('p-larg').value='420';$('p-qr').value='180';$('p-corujaalt').value='30';
+  [['p-c1','#075E54'],['p-c2','#ffffff'],['p-c3','#333333'],['p-corujacorpo','#ffffff'],['p-corujadet','#075E54']]
+    .forEach(function(par){$(par[0]).value=par[1];$(par[0]+'-t').value=par[1];});
+  $('p-t1').value='Pagamento do seu ensaio';
+  $('p-t2').value='Total a pagar';
+  $('p-t3').value='Copiar código Pix';
+  $('p-t4').value='Já paguei';
+  $('p-t5').value='Este endereço não está trazendo nenhuma cobrança. Peça o link de pagamento por WhatsApp que a gente manda na hora.';
+  $('p-t6').value='Este link de pagamento não pôde ser conferido: o código da cobrança chegou alterado ou incompleto. Por segurança não vamos exibir nenhum valor. Peça um link novo por WhatsApp.';
+  $('p-t7').value='Abra o aplicativo do seu banco, escolha Pix e use o Copia e Cola ou o QR Code.';
+  $('p-desc').value='';$('p-valor').value='';$('p-txid').value='';$('p-pplink').value='';
+  $('p-out1').value='';$('p-out2').value='';
+  pToggles();pPreview(true);salvarEstado();
+}
+
+/* ===== mostra/esconde conforme as escolhas ===== */
+function pToggles(){
+  var pp=$('p-pp-campos'),cor=$('p-coruja-campos'),lk=$('p-pplink-campo');
+  if(pp)pp.style.display=(radio('p-usapp')==='nao')?'none':'block';
+  if(cor)cor.style.display=(radio('p-coruja')==='nao')?'none':'block';
+  if(lk)lk.style.display=(radio('p-ppmodo')==='link')?'block':'none';
+}
+
+/* ===== previa fiel: o bloco gerado rodando de verdade =====
+   A novidade desta aba e que o bloco le o ENDERECO, e um quadro escrito por document.write nao
+   tem parametros. Quem fornece o endereco simulado e o shim do ambiente -- o mesmo que ja troca
+   o armazenamento por memoria. Um iframe sem 'src' herda o endereco do documento de cima, e
+   history.replaceState escreve ali a consulta desta cobranca: o bloco entregue continua lendo
+   location.search normalmente, byte a byte igual ao que sai na textarea.
+   E vale a obrigacao de sempre: a troca e CONFERIDA e, se nao pegar (num file://, por exemplo,
+   replaceState lanca SecurityError), um aviso vermelho entra no topo do quadro. Sem isso a
+   previa mostraria "sem cobranca" e o operador leria isso como defeito do codigo dele. */
+var pPvTimer=null,pPvModo='ok';
+var P_PV_ALTURA=520;
+/* Os tres estados que a previa precisa exercitar. 'adulterado' troca UM digito do codigo, que
+   e exatamente o que aconteceria se alguem mexesse no link. */
+function pPvBusca(cfg){
+  if(pPvModo==='vazio')return '';
+  var codigo;
+  try{codigo=pPayload(cfg);}catch(e){return '';}
+  if(pPvModo==='adulterado')codigo=pPvTorcer(codigo);
+  var q='?c='+encodeURIComponent(codigo)+'&d='+encodeURIComponent(cfg.desc);
+  if(cfg.ppmodo==='link'&&cfg.pplink)q+='&pp='+encodeURIComponent(cfg.pplink);
+  else if(cfg.ppmodo==='nao')q+='&pp=nao';
+  return q;
+}
+/* Troca o ULTIMO digito do valor dentro do payload por outro digito. Mexer num digito e o
+   ataque realista (o valor esta escrito ali, legivel), e ele derruba o CRC -- que e o que a
+   previa precisa demonstrar. */
+function pPvTorcer(codigo){
+  var i;
+  for(i=codigo.length-9;i>=0;i--){
+    if(codigo.charAt(i)>='0'&&codigo.charAt(i)<='9'){
+      return codigo.substring(0,i)+(codigo.charAt(i)==='9'?'8':String(Number(codigo.charAt(i))+1))+codigo.substring(i+1);
+    }
+  }
+  return codigo+'X';
+}
+/* Texto que vai para dentro de um <scr'+'ipt> escrito por document.write. JSON.stringify
+   fecha aspas e barras, mas nao fecha a sequencia de fechamento de script nem o abre-comentario
+   -- as duas que tiram o parser de HTML do estado normal (Manual do Prosite, item 2b). O valor
+   digitado pelo operador chega aqui pelas mensagens de recusa, entao o '<' sai escapado. */
+function pJson(v){return JSON.stringify(String(v==null?'':v)).replace(/</g,'\\u003C');}
+/* O SDK do PayPal nao pode rodar na previa por dois motivos: ele mandaria o Client ID do
+   operador para fora a cada remontagem (a previa remonta a cada 400 ms de digitacao), e o
+   botao de verdade nao acrescenta nada ao que ha para conferir aqui. O shim intercepta o
+   pedido do script e instala um paypal.Buttons de mentira que DESENHA o botao e EXERCITA o
+   createOrder do proprio bloco -- com actions.order.create devolvendo o objeto recebido --,
+   entao a previa mostra, medido no bloco, o valor que iria na ordem. E assim que se prova que
+   o valor do PayPal e o mesmo da tela: os dois saem do campo 54 do codigo Pix. */
+function pPvPayPal(cfg){
+  var s='';
+  if(!cfg.usapp)return s;
+  s+="  var DESENHO_PP='"+escJs(mockPP(cfg.ppcor))+"';\n";
+  s+='  var inserir=document.head.appendChild;\n';
+  s+='  document.head.appendChild=function(n){\n';
+  s+="    if(n&&n.tagName==='SCRIPT'&&/paypal\\.com/.test(String(n.src||''))){\n";
+  s+='      window.paypal={Buttons:function(bt){return {render:function(sel){\n';
+  s+="        var alvo=(typeof sel==='string')?document.querySelector(sel):sel;\n";
+  s+='        if(!alvo)return;\n';
+  s+="        var caixa=document.createElement('div');\n";
+  s+="        caixa.id='p-pv-pp';\n";
+  s+='        caixa.setAttribute(\'style\',\'border:1px dashed #b9b3a4;border-radius:8px;padding:6px 8px 10px\');\n';
+  s+="        alvo.innerHTML='';alvo.appendChild(caixa);\n";
+  s+="        var valor='',descricao='';\n";
+  s+='        try{\n';
+  s+='          var ped=bt.createOrder(null,{order:{create:function(o){return o;}}});\n';
+  s+='          var am=ped.purchase_units[0].amount;\n';
+  s+="          valor=am.value+' '+am.currency_code;\n";
+  s+='          descricao=ped.purchase_units[0].description;\n';
+  s+="        }catch(e){valor='(erro: '+String(e&&e.message||e)+')';}\n";
+  s+="        var eti=document.createElement('div');\n";
+  s+='        eti.setAttribute(\'style\',\'font:600 10px/1.4 -apple-system,BlinkMacSystemFont,sans-serif;color:#8a8375;text-align:center;text-transform:uppercase;letter-spacing:.06em\');\n';
+  s+="        eti.textContent='desenho: o SDK do PayPal nao roda na previa';\n";
+  s+='        caixa.appendChild(eti);\n';
+  s+="        var des=document.createElement('div');des.innerHTML=DESENHO_PP;caixa.appendChild(des);\n";
+  s+="        var med=document.createElement('div');\n";
+  s+="        med.id='p-pv-pp-valor';\n";
+  s+='        med.setAttribute(\'style\',\'margin-top:8px;border-top:1px dashed #d8d2c4;padding-top:7px;font:12px/1.5 -apple-system,BlinkMacSystemFont,sans-serif;color:#555;text-align:left\');\n';
+  s+="        med.textContent='Medido no proprio bloco -- valor que iria na ordem: '+valor+(descricao?(' | descricao: '+descricao):'');\n";
+  s+='        caixa.appendChild(med);\n';
+  s+='      }};}};\n';
+  s+='      setTimeout(function(){if(n.onload)n.onload();},0);\n';
+  s+='      return n;\n';
+  s+='    }\n';
+  s+='    return inserir.call(document.head,n);\n';
+  s+='  };\n';
+  s+='  document.head.appendChild.fcPvSemPayPal=true;\n';
+  return s;
+}
+function pPvShim(busca,cfg){
+  return fcPvShim({pref:'p',
+    /* o endereco simulado: o bloco le location.search e nao sabe que esta numa previa */
+    extras:'  var alvo='+pJson(busca)+';\n'+
+           '  try{history.replaceState(null,\'\',alvo||location.pathname);}catch(e){}\n'+
+           pPvPayPal(cfg),
+    conferencias:'  try{if(String(location.search||\'\')!==alvo)falhou.push(\'o endereco simulado\');}catch(e){falhou.push(\'o endereco simulado\');}\n'+
+      (cfg.usapp?'  try{if(!document.head.appendChild.fcPvSemPayPal)falhou.push(\'o SDK do PayPal\');}catch(e){falhou.push(\'o SDK do PayPal\');}\n':''),
+    abre:'',
+    fecha:' deste quadro. A previa pode estar gravando nas chaves reais do navegador, mostrando a pagina sem a cobranca simulada ou mandando o seu Client ID para o PayPal -- o que aparece abaixo nao prova nada. O codigo gerado ao lado nao e afetado.'});
+}
+/* Enchimento cinzento abaixo do cartao: sem ele nao da para ver onde a pagina termina nem
+   rolar ate o QR Code em cobranca com descricao longa. */
+function pPvEnchimento(){
+  var s='',i;
+  for(i=0;i<6;i++)s+='<div class="p-pv-falso">conteudo da sua pagina</div>';
+  return s;
+}
+function pPvDoc(cfg,busca,recusa){
+  var h='';
+  h+='<!DOCTYPE html>\n<html lang="pt-br">\n<head>\n<meta charset="utf-8">\n';
+  h+='<meta name="viewport" content="width=device-width,initial-scale=1">\n';
+  h+='<sty'+'le>\n';
+  h+='html,body{margin:0;padding:0}\n';
+  h+='body{background:#FFFFFF;padding:18px 12px;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Ubuntu,sans-serif}\n';
+  h+='.p-pv-falso{background:#EDEAE1;color:#A9A294;border-radius:6px;margin:10px 0;padding:0 14px;';
+  h+='height:70px;display:flex;align-items:center;font-size:12px;letter-spacing:.04em}\n';
+  h+='.p-pv-recusa{background:#8C1D18;color:#FDFBF6;border-radius:8px;padding:12px 14px;';
+  h+='font:600 13px/1.5 -apple-system,BlinkMacSystemFont,sans-serif}\n';
+  h+='</sty'+'le>\n</head>\n<body>\n';
+  h+=pPvShim(busca,cfg);
+  /* Configuracao recusada nao desenha a pagina: mostra a RECUSA, com o motivo. Um bloco velho
+     com etiqueta continuaria exibindo valores que o operador le antes de ler a etiqueta. */
+  if(recusa){
+    h+='<div class="p-pv-recusa"></div>\n';
+    h+='<scr'+'ipt>document.querySelector(\'.p-pv-recusa\').textContent='+pJson('Esta configuracao ainda nao gera codigo: '+recusa)+';</scr'+'ipt>\n';
+  }else{
+    h+=pBloco(cfg);
+  }
+  h+=pPvEnchimento();
+  h+='\n</body>\n</html>';
+  return h;
+}
+function pPvMontar(){
+  var box=$('p-pv-box');if(!box)return;
+  var cfg=pCfg();
+  var recusa=pRecusaBloco(cfg);
+  /* o quadro so precisa de cobranca valida quando o estado pedido nao e o "sem parametros" */
+  if(!recusa&&pPvModo!=='vazio')recusa=pRecusaCobranca(cfg);
+  var busca=recusa?'':pPvBusca(cfg);
+  var larg=Math.max(360,cfg.larg+80);
+  var disp=box.clientWidth||440;
+  var k=Math.min(1,disp/larg);
+  /* trocar o iframe inteiro e o jeito barato de parar o bloco anterior */
+  box.innerHTML='';
+  var moldura=document.createElement('div');
+  moldura.className='c-pv-moldura';
+  moldura.style.width=Math.round(larg*k)+'px';
+  moldura.style.height=P_PV_ALTURA+'px';
+  var ifr=document.createElement('iframe');
+  ifr.id='p-pv-frame';
+  ifr.setAttribute('title','Previa da pagina de cobranca');
+  ifr.style.width=larg+'px';
+  ifr.style.height=Math.round(P_PV_ALTURA/k)+'px';
+  ifr.style.transform='scale('+k+')';
+  ifr.style.transformOrigin='top left';
+  moldura.appendChild(ifr);
+  box.appendChild(moldura);
+  var doc=ifr.contentDocument||(ifr.contentWindow&&ifr.contentWindow.document);
+  if(!doc)return;
+  doc.open();doc.write(pPvDoc(cfg,busca,recusa));doc.close();
+}
+/* Debounce com timer UNICO, sempre cancelado antes de reagendar. */
+function pPreview(imediato){
+  if(pPvTimer){clearTimeout(pPvTimer);pPvTimer=null;}
+  if(imediato){pPvMontar();return;}
+  pPvTimer=setTimeout(function(){pPvTimer=null;pPvMontar();},400);
+}
+function pPvBotoes(){
+  [['p-pv-ok','ok'],['p-pv-adult','adulterado'],['p-pv-vazio','vazio']].forEach(function(par){
+    var b=$(par[0]);if(!b)return;
+    b.className='botao mini'+(pPvModo===par[1]?'':' claro');
+    b.setAttribute('aria-pressed',pPvModo===par[1]?'true':'false');
+  });
+}
+function pPvModoSet(m){pPvModo=m;pPvBotoes();pPreview(true);}
+
+/* ===== estado e biblioteca de presets ===== */
+function pColeta(){
+  return {p:{chave:$('p-chave').value,nomer:$('p-nomer').value,cidade:$('p-cidade').value,
+    usapp:radio('p-usapp'),client:$('p-client').value,ppcor:radio('p-ppcor'),
+    zap:radio('p-zap'),zapnum:$('p-zapnum').value,url:$('p-url').value,
+    larg:$('p-larg').value,qr:$('p-qr').value,
+    c1:$('p-c1-t').value,c2:$('p-c2-t').value,c3:$('p-c3-t').value,
+    coruja:radio('p-coruja'),corujaalt:$('p-corujaalt').value,
+    corujacorpo:$('p-corujacorpo-t').value,corujadet:$('p-corujadet-t').value,
+    t1:$('p-t1').value,t2:$('p-t2').value,t3:$('p-t3').value,t4:$('p-t4').value,
+    t5:$('p-t5').value,t6:$('p-t6').value,t7:$('p-t7').value,
+    desc:$('p-desc').value,valor:$('p-valor').value,txid:$('p-txid').value,
+    ppmodo:radio('p-ppmodo'),pplink:$('p-pplink').value}};
+}
+function pRestaura(st){
+  var P=st.p||{},i;
+  if(P.chave!==undefined)$('p-chave').value=P.chave;
+  if(P.nomer!==undefined)$('p-nomer').value=P.nomer;
+  if(P.cidade!==undefined)$('p-cidade').value=P.cidade;
+  if(P.usapp)setRadio('p-usapp',P.usapp);
+  if(P.client!==undefined)$('p-client').value=P.client;
+  if(P.ppcor)setRadio('p-ppcor',P.ppcor);
+  if(P.zap)setRadio('p-zap',P.zap);
+  if(P.zapnum!==undefined)$('p-zapnum').value=P.zapnum;
+  if(P.url!==undefined)$('p-url').value=P.url;
+  if(P.larg!==undefined)$('p-larg').value=P.larg;
+  if(P.qr!==undefined)$('p-qr').value=P.qr;
+  [['c1','p-c1'],['c2','p-c2'],['c3','p-c3'],['corujacorpo','p-corujacorpo'],['corujadet','p-corujadet']]
+    .forEach(function(par){
+      var v=P[par[0]];
+      if(corValida(v)){$(par[1]).value=v;$(par[1]+'-t').value=v;}
+    });
+  if(P.coruja)setRadio('p-coruja',P.coruja);
+  if(P.corujaalt!==undefined)$('p-corujaalt').value=P.corujaalt;
+  for(i=1;i<=7;i++)if(P['t'+i]!==undefined)$('p-t'+i).value=P['t'+i];
+  if(P.desc!==undefined)$('p-desc').value=P.desc;
+  if(P.valor!==undefined)$('p-valor').value=P.valor;
+  if(P.txid!==undefined)$('p-txid').value=P.txid;
+  if(P.ppmodo)setRadio('p-ppmodo',P.ppmodo);
+  if(P.pplink!==undefined)$('p-pplink').value=P.pplink;
+}
+/* ===== O que esta aba poe na biblioteca de presets (ver o bloco compartilhado) ===== */
+function pPresetResumo(v){
+  var P=v.p||{};
+  var t=(P.usapp==='nao')?'so Pix':'Pix e PayPal';
+  t+=', '+((P.zap==='nao')?'sem comprovante':'comprovante pelo WhatsApp');
+  if(P.desc)t+=' — '+String(P.desc).substring(0,40);
+  return t;
+}
+function pPresetAntes(){
+  var mudou=false;
+  if(fcAjustarTodos(P_NUMS))mudou=true;
+  if(pValorAjustar())mudou=true;
+  if(pTxidAjustar())mudou=true;
+  if(mudou)salvarEstado();
+  return '';
+}
+function pPresetDepois(){
+  var mudou=false;
+  if(fcAjustarTodos(P_NUMS))mudou=true;
+  if(fcCoresAjustar('p-'))mudou=true;
+  if(mudou)salvarEstado();
+  /* Aplicar um preset (de aba ou geral) reescreve a cobranca que estava na tela, e faz isso
+     por restaura(), que escreve nos campos sem disparar 'input'/'change' -- entao o
+     pSaidaVence dos listeners nao acorda. Sem esta linha, a caixa ficaria com o link da
+     cobranca ANTERIOR ao lado dos valores novos: a divergencia mais cara possivel nesta aba.
+     Esvaziar sempre, e nao so quando os campos da cobranca mudaram, e deliberado -- comparar
+     antes e depois exigiria uma segunda leitura dos campos, e o custo de esvaziar a toa e um
+     clique em "Gerar link". */
+  var ta=$('p-out2');if(ta)ta.value='';
+  pToggles();pPvBotoes();pPreview(true);
+}
+
 /* ============ painel consolidado (fase 5) ============ */
 /* O QUE E. Um so lugar que junta, para a pagina selecionada na barra do preset geral, tudo o
    que vai para a Tag Head e tudo o que vai para a Tag Body -- os dois campos DA PAGINA. O
@@ -10111,7 +11186,7 @@ function cPvModoSet(m){
    os lista, com o botao de copiar de cada um, e nunca os junta. A Contagem regressiva cai nos
    dois lados, conforme o radio "fixa no topo" (Tag Body) ou "no fluxo" (componente).
 
-   O QUE ELE NAO E. Nao e um gerador. Ele LE as caixas de codigo que os seis geradores
+   O QUE ELE NAO E. Nao e um gerador. Ele LE as caixas de codigo que os geradores
    escreveram e as junta; nenhuma linha daqui monta bloco. Se o painel pudesse formatar codigo,
    seria uma segunda implementacao do gerador, e este projeto ja pagou duas vezes por isso na
    previa da Contagem regressiva.
@@ -10149,14 +11224,29 @@ var fccTimer=null;  /* timer UNICO do redesenho adiado, cancelado antes de reage
    Quem le o PRESET continua sem ver 'fora'; quem pergunta "este bloco ainda descreve o que
    esta na tela?" ve. Por isso a leitura extra e por fcPresetCapturar(a,true) -- o mesmo
    caminho unico de captura, so que sem descartar os campos 'fora' -- e nao um segundo jeito
-   de ler a aba. Ela so acontece nas abas que TEM campo 'fora' (uma), entao nao pesa nas seis.
+   de ler a aba. Ela so acontece nas abas que TEM campo 'fora' (uma), entao nao pesa nas demais.
    Aba em so-leitura devolve null: ali o gerador leu o DOM e fcgValoresDaAbaLer devolve o
    fragmento GUARDADO, e comparar os dois seria comparar duas coisas que nunca foram feitas
    para bater. O painel diz o que ha para dizer nesse estado por outro caminho, o
    plano.travadas. */
+/* 'naoEmite' e o caso simetrico de 'fora', e por isso mora na mesma funcao. 'fora' e o campo
+   que NAO viaja no preset mas MUDA o que a aba emite (b.consol). 'naoEmite' e o oposto: campo
+   que viaja no preset e NAO muda o que a aba emite -- na aba Link de cobranca, a descricao, o
+   valor e o identificador desta cobranca, que vao para o LINK e nunca para o bloco. Sem esta
+   linha, digitar a descricao de uma cobranca nova faria o painel anunciar que o bloco da
+   pagina esta velho, sobre um bloco que nao mudou nem podia mudar -- aviso falso, e aviso
+   falso e o comeco de o operador parar de ler os verdadeiros. */
+function fccSemNaoEmite(a,vals){
+  var o,i;
+  if(!a.naoEmite||!a.naoEmite.length)return vals;
+  o=fcClone(vals)||{};
+  if(o[a.pref])for(i=0;i<a.naoEmite.length;i++)delete o[a.pref][a.naoEmite[i]];
+  return o;
+}
 function fccAssinar(a,vals){
   var o,extra,i;
   if(fcSoLeitura[a.id])return null;
+  vals=fccSemNaoEmite(a,vals);
   if(!a.fora||!a.fora.length)return fcCanon(vals);
   o=(fcPresetCapturar(a,true)||{})[a.pref]||{};
   extra='';
@@ -10234,6 +11324,13 @@ function fccDaAba(a,p,plano,vals){
     fixa=(v.c&&v.c.fixa)||radio('c-fixa');
     if(fixa==='fixa')plano.body.push(fccItem(a,'c-out1','Contagem regressiva','Tag Body'));
     else plano.comps.push(fccItem(a,'c-out1','Contagem regressiva','Componente HTML desta página'));
+  }else if(a.id==='cob'){
+    /* So o BLOCO entra aqui. O link desta cobranca (p-out2) nao vai para campo nenhum do
+       Prosite -- ele vai para o cliente --, entao o painel, que existe para montar os campos
+       da pagina, nao teria onde encaixa-lo. Listar as duas saidas juntas confundiria as duas
+       vidas que a aba acabou de separar. */
+    plano.comps.push(fccItem(a,'p-out1','Link de cobrança — a página de pagamento','Componente HTML desta página',
+      'Cola-se <b>uma vez só</b>. O <b>link de cada cobrança</b> é gerado na aba, muda a cada cliente e não vai em campo nenhum do Prosite.'));
   }else if(a.id==='tidy'){
     emb=(((v.t&&v.t.arq)||radio('t-arq'))==='embutida');
     if(!emb){
@@ -10423,7 +11520,7 @@ function fccRender(){
   }else{
     h+='<p><b>'+escHtml(plano.nome)+'</b> — '+plano.ligadas+' de '+ABAS.length+' abas nesta página.</p>';
     if(!plano.ligadas){
-      h+='<p class="fcc-falta"><b>Nenhuma aba foi ligada nesta página.</b> Todo preset geral nasce com as seis abas fora — ligue, no interruptor no topo de cada aba, as que esta página realmente usa. Aba fora não entra aqui.</p>';
+      h+='<p class="fcc-falta"><b>Nenhuma aba foi ligada nesta página.</b> Todo preset geral nasce com as '+fcAbasTxt()+' abas fora — ligue, no interruptor no topo de cada aba, as que esta página realmente usa. Aba fora não entra aqui.</p>';
     }
     /* Vem ANTES do aviso de codigo velho de proposito: neste estado o painel nao sabe dizer se
        o codigo envelheceu, e mandar "clique em Gerar codigo" numa aba que avisou que nao grava
@@ -10483,6 +11580,9 @@ prep('Barra de abas','',function(){
   /* enquanto o painel esta escondido o box mede 0: a previa e remontada ao abrir a aba, ja com
      a largura real da coluna, senao o iframe nasceria na largura de emergencia. */
   liga('aba-cnt',function(){trocarAba('cnt');cPreview(true);});
+  /* enquanto o painel esta escondido o box mede 0: a previa e remontada ao abrir a aba, ja com
+     a largura real da coluna, senao o iframe nasceria na largura de emergencia. */
+  liga('aba-cob',function(){trocarAba('cob');pPreview(true);});
 });
 /* O logotipo do topo deixou de ser SVG colado no corpo da pagina e passa a ser desenhado a
    partir de CORUJA_PECAS, a mesma fonte que alimenta os blocos gerados. Passo proprio, e nao
@@ -10583,8 +11683,8 @@ prep('Checkout','uni',function(){
   parearCor('u-c1');parearCor('u-c2');parearCor('u-c3');
   var el=$('u-chave');
   if(el){
-    el.addEventListener('change',function(){if(uChaveAjustar())salvarEstado();});
-    el.addEventListener('blur',function(){if(uChaveAjustar()){salvarEstado();uPreview(true);}});
+    el.addEventListener('change',function(){if(fcPixChaveAjustar('u-chave'))salvarEstado();});
+    el.addEventListener('blur',function(){if(fcPixChaveAjustar('u-chave')){salvarEstado();uPreview(true);}});
   }
 });
 prep('Bordas com efeito','bor',function(){
@@ -10621,6 +11721,30 @@ prep('Contagem regressiva','cnt',function(){
      redesenha por conta propria. */
   fcLigarFaixa(C_NUMS,function(){cPreview(true);});
 });
+prep('Link de cobrança','cob',function(){
+  liga('p-gerar',pGerar);
+  liga('p-gerarlink',pGerarLink);
+  liga('p-atualizar',function(){pPreview(true);});
+  liga('p-limpar',pLimpar);
+  liga('p-pv-ok',function(){pPvModoSet('ok');});
+  liga('p-pv-adult',function(){pPvModoSet('adulterado');});
+  liga('p-pv-vazio',function(){pPvModoSet('vazio');});
+  liga('p-copy1',function(){copiar('p-out1','p-cop1');});
+  liga('p-copy2',function(){copiar('p-out2','p-cop2');});
+  parearCor('p-c1');parearCor('p-c2');parearCor('p-c3');
+  parearCor('p-corujacorpo');parearCor('p-corujadet');
+  fcLigarFaixa(P_NUMS,function(){pPreview(true);});
+  /* A chave Pix, o valor e o identificador se corrigem a vista, no proprio campo -- em
+     'change'/'blur', nunca em 'input'. O listener fica no proprio elemento porque ele corre
+     antes dos de document: quando o salvarEstado global rodar, o valor ja esta limpo. */
+  [['p-chave',function(){return fcPixChaveAjustar('p-chave');}],
+   ['p-valor',pValorAjustar],
+   ['p-txid',pTxidAjustar]].forEach(function(par){
+    var el=$(par[0]);if(!el)return;
+    el.addEventListener('change',function(){if(par[1]())salvarEstado();});
+    el.addEventListener('blur',function(){if(par[1]()){salvarEstado();pPreview(true);}});
+  });
+});
 /* Cores de texto livre das quatro abas que as tem: o campo se corrige a vista, como o c-mob.
    Mesmo motivo do listener no proprio elemento (roda antes dos de document, entao o
    salvarEstado/previa globais ja leem o valor corrigido); 'blur' nao borbulha, por isso esse
@@ -10639,8 +11763,8 @@ prep('Correcao a vista das cores livres','leads uni bor cnt',function(){
    impede as outras cinco de voltar, e o aviso aparece na tela. */
 restaurarEstado();
 
-/* A secao "Biblioteca de presets" das seis abas: montada uma vez (mesma mecanica, mesma
-   aparencia, mesmas palavras nas seis -- ver fcPresetsMontar) e ja desenhada com a
+/* A secao "Biblioteca de presets" de todas as abas: montada uma vez (mesma mecanica, mesma
+   aparencia, mesmas palavras em todas -- ver fcPresetsMontar) e ja desenhada com a
    biblioteca lida do estado gravado. Um prep por aba, pelo motivo de sempre: a biblioteca
    ilegivel de uma aba nao pode deixar as outras cinco sem a secao. */
 for(var iAba=0;iAba<ABAS.length;iAba++){
@@ -10656,7 +11780,7 @@ for(var iAba=0;iAba<ABAS.length;iAba++){
 prep('Correcao das cores livres e da chave Pix na carga','leads uni bor cnt',function(){
   var mudou=false;
   CORES_LIVRES.forEach(function(par){if(corAjustar(par[0],par[1]))mudou=true;});
-  if(uChaveAjustar())mudou=true;
+  if(fcPixChaveAjustar('u-chave'))mudou=true;
   if(mudou)salvarEstado();
 });
 /* Mesmo motivo do c-mob e das cores livres: estado gravado antes desta regra pode trazer numeros
@@ -10672,7 +11796,7 @@ prep('Slideshow','slide',function(){
   sRender();
   /* O importador nao tem estado salvo de proposito: o codigo-fonte colado chega a centenas
      de milhares de caracteres e nao pode disputar o espaco de fcConstrutores com a
-     configuracao das seis abas. Entao aqui so o desenho inicial -- campo da legenda padrao
+     configuracao das abas. Entao aqui so o desenho inicial -- campo da legenda padrao
      escondido e botao de adicionar desligado, que e o estado sem conferencia feita. */
   sImpToggles();
   sPvBotoes();
@@ -10735,9 +11859,20 @@ prep('Contagem regressiva','cnt',function(){
   cPvBotoes();
 },'desenhar a aba com o estado restaurado');
 
+prep('Link de cobrança','cob',function(){
+  /* estado gravado antes desta regra pode trazer numero fora da faixa: prende na carga, para o
+     campo nunca exibir algo diferente do que pCfg vai usar. */
+  if(fcAjustarTodos(P_NUMS))salvarEstado();
+  pToggles();
+  /* A previa NAO e montada aqui, pelo mesmo motivo das outras: montar na carga executaria o
+     bloco -- inclusive o pedido do script do QR Code -- em toda abertura da ferramenta, mesmo
+     para quem nunca abre esta aba, e com o painel escondido (largura de emergencia). */
+  pPvBotoes();
+},'desenhar a aba com o estado restaurado');
+
 /* O preset geral e o ULTIMO passo da partida, e nao por acaso: fcgValoresDaAba le o que esta na
    tela, e a tela so termina de ser desenhada -- e de ter os numeros presos a faixa pelo
-   fcAjustarTodos de cada aba -- depois dos seis passos "desenhar a aba com o estado restaurado".
+   fcAjustarTodos de cada aba -- depois dos passos "desenhar a aba com o estado restaurado".
    Lendo antes, a barra compararia uma tela ainda por corrigir com o preset gravado e diria
    "alterado" numa ferramenta recem-aberta em que ninguem mexeu. */
 prep('Preset geral','',fcgIniciar,'preparar a barra do preset geral');
