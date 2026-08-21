@@ -299,3 +299,40 @@ A revisão provou a coerência **por medição**, não por leitura: `Function.pr
 ### Total do dia
 
 **11h55** de trabalho medido, das 11:07 às 23:56 — cinco fases mais a sétima aba.
+
+---
+
+## Oitava aba — mini loja
+
+| | Estimado | Real |
+|---|---|---|
+| Mini loja (escopo cheio) | 5h30 – 8h | **4h30** (22:38 → 03:08) |
+
+**Abaixo do piso pela terceira vez seguida**, e pela mesma razão: o motor de pagamento já existia, testado e unificado, e a loja consumiu em vez de reconstruir.
+
+### O que ela consertou fora do próprio escopo
+
+**Um defeito de dinheiro que estava no ar.** Em ~2% das combinações de preço com cupom, o Pix cobrava **um centavo a mais** do que a tela mostrava (R$ 10,50 com 5%: tela R$ 9,97, campo 54 do Pix `9.98`). Varredura de 2 milhões de combinações: **37.536 divergiam, sempre para mais**. Herdado do Checkout — o carrinho publicado tinha o mesmo defeito.
+
+A correção arredonda o total em centavos **num lugar só** e **muda a saída do Checkout de propósito**. A regra do byte a byte existe para pegar mudança *não intencional*; esta é intencional e conserta dinheiro. A prova mudou de forma: em vez do hash, **o diff** — e ele mostra só o arredondamento, nos 30 cenários. Depois: 2.002.000 combinações, **zero divergências**.
+
+### Três lições de método, todas caras
+
+**1. Medir com números redondos esconde a classe de erro que os números feios revelam.** A documentação registrava a coerência com R$ 500 e 10% — combinação que nunca expõe o meio centavo.
+
+**2. Regressão por texto não vê bloco que não executa.** Um Critical apareceu na rodada de correção: a loja em "somente Pix" morria com `MOEDA is not defined` — nenhum produto, nenhum aviso. O bloco estava **bem escrito** e não rodava. A bateria ganhou um passo que **executa** os 55 blocos gerados.
+
+**3. Texto que promete demais atravessa gerações.** A prévia afirmava que o botão "Já paguei" não abre o WhatsApp — e abria, com o número do dono. A frase **já era falsa no Checkout** antes desta aba; a loja copiou uma declaração que não valia mais. Corrigido neutralizando `window.open` no shim, que é ambiente, em vez de reescrever o texto.
+
+### Placar
+
+Zero Critical na revisão; **um Critical achado pela própria rodada de correção**. Cinco Important e cinco Minor, todas fechadas.
+
+## Total acumulado
+
+| Rodada | Estimado | Real |
+|---|---|---|
+| Cinco fases (preset geral e painel) | 13h45 – 19h15 | 9h50 |
+| Sétima aba (link de cobrança) | 3h30 – 5h | 2h05 |
+| Oitava aba (mini loja) | 5h30 – 8h | 4h30 |
+| **Total** | **22h45 – 32h15** | **16h25** |
