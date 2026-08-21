@@ -403,6 +403,13 @@
   .fcg-selo.salvo{color:#294B24;background:#EAF3E9;border-color:#7FA97A}
   .fcg-selo.alterado{color:#6B5210;background:#FFF6DF;border-color:#E3B23C}
   .fcg-cresce{flex:1 1 20px;min-width:0}
+  /* .fcg-painel e a PELE do painel recolhivel da barra do topo, e nao a marca de dono de uma
+     fase: ela veste tanto #fcg-painel ("Detalhes", da campanha) quanto #fci-painel
+     ("Identidade", da ferramenta). Os dois sao painel recolhivel da mesma barra, com a mesma
+     largura e a mesma folga; uma segunda folha de estilo identica com outro prefixo seria a
+     duplicacao que este projeto vem desfazendo -- e a que ganharia uma regra nova sozinha no
+     dia em que uma das duas fosse ajustada. Os IDs e o JavaScript de cada painel continuam em
+     espacos de nomes separados ('fcg-' e 'fci-'); o que se compartilha aqui e so aparencia. */
   .fcg-painel{padding:14px 0;display:none;border-bottom:1px solid var(--linha)}
   .fcg-painel.aberto{display:block}
   /* Mesmo max-width e mesma folga de 20 px da .fcg-linha, para o conteudo de "Detalhes" comecar
@@ -543,6 +550,73 @@
     <button class="botao mini" type="button" id="fcg-salvar">Salvar</button>
     <button class="botao mini claro" type="button" id="fcg-descartar" title="Descartar as alterações e voltar ao que está guardado neste preset geral">Descartar</button>
     <button class="botao mini claro" type="button" id="fcg-detalhes">Detalhes</button>
+    <button class="botao mini claro" type="button" id="fci-botao" title="Chave Pix, recebedor, Client ID, WhatsApp e a paleta — configuração da ferramenta, não da campanha">Identidade</button>
+  </div>
+</div>
+
+<!-- ==================== IDENTIDADE E PALETA ====================
+     Segundo painel recolhivel da barra do topo, ao lado de "Detalhes". Fica AQUI, e nao numa
+     aba, porque as oito abas sao construtores e isto nao constroi nada; e nao numa faixa fixa,
+     que empurraria todo o conteudo para baixo.
+     A distincao que o rotulo precisa carregar: "Detalhes" e da CAMPANHA (campanha, pagina,
+     codigos manuais, backup); "Identidade" e da FERRAMENTA. E ela que explica por que a
+     identidade nao entra no preset geral -- chave Pix e a mesma no Natal e na Pascoa. -->
+<div class="fcg-painel" id="fci-painel">
+    <div class="grade">
+      <!-- Recado da migracao: o que a ferramenta recolheu das abas e o que ela ignorou nos
+           presets antigos. Fica ate o operador fechar (a marca de "ja li" e gravada), porque
+           "dizer na tela uma vez" nao pode significar "piscar e sumir". -->
+      <div class="fcx-largo" id="fci-migracao-caixa" style="display:none">
+        <fieldset>
+          <legend>A identidade saiu das abas</legend>
+          <p class="ajuda alerta" id="fci-migracao"></p>
+          <div class="acoes"><button class="botao mini claro" type="button" id="fci-migracao-ok">Entendi, pode fechar este aviso</button></div>
+        </fieldset>
+      </div>
+      <div>
+        <fieldset>
+          <legend>Identidade — quem recebe e quem atende</legend>
+          <p class="ajuda"><b>Preenchido uma vez, vale para todas as abas.</b> O Checkout, o Link de cobrança e a Mini loja leem a chave Pix, o recebedor e o Client ID daqui; o WhatsApp é lido também pela Captação de leads. <b>Não existe segunda cópia</b> — trocar de chave Pix aqui troca em todas, e não há mais como uma aba ficar com a chave antiga.</p>
+          <label for="fci-chave">Chave Pix <small>(máx. 77 caracteres; espaços e caracteres invisíveis das pontas são removidos ao sair do campo — no meio da chave eles impedem a geração, com aviso)</small></label>
+          <input type="text" id="fci-chave" value="" placeholder="e-mail, telefone, CPF/CNPJ ou chave aleatoria">
+          <label for="fci-nomer">Nome do recebedor <small>(máx. 25 caracteres, acentos removidos no código Pix)</small></label>
+          <input type="text" id="fci-nomer" value="Foto Certa" maxlength="25" placeholder="nome que aparece no Pix">
+          <label for="fci-cidade">Cidade do recebedor <small>(máx. 15 caracteres, acentos removidos no código Pix)</small></label>
+          <input type="text" id="fci-cidade" value="Vitoria" maxlength="15" placeholder="cidade do recebedor">
+          <label for="fci-client">Client ID do PayPal <small>(Live, público)</small></label>
+          <input type="text" id="fci-client" value="" placeholder="Cole aqui o Client ID Live da sua conta PayPal">
+          <label for="fci-zapnum">WhatsApp <small>(DDI+DDD+número, só dígitos)</small></label>
+          <input type="text" id="fci-zapnum" value="" placeholder="5527999999999">
+          <p class="ajuda"><b>Onde fica:</b> no armazenamento deste navegador, em chave própria — não acompanha outro computador e some se você limpar os dados do site. <b>No backup em arquivo</b> ela entra só no <i>com dados</i>; o arquivo <i>sem dados</i> sai sem nada disso. <b>No preset geral não entra</b>: um preset repassado a outra pessoa não leva os seus dados de pagamento.</p>
+        </fieldset>
+      </div>
+      <div>
+        <fieldset>
+          <legend>Paleta</legend>
+          <p class="ajuda"><b>A paleta não se aplica sozinha: ela tem botão.</b> Identidade não muda por campanha, aparência muda — e uma campanha pode precisar de cores próprias. Por isso aqui é <b>cópia com origem visível</b>, e não amarração: você escolhe quando levar estas cores para as abas.</p>
+          <label for="fci-destaque-t">Cor de destaque</label>
+          <div class="cor-linha"><input type="color" id="fci-destaque" value="#075E54"><input type="text" id="fci-destaque-t" value="#075E54"></div>
+          <label for="fci-fundo-t">Fundo do cartão</label>
+          <div class="cor-linha"><input type="color" id="fci-fundo" value="#ffffff"><input type="text" id="fci-fundo-t" value="#ffffff"></div>
+          <label for="fci-texto-t">Cor do texto</label>
+          <div class="cor-linha"><input type="color" id="fci-texto" value="#333333"><input type="text" id="fci-texto-t" value="#333333"></div>
+          <label for="fci-corujacorpo-t">Corpo da coruja</label>
+          <div class="cor-linha"><input type="color" id="fci-corujacorpo" value="#ffffff"><input type="text" id="fci-corujacorpo-t" value="#ffffff"></div>
+          <label for="fci-corujadet-t">Detalhes da coruja</label>
+          <div class="cor-linha"><input type="color" id="fci-corujadet" value="#075E54"><input type="text" id="fci-corujadet-t" value="#075E54"></div>
+          <div class="acoes"><button class="botao" type="button" id="fci-aplicar">Aplicar a paleta às abas</button></div>
+          <p class="ajuda" id="fci-estado"></p>
+          <p class="ajuda"><b>Onde cada cor cai:</b> destaque, fundo e texto vão para <b>Checkout</b>, <b>Link de cobrança</b> e <b>Mini loja</b> — as três abas em que esses três campos significam exatamente isso. As duas cores da coruja vão para <b>Captação de leads</b>, <b>Contagem regressiva</b> e <b>Link de cobrança</b>.</p>
+          <p class="ajuda"><b>O que o botão não encosta:</b> as cores de <b>Bordas com efeito</b>, as cores próprias da <b>Contagem regressiva</b> (fundo, texto, destaque, borda, botão, progresso, urgência) e as da <b>Captação de leads</b> (cabeçalho, card, botão enviar, texto). Medido: são 35 campos de cor no arquivo e só 9 são a mesma coisa — na Leads, <i>c1</i> é o fundo do cabeçalho e <i>c3</i> é o botão enviar, não destaque e texto. Amarrar por nome quebraria aquela aba.</p>
+        </fieldset>
+      </div>
+      <div class="fcx-largo">
+        <fieldset>
+          <legend>Por que isto não é uma aba, e não entra no preset geral</legend>
+          <p class="ajuda"><b>Identidade não muda por campanha; aparência muda.</b> A chave Pix é a mesma no Natal e na Páscoa. O <b>preset geral</b> é por campanha e página — esta configuração fica num nível <b>acima</b> dele, e por isso trocar de preset geral não mexe em nada do que está neste painel.</p>
+          <p class="ajuda"><b>Consequência boa:</b> um preset geral repassado a outra pessoa não leva a sua chave Pix, o seu Client ID nem o seu WhatsApp. <b>Consequência que sumiu:</b> como a identidade deixou de ser por aba, o aviso de que “a outra página desta campanha tem outro valor para a chave Pix” <b>não pode mais acontecer</b> — não existem mais duas cópias para divergir.</p>
+        </fieldset>
+      </div>
   </div>
 </div>
 <div class="fcg-painel" id="fcg-painel">
@@ -825,8 +899,7 @@
     <div>
       <fieldset>
       <legend>Essenciais</legend>
-      <label for="l-num">WhatsApp de destino <small>(DDI+DDD+número, só dígitos)</small></label>
-      <input type="text" id="l-num" value="" placeholder="5527999999999">
+      <p class="ajuda"><b>O WhatsApp de destino saiu desta aba.</b> Ele agora é um só para a ferramenta inteira, no painel <b>Identidade</b>, no topo da página. <span class="acoes"><button type="button" class="botao mini claro fci-ir">Abrir Identidade</button></span></p>
       <label for="l-cod">Código da página <small>(obrigatório — é ele que identifica a campanha na mensagem)</small></label>
       <input type="text" id="l-cod" value="" placeholder="ex.: CAMPANHA26">
       <label for="l-pag">Nome da página <small>(vazio = usa o título da página automaticamente)</small></label>
@@ -1278,8 +1351,7 @@
 
       <fieldset id="u-pp-campos">
         <legend>Conta PayPal</legend>
-        <label for="u-client">Client ID (Live) <small>(público)</small></label>
-        <input type="text" id="u-client" value="" placeholder="Cole aqui o Client ID Live da sua conta PayPal">
+        <p class="ajuda"><b>O Client ID saiu desta aba</b> e está no painel <b>Identidade</b>, no topo da página, com a chave Pix, o recebedor e o WhatsApp. É a mesma conta nas três abas de pagamento. <span class="acoes"><button type="button" class="botao mini claro fci-ir">Abrir Identidade</button></span></p>
         <div id="u-moeda-campo">
           <label>Moeda</label>
           <div class="radios">
@@ -1304,12 +1376,7 @@
     <div>
       <fieldset id="u-pix-campos">
         <legend>Dados do recebedor (Pix)</legend>
-        <label for="u-chave">Chave Pix <small>(máx. 77 caracteres; espaços e caracteres invisíveis das pontas são removidos ao sair do campo — no meio da chave eles impedem a geração, com aviso)</small></label>
-        <input type="text" id="u-chave" value="" placeholder="e-mail, telefone, CPF/CNPJ ou chave aleatoria">
-        <label for="u-nomer">Nome do recebedor <small>(máx. 25 caracteres, acentos removidos no código Pix)</small></label>
-        <input type="text" id="u-nomer" value="" maxlength="25" placeholder="nome que aparece no Pix">
-        <label for="u-cidade">Cidade <small>(máx. 15 caracteres, acentos removidos no código Pix)</small></label>
-        <input type="text" id="u-cidade" value="" maxlength="15" placeholder="cidade do recebedor">
+        <p class="ajuda"><b>A chave Pix, o nome e a cidade do recebedor saíram desta aba.</b> Eles são os mesmos aqui, no Link de cobrança e na Mini loja, e por isso ficam num lugar só: o painel <b>Identidade</b>, no topo da página. <span class="acoes"><button type="button" class="botao mini claro fci-ir">Abrir Identidade</button></span></p>
       </fieldset>
 
       <fieldset id="u-descpix-campo">
@@ -1327,8 +1394,7 @@
           <label><input type="radio" name="u-zap" value="nao"><span>Não incluir</span></label>
         </div>
         <div id="u-zap-campo">
-          <label for="u-zapnum">WhatsApp de destino <small>(DDI+DDD+número, só dígitos)</small></label>
-          <input type="text" id="u-zapnum" value="" placeholder="5527999999999">
+          <p class="ajuda"><b>O número de destino saiu desta aba</b> — é o WhatsApp do painel <b>Identidade</b>, o mesmo que a Captação de leads, o Link de cobrança e a Mini loja usam. <span class="acoes"><button type="button" class="botao mini claro fci-ir">Abrir Identidade</button></span></p>
         </div>
       </fieldset>
     </div>
@@ -2036,12 +2102,7 @@
     <div>
       <fieldset>
       <legend>Pix</legend>
-      <label for="p-chave">Chave Pix <small>(máx. 77 caracteres; espaços e caracteres invisíveis das pontas são removidos ao sair do campo — no meio da chave eles impedem a geração, com aviso)</small></label>
-      <input type="text" id="p-chave" value="" placeholder="e-mail, telefone, CPF/CNPJ ou chave aleatoria">
-      <label for="p-nomer">Nome do recebedor <small>(máx. 25 caracteres, acentos removidos no código Pix)</small></label>
-      <input type="text" id="p-nomer" value="Foto Certa" maxlength="25" placeholder="nome que aparece no Pix">
-      <label for="p-cidade">Cidade <small>(máx. 15 caracteres, acentos removidos no código Pix)</small></label>
-      <input type="text" id="p-cidade" value="Vitoria" maxlength="15" placeholder="cidade do recebedor">
+      <p class="ajuda"><b>A chave Pix, o nome e a cidade do recebedor saíram desta aba</b> e estão no painel <b>Identidade</b>, no topo da página — os mesmos do Checkout e da Mini loja. <span class="acoes"><button type="button" class="botao mini claro fci-ir">Abrir Identidade</button></span></p>
       <p class="ajuda"><b>Estes três campos entram no bloco da página</b> e também em cada link. A página só aceita um link cujo código Pix tenha sido montado com <b>exatamente</b> esta chave, este nome e esta cidade — é assim que ela sabe que aquela cobrança é sua. Se você trocar a chave e regerar o bloco, os links antigos ainda não pagos param de abrir: gere links novos para eles.</p>
       </fieldset>
     </div>
@@ -2054,8 +2115,7 @@
       <label><input type="radio" name="p-usapp" value="nao"><span>Não — só Pix</span></label>
       </div>
       <div id="p-pp-campos">
-      <label for="p-client">Client ID (Live) <small>(público)</small></label>
-      <input type="text" id="p-client" value="" placeholder="Cole aqui o Client ID Live da sua conta PayPal">
+      <p class="ajuda"><b>O Client ID saiu desta aba</b> e está no painel <b>Identidade</b>, no topo da página. <span class="acoes"><button type="button" class="botao mini claro fci-ir">Abrir Identidade</button></span></p>
       <label>Cor do botão PayPal</label>
       <div class="radios">
       <label><input type="radio" name="p-ppcor" value="gold" checked><span>Dourado</span></label>
@@ -2074,8 +2134,7 @@
       <label><input type="radio" name="p-zap" value="sim" checked><span>Sim</span></label>
       <label><input type="radio" name="p-zap" value="nao"><span>Não</span></label>
       </div>
-      <label for="p-zapnum">WhatsApp de destino <small>(DDI+DDD+número, só dígitos)</small></label>
-      <input type="text" id="p-zapnum" value="" placeholder="5527999999999">
+      <p class="ajuda"><b>O número de destino saiu desta aba</b> — é o WhatsApp do painel <b>Identidade</b>, no topo da página. <span class="acoes"><button type="button" class="botao mini claro fci-ir">Abrir Identidade</button></span></p>
       <p class="ajuda">O botão abre o WhatsApp com a descrição, o valor e o identificador da cobrança já escritos na mensagem — assim você sabe de qual cobrança o cliente está falando. O Pix estático não avisa ninguém quando cai: <b>confira o extrato</b> antes de entregar o trabalho.</p>
       </fieldset>
     </div>
@@ -2259,8 +2318,7 @@
       </fieldset>
       <fieldset id="m-pp-campos">
         <legend>Conta PayPal</legend>
-        <label for="m-client">Client ID (Live) <small>(público)</small></label>
-        <input type="text" id="m-client" value="" placeholder="Cole aqui o Client ID Live da sua conta PayPal">
+        <p class="ajuda"><b>O Client ID saiu desta aba</b> e está no painel <b>Identidade</b>, no topo da página. <span class="acoes"><button type="button" class="botao mini claro fci-ir">Abrir Identidade</button></span></p>
         <div id="m-moeda-campo">
           <label>Moeda</label>
           <div class="radios">
@@ -2283,12 +2341,7 @@
     <div>
       <fieldset id="m-pix-campos">
         <legend>Dados do recebedor (Pix)</legend>
-        <label for="m-chave">Chave Pix <small>(máx. 77 caracteres; espaços e caracteres invisíveis das pontas são removidos ao sair do campo — no meio da chave eles impedem a geração, com aviso)</small></label>
-        <input type="text" id="m-chave" value="" placeholder="e-mail, telefone, CPF/CNPJ ou chave aleatoria">
-        <label for="m-nomer">Nome do recebedor <small>(máx. 25 caracteres, acentos removidos no código Pix)</small></label>
-        <input type="text" id="m-nomer" value="" maxlength="25" placeholder="nome que aparece no Pix">
-        <label for="m-cidade">Cidade <small>(máx. 15 caracteres, acentos removidos no código Pix)</small></label>
-        <input type="text" id="m-cidade" value="" maxlength="15" placeholder="cidade do recebedor">
+        <p class="ajuda"><b>A chave Pix, o nome e a cidade do recebedor saíram desta aba</b> e estão no painel <b>Identidade</b>, no topo da página — os mesmos do Checkout e do Link de cobrança. <span class="acoes"><button type="button" class="botao mini claro fci-ir">Abrir Identidade</button></span></p>
       </fieldset>
       <fieldset id="m-descpix-campo">
         <legend>Desconto para pagamento via Pix</legend>
@@ -2303,8 +2356,7 @@
           <label><input type="radio" name="m-zap" value="nao"><span>Não incluir</span></label>
         </div>
         <div id="m-zap-campo">
-          <label for="m-zapnum">WhatsApp de destino <small>(DDI+DDD+número, só dígitos)</small></label>
-          <input type="text" id="m-zapnum" value="" placeholder="5527999999999">
+          <p class="ajuda"><b>O número de destino saiu desta aba</b> — é o WhatsApp do painel <b>Identidade</b>, no topo da página. <span class="acoes"><button type="button" class="botao mini claro fci-ir">Abrir Identidade</button></span></p>
         </div>
         <p class="ajuda">A mensagem já vai com o identificador do pedido, os itens, o cupom e o valor. <b>Ao clicar nele o carrinho do cliente é esvaziado</b> — é o único momento em que a página sabe que a compra terminou. O Pix estático não avisa ninguém quando o dinheiro cai: a conferência é sua, no extrato.</p>
       </fieldset>
@@ -3087,9 +3139,10 @@ function pixLimpar(t){
 }
 /* Correcao a vista, no padrao do c-mob: o campo passa a mostrar exatamente a chave que vai
    para o codigo. So em 'change'/'blur', nunca em 'input'.
-   Recebe o ID porque duas abas tem campo de chave Pix -- Checkout ('u-chave') e Link de
-   cobranca ('p-chave'). Uma copia por aba seria a mesma limpeza em dois lugares, e no dia em
-   que a faixa de invisiveis mudasse so uma delas mudaria. */
+   Recebe o ID por historia: quando tres abas tinham cada uma o seu campo de chave Pix, uma
+   copia da limpeza por aba seria a mesma correcao em tres lugares. Hoje o campo e um so
+   ('fci-chave'), no painel Identidade, e o parametro sobrevive porque a funcao nao tem por que
+   saber onde o campo mora -- quem sabe e quem a chama. */
 function fcPixChaveAjustar(id){
   var el=$(id);if(!el)return false;
   var limpo=pixLimpar(el.value);
@@ -3104,7 +3157,7 @@ function fcPixChaveAjustar(id){
    caracteres" quando o problema e o emoji -- o operador cortaria a chave certa e continuaria
    sem QR valido. O defeito mais especifico e o que deve ser nomeado. */
 function pixChaveErro(chave,bruta){
-  if(!chave)return String(bruta||'').length?'A chave Pix so tinha espacos ou caracteres invisiveis (vindos de copiar-e-colar) e ficou vazia depois da limpeza das pontas. Digite a chave novamente.':'';
+  if(!chave)return String(bruta||'').length?fciRecusa('A chave Pix so tinha espacos ou caracteres invisiveis (vindos de copiar-e-colar) e ficou vazia depois da limpeza das pontas. Digite a chave novamente.'):'';
   if(!/^[!-~]+$/.test(chave))return 'A chave Pix tem, no meio, um espaco ou um caractere fora do padrao -- pode ser um caractere invisivel que veio junto do copiar-e-colar do app do banco e que voce nao esta vendo. O codigo do QR conta os caracteres em bytes, e qualquer um fora da faixa comum (letras, numeros e sinais, sem espacos) faz o banco recusar o pagamento sem explicacao. Apague o campo e digite a chave de novo.';
   if(chave.length>PIX_CHAVE_MAX)return 'A chave Pix tem '+chave.length+' caracteres e o padrao do Banco Central aceita no maximo '+PIX_CHAVE_MAX+' no campo da chave. Uma chave maior desmonta o codigo do QR sem que ele pareca invalido: confira se nao colou algo a mais.';
   return '';
@@ -3512,9 +3565,19 @@ function prep(nome,abaId,fn,fase){
                   gravada (<pref>.presets) -- as duas coisas sempre coincidiram.
      fora         campos do fragmento que NAO entram num preset (escolhas sobre outro
                   componente). Ao aplicar, eles conservam o que esta na tela.
-     operacionais [chave, como aparece na interface] dos campos de contato/pagamento. Fonte
-                  unica: alimenta o aviso da aba hoje, o "sem dados" da exportacao na fase 4
-                  e a comparacao entre paginas da mesma campanha na fase 3.
+     (ago/2026) 'operacionais' SAIU deste registro. Ela listava, por aba, os campos de contato
+                  e pagamento -- e existia porque cada aba tinha a sua copia deles. Com a
+                  identidade recolhida num lugar so (ver o bloco "identidade e paleta"), nao ha
+                  campo operacional dentro de aba nenhuma: a lista ficaria vazia nas oito, e as
+                  tres maquinas que a consumiam (o aviso de divergencia entre as duas paginas
+                  de uma campanha, o "sem dados" da exportacao e a heranca na importacao)
+                  passariam a rodar sobre o vazio -- codigo que nao pode mais fazer nada, e que
+                  o proximo leitor teria de estudar para descobrir isso. Foram removidas, e o
+                  que cada uma fazia agora e feito uma vez so, sobre a identidade global.
+                  A SIMPLIFICACAO QUE ISSO TRAZ, dita aqui de proposito: o aviso de divergencia
+                  do R1 entre a hospedeira e a embutida da mesma campanha NAO PODE MAIS
+                  ACONTECER para esses campos. Nao e que ele deixou de ser desenhado -- e que
+                  deixaram de existir duas copias para divergir.
      resumo       a linha curta que descreve o preset na lista.
      redesenhar   o que a aba precisa refazer depois que um preset e aplicado -- e o mesmo
                   passo que a partida ja executa "com o estado restaurado".
@@ -3550,13 +3613,13 @@ function prep(nome,abaId,fn,fase){
                   chave essencial e recusado e SOMADO, como todo o resto. */
 var ABAS=[
   {id:'slide',nome:'Slideshow',           chaves:['imgs','s'],  coleta:sColeta,restaura:sRestaura,
-   pref:'s',fora:[],operacionais:[],resumo:sPresetResumo,redesenhar:sPresetDepois,antesDeSalvar:sPresetAntes,
+   pref:'s',fora:[],resumo:sPresetResumo,redesenhar:sPresetDepois,antesDeSalvar:sPresetAntes,
    importar:sImportarLimpar,
    listas:[['imgs',{url:'',legenda:''},'url']],
    exemplo:'ex.: Natal 2026 - galeria do hero',
    guarda:'tudo o que está configurado nesta aba — a <b>lista de imagens</b> (links, legendas e a ordem), a transição, o tempo, a largura, a proporção, o corte de celular, a ordem de exibição e os controles do visitante. Não guarda o que está no importador de galeria, que não é configuração e sim uma colagem de trabalho.'},
   {id:'tidy', nome:'Agendamento TidyCal', chaves:['t'],         coleta:tColeta,restaura:tRestaura,
-   pref:'t',fora:[],operacionais:[],resumo:tPresetResumo,redesenhar:tPresetDepois,antesDeSalvar:tPresetAntes,
+   pref:'t',fora:[],resumo:tPresetResumo,redesenhar:tPresetDepois,antesDeSalvar:tPresetAntes,
    exemplo:'ex.: Natal 2026 - ensaio tematico',
    guarda:'tudo o que está configurado nesta aba — o caminho do agendamento no TidyCal, as duas alturas, a largura de corte, o modo (direto ou embutido), o endereço da página intermediária e a altura inicial do iframe.'},
   /* 'nome' e TEXTO DE INTERFACE: aparece na barra vermelha de falhas, nas perguntas do preset
@@ -3564,39 +3627,34 @@ var ABAS=[
      arquivo -- e por isso os prep() desta aba usam exatamente a mesma grafia, senao a barra
      mostraria as duas. */
   {id:'leads',nome:'Captação de leads',   chaves:['l'],         coleta:lColeta,restaura:lRestaura,
-   pref:'l',fora:[],operacionais:[['num','o número do WhatsApp']],resumo:lPresetResumo,redesenhar:lPresetDepois,antesDeSalvar:lPresetAntes,
+   pref:'l',fora:[],resumo:lPresetResumo,redesenhar:lPresetDepois,antesDeSalvar:lPresetAntes,
    listas:[['l.qops',''],['l.hordias',0]],
    exemplo:'ex.: Natal 2026 - hospedeira',
    guarda:'tudo o que está configurado nesta aba — modo de exibição, ícone, formato, cores e posição do botão, os quatro trechos da mensagem, os textos do pop-up, o cabeçalho (coruja, movimento e efeitos), o horário de atendimento, a pergunta de qualificação com as opções cadastradas e a âncora.'},
   {id:'uni',  nome:'Checkout',            chaves:['u'],         coleta:uColeta,restaura:uRestaura,
-   pref:'u',fora:[],operacionais:[['client','o Client ID do PayPal'],['chave','a chave Pix'],['nomer','o nome do recebedor'],['cidade','a cidade do recebedor'],['zapnum','o WhatsApp do \u201cJá paguei\u201d']],
-   resumo:uPresetResumo,redesenhar:uPresetDepois,antesDeSalvar:uPresetAntes,
+   pref:'u',fora:[],resumo:uPresetResumo,redesenhar:uPresetDepois,antesDeSalvar:uPresetAntes,
    listas:[['u.prods',{nome:'',desc:'',preco:0,opsel:'unico',opnenhum:'nao',qtd:false,ops:[{nome:'',preco:0,qtd:false}]},'nome'],
            ['u.prods.ops',{nome:'',preco:0,qtd:false},'nome'],
            ['u.cps',{codigo:'',tipo:'pct_total',valor:0,validade:''},'codigo']],
    exemplo:'ex.: Natal 2026 - pacotes',
    guarda:'tudo o que está configurado nesta aba — formas de pagamento, moeda, <b>produtos com os opcionais de cada um</b>, cupons, código do pedido, sinal, desconto Pix, textos, largura e cores.'},
   {id:'bor',  nome:'Bordas com efeito',   chaves:['b'],         coleta:bColeta,restaura:bRestaura,
-   pref:'b',fora:['consol'],operacionais:[],resumo:bPresetResumo,redesenhar:bPresetDepois,antesDeSalvar:bPresetAntes,
+   pref:'b',fora:['consol'],resumo:bPresetResumo,redesenhar:bPresetDepois,antesDeSalvar:bPresetAntes,
    presetOk:bPresetOk,aposPresets:bConsolRender,
    exemplo:'ex.: Natal 2026 - card do plano',
    guarda:'tudo o que está configurado nesta aba — efeito, fundo, cores, espessura, halo, texto, espaçamento e também o <b>fundo da prévia</b>, que é como você confere o resultado. Não guarda a escolha de consolidação do código 1, que é sobre <i>outro</i> componente.'},
   {id:'cnt',  nome:'Contagem regressiva', chaves:['cmsgs','c'], coleta:cColeta,restaura:cRestaura,
-   pref:'c',fora:[],operacionais:[],resumo:cPresetResumo,redesenhar:cPresetDepois,antesDeSalvar:cPresetAntes,
+   pref:'c',fora:[],resumo:cPresetResumo,redesenhar:cPresetDepois,antesDeSalvar:cPresetAntes,
    listas:[['cmsgs',{texto:'',curta:''},'texto']],
    exemplo:'ex.: Natal 2026 - barra do topo',
    guarda:'tudo o que está configurado nesta aba — modo e duração da contagem, o código da campanha, as <b>mensagens cadastradas</b>, aparência, posição, extras, coruja, efeitos, movimento, urgência e entrada.'},
   {id:'cob',  nome:'Link de cobrança',    chaves:['p'],         coleta:pColeta,restaura:pRestaura,
-   pref:'p',fora:[],
-   operacionais:[['chave','a chave Pix'],['nomer','o nome do recebedor'],['cidade','a cidade do recebedor'],['client','o Client ID do PayPal'],['zapnum','o WhatsApp do \u201cJá paguei\u201d']],
-   resumo:pPresetResumo,redesenhar:pPresetDepois,antesDeSalvar:pPresetAntes,
+   pref:'p',fora:[],resumo:pPresetResumo,redesenhar:pPresetDepois,antesDeSalvar:pPresetAntes,
    naoEmite:['url','desc','valor','txid','ppmodo','pplink'],
    exemplo:'ex.: Foto Certa - pagina /pagar',
    guarda:'tudo o que está configurado nesta aba — os dados de quem recebe, o endereço da página, a aparência, os textos, e também a <b>cobrança que está na tela</b> (descrição, valor e identificador). Aplicar um preset troca também essa cobrança: ele é a fotografia da aba inteira.'},
   {id:'loja', nome:'Mini loja',           chaves:['m'],         coleta:mColeta,restaura:mRestaura,
-   pref:'m',fora:[],
-   operacionais:[['client','o Client ID do PayPal'],['chave','a chave Pix'],['nomer','o nome do recebedor'],['cidade','a cidade do recebedor'],['zapnum','o WhatsApp do \u201cJá paguei\u201d']],
-   resumo:mPresetResumo,redesenhar:mPresetDepois,antesDeSalvar:mPresetAntes,
+   pref:'m',fora:[],resumo:mPresetResumo,redesenhar:mPresetDepois,antesDeSalvar:mPresetAntes,
    listas:[['m.prods',{nome:'',desc:'',preco:0,cat:'',img:'',opsel:'unico',opnenhum:'nao',qtd:false,ops:[{nome:'',preco:0,qtd:false}]},'nome'],
            ['m.prods.ops',{nome:'',preco:0,qtd:false},'nome'],
            ['m.cps',{codigo:'',tipo:'pct_total',valor:0,validade:''},'codigo']],
@@ -3671,6 +3729,10 @@ function restaurarEstado(){
       c=a.chaves[j];
       if(st[c]!==undefined)fcFrag[a.id][c]=st[c];
     }
+    /* O pedaco guardado para o caso de a aba falhar tambem perde a identidade: ele e o que
+       volta para o armazenamento em aba so-leitura, e sem esta poda a chave Pix velha
+       ressuscitaria por essa porta. */
+    fciPodar(fcFrag[a.id]);
     /* A biblioteca de presets e lida ANTES do restaura da aba, por dois motivos: ela nao
        depende de nada que o restaura escreva, e a aba Bordas repovoa a caixa de consolidacao
        do codigo 1 de dentro do proprio restaura -- as opcoes precisam existir antes de o
@@ -3727,7 +3789,14 @@ var CORES_LIVRES=[['l-corbtn','#25D366'],['l-c1','#075E54'],['l-c2','#ffffff'],[
   ['c-ctafundo','#FFC94A'],['c-ctatexto','#23281F'],['c-cprog','#FFC94A'],
   ['c-corujacorpo','#FDFBF6'],['c-corujadet','#FFC94A'],['c-curg','#8C1D18'],
   ['p-c1','#075E54'],['p-c2','#ffffff'],['p-c3','#333333'],
-  ['p-corujacorpo','#ffffff'],['p-corujadet','#075E54']];
+  ['p-corujacorpo','#ffffff'],['p-corujadet','#075E54'],
+  /* As cinco da PALETA global entram na mesma lista, e nao numa segunda lista dentro do bloco
+     da identidade: a correcao a vista e a mesma correcao, e duas listas divergiriam no dia em
+     que uma cor nova entrasse so numa delas. Elas nao sao alcancadas por fcCoresAjustar (que
+     filtra por prefixo de aba) nem por fcCorRedesenhar (que so conhece os prefixos de uma
+     letra), justamente porque nao pertencem a aba nenhuma. */
+  ['fci-destaque','#075E54'],['fci-fundo','#ffffff'],['fci-texto','#333333'],
+  ['fci-corujacorpo','#ffffff'],['fci-corujadet','#075E54']];
 /* Corrige a vista as cores livres de UMA aba, pelo prefixo. Existe porque o mesmo laco ja
    estava copiado em lPresetDepois e uPresetDepois: uma copia por aba seria uma copia nova a
    cada aba nova, e copia numero tres e onde uma delas ganha uma regra que as outras nao ganham. */
@@ -3761,6 +3830,534 @@ function parearCor(idCor){
   t.addEventListener('input',function(){if(corValida(t.value)){c.value=t.value;lBtnPreview();if(/^c-/.test(idCor))cPreview();if(/^p-/.test(idCor))pPreview();if(/^m-/.test(idCor))mPreview();}});
 }
 
+/* ============================================================
+   IDENTIDADE E PALETA -- uma configuracao ACIMA das oito abas
+   ============================================================
+   O PROBLEMA, MEDIDO. Com oito abas, os mesmos seis valores eram digitados em 16 campos:
+   chave Pix, nome e cidade do recebedor e Client ID do PayPal no Checkout, no Link de cobranca
+   e na Mini loja; o WhatsApp nessas tres mais a Captacao de leads. O risco nao era a digitacao
+   repetida: era trocar de chave Pix e ter de LEMBRAR de tres lugares. Esquecer um e defeito
+   silencioso num campo que e dinheiro.
+
+   A DISTINCAO QUE GOVERNA O DESENHO. Identidade nao muda por campanha; aparencia muda. A chave
+   Pix e a mesma no Natal e na Pascoa; as cores, nao. Por isso as duas metades deste bloco sao
+   diferentes de proposito:
+
+     IDENTIDADE SAI DAS ABAS. Os campos deixaram de existir nas abas. Nao ha segunda copia,
+     logo nao ha como divergir -- que e o ponto inteiro. Os geradores leem daqui pelo mesmo
+     caminho (fciVal/fciBruto/fciDigitos), e nao ha um segundo caminho de leitura.
+
+     PALETA FICA GLOBAL COM BOTAO, NAO COM AMARRACAO. Copia com origem visivel, como o R3 do
+     preset geral: o operador manda aplicar, e a tela diz depois se as abas ainda conferem.
+     Amarrar seria propagacao silenciosa, e uma campanha pode precisar de cor propria (o dono
+     levantou o caso: trocar a cor da coruja para criar contraste com outro fundo).
+
+   POR QUE A PALETA SO ALCANCA TRES ABAS. Medido nos rotulos do arquivo: sao 35 campos de cor e
+   so 9 sao a mesma coisa. 'c1', 'c2' e 'c3' significam destaque, fundo do cartao e cor do texto
+   no Checkout, no Link de cobranca e na Mini loja -- mas na Captacao de leads 'c1' e o FUNDO DO
+   CABECALHO e 'c3' e o BOTAO ENVIAR. Amarrar por nome quebraria aquela aba. Bordas
+   (f1, f2, c1-c4) e Contagem (cfundo, ctexto, cdestaque, ctafundo, ctatexto, cprog, curg) tem
+   vocabulario proprio e nao sao tocadas. A coruja, sim, e a mesma coisa em Leads, Contagem e
+   Cobranca -- e a coruja foi para a PALETA, e nao para a identidade, por decisao do dono: cor
+   de coruja e aparencia, nao marca.
+
+   ESPACO DE NOMES: tudo o que este bloco desenha e 'fci-...'. Mesmo motivo de 'fcg-', 'fcp-' e
+   'fcx-': campo de aba comeca por prefixo de UMA letra, entao 'fci-' nao colide com campo
+   nenhum e nao e alcancado pelos listeners de "mudou alguma coisa nesta aba".
+
+   ONDE MORA: chave propria no armazenamento, 'fcConstrutoresIdentidade'. Nem em
+   'fcConstrutores' (o estado das abas) nem em 'fcConstrutoresGerais' (as campanhas), pelo
+   mesmo motivo que separou aquelas duas: um defeito aqui nao pode corromper a configuracao das
+   abas, e a identidade precisa sobreviver a troca de preset geral -- ela esta ACIMA dele. */
+var FCI_CHAVE='fcConstrutoresIdentidade';
+/* [chave, rotulo de interface com artigo, rotulo curto]. Uma lista so: ela alimenta os
+   geradores, a migracao, a recusa, o backup e o texto da tela. */
+var FCI_CAMPOS=[
+  ['chave','a chave Pix','Chave Pix'],
+  ['nomer','o nome do recebedor','Nome do recebedor'],
+  ['cidade','a cidade do recebedor','Cidade do recebedor'],
+  ['client','o Client ID do PayPal','Client ID do PayPal'],
+  ['zapnum','o WhatsApp','WhatsApp']
+];
+/* Padroes: nome e cidade da marca ficam preenchidos porque sao identidade PUBLICA, nao
+   credencial (a mesma regra que ja os mantinha nos padroes do Link de cobranca). Chave Pix,
+   Client ID e WhatsApp nascem vazios, com exemplo no placeholder -- o repositorio e publico. */
+var FCI_PADRAO={chave:'',nomer:'Foto Certa',cidade:'Vitoria',client:'',zapnum:''};
+/* [chave, padrao, rotulo, campos de aba que significam A MESMA COISA, abas]. A quarta coluna e
+   a lista inteira do que o botao alcanca -- nao existe uma segunda lista em lugar nenhum. */
+var FCI_PALETA=[
+  ['destaque',    '#075E54','a cor de destaque',   ['u-c1','p-c1','m-c1'],                            'Checkout, Link de cobrança e Mini loja'],
+  ['fundo',       '#ffffff','o fundo do cartão',   ['u-c2','p-c2','m-c2'],                            'Checkout, Link de cobrança e Mini loja'],
+  ['texto',       '#333333','a cor do texto',      ['u-c3','p-c3','m-c3'],                            'Checkout, Link de cobrança e Mini loja'],
+  ['corujacorpo', '#ffffff','o corpo da coruja',   ['l-corujacorpo','c-corujacorpo','p-corujacorpo'], 'Captação de leads, Contagem regressiva e Link de cobrança'],
+  ['corujadet',   '#075E54','os detalhes da coruja',['l-corujadet','c-corujadet','p-corujadet'],      'Captação de leads, Contagem regressiva e Link de cobrança']
+];
+/* ONDE A IDENTIDADE MORAVA ANTES DESTA VERSAO. [id da aba, nome da aba, chave do fragmento,
+   {campo global: campo antigo da aba}]. Serve para DUAS coisas, e por isso e uma lista so:
+   colher o que o operador ja tinha (a migracao) e podar as copias velhas que continuam dentro
+   de presets gravados. Podar importa tanto quanto colher: um preset antigo com a chave Pix
+   dentro faria a exportacao "sem dados" sair COM dado, com o nome do arquivo dizendo que nao
+   tinha -- exatamente a classe de defeito que o nome do arquivo existe para impedir. */
+var FCI_ANTIGO=[
+  ['leads','Captação de leads',  'l',{zapnum:'num'}],
+  ['uni',  'Checkout',           'u',{chave:'chave',nomer:'nomer',cidade:'cidade',client:'client',zapnum:'zapnum'}],
+  ['cob',  'Link de cobrança',   'p',{chave:'chave',nomer:'nomer',cidade:'cidade',client:'client',zapnum:'zapnum'}],
+  ['loja', 'Mini loja',          'm',{chave:'chave',nomer:'nomer',cidade:'cidade',client:'client',zapnum:'zapnum'}]
+];
+var FCI={
+  pronto:false,        /* so depois de fciIniciar; antes disso nada aqui grava */
+  aplicadaEm:0,        /* quando a paleta foi aplicada as abas pela ultima vez (ms), 0 = nunca */
+  avisoVisto:false,    /* o recado da migracao ja foi fechado pelo operador */
+  migrou:[],           /* linhas do que a migracao recolheu, para o recado da tela */
+  podados:0,           /* campos de identidade apagados de presets antigos ao le-los */
+  pendente:null        /* migracao com divergencia esperando resposta */
+};
+
+/* ---- leitura dos campos: caminho unico, o mesmo para gerador e previa ---- */
+function fciBruto(k){var el=$('fci-'+k);return el?String(el.value):'';}
+function fciVal(k){return fciBruto(k).replace(/^\s+/,'').replace(/\s+$/,'');}
+function fciDigitos(k){return fciVal(k).replace(/\D/g,'');}
+function fciIdentidade(){var o={},i;for(i=0;i<FCI_CAMPOS.length;i++)o[FCI_CAMPOS[i][0]]=fciBruto(FCI_CAMPOS[i][0]);return o;}
+function fciPaletaAtual(){var o={},i;for(i=0;i<FCI_PALETA.length;i++)o[FCI_PALETA[i][0]]=corSegura('fci-'+FCI_PALETA[i][0],FCI_PALETA[i][1]);return o;}
+
+/* ---- a recusa aponta o painel ----
+   As abas ja recusavam gerar sem chave Pix, sem Client ID ou sem WhatsApp. O que muda e o
+   ENDERECO da recusa: o campo nao esta mais na aba, e mandar o operador procurar onde ele nao
+   esta seria trocar uma recusa util por uma caca ao tesouro. A frase e um sufixo unico, e e
+   ela tambem que fciApontarSe reconhece para abrir o painel -- sem estado escondido entre a
+   funcao que recusa e a que reage a recusa. */
+var FCI_APONTA=' Este campo agora e um so para a ferramenta inteira: preencha no painel Identidade, no topo da pagina.';
+function fciRecusa(t){return t+FCI_APONTA;}
+/* Abre o painel e leva o foco ao primeiro campo de identidade vazio. Chamada pelos geradores
+   depois de um alert(): 'apontar' e mostrar onde, nao so dizer onde. */
+function fciApontarSe(msg){
+  var i,el;
+  if(String(msg==null?'':msg).indexOf(FCI_APONTA)<0)return false;
+  fciPainelAbrir(true);
+  for(i=0;i<FCI_CAMPOS.length;i++){
+    el=$('fci-'+FCI_CAMPOS[i][0]);
+    if(el&&!fciVal(FCI_CAMPOS[i][0])){try{el.focus();}catch(e){}break;}
+  }
+  try{var p=$('fci-painel');if(p&&p.scrollIntoView)p.scrollIntoView(true);}catch(e){}
+  return true;
+}
+
+/* ---- o painel ---- */
+function fciPainelAbrir(abrir){
+  var el=$('fci-painel'),b=$('fci-botao');
+  if(!el)return;
+  if(abrir===undefined)abrir=!el.classList.contains('aberto');
+  el.classList.toggle('aberto',!!abrir);
+  if(b)b.setAttribute('aria-expanded',abrir?'true':'false');
+  /* Os dois paineis da barra nunca ficam abertos juntos: sao o mesmo lugar da tela, e dois
+     abertos empurrariam as abas para muito longe. */
+  if(abrir)fcgPainelAbrir(false);
+}
+
+/* ---- armazenamento ---- */
+function fciGravar(){
+  if(!FCI.pronto)return;
+  var st={v:1,identidade:fciIdentidade(),paleta:fciPaletaAtual(),
+          aplicadaEm:FCI.aplicadaEm,avisoVisto:!!FCI.avisoVisto,migrada:true,
+          /* A pendencia da migracao mora AQUI, e nao so na memoria: as abas param de gravar
+             esses campos na primeira vez que o estado e salvo, e uma pergunta sem os valores
+             que ela oferece nao e pergunta. Guardando-a, "decidir depois" nao custa nada. */
+          pendente:FCI.pendente&&FCI.pendente.perguntar&&FCI.pendente.perguntar.length?FCI.pendente:null,
+          migrou:FCI.migrou.slice(0)};
+  try{localStorage.setItem(FCI_CHAVE,JSON.stringify(st));}
+  catch(e){fcFalha('Identidade','gravar a identidade e a paleta -- armazenamento do navegador indisponivel',e,'');}
+}
+function fciLerBruto(chave,rotulo){
+  var raw,st;
+  try{raw=localStorage.getItem(chave);}
+  catch(e){fcFalha(rotulo,'ler o que estava gravado -- armazenamento do navegador indisponivel',e,'');return null;}
+  if(!raw)return null;
+  try{st=JSON.parse(raw);}
+  catch(e){fcFalha(rotulo,'entender o que estava gravado -- o conteudo salvo esta corrompido',e,'');return null;}
+  return fcEhObjeto(st)?st:null;
+}
+/* Escreve nos campos. Texto vai como texto (o vazio e uma escolha e e honrado); cor passa por
+   corValida, como em toda aba. */
+function fciEscrever(ident,pal){
+  var i,k,v,el;
+  for(i=0;i<FCI_CAMPOS.length;i++){
+    k=FCI_CAMPOS[i][0];el=$('fci-'+k);
+    if(!el)continue;
+    v=(fcEhObjeto(ident)&&typeof ident[k]==='string')?ident[k]:FCI_PADRAO[k];
+    el.value=v;
+  }
+  for(i=0;i<FCI_PALETA.length;i++){
+    k=FCI_PALETA[i][0];
+    v=(fcEhObjeto(pal)&&corValida(pal[k]))?pal[k]:FCI_PALETA[i][1];
+    el=$('fci-'+k);if(el)el.value=v;
+    el=$('fci-'+k+'-t');if(el)el.value=v;
+  }
+}
+
+/* Escrita PARCIAL, para o arquivo importado: so o que o arquivo trouxe. Campo ausente conserva
+   o que esta aqui -- e a garantia 5 do R4 ("arquivo sem dados NAO apaga os dados atuais"),
+   agora no nivel do bloco em vez de campo a campo. Campo PRESENTE e vazio e adotado: vazio e
+   escolha, e a regra de texto livre desta ferramenta e honrar o vazio. */
+function fciEscreverParcial(ident,pal){
+  var i,k,el,v;
+  if(fcEhObjeto(ident)){
+    for(i=0;i<FCI_CAMPOS.length;i++){
+      k=FCI_CAMPOS[i][0];
+      if(typeof ident[k]!=='string')continue;
+      el=$('fci-'+k);if(el)el.value=ident[k];
+    }
+    fcPixChaveAjustar('fci-chave');   /* chave de arquivo tambem pode vir com invisiveis */
+  }
+  if(fcEhObjeto(pal)){
+    for(i=0;i<FCI_PALETA.length;i++){
+      k=FCI_PALETA[i][0];v=pal[k];
+      if(!corValida(v))continue;
+      el=$('fci-'+k);if(el)el.value=v;
+      el=$('fci-'+k+'-t');if(el)el.value=v;
+    }
+  }
+}
+
+/* ---- poda: tira as copias velhas de dentro de qualquer conjunto de valores de aba ----
+   Chamada na leitura dos presets de aba e dos presets gerais (inclusive os que vem de arquivo
+   importado). Devolve quantos campos apagou. */
+function fciPodar(valores){
+  var i,e,o,k,n=0;
+  if(!fcEhObjeto(valores))return 0;
+  for(i=0;i<FCI_ANTIGO.length;i++){
+    e=FCI_ANTIGO[i];o=valores[e[2]];
+    if(!fcEhObjeto(o))continue;
+    for(k in e[3]){
+      if(!Object.prototype.hasOwnProperty.call(e[3],k))continue;
+      if(o[e[3][k]]!==undefined){delete o[e[3][k]];n++;}
+    }
+  }
+  return n;
+}
+function fciPodarConta(valores){var n=fciPodar(valores);if(n)FCI.podados+=n;return n;}
+
+/* ---- a migracao ----
+   O RISCO DESTA MUDANCA nao e o desenho: e que o operador JA TEM valores digitados, e eles
+   podem divergir entre abas. As regras, nesta ordem:
+     1. recolher o que existe;
+     2. se as abas discordarem, PERGUNTAR qual vale, nomeando as abas e mostrando os valores --
+        nunca escolher calado;
+     3. presets de aba antigos que carregam identidade: ignorada ao aplicar, e dito na tela;
+     4. nada se perde; em duvida entre descartar e preservar, preservar.
+   Campo VAZIO nao e opiniao. So valores nao vazios concorrem, e por isso ficar com o unico
+   valor preenchido nao perde nada e nao vira pergunta -- mas entra no recado da tela, para a
+   escolha continuar visivel. Perguntar sobre "" contra "Foto Certa" seria transformar em
+   decisao do operador uma diferenca que so existe porque ele nunca abriu aquela aba. */
+/* O mesmo preset geral guarda os valores de OITO abas, e sem esta juncao ele apareceria oito
+   vezes na mesma linha ("veio de um preset geral, um preset geral, um preset geral..."). */
+function fciJuntarOrigem(lista,rotulo){
+  var i;
+  for(i=0;i<lista.length;i++)if(lista[i]===rotulo)return;
+  lista.push(rotulo);
+}
+function fciCandidatos(st,rotuloDe,saco){
+  var i,e,o,k,v,c,j,achou;
+  if(!fcEhObjeto(st))return;
+  for(i=0;i<FCI_ANTIGO.length;i++){
+    e=FCI_ANTIGO[i];o=st[e[2]];
+    if(!fcEhObjeto(o))continue;
+    for(k in e[3]){
+      if(!Object.prototype.hasOwnProperty.call(e[3],k))continue;
+      v=o[e[3][k]];
+      if(typeof v!=='string')continue;
+      if(!v.replace(/^\s+/,'').replace(/\s+$/,''))continue;
+      c=saco[k]||(saco[k]=[]);
+      achou=false;
+      for(j=0;j<c.length;j++){if(c[j].valor===v){fciJuntarOrigem(c[j].de,rotuloDe(e));achou=true;break;}}
+      if(!achou)c.push({valor:v,de:[rotuloDe(e)]});
+    }
+  }
+}
+/* Monta o plano da migracao a partir do armazenamento BRUTO -- o estado das abas primeiro e,
+   so para os campos que ele nao tiver, as bibliotecas de presets e os presets gerais. A ordem
+   nao e arbitraria: o rascunho e o que esta na tela hoje; um preset e uma fotografia antiga.
+   Recorrer a fotografia so quando a tela nao tem nada e o que cumpre "nada se perde" sem
+   deixar um valor velho vencer um valor atual. */
+function fciPlanoMigracao(){
+  var abas=fciLerBruto('fcConstrutores','Identidade'),
+      gerais=fciLerBruto('fcConstrutoresGerais','Identidade'),
+      tela={},antigos={},plano={escolhido:{},perguntar:[],notas:[]},i,j,k,c;
+  fciCandidatos(abas,function(e){return e[1];},tela);
+  /* bibliotecas de presets de aba: elas moram dentro do fragmento da propria aba */
+  if(fcEhObjeto(abas)){
+    for(i=0;i<FCI_ANTIGO.length;i++){
+      (function(e){
+        var o=abas[e[2]],lista,n;
+        if(!fcEhObjeto(o)||!fcEhArray(o.presets))return;
+        lista=o.presets;
+        for(n=0;n<lista.length;n++){
+          if(!fcEhObjeto(lista[n]))continue;
+          (function(nome,vals){
+            fciCandidatos(vals,function(){return 'um preset da aba '+e[1]+' (“'+nome+'”)';},antigos);
+          })(String(lista[n].nome||lista[n].n||'sem nome'),fcEhObjeto(lista[n].valores)?lista[n].valores:null);
+        }
+      })(FCI_ANTIGO[i]);
+    }
+  }
+  /* presets gerais: uma campanha-pagina por vez */
+  if(fcEhObjeto(gerais)&&fcEhArray(gerais.presets)){
+    for(i=0;i<gerais.presets.length;i++){
+      (function(p){
+        var nome,id;
+        if(!fcEhObjeto(p)||!fcEhObjeto(p.abas))return;
+        nome=String(p.campanha||'sem nome');
+        for(id in p.abas){
+          if(!Object.prototype.hasOwnProperty.call(p.abas,id))continue;
+          if(!fcEhObjeto(p.abas[id])||!fcEhObjeto(p.abas[id].valores))continue;
+          (function(vals){
+            fciCandidatos(vals,function(){return 'um preset geral (“'+nome+'”)';},antigos);
+          })(p.abas[id].valores);
+        }
+      })(gerais.presets[i]);
+    }
+  }
+  for(i=0;i<FCI_CAMPOS.length;i++){
+    k=FCI_CAMPOS[i][0];
+    c=tela[k]&&tela[k].length?tela[k]:(antigos[k]||[]);
+    if(!c.length)continue;
+    if(c.length===1){
+      plano.escolhido[k]=c[0].valor;
+      plano.notas.push(FCI_CAMPOS[i][2]+': veio de '+fcLista(c[0].de)+'.');
+    }else{
+      plano.perguntar.push({chave:k,rotulo:FCI_CAMPOS[i][1],curto:FCI_CAMPOS[i][2],ops:c});
+    }
+  }
+  return plano;
+}
+/* Uma pergunta por campo divergente, encadeadas -- e a MESMA caixa do preset geral
+   (fcgPerguntar), e nao uma segunda caixa de pergunta com outro comportamento de Esc, outro
+   foco e outra aparencia. Sem resposta, nada e escolhido: a pergunta volta na proxima abertura
+   e os valores continuam onde estavam (nos presets e no estado gravado), intactos. */
+function fciPerguntarDivergencia(lista,i,escolhas,fim){
+  var it,ops,linhas,j;
+  if(i>=lista.length){fim(escolhas,[]);return;}
+  it=lista[i];
+  linhas=[
+    'Este campo saiu das abas e passou a ser um só para a ferramenta inteira. As abas abaixo estão com valores diferentes para '+it.rotulo+', e a ferramenta não escolhe sozinha qual vale.',
+    'Escolher um não apaga nada nas outras abas: os campos delas deixaram de existir de qualquer jeito. O que você escolher aqui é o que os códigos gerados vão passar a usar.'
+  ];
+  ops=[];
+  for(j=0;j<it.ops.length;j++){
+    ops.push({rotulo:it.ops[j].valor+'  ('+fcLista(it.ops[j].de)+')',valor:'v'+j});
+  }
+  ops.push({rotulo:'Decidir depois',valor:null,claro:true});
+  fcgPerguntar(it.curto+': as abas discordam',linhas,ops,function(v){
+    /* "Decidir depois" nao e cancelar: e adiar. O que ainda nao foi respondido volta como
+       pendencia GRAVADA -- ver fciGravar --, com os valores que estavam nas abas dentro dela.
+       Sem gravar a pendencia, a proxima gravacao do estado (que ja nao emite esses campos)
+       apagaria das abas os valores que a pergunta oferecia, e a pergunta voltaria sem
+       resposta possivel: exatamente a perda que esta migracao existe para impedir. */
+    if(!v){fim(escolhas,lista.slice(i));return;}
+    escolhas[it.chave]={valor:it.ops[parseInt(v.substring(1),10)].valor,de:it.ops[parseInt(v.substring(1),10)].de};
+    fciPerguntarDivergencia(lista,i+1,escolhas,fim);
+  });
+}
+function fciMigrar(){
+  var plano=fciPlanoMigracao(),k,mexeu=false;
+  for(k in plano.escolhido){
+    if(!Object.prototype.hasOwnProperty.call(plano.escolhido,k))continue;
+    var el=$('fci-'+k);
+    if(el){el.value=plano.escolhido[k];mexeu=true;}
+  }
+  FCI.migrou=plano.notas.slice(0);
+  if(!plano.perguntar.length){
+    FCI.pendente=null;
+    if(mexeu)fciGravar();
+    return;
+  }
+  /* Ha divergencia: a pergunta e adiada para o fim da partida (a tela precisa estar desenhada
+     por tras da caixa), e ate ela ser respondida a migracao continua PENDENTE -- nada e
+     gravado como decidido. */
+  FCI.pendente=plano;
+  if(mexeu)fciGravar();
+}
+function fciMigracaoPerguntar(){
+  var plano=FCI.pendente;
+  if(!plano||!plano.perguntar||!plano.perguntar.length)return;
+  fciPerguntarDivergencia(plano.perguntar,0,{},function(escolhas,restantes){
+    var k,el;
+    for(k in escolhas){
+      if(!Object.prototype.hasOwnProperty.call(escolhas,k))continue;
+      el=$('fci-'+k);
+      if(el)el.value=escolhas[k].valor;
+      FCI.migrou.push(fciRotuloCurto(k)+': você escolheu o valor que estava em '+fcLista(escolhas[k].de)+'.');
+    }
+    FCI.pendente=restantes.length?{perguntar:restantes}:null;
+    if(restantes.length)FCI.migrou.push('Ficou sem decisão: '+fciNomesPendentes(restantes)+'. A pergunta volta na próxima vez que você abrir a ferramenta, com os mesmos valores — eles ficam guardados aqui, e não se perdem quando as abas forem regravadas.');
+    FCI.avisoVisto=false;
+    fciGravar();
+    fciAvisoRender();
+    fciPainelAbrir(true);
+  });
+}
+function fciNomesPendentes(lista){var i,n=[];for(i=0;i<lista.length;i++)n.push(lista[i].curto);return fcLista(n);}
+/* Leitura defensiva da pendencia gravada: ela vem do armazenamento e nao pode derrubar a
+   partida. Item que nao tiver a forma inteira e descartado -- e descartar aqui nao perde nada
+   que a tela ja nao tenha, porque a pendencia so existe enquanto NINGUEM escolheu. */
+function fciLerPendente(x){
+  var out=[],i,j,it,ops,op;
+  if(!fcEhObjeto(x)||!fcEhArray(x.perguntar))return null;
+  for(i=0;i<x.perguntar.length;i++){
+    it=x.perguntar[i];
+    if(!fcEhObjeto(it)||typeof it.chave!=='string'||!fciRotuloCurto(it.chave))continue;
+    if(!fcEhArray(it.ops))continue;
+    ops=[];
+    for(j=0;j<it.ops.length;j++){
+      op=it.ops[j];
+      if(!fcEhObjeto(op)||typeof op.valor!=='string')continue;
+      ops.push({valor:op.valor,de:fcEhArray(op.de)?op.de.slice(0):[]});
+    }
+    if(ops.length<2)continue;
+    out.push({chave:it.chave,rotulo:fciRotuloLongo(it.chave),curto:fciRotuloCurto(it.chave),ops:ops});
+  }
+  return out.length?{perguntar:out}:null;
+}
+function fciRotuloLongo(k){var i;for(i=0;i<FCI_CAMPOS.length;i++){if(FCI_CAMPOS[i][0]===k)return FCI_CAMPOS[i][1];}return k;}
+function fciRotuloCurto(k){var i;for(i=0;i<FCI_CAMPOS.length;i++){if(FCI_CAMPOS[i][0]===k)return FCI_CAMPOS[i][2];}return '';}
+
+/* ---- o recado da tela, uma vez ---- */
+function fciAvisoRender(){
+  var caixa=$('fci-migracao-caixa'),p=$('fci-migracao'),txt='';
+  if(!caixa||!p)return;
+  if(FCI.avisoVisto||(!FCI.migrou.length&&!FCI.podados&&!FCI.pendente)){caixa.style.display='none';return;}
+  txt='A chave Pix, o recebedor, o Client ID do PayPal e o WhatsApp saíram das abas e passaram a ser um só, aqui. ';
+  if(FCI.migrou.length)txt+='O que a ferramenta recolheu do que você já tinha — '+FCI.migrou.join(' ')+' ';
+  if(FCI.podados)txt+='Presets salvos antes desta versão guardavam esses campos: '+FCI.podados+' valor(es) de identidade foram ignorados ao ler esses presets, e aplicar um preset antigo não mexe mais na identidade. ';
+  if(FCI.pendente&&FCI.pendente.perguntar.length)txt+='Ainda há campo com valores diferentes entre abas esperando a sua decisão. ';
+  txt+='Confira os campos abaixo antes de gerar qualquer código.';
+  fcgTexto(p,txt);
+  caixa.style.display='';
+}
+
+/* ---- a paleta: copia com origem visivel (R3), nunca amarracao ---- */
+/* Quais campos de aba estao diferentes da paleta agora. Uma leitura so serve as duas pontas:
+   a confirmacao antes de aplicar e a linha de estado depois. */
+function fciPaletaDiferencas(){
+  var out=[],i,j,ids,alvo,val;
+  for(i=0;i<FCI_PALETA.length;i++){
+    val=corSegura('fci-'+FCI_PALETA[i][0],FCI_PALETA[i][1]);
+    ids=FCI_PALETA[i][3];
+    for(j=0;j<ids.length;j++){
+      alvo=$(ids[j]+'-t');
+      if(!alvo)continue;
+      if(String(alvo.value).toLowerCase()!==String(val).toLowerCase())out.push({id:ids[j],de:String(alvo.value),para:val,rotulo:FCI_PALETA[i][2]});
+    }
+  }
+  return out;
+}
+function fciPaletaAplicar(){
+  var difs=fciPaletaDiferencas(),i,prefs={},k,nomes=[],el;
+  if(!difs.length){alert('As abas já estão com estas cores: não há nada para aplicar.');return;}
+  for(i=0;i<FCI_PALETA.length;i++)nomes.push(FCI_PALETA[i][2]);
+  if(!confirm('Aplicar a paleta às abas?\n\n'+
+    'Isto substitui '+difs.length+' campo(s) de cor: '+fcLista(nomes)+'.\n\n'+
+    'Alcança só onde a cor significa a mesma coisa — Checkout, Link de cobrança e Mini loja (destaque, fundo, texto) e Captação de leads, Contagem regressiva e Link de cobrança (coruja).\n\n'+
+    'NÃO encosta nas cores das Bordas com efeito, nem nas cores próprias da Captação de leads e da Contagem regressiva.\n\n'+
+    'As cores que estão hoje nas abas não voltam.'))return;
+  for(i=0;i<difs.length;i++){
+    el=$(difs[i].id+'-t');if(el)el.value=difs[i].para;
+    el=$(difs[i].id);if(el)el.value=difs[i].para;
+    prefs[difs[i].id.slice(0,2)]=1;
+  }
+  FCI.aplicadaEm=fcAgora();
+  fciGravar();
+  salvarEstado();
+  /* A previa que precisa acordar e a da aba ABERTA. As outras redesenham sozinhas ao serem
+     abertas (o clique na aba ja chama a previa dela), e montar cinco previas escondidas aqui
+     executaria cinco blocos gerados de uma vez -- inclusive intervalos e pedidos de script --
+     por causa de um clique de configuracao. */
+  fciPreviaDaAberta(true);
+  fciEstadoRender();
+  alert('Paleta aplicada: '+difs.length+' campo(s) de cor nas abas de pagamento e da coruja. As cores próprias da Captação de leads, da Contagem regressiva e das Bordas ficaram como estavam.');
+}
+/* A previa que precisa acordar quando a identidade ou a paleta muda e a da aba ABERTA. As
+   outras redesenham sozinhas ao serem abertas -- o clique na aba ja chama a previa dela --, e
+   montar cinco previas escondidas aqui executaria cinco blocos gerados de uma vez, com os
+   intervalos e os pedidos de script de cada um, por causa de uma tecla num campo de
+   configuracao. Sem 'imediato' vale o debounce que cada previa ja tem. */
+function fciPreviaDaAberta(imediato){
+  var painel=document.querySelector('.painel.ativo'),id=painel?String(painel.id||'').replace('painel-',''):'';
+  if(id==='leads'){lBtnPreview();lPreview(!!imediato);return;}
+  if(id==='uni'){uPreview(!!imediato);return;}
+  if(id==='cnt'){cPreview(!!imediato);return;}
+  if(id==='cob'){pPreview(!!imediato);return;}
+  if(id==='loja'){mPreview(!!imediato);return;}
+}
+/* A linha que torna a copia VISIVEL depois de feita: nao basta copiar, e preciso poder ver que
+   as abas ja nao conferem com a paleta. E o mesmo desenho da marca de origem do preset geral --
+   divergencia a vista, sem propagacao silenciosa. */
+function fciEstadoRender(){
+  var el=$('fci-estado'),difs,txt;
+  if(!el)return;
+  difs=fciPaletaDiferencas();
+  if(!difs.length){
+    txt='As três abas de pagamento e as três da coruja estão exatamente com estas cores.';
+    if(FCI.aplicadaEm)txt+=' Última aplicação: '+fciData(FCI.aplicadaEm)+'.';
+  }else{
+    txt=difs.length+' campo(s) de cor nas abas estão diferentes desta paleta';
+    txt+=FCI.aplicadaEm?(' — a paleta foi aplicada em '+fciData(FCI.aplicadaEm)+' e alguém mudou depois, aqui ou lá.')
+                       :' — a paleta ainda não foi aplicada às abas.';
+    txt+=' Nada é atualizado sozinho: a decisão é sua.';
+  }
+  fcgTexto(el,txt);
+}
+function fciData(ms){
+  var d=new Date(ms),n=function(v){return (v<10?'0':'')+v;};
+  return n(d.getDate())+'/'+n(d.getMonth()+1)+'/'+d.getFullYear()+' às '+n(d.getHours())+':'+n(d.getMinutes());
+}
+
+/* ---- partida ---- */
+function fciIniciar(){
+  var st=fciLerBruto(FCI_CHAVE,'Identidade'),i;
+  fciEscrever(st?st.identidade:null,st?st.paleta:null);
+  if(st&&typeof st.aplicadaEm==='number'&&isFinite(st.aplicadaEm))FCI.aplicadaEm=st.aplicadaEm;
+  if(st&&st.avisoVisto)FCI.avisoVisto=true;
+  if(st&&fcEhArray(st.migrou))FCI.migrou=st.migrou.slice(0);
+  if(st&&st.pendente)FCI.pendente=fciLerPendente(st.pendente);
+  FCI.pronto=true;
+  /* Migracao so na PRIMEIRA abertura da versao nova: sem a marca 'migrada' no armazenamento,
+     o que existe nas abas ainda nao foi recolhido. Depois disso o que vale e o que esta aqui --
+     recolher de novo desfaria uma edicao deliberada do operador. */
+  if(!st||!st.migrada)fciMigrar();
+  fciGravar();
+  for(i=0;i<FCI_PALETA.length;i++)parearCor('fci-'+FCI_PALETA[i][0]);
+  liga('fci-botao',function(){fciPainelAbrir();});
+  liga('fci-aplicar',fciPaletaAplicar);
+  liga('fci-migracao-ok',function(){FCI.avisoVisto=true;fciGravar();fciAvisoRender();});
+  /* A chave Pix se corrige a vista, no proprio campo, em 'change'/'blur' e nunca em 'input' --
+     a mesma linha que corria nas tres abas de pagamento, agora numa so. O listener fica no
+     proprio elemento porque ele corre antes dos de document: quando o fciTalvezGravar global
+     rodar, o valor ja esta limpo. */
+  var ch=$('fci-chave');
+  if(ch){
+    ch.addEventListener('change',function(){if(fcPixChaveAjustar('fci-chave')){fciGravar();}});
+    ch.addEventListener('blur',function(){if(fcPixChaveAjustar('fci-chave')){fciGravar();fciPreviaDaAberta(true);}});
+  }
+  /* Os botoes "Abrir Identidade" espalhados pelas abas nao tem ID: sao muitos, e um ID por
+     botao seria uma familia de IDs so para abrir um painel. Um listener delegado no documento
+     resolve, e nao ha como dois deles colidirem. */
+  document.addEventListener('click',function(ev){
+    var t=ev&&ev.target;
+    while(t&&t!==document){
+      if(t.className&&String(t.className).indexOf('fci-ir')>=0){fciPainelAbrir(true);try{$('fci-painel').scrollIntoView(true);}catch(e){}return;}
+      t=t.parentNode;
+    }
+  });
+  /* Mesma mecanica do salvarEstado global, restrita ao espaco de nomes deste painel. */
+  document.addEventListener('input',fciTalvezGravar);
+  document.addEventListener('change',fciTalvezGravar);
+}
+function fciTalvezGravar(e){
+  var t=e&&e.target;
+  if(!t||!t.id||String(t.id).indexOf('fci-')!==0)return;
+  fciGravar();fciEstadoRender();fciPreviaDaAberta(false);
+}
+
 /* ============ biblioteca de presets por aba ============ */
 /* Um preset e uma FOTOGRAFIA do que o coleta() da aba devolve -- nao existe um segundo
    caminho de leitura de campos. Isso e o que garante que "Aplicar" devolva a aba INTEIRA:
@@ -3786,13 +4383,14 @@ function parearCor(idCor){
      todos os outros) e menos os campos declarados em 'fora' (escolhas que sao sobre OUTRO
      componente, como a consolidacao do codigo 1 da Bordas).
 
-   Dados operacionais (WhatsApp, chave Pix, Client ID, recebedor, cidade): ENTRAM no preset,
-   por decisao consciente. Motivo: um preset e a fotografia da aba, e tirar campos dele faria
-   "Aplicar" devolver a aba pela metade, em silencio -- o defeito que este projeto mais evita.
-   O preset nao sai do navegador: mora no mesmo localStorage onde esses campos ja moram, e a
-   aba diz isso na tela. A lista 'operacionais' de cada aba existe para a FASE 4 (exportar
-   arquivo "sem dados" precisa saber quais campos limpar) e para o aviso de divergencia da
-   fase 3 -- ela e a fonte unica desses nomes, inclusive do texto que aparece na interface. */
+   Dados de contato e pagamento (WhatsApp, chave Pix, Client ID, recebedor, cidade): NAO
+   entram mais no preset -- eles deixaram de ser campos de aba (ver o bloco "identidade e
+   paleta"). Isso nao contradiz "o preset e a fotografia da aba": ele continua sendo a
+   fotografia do coleta() dela, e o coleta() ja nao tem esses campos. Preset gravado por
+   versao anterior ainda os carrega dentro dos valores, e por isso a leitura de um preset PODA
+   a identidade (fciPodarConta em fcPresetConverter) e a tela diz isso uma vez. Aplicar um
+   preset antigo, portanto, nao mexe na identidade -- que e o comportamento certo: a chave Pix
+   nao pertence a uma campanha. */
 var fcPresets={};          /* abaId -> [ {nome,carimbo,valores}, ... ] */
 var fcPresetsFora={};      /* abaId -> quantos itens ilegiveis ficaram de fora da leitura */
 var FC_PRESET_NOME_MAX=60;
@@ -3887,6 +4485,13 @@ function fcPresetConverter(a,x){
   else if(fcEhObjeto(x.cfg)){valores={};valores[a.pref]=x.cfg;}   /* formato antigo da Bordas */
   else return null;
   if(!fcEhObjeto(valores[a.pref]))return null;
+  /* Preset gravado por versao anterior guarda a identidade dentro dos valores da aba. Ela e
+     PODADA aqui, na unica porta por onde um preset entra na ferramenta -- venha do
+     armazenamento ou de arquivo importado. Podar e a metade que faltava de "a identidade saiu
+     das abas": sem isso, aplicar um preset antigo devolveria a chave Pix de outra campanha
+     para dentro do estado, e a exportacao "sem dados" sairia COM dado, num arquivo cujo nome
+     promete que nao tem. O que foi podado e CONTADO e dito na tela uma vez. */
+  fciPodarConta(valores);
   if(a.presetOk&&!a.presetOk(valores))return null;
   return {nome:x.nome,carimbo:(typeof x.carimbo==='number'&&isFinite(x.carimbo))?x.carimbo:0,valores:valores};
 }
@@ -4024,7 +4629,7 @@ function fcPresetResumo(a,p){
 /* A secao "Biblioteca de presets" de TODAS as abas e desenhada por esta funcao, e nao copiada
    uma vez por aba no HTML: mesma mecanica, mesma aparencia, mesmas palavras -- e uma correcao
    de texto conserta todas. O que muda por aba vem do registro ABAS (exemplo de nome, o que a
-   aba guarda, campos operacionais).
+   aba guarda).
 
    ESQUEMA DE ID -- 'fcp-<prefixo da aba>-<papel>', e nunca '<prefixo>-<papel>'.
    A primeira versao desta funcao gerava '<pref>-pnome', que no Checkout dava 'u-pnome' --
@@ -4045,7 +4650,7 @@ function fcPresetResumo(a,p){
    listeners de "mudou alguma coisa nesta aba" ja nao alcancam estes campos, e a excecao que
    existia para eles (fcCampoDePreset) deixou de ser necessaria e saiu. */
 function fcPresetsMontar(a){
-  var box=$('fcp-'+a.pref+'-box'),h,i,ops;
+  var box=$('fcp-'+a.pref+'-box'),h;
   if(!box)return;
   h='<div><fieldset>';
   h+='<legend>Salvar a configuração atual</legend>';
@@ -4053,12 +4658,7 @@ function fcPresetsMontar(a){
   h+='<input type="text" id="fcp-'+a.pref+'-nome" value="" placeholder="'+escAttr(a.exemplo||'ex.: Natal 2026')+'">';
   h+='<div class="acoes"><button class="botao" type="button" id="fcp-'+a.pref+'-salvar">Salvar preset</button></div>';
   h+='<p class="ajuda"><b>O que o preset guarda:</b> '+a.guarda+'</p>';
-  if(a.operacionais&&a.operacionais.length){
-    ops=[];
-    for(i=0;i<a.operacionais.length;i++)ops.push(a.operacionais[i][1]);
-    h+='<p class="ajuda"><b>Dados de contato e pagamento:</b> este preset guarda também '+fcLista(ops)+
-       ', como estão na tela. Eles continuam apenas no <b>armazenamento deste navegador</b>, onde já ficam hoje — nada é enviado para lugar nenhum. Se for aplicar este preset numa campanha de outro recebedor, confira esses campos depois de aplicar.</p>';
-  }
+  h+='<p class="ajuda"><b>O que o preset NÃO guarda:</b> a chave Pix, o nome e a cidade do recebedor, o Client ID do PayPal e o WhatsApp. Esses cinco deixaram de ser campos de aba e ficam no painel <b>Identidade</b>, no topo da página — aplicar um preset não troca nenhum deles. Preset salvo antes desta mudança ainda os carrega por dentro: eles são <b>ignorados</b> ao aplicar.</p>';
   h+='<p class="ajuda"><b>Onde eles ficam:</b> no <b>armazenamento deste navegador</b>, junto com o resto da configuração da ferramenta — mesma regra do estado das '+fcAbasTxt()+' abas. <b>Não acompanham outro computador</b>, nem outro navegador no mesmo computador, e somem se você limpar os dados do site. Para levar uma configuração adiante, o que viaja é o <b>código gerado</b>, não o preset.</p>';
   h+='<p class="ajuda"><b>Nome repetido:</b> salvar com o nome de um preset que já existe <b>substitui</b> aquele preset, depois de confirmar. Não se criam dois com o mesmo nome — a lista identifica o preset pelo nome, e dois iguais deixariam de dizer qual é qual.</p>';
   h+='</fieldset></div>';
@@ -4239,6 +4839,7 @@ function fcgLerPreset(x){
     a=ABAS[i];
     ab=(fcEhObjeto(x.abas)&&fcEhObjeto(x.abas[a.id]))?x.abas[a.id]:null;
     vals=(ab&&fcEhObjeto(ab.valores))?ab.valores:{};
+    fciPodarConta(vals);   /* mesma poda dos presets de aba, e pelo mesmo motivo */
     p.abas[a.id]={ativa:!!(ab&&ab.ativa),valores:vals,origem:fcgLerOrigem(ab&&ab.origem)};
   }
   if(fcEhObjeto(x.codigos)){
@@ -4392,27 +4993,16 @@ function fcgCamposDiferentes(a,x,y){
   return out;
 }
 
-/* ---- divergencia de campo operacional entre as duas paginas da campanha (R1) ----
-   So dispara quando a MESMA aba esta ativa nas DUAS paginas: sem isso nao ha o que comparar.
-   Nao bloqueia -- pode ser intencional (recebedor diferente, WhatsApp de outro atendente). */
-function fcgDivergencia(a){
-  var p=fcgAtivo(),out=[],irmao,ab,meu,dele,i,ch,va,vb;
-  if(!p||!a.operacionais||!a.operacionais.length)return out;
-  if(!FCG.ativas[a.id])return out;
-  irmao=fcgIrmao(p);
-  if(!irmao)return out;
-  ab=irmao.abas[a.id];
-  if(!ab||!ab.ativa)return out;
-  meu=fcgValoresDaAba(a)[a.pref]||{};
-  dele=(ab.valores&&ab.valores[a.pref])||{};
-  for(i=0;i<a.operacionais.length;i++){
-    ch=a.operacionais[i][0];
-    va=(meu[ch]==null)?'':String(meu[ch]);
-    vb=(dele[ch]==null)?'':String(dele[ch]);
-    if(va!==vb)out.push(a.operacionais[i][1]);
-  }
-  return out;
-}
+/* ---- o aviso de divergencia do R1 saiu daqui (ago/2026) ----
+   Ele comparava os campos de contato e pagamento entre a hospedeira e a embutida da mesma
+   campanha e avisava em ambar quando discordavam. Com a identidade recolhida num lugar so
+   (ver o bloco "identidade e paleta"), NAO EXISTEM MAIS DUAS COPIAS PARA DIVERGIR: o aviso
+   nao deixou de ser desenhado, ele deixou de poder acontecer.
+   Fica registrado aqui, e nao so na documentacao, porque a alternativa era manter a funcao
+   comparando listas vazias -- codigo que roda a cada redesenho, nunca acha nada e obriga o
+   proximo leitor a provar por que. Se um dia voltar a existir campo operacional POR PAGINA
+   (algo que legitimamente mude entre a hospedeira e a embutida), a comparacao volta com ele.
+   fcgIrmao continua existindo: ele e quem sabe achar a outra pagina da campanha. */
 
 /* ---- pergunta de tres saidas ----
    Construida com DOM, sem ID nenhum: a caixa nasce e morre a cada pergunta, e um ID repetido
@@ -4840,7 +5430,7 @@ function fcgIntMontar(a){
 }
 function fcgRenderInt(a){
   var d=$('fcg-int-'+a.id),tit=$('fcg-tit-'+a.id),msg=$('fcg-msg-'+a.id),
-      p=fcgAtivo(),usa=!!FCG.ativas[a.id],h='',org,div,i,dif,btns;
+      p=fcgAtivo(),usa=!!FCG.ativas[a.id],h='',org,i,dif,btns;
   if(!d)return;
   if(!p){d.style.display='none';return;}   /* Rascunho: a aba fica exatamente como sempre foi */
   d.style.display='';
@@ -4855,15 +5445,6 @@ function fcgRenderInt(a){
     ? 'O que está aqui pertence à página <b>'+escHtml(fcgPaginaRotulo(p.pagina))+'</b> da campanha <b>'+escHtml(p.campanha)+'</b>. Tirar a aba desta página <b>não apaga nada</b>: os valores ficam guardados e voltam ao religar.'
     : 'Os valores desta aba continuam guardados e visíveis — só não pertencem a esta página. Ligue a aba se a página <b>'+escHtml(fcgPaginaRotulo(p.pagina))+'</b> usar este bloco.')+'</p>';
 
-  /* aviso de divergencia (R1): ambar, nomeando o campo, e sem bloquear nada.
-     "tem outro valor PARA", e nao "em": o rotulo de 'operacionais' ja traz o artigo ("o numero
-     do WhatsApp"), entao prefixar "em " dava "tem outro valor em o numero do WhatsApp". */
-  div=fcgDivergencia(a);
-  if(div.length){
-    h+='<p class="ajuda alerta"><b>A outra página desta campanha ('+
-       escHtml(fcgPaginaRotulo(p.pagina==='hospedeira'?'embutida':'hospedeira'))+
-       ') tem outro valor para '+escHtml(fcLista(div))+'.</b> Pode ser intencional — isto não impede nada. Se não for, confira qual das duas páginas está com o valor certo.</p>';
-  }
 
   /* marca de origem (R3) */
   org=fcgOrigemEstado(a);
@@ -5046,7 +5627,14 @@ var FCX_CHAVE_OK=/^[A-Za-z0-9_]{1,40}$/;
    de aba do mesmo arquivo, e contar aparicoes anunciaria tres fotos de fora onde ha uma. E o
    mesmo criterio que o importador de galeria ja usa nos descartes dele. A chave leva prefixo
    para nunca coincidir com um nome de campo herdado do prototipo. */
-function fcxConta(){return {descartados:0,ajustados:0,herdados:0,nos:0,forasteiras:0,forVistas:{}};}
+/* 'herdados' saiu deste contador junto com fcxHerdarOperacionais: a heranca campo a campo era
+   uma consequencia de a identidade morar dentro de cada aba. Hoje ela e um bloco so, e o
+   arquivo "sem dados" simplesmente nao o traz -- o que ja estava aqui fica, inteiro. */
+function fcxConta(){return {descartados:0,ajustados:0,nos:0,forasteiras:0,forVistas:{}};}
+/* Copia as chaves de 'extra' para 'o'. Existe para o bloco de identidade poder ser montado
+   numa funcao so (fcxIdentidadeParaArquivo) e usado nos DOIS tipos de arquivo, em vez de duas
+   montagens que divergiriam no dia em que um campo entrasse so numa delas. */
+function fcxJuntar(o,extra){var k;for(k in extra){if(Object.prototype.hasOwnProperty.call(extra,k))o[k]=extra[k];}return o;}
 /* '__proto__' e parentes ficam de fora antes de qualquer outra coisa: este bloco copia valores
    com atribuicao por chave em varios lugares, e atribuir '__proto__' num objeto comum troca o
    prototipo dele em vez de criar um campo. O resto da regra e simples de proposito -- toda
@@ -5238,53 +5826,29 @@ function fcxLimparValores(a,valores,conta,manterFora){
   if(a.importar)frag=a.importar(frag,conta);
   return frag;
 }
-/* Arquivo "sem dados" NAO apaga o que o navegador tem (garantia 5 do R4). O que o "sem dados"
-   faz e OMITIR os campos de 'operacionais'; aqui, campo omitido herda o valor que ja existe --
-   do preset que esta sendo substituido, ou da tela, quando o preset e novo. Campo PRESENTE e
-   vazio nao herda nada: vazio e escolha, e a regra de texto livre desta ferramenta e honrar o
-   vazio. E o que separa "o arquivo nao trouxe" de "o arquivo trouxe vazio" e a AUSENCIA da
-   chave -- por isso a exportacao sem dados apaga a chave em vez de gravar ''. */
-function fcxHerdarOperacionais(a,frag,base,conta){
-  var o,b,i,ch;
-  if(!a.operacionais||!a.operacionais.length)return frag;
-  o=frag&&frag[a.pref];
-  b=(fcEhObjeto(base)&&fcEhObjeto(base[a.pref]))?base[a.pref]:null;
-  if(!fcEhObjeto(o)||!b)return frag;
-  for(i=0;i<a.operacionais.length;i++){
-    ch=a.operacionais[i][0];
-    if(o[ch]===undefined&&b[ch]!==undefined){o[ch]=b[ch];conta.herdados++;}
-  }
-  return frag;
+/* ---- exportar ----
+   A DISTINCAO "COM DADOS" / "SEM DADOS" MUDOU DE NIVEL (ago/2026). Ela limpava, aba por aba,
+   os campos declarados em 'operacionais'. Com a identidade recolhida num lugar so, nao ha o
+   que limpar dentro das abas -- o que entra ou sai do arquivo e UM bloco, 'identidade', ao
+   lado dos presets. As funcoes fcxSemDados e fcxHerdarOperacionais sairam junto com a lista
+   que as alimentava: sem 'operacionais' as duas apagariam e herdariam o conjunto vazio.
+   O NOME DO ARQUIVO CONTINUA SENDO A SALVAGUARDA, e por isso o bloco de identidade viaja nos
+   DOIS tipos de arquivo (backup completo e preset unico) quando o operador escolhe "com os
+   dados": um arquivo chamado '...-com-dados.json' que nao tivesse dado nenhum dentro faria o
+   nome mentir, e o nome e exatamente o que decide se aquele arquivo pode ser enviado a alguem.
+   Nao ha contradicao com "o preset geral nao carrega identidade": o REGISTRO do preset geral
+   nao a carrega mesmo -- ela viaja no envelope, fora dele, e some do envelope no "sem dados". */
+function fcxIdentidadeParaArquivo(comDados){
+  return comDados?{identidade:fciIdentidade(),paleta:fciPaletaAtual()}:{paleta:fciPaletaAtual()};
 }
-
-/* ---- exportar ---- */
-/* Apaga de um fragmento os campos declarados em 'operacionais' -- a MESMA lista que alimenta o
-   aviso das abas Leads e Checkout e a comparacao entre as duas paginas da campanha. Uma lista
-   so: uma segunda lista aqui divergiria da primeira no dia em que um campo fosse acrescentado,
-   e o arquivo "sem dados" sairia com dado dentro, com o nome dizendo que nao tinha. */
-function fcxSemDados(a,frag){
-  var o=frag&&frag[a.pref],i;
-  if(!fcEhObjeto(o)||!a.operacionais)return frag;
-  for(i=0;i<a.operacionais.length;i++)delete o[a.operacionais[i][0]];
-  return frag;
+function fcxGeralParaArquivo(p){
+  return fcClone(p);
 }
-function fcxGeralParaArquivo(p,comDados){
-  var q=fcClone(p),i,a;
-  for(i=0;i<ABAS.length;i++){
-    a=ABAS[i];
-    if(q.abas&&q.abas[a.id]&&!comDados)fcxSemDados(a,q.abas[a.id].valores);
-  }
-  return q;
-}
-function fcxAbasParaArquivo(comDados){
-  var out={},i,j,a,lista,arr,it;
+function fcxAbasParaArquivo(){
+  var out={},i,j,a,lista,arr;
   for(i=0;i<ABAS.length;i++){
     a=ABAS[i];lista=fcPresets[a.id]||[];arr=[];
-    for(j=0;j<lista.length;j++){
-      it=fcClone(lista[j]);
-      if(!comDados)fcxSemDados(a,it.valores);
-      arr.push(it);
-    }
+    for(j=0;j<lista.length;j++)arr.push(fcClone(lista[j]));
     out[a.id]=arr;
   }
   return out;
@@ -5292,12 +5856,11 @@ function fcxAbasParaArquivo(comDados){
 /* O rascunho sai do MESMO fcEstadoAtual() que grava o armazenamento -- nao de uma segunda
    montagem. A biblioteca de presets e retirada daqui porque ela viaja em 'presetsDeAba': duas
    copias da mesma coisa no mesmo arquivo divergem no dia em que uma delas for filtrada. */
-function fcxRascunhoParaArquivo(comDados){
+function fcxRascunhoParaArquivo(){
   var st=fcClone(fcEstadoAtual())||{},i,a;
   for(i=0;i<ABAS.length;i++){
     a=ABAS[i];
     if(fcEhObjeto(st[a.pref]))delete st[a.pref].presets;
-    if(!comDados)fcxSemDados(a,st);
   }
   return st;
 }
@@ -5380,9 +5943,10 @@ function fcxExportarTudo(){
       try{
         o={formato:FCX_FORMATO,versao:FCX_VERSAO,tipo:'tudo',dados:!!comDados,
            geradoEm:(new Date()).toISOString(),
-           presetsGerais:[],presetsDeAba:fcxAbasParaArquivo(comDados),
-           rascunho:fcxRascunhoParaArquivo(comDados),rascunhoGeral:fcxGeralDaTelaParaArquivo()};
-        for(var i=0;i<FCG.presets.length;i++)o.presetsGerais.push(fcxGeralParaArquivo(FCG.presets[i],comDados));
+           presetsGerais:[],presetsDeAba:fcxAbasParaArquivo(),
+           rascunho:fcxRascunhoParaArquivo(),rascunhoGeral:fcxGeralDaTelaParaArquivo()};
+        fcxJuntar(o,fcxIdentidadeParaArquivo(comDados));
+        for(var i=0;i<FCG.presets.length;i++)o.presetsGerais.push(fcxGeralParaArquivo(FCG.presets[i]));
       }catch(e){
         fcFalha('Backup','montar o arquivo de exportação',e,'');
         alert('Não foi possível montar o arquivo. O aviso vermelho no topo tem o detalhe.');
@@ -5404,7 +5968,8 @@ function fcxExportarUm(){
       try{
         o={formato:FCX_FORMATO,versao:FCX_VERSAO,tipo:'preset',dados:!!comDados,
            geradoEm:(new Date()).toISOString(),
-           presetsGerais:[fcxGeralParaArquivo(p,comDados)]};
+           presetsGerais:[fcxGeralParaArquivo(p)]};
+        fcxJuntar(o,fcxIdentidadeParaArquivo(comDados));
       }catch(e){
         fcFalha('Backup','montar o arquivo de exportação',e,'');
         alert('Não foi possível montar o arquivo. O aviso vermelho no topo tem o detalhe.');
@@ -5498,6 +6063,7 @@ function fcxPlano(obj){
       plano={tipo:(obj.tipo==='preset')?'preset':'tudo',dados:obj.dados!==false,
              geradoEm:fcxDataDoArquivo(obj.geradoEm),
              gerais:[],abas:[],rascunho:null,rascunhoGeral:null,
+             identidade:null,paleta:null,
              travadas:[],codHead:0,codBody:0,conta:conta};
   fcxTpl={};
   try{return fcxPlanoMiolo(obj,conta,plano);}finally{fcxTpl=null;}
@@ -5564,8 +6130,33 @@ function fcxPlanoMiolo(obj,conta,plano){
     if(vazio)plano.rascunho=null;
     else plano.rascunhoGeral=fcxPlanoGeralDaTela(obj.rascunhoGeral,conta);
   }else if(plano.tipo==='tudo'&&obj.rascunho!==undefined&&obj.rascunho!==null)conta.descartados++;
+
+  /* IDENTIDADE E PALETA: um bloco so, no envelope do arquivo, e nao espalhado dentro das abas.
+     Ausente = o arquivo e "sem dados" (ou de uma versao anterior): nada e tocado, e o que
+     estiver aqui fica inteiro -- a garantia 5 do R4, agora com um bloco em vez de campo a
+     campo. Presente = substitui, depois da confirmacao, que diz isso com todas as letras. */
+  if(fcEhObjeto(obj.identidade)){
+    plano.identidade={};
+    for(i=0;i<FCI_CAMPOS.length;i++){
+      k=FCI_CAMPOS[i][0];x=obj.identidade[k];
+      if(typeof x==='string'&&x.length<=FCI_TEXTO_MAX)plano.identidade[k]=x;
+      else if(x!==undefined)conta.descartados++;
+    }
+    if(!fcxTemAlgo(plano.identidade))plano.identidade=null;
+  }else if(obj.identidade!==undefined&&obj.identidade!==null)conta.descartados++;
+  if(fcEhObjeto(obj.paleta)){
+    plano.paleta={};
+    for(i=0;i<FCI_PALETA.length;i++){
+      k=FCI_PALETA[i][0];x=obj.paleta[k];
+      if(typeof x==='string'&&corValida(x))plano.paleta[k]=x;
+      else if(x!==undefined)conta.descartados++;
+    }
+    if(!fcxTemAlgo(plano.paleta))plano.paleta=null;
+  }else if(obj.paleta!==undefined&&obj.paleta!==null)conta.descartados++;
   return plano;
 }
+var FCI_TEXTO_MAX=300;
+function fcxTemAlgo(o){var k;for(k in o){if(Object.prototype.hasOwnProperty.call(o,k))return true;}return false;}
 function fcxPlanoGeralDaTela(x,conta){
   var out={ativo:null,ativas:{},origens:{},codigos:{head:'',body:''}},i,a;
   if(!fcEhObjeto(x))return out;
@@ -5608,8 +6199,12 @@ function fcxConfirmar(plano,nomeArq){
   if(plano.conta.descartados)itens.push(plano.conta.descartados+' item(ns) do arquivo NÃO foram reconhecidos e ficam de fora');
   if(plano.conta.ajustados)itens.push(plano.conta.ajustados+' nome(s) longo(s) demais foram encurtados');
   linhas.push(itens);
-  if(!plano.dados)
-    linhas.push('Como o arquivo é “sem dados”, os campos de contato e pagamento que ele não traz mantêm o valor que já está aqui — importar este arquivo não esvazia nenhum campo preenchido.');
+  if(plano.identidade)
+    linhas.push('ATENÇÃO — o arquivo traz a IDENTIDADE (chave Pix, nome e cidade do recebedor, Client ID do PayPal e WhatsApp) e ela SUBSTITUI a que está neste navegador. É o dado mais sensível do arquivo: se ele não veio de você, o que os seus códigos gerados passarem a cobrar vai para a conta de quem fez o arquivo. Confira o painel Identidade logo depois de importar.');
+  else
+    linhas.push('O arquivo NÃO traz a identidade (chave Pix, recebedor, Client ID, WhatsApp): a que está neste navegador fica exatamente como está. Importar um arquivo “sem dados” não esvazia nenhum desses campos.');
+  if(plano.paleta)
+    linhas.push('O arquivo também traz a PALETA global, e ela substitui a que está aqui. As cores das abas só mudam se você clicar em “Aplicar a paleta às abas” depois — a paleta nunca se aplica sozinha.');
   if(plano.conta.forasteiras)
     linhas.push('Atenção: '+plano.conta.forasteiras+' foto(s) deste arquivo não está(ão) no storage da Alboom ('+S_HOSTS_ALBOOM.join(', ')+') — elas serão carregadas do servidor de outra pessoa na sua página publicada. Isso é permitido, mas se o arquivo veio de fora, confira esses endereços: na lista de fotos da aba a que eles pertencem, essas linhas aparecem com o host em destaque.');
   if(plano.codHead||plano.codBody)
@@ -5683,7 +6278,6 @@ function fcxAplicar(plano,politica,comRascunho){
       idx=-1;copiasA++;
     }else if(idx>=0)subsA++;
     else novosA++;
-    fcxHerdarOperacionais(a,it.valores,(idx>=0)?lista[idx].valores:fcgValoresDaAba(a),conta);
     if(idx>=0)lista[idx]=it;else lista.push(it);
   }
 
@@ -5708,8 +6302,6 @@ function fcxAplicar(plano,politica,comRascunho){
          confirmacao ja disse que estas abas nao recebem nada deste arquivo. */
       if(fcSoLeitura[a.id]&&alvo&&alvo.abas[a.id]){p.abas[a.id]=alvo.abas[a.id];continue;}
       it=g.abas[a.id]||{ativa:false,valores:{},origem:null};
-      fcxHerdarOperacionais(a,it.valores,
-        (alvo&&alvo.abas[a.id])?alvo.abas[a.id].valores:fcgValoresDaAba(a),conta);
       p.abas[a.id]={ativa:!!it.ativa,valores:it.valores,origem:it.origem};
     }
     mapa[g.id]=p.id;
@@ -5759,6 +6351,15 @@ function fcxAplicar(plano,politica,comRascunho){
     }
   }
 
+  /* 4. identidade e paleta -- um bloco so, e so quando o arquivo traz. Vem DEPOIS das abas
+        porque escrever nos campos do painel dispara o gravador dele, e antes disso o resto ja
+        precisa estar consistente. */
+  if(plano.identidade||plano.paleta){
+    fciEscreverParcial(plano.identidade,plano.paleta);
+    fciGravar();
+    fciEstadoRender();
+  }
+
   fcgGravar();
   salvarEstado();
   for(i=0;i<ABAS.length;i++){
@@ -5775,8 +6376,10 @@ function fcxAplicar(plano,politica,comRascunho){
      acrescimo independente e fica DEPOIS do par. */
   if(comRascunho&&plano.rascunho)r+=' O rascunho do arquivo foi aplicado na tela.';
   else if(plano.rascunho)r+=' O rascunho do arquivo NÃO foi aplicado: a tela ficou como estava.';
+  if(plano.identidade)r+=' A identidade (chave Pix, recebedor, Client ID e WhatsApp) foi substituída pela do arquivo — confira o painel Identidade.';
+  else r+=' A identidade que estava neste navegador não foi tocada: o arquivo não trazia essa parte.';
+  if(plano.paleta)r+=' A paleta global foi substituída pela do arquivo; as cores das abas só mudam se você mandar aplicar.';
   if(caiuNoRascunho)r+=' O arquivo dizia estar num preset geral que não veio junto: a barra ficou em Rascunho, e as caixas “Outros códigos meus” ficaram vazias porque elas são de uma página e o Rascunho não é uma página.';
-  if(conta.herdados)r+=' '+conta.herdados+' campo(s) de contato e pagamento que o arquivo não trazia mantiveram o valor que já estava aqui.';
   if(conta.descartados)r+=' '+conta.descartados+' item(ns) não reconhecido(s) ficaram de fora.';
   /* repetido aqui de proposito: a confirmacao some com o clique, e esta linha fica na tela */
   if(conta.forasteiras)r+=' '+conta.forasteiras+' foto(s) do arquivo vêm de fora do storage da Alboom; na aba Slideshow elas aparecem com o host em destaque.';
@@ -7376,7 +7979,8 @@ function lHoraOk(v){return /^\d{1,2}:\d{2}$/.test(String(v||''));}
 /* Salvamento e restauracao desta aba (registradas em ABAS). */
 function lColeta(){
   return {
-    l:{num:$('l-num').value,cod:$('l-cod').value,pag:$('l-pag').value,
+    /* Sem 'num': o WhatsApp saiu desta aba e e o da ferramenta inteira (ver uColeta). */
+    l:{cod:$('l-cod').value,pag:$('l-pag').value,
       modo:radio('l-modo'),segauto:$('l-segauto').value,efeito:radio('l-efeito'),segef:$('l-segef').value,
       icone:radio('l-icone'),formato:radio('l-formato'),corbtn:$('l-corbtn-t').value,
       btnlado:radio('l-btnlado'),btnbaixo:$('l-btnbaixo').value,
@@ -7398,7 +8002,7 @@ function lColeta(){
 function lRestaura(st){
   if(!st.l)return;
   var L=st.l,i;
-  $('l-num').value=L.num;$('l-cod').value=L.cod;$('l-pag').value=L.pag;
+  $('l-cod').value=L.cod;$('l-pag').value=L.pag;
   setRadio('l-modo',L.modo);$('l-segauto').value=L.segauto;setRadio('l-efeito',L.efeito);$('l-segef').value=L.segef;
   setRadio('l-icone',L.icone);setRadio('l-formato',L.formato);
   $('l-corbtn-t').value=L.corbtn;$('l-corbtn').value=corValida(L.corbtn)?L.corbtn:'#25D366';
@@ -7474,7 +8078,7 @@ function lPresetDepois(){
 
 function lPadroes(){
   if(!confirm('Restaurar todos os campos para os valores padrao?'))return;
-  $('l-num').value='';$('l-cod').value='';$('l-pag').value='';
+  $('l-cod').value='';$('l-pag').value='';
   setRadio('l-modo','botao');$('l-segauto').value=8;
   setRadio('l-efeito','normal');$('l-segef').value=10;
   setRadio('l-icone','identidade');setRadio('l-formato','circulo');
@@ -7670,7 +8274,9 @@ function lCfg(){
     resp=lPreso('l-resp');if(resp==null)resp=24;
   }
   return {
-    num:$('l-num').value.replace(/\D/g,''),cod:escJs($('l-cod').value),pag:escJs($('l-pag').value),
+    /* IDENTIDADE: o WhatsApp de destino e o mesmo da ferramenta inteira -- ver o bloco
+       "identidade e paleta". */
+    num:fciDigitos('zapnum'),cod:escJs($('l-cod').value),pag:escJs($('l-pag').value),
     modo:radio('l-modo'),segauto:lPreso('l-segauto'),
     efeito:radio('l-efeito'),segef:lPreso('l-segef'),
     icone:radio('l-icone'),formato:radio('l-formato'),
@@ -7702,7 +8308,7 @@ function lCfg(){
 function lGerar(){
   if(fcAjustarTodos(L_NUMS))salvarEstado();
   var v=lCfg();
-  if(!v.num){alert('Informe o WhatsApp de destino.');return;}
+  if(!v.num){var rNum=fciRecusa('Informe o WhatsApp de destino.');alert(rNum);fciApontarSe(rNum);return;}
   /* O codigo da pagina e a razao de ser deste recurso: e ele que chega ao atendimento como
      "(cod: *NATAL26*)" e diz de qual campanha veio o lead. Vazio, a mensagem chegava como
      "(cod: **)" -- defeituosa e muda, descoberta so quando o primeiro lead chegasse sem
@@ -8588,9 +9194,12 @@ var uEditIdx=-1;
 /* Salvamento e restauracao desta aba (registradas em ABAS). */
 function uColeta(){
   return {
-    u:{prods:uProds,cps:uCps,metodo:radio('u-metodo'),client:$('u-client').value,moeda:radio('u-moeda'),
-      chave:$('u-chave').value,nomer:$('u-nomer').value,cidade:$('u-cidade').value,cod:$('u-cod').value,
-      selprod:radio('u-selprod'),zap:radio('u-zap'),zapnum:$('u-zapnum').value,descpix:$('u-descpix').value,
+    /* Sem client, chave, nomer, cidade e zapnum: a identidade saiu desta aba e mora em
+       'fcConstrutoresIdentidade'. Tirar as chaves daqui e o que impede uma segunda copia de
+       nascer de novo -- o preset desta aba e uma fotografia deste coleta(). */
+    u:{prods:uProds,cps:uCps,metodo:radio('u-metodo'),moeda:radio('u-moeda'),
+      cod:$('u-cod').value,
+      selprod:radio('u-selprod'),zap:radio('u-zap'),descpix:$('u-descpix').value,
       sinal:radio('u-sinal'),sinaltipo:radio('u-sinaltipo'),sinalpct:$('u-sinalpct').value,sinalfixo:$('u-sinalfixo').value,
       resumo:radio('u-resumo'),
       t8:$('u-t8').value,t9:$('u-t9').value,t10:$('u-t10').value,
@@ -8604,12 +9213,7 @@ function uRestaura(st){
   var U=st.u;
   uProds=U.prods||[];uProdRender();uCps=U.cps||[];uCpRender();
   setRadio('u-metodo',U.metodo);setRadio('u-moeda',U.moeda);setRadio('u-selprod',U.selprod);setRadio('u-zap',U.zap);
-  $('u-client').value=U.client||'';
-  $('u-chave').value=U.chave||'';
-  $('u-nomer').value=U.nomer||'';
-  $('u-cidade').value=U.cidade||'';
   $('u-cod').value=U.cod;
-  $('u-zapnum').value=U.zapnum||'';
   $('u-descpix').value=(U.descpix!=null&&U.descpix!=='')?U.descpix:10;
   $('u-t1').value=U.t1;$('u-t2').value=U.t2;$('u-t3').value=U.t3;$('u-t4').value=U.t4;$('u-t5').value=U.t5;$('u-t6').value=U.t6;
   /* '!=null' e nao "e verdade": t7..t10 sao TEXTO LIVRE, e texto livre vazio e uma escolha,
@@ -8659,9 +9263,6 @@ function uPresetDepois(){
   var mudou=false;
   if(fcAjustarTodos(U_NUMS))mudou=true;
   if(fcCoresAjustar('u-'))mudou=true;
-  /* a chave Pix guardada num preset antigo pode trazer invisiveis do copiar-e-colar: mesma
-     limpeza a vista que a carga faz */
-  if(fcPixChaveAjustar('u-chave'))mudou=true;
   if(mudou)salvarEstado();
   uProdRender();uCpRender();uToggles();uPvBotoes();uPreview(true);
 }
@@ -9103,18 +9704,21 @@ function uCfg(){
     resumo:(radio('u-resumo')==='sim'),
     t8:$('u-t8').value, t9:$('u-t9').value, t10:$('u-t10').value,
     m:m, usaPP:(m!=='pix'), usaPix:usaPix,
-    client:$('u-client').value.trim(),
+    /* IDENTIDADE: lida do painel global, nao da aba. Os cinco campos abaixo deixaram de
+       existir aqui -- nao ha segunda copia, logo nao ha como esta aba ficar com a chave
+       antiga depois de uma troca. */
+    client:fciVal('client'),
     moeda:usaPix?'BRL':(radio('u-moeda')||'BRL'),
     /* a chave ja sai LIMPA das pontas daqui: e este o valor que vai para o bloco nas duas
        pontas (textarea e previa). fcPixChaveAjustar continua existindo para corrigir o CAMPO, que
-       e outra coisa -- e so uGerar mexe no campo. 'chaveBruta' acompanha porque a recusa
+       e outra coisa -- e so a geracao mexe no campo. 'chaveBruta' acompanha porque a recusa
        precisa distinguir "campo nunca preenchido" de "so tinha invisiveis". */
-    chave:pixLimpar($('u-chave').value), chaveBruta:$('u-chave').value,
-    nomer:$('u-nomer').value.trim(),
-    cidade:$('u-cidade').value.trim(),
+    chave:pixLimpar(fciBruto('chave')), chaveBruta:fciBruto('chave'),
+    nomer:fciVal('nomer'),
+    cidade:fciVal('cidade'),
     cod:$('u-cod').value.trim(),
     zap:usaPix&&(radio('u-zap')==='sim'),
-    zapnum:String($('u-zapnum').value).replace(/\D/g,''),
+    zapnum:fciDigitos('zapnum'),
     larg:larg, ppcor:radio('u-ppcor')||'gold', descpix:descpix,
     selprod:radio('u-selprod')||'unico',
     prods:uProds, cps:uCps,
@@ -9137,13 +9741,13 @@ function uCfg(){
 function uRecusa(cfg){
   var i,cpv,cpc,cpe;
   if(!cfg.prods.length)return 'Cadastre ao menos um produto.';
-  if(cfg.usaPP&&!cfg.client)return 'Informe o Client ID do PayPal.';
+  if(cfg.usaPP&&!cfg.client)return fciRecusa('Informe o Client ID do PayPal.');
   if(cfg.usaPix){
     var erroChave=pixChaveErro(cfg.chave,cfg.chaveBruta);
     if(erroChave)return erroChave;
-    if(!cfg.chave||!cfg.nomer||!cfg.cidade)return 'Preencha a chave Pix, o nome do recebedor e a cidade.';
+    if(!cfg.chave||!cfg.nomer||!cfg.cidade)return fciRecusa('Preencha a chave Pix, o nome do recebedor e a cidade.');
   }
-  if(cfg.zap&&!cfg.zapnum)return 'Informe o numero do WhatsApp de destino.';
+  if(cfg.zap&&!cfg.zapnum)return fciRecusa('Informe o numero do WhatsApp de destino.');
 
   /* Os cupons sao conferidos AQUI, e nao so no formulario de cadastro: o campo de valor
      DENTRO da lista de cupons nao valida nada, entao apagar o numero de um cupom ja cadastrado
@@ -9174,11 +9778,11 @@ function uRecusa(cfg){
 function uGerar(){
   /* a chave e os campos numericos se corrigem na tela ANTES de qualquer conferencia -- assim o
      que o operador esta lendo e o que vai ser conferido e gerado */
-  fcPixChaveAjustar('u-chave');
+  if(fcPixChaveAjustar('fci-chave'))fciGravar();
   if(fcAjustarTodos(U_NUMS))salvarEstado();
   var cfg=uCfg();
   var recusa=uRecusa(cfg);
-  if(recusa){alert(recusa);return;}
+  if(recusa){alert(recusa);fciApontarSe(recusa);return;}
   $('u-out').value=uBloco(cfg);
   uPreview(true);
   fccMarcar('uni');
@@ -11444,14 +12048,16 @@ function pCfg(){
   var usapp=(radio('p-usapp')!=='nao');
   var ppmodo=radio('p-ppmodo')||'sdk';
   return {
-    chave:pixLimpar($('p-chave').value), chaveBruta:$('p-chave').value,
-    nomer:$('p-nomer').value.trim(),
-    cidade:$('p-cidade').value.trim(),
+    /* IDENTIDADE: lida do painel global (ver o bloco "identidade e paleta"). Os cinco campos
+       sairam desta aba; aqui existe uma leitura, nao uma copia. */
+    chave:pixLimpar(fciBruto('chave')), chaveBruta:fciBruto('chave'),
+    nomer:fciVal('nomer'),
+    cidade:fciVal('cidade'),
     usapp:usapp,
-    client:$('p-client').value.trim(),
+    client:fciVal('client'),
     ppcor:radio('p-ppcor')||'gold',
     zap:(radio('p-zap')!=='nao'),
-    zapnum:String($('p-zapnum').value).replace(/\D/g,''),
+    zapnum:fciDigitos('zapnum'),
     url:$('p-url').value.trim(),
     larg:pPreso('p-larg',420), qr:pPreso('p-qr',180),
     c1:corSegura('p-c1','#075E54'), c2:corSegura('p-c2','#ffffff'), c3:corSegura('p-c3','#333333'),
@@ -11475,9 +12081,9 @@ function pCfg(){
 function pRecusaBloco(cfg){
   var erroChave=pixChaveErro(cfg.chave,cfg.chaveBruta);
   if(erroChave)return erroChave;
-  if(!cfg.chave||!cfg.nomer||!cfg.cidade)return 'Preencha a chave Pix, o nome do recebedor e a cidade. Sao eles que a pagina usa para conferir se um link de cobranca e mesmo seu.';
-  if(cfg.usapp&&!cfg.client)return 'Informe o Client ID do PayPal, ou marque "Nao -- so Pix" em PayPal.';
-  if(cfg.zap&&!cfg.zapnum)return 'Informe o numero do WhatsApp de destino, ou desligue o botao "Ja paguei".';
+  if(!cfg.chave||!cfg.nomer||!cfg.cidade)return fciRecusa('Preencha a chave Pix, o nome do recebedor e a cidade. Sao eles que a pagina usa para conferir se um link de cobranca e mesmo seu.');
+  if(cfg.usapp&&!cfg.client)return fciRecusa('Informe o Client ID do PayPal, ou marque "Nao -- so Pix" em PayPal.');
+  if(cfg.zap&&!cfg.zapnum)return fciRecusa('Informe o numero do WhatsApp de destino, ou desligue o botao "Ja paguei".');
   return '';
 }
 function pRecusaCobranca(cfg){
@@ -11815,8 +12421,11 @@ function pInd(t){
    O criterio nao vale para a aparencia nem para os textos do cartao: eles mudam o BLOCO, nao o
    link, e ali continua valendo a regra das outras abas (a caixa fica, e o painel consolidado
    avisa que o codigo e mais velho que a aba). Esta e exatamente a lista 'naoEmite' do registro
-   ABAS mais os tres campos do recebedor -- o que nao entra no bloco, entra no link. */
-var P_LINK_CAMPOS=['p-chave','p-nomer','p-cidade','p-url','p-desc','p-valor','p-txid','p-ppmodo','p-pplink'];
+   ABAS mais os tres campos do recebedor -- o que nao entra no bloco, entra no link.
+   Os tres do recebedor moram no painel Identidade desde que a identidade saiu das abas, e por
+   isso aparecem aqui com o prefixo 'fci-': o campo mudou de lugar, o efeito dele sobre o link
+   nao mudou nada. */
+var P_LINK_CAMPOS=['fci-chave','fci-nomer','fci-cidade','p-url','p-desc','p-valor','p-txid','p-ppmodo','p-pplink'];
 function pSaidaVence(alvo){
   var i,ta=$('p-out2');
   if(!ta||!ta.value)return;
@@ -11826,6 +12435,11 @@ function pSaidaVence(alvo){
    campo, e a previa ficaria parada enquanto o operador digita. */
 function pMexeu(e){
   var alvo=(e.target&&(e.target.name||e.target.id))||'';
+  /* A identidade nao e mais campo desta aba, mas o LINK reproduz a chave, o nome e a cidade
+     dentro do payload. Trocar o recebedor e ficar com o link antigo na caixa entregaria um
+     link que a pagina nova vai RECUSAR -- e o operador so descobriria pelo cliente. Aqui so a
+     caixa vence: previa e toggles continuam sendo assunto dos campos desta aba. */
+  if(/^fci-/.test(alvo)){pSaidaVence(alvo);return;}
   if(!/^p-/.test(alvo))return;
   pSaidaVence(alvo);
   pToggles();
@@ -11838,32 +12452,33 @@ document.addEventListener('change',pMexeu);
 function pGerar(){
   var mudou=false;
   if(fcAjustarTodos(P_NUMS))mudou=true;
-  if(fcPixChaveAjustar('p-chave'))mudou=true;
+  if(fcPixChaveAjustar('fci-chave'))fciGravar();
   if(fcCoresAjustar('p-'))mudou=true;
   if(mudou)salvarEstado();
   var cfg=pCfg(),r=pRecusaBloco(cfg);
-  if(r){alert(r);return;}
+  if(r){alert(r);fciApontarSe(r);return;}
   $('p-out1').value=pBloco(cfg);
   fccMarcar('cob');
 }
 function pGerarLink(){
   var mudou=false;
   if(fcAjustarTodos(P_NUMS))mudou=true;
-  if(fcPixChaveAjustar('p-chave'))mudou=true;
+  if(fcPixChaveAjustar('fci-chave'))fciGravar();
   if(pValorAjustar())mudou=true;
   if(pTxidAjustar())mudou=true;
   if(mudou)salvarEstado();
   var cfg=pCfg(),r=pRecusaCobranca(cfg);
-  if(r){alert(r);return;}
+  if(r){alert(r);fciApontarSe(r);return;}
   var codigo=pPayload(cfg),erro=pConferir(cfg,codigo);
   if(erro){alert(erro);return;}
   $('p-out2').value=pLinkDe(cfg,codigo);
   pPreview(true);
 }
 function pLimpar(){
-  if(!confirm('Isto devolve a aba inteira aos padroes de fabrica: os dados do recebedor, a aparencia da pagina, os textos e a cobranca que esta na tela. Nenhum codigo ja colado no site e afetado, e os links ja enviados continuam funcionando. Continuar?'))return;
-  $('p-chave').value='';$('p-nomer').value='Foto Certa';$('p-cidade').value='Vitoria';
-  $('p-client').value='';$('p-zapnum').value='';$('p-url').value='/pagar';
+  if(!confirm('Isto devolve a aba inteira aos padroes de fabrica: a aparencia da pagina, os textos e a cobranca que esta na tela. Os dados do recebedor NAO sao tocados -- eles sao da ferramenta inteira, no painel Identidade. Nenhum codigo ja colado no site e afetado, e os links ja enviados continuam funcionando. Continuar?'))return;
+  /* A identidade nao entra aqui: ela nao pertence a esta aba, e "restaurar os padroes desta
+     aba" nao pode apagar a chave Pix que as outras duas abas tambem usam. */
+  $('p-url').value='/pagar';
   setRadio('p-usapp','sim');setRadio('p-ppcor','gold');setRadio('p-zap','sim');
   setRadio('p-coruja','esq');setRadio('p-ppmodo','sdk');
   $('p-larg').value='420';$('p-qr').value='180';$('p-corujaalt').value='30';
@@ -12071,9 +12686,10 @@ function pPvModoSet(m){pPvModo=m;pPvBotoes();pPreview(true);}
 
 /* ===== estado e biblioteca de presets ===== */
 function pColeta(){
-  return {p:{chave:$('p-chave').value,nomer:$('p-nomer').value,cidade:$('p-cidade').value,
-    usapp:radio('p-usapp'),client:$('p-client').value,ppcor:radio('p-ppcor'),
-    zap:radio('p-zap'),zapnum:$('p-zapnum').value,url:$('p-url').value,
+  /* Sem chave, nomer, cidade, client e zapnum: a identidade saiu desta aba (ver uColeta). */
+  return {p:{
+    usapp:radio('p-usapp'),ppcor:radio('p-ppcor'),
+    zap:radio('p-zap'),url:$('p-url').value,
     larg:$('p-larg').value,qr:$('p-qr').value,
     c1:$('p-c1-t').value,c2:$('p-c2-t').value,c3:$('p-c3-t').value,
     coruja:radio('p-coruja'),corujaalt:$('p-corujaalt').value,
@@ -12085,14 +12701,9 @@ function pColeta(){
 }
 function pRestaura(st){
   var P=st.p||{},i;
-  if(P.chave!==undefined)$('p-chave').value=P.chave;
-  if(P.nomer!==undefined)$('p-nomer').value=P.nomer;
-  if(P.cidade!==undefined)$('p-cidade').value=P.cidade;
   if(P.usapp)setRadio('p-usapp',P.usapp);
-  if(P.client!==undefined)$('p-client').value=P.client;
   if(P.ppcor)setRadio('p-ppcor',P.ppcor);
   if(P.zap)setRadio('p-zap',P.zap);
-  if(P.zapnum!==undefined)$('p-zapnum').value=P.zapnum;
   if(P.url!==undefined)$('p-url').value=P.url;
   if(P.larg!==undefined)$('p-larg').value=P.larg;
   if(P.qr!==undefined)$('p-qr').value=P.qr;
@@ -12165,9 +12776,9 @@ function mFmt(v){return precoFmt(radio('m-metodo')==='paypal'?(radio('m-moeda')|
 
 /* ===== salvamento e restauracao (registradas em ABAS) ===== */
 function mColeta(){
-  return {m:{metodo:radio('m-metodo'),client:$('m-client').value,moeda:radio('m-moeda'),ppcor:radio('m-ppcor'),
-    chave:$('m-chave').value,nomer:$('m-nomer').value,cidade:$('m-cidade').value,
-    descpix:$('m-descpix').value,zap:radio('m-zap'),zapnum:$('m-zapnum').value,cod:$('m-cod').value,
+  /* Sem client, chave, nomer, cidade e zapnum: a identidade saiu desta aba (ver uColeta). */
+  return {m:{metodo:radio('m-metodo'),moeda:radio('m-moeda'),ppcor:radio('m-ppcor'),
+    descpix:$('m-descpix').value,zap:radio('m-zap'),cod:$('m-cod').value,
     prods:mProds,cps:mCps,
     cols:$('m-cols').value,mob:$('m-mob').value,imgvit:$('m-imgvit').value,imgdet:$('m-imgdet').value,
     prop:radio('m-prop'),filtro:radio('m-filtro'),
@@ -12181,15 +12792,10 @@ function mColeta(){
 function mRestaura(st){
   var M=st.m;if(!M)return;
   if(M.metodo)setRadio('m-metodo',M.metodo);
-  if(M.client!=null)$('m-client').value=M.client;
   if(M.moeda)setRadio('m-moeda',M.moeda);
   if(M.ppcor)setRadio('m-ppcor',M.ppcor);
-  if(M.chave!=null)$('m-chave').value=M.chave;
-  if(M.nomer!=null)$('m-nomer').value=M.nomer;
-  if(M.cidade!=null)$('m-cidade').value=M.cidade;
   if(M.descpix!=null)$('m-descpix').value=M.descpix;
   if(M.zap)setRadio('m-zap',M.zap);
-  if(M.zapnum!=null)$('m-zapnum').value=M.zapnum;
   if(M.cod!=null)$('m-cod').value=M.cod;
   if(fcEhArray(M.prods))mProds=M.prods;
   if(fcEhArray(M.cps))mCps=M.cps;
@@ -12758,14 +13364,15 @@ function mCfg(){
   }
   return {
     m:m, usaPP:(m!=='pix'), usaPix:usaPix,
-    client:$('m-client').value.trim(),
+    /* IDENTIDADE: lida do painel global (ver o bloco "identidade e paleta"). */
+    client:fciVal('client'),
     moeda:usaPix?'BRL':(radio('m-moeda')||'BRL'),
     ppcor:radio('m-ppcor')||'gold',
-    chave:pixLimpar($('m-chave').value), chaveBruta:$('m-chave').value,
-    nomer:$('m-nomer').value.trim(), cidade:$('m-cidade').value.trim(),
+    chave:pixLimpar(fciBruto('chave')), chaveBruta:fciBruto('chave'),
+    nomer:fciVal('nomer'), cidade:fciVal('cidade'),
     cod:$('m-cod').value.trim(),
     zap:usaPix&&(radio('m-zap')==='sim'),
-    zapnum:String($('m-zapnum').value).replace(/\D/g,''),
+    zapnum:fciDigitos('zapnum'),
     descpix:descpix,
     sinal:{ativo:sinalOn,tipo:sinalTipo,valor:(sinalTipo==='fixo')?(Math.round(sinalFixo*100)/100):sinalPct},
     resumo:(radio('m-resumo')==='sim'),
@@ -12795,13 +13402,13 @@ function mRecusa(cfg){
   for(i=0;i<cfg.prods.length;i++){
     if(!String(cfg.prods[i].img||'').trim())return 'O produto "'+cfg.prods[i].nome+'" esta sem foto. A vitrine e feita de imagens: sem foto ele sai como um retangulo vazio no meio da grade.';
   }
-  if(cfg.usaPP&&!cfg.client)return 'Informe o Client ID do PayPal.';
+  if(cfg.usaPP&&!cfg.client)return fciRecusa('Informe o Client ID do PayPal.');
   if(cfg.usaPix){
     var erroChave=pixChaveErro(cfg.chave,cfg.chaveBruta);
     if(erroChave)return erroChave;
-    if(!cfg.chave||!cfg.nomer||!cfg.cidade)return 'Preencha a chave Pix, o nome do recebedor e a cidade.';
+    if(!cfg.chave||!cfg.nomer||!cfg.cidade)return fciRecusa('Preencha a chave Pix, o nome do recebedor e a cidade.');
   }
-  if(cfg.zap&&!cfg.zapnum)return 'Informe o numero do WhatsApp de destino.';
+  if(cfg.zap&&!cfg.zapnum)return fciRecusa('Informe o numero do WhatsApp de destino.');
   for(i=0;i<cfg.cps.length;i++){
     cpc=String(cfg.cps[i].codigo||'').trim();
     if(!cpc)return 'O cupom na posicao '+(i+1)+' da lista esta sem codigo. Um cupom sem codigo nunca pode ser digitado pelo cliente: preencha o codigo ou remova a linha.';
@@ -12836,11 +13443,11 @@ function mTotalMaximo(prods,qtdmax){
   return Math.round(t*100)/100;
 }
 function mGerar(){
-  fcPixChaveAjustar('m-chave');
+  if(fcPixChaveAjustar('fci-chave'))fciGravar();
   if(fcAjustarTodos(M_NUMS))salvarEstado();
   var cfg=mCfg();
   var recusa=mRecusa(cfg);
-  if(recusa){alert(recusa);return;}
+  if(recusa){alert(recusa);fciApontarSe(recusa);return;}
   $('m-out').value=mBloco(cfg);
   /* a conta do peso descreve o codigo que acabou de sair: gerar sem redesenha-la deixaria a
      frase falando de uma configuracao anterior ao lado do bloco novo */
@@ -14553,11 +15160,6 @@ prep('Checkout','uni',function(){
   liga('u-pv-cel',function(){uPvModoSet('cel');});
   liga('u-copy',function(){copiar('u-out','u-cop');});
   parearCor('u-c1');parearCor('u-c2');parearCor('u-c3');
-  var el=$('u-chave');
-  if(el){
-    el.addEventListener('change',function(){if(fcPixChaveAjustar('u-chave'))salvarEstado();});
-    el.addEventListener('blur',function(){if(fcPixChaveAjustar('u-chave')){salvarEstado();uPreview(true);}});
-  }
 });
 prep('Bordas com efeito','bor',function(){
   liga('b-gerar',bGerar);
@@ -14606,11 +15208,11 @@ prep('Link de cobrança','cob',function(){
   parearCor('p-c1');parearCor('p-c2');parearCor('p-c3');
   parearCor('p-corujacorpo');parearCor('p-corujadet');
   fcLigarFaixa(P_NUMS,function(){pPreview(true);});
-  /* A chave Pix, o valor e o identificador se corrigem a vista, no proprio campo -- em
-     'change'/'blur', nunca em 'input'. O listener fica no proprio elemento porque ele corre
-     antes dos de document: quando o salvarEstado global rodar, o valor ja esta limpo. */
-  [['p-chave',function(){return fcPixChaveAjustar('p-chave');}],
-   ['p-valor',pValorAjustar],
+  /* O valor e o identificador se corrigem a vista, no proprio campo -- em 'change'/'blur',
+     nunca em 'input'. O listener fica no proprio elemento porque ele corre antes dos de
+     document: quando o salvarEstado global rodar, o valor ja esta limpo. A chave Pix saiu
+     desta lista junto com o campo: quem a corrige agora e o painel Identidade. */
+  [['p-valor',pValorAjustar],
    ['p-txid',pTxidAjustar]].forEach(function(par){
     var el=$(par[0]);if(!el)return;
     el.addEventListener('change',function(){if(par[1]())salvarEstado();});
@@ -14642,11 +15244,6 @@ prep('Mini loja','loja',function(){
     el.addEventListener('input',mImpInvalidar);
     el.addEventListener('change',mImpInvalidar);
   });
-  var ch=$('m-chave');
-  if(ch){
-    ch.addEventListener('change',function(){if(fcPixChaveAjustar('m-chave'))salvarEstado();});
-    ch.addEventListener('blur',function(){if(fcPixChaveAjustar('m-chave')){salvarEstado();mPreview(true);}});
-  }
 });
 /* Cores de texto livre das abas que as tem: o campo se corrige a vista, como o c-mob.
    Mesmo motivo do listener no proprio elemento (roda antes dos de document, entao o
@@ -14657,10 +15254,24 @@ prep('Mini loja','loja',function(){
 prep('Correcao a vista das cores livres','leads uni bor cnt cob loja',function(){
   CORES_LIVRES.forEach(function(par){
     var t=$(par[0]+'-t');if(!t)return;
-    t.addEventListener('change',function(){if(corAjustar(par[0],par[1]))salvarEstado();});
-    t.addEventListener('blur',function(){if(corAjustar(par[0],par[1])){salvarEstado();fcCorRedesenhar(par[0]);}});
+    /* Os dois gravadores sao chamados sempre: 'salvarEstado' guarda as cores das abas e
+       'fciGravar' as da paleta global, e as duas familias estao na MESMA lista. Escolher qual
+       chamar pelo prefixo do id seria um terceiro lugar sabendo de quem e cada cor -- e o
+       lugar que esqueceria a proxima. Gravar as duas custa uma escrita a mais e nao erra. */
+    t.addEventListener('change',function(){if(corAjustar(par[0],par[1])){salvarEstado();fciGravar();}});
+    t.addEventListener('blur',function(){if(corAjustar(par[0],par[1])){salvarEstado();fciGravar();fcCorRedesenhar(par[0]);}});
   });
 });
+
+/* A IDENTIDADE E A PALETA VEM ANTES DE TUDO, e por dois motivos que se somam:
+     1. a MIGRACAO le o armazenamento BRUTO das abas ('fcConstrutores') para recolher o que o
+        operador ja tinha digitado -- se ela rodasse depois, leria um estado do qual as chaves
+        de identidade ja teriam comecado a sair;
+     2. a poda dos presets antigos (fcPresetConverter) acontece dentro de restaurarEstado e
+        conta quantos valores de identidade ignorou; o contador precisa existir antes.
+   Passo proprio, com rotulo proprio: se ele falhar, a barra vermelha precisa dizer que foi a
+   identidade -- as abas continuam funcionando, so vao recusar gerar por falta de chave. */
+prep('Identidade e paleta','',fciIniciar,'preparar a identidade e a paleta');
 
 /* restaurarEstado ja isola aba por aba por dentro: a aba que falhar ao restaurar nao
    impede as demais de voltar, e o aviso aparece na tela. */
@@ -14683,8 +15294,8 @@ for(var iAba=0;iAba<ABAS.length;iAba++){
 prep('Correcao das cores livres e da chave Pix na carga','leads uni bor cnt',function(){
   var mudou=false;
   CORES_LIVRES.forEach(function(par){if(corAjustar(par[0],par[1]))mudou=true;});
-  if(fcPixChaveAjustar('u-chave'))mudou=true;
-  if(mudou)salvarEstado();
+  if(fcPixChaveAjustar('fci-chave'))mudou=true;
+  if(mudou){salvarEstado();fciGravar();}
 });
 /* Mesmo motivo do c-mob e das cores livres: estado gravado antes desta regra pode trazer numeros
    fora da faixa, e o campo nao pode exibir algo diferente do que o gerador vai usar. */
@@ -14797,6 +15408,16 @@ prep('Preset geral','',fcgIniciar,'preparar a barra do preset geral');
 /* Passo proprio, com rotulo proprio: se ligar os botoes de backup falhar, a barra vermelha
    precisa dizer que foi o backup -- e nao o preset geral, que continua funcionando. */
 prep('Backup em arquivo','',fcxIniciar,'preparar os botoes de exportar e importar');
+/* O recado da migracao e a linha de estado da paleta sao os ULTIMOS: o recado precisa da
+   contagem do que foi podado dos presets (que so termina depois de todas as bibliotecas serem
+   lidas) e a linha de estado compara a paleta com os campos de cor das abas, que so terminam
+   de ser corrigidos nos passos "desenhar a aba com o estado restaurado". A pergunta da
+   divergencia tambem fica para aqui, para a caixa nascer sobre uma tela ja desenhada. */
+prep('Identidade e paleta','',function(){
+  fciAvisoRender();
+  fciEstadoRender();
+  fciMigracaoPerguntar();
+},'mostrar o recado da identidade e o estado da paleta');
 /* O painel consolidado ja e desenhado por fcgAtualizar, no fim de fcgIniciar. Este passo
    existe para o caso em que a barra do preset geral falha: sem ele, o painel ficaria em
    branco, sem uma linha dizendo por que. Desenhar duas vezes nao custa nada -- a assinatura
