@@ -623,14 +623,14 @@
       <div class="acoes"><button class="botao claro" id="s-add">Adicionar imagem</button></div>
       </fieldset>
       <fieldset>
-      <legend>Importar uma galeria inteira</legend>
-      <p class="ajuda"><b>Por que duas colagens:</b> o navegador não deixa esta ferramenta abrir uma página do fotocerta.com.br por conta própria (política de origem cruzada — medido: <i>Failed to fetch</i>). Então você traz a página até aqui. <b>Como fazer:</b> abra a galeria no navegador, aperte <b>Cmd&nbsp;⌥&nbsp;U</b> (ver código-fonte), depois <b>Cmd&nbsp;A</b> (selecionar tudo) e <b>Cmd&nbsp;C</b> (copiar). Cole o link da galeria no primeiro campo e o código-fonte no segundo. Vale para galerias (<i>/gallery/…</i>) e para portfólios (<i>/portfolio/…</i>).</p>
-      <label for="s-imp-link">Link da galeria <small>(o endereço da barra do navegador)</small></label>
+      <legend>Importar de uma galeria ou de uma página</legend>
+      <p class="ajuda"><b>Por que duas colagens:</b> o navegador não deixa esta ferramenta abrir uma página do fotocerta.com.br por conta própria (política de origem cruzada — medido: <i>Failed to fetch</i>). Então você traz a página até aqui. <b>Como fazer:</b> abra a galeria no navegador, aperte <b>Cmd&nbsp;⌥&nbsp;U</b> (ver código-fonte), depois <b>Cmd&nbsp;A</b> (selecionar tudo) e <b>Cmd&nbsp;C</b> (copiar). Cole o link no primeiro campo e o código-fonte no segundo. Vale para galerias (<i>/gallery/…</i>), para portfólios (<i>/portfolio/…</i>) e para as <b>páginas comuns</b> do site (<i>/albuns</i>), que servem as fotos de <i>cdn.alboompro.com</i> em vez do storage.</p>
+      <label for="s-imp-link">Link da galeria ou da página <small>(o endereço da barra do navegador)</small></label>
       <input type="text" id="s-imp-link" placeholder="https://www.fotocerta.com.br/gallery/121894-estudio-tematico">
       <label for="s-imp-fonte">Código-fonte da página <small>(Cmd ⌥ U, Cmd A, Cmd C — cole aqui)</small></label>
-      <textarea id="s-imp-fonte" spellcheck="false" placeholder="Cole aqui o codigo-fonte inteiro da pagina da galeria."></textarea>
-      <div class="acoes"><button class="botao claro" id="s-imp-conferir">Conferir a galeria</button></div>
-      <p class="ajuda">O código-fonte traz <b>mais fotos que a tela</b>: na galeria de exemplo, o navegador tinha 10 fotos carregadas e o código-fonte trazia 46. As fotos entram <b>na mesma ordem em que aparecem na página</b>, inclusive a de capa, que na página não é a primeira. Só entram endereços do storage da Alboom: qualquer outro é descartado com a contagem à vista. Nada do que você cola aqui é salvo — a ferramenta só lê os endereços das fotos e esquece o resto.</p>
+      <textarea id="s-imp-fonte" spellcheck="false" placeholder="Cole aqui o codigo-fonte inteiro da pagina."></textarea>
+      <div class="acoes"><button class="botao claro" id="s-imp-conferir">Conferir a página</button></div>
+      <p class="ajuda">O código-fonte traz <b>mais fotos que a tela</b>: na galeria de exemplo, o navegador tinha 10 fotos carregadas e o código-fonte trazia 46. As fotos entram <b>na mesma ordem em que aparecem na página</b>, inclusive a de capa, que na página não é a primeira. Só entram endereços dos servidores da Alboom: qualquer outro é descartado com a contagem à vista. <b>Numa página comum</b> a mesma foto aparece em vários tamanhos (medido: 51 endereços para 10 fotos em <i>/albuns</i>) — cada foto entra <b>uma vez só, no maior tamanho que a página trouxe</b>, e só as da conta que aparece em mais fotos, que a conferência mostra. Nada do que você cola aqui é salvo — a ferramenta só lê os endereços das fotos e esquece o resto.</p>
       </fieldset>
     </div>
     <div>
@@ -648,10 +648,10 @@
       </div>
       <label>Tamanho das fotos</label>
       <div class="radios" id="s-imp-tamanho">
-      <label><input type="radio" name="s-imptam" value="orig" checked><span>Como a galeria entrega (1200 px)</span></label>
+      <label><input type="radio" name="s-imptam" value="orig" checked><span>Como a página entrega <small>(galeria: 1200 px)</small></span></label>
       <label><input type="radio" name="s-imptam" value="900"><span>Reduzir para 900 px</span></label>
       </div>
-      <p class="ajuda"><b>Sobre o tamanho:</b> medi as 104 fotos das duas galerias de exemplo e o site <b>já entrega tudo com 1200 px de largura</b> (de 157 a 868 KB por foto; metade delas abaixo de 340 KB, e seis acima de 610 KB). Pedir 1400 px ao redimensionador da Alboom funciona, mas só <b>estica</b> a foto de 1200: arquivo maior, nenhum detalhe a mais. Por isso a escolha aqui é entre o que a galeria entrega e uma redução de verdade para 900 px — a largura padrão do slideshow —, que economizou de 15% a 55% por foto nas fotos medidas.</p>
+      <p class="ajuda"><b>Sobre o tamanho:</b> medi as 104 fotos das duas galerias de exemplo e o site <b>já entrega tudo com 1200 px de largura</b> (de 157 a 868 KB por foto; metade delas abaixo de 340 KB, e seis acima de 610 KB). Pedir 1400 px ao redimensionador da Alboom funciona, mas só <b>estica</b> a foto de 1200: arquivo maior, nenhum detalhe a mais. Numa página comum o tamanho <b>varia por foto</b> (de 735 a 1920 px de largura nas 10 medidas em <i>/albuns</i>), e por isso a redução para 900 px pode não reduzir nada em algumas delas. Por isso a escolha aqui é entre o que a página entrega e uma redução de verdade para 900 px — a largura padrão do slideshow —, que economizou de 15% a 55% por foto nas fotos medidas.</p>
       <div class="acoes"><button class="botao" id="s-imp-aplicar" disabled>Adicionar à lista</button></div>
       <p class="ajuda s-alerta" id="s-imp-resultado" style="display:none"></p>
       </fieldset>
@@ -2347,11 +2347,11 @@
       </fieldset>
       <fieldset>
         <legend>Importar as fotos de uma galeria inteira</legend>
-        <label for="m-imp-link">Link da galeria <small>(o endereço da barra do navegador)</small></label>
+        <label for="m-imp-link">Link da galeria ou da página <small>(o endereço da barra do navegador)</small></label>
         <input type="text" id="m-imp-link" placeholder="https://www.fotocerta.com.br/gallery/121894-estudio-tematico">
         <label for="m-imp-fonte">Código-fonte da página <small>(Cmd ⌥ U, Cmd A, Cmd C — cole aqui)</small></label>
-        <textarea id="m-imp-fonte" spellcheck="false" placeholder="Cole aqui o codigo-fonte inteiro da pagina da galeria."></textarea>
-        <div class="acoes"><button class="botao claro" id="m-imp-conferir">Conferir a galeria</button></div>
+        <textarea id="m-imp-fonte" spellcheck="false" placeholder="Cole aqui o codigo-fonte inteiro da pagina."></textarea>
+        <div class="acoes"><button class="botao claro" id="m-imp-conferir">Conferir a página</button></div>
         <p class="ajuda s-alerta" id="m-imp-resultado" style="display:none"></p>
         <p class="lista-conta" id="m-imp-conta" style="display:none"></p>
         <ul class="lista-imgs lista-rolagem" id="m-imp-lista"></ul>
@@ -2449,7 +2449,7 @@
         <input type="number" id="m-imgdet" value="1000" min="400" max="1600" step="20">
         <p class="ajuda" id="m-peso" style="display:none"></p>
         <p class="ajuda"><b>Por que isto é um campo e não um detalhe.</b> As fotos do storage da Alboom saem todas com 1200 px de largura e de <b>157 a 868 KB</b> cada (medido). Cinquenta delas numa grade seriam dezenas de megabytes. A página pede cada foto ao <b>redimensionador da Alboom</b> na largura escolhida aqui, e só pede a foto grande quando alguém abre o cartão de detalhe.</p>
-        <p class="ajuda alerta"><b>Foto que não passa pelo redimensionador não encolhe.</b> O redimensionador é um serviço da Alboom sobre o storage dela, e só alcança endereços completos em <code>storage.alboom.ninja</code> ou <code>alfred.alboompro.com</code>. Qualquer outra — outro servidor, ou um caminho do próprio site como <code>/fotos/promo.jpg</code> — vai <b>inteira</b> para a vitrine. O cadastro avisa quando isso acontece, e na lista do catálogo essas linhas aparecem com a origem em destaque. Quem decide é a <b>mesma função</b> que roda dentro do código gerado, então o aviso não tem como discordar da página publicada.</p>
+        <p class="ajuda alerta"><b>Foto que não passa pelo redimensionador não encolhe.</b> O redimensionador é um serviço da Alboom sobre o storage dela, e só alcança endereços completos em <code>storage.alboom.ninja</code>, <code>alfred.alboompro.com</code> ou <code>cdn.alboompro.com</code> (este último é o servidor das páginas comuns do site). Qualquer outra — outro servidor, ou um caminho do próprio site como <code>/fotos/promo.jpg</code> — vai <b>inteira</b> para a vitrine. O cadastro avisa quando isso acontece, e na lista do catálogo essas linhas aparecem com a origem em destaque. Quem decide é a <b>mesma função</b> que roda dentro do código gerado, então o aviso não tem como discordar da página publicada.</p>
       </fieldset>
     </div>
   </div>
@@ -6110,15 +6110,36 @@ function sRender(){
    portfolio 1518588" -- texto errado que o operador le na hora exata em que ja esta
    confuso com um link que nao bate com a fonte. */
 var S_IMP_PORT='portfólio';
+/* Caminho do endereco colado, para NOMEAR a pagina comum na conferencia. Corta consulta e
+   fragmento (nao mudam de que pagina se trata) e limita o tamanho, porque o rotulo entra no
+   meio de frases da tela: um endereco de 300 caracteres empurraria a explicacao para fora do
+   campo de visao justamente na hora de conferir. */
+function sImpCaminho(v){
+  var s=String(v||'').replace(/[\u0000-\u0020]/g,'').split('?')[0].split('#')[0],m;
+  m=s.match(/^(?:https?:)?\/\/[^\/]*(\/.*)?$/i);
+  if(m)s=m[1]||'/';
+  if(!s)s='/';
+  if(s.length>60)s=s.slice(0,57)+'...';
+  return s;
+}
+/* TRES formatos de alvo, nao mais dois. Os dois primeiros continuam sendo galeria e portfolio,
+   reconhecidos pelo NUMERO do link; o terceiro e a pagina comum do Prosite, que nao tem numero
+   nenhum -- nela o que separa uma foto da outra e o codigo da conta, e esse vem do proprio
+   codigo-fonte (ver sImpExtraiCdn). O 'tipo' existe para a extracao saber qual ramo rodar.
+   Link que CITA galeria ou portfolio mas nao traz numero devolve null de proposito: cair no
+   ramo da pagina comum ali trocaria a recusa explicada ("nao reconheci o link da galeria") por
+   uma importacao silenciosa das fotos decorativas da pagina. */
 function sImpAlvo(link){
   var v=String(link||'').replace(/[\u0000-\u0020]/g,''),m;
   if(!v)return null;
   m=v.match(/\/gallery\/(\d+)/i);
-  if(m)return {num:m[1],pasta:'/galleries/'+m[1]+'/',rotulo:'galeria '+m[1],artigo:'a'};
+  if(m)return {tipo:'galeria',num:m[1],pasta:'/galleries/'+m[1]+'/',rotulo:'galeria '+m[1],artigo:'a'};
   m=v.match(/\/portfolio\/[^\/]+\/(\d+)/i);
-  if(m)return {num:m[1],pasta:'/albuns/'+m[1]+'/',rotulo:S_IMP_PORT+' '+m[1],artigo:'o'};
+  if(m)return {tipo:'galeria',num:m[1],pasta:'/albuns/'+m[1]+'/',rotulo:S_IMP_PORT+' '+m[1],artigo:'o'};
   m=v.match(/\/portfolio\/(\d+)/i);
-  if(m)return {num:m[1],pasta:'/albuns/'+m[1]+'/',rotulo:S_IMP_PORT+' '+m[1],artigo:'o'};
+  if(m)return {tipo:'galeria',num:m[1],pasta:'/albuns/'+m[1]+'/',rotulo:S_IMP_PORT+' '+m[1],artigo:'o'};
+  if(/\/(gallery|portfolio)\//i.test(v))return null;
+  if(sUrlOk(v))return {tipo:'cdn',num:'',pasta:'',rotulo:'página '+sImpCaminho(v),artigo:'a'};
   return null;
 }
 var S_IMP_ENT={'amp':'&','lt':'<','gt':'>','quot':'"','apos':"'",'nbsp':' '};
@@ -6178,7 +6199,13 @@ function sImpNormal(fonte){return String(fonte||'').replace(/\\\//g,'/');}
    consulta para decidir se o cartao da lista mostra o host em destaque. La ela nao recusa
    nada -- so separa o comum do estranho. Manter uma lista so evita o pior caso, que e um host
    entrar na trava do importador e continuar marcado como estranho na lista (ou o contrario). */
-var S_HOSTS_ALBOOM=['storage.alboom.ninja','alfred.alboompro.com'];
+/* A TERCEIRA fonte, ago/2026: o CDN das paginas COMUNS do Prosite. As galerias saem de
+   storage.alboom.ninja (embrulhadas no redimensionador alfred); uma pagina comum -- a
+   /albuns do dono, por exemplo -- serve as fotos direto de cdn.alboompro.com, sem embrulho.
+   O nome fica numa constante porque o formato de caminho ('/{conta}_{imagem}/{degrau}/') e
+   deste host e de mais nenhum: a extracao precisa nomea-lo. Continua havendo UMA lista. */
+var S_HOST_CDN='cdn.alboompro.com';
+var S_HOSTS_ALBOOM=['storage.alboom.ninja','alfred.alboompro.com',S_HOST_CDN];
 function sImpHostOk(url){
   var m=String(url).match(/^https:\/\/([^\/?#]*)/),h,i;
   if(!m)return false;
@@ -6222,7 +6249,7 @@ function sImpChave(u){
    Limite honesto: se um dia a Alboom repetisse uma foto DEPOIS da grade, essa foto iria para
    o fim. E o mesmo defeito na direcao contraria, e a conferencia continuaria mostrando o
    numero certo de fotos. */
-function sImpExtrai(fonte,pasta){
+function sImpExtraiGal(fonte,pasta){
   var src=sImpNormal(fonte),re=/\/url\/([^"'\s\\),<>]+)/g,m,vistos={},ordem=[],out=[];
   var alvo,chave,i,forasteiras=0,quebradas=0,invalidas=0;
   while((m=re.exec(src))){
@@ -6251,7 +6278,126 @@ function sImpExtrai(fonte,pasta){
   /* posicoes sao todas distintas, entao nao ha empate para a ordenacao desfazer */
   ordem.sort(function(a,b){return vistos[a].pos-vistos[b].pos;});
   for(i=0;i<ordem.length;i++)out.push(vistos[ordem[i]].url);
-  return {urls:out,forasteiras:forasteiras,quebradas:quebradas,invalidas:invalidas};
+  /* outraconta e do ramo do CDN; sai zerado aqui para que sImpDescartes leia um so formato */
+  return {urls:out,forasteiras:forasteiras,quebradas:quebradas,invalidas:invalidas,outraconta:0,cdn:false,conta:'',enderecos:0};
+}
+
+/* ---------- o CDN das paginas comuns (ago/2026) ----------
+   Uma pagina comum do Prosite -- /albuns, por exemplo -- nao serve foto de galeria: serve
+   cdn.alboompro.com/{conta}_{imagem}/{degrau}/{arquivo}, sem embrulho de redimensionador. Tres
+   medidas mandaram no desenho, e cada uma derrubou uma solucao mais simples:
+
+   1. A ESCADA DE TAMANHOS NAO E UNIFORME. Medido nas 10 fotos da /albuns do dono, pedindo os
+      sete degraus de cada uma: 'natalia' e 'v60-01' tem thumb/small/medium/standard e
+      original_size, mas 404 em large e xlarge; 'journal' nao tem nem standard; as quatro do
+      album tem ate xlarge e 404 em original_size; o logo tem ate large e original_size, e 404
+      em xlarge. Ou seja: TROCAR o degrau no endereco -- que parecia trivial -- pediria degrau
+      inexistente e daria foto quebrada na pagina do cliente, em silencio.
+   2. A PAGINA JA TRAZ VARIOS DEGRAUS DA MESMA FOTO: 51 enderecos para 10 fotos. Entao nao ha o
+      que adivinhar. Agrupa-se por foto e fica-se com o MAIOR degrau que a fonte trouxe -- que
+      existe por construcao, porque veio da propria pagina.
+   3. PARTIR DE UM DEGRAU PEQUENO AMPLIA E NAO AVISA. Pedindo 400 px ao redimensionador a partir
+      de thumb (200 px) vem 400x266 com 31 KB; a partir de large (1280 px), 400x266 com 41 KB.
+      Mesma dimensao, menos bytes = menos detalhe. E a armadilha dos 1400 px da fase 1.
+
+   ORDEM DOS DEGRAUS, medida: thumb(200) < small(320) < medium(600) < standard(840) <
+   large(1280) < xlarge(1920) < original_size. A posicao de original_size foi medida no logo da
+   /albuns, a unica foto onde ele convive com um degrau nomeado grande: original_size devolve
+   1772x1181 e large devolve 1280x853 -- original_size e MAIOR. Nenhuma das 10 fotos tem xlarge
+   E original_size ao mesmo tempo, e a medicao explica por que: original_size so aparece quando
+   o original e menor que o proximo degrau da escada (por isso esse proximo da 404). Sendo o
+   proprio original, ele e o maior por definicao -- e nas tres fotos em que aparece ele e
+   estritamente maior que todos os outros presentes (1080>840, 735>600, 1772>1280). Fica no fim
+   da escada, agora medido; o que continua sem medicao direta e a comparacao xlarge x
+   original_size na MESMA foto, que nao existe em nenhuma foto real desta conta.
+   Degrau de nome DESCONHECIDO pesa -1: so e usado quando a foto nao trouxe nenhum degrau
+   conhecido. Poe-lo acima dos medidos seria palpite, e o palpite que perde e silencioso
+   (perda de detalhe); po-lo abaixo, no pior caso, entrega a foto num tamanho que a propria
+   pagina ja servia. */
+var S_CDN_DEGRAUS=['thumb','small','medium','standard','large','xlarge','original_size'];
+function sCdnEsc(){return S_HOST_CDN.replace(/\./g,'\\.');}
+function sImpCdnPeso(d){
+  var i;
+  for(i=0;i<S_CDN_DEGRAUS.length;i++)if(d===S_CDN_DEGRAUS[i])return i;
+  return -1;
+}
+/* Um endereco do CDN so e FOTO se tiver a forma /{conta}_{imagem}/{degrau}/{arquivo}. Folha de
+   estilo, script e icone do tema tambem moram neste host e nao tem essa forma: eles sao
+   ignorados sem contagem, porque contar como "descartada" coisa que nunca foi foto poria um
+   numero grande e falso na conferencia -- o mesmo defeito que sImpPastas ja teve. */
+function sImpCdnPartes(u){
+  var m=String(u).match(new RegExp('^https:\\/\\/'+sCdnEsc()+'\\/([^\\/_]+)_([^\\/]+)\\/([^\\/]+)\\/(.+)$','i'));
+  if(!m)return null;
+  return {conta:m[1],img:m[2],degrau:m[3],arq:m[4].split('?')[0]};
+}
+function sImpExtraiCdn(fonte){
+  var src=sImpNormal(fonte);
+  var re=new RegExp('(?:https?:)?\\/\\/'+sCdnEsc()+'\\/[^"\'\\s\\\\),<>]+','gi');
+  var m,vistos={},grupos={},ordem=[],ch,alvo,p,g,i,k;
+  var quebradas=0,invalidas=0,outraconta=0;
+  while((m=re.exec(src))){
+    alvo=sImpEntidades(m[0]);
+    if(alvo.indexOf('//')===0)alvo='https:'+alvo;
+    alvo=alvo.replace(/^http:\/\//i,'https://');
+    ch=alvo.split('?')[0];
+    /* endereco repetido identico nao conta duas vezes -- mesmo criterio do ramo de galeria */
+    if(Object.prototype.hasOwnProperty.call(vistos,ch))continue;
+    vistos[ch]=1;
+    p=sImpCdnPartes(alvo);
+    if(!p)continue;
+    if(!sImpHostOk(alvo)){invalidas++;continue;}
+    /* nome de arquivo cortado pela classe de caracteres da extracao: daria 404 na pagina
+       publicada, entao recusa CONTANDO, como no ramo de galeria */
+    if(!sImpArquivoOk(p.arq)){quebradas++;continue;}
+    k=p.conta+'|'+p.img+'|'+p.arq;
+    if(!Object.prototype.hasOwnProperty.call(grupos,k)){
+      grupos[k]={conta:p.conta,url:alvo,peso:sImpCdnPeso(p.degrau),pos:m.index,n:0};
+      ordem.push(k);
+    }
+    g=grupos[k];
+    g.n++;
+    if(m.index>g.pos)g.pos=m.index;
+    if(sImpCdnPeso(p.degrau)>g.peso){g.peso=sImpCdnPeso(p.degrau);g.url=alvo;}
+  }
+  /* O CODIGO DA CONTA E O DISCRIMINADOR, e ele e DERIVADO: a conta escolhida e a que tem mais
+     FOTOS na fonte. Contar enderecos em vez de fotos deixaria uma unica foto com seis degraus
+     ganhar de cinco fotos de outra conta com um degrau cada. Empate fica com a primeira que
+     apareceu. Por ser derivacao e nao certeza, o codigo escolhido vai para a tela na
+     conferencia, ANTES de o operador aplicar. */
+  var cont={},ordemConta=[],conta='',melhor=-1;
+  for(i=0;i<ordem.length;i++){
+    g=grupos[ordem[i]];
+    if(!Object.prototype.hasOwnProperty.call(cont,g.conta)){cont[g.conta]=0;ordemConta.push(g.conta);}
+    cont[g.conta]++;
+  }
+  for(i=0;i<ordemConta.length;i++)if(cont[ordemConta[i]]>melhor){melhor=cont[ordemConta[i]];conta=ordemConta[i];}
+  var escolhidos=[],enderecos=0;
+  for(i=0;i<ordem.length;i++){
+    g=grupos[ordem[i]];
+    if(g.conta!==conta){outraconta++;continue;}
+    /* A MESMA validacao que sImpAplicar aplica, rodada aqui e nos DOIS enderecos finais
+       possiveis -- o do degrau escolhido e o embrulhado de 900 px --, para a conferencia e a
+       aplicacao nunca anunciarem numeros diferentes. */
+    if(!sUrlOk(g.url)||!sUrlOk(sImpTamanho(g.url,'900'))){invalidas++;continue;}
+    enderecos+=g.n;
+    escolhidos.push(g);
+  }
+  /* ORDEM: a da ULTIMA aparicao, a mesma regra que o ramo de galeria mediu. Os degraus de uma
+     mesma foto sao vizinhos no codigo-fonte (saem todos do mesmo <img data-image-size-*>),
+     entao nas 10 fotos medidas primeira e ultima aparicao dao a mesma ordem -- mas a foto que
+     tambem aparece no <meta og:image>, antes da pagina, saltaria para o comeco pela primeira
+     aparicao. Foi exatamente esse o defeito corrigido no ramo de galeria. */
+  escolhidos.sort(function(a,b){return a.pos-b.pos;});
+  var out=[];
+  for(i=0;i<escolhidos.length;i++)out.push(escolhidos[i].url);
+  return {urls:out,forasteiras:0,quebradas:quebradas,invalidas:invalidas,outraconta:outraconta,
+          cdn:true,conta:conta,enderecos:enderecos};
+}
+/* Porta unica da extracao: o tipo do alvo escolhe o ramo. As duas abas (Slideshow e Mini loja)
+   chamam daqui, e por isso nao existe segunda extracao para divergir. */
+function sImpExtrai(fonte,alvo){
+  if(alvo&&alvo.tipo==='cdn')return sImpExtraiCdn(fonte);
+  return sImpExtraiGal(fonte,alvo?alvo.pasta:'');
 }
 /* Frase unica dos descartes, usada nas duas saidas da conferencia (com e sem foto achada).
    Descarte que nao aparece em lugar nenhum e a falha muda que motivou tres destes itens. */
@@ -6260,6 +6406,10 @@ function sImpDescartes(a){
   if(a.forasteiras)p.push('<b>'+a.forasteiras+'</b> por não estarem no storage da Alboom (<i>'+S_HOSTS_ALBOOM.join('</i>, <i>')+'</i>)');
   if(a.quebradas)p.push('<b>'+a.quebradas+'</b> por terem o nome do arquivo cortado, o que daria foto quebrada na página publicada');
   if(a.invalidas)p.push('<b>'+a.invalidas+'</b> por não formarem um endereço válido');
+  /* A conta de FOTOS, nao de enderecos: no CDN a mesma foto aparece em ate seis degraus, e
+     anunciar "6 descartadas" para uma foto de outra conta seria numero errado justamente para
+     mais -- o defeito que este projeto ja corrigiu duas vezes. */
+  if(a.outraconta)p.push('<b>'+a.outraconta+'</b> foto(s) por serem de <b>outra conta</b> da Alboom');
   if(!p.length)return '';
   return ' Descartei '+p.join(', ')+'.';
 }
@@ -6359,14 +6509,43 @@ function sImpInvalidar(){
   if(!sImpAchado)return;
   sImpAchado=null;
   sImpToggles();
-  sImpAviso('O link ou o código-fonte mudaram depois da conferência. Clique em <b>Conferir a galeria</b> de novo antes de adicionar — senão o que entraria na lista seria o resultado antigo.',false);
+  sImpAviso('O link ou o código-fonte mudaram depois da conferência. Clique em <b>Conferir a página</b> de novo antes de adicionar — senão o que entraria na lista seria o resultado antigo.',false);
+}
+/* Quando a busca volta vazia, dizer o que a fonte TEM da OUTRA forma. As duas colagens vem de
+   janelas diferentes e trocar uma delas e o erro mais provavel deste fluxo -- agora com dois
+   formatos, o erro tem duas direcoes: link de galeria com fonte de pagina comum, e o contrario.
+   Sem esta frase, os dois casos terminam num "nenhuma foto" que nao diz onde esta o engano. */
+function sImpOutraFonte(fonte,alvo){
+  var i,l=[],g,n;
+  if(alvo.tipo==='cdn'){
+    g=sImpPastas(fonte);
+    for(i=0;i<g.length&&l.length<3;i++)l.push('<b>'+escHtml(g[i].rotulo)+'</b> ('+g[i].n+(g[i].n===1?' foto':' fotos')+')');
+    if(!l.length)return '';
+    return ' Este código-fonte tem, isso sim, endereços de galeria: '+l.join(', ')+'. Se é uma galeria que você quer, cole o link <b>dela</b> no campo acima.';
+  }
+  n=sImpExtraiCdn(fonte).urls.length;
+  if(!n)return '';
+  return ' Este código-fonte tem, isso sim, <b>'+n+'</b> foto'+(n===1?'':'s')+' de <i>'+S_HOST_CDN+'</i>, que é o servidor das <b>páginas comuns</b> do Prosite (as que não são galeria). Se foi o código-fonte de uma dessas que você colou, ponha o link <b>dela</b> no campo acima.';
 }
 var S_IMP_AJUDA_FONTE='Abra a galeria no navegador, aperte <b>Cmd&nbsp;⌥&nbsp;U</b>, depois <b>Cmd&nbsp;A</b> e <b>Cmd&nbsp;C</b>, e cole aqui.';
+/* A frase que diz DE ONDE as fotos vieram e, no ramo do CDN, DE QUAL CONTA. O codigo da conta
+   e derivado (a conta com mais fotos na fonte), nao lido de lugar nenhum: por ser palpite, ele
+   aparece na tela ANTES de o operador aplicar -- se a fonte misturar duas contas, quem decide e
+   ele. A juncao dos degraus tambem e dita com os dois numeros, porque "51 enderecos viraram 10
+   fotos" e a unica explicacao de por que a conta da tela nao bate com a da pagina. */
+function sImpFonteTxt(a){
+  if(!a.cdn)return '';
+  var t=' <b>Fonte: '+S_HOST_CDN+'</b> — o servidor das páginas comuns do Prosite, não o das galerias.';
+  t+=' Conta <b>'+escHtml(a.conta)+'</b>: esse código é <b>deduzido</b> do próprio código-fonte (é o que aparece em mais fotos), então confira se é o seu antes de adicionar.';
+  if(a.enderecos>a.urls.length)t+=' A página serve a mesma foto em vários tamanhos: <b>'+a.enderecos+'</b> endereços viraram <b>'+a.urls.length+'</b> foto'+(a.urls.length===1?'':'s')+', cada uma no <b>maior tamanho que a página trouxe</b>.';
+  else t+=' Cada foto entra no <b>maior tamanho que a página trouxe</b>.';
+  return t;
+}
 function sImpConferir(){
   sImpAchado=null;sImpToggles();
   var alvo=sImpAlvo($('s-imp-link').value);
   if(!alvo){
-    sImpAviso('Não reconheci o link da galeria. Ele precisa ser o endereço de uma galeria (<i>…/gallery/121894-estudio-tematico</i>) ou de um portfólio (<i>…/portfolio/ensaio-casal/1518588-fernanda-ricardo-pre-casamento</i>). É de dentro dele que sai o número da galeria.',false);
+    sImpAviso('Não reconheci o link. Ele precisa ser o endereço de uma galeria (<i>…/gallery/121894-estudio-tematico</i>), de um portfólio (<i>…/portfolio/ensaio-casal/1518588-fernanda-ricardo-pre-casamento</i>) — é de dentro deles que sai o número da galeria — ou de uma <b>página comum</b> do site (<i>…/albuns</i>), cujas fotos vêm de <i>'+S_HOST_CDN+'</i>.',false);
     return;
   }
   var fonte=$('s-imp-fonte').value;
@@ -6374,7 +6553,7 @@ function sImpConferir(){
     sImpAviso('Falta o código-fonte da página. '+S_IMP_AJUDA_FONTE,false);
     return;
   }
-  var achado=sImpExtrai(fonte,alvo.pasta),urls=achado.urls,descartes=sImpDescartes(achado);
+  var achado=sImpExtrai(fonte,alvo),urls=achado.urls,descartes=sImpDescartes(achado);
   if(!urls.length){
     var outras=sImpPastas(fonte),i,lista=[];
     /* A contagem ao lado de cada nome e o que transforma a lista em diagnostico: a galeria
@@ -6393,13 +6572,14 @@ function sImpConferir(){
     /* Ordem das explicacoes, da mais proxima para a mais distante: se houve descarte, ele e o
        motivo direto de a lista ter ficado vazia; a hipotese de "colou a fonte de outra
        galeria" so entra depois, e como complemento. */
+    var pista=sImpOutraFonte(fonte,alvo);
     if(descartes){
       var extra=lista.length?(' O código-fonte também traz: '+lista.join(', ')+'.'):'';
-      sImpAviso('Nenhum endereço d'+alvo.artigo+' <b>'+escHtml(alvo.rotulo)+'</b> pôde entrar na lista.'+descartes+extra+' Endereço de foto só é aceito se estiver no storage da Alboom e vier inteiro — o resto viraria foto que não carrega na página publicada.',false);
+      sImpAviso('Nenhum endereço d'+alvo.artigo+' <b>'+escHtml(alvo.rotulo)+'</b> pôde entrar na lista.'+descartes+extra+pista+' Endereço de foto só é aceito se estiver no storage da Alboom e vier inteiro — o resto viraria foto que não carrega na página publicada.',false);
     }else if(lista.length){
-      sImpAviso('Nenhuma foto d'+alvo.artigo+' <b>'+escHtml(alvo.rotulo)+'</b> no código-fonte colado. O que esse código-fonte tem é: '+lista.join(', ')+'. Provavelmente o link e o código-fonte são de galerias diferentes — abra a página do link, veja o código-fonte <b>dela</b> e cole de novo.',false);
+      sImpAviso('Nenhuma foto d'+alvo.artigo+' <b>'+escHtml(alvo.rotulo)+'</b> no código-fonte colado. O que esse código-fonte tem é: '+lista.join(', ')+'.'+pista+' Provavelmente o link e o código-fonte são de páginas diferentes — abra a página do link, veja o código-fonte <b>dela</b> e cole de novo.',false);
     }else{
-      sImpAviso('Não encontrei nenhum endereço de foto de galeria no código-fonte colado. Confira se copiou o código-fonte <b>inteiro</b>: o endereço da página, o texto visível da página ou um pedaço do código não servem. '+S_IMP_AJUDA_FONTE,false);
+      sImpAviso('Não encontrei nenhum endereço de foto d'+alvo.artigo+' <b>'+escHtml(alvo.rotulo)+'</b> no código-fonte colado.'+pista+' Confira se copiou o código-fonte <b>inteiro</b>: o endereço da página, o texto visível da página ou um pedaço do código não servem. '+S_IMP_AJUDA_FONTE,false);
     }
     return;
   }
@@ -6423,18 +6603,18 @@ function sImpConferir(){
   sImpToggles();
   var msg='Encontrei <b>'+urls.length+(urls.length===1?' foto':' fotos')+'</b> n'+alvo.artigo+' <b>'+escHtml(alvo.rotulo)+'</b>';
   if(titulo)msg+=' — “'+escHtml(titulo)+'”';
-  msg+='.'+descartes+' ';
+  msg+='.'+descartes+sImpFonteTxt(achado)+' ';
   /* Nunca substitui em silencio: a lista atual e dita antes, com o total resultante. */
-  if(!sImgs.length)msg+='Elas entram na <b>ordem da galeria</b>. ';
+  if(!sImgs.length)msg+='Elas entram na <b>ordem da página</b>. ';
   else if(repetidas===urls.length)msg+='A lista já tem <b>'+sImgs.length+'</b>, e <b>todas estas '+urls.length+'</b> já estão nela — adicionando, cada uma fica <b>repetida</b>, e a lista vai a <b>'+(sImgs.length+urls.length)+'</b>. ';
-  else if(repetidas)msg+='A lista já tem <b>'+sImgs.length+'</b>. Destas, <b>'+novas+'</b> '+(novas===1?'é nova':'são novas')+' e <b>'+repetidas+'</b> já '+(repetidas===1?'está':'estão')+' na lista (entraria'+(repetidas===1?'':'m')+' <b>repetida'+(repetidas===1?'':'s')+'</b>). Todas entram <b>no fim</b>, na ordem da galeria, ficando <b>'+(sImgs.length+urls.length)+'</b> no total. ';
-  else msg+='A lista já tem <b>'+sImgs.length+'</b>, e <b>nenhuma</b> destas está nela; entram <b>no fim</b>, na ordem da galeria, ficando <b>'+(sImgs.length+urls.length)+'</b> no total. ';
+  else if(repetidas)msg+='A lista já tem <b>'+sImgs.length+'</b>. Destas, <b>'+novas+'</b> '+(novas===1?'é nova':'são novas')+' e <b>'+repetidas+'</b> já '+(repetidas===1?'está':'estão')+' na lista (entraria'+(repetidas===1?'':'m')+' <b>repetida'+(repetidas===1?'':'s')+'</b>). Todas entram <b>no fim</b>, na ordem da página, ficando <b>'+(sImgs.length+urls.length)+'</b> no total. ';
+  else msg+='A lista já tem <b>'+sImgs.length+'</b>, e <b>nenhuma</b> destas está nela; entram <b>no fim</b>, na ordem da página, ficando <b>'+(sImgs.length+urls.length)+'</b> no total. ';
   msg+='Confira a legenda e o tamanho ao lado e clique no botão abaixo.';
   sImpAviso(msg,true);
 }
 function sImpAplicar(){
   if(!sImpAchado){
-    sImpAviso('Clique em <b>Conferir a galeria</b> antes: é a conferência que diz quantas fotos e de qual galeria seriam adicionadas.',false);
+    sImpAviso('Clique em <b>Conferir a página</b> antes: é a conferência que diz quantas fotos e de onde elas seriam adicionadas.',false);
     return;
   }
   var modo=radio('s-imptam');
@@ -12178,19 +12358,20 @@ function mImpAviso(txt,ok){
 function mImpInvalidar(){
   if(!mImpAchado)return;
   mImpAchado=null;mImpRender();
-  mImpAviso('O link ou o código-fonte mudou, então o resultado anterior foi descartado. Clique em <b>Conferir a galeria</b> de novo — sem isso, os endereços da galeria anterior continuariam disponíveis para associar, sem nada na tela indicando isso.',false);
+  mImpAviso('O link ou o código-fonte mudou, então o resultado anterior foi descartado. Clique em <b>Conferir a página</b> de novo — sem isso, os endereços da página anterior continuariam disponíveis para associar, sem nada na tela indicando isso.',false);
 }
 function mImpConferir(){
   var alvo=sImpAlvo($('m-imp-link').value),fonte=$('m-imp-fonte').value,a,pastas,i,ex,usadas,novos=0;
   mImpAchado=null;mImpRender();
-  if(!alvo){mImpAviso('Não reconheci o link. Cole o endereço de uma <b>galeria</b> (<code>/gallery/121894-...</code>) ou de um <b>portfólio</b> (<code>/portfolio/nome/1518588-...</code>), copiado da barra do navegador.',false);return;}
+  if(!alvo){mImpAviso('Não reconheci o link. Cole o endereço de uma <b>galeria</b> (<code>/gallery/121894-...</code>), de um <b>portfólio</b> (<code>/portfolio/nome/1518588-...</code>) ou de uma <b>página comum</b> do site (<code>/albuns</code>), copiado da barra do navegador.',false);return;}
   if(!String(fonte).trim()){mImpAviso('Falta o código-fonte da página. Abra a galeria no navegador, use <b>Cmd ⌥ U</b> para ver o código-fonte, selecione tudo (<b>Cmd A</b>), copie (<b>Cmd C</b>) e cole no campo acima.',false);return;}
-  a=sImpExtrai(fonte,alvo.pasta);
+  a=sImpExtrai(fonte,alvo);
   if(!a.urls.length){
     pastas=sImpPastas(fonte);
     ex=sImpDescartes(a);
-    if(pastas.length)mImpAviso('Nenhuma foto d'+alvo.artigo+' <b>'+escHtml(alvo.rotulo)+'</b> neste código-fonte.'+ex+' O que este código-fonte realmente contém: '+escHtml(pastas.join(', '))+'. Você provavelmente colou a fonte de uma página e o link de outra.',false);
-    else mImpAviso('Não encontrei nenhuma foto neste código-fonte.'+ex+' Confira se copiou o código-fonte inteiro da página da galeria (e não o texto da página).',false);
+    var pista=sImpOutraFonte(fonte,alvo);
+    if(pastas.length&&alvo.tipo!=='cdn')mImpAviso('Nenhuma foto d'+alvo.artigo+' <b>'+escHtml(alvo.rotulo)+'</b> neste código-fonte.'+ex+pista+' Você provavelmente colou a fonte de uma página e o link de outra.',false);
+    else mImpAviso('Não encontrei nenhuma foto d'+alvo.artigo+' <b>'+escHtml(alvo.rotulo)+'</b> neste código-fonte.'+ex+pista+' Confira se copiou o código-fonte inteiro da página (e não o texto da página).',false);
     return;
   }
   usadas={};
@@ -12198,8 +12379,8 @@ function mImpConferir(){
   for(i=0;i<a.urls.length;i++)if(!usadas[sImpChave(a.urls[i])])novos++;
   mImpAchado={urls:a.urls,rotulo:alvo.rotulo,artigo:alvo.artigo};
   mImpRender();
-  mImpAviso('Encontrei <b>'+a.urls.length+'</b> foto'+(a.urls.length===1?'':'s')+' n'+alvo.artigo+' <b>'+escHtml(alvo.rotulo)+'</b>.'+sImpDescartes(a)+
-    ' Destas, <b>'+(a.urls.length-novos)+'</b> já está'+((a.urls.length-novos)===1?'':'ão')+' em algum produto e <b>'+novos+'</b> ainda não. Clique em <b>Usar</b> ao lado de uma foto para levá-la ao formulário de cadastro ao lado.',true);
+  mImpAviso('Encontrei <b>'+a.urls.length+'</b> foto'+(a.urls.length===1?'':'s')+' n'+alvo.artigo+' <b>'+escHtml(alvo.rotulo)+'</b>.'+sImpDescartes(a)+sImpFonteTxt(a)+
+    ' Destas, <b>'+(a.urls.length-novos)+'</b> '+((a.urls.length-novos)===1?'já está':'já estão')+' em algum produto e <b>'+novos+'</b> ainda não. Clique em <b>Usar</b> ao lado de uma foto para levá-la ao formulário de cadastro ao lado.',true);
 }
 function mImpUsar(url){
   $('m-pimg').value=url;
@@ -12422,6 +12603,12 @@ function mBloco(cfg){
   c+='.fcmloja .fcm-card{border:1px solid #e5dfd0;border-radius:14px;overflow:hidden;background:var(--fcm-fundo,#fff);cursor:pointer;padding:0;text-align:left;color:inherit;font:inherit;display:block;width:100%;transition:box-shadow .18s,transform .18s}\n';
   c+='.fcmloja .fcm-card:hover{box-shadow:0 8px 22px rgba(0,0,0,.10);transform:translateY(-2px)}\n';
   c+='.fcmloja .fcm-foto{width:100%;aspect-ratio:'+cfg.prop+';object-fit:cover;display:block;background:#EDEAE1}\n';
+  /* FALHA VISIVEL da foto. O desenho do importador do CDN nunca pede um degrau que a pagina
+     nao trouxe, entao esta caixa nao deveria aparecer nunca -- e e exatamente por isso que ela
+     precisa existir: se aparecer, e porque a suposicao caiu, e a alternativa e a imagem
+     quebrada muda que o cliente le como loja defeituosa. Vale para qualquer foto que nao
+     carregue, nao so para as do CDN. */
+  c+='.fcmloja .fcm-foto-erro{width:100%;aspect-ratio:'+cfg.prop+';display:flex;align-items:center;justify-content:center;background:#F6E7E5;color:#8C1D18;font-size:12px;line-height:1.35;padding:10px;box-sizing:border-box;text-align:left}\n';
   c+='.fcmloja .fcm-card-c{padding:10px 12px 12px}\n';
   c+='.fcmloja .fcm-card-n{font-size:14px;font-weight:600;margin:0 0 2px;text-align:left}\n';
   c+='.fcmloja .fcm-card-cat{font-size:11px;color:#8a8375;text-transform:uppercase;letter-spacing:.05em;margin:0 0 4px;text-align:left}\n';
@@ -12643,6 +12830,9 @@ function mBlocoJs(cfg,prods,cps,cats,client,cod){
   c+="var TXT_CESTA_VAZIA='Seu carrinho esta vazio. Escolha um item na vitrine ao lado.';\n";
   c+="var TXT_SEM_OPCIONAL='Sem opcional';\n";
   c+="var TXT_TODOS='Todos';\n";
+  /* Nao e texto editavel de proposito: o operador nunca deveria ve-lo na pagina publicada, e
+     dar um campo a ele sugeriria o contrario. ASCII, como o resto do bloco. */
+  c+="var TXT_FOTO_ERRO='Esta foto nao carregou. Confira o endereco dela no cadastro.';\n";
   c+="var TXT_SUMIU='item do seu carrinho saiu do catalogo e foi removido.';\n";
   c+="var TXT_SUMIRAM='itens do seu carrinho sairam do catalogo e foram removidos.';\n";
   c+="var TXT_OP_SUMIU='opcional que voce tinha escolhido saiu do catalogo e foi removido.';\n";
@@ -12927,6 +13117,15 @@ function mBlocoVitrine(cfg,usaPP,usaPix,usaQtd,usaSinal,usaResumo,descpix,zap,us
     c+="b.addEventListener('click',function(){filtroAtual=cat;fecharDetalhe();desenharFiltros();desenharGrade();});\n";
     c+='cx.appendChild(b);\n});\n}\n\n';
   }
+  /* Uma implementacao so para os dois lugares que mostram foto (vitrine e cartao de detalhe).
+     addEventListener, nunca onerror inline: o sanitizador do Prosite apaga evento em atributo. */
+  c+='/* Foto que nao carrega vira aviso na cara, e nao retangulo vazio. */\n';
+  c+='function fotoFalhou(img){\n';
+  c+="var d=document.createElement('div');\n";
+  c+="d.className=img.className+' fcm-foto-erro';\n";
+  c+='d.textContent=TXT_FOTO_ERRO;\n';
+  c+='d.title=img.src;\n';
+  c+='if(img.parentNode)img.parentNode.replaceChild(d,img);\n}\n\n';
   c+='function desenharGrade(){\n';
   c+='var vis=visiveis();\n';
   c+="grade.innerHTML='';\n";
@@ -12938,6 +13137,7 @@ function mBlocoVitrine(cfg,usaPP,usaPix,usaQtd,usaSinal,usaResumo,descpix,zap,us
   c+='var p=PRODUTOS[i];\n';
   c+="var card=document.createElement('button');card.type='button';card.className='fcm-card';\n";
   c+="var img=document.createElement('img');img.className='fcm-foto';\n";
+  c+="img.addEventListener('error',function(){fotoFalhou(img);});\n";
   c+='img.src=imgTamanho(p.imagem,IMG_VITRINE);\n';
   c+='img.alt=p.nome;\n';
   c+="img.loading=(pos<COLUNAS)?'eager':'lazy';\n";
@@ -12970,6 +13170,7 @@ function mBlocoVitrine(cfg,usaPP,usaPix,usaQtd,usaSinal,usaResumo,descpix,zap,us
   c+='caixaDet.appendChild(volta);\n';
   c+="var g=document.createElement('div');g.className='fcm-det-grade';\n";
   c+="var img=document.createElement('img');img.className='fcm-det-foto';\n";
+  c+="img.addEventListener('error',function(){fotoFalhou(img);});\n";
   c+='img.src=imgTamanho(p.imagem,IMG_DETALHE);img.alt=p.nome;\n';
   c+="var lado=document.createElement('div');\n";
   c+="var nm=document.createElement('p');nm.className='fcm-det-n';nm.textContent=p.nome;lado.appendChild(nm);\n";

@@ -507,6 +507,53 @@ E **nenhum dos dois avisava no cadastro**, porque `sHostEsperado` responde "é A
 
 **Duas Mini lojas na mesma página: registrado, não corrigido.** As duas procuram `id="fcmloja"`, então a primeira raiz recebe o catálogo da segunda e a segunda fica vazia. É o mesmo padrão do `fcuni` do Checkout, e corrigir mudaria o identificador dos dois blocos e de todo código já colado no site. Ficou **escrito nas instruções da aba**: uma Mini loja por página, duas lojas em duas páginas.
 
+### Terceira fonte de imagem: `cdn.alboompro.com` (ago/2026) — não trocar degrau, aproveitar os que a página já traz
+
+**O que é.** Os importadores (Slideshow e Mini loja) reconheciam duas fontes: `storage.alboom.ninja` e `alfred.alboompro.com`, ambas de **galeria**. As **páginas comuns** do Prosite — `/albuns`, por exemplo — servem as fotos de um terceiro servidor, `cdn.alboompro.com`, no formato `/{conta}_{imagem}/{degrau}/{arquivo}` e **sem embrulho de redimensionador**. Um endereço desses era descartado em silêncio pelo importador e não era redimensionado pela loja.
+
+**A medição que derrubou o desenho óbvio.** Trocar o degrau no endereço (`thumb` → `xlarge`) parecia trivial e seria errado: **a escada não é uniforme**. Pedindo os sete degraus de cada uma das 10 fotos de `/albuns`, 70 requisições:
+
+| Foto | thumb | small | medium | standard | large | xlarge | original_size |
+|---|---|---|---|---|---|---|---|
+| `natalia`, `v60-01` | 200 | 320 | 600 | 840 | **404** | **404** | 1080 |
+| `journal` | 147 | 320 | 600 | **404** | **404** | **404** | 735 |
+| 4 do álbum, `foto-certa-design`, `…-escolha-de-album` | 200 | 320 | 600 | 840 | 1280 | 1920 | **404** |
+| logo (`…-paleta.png`) | 200 | 320 | 600 | 840 | 1280 | **404** | 1772 |
+
+Pedir um degrau ausente devolve 404, ou seja **imagem quebrada na página do cliente, em silêncio**.
+
+**A posição de `original_size`, medida.** A spec deixou esta pergunta em aberto: `original_size` é maior ou menor que `xlarge`? **Nenhuma das 10 fotos tem os dois** — e a medição explica por quê: `original_size` só existe quando o original é **menor que o próximo degrau da escada**, que é justamente por isso que esse próximo dá 404. Quem resolve é o **logo**: `large` devolve 1280×853 e `original_size` devolve **1772×1181** — maior, e com `xlarge` (1920) ausente. Nas outras duas fotos em que aparece, `original_size` também é estritamente maior que todos os presentes (1080 > 840; 735 > 600). Ordem fixada, agora medida: `thumb < small < medium < standard < large < xlarge < original_size`. **Incerteza que fica registrada:** a comparação direta `xlarge` × `original_size` na mesma foto não existe em nenhuma foto real desta conta, porque os dois são mutuamente exclusivos por construção; o que sustenta a posição de `original_size` é ele ser o próprio original.
+
+**O desenho.** *Não trocar degrau. Aproveitar os que a página já traz* — a página emite **51 endereços para 10 fotos**.
+
+1. **Filtrar pela conta**, derivada como a conta com **mais fotos** na fonte (fotos, não endereços: uma foto com seis degraus não pode ganhar de cinco fotos de outra conta com um degrau cada). Por ser derivação e não certeza, **o código escolhido aparece na conferência antes de o operador aplicar**.
+2. **Agrupar** por `conta + imagem + nome do arquivo`.
+3. **Ficar com o maior degrau presente na fonte** — existe por construção, já que veio da própria página. Degrau de nome desconhecido pesa −1: só é usado quando a foto não trouxe nenhum degrau conhecido.
+4. **Ordem pela última aparição**, a mesma regra medida no ramo de galeria: a foto que também aparece no `<meta og:image>` saltaria para o começo pela primeira aparição.
+5. **A loja pede a largura exata ao redimensionador**, partindo desse maior.
+
+**Por que não partir de um degrau pequeno.** Pedindo 400 px ao redimensionador, mesma foto: de `thumb` (200 px) vem 400×266 com **31 246 bytes**; de `small`, 37 746; de `xlarge` (1920 px), 400×267 com **41 615**. Mesma dimensão, menos bytes = menos detalhe. É a armadilha dos 1400 px da fase 1.
+
+**O que mudou no código.** `S_HOSTS_ALBOOM` ganhou `cdn.alboompro.com` (fonte única: importador, selo de host da lista e `HOSTS_RESIZE` do bloco da loja saem dela). `sImpAlvo` passou a devolver um `tipo` e reconhece um terceiro formato de link — a página comum, que não tem número; link que **cita** galeria ou portfólio sem número continua sendo recusado com explicação, para não virar importação silenciosa das fotos decorativas. `sImpExtrai(fonte, alvo)` virou porta única: `sImpExtraiGal` (o de sempre, intocado) e `sImpExtraiCdn` (novo). A conferência ganhou `sImpFonteTxt`, que diz a fonte, a conta derivada e a junção `51 → 10`.
+
+**Falha visível no bloco da loja.** O desenho nunca pede um degrau que a página não trouxe — e é por isso que a caixa precisa existir: se aparecer, é porque a suposição caiu. `fotoFalhou(img)` troca a `<img>` por um `<div class="fcm-foto fcm-foto-erro">` com texto em vermelho, ligado por `addEventListener('error')` na vitrine e no cartão de detalhe. Vale para qualquer foto que não carregue, não só as do CDN. Medido: com o produto apontando para um degrau que dá 404, a prévia (que executa o bloco entregue) mostra *"Esta foto nao carregou. Confira o endereco dela no cadastro."* em vez de retângulo vazio.
+
+**Medições de aceitação (navegador, servido em `localhost`, `localStorage` limpo, digitando e clicando).**
+
+| Prova | Resultado |
+|---|---|
+| `https://www.fotocerta.com.br/albuns` | **10 fotos**, não 51; conferência nomeia a conta `5eb96ab6…` e a fonte `cdn.alboompro.com` |
+| Os 10 endereços escolhidos, um a um | **10 × HTTP 200**, cada um no maior degrau (1772, 1920×6, 1080×2, 735) |
+| Prévia do Slideshow com as 10 | 10 imagens, **0 quebradas**; `naturalWidth` bate com o degrau escolhido |
+| `/gallery/121894-estudio-tematico` | **46 fotos** — formato antigo não regrediu |
+| `/portfolio/…/1518588-…` | **58 fotos** |
+| Fonte com os dois formatos juntos | link da página → **10**; link da galeria → **46** |
+| CDN de outra conta (2 fotos plantadas) | descartadas e **contadas**: *"Descartei 2 foto(s) por serem de outra conta da Alboom"* |
+| Cadastro da foto do CDN na Mini loja | **sem** o aviso de "não passa pelo redimensionador" — `imgResize` agora responde sim |
+| Miniatura da vitrine (400 px) | pedida a partir de `xlarge`, entrega **400×267** — redução, nunca ampliação |
+
+**Regressão.** **32 cenários dos oito geradores** (s, l, t, u, b, c, p, m), gerados na `main` e aqui: **26 byte a byte idênticos**. Os 6 que mudam são todos da Mini loja, com a **mesma diferença enumerada nos 6**: a linha do `HOSTS_RESIZE` (ganhou o terceiro host) mais as 12 linhas da falha visível. Junto, o passo que **executa** cada bloco numa página: os 24 blocos executáveis rodam e desenham — regressão por texto nunca acusaria nome não declarado, que foi como o `MOEDA is not defined` passou inteiro. Varredura de norma nos 32: ES5, nenhuma das cinco sequências dentro de string JS, zero evento inline, zero tag semântica; ferramenta com **507 IDs, nenhum repetido**, IIFE única; bloco da Mini loja **100 % ASCII**.
+
 ## 5. Decisões de arquitetura registradas
 
 - **Sem servidor, sem segredos**: tudo roda client-side. Client ID do PayPal e chave Pix são públicos por definição; Secret do PayPal nunca é usado.

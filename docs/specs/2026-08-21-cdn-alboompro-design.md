@@ -67,7 +67,8 @@ Nas 51 ocorrências da página, o **primeiro** código é sempre `5eb96ab625241f
 
 1. **Filtrar** pelo código da conta — derivado da fonte colada como **o primeiro código mais frequente**. Por ser derivação e não certeza, o código escolhido **aparece na conferência**, junto da contagem, antes de o operador aplicar.
 2. **Agrupar** por `{imagemId} + nome do arquivo`.
-3. **Ficar com o maior degrau presente na fonte** — existe por construção, já que veio da própria página. Ordem medida: `thumb < small < medium < standard < large < xlarge`. **A posição de `original_size` precisa ser medida** contra `xlarge` numa foto que tenha os dois; até lá, tratá-lo como o maior e registrar a incerteza.
+3. **Ficar com o maior degrau presente na fonte** — existe por construção, já que veio da própria página. Ordem medida: `thumb < small < medium < standard < large < xlarge < original_size`.
+   > **Medido em 21/08/2026 (implementação).** Nenhuma das 10 fotos de `/albuns` tem `xlarge` **e** `original_size`: os dois são mutuamente exclusivos, porque `original_size` só aparece quando o original é menor que o próximo degrau da escada — que é justamente por isso que esse próximo dá 404. Quem resolve a ordem é o logo `…-paleta.png`: `large` = 1280×853, `xlarge` = **404**, `original_size` = **1772×1181**. Nas outras duas fotos em que aparece, `original_size` também é estritamente maior que todos os presentes (1080 > 840; 735 > 600). **`original_size` fica no fim da escada.** Incerteza que permanece registrada: a comparação direta `xlarge` × `original_size` na mesma foto não é observável nesta conta.
 4. **A loja pede a largura exata ao redimensionador**, partindo desse maior.
 
 Resolve de uma vez: nunca pede degrau inexistente, nunca amplia, e reduz 51 endereços a 10 fotos — o mesmo que o importador de galeria já faz com repetições.
@@ -83,7 +84,7 @@ Resolve de uma vez: nunca pede degrau inexistente, nunca amplia, e reduz 51 ende
 
 - **A heurística do código da conta** é palpite, não certeza. Mitigado por mostrá-la na conferência. Se a fonte tiver imagens de duas contas, o operador vê e decide.
 - **Degrau ausente no endereço escolhido** não pode acontecer pelo desenho (só se usa o que veio da fonte), mas o bloco deve **falhar visível** se acontecer.
-- **`original_size` pode não ser o maior.** Medir antes de fixar a ordem.
+- ~~**`original_size` pode não ser o maior.** Medir antes de fixar a ordem.~~ **Medido** (ver §3, item 3): é o maior, e nunca convive com `xlarge`.
 
 ## 6. Verificação
 
