@@ -265,3 +265,37 @@ Nada foi despachado enquanto a fase 2 corre: ela mexe na estrutura das seis abas
 **Confirmado pelo dono em 20/08/2026**, com um enunciado mais preciso do acoplamento do que o meu: *"o ajuste já passará a contar com o painel consolidado usando parte da área à direita das abas"*.
 
 Isso vira **restrição de layout da fase 5**: as abas não devem se esticar até a borda da janela: o painel consolidado ocupa parte da faixa à direita, e a largura das abas é o que sobra. O número de colunas dentro da aba se ajusta a essa largura restante, não à janela inteira.
+
+---
+
+## Sétima aba — link de cobrança
+
+Ideia nova do dono, validada e aprovada em 20/08/2026 depois da rodada de cinco fases. Spec em `docs/specs/2026-08-20-link-de-cobranca-design.md`.
+
+| | Estimado | Real |
+|---|---|---|
+| Link de cobrança | 3h30 – 5h | **2h05** (21:51 → 23:56) |
+
+**Abaixo do piso de novo**, e pela mesma razão das cinco fases: a integração — que eu apontei como o risco de estouro — foi barata porque as engrenagens estavam prontas e testadas. A sétima aba entrou no registro `ABAS`, na biblioteca de presets, no preset geral, no backup e no painel, e o que ela quebrou foi só o que estava **cravado em número**: `trocarAba` com seis, e a palavra "seis" em catorze mensagens.
+
+### O que foi medido antes de projetar
+
+Testado na página publicada de verdade (`fotocerta.com.br/natal-2026`): o Prosite **preserva a consulta inteira**. Endereço de 259 caracteres, payload Pix de 154 no meio, acento e travessão na descrição — tudo intacto, sem redirecionamento e sem normalização. É o que confirmou o caminho B como viável antes de uma linha ser escrita.
+
+**Uma armadilha encontrada montando o próprio teste**, que virou requisito: escrevi à mão um campo 54 declarando comprimento 7 para um valor de 5 caracteres. O leitor obedeceu ao comprimento declarado e devolveu `75.0058` — invadindo o campo seguinte. Valor errado, sem erro nenhum, num número que é dinheiro. Virou a primeira das três conferências.
+
+### O limite, declarado
+
+A chave Pix é **pública** — está no próprio link. Então dá para forjar um link legítimo com valor diferente (**para menos ou para mais**) e com outro identificador. O que **não** dá é mentir sobre quanto se pagou: tela, Pix e PayPal leem o mesmo lugar e não têm como divergir.
+
+Esse texto foi reescrito **duas vezes** durante a rodada, as duas por prometer mais do que a página entrega. A primeira versão dizia que alterar não adiantava; a segunda falava só em "valor menor" e não citava o identificador. Fica como exemplo: **texto que promete demais é pior que nenhum texto**, porque o operador confia nele.
+
+### Placar da revisão
+
+Zero Critical. Quatro Important, **três delas visíveis para o cliente do dono** — link do PayPal sumindo da página por um caractere invisível colado de PDF, falha do SDK deixando a seção vazia, e acentuação misturada no cartão. Mais dez de acabamento.
+
+A revisão provou a coerência **por medição**, não por leitura: `Function.prototype.toString` de cada função que a ferramenta executa bate caractere por caractere com o texto que vai no bloco. E provou a autossuficiência **por execução**: o bloco salvo num arquivo avulso, sem a ferramenta em lugar nenhum, atendeu a cobrança inteira.
+
+### Total do dia
+
+**11h55** de trabalho medido, das 11:07 às 23:56 — cinco fases mais a sétima aba.
