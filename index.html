@@ -38,6 +38,24 @@
   body{margin:0;background:var(--areia);color:var(--tinta);
     font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Ubuntu,sans-serif;
     font-size:15px;line-height:1.5}
+
+  /* ===== a ferramenta dentro do Prosite (ago/2026) =====
+     O dono publica esta ferramenta num componente HTML (/prosite-custom) e TODOS os textos
+     saiam centrados, em todas as abas. Diagnosticado: o editor do Prosite envolve o componente
+     numa <div> de classe gerada (hoje '.llleLo') que traz text-align:center. Acima dela a
+     cadeia esta toda em 'start'; abaixo, a ferramenta inteira herdava o centro, porque
+     alinhamento e propriedade HERDADA e a ferramenta nunca declarou o seu -- ela foi feita para
+     viver em pagina propria, onde o padrao ja e o que se quer.
+     A regra do Manual do Prosite (item 8) sempre foi aplicada aos blocos GERADOS e nunca a
+     ferramenta. Agora e aplicada aqui tambem.
+     POR QUE SEM !important E SEM SELETOR FORTE: a classe do tema e ANCESTRAL, nao concorrente.
+     Qualquer declaracao direta no elemento raiz vence a heranca -- heranca so alcanca o que nao
+     declarou nada. Nao ha briga de especificidade para ganhar.
+     A lista sao as raizes da ferramenta, isto e, os filhos diretos de <body>. Raiz nova entra
+     aqui; do contrario ela nasce centrada dentro do Prosite e certa fora dele, que e o pior dos
+     dois mundos (defeito que so aparece publicado). Quem centra de PROPOSITO (.pv-vazia e os
+     estilos em atributo das previas) declara no proprio elemento e continua centrado. */
+  body,.topo,.fcg-fixa,.fcg-painel,.app,.rodape{text-align:left}
   .topo{max-width:var(--larg);margin:0 auto;padding:28px 20px 8px;display:flex;align-items:center;gap:14px}
   .topo svg{width:40px;height:48px;flex-shrink:0}
   .topo h1{font-size:22px;font-weight:600;margin:0;letter-spacing:.3px}
@@ -648,10 +666,10 @@
       </div>
       <label>Tamanho das fotos</label>
       <div class="radios" id="s-imp-tamanho">
-      <label><input type="radio" name="s-imptam" value="orig" checked><span>Como a página entrega <small>(galeria: 1200 px)</small></span></label>
-      <label><input type="radio" name="s-imptam" value="900"><span>Reduzir para 900 px</span></label>
+      <label><input type="radio" name="s-imptam" value="orig" checked><span>Como a página entrega <small>(galeria: 1200 px; página comum: varia por foto)</small></span></label>
+      <label><input type="radio" name="s-imptam" value="900"><span>Reduzir para 900 px <small>(nunca aumenta)</small></span></label>
       </div>
-      <p class="ajuda"><b>Sobre o tamanho:</b> medi as 104 fotos das duas galerias de exemplo e o site <b>já entrega tudo com 1200 px de largura</b> (de 157 a 868 KB por foto; metade delas abaixo de 340 KB, e seis acima de 610 KB). Pedir 1400 px ao redimensionador da Alboom funciona, mas só <b>estica</b> a foto de 1200: arquivo maior, nenhum detalhe a mais. Numa página comum o tamanho <b>varia por foto</b> (de 735 a 1920 px de largura nas 10 medidas em <i>/albuns</i>), e por isso a redução para 900 px pode não reduzir nada em algumas delas. Por isso a escolha aqui é entre o que a página entrega e uma redução de verdade para 900 px — a largura padrão do slideshow —, que economizou de 15% a 55% por foto nas fotos medidas.</p>
+      <p class="ajuda"><b>Sobre o tamanho:</b> medi as 104 fotos das duas galerias de exemplo e o site <b>já entrega tudo com 1200 px de largura</b> (de 157 a 868 KB por foto; metade delas abaixo de 340 KB, e seis acima de 610 KB). Pedir 1400 px ao redimensionador da Alboom funciona, mas só <b>estica</b> a foto de 1200: arquivo maior, nenhum detalhe a mais. Numa <b>página comum</b> a largura <b>varia por foto</b> — de 735 a 1920 px nas 10 medidas em <i>/albuns</i> —, e por isso a ferramenta <b>mede cada foto da página</b> antes de reduzir: a que já tiver 900 px ou menos entra com o endereço original, porque pedir 900 de uma foto de 735 devolvia 900×1224 com <b>15% mais bytes</b> e nenhum detalhe a mais (medido). A conferência diz quantas ficaram de fora da redução. Fotos de <b>galeria</b> não são medidas: as 46 da galeria de exemplo têm 1200 px de largura, todas, e medi-las custaria 18 MB de download para confirmar um número que não muda nada.</p>
       <div class="acoes"><button class="botao" id="s-imp-aplicar" disabled>Adicionar à lista</button></div>
       <p class="ajuda s-alerta" id="s-imp-resultado" style="display:none"></p>
       </fieldset>
@@ -2449,6 +2467,7 @@
         <input type="number" id="m-imgdet" value="1000" min="400" max="1600" step="20">
         <p class="ajuda" id="m-peso" style="display:none"></p>
         <p class="ajuda"><b>Por que isto é um campo e não um detalhe.</b> As fotos do storage da Alboom saem todas com 1200 px de largura e de <b>157 a 868 KB</b> cada (medido). Cinquenta delas numa grade seriam dezenas de megabytes. A página pede cada foto ao <b>redimensionador da Alboom</b> na largura escolhida aqui, e só pede a foto grande quando alguém abre o cartão de detalhe.</p>
+        <p class="ajuda"><b>Estas larguras são um teto, não uma promessa.</b> Foto pedida acima da largura que ela tem de verdade sai <b>esticada</b>: mais bytes, nenhum detalhe a mais — medido, uma foto de 735 px pedida a 1000 px devolve 297 KB no lugar de 220 KB. Por isso a ferramenta <b>mede a largura de cada foto do catálogo</b> (uma vez por foto, ao abrir esta aba ou ao cadastrar, e o número fica salvo) e a loja publicada nunca pede mais do que a foto tem. A linha acima diz quantas ficaram abaixo das larguras escolhidas. Foto que não passa pelo redimensionador não é medida: ela vai inteira de qualquer jeito.</p>
         <p class="ajuda alerta"><b>Foto que não passa pelo redimensionador não encolhe.</b> O redimensionador é um serviço da Alboom sobre o storage dela, e só alcança endereços completos em <code>storage.alboom.ninja</code>, <code>alfred.alboompro.com</code> ou <code>cdn.alboompro.com</code> (este último é o servidor das páginas comuns do site). Qualquer outra — outro servidor, ou um caminho do próprio site como <code>/fotos/promo.jpg</code> — vai <b>inteira</b> para a vitrine. O cadastro avisa quando isso acontece, e na lista do catálogo essas linhas aparecem com a origem em destaque. Quem decide é a <b>mesma função</b> que roda dentro do código gerado, então o aviso não tem como discordar da página publicada.</p>
       </fieldset>
     </div>
@@ -6139,7 +6158,18 @@ function sImpAlvo(link){
   m=v.match(/\/portfolio\/(\d+)/i);
   if(m)return {tipo:'galeria',num:m[1],pasta:'/albuns/'+m[1]+'/',rotulo:S_IMP_PORT+' '+m[1],artigo:'o'};
   if(/\/(gallery|portfolio)\//i.test(v))return null;
-  if(sUrlOk(v))return {tipo:'cdn',num:'',pasta:'',rotulo:'página '+sImpCaminho(v),artigo:'a'};
+  /* O QUE ESTE RAMO EXIGE, e por que nao exige mais. sUrlOk era permissivo demais aqui: ela
+     aceita caminho a partir da raiz ('/albuns') e endereco sem esquema ('//host/x'), e com isso
+     o campo deixava de recusar praticamente qualquer coisa. O pedido do campo e explicito -- "o
+     endereco da barra do navegador" --, entao a exigencia passa a ser endereco http(s) ABSOLUTO
+     com host.
+     Mais que isso NAO se exige, e e decisao, nao esquecimento: neste ramo o link nao escolhe
+     foto nenhuma. Quem escolhe e o codigo-fonte, pelo codigo da conta, que a conferencia mostra
+     na tela antes de o operador aplicar. O link so DA NOME a pagina na mensagem. Conferir o host
+     do link contra o do site seria adivinhar qual e o site (a ferramenta serve qualquer conta
+     Prosite), e conferir contra o canonical da propria fonte transformaria um rotulo em regra --
+     preco alto para proteger um texto. */
+  if(/^https?:\/\/[^\/\\?#]+/i.test(v))return {tipo:'cdn',num:'',pasta:'',rotulo:'página '+sImpCaminho(v),artigo:'a'};
   return null;
 }
 var S_IMP_ENT={'amp':'&','lt':'<','gt':'>','quot':'"','apos':"'",'nbsp':' '};
@@ -6321,6 +6351,96 @@ function sImpCdnPeso(d){
   for(i=0;i<S_CDN_DEGRAUS.length;i++)if(d===S_CDN_DEGRAUS[i])return i;
   return -1;
 }
+
+/* ===== a LARGURA DA FONTE (ago/2026) =====
+   PEDIR MAIS DO QUE A FONTE TEM E SEMPRE PREJUIZO, e o redimensionador nao recusa: ele estica
+   e cobra os bytes. Medido em 21/08/2026 na journal.JPG da /albuns, cuja maior versao servida
+   e original_size com 735x1000 e 220 164 B:
+     pedindo 735 px -> 735x1000, 185 022 B   (mesma foto, menos bytes: vale a pena)
+     pedindo 900 px -> 900x1224, 253 906 B   (+15% de bytes, zero detalhe a mais)
+     pedindo 1000   -> 1000x1361, 297 659 B  (+35%)
+     pedindo 1600   -> 1600x2177, 585 840 B  (+166%)
+   Enquanto a fonte era so o storage (largura uniforme de 1200 px) isso nao aparecia. No CDN a
+   largura VARIA por foto -- medido, de 735 a 1920 nas 10 fotos da /albuns --, e por isso a
+   largura de destino passou a precisar de um TETO por foto.
+   Medido tambem que o redimensionador NAO tem modo "nao ampliar": /resize/max/900/,
+   /resize/fit/900/ e /resize/maxwidth/900/ respondem 422, e /resize/width/900/upscale/false/
+   devolve exatamente os mesmos 253 906 B do pedido simples -- o parametro e ignorado. Quem tem
+   de decidir e a ferramenta.
+
+   DOIS CAMINHOS PARA SABER A LARGURA, e a escolha entre eles e por foto:
+   1. DE GRACA, pela escada do CDN. Medido nas cinco fotos de orientacoes diferentes da /albuns
+      (paisagem, dois retratos e uma quadrada): small=320, medium=600, standard=840, large=1280
+      e xlarge=1920 sao a LARGURA exata, qualquer que seja a proporcao. Sao numeros medidos, e
+      entram na tabela abaixo.
+   2. MEDINDO de verdade: carregar a foto e ler naturalWidth. E o unico caminho para os dois
+      degraus que a tabela nao sabe, e a medicao explica por que nao sabe:
+        - 'thumb' limita o LADO MAIOR, nao a largura (journal thumb = 147x200, design = 125x200,
+          album = 200x133). Um teto de 200 num retrato ainda ampliaria.
+        - 'original_size' e o arquivo original: por definicao nao ha tabela possivel.
+      Vale tambem para o storage e para qualquer outro host, onde nao ha escada nenhuma.
+   Custa uma requisicao por foto, e a foto vem inteira: o CDN nao manda
+   Access-Control-Allow-Origin nem aceita Range (medido: pedido com Range devolve 200, nao 206),
+   entao nao ha como ler so o cabecalho do JPEG. Por isso a medicao e usada onde muda o
+   resultado, e nao em toda parte -- cada aba justifica a sua escolha no lugar onde decide. */
+var S_CDN_LARGURAS={small:320,medium:600,standard:840,large:1280,xlarge:1920};
+/* O endereco numa forma so ANTES de qualquer pergunta sobre largura: o que veio embrulhado
+   pelo redimensionador e desembrulhado, e //host ganha o https. E a MESMA imgNorm que roda
+   dentro do bloco entregue (M_IMG_SRC), nao uma copia -- endereco embrulhado tem a largura da
+   fonte de dentro, nao a do embrulho. */
+function sLargNorm(u){return mImgNorm(u);}
+function sLargDaEscada(u){
+  var p=sImpCdnPartes(sLargNorm(u));
+  if(!p)return 0;
+  return Object.prototype.hasOwnProperty.call(S_CDN_LARGURAS,p.degrau)?S_CDN_LARGURAS[p.degrau]:0;
+}
+/* So guarda ACERTO. Medicao que falhou (rede fora, endereco morto) nao vira 0 gravado: se
+   virasse, um tropeco de rede congelaria a foto como "largura desconhecida" pelo resto da
+   sessao, e o teto que ela deveria ter nunca mais apareceria. */
+var sLargCache={};
+function sLargSabida(u){
+  var v=sLargNorm(u);
+  if(!v)return 0;
+  if(Object.prototype.hasOwnProperty.call(sLargCache,v))return sLargCache[v];
+  return sLargDaEscada(v);
+}
+function sLargMedir(u,cb){
+  var v=sLargNorm(u),n,im,pronto=false,t=null;
+  if(!v){cb(0);return;}
+  n=sLargSabida(v);
+  if(n){cb(n);return;}
+  im=new Image();
+  function fim(w){
+    if(pronto)return;
+    pronto=true;
+    if(t){clearTimeout(t);t=null;}
+    im.onload=null;im.onerror=null;
+    if(w>0)sLargCache[v]=w;
+    cb(w>0?w:0);
+  }
+  im.onload=function(){fim(im.naturalWidth||0);};
+  im.onerror=function(){fim(0);};
+  /* Sem teto de tempo, uma foto que nunca responde deixaria a conferencia pendurada para
+     sempre, sem nada na tela dizendo o que espera. */
+  t=setTimeout(function(){fim(0);},20000);
+  im.src=v;
+}
+/* Lote com tres de cada vez: em serie, dez fotos grandes viram uma espera longa; todas de uma
+   vez, o navegador enfileira do mesmo jeito e ainda disputa banda com a propria pagina. */
+function sLargLote(urls,aoFim){
+  var i=0,restam=urls.length,j,k;
+  if(!restam){aoFim();return;}
+  function proxima(){
+    if(i>=urls.length)return;
+    sLargMedir(urls[i++],function(){
+      restam--;
+      if(restam<=0){aoFim();return;}
+      proxima();
+    });
+  }
+  k=Math.min(3,urls.length);
+  for(j=0;j<k;j++)proxima();
+}
 /* Um endereco do CDN so e FOTO se tiver a forma /{conta}_{imagem}/{degrau}/{arquivo}. Folha de
    estilo, script e icone do tema tambem moram neste host e nao tem essa forma: eles sao
    ignorados sem contagem, porque contar como "descartada" coisa que nunca foi foto poria um
@@ -6330,11 +6450,18 @@ function sImpCdnPartes(u){
   if(!m)return null;
   return {conta:m[1],img:m[2],degrau:m[3],arq:m[4].split('?')[0]};
 }
+/* LIMITE REGISTRADO: a expressao exige '//' antes do host, entao endereco do CDN ja EMBRULHADO
+   no redimensionador ('.../resize/width/600/url/cdn.alboompro.com/...') nao casa aqui -- e
+   tambem nao casa no ramo de galeria, que filtra pela pasta '/galleries/N/' ou '/albuns/N/', que
+   um caminho do CDN nao tem. Numa pagina que servisse as fotos embrulhadas, nenhum dos dois
+   ramos as reconheceria. E o que se quer nas paginas medidas, onde o CDN vem sempre cru e o
+   embrulho so apareceria vindo de galeria; se um dia uma pagina comum servir embrulhado, o
+   sintoma sera "nenhuma foto encontrada" com o codigo-fonte certo colado. */
 function sImpExtraiCdn(fonte){
   var src=sImpNormal(fonte);
   var re=new RegExp('(?:https?:)?\\/\\/'+sCdnEsc()+'\\/[^"\'\\s\\\\),<>]+','gi');
   var m,vistos={},grupos={},ordem=[],ch,alvo,p,g,i,k;
-  var quebradas=0,invalidas=0,outraconta=0;
+  var quebradas=0,outraconta=0;
   while((m=re.exec(src))){
     alvo=sImpEntidades(m[0]);
     if(alvo.indexOf('//')===0)alvo='https:'+alvo;
@@ -6345,7 +6472,15 @@ function sImpExtraiCdn(fonte){
     vistos[ch]=1;
     p=sImpCdnPartes(alvo);
     if(!p)continue;
-    if(!sImpHostOk(alvo)){invalidas++;continue;}
+    /* NAO HA 'invalidas' NESTE RAMO, e a ausencia e deliberada. No ramo de galeria a lista de
+       hosts e a trava de endereco existem porque o que a expressao captura de '/url/...' pode
+       ser qualquer host e qualquer forma. Aqui a expressao ja fixa o host (cdn.alboompro.com) e
+       sImpCdnPartes ja fixa a forma (https://host/{conta}_{imagem}/{degrau}/{arquivo}): o que
+       chega neste ponto e, por construcao, um https absoluto que sImpHostOk e sUrlOk aprovam
+       sempre. As duas conferencias estavam aqui e eram inalcancaveis -- e com elas o contador
+       'invalidas' deste ramo, que so podia sair zero. Codigo morto que finge conferir e pior do
+       que conferencia nenhuma: sugere uma protecao que nao existe.
+       Recusa de verdade neste ramo so ha uma, a de baixo. */
     /* nome de arquivo cortado pela classe de caracteres da extracao: daria 404 na pagina
        publicada, entao recusa CONTANDO, como no ramo de galeria */
     if(!sImpArquivoOk(p.arq)){quebradas++;continue;}
@@ -6375,10 +6510,6 @@ function sImpExtraiCdn(fonte){
   for(i=0;i<ordem.length;i++){
     g=grupos[ordem[i]];
     if(g.conta!==conta){outraconta++;continue;}
-    /* A MESMA validacao que sImpAplicar aplica, rodada aqui e nos DOIS enderecos finais
-       possiveis -- o do degrau escolhido e o embrulhado de 900 px --, para a conferencia e a
-       aplicacao nunca anunciarem numeros diferentes. */
-    if(!sUrlOk(g.url)||!sUrlOk(sImpTamanho(g.url,'900'))){invalidas++;continue;}
     enderecos+=g.n;
     escolhidos.push(g);
   }
@@ -6390,7 +6521,7 @@ function sImpExtraiCdn(fonte){
   escolhidos.sort(function(a,b){return a.pos-b.pos;});
   var out=[];
   for(i=0;i<escolhidos.length;i++)out.push(escolhidos[i].url);
-  return {urls:out,forasteiras:0,quebradas:quebradas,invalidas:invalidas,outraconta:outraconta,
+  return {urls:out,forasteiras:0,quebradas:quebradas,invalidas:0,outraconta:outraconta,
           cdn:true,conta:conta,enderecos:enderecos};
 }
 /* Porta unica da extracao: o tipo do alvo escolhe o ramo. As duas abas (Slideshow e Mini loja)
@@ -6409,7 +6540,7 @@ function sImpDescartes(a){
   /* A conta de FOTOS, nao de enderecos: no CDN a mesma foto aparece em ate seis degraus, e
      anunciar "6 descartadas" para uma foto de outra conta seria numero errado justamente para
      mais -- o defeito que este projeto ja corrigiu duas vezes. */
-  if(a.outraconta)p.push('<b>'+a.outraconta+'</b> foto(s) por serem de <b>outra conta</b> da Alboom');
+  if(a.outraconta)p.push('<b>'+a.outraconta+'</b> '+(a.outraconta===1?'foto por ser':'fotos por serem')+' de <b>outra conta</b> da Alboom');
   if(!p.length)return '';
   return ' Descartei '+p.join(', ')+'.';
 }
@@ -6439,6 +6570,21 @@ function sImpPastas(fonte){
   out.sort(function(a,b){return b.n-a.n;});
   return out;
 }
+/* UMA formatacao para a lista de galerias que a fonte contem, usada nas TRES telas que a
+   mostram (o caso zero do Slideshow, a pista da outra fonte e o caso zero da Mini loja). Existir
+   uma so evita o que ja aconteceu duas vezes: a Mini loja imprimia "[object Object],
+   [object Object]" porque juntava com join a lista de objetos que sImpPastas devolve, enquanto o
+   Slideshow, com a sua propria formatacao ao lado, mostrava a informacao certa.
+   'excluir' tira do levantamento a galeria que o operador PEDIU: nomea-la produzia mensagem que
+   se contradizia em duas frases. */
+function sImpPastasTxt(fonte,excluir,max){
+  var g=sImpPastas(fonte),i,l=[],lim=max||3;
+  for(i=0;i<g.length&&l.length<lim;i++){
+    if(excluir&&g[i].rotulo===excluir)continue;
+    l.push('<b>'+escHtml(g[i].rotulo)+'</b> ('+g[i].n+(g[i].n===1?' foto':' fotos')+')');
+  }
+  return l.join(', ');
+}
 /* O titulo da pagina serve de legenda; a descricao das fotos, nao (medido nas duas galerias:
    todas compartilham o mesmo texto de buscador). O <h1> vem antes do <title> de proposito:
    no portfolio medido o <h1> e "Fernanda & Ricardo {Pre.Casamento}" enquanto o <title> traz
@@ -6463,8 +6609,16 @@ function sImpTitulo(fonte){
    Medido tambem que o '?t=' do original NAO atrapalha ao ser embrulhado: o redimensionador
    devolveu byte a byte o mesmo arquivo com e sem ele. */
 var S_IMP_LARG=900;
+/* O TETO. "Reduzir para 900" so pode embrulhar a foto que tenha MAIS de 900 px de largura: na
+   /albuns do dono a journal.JPG tem 735, e embrulha-la devolvia 900x1224 com 253 906 B contra
+   os 220 164 B do original -- 15% mais bytes e nenhum detalhe a mais. Largura 0 quer dizer
+   "nao sabida", e ai o comportamento e o de sempre (embrulha): e o caso das fotos de galeria,
+   e a proxima linha explica por que ele nao e medido. */
 function sImpTamanho(url,modo){
+  var w;
   if(modo!=='900')return url;
+  w=sLargSabida(url);
+  if(w&&w<=S_IMP_LARG)return url;
   return 'https://alfred.alboompro.com/resize/width/'+S_IMP_LARG+'/url/'+String(url).replace(/^https?:\/\//i,'');
 }
 
@@ -6506,22 +6660,29 @@ function sImpToggles(){
    tela dizendo isso -- defeito invisivel. So fala quando havia mesmo um resultado pendente,
    para nao virar ruido a cada tecla. */
 function sImpInvalidar(){
-  if(!sImpAchado)return;
+  /* O SELO SOBE SEMPRE, antes de qualquer saida: e ele que mata a medicao em voo. Sem isto a
+     guarda so cobria o caso do resultado JA pronto -- durante a medicao sImpAchado ainda e null,
+     a funcao voltava na primeira linha sem mexer no selo, e a medicao terminava escrevendo na
+     tela o resultado do link ANTERIOR. Medido: trocando o link no meio da medicao, a mensagem
+     final anunciava "10 fotos na pagina /albuns" com /outra-pagina no campo, e o botao de
+     adicionar acendia. E exatamente o defeito que esta funcao existe para impedir. */
+  sImpConfSeq++;
+  if(!sImpAchado&&!sImpMedindo)return;
   sImpAchado=null;
+  sImpMedindo=false;
   sImpToggles();
-  sImpAviso('O link ou o código-fonte mudaram depois da conferência. Clique em <b>Conferir a página</b> de novo antes de adicionar — senão o que entraria na lista seria o resultado antigo.',false);
+  sImpAviso('O link ou o código-fonte mudaram. Clique em <b>Conferir a página</b> de novo antes de adicionar — senão o que entraria na lista seria o resultado de antes da mudança.',false);
 }
 /* Quando a busca volta vazia, dizer o que a fonte TEM da OUTRA forma. As duas colagens vem de
    janelas diferentes e trocar uma delas e o erro mais provavel deste fluxo -- agora com dois
    formatos, o erro tem duas direcoes: link de galeria com fonte de pagina comum, e o contrario.
    Sem esta frase, os dois casos terminam num "nenhuma foto" que nao diz onde esta o engano. */
 function sImpOutraFonte(fonte,alvo){
-  var i,l=[],g,n;
+  var t,n;
   if(alvo.tipo==='cdn'){
-    g=sImpPastas(fonte);
-    for(i=0;i<g.length&&l.length<3;i++)l.push('<b>'+escHtml(g[i].rotulo)+'</b> ('+g[i].n+(g[i].n===1?' foto':' fotos')+')');
-    if(!l.length)return '';
-    return ' Este código-fonte tem, isso sim, endereços de galeria: '+l.join(', ')+'. Se é uma galeria que você quer, cole o link <b>dela</b> no campo acima.';
+    t=sImpPastasTxt(fonte,'',3);
+    if(!t)return '';
+    return ' Este código-fonte tem, isso sim, endereços de galeria: '+t+'. Se é uma galeria que você quer, cole o link <b>dela</b> no campo acima.';
   }
   n=sImpExtraiCdn(fonte).urls.length;
   if(!n)return '';
@@ -6541,8 +6702,51 @@ function sImpFonteTxt(a){
   else t+=' Cada foto entra no <b>maior tamanho que a página trouxe</b>.';
   return t;
 }
+/* Quais fotos do achado ainda precisam de MEDICAO, e por que so as do CDN.
+   Na pagina comum a largura varia por foto (medido: 735 a 1920 nas 10 da /albuns), entao medir
+   muda o resultado -- a journal.JPG, com 735, deixa de ser embrulhada. Na galeria nao muda: as
+   46 fotos da galeria de exemplo tem 1200 px de largura, TODAS (medido foto a foto em
+   21/08/2026), e o unico numero que esta aba pede e 900. Medi-las custaria 18,4 MB de download
+   numa conferencia para reconfirmar uma constante e nao mexer num byte da saida. Por isso a
+   galeria nao e medida, e o texto da aba diz exatamente isso em vez de prometer mais.
+   Do CDN tambem so entram as que a escada nao sabe de graca: em /albuns sao 4 das 10 (as de
+   original_size), 0,96 MB em vez dos 5,68 MB das dez. */
+function sImpLargFaltam(achado){
+  var i,f=[];
+  if(!achado.cdn)return f;
+  for(i=0;i<achado.urls.length;i++)if(!sLargSabida(achado.urls[i]))f.push(achado.urls[i]);
+  return f;
+}
+/* A frase que conta o que a conferencia de largura descobriu. Ela existe porque a anterior
+   dizia que a reducao "pode nao reduzir nada em algumas delas" -- e, medido, ela AUMENTAVA.
+   SO SAI NO RAMO DO CDN, e a guarda nao e decoracao: a largura fica num cache por endereco que
+   atravessa as abas, entao uma foto de galeria que ja tivesse sido medida pela Mini loja daria
+   'sabidas=1' num achado de 46 e a frase anunciaria "medi a largura de cada uma" depois de nao
+   ter medido nenhuma. Medido: aconteceu na primeira versao desta rodada. */
+function sImpLargTxt(achado){
+  var urls=achado.urls,i,w,sabidas=0,abaixo=0,quantas;
+  if(!achado.cdn)return '';
+  for(i=0;i<urls.length;i++){
+    w=sLargSabida(urls[i]);
+    if(!w)continue;
+    sabidas++;
+    if(w<=S_IMP_LARG)abaixo++;
+  }
+  if(!sabidas)return '';
+  /* Quando alguma medicao falhou, dizer de quantas se esta falando -- "de cada uma" seria
+     promessa maior do que o que se sabe. */
+  quantas=(sabidas===urls.length)?'de cada uma':('de <b>'+sabidas+'</b> das '+urls.length);
+  if(!abaixo)return ' Conferi a largura '+quantas+': '+(sabidas===1?'ela tem':'todas têm')+' mais de '+S_IMP_LARG+' px, então “Reduzir para '+S_IMP_LARG+' px” reduz de verdade.';
+  if(abaixo===sabidas)return ' Conferi a largura '+quantas+': '+(sabidas===1?'ela já tem':'<b>todas</b> já têm')+' '+S_IMP_LARG+' px ou menos, então “Reduzir para '+S_IMP_LARG+' px” <b>não muda nada</b> — '+(sabidas===1?'ela entra':'elas entram')+' com o endereço original nas duas opções.';
+  return ' Conferi a largura '+quantas+': <b>'+abaixo+'</b> '+(abaixo===1?'já tem':'já têm')+' '+S_IMP_LARG+' px ou menos e '+(abaixo===1?'fica':'ficam')+' com o endereço original mesmo em “Reduzir para '+S_IMP_LARG+' px” — pedir mais do que a fonte tem só engorda o arquivo, sem nenhum detalhe a mais.';
+}
+/* Marca de qual conferencia e esta. Sem ela, a medicao (que demora) terminaria e escreveria o
+   resultado na tela mesmo que o operador ja tivesse mexido no link ou na fonte no meio do
+   caminho -- exatamente o resultado velho que sImpInvalidar existe para impedir. */
+var sImpConfSeq=0,sImpMedindo=false;
 function sImpConferir(){
-  sImpAchado=null;sImpToggles();
+  sImpAchado=null;sImpMedindo=false;sImpToggles();
+  sImpConfSeq++;
   var alvo=sImpAlvo($('s-imp-link').value);
   if(!alvo){
     sImpAviso('Não reconheci o link. Ele precisa ser o endereço de uma galeria (<i>…/gallery/121894-estudio-tematico</i>), de um portfólio (<i>…/portfolio/ensaio-casal/1518588-fernanda-ricardo-pre-casamento</i>) — é de dentro deles que sai o número da galeria — ou de uma <b>página comum</b> do site (<i>…/albuns</i>), cujas fotos vêm de <i>'+S_HOST_CDN+'</i>.',false);
@@ -6555,34 +6759,50 @@ function sImpConferir(){
   }
   var achado=sImpExtrai(fonte,alvo),urls=achado.urls,descartes=sImpDescartes(achado);
   if(!urls.length){
-    var outras=sImpPastas(fonte),i,lista=[];
+    /* O levantamento das galerias so entra quando o ALVO e galeria. Com alvo de pagina comum
+       quem diz o que a fonte tem e sImpOutraFonte, e montar os dois imprimia a mesma lista
+       duas vezes seguidas na mesma frase ("O que esse codigo-fonte tem e: galeria 121894
+       (46 fotos). Este codigo-fonte tem, isso sim, enderecos de galeria: galeria 121894
+       (46 fotos)."). A Mini loja ja tinha a guarda; aqui faltava. */
     /* A contagem ao lado de cada nome e o que transforma a lista em diagnostico: a galeria
        de verdade e a que tem dezenas de fotos, e as de uma ou duas sao as miniaturas de
        "galerias relacionadas" que toda pagina do Prosite traz no rodape. Sem os numeros, as
-       quatro pareceriam candidatas iguais. */
-    /* A galeria ALVO sai do levantamento: ela e a que o operador pediu, e nomea-la aqui
-       produzia mensagem que se contradizia em duas frases -- "Nenhuma foto da galeria 121894
-       no codigo-fonte colado (...) o que esse codigo-fonte tem e: galeria 121894 (2 fotos)".
-       O levantamento existe para nomear as OUTRAS. Quando o alvo esta la mas nao entrou, quem
-       explica e a frase dos descartes, que diz o motivo. */
-    for(i=0;i<outras.length&&lista.length<3;i++){
-      if(outras[i].rotulo===alvo.rotulo)continue;
-      lista.push('<b>'+escHtml(outras[i].rotulo)+'</b> ('+outras[i].n+(outras[i].n===1?' foto':' fotos')+')');
-    }
+       quatro pareceriam candidatas iguais. A galeria ALVO sai do levantamento (ver
+       sImpPastasTxt); quando ela esta la mas nao entrou, quem explica e a frase dos descartes. */
+    var lista=(alvo.tipo==='cdn')?'':sImpPastasTxt(fonte,alvo.rotulo,3);
     /* Ordem das explicacoes, da mais proxima para a mais distante: se houve descarte, ele e o
        motivo direto de a lista ter ficado vazia; a hipotese de "colou a fonte de outra
        galeria" so entra depois, e como complemento. */
     var pista=sImpOutraFonte(fonte,alvo);
     if(descartes){
-      var extra=lista.length?(' O código-fonte também traz: '+lista.join(', ')+'.'):'';
+      var extra=lista?(' O código-fonte também traz: '+lista+'.'):'';
       sImpAviso('Nenhum endereço d'+alvo.artigo+' <b>'+escHtml(alvo.rotulo)+'</b> pôde entrar na lista.'+descartes+extra+pista+' Endereço de foto só é aceito se estiver no storage da Alboom e vier inteiro — o resto viraria foto que não carrega na página publicada.',false);
-    }else if(lista.length){
-      sImpAviso('Nenhuma foto d'+alvo.artigo+' <b>'+escHtml(alvo.rotulo)+'</b> no código-fonte colado. O que esse código-fonte tem é: '+lista.join(', ')+'.'+pista+' Provavelmente o link e o código-fonte são de páginas diferentes — abra a página do link, veja o código-fonte <b>dela</b> e cole de novo.',false);
+    }else if(lista){
+      sImpAviso('Nenhuma foto d'+alvo.artigo+' <b>'+escHtml(alvo.rotulo)+'</b> no código-fonte colado. O que esse código-fonte tem é: '+lista+'.'+pista+' Provavelmente o link e o código-fonte são de páginas diferentes — abra a página do link, veja o código-fonte <b>dela</b> e cole de novo.',false);
     }else{
       sImpAviso('Não encontrei nenhum endereço de foto d'+alvo.artigo+' <b>'+escHtml(alvo.rotulo)+'</b> no código-fonte colado.'+pista+' Confira se copiou o código-fonte <b>inteiro</b>: o endereço da página, o texto visível da página ou um pedaço do código não servem. '+S_IMP_AJUDA_FONTE,false);
     }
     return;
   }
+  /* A MEDICAO ENTRA AQUI, entre achar e anunciar: se entrasse depois, a conferencia anunciaria
+     um numero e a aplicacao entregaria outro -- que e a divergencia que esta ferramenta ja
+     pagou caro para nao ter. Enquanto mede, o botao de adicionar continua desligado (sImpAchado
+     ainda e null) e a tela diz o que esta acontecendo. */
+  var faltam=sImpLargFaltam(achado),selo=sImpConfSeq;
+  if(faltam.length){
+    sImpMedindo=true;
+    sImpAviso('Medindo a largura de <b>'+faltam.length+'</b> foto'+(faltam.length===1?'':'s')+' da página… A ferramenta precisa carregar cada uma uma vez para saber se a redução para '+S_IMP_LARG+' px reduz ou aumenta o arquivo. Aguarde.',true);
+    sLargLote(faltam,function(){
+      if(selo!==sImpConfSeq)return;
+      sImpMedindo=false;
+      sImpConferirFim(alvo,fonte,achado);
+    });
+    return;
+  }
+  sImpConferirFim(alvo,fonte,achado);
+}
+function sImpConferirFim(alvo,fonte,achado){
+  var urls=achado.urls,descartes=sImpDescartes(achado);
   var titulo=sImpTitulo(fonte);
   var leg=$('s-imp-leg');
   /* Atualiza a sugestao quando muda a galeria, sem nunca passar por cima do que foi digitado
@@ -6603,7 +6823,7 @@ function sImpConferir(){
   sImpToggles();
   var msg='Encontrei <b>'+urls.length+(urls.length===1?' foto':' fotos')+'</b> n'+alvo.artigo+' <b>'+escHtml(alvo.rotulo)+'</b>';
   if(titulo)msg+=' — “'+escHtml(titulo)+'”';
-  msg+='.'+descartes+sImpFonteTxt(achado)+' ';
+  msg+='.'+descartes+sImpFonteTxt(achado)+sImpLargTxt(achado)+' ';
   /* Nunca substitui em silencio: a lista atual e dita antes, com o total resultante. */
   if(!sImgs.length)msg+='Elas entram na <b>ordem da página</b>. ';
   else if(repetidas===urls.length)msg+='A lista já tem <b>'+sImgs.length+'</b>, e <b>todas estas '+urls.length+'</b> já estão nela — adicionando, cada uma fica <b>repetida</b>, e a lista vai a <b>'+(sImgs.length+urls.length)+'</b>. ';
@@ -6619,7 +6839,7 @@ function sImpAplicar(){
   }
   var modo=radio('s-imptam');
   var leg=(radio('s-impleg')==='padrao')?String($('s-imp-leg').value).trim():'';
-  var urls=sImpAchado.urls,rotulo=sImpAchado.rotulo,artigo=sImpAchado.artigo,i,u,ok=0,recusadas=0,repetidas=0;
+  var urls=sImpAchado.urls,rotulo=sImpAchado.rotulo,artigo=sImpAchado.artigo,i,u,ok=0,recusadas=0,repetidas=0,intocadas=0;
   /* Retrato da lista ANTES de acrescentar: comparar contra a lista que cresce contaria como
      repetida a segunda copia que este mesmo clique acabou de pôr la. */
   var jaTem={};
@@ -6631,6 +6851,9 @@ function sImpAplicar(){
        que nunca carrega na pagina publicada, descoberta depois de publicar. Recusa contando,
        nunca em silencio. */
     if(!sUrlOk(u)){recusadas++;continue;}
+    /* Foto que o teto deixou intocada: dizer o numero e o que impede a mensagem de prometer
+       uma reducao que nao aconteceu em parte da lista. */
+    if(modo==='900'&&u===urls[i])intocadas++;
     if(Object.prototype.hasOwnProperty.call(jaTem,sImpChave(u)))repetidas++;
     sImgs.push({url:u,legenda:leg});
     ok++;
@@ -6642,7 +6865,9 @@ function sImpAplicar(){
   sRender();salvarEstado();sPreview();
   if(ok)sSaidaVence();
   var msg='Pronto: <b>'+ok+(ok===1?' foto':' fotos')+'</b> d'+artigo+' '+escHtml(rotulo)+(ok?' na lista ao lado':'')+'. A lista agora tem <b>'+sImgs.length+'</b>.';
-  if(modo==='900')msg+=' Tamanho: reduzidas para '+S_IMP_LARG+' px.';
+  if(modo==='900'&&intocadas>=ok&&ok)msg+=' Tamanho: nenhuma foi reduzida — '+(ok===1?'ela já tinha':'todas já tinham')+' '+S_IMP_LARG+' px ou menos, e pedir mais do que a fonte tem só aumentaria o arquivo.';
+  else if(modo==='900'&&intocadas)msg+=' Tamanho: <b>'+(ok-intocadas)+'</b> reduzida'+((ok-intocadas)===1?'':'s')+' para '+S_IMP_LARG+' px; <b>'+intocadas+'</b> '+(intocadas===1?'ficou':'ficaram')+' com o endereço original por já ter'+(intocadas===1?'':'em')+' '+S_IMP_LARG+' px ou menos.';
+  else if(modo==='900')msg+=' Tamanho: reduzidas para '+S_IMP_LARG+' px.';
   if(leg)msg+=' Legenda: “'+escHtml(leg)+'”.';
   if(repetidas)msg+=' <b>'+repetidas+(repetidas===1?'</b> dela já estava':'</b> delas já estavam')+' na lista e agora aparece'+(repetidas===1?'':'m')+' <b>duas vezes</b> — use o ✕ da lista para tirar o que sobrar.';
   if(recusadas)msg+=' <b>'+recusadas+'</b> foram descartadas por não terem endereço válido.';
@@ -12115,11 +12340,16 @@ function mProdSalvar(){
      um ia inteiro para a vitrine sem aviso nenhum. */
   if(!mImgResize(img)&&!confirm('Esta foto nao passa pelo redimensionador da Alboom, que so alcanca enderecos completos em '+S_HOSTS_ALBOOM.join(' ou ')+'.\n\nEla vai funcionar, mas sera carregada no tamanho ORIGINAL na vitrine, e nao na miniatura. Com muitos produtos isso pesa.\n\nContinuar mesmo assim?'))return;
   var p={nome:n,desc:$('m-pdesc').value.trim(),preco:v,cat:String($('m-pcat').value).trim(),img:img,
+    larg:sLargSabida(img),
     opsel:radio('m-opsel')||'unico',opnenhum:radio('m-opnenhum')||'nao',
     qtd:radio('m-pqtd')==='sim',
     ops:mEditOps.map(function(o){return {nome:o.nome,preco:o.preco,qtd:!!o.qtd};})};
   if(mEditIdx>=0)mProds[mEditIdx]=p;else mProds.push(p);
   mProdLimpar();mProdRender();mCatsRender();salvarEstado();mPreview();
+  /* A largura da FONTE desta foto, quando a escada do CDN nao sabe de graca. Enquanto a medicao
+     nao chega, o produto vale como "largura desconhecida", que e o comportamento de antes desta
+     rodada -- e quando chega, a lista, a previa e o codigo se refazem sozinhos. */
+  mLargTodas();
 }
 function mProdEditar(i){
   var p=mProds[i];
@@ -12157,7 +12387,61 @@ var mAbaAberta=false,mListaPendente=false;
 function mAbaAbrir(){
   mAbaAberta=true;
   if(mListaPendente)mProdRender();
+  mLargTodas();
   mPreview(true);
+}
+
+/* ===== a largura da fonte de cada produto, e por que ela e SALVA com o produto =====
+   A vitrine pede IMG_VITRINE px e o cartao de detalhe pede IMG_DETALHE px, e os dois pedidos
+   acontecem na pagina publicada, foto a foto -- nao aqui. Para o bloco nunca pedir mais do que
+   a fonte tem, o numero precisa VIAJAR com o produto: por isso ele e um campo do catalogo
+   (larg) e nao uma conta feita na hora de gerar.
+   Medido em 21/08/2026 o que acontece sem ele: a journal.JPG da /albuns tem 735 px de largura
+   e o campo do detalhe vem com 1000, entao a loja pedia 1000x1361 com 297 659 B contra os
+   220 164 B da fonte -- 35% mais bytes e nenhum detalhe a mais. O mesmo vale para as fotos do
+   storage, que tem 1200 px enquanto o campo do detalhe aceita ate 1600.
+   SO SE MEDE O QUE PASSA PELO REDIMENSIONADOR. Foto hospedada fora dele vai INTEIRA para a
+   vitrine (o bloco nem tenta encolher), entao um teto para ela nao mudaria nada e o download
+   seria puro desperdicio. A pergunta e mImgResize -- a mesma que o bloco entregue faz.
+   QUANDO SE MEDE: ao abrir a aba e ao salvar um produto. Abrir a aba ja e o portao de rede
+   desta aba (e onde as miniaturas da lista sao buscadas), e o resultado fica SALVO, entao o
+   custo e uma vez por foto, nao uma vez por sessao. O numero da medicao aparece na linha de
+   peso enquanto ela acontece: baixar as fotos em silencio seria gasto invisivel. */
+var mLargMedindo=0;
+function mLargPrecisa(p){
+  return !!(p&&typeof p.img==='string'&&p.img&&!p.larg&&mImgResize(p.img));
+}
+/* Passa para os produtos o que ja se sabe (escada do CDN ou medicao ja feita). Roda antes e
+   depois do lote: antes porque o que e de graca nao precisa de rede; depois porque e ele que
+   colhe o resultado. */
+function mLargColher(){
+  var i,n,mudou=false;
+  for(i=0;i<mProds.length;i++){
+    if(!mLargPrecisa(mProds[i]))continue;
+    n=sLargSabida(mProds[i].img);
+    if(n){mProds[i].larg=n;mudou=true;}
+  }
+  if(mudou){salvarEstado();mProdRender();mPreview();}
+  return mudou;
+}
+function mLargTodas(){
+  var i,p,v,urls=[],vistos={};
+  mLargColher();
+  for(i=0;i<mProds.length;i++){
+    p=mProds[i];
+    if(!mLargPrecisa(p))continue;
+    v=sLargNorm(p.img);
+    if(Object.prototype.hasOwnProperty.call(vistos,v))continue;
+    vistos[v]=1;urls.push(p.img);
+  }
+  if(!urls.length)return;
+  mLargMedindo=urls.length;
+  mPesoRender();
+  sLargLote(urls,function(){
+    mLargMedindo=0;
+    mLargColher();
+    mPesoRender();
+  });
 }
 function mProdRender(){
   var ul=$('m-prod-lista');if(!ul)return;
@@ -12335,11 +12619,15 @@ function mImgTamanhoGer(){
    nao depende da ordem em que os 'var' deste arquivo sao inicializados. */
 var mImgApi=null;
 function mImgApiOb(){
-  if(!mImgApi)mImgApi=(new Function(mImgTamanhoGer()+'return {tamanho:imgTamanho,resize:imgResize};'))();
+  /* imgNorm entra na porta junto com as outras duas porque a pergunta "qual e a largura da
+     FONTE desta foto?" (sLargNorm) tem de partir do mesmo endereco desembrulhado que o bloco
+     entregue usa. Segunda implementacao de desembrulho seria segunda chance de divergir. */
+  if(!mImgApi)mImgApi=(new Function(mImgTamanhoGer()+'return {tamanho:imgTamanho,resize:imgResize,norm:imgNorm};'))();
   return mImgApi;
 }
 function mImgTamanho(u,larg){return mImgApiOb().tamanho(u,larg);}
 function mImgResize(u){return mImgApiOb().resize(u);}
+function mImgNorm(u){return mImgApiOb().norm(u);}
 
 /* ===== importador de galeria: o mesmo da aba Slideshow, outro destino =====
    Colar link a link cinquenta vezes e proibitivo -- foi essa medida que criou o importador na
@@ -12367,10 +12655,16 @@ function mImpConferir(){
   if(!String(fonte).trim()){mImpAviso('Falta o código-fonte da página. Abra a galeria no navegador, use <b>Cmd ⌥ U</b> para ver o código-fonte, selecione tudo (<b>Cmd A</b>), copie (<b>Cmd C</b>) e cole no campo acima.',false);return;}
   a=sImpExtrai(fonte,alvo);
   if(!a.urls.length){
-    pastas=sImpPastas(fonte);
+    /* Com alvo de galeria, DIZER QUAIS galerias a fonte tem e a informacao que resolve o caso
+       (link de uma galeria com a fonte de outra). A frase existia e estava quebrada -- imprimia
+       "[object Object], [object Object]", porque juntava com join a lista de objetos de
+       sImpPastas --, e a rodada anterior a apagou em vez de conserta-la. Agora ela sai pela
+       mesma sImpPastasTxt que o Slideshow usa. Com alvo de pagina comum a lista nao entra: quem
+       diz o que a fonte tem, nesse caso, e sImpOutraFonte, e as duas juntas repetiriam. */
+    pastas=(alvo.tipo==='cdn')?'':sImpPastasTxt(fonte,alvo.rotulo,3);
     ex=sImpDescartes(a);
     var pista=sImpOutraFonte(fonte,alvo);
-    if(pastas.length&&alvo.tipo!=='cdn')mImpAviso('Nenhuma foto d'+alvo.artigo+' <b>'+escHtml(alvo.rotulo)+'</b> neste código-fonte.'+ex+pista+' Você provavelmente colou a fonte de uma página e o link de outra.',false);
+    if(pastas)mImpAviso('Nenhuma foto d'+alvo.artigo+' <b>'+escHtml(alvo.rotulo)+'</b> neste código-fonte. O que este código-fonte tem é: '+pastas+'.'+ex+pista+' Você provavelmente colou a fonte de uma página e o link de outra.',false);
     else mImpAviso('Não encontrei nenhuma foto d'+alvo.artigo+' <b>'+escHtml(alvo.rotulo)+'</b> neste código-fonte.'+ex+pista+' Confira se copiou o código-fonte inteiro da página (e não o texto da página).',false);
     return;
   }
@@ -12575,8 +12869,12 @@ function mBloco(cfg){
       var v=parseFloat(String(o.preco).replace(',','.'))||0;
       return "{nome:'"+escJs(o.nome)+"', preco:"+v.toFixed(2)+(o.qtd?", qtd:true":"")+"}";
     }).join(', ');
+    /* larguraFonte so sai quando e SABIDA. Emitir 0 seria pior do que nao emitir: o bloco teria
+       de tratar 0 como "sem teto" e o numero na tela pareceria uma medida. Sem o campo, a foto
+       e pedida na largura escolhida, que e o comportamento de antes desta rodada. */
+    var lf=(parseInt(p.larg,10)>0)?(", larguraFonte:"+parseInt(p.larg,10)):"";
     return "  {nome:'"+escJs(p.nome)+"', descricao:'"+escJs(p.desc||'')+"', preco:"+(parseFloat(p.preco)||0).toFixed(2)+",\n"+
-           "   categoria:'"+escJs(p.cat||'')+"', imagem:'"+escJs(urlLimpa(p.img||''))+"',\n"+
+           "   categoria:'"+escJs(p.cat||'')+"', imagem:'"+escJs(urlLimpa(p.img||''))+"'"+lf+",\n"+
            "   selecaoOpcionais:'"+p.opsel+"', permitirNenhum:"+(p.opnenhum==='sim'?'true':'false')+(p.qtd?", quantidade:true":"")+",\n"+
            "   opcionais:["+ops+"]}";
   }).join(',\n');
@@ -12603,12 +12901,6 @@ function mBloco(cfg){
   c+='.fcmloja .fcm-card{border:1px solid #e5dfd0;border-radius:14px;overflow:hidden;background:var(--fcm-fundo,#fff);cursor:pointer;padding:0;text-align:left;color:inherit;font:inherit;display:block;width:100%;transition:box-shadow .18s,transform .18s}\n';
   c+='.fcmloja .fcm-card:hover{box-shadow:0 8px 22px rgba(0,0,0,.10);transform:translateY(-2px)}\n';
   c+='.fcmloja .fcm-foto{width:100%;aspect-ratio:'+cfg.prop+';object-fit:cover;display:block;background:#EDEAE1}\n';
-  /* FALHA VISIVEL da foto. O desenho do importador do CDN nunca pede um degrau que a pagina
-     nao trouxe, entao esta caixa nao deveria aparecer nunca -- e e exatamente por isso que ela
-     precisa existir: se aparecer, e porque a suposicao caiu, e a alternativa e a imagem
-     quebrada muda que o cliente le como loja defeituosa. Vale para qualquer foto que nao
-     carregue, nao so para as do CDN. */
-  c+='.fcmloja .fcm-foto-erro{width:100%;aspect-ratio:'+cfg.prop+';display:flex;align-items:center;justify-content:center;background:#F6E7E5;color:#8C1D18;font-size:12px;line-height:1.35;padding:10px;box-sizing:border-box;text-align:left}\n';
   c+='.fcmloja .fcm-card-c{padding:10px 12px 12px}\n';
   c+='.fcmloja .fcm-card-n{font-size:14px;font-weight:600;margin:0 0 2px;text-align:left}\n';
   c+='.fcmloja .fcm-card-cat{font-size:11px;color:#8a8375;text-transform:uppercase;letter-spacing:.05em;margin:0 0 4px;text-align:left}\n';
@@ -12619,6 +12911,18 @@ function mBloco(cfg){
   c+='.fcmloja .fcm-detalhe.on{display:block}\n';
   c+='.fcmloja .fcm-det-grade{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px;align-items:start}\n';
   c+='.fcmloja .fcm-det-foto{width:100%;border-radius:14px;display:block;background:#EDEAE1}\n';
+  /* FALHA VISIVEL da foto. O desenho do importador do CDN nunca pede um degrau que a pagina
+     nao trouxe, entao esta caixa nao deveria aparecer nunca -- e e exatamente por isso que ela
+     precisa existir: se aparecer, e porque a suposicao caiu, e a alternativa e a imagem
+     quebrada muda que o cliente le como loja defeituosa. Vale para qualquer foto que nao
+     carregue, nao so para as do CDN.
+     A REGRA VEM DEPOIS de .fcm-foto E de .fcm-det-foto, e a ordem e o que a faz funcionar. A
+     caixa de erro fica com AS DUAS classes (fotoFalhou copia a do <img> e acrescenta esta), e
+     as tres tem a mesma especificidade: quem vier por ultimo no CSS vence. Emitida antes de
+     .fcm-det-foto, como estava, a caixa saia bege (#EDEAE1) e em 'block' no cartao de detalhe
+     -- medido: rgb(237,234,225) e texto no canto, enquanto a vitrine mostrava rgb(246,231,229)
+     e o texto centrado. Uma unica regra descrevia dois resultados diferentes. */
+  c+='.fcmloja .fcm-foto-erro{width:100%;aspect-ratio:'+cfg.prop+';display:flex;align-items:center;justify-content:center;background:#F6E7E5;color:#8C1D18;font-size:12px;line-height:1.35;padding:10px;box-sizing:border-box;text-align:left}\n';
   c+='.fcmloja .fcm-det-n{font-size:20px;font-weight:700;margin:0 0 4px;text-align:left}\n';
   c+='.fcmloja .fcm-det-p{font-size:18px;font-weight:700;color:var(--fcm-destaque,#0F3A30);margin:0 0 10px;text-align:left}\n';
   c+='.fcmloja .fcm-det-d{font-size:13px;color:#666;margin:0 0 14px;text-align:left}\n';
@@ -12761,6 +13065,9 @@ function mBlocoJs(cfg,prods,cps,cats,client,cod){
   c+='/* ===== PRODUTOS =====\n';
   c+='   preco: numero com ponto decimal | categoria: texto livre (vazio = so aparece em Todos)\n';
   c+='   imagem: endereco da foto; a vitrine pede a miniatura e o detalhe pede a foto grande\n';
+  c+='   larguraFonte: largura real da foto em px, medida pela ferramenta. So aparece quando e\n';
+  c+='     sabida, e serve de TETO: pedir ao redimensionador mais do que a foto tem devolve um\n';
+  c+='     arquivo maior sem nenhum detalhe a mais (medido: 735 px pedidos a 1000 = +35% bytes)\n';
   c+="   selecaoOpcionais: 'unico' = escolhe 1 | 'multiplo' = pode marcar varios\n";
   c+='   permitirNenhum: true = inclui a opcao "sem opcional" (so no modo unico)\n';
   if(usaQtd)c+='   quantidade: true no produto, qtd: true no opcional = mostra o seletor de quantidade */\n';
@@ -13126,6 +13433,13 @@ function mBlocoVitrine(cfg,usaPP,usaPix,usaQtd,usaSinal,usaResumo,descpix,zap,us
   c+='d.textContent=TXT_FOTO_ERRO;\n';
   c+='d.title=img.src;\n';
   c+='if(img.parentNode)img.parentNode.replaceChild(d,img);\n}\n\n';
+  /* O TETO, nos dois lugares que pedem foto. Uma implementacao so, pelo mesmo motivo de
+     fotoFalhou: duas divergem. */
+  c+='/* Nunca pedir ao redimensionador mais largura do que a foto tem: acima da largura da\n';
+  c+='   fonte ele ESTICA a imagem e o arquivo cresce sem nenhum detalhe a mais. Produto sem\n';
+  c+='   larguraFonte (largura nao sabida) e pedido na largura escolhida, como antes. */\n';
+  c+='function largFoto(p,larg){\n';
+  c+='return (p.larguraFonte&&p.larguraFonte<larg)?p.larguraFonte:larg;\n}\n\n';
   c+='function desenharGrade(){\n';
   c+='var vis=visiveis();\n';
   c+="grade.innerHTML='';\n";
@@ -13138,7 +13452,7 @@ function mBlocoVitrine(cfg,usaPP,usaPix,usaQtd,usaSinal,usaResumo,descpix,zap,us
   c+="var card=document.createElement('button');card.type='button';card.className='fcm-card';\n";
   c+="var img=document.createElement('img');img.className='fcm-foto';\n";
   c+="img.addEventListener('error',function(){fotoFalhou(img);});\n";
-  c+='img.src=imgTamanho(p.imagem,IMG_VITRINE);\n';
+  c+='img.src=imgTamanho(p.imagem,largFoto(p,IMG_VITRINE));\n';
   c+='img.alt=p.nome;\n';
   c+="img.loading=(pos<COLUNAS)?'eager':'lazy';\n";
   c+="var cx=document.createElement('div');cx.className='fcm-card-c';\n";
@@ -13171,7 +13485,7 @@ function mBlocoVitrine(cfg,usaPP,usaPix,usaQtd,usaSinal,usaResumo,descpix,zap,us
   c+="var g=document.createElement('div');g.className='fcm-det-grade';\n";
   c+="var img=document.createElement('img');img.className='fcm-det-foto';\n";
   c+="img.addEventListener('error',function(){fotoFalhou(img);});\n";
-  c+='img.src=imgTamanho(p.imagem,IMG_DETALHE);img.alt=p.nome;\n';
+  c+='img.src=imgTamanho(p.imagem,largFoto(p,IMG_DETALHE));img.alt=p.nome;\n';
   c+="var lado=document.createElement('div');\n";
   c+="var nm=document.createElement('p');nm.className='fcm-det-n';nm.textContent=p.nome;lado.appendChild(nm);\n";
   c+="var pr=document.createElement('p');pr.className='fcm-det-p';pr.textContent=moedaFmt(p.preco);lado.appendChild(pr);\n";
@@ -13680,15 +13994,34 @@ document.addEventListener('change',function(e){
    funcao nao mede bytes de rede -- ela declara o que a pagina PEDE, e o numero de fotos que
    entram no primeiro carregamento (as demais so entram quando o visitante rola). O aviso ao
    lado da lista repete o teto de largura escolhido. */
+/* Quantos produtos tem a largura da fonte ABAIXO da largura pedida -- ou seja, quantos vao ser
+   pedidos menores do que o campo diz. Dizer o numero e o que impede a linha de peso de
+   prometer "400 px" para uma foto que vai ser pedida com 320. */
+function mPesoTeto(prods,larg){
+  var i,w,k=0;
+  for(i=0;i<prods.length;i++){
+    w=parseInt(prods[i].larg,10);
+    if(w>0&&w<larg)k++;
+  }
+  return k;
+}
 function mPesoTexto(cfg){
   var n=cfg.prods.length,eager=Math.min(n,cfg.cols);
   if(!n)return '';
-  var resto=n-eager;
+  var resto=n-eager,tv=mPesoTeto(cfg.prods,cfg.imgvit),td=mPesoTeto(cfg.prods,cfg.imgdet),extra='';
+  if(mLargMedindo)extra+=' <b>Medindo a largura de '+mLargMedindo+' foto'+(mLargMedindo===1?'':'s')+'</b> — a ferramenta carrega cada uma uma vez para nunca pedir ao redimensionador mais do que a foto tem. O resultado fica salvo, então isso acontece uma vez por foto.';
+  else if(tv||td){
+    extra+=' Nem todas cabem nessas larguras: ';
+    if(tv)extra+='<b>'+tv+'</b> '+(tv===1?'foto é menor':'fotos são menores')+' que '+cfg.imgvit+' px';
+    if(tv&&td)extra+=' e ';
+    if(td)extra+='<b>'+td+'</b> '+(td===1?'foto é menor':'fotos são menores')+' que '+cfg.imgdet+' px';
+    extra+=' — '+((tv+td)===1?'essa é pedida':'essas são pedidas')+' no tamanho que '+((tv+td)===1?'tem':'têm')+', porque pedir mais só aumenta o arquivo.';
+  }
   return n+(n===1?' produto na vitrine.':' produtos na vitrine.')+
     ' No primeiro carregamento a página pede <b>'+eager+'</b> '+(eager===1?'foto':'fotos')+
     ' de <b>'+cfg.imgvit+' px</b> de largura'+
     (resto?('; '+(resto===1?'a outra entra':'as outras <b>'+resto+'</b> entram')+' com <code>loading="lazy"</code>, só quando o visitante rola até '+(resto===1?'ela':'elas')+'.'):'.')+
-    ' A foto de <b>'+cfg.imgdet+' px</b> só é pedida quando alguém abre o cartão de detalhe — uma por vez.';
+    ' A foto de <b>'+cfg.imgdet+' px</b> só é pedida quando alguém abre o cartão de detalhe — uma por vez.'+extra;
 }
 function mPesoRender(){
   var el=$('m-peso');if(!el)return;

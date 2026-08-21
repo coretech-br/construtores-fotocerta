@@ -48,7 +48,7 @@ Os códigos completos estão nos arquivos anexos do projeto e podem ser regenera
 5. **Editor ≠ publicado**: sempre publicar para testar. Console do Safari (Cmd+Option+C) é a ferramenta de diagnóstico.
 6. **Componentes HTML vivem em iframe do mesmo domínio** → scripts atravessam via `contentDocument`/`frameElement`.
 7. **O CSS do tema esconde radios/checkboxes nativos** dentro de componentes → desenhar marcadores próprios (input invisível + span estilizado com `:checked + span`).
-8. **O tema centraliza textos** dentro de componentes → forçar `text-align:left` no card e nos elementos.
+8. **O tema centraliza textos** dentro de componentes → forçar `text-align:left` no card e nos elementos. Vale para **qualquer** HTML que entre num componente, **inclusive a própria ferramenta** quando publicada em `/prosite-custom` (ago/2026: ela saía inteira centralizada porque nunca declarava o alinhamento dela). O envoltório do editor é uma `<div>` de classe gerada (hoje `.llleLo`) com `text-align:center`, e ele é **ancestral, não concorrente**: declaração direta na raiz vence a herança **sem `!important` e sem seletor forte**.
 9. **At-rules (`@keyframes`, `@media`) só funcionam em `<style>`** — na Tag Head do site (Configurações → Códigos personalizados → cabeçalho), na Tag Body ou dentro de um componente HTML. **Nunca no campo CSS Customizado do componente**, que aceita apenas propriedades soltas. Com o `@keyframes` no head, animações em componentes funcionam normalmente (ver aba "Bordas com efeito"). A exceção que permanece: animar **elementos de texto do editor** do Prosite (reconstruídos na publicação) — considerar inviável.
     - **Campo CSS Customizado do componente**: as propriedades soltas são aplicadas direto no elemento raiz daquele componente — **não precisa de ID Html, classe nem seletor**. Se algum componente exigir regra completa, inspecionar o elemento publicado, pegar a classe gerada pela Alboom e levar a regra (com seletor) para o head.
 10. **Sem acentos/emojis em código colado** (precaução com o validador); textos visíveis com acento OK.
@@ -553,6 +553,70 @@ Pedir um degrau ausente devolve 404, ou seja **imagem quebrada na página do cli
 | Miniatura da vitrine (400 px) | pedida a partir de `xlarge`, entrega **400×267** — redução, nunca ampliação |
 
 **Regressão.** **32 cenários dos oito geradores** (s, l, t, u, b, c, p, m), gerados na `main` e aqui: **26 byte a byte idênticos**. Os 6 que mudam são todos da Mini loja, com a **mesma diferença enumerada nos 6**: a linha do `HOSTS_RESIZE` (ganhou o terceiro host) mais as 12 linhas da falha visível. Junto, o passo que **executa** cada bloco numa página: os 24 blocos executáveis rodam e desenham — regressão por texto nunca acusaria nome não declarado, que foi como o `MOEDA is not defined` passou inteiro. Varredura de norma nos 32: ES5, nenhuma das cinco sequências dentro de string JS, zero evento inline, zero tag semântica; ferramenta com **507 IDs, nenhum repetido**, IIFE única; bloco da Mini loja **100 % ASCII**.
+
+### A largura da fonte: o teto que faltava, e por que "nunca amplia" era falso (ago/2026)
+
+**O que estava errado.** O desenho acima garante que o importador **nunca pede um degrau inexistente**. Ele **não** garantia a outra metade: a **largura de destino não era conferida contra a foto escolhida**. Medido na própria `/albuns`, com a `journal.JPG`, cujo maior degrau é `original_size` = **735×1000, 220 164 B**:
+
+| Pedido | Resultado | Peso |
+|---|---|---|
+| Slideshow, "reduzir para 900" | 900×1224 | 253 906 B — **+15%** |
+| Mini loja, detalhe 1000 | 1000×1361 | 297 659 B — **+35%** |
+| Mini loja, detalhe 1600 | 1600×2177 | 585 840 B — **+166%** |
+
+Mais bytes, zero detalhe a mais: a armadilha dos 1400 px da fase 1, reaparecendo porque **no CDN a largura varia por foto** (735 a 1920) enquanto no storage era uniforme (1200). E o texto de ajuda dizia que a redução *"pode não reduzir nada em algumas delas"* — medido, ela **aumentava**.
+
+**O redimensionador não tem modo "não ampliar".** Medido: `/resize/max/900/`, `/resize/fit/900/` e `/resize/maxwidth/900/` respondem **422**; `/resize/width/900/upscale/false/` devolve exatamente os mesmos 253 906 B do pedido simples — o parâmetro é ignorado. Quem tem de decidir é a ferramenta.
+
+**Como a largura é sabida — dois caminhos, escolhidos por foto.**
+
+1. **De graça, pela escada do CDN.** Medido em cinco fotos de orientações diferentes (paisagem, dois retratos, uma quadrada): `small`=320, `medium`=600, `standard`=840, `large`=1280, `xlarge`=1920 são a **largura exata**, qualquer que seja a proporção. Viraram a tabela `S_CDN_LARGURAS`.
+2. **Medindo de verdade** (`new Image()` + `naturalWidth`), para os dois degraus que a tabela **não** sabe — e a medição explica por que não sabe: `thumb` limita o **lado maior**, não a largura (`journal` = 147×200, `foto-certa-design` = 125×200, álbum = 200×133), e `original_size` é o próprio arquivo original, que por definição não tem tabela. Vale também para o storage e para qualquer outro host.
+
+Custa uma requisição por foto, e a foto vem **inteira**: o CDN não manda `Access-Control-Allow-Origin` nem aceita `Range` (medido: pedido com `Range` devolve 200, não 206), então não há como ler só o cabeçalho do JPEG.
+
+**Onde se mede, e a conta que decidiu.**
+
+| Onde | Decisão | Número que a sustenta |
+|---|---|---|
+| Slideshow, ramo do **CDN** | mede o que a escada não sabe | 4 das 10 fotos de `/albuns`, **0,96 MB** (contra 5,68 MB se medisse as dez) |
+| Slideshow, ramo de **galeria** | **não mede** | as 46 fotos da galeria de exemplo têm **1200 px, todas** (medido uma a uma); o único número pedido ali é 900, então medir custaria **18,4 MB** para reconfirmar uma constante e **não mudar um byte** da saída |
+| Mini loja | mede toda foto que passa pelo redimensionador | é aqui que a largura pedida varia (200–900 na vitrine, 400–1600 no detalhe) e pode passar da fonte; o resultado é **salvo com o produto**, então é uma vez por foto, não por sessão |
+
+Foto que **não** passa pelo redimensionador não é medida: ela vai inteira de qualquer jeito, e o download seria puro desperdício. A pergunta é `mImgResize` — a mesma que o bloco entregue faz.
+
+**O teto viaja com o produto.** A vitrine e o cartão de detalhe pedem a foto **na página publicada**, produto a produto, então o número precisa estar lá: `PRODUTOS[i].larguraFonte`, emitido só quando é sabido, e `largFoto(p,larg)` no bloco escolhe o menor dos dois. Sem o campo, a foto é pedida na largura escolhida — o comportamento de antes. Isso conserta também um caso **anterior ao CDN**: foto do storage (1200 px) com o detalhe em 1600 px era esticada em 33%.
+
+**Resultado medido, `journal.JPG` (fonte 735×1000, 220 164 B):**
+
+| Onde | Antes | Depois |
+|---|---|---|
+| Slideshow, "reduzir para 900" | embrulhada em 900 → 253 906 B (+15%) | **endereço original**, 220 164 B |
+| Mini loja, detalhe 1000 | `width/1000` → 297 659 B (+35%) | `width/735` → **185 022 B** (−16% sobre a própria fonte) |
+| Mini loja, vitrine 400 | `width/400` | `width/400` (inalterado: 400 < 735) |
+
+E a conferência passou a dizer o número: *"Conferi a largura de cada uma: 1 já tem 900 px ou menos e fica com o endereço original…"*, com a aplicação repetindo *"9 reduzidas para 900 px; 1 ficou com o endereço original"*.
+
+**A guarda que faltou na primeira versão desta rodada, e foi medida.** A medição é assíncrona; `sImpInvalidar` (que mata a conferência quando o link ou a fonte mudam) começava com `if(!sImpAchado)return`, e durante a medição `sImpAchado` ainda é `null` — então trocar o link no meio da medição não cancelava nada e o resultado do link **anterior** aterrissava na tela, com o botão de adicionar acendendo. Medido e corrigido: o selo `sImpConfSeq` sobe **sempre**, antes de qualquer saída da função.
+
+**Os oito reparos menores da mesma rodada.**
+
+- **Caixa de falha bege no cartão de detalhe.** `.fcm-foto-erro` era emitida **antes** de `.fcm-det-foto`, mesma especificidade — a de baixo vencia. Medido: vitrine `rgb(246,231,229)` + flex, detalhe `rgb(237,234,225)` + block. A regra passou para **depois** das duas de foto; medido de novo, os dois lugares agora dão `rgb(246,231,229)` + flex. É a classe que o `CLAUDE.md` nomeia.
+- **Dica repetida no Slideshow.** Com alvo de página comum, `sImpPastas` e `sImpOutraFonte` imprimiam a mesma lista de galerias em duas frases seguidas. A Mini loja já tinha a guarda; agora as duas têm.
+- **Lista de galerias apagada na Mini loja.** A frase *"o que este código-fonte realmente contém"* imprimia `[object Object], [object Object]` (fazia `join` sobre a lista de objetos de `sImpPastas`) e a rodada anterior a **apagou** em vez de consertá-la. Agora existe **uma** formatação, `sImpPastasTxt`, usada nas três telas que mostram essa lista.
+- **Rótulo do tamanho.** "Como a página entrega *(galeria: 1200 px)*" virou "*(galeria: 1200 px; página comum: varia por foto)*".
+- **O ramo do CDN virara pega-tudo** do reconhecimento de link, porque usava `sUrlOk`, que aceita caminho a partir da raiz e endereço sem esquema. Passou a exigir **endereço http(s) absoluto com host**, que é o que o campo pede ("o endereço da barra do navegador"). Mais que isso não se exige, e é decisão: nesse ramo o link **não escolhe foto nenhuma** — quem escolhe é o código-fonte, pelo código da conta, que a conferência mostra antes de aplicar.
+- **Código morto removido.** `sImpHostOk` e o par de `sUrlOk` dentro de `sImpExtraiCdn` eram inalcançáveis (a expressão já fixa o host e `sImpCdnPartes` já fixa a forma), e com eles o contador `invalidas` daquele ramo, que só podia sair zero. Conferência que não pode falhar sugere uma proteção que não existe.
+- **Limite registrado:** endereço do CDN **embrulhado no redimensionador** não casa em nenhum dos dois ramos. É o desejado nas páginas medidas, onde o CDN vem sempre cru; se um dia uma página comum servir embrulhado, o sintoma será "nenhuma foto encontrada" com o código-fonte certo colado.
+- **Plural.** *"Descartei 1 foto(s) por serem de outra conta"* → *"1 foto por ser"* / *"2 fotos por serem"*.
+
+**A ferramenta dentro do Prosite: `text-align:left` na raiz.** O dono publica a ferramenta num componente HTML (`/prosite-custom`) e **todos os textos saíam centralizados, em todas as abas**. Diagnóstico: o editor do Prosite envolve o componente numa `<div>` de classe gerada (hoje `.llleLo`) com `text-align:center`; acima dela a cadeia está toda em `start`. Alinhamento é **herdado**, e a ferramenta nunca declarou o dela — foi feita para viver em página própria, onde o padrão já é o que se quer. A regra do Manual do Prosite (§3, item 8) sempre foi aplicada aos blocos **gerados** e nunca à ferramenta.
+
+A correção é uma linha: `body,.topo,.fcg-fixa,.fcg-painel,.app,.rodape{text-align:left}` — as raízes da ferramenta, isto é, os filhos diretos de `<body>`. **Sem `!important` e sem seletor forte**, porque a classe do tema é **ancestral, não concorrente**: qualquer declaração direta na raiz vence a herança, que só alcança quem não declarou nada. Raiz nova entra nessa lista; senão nasce centrada dentro do Prosite e certa fora dele — defeito que só aparece publicado.
+
+Provado servindo a ferramenta dentro de um ancestral com `text-align:center`: as **oito abas** dão `left` em descrição, ajuda, legend e label (antes: `center` nas oito), o ancestral continua em `center` (ou seja, a herança existia mesmo) e o que centraliza de propósito continua centralizado — `.pv-vazia` e os `<button>`, que é o padrão do navegador; censo dos painéis abertos: os únicos elementos fora de `left` são `BUTTON` e `.pv-vazia`, iguais aos da página avulsa.
+
+**Regressão desta rodada.** Os oito geradores contra a `main` (`72aca6a`), mesmo estado semeado: **s, l, t (3 saídas), u, b (2), c, p (2) byte a byte idênticos**; só o `m-out` muda, e o `diff` inteiro são **29 linhas**, todas já enumeradas — a regra da caixa de falha (agora na posição certa), `TXT_FOTO_ERRO`, o `HOSTS_RESIZE` com o terceiro host, `fotoFalhou`, `largFoto` e as duas linhas de `img.src`. A correção do alinhamento **não muda saída nenhuma**: é CSS da ferramenta, não do bloco. Importação da galeria de exemplo: **os 46 endereços idênticos** aos da `main`. Ferramenta com **561 IDs, nenhum repetido**; ES5 nas saídas; zero erro de console com as oito abas abertas.
 
 ## 5. Decisões de arquitetura registradas
 

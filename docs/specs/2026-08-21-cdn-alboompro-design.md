@@ -71,7 +71,9 @@ Nas 51 ocorrências da página, o **primeiro** código é sempre `5eb96ab625241f
    > **Medido em 21/08/2026 (implementação).** Nenhuma das 10 fotos de `/albuns` tem `xlarge` **e** `original_size`: os dois são mutuamente exclusivos, porque `original_size` só aparece quando o original é menor que o próximo degrau da escada — que é justamente por isso que esse próximo dá 404. Quem resolve a ordem é o logo `…-paleta.png`: `large` = 1280×853, `xlarge` = **404**, `original_size` = **1772×1181**. Nas outras duas fotos em que aparece, `original_size` também é estritamente maior que todos os presentes (1080 > 840; 735 > 600). **`original_size` fica no fim da escada.** Incerteza que permanece registrada: a comparação direta `xlarge` × `original_size` na mesma foto não é observável nesta conta.
 4. **A loja pede a largura exata ao redimensionador**, partindo desse maior.
 
-Resolve de uma vez: nunca pede degrau inexistente, nunca amplia, e reduz 51 endereços a 10 fotos — o mesmo que o importador de galeria já faz com repetições.
+Resolve de uma vez: nunca pede degrau inexistente, ~~nunca amplia~~, e reduz 51 endereços a 10 fotos — o mesmo que o importador de galeria já faz com repetições.
+
+> **"Nunca amplia" era falso, e foi corrigido em 21/08/2026.** O desenho garante que o **degrau** pedido existe; não garantia que a **largura de destino** cabe nele. Medido na `journal.JPG` (maior degrau = `original_size`, 735×1000, 220 164 B): "reduzir para 900" devolvia 900×1224 com 253 906 B (+15%) e o detalhe da loja em 1000 px devolvia 297 659 B (+35%). A causa é a mesma que motivou o resto desta spec — **no CDN a largura varia por foto** (735 a 1920), enquanto no storage era uniforme (1200). A correção está registrada na `docs/documentacao-fotocerta.md`, §4: a largura da fonte passou a ser **sabida por foto** (tabela dos degraus nomeados onde ela é exata e medida; `new Image()` + `naturalWidth` onde não é) e vira **teto** nos dois lugares que pedem tamanho — o "reduzir para 900" do Slideshow e o `largFoto(p, larg)` do bloco da loja, alimentado por `PRODUTOS[i].larguraFonte`.
 
 ## 4. O que muda no código
 
@@ -84,6 +86,7 @@ Resolve de uma vez: nunca pede degrau inexistente, nunca amplia, e reduz 51 ende
 
 - **A heurística do código da conta** é palpite, não certeza. Mitigado por mostrá-la na conferência. Se a fonte tiver imagens de duas contas, o operador vê e decide.
 - **Degrau ausente no endereço escolhido** não pode acontecer pelo desenho (só se usa o que veio da fonte), mas o bloco deve **falhar visível** se acontecer.
+- **Largura de destino maior que a fonte** — risco que esta spec *não* previu e que se realizou: ver o aviso no §3. Corrigido em 21/08/2026.
 - ~~**`original_size` pode não ser o maior.** Medir antes de fixar a ordem.~~ **Medido** (ver §3, item 3): é o maior, e nunca convive com `xlarge`.
 
 ## 6. Verificação
