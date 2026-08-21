@@ -198,6 +198,15 @@
   .lista-imgs .url.partida .host{flex-shrink:0;max-width:12em;color:#B3261E;font-weight:700;
     background:#FBEAE8;border:1px solid #E7B9B4;border-radius:4px;padding:0 4px;margin-right:4px}
   .lista-imgs input[type=text]{padding:5px 8px;font-size:13px;margin-top:4px}
+  /* Cartao da lista de produtos da Mini loja: ele carrega quatro linhas (nome com preco,
+     endereco da foto, categoria e a contagem de opcionais) e sem estas regras as quatro
+     sairiam com o mesmo peso, o que apaga a hierarquia numa lista de dezenas de itens. */
+  .lista-imgs .info .nome{font-size:13px;font-weight:600;color:var(--tinta)}
+  .lista-imgs .info .sub{font-size:11px;color:var(--tinta-suave);margin-top:2px}
+  .m-cat-selo{display:inline-block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;
+    background:#E8F0EC;color:var(--verde);border-radius:4px;padding:1px 6px;margin-top:3px}
+  .m-cat-selo.vazio{background:#F1EEE5;color:var(--tinta-suave)}
+  #m-imp-fonte{height:110px;resize:vertical;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;line-height:1.4}
   .lista-imgs .ctrl{display:flex;flex-direction:column;gap:3px}
   .lista-imgs .ctrl button{border:1px solid var(--linha);background:#fff;border-radius:6px;width:28px;height:24px;
     cursor:pointer;font-size:12px;color:var(--tinta);line-height:1}
@@ -337,6 +346,8 @@
   .u-pv-modos .rotulo{font-size:12px;color:var(--tinta-suave)}
   .u-pv-moldura{overflow:hidden;max-width:100%;margin:0 auto;background:#fff;border:1px solid var(--linha);border-radius:8px}
   .u-pv-moldura iframe{border:0;display:block;background:#fff}
+  .m-pv-moldura{overflow:hidden;max-width:100%;margin:0 auto;background:#fff;border:1px solid var(--linha);border-radius:8px}
+  .m-pv-moldura iframe{border:0;display:block;background:#fff}
   /* aviso ambar de recurso que nao vale agora: nasceu no desconto Pix da aba Checkout e
      passou a servir tambem a Contagem regressiva (pulsar x alternar deslizando). Uma regra so,
      sem prefixo de aba, porque o visual e o mesmo nos dois lugares. */
@@ -593,6 +604,7 @@
   <button class="aba" id="aba-bor" role="tab" aria-selected="false">Bordas com efeito</button>
   <button class="aba" id="aba-cnt" role="tab" aria-selected="false">Contagem regressiva</button>
   <button class="aba" id="aba-cob" role="tab" aria-selected="false">Link de cobrança</button>
+  <button class="aba" id="aba-loja" role="tab" aria-selected="false">Mini loja</button>
 </div>
 
 <!-- ==================== CONSTRUTOR: SLIDESHOW ==================== -->
@@ -1462,7 +1474,7 @@
         </div>
         <div id="u-pv-box"></div>
       </div>
-      <p class="ajuda">A prévia <b>roda o código gerado de verdade</b>: é o mesmo bloco que sai na saída ao lado, executando dentro de um quadro isolado — dá para marcar produtos, mudar quantidade, aplicar cupom, gerar o Pix e ler o Copia e Cola. Ela também passa pelas <b>mesmas recusas</b> do botão "Gerar código": enquanto a configuração for recusada, o quadro mostra a recusa e o motivo, nunca um carrinho.<br><br><b>O que a prévia prova sobre o PayPal:</b> o botão é um desenho, mas logo abaixo dele a prévia mostra o <b>valor que iria na ordem</b> e a <b>decisão do clique</b> (segue para o PayPal ou recusa, com o motivo) — os dois medidos chamando o <code>createOrder</code> e o <code>onClick</code> do próprio bloco, a cada mudança do carrinho. É por isso que o valor do sinal e as recusas do lado PayPal são verificáveis aqui sem baixar o SDK e sem mandar seu Client ID para fora.<br><br><b>O que ela ainda não prova:</b> o que depende da resposta do PayPal — a janela de pagamento, a captura e as mensagens de sucesso e de erro que vêm dela; o QR Code é real, mas depende da biblioteca do cdnjs (sem internet ele some e só o Copia e Cola aparece); o quadro não carrega o CSS do tema do site; e o botão "Já paguei" abre o WhatsApp de verdade se você clicar.</p>
+      <p class="ajuda">A prévia <b>roda o código gerado de verdade</b>: é o mesmo bloco que sai na saída ao lado, executando dentro de um quadro isolado — dá para marcar produtos, mudar quantidade, aplicar cupom, gerar o Pix e ler o Copia e Cola. Ela também passa pelas <b>mesmas recusas</b> do botão "Gerar código": enquanto a configuração for recusada, o quadro mostra a recusa e o motivo, nunca um carrinho.<br><br><b>O que a prévia prova sobre o PayPal:</b> o botão é um desenho, mas logo abaixo dele a prévia mostra o <b>valor que iria na ordem</b> e a <b>decisão do clique</b> (segue para o PayPal ou recusa, com o motivo) — os dois medidos chamando o <code>createOrder</code> e o <code>onClick</code> do próprio bloco, a cada mudança do carrinho. É por isso que o valor do sinal e as recusas do lado PayPal são verificáveis aqui sem baixar o SDK e sem mandar seu Client ID para fora.<br><br><b>O que ela ainda não prova:</b> o que depende da resposta do PayPal — a janela de pagamento, a captura e as mensagens de sucesso e de erro que vêm dela; o QR Code é real, mas depende da biblioteca do cdnjs (sem internet ele some e só o Copia e Cola aparece); o quadro não carrega o CSS do tema do site; e o botão "Já paguei" <b>não abre o WhatsApp aqui</b> — o quadro desliga a abertura de abas, e avisa em vermelho se não conseguir desligar.</p>
     </div>
     <div>
       <div class="saida">
@@ -2174,7 +2186,7 @@
       </div>
       <div id="p-pv-box"></div>
       </div>
-      <p class="ajuda">A prévia roda o código gerado de verdade: é o mesmo bloco que sai na saída ao lado, executando dentro de um quadro isolado que recebe um <b>endereço simulado</b> com os parâmetros da cobrança da seção 3. Os três botões acima trocam esse endereço — em <b>Código adulterado</b> um dígito do código Pix é trocado, exatamente como aconteceria se alguém mexesse no link. O que ainda difere da página publicada: o QR Code é desenhado por uma biblioteca baixada da internet, então no quadro ele só aparece depois que ela carrega; o botão do PayPal não é o botão de verdade (o SDK não roda na prévia) e sai como desenho; o botão “Já paguei” não abre o WhatsApp aqui; e o quadro não carrega o CSS do tema do site.</p>
+      <p class="ajuda">A prévia roda o código gerado de verdade: é o mesmo bloco que sai na saída ao lado, executando dentro de um quadro isolado que recebe um <b>endereço simulado</b> com os parâmetros da cobrança da seção 3. Os três botões acima trocam esse endereço — em <b>Código adulterado</b> um dígito do código Pix é trocado, exatamente como aconteceria se alguém mexesse no link. O que ainda difere da página publicada: o QR Code é desenhado por uma biblioteca baixada da internet, então no quadro ele só aparece depois que ela carrega; o botão do PayPal não é o botão de verdade (o SDK não roda na prévia) e sai como desenho; o botão “Já paguei” não abre o WhatsApp aqui (o quadro desliga a abertura de abas, e avisa em vermelho se não conseguir desligar); e o quadro não carrega o CSS do tema do site.</p>
     </div>
     <div>
       <div class="saida">
@@ -2206,6 +2218,343 @@
   <p class="ajuda">Na prática, os dois jeitos de isso incomodar: um cliente que <b>tenta pagar menos</b> do que foi combinado; e alguém que manda ao <b>seu cliente</b> um link forjado com valor <b>maior</b> — o cliente paga a mais, para você, achando que é o preço. Nos dois casos o que resta é <b>detectar</b>: <b>confira no extrato o valor recebido e a qual cobrança ele se refere, antes de entregar o trabalho</b>. Impedir exigiria um segredo que o cliente não pudesse ler, ou seja, um servidor — e este projeto não tem um, por decisão.</p>
   <p class="ajuda"><b>O que continua sendo por sua conta:</b> o Pix estático não confirma pagamento sozinho — ninguém avisa a página quando o dinheiro cai. O botão “Já paguei” serve para o cliente te chamar; a conferência é sua, no extrato.</p>
   <p class="ajuda"><b>Depois de publicar:</b> abra o endereço da página <b>sem nenhum parâmetro</b> e confirme que aparece a mensagem cordial. Depois abra um link de cobrança de verdade em <b>aba anônima</b> e confira que o valor da tela é o mesmo do aplicativo do banco ao ler o QR Code.</p>
+  </div>
+</div>
+
+<!-- ==================== CONSTRUTOR: MINI LOJA ==================== -->
+<div class="painel" id="painel-loja" role="tabpanel">
+  <p class="descricao"><b>Mini loja</b> — gera o código de uma <b>vitrine com carrinho</b> para colar num componente HTML de uma página do site. O visitante vê os produtos em grade com foto, filtra por categoria, clica num item para abrir o <b>cartão de detalhe na mesma página</b> (com a foto grande, a descrição e os opcionais), monta o carrinho ao lado e paga por <b>Pix</b>, <b>PayPal</b> ou os dois. Cupom, cobrança de sinal, quantidade por item e desconto no Pix são <b>as mesmas contas do Checkout</b> — a conta do dinheiro é escrita uma vez só e usada pelas duas abas. É um <b>catálogo com carrinho</b>, não uma loja completa: não há registro de pedidos, confirmação automática de pagamento nem estoque. Esses limites estão escritos na seção 6 e também <b>dentro da página gerada</b>, no rodapé do carrinho.</p>
+
+  <div class="secao primeira"><span class="secao-n">1</span> Como você recebe</div>
+  <div class="grade">
+    <div>
+      <fieldset>
+        <legend>Formas de pagamento</legend>
+        <div class="radios">
+          <label><input type="radio" name="m-metodo" value="ambos" checked><span>PayPal <b>e</b> Pix</span></label>
+          <label><input type="radio" name="m-metodo" value="paypal"><span>Somente PayPal</span></label>
+          <label><input type="radio" name="m-metodo" value="pix"><span>Somente Pix</span></label>
+        </div>
+        <label for="m-cod">Código desta loja <small>(letras sem acento, números, hífen e sublinhado)</small></label>
+        <input type="text" id="m-cod" value="LOJA" placeholder="LOJAFOTOS">
+        <p class="ajuda">Ele identifica o carrinho <b>no navegador do cliente</b> (é a chave do armazenamento) e abre o identificador de cada pedido, que é o que aparece no seu extrato. <b>Duas lojas no mesmo site precisam de códigos diferentes</b>, senão dividem o mesmo carrinho.</p>
+      </fieldset>
+      <fieldset id="m-pp-campos">
+        <legend>Conta PayPal</legend>
+        <label for="m-client">Client ID (Live) <small>(público)</small></label>
+        <input type="text" id="m-client" value="" placeholder="Cole aqui o Client ID Live da sua conta PayPal">
+        <div id="m-moeda-campo">
+          <label>Moeda</label>
+          <div class="radios">
+            <label><input type="radio" name="m-moeda" value="BRL" checked><span>Real (BRL)</span></label>
+            <label><input type="radio" name="m-moeda" value="USD"><span>Dólar (USD)</span></label>
+            <label><input type="radio" name="m-moeda" value="EUR"><span>Euro (EUR)</span></label>
+          </div>
+        </div>
+        <label>Cor dos botões do PayPal</label>
+        <div class="radios">
+          <label><input type="radio" name="m-ppcor" value="gold" checked><span>Dourado</span></label>
+          <label><input type="radio" name="m-ppcor" value="blue"><span>Azul</span></label>
+          <label><input type="radio" name="m-ppcor" value="silver"><span>Prateado</span></label>
+          <label><input type="radio" name="m-ppcor" value="white"><span>Branco</span></label>
+          <label><input type="radio" name="m-ppcor" value="black"><span>Preto</span></label>
+        </div>
+        <p class="ajuda alerta"><b>O preço tem aqui o mesmo limite do link de cobrança.</b> No Pix o valor viaja dentro do código que o aplicativo do banco lê, e o banco trava nele. No botão do PayPal o valor é calculado <b>no navegador do cliente</b>: tela, Pix e PayPal desta página nunca divergem entre si, mas alguém determinado monta um pagamento com outro valor. Não há como impedir sem um servidor, e este projeto não tem um. <b>Confira o valor recebido antes de produzir.</b></p>
+      </fieldset>
+    </div>
+    <div>
+      <fieldset id="m-pix-campos">
+        <legend>Dados do recebedor (Pix)</legend>
+        <label for="m-chave">Chave Pix <small>(máx. 77 caracteres; espaços e caracteres invisíveis das pontas são removidos ao sair do campo — no meio da chave eles impedem a geração, com aviso)</small></label>
+        <input type="text" id="m-chave" value="" placeholder="e-mail, telefone, CPF/CNPJ ou chave aleatoria">
+        <label for="m-nomer">Nome do recebedor <small>(máx. 25 caracteres, acentos removidos no código Pix)</small></label>
+        <input type="text" id="m-nomer" value="" maxlength="25" placeholder="nome que aparece no Pix">
+        <label for="m-cidade">Cidade <small>(máx. 15 caracteres, acentos removidos no código Pix)</small></label>
+        <input type="text" id="m-cidade" value="" maxlength="15" placeholder="cidade do recebedor">
+      </fieldset>
+      <fieldset id="m-descpix-campo">
+        <legend>Desconto para pagamento via Pix</legend>
+        <label for="m-descpix">Percentual de desconto no Pix <small>(0 = sem desconto; aplica sobre o total já com cupom)</small></label>
+        <input type="number" id="m-descpix" value="10" min="0" max="90" step="0.5">
+        <p class="ajuda alerta" id="m-descpix-aviso"><b>Com a cobrança de sinal ligada este campo não vale.</b> O Pix passa a cobrar o sinal, e o desconto do Pix não se aplica sobre o sinal — seria desconto dobrado, porque o sinal já sai de um total que pode ter cupom. O número acima fica guardado, mas <b>não entra no código gerado</b>.</p>
+      </fieldset>
+      <fieldset id="m-zap-fieldset">
+        <legend>Aviso de pagamento Pix via WhatsApp</legend>
+        <div class="radios">
+          <label><input type="radio" name="m-zap" value="sim" checked><span>Incluir botão "Já paguei"</span></label>
+          <label><input type="radio" name="m-zap" value="nao"><span>Não incluir</span></label>
+        </div>
+        <div id="m-zap-campo">
+          <label for="m-zapnum">WhatsApp de destino <small>(DDI+DDD+número, só dígitos)</small></label>
+          <input type="text" id="m-zapnum" value="" placeholder="5527999999999">
+        </div>
+        <p class="ajuda">A mensagem já vai com o identificador do pedido, os itens, o cupom e o valor. <b>Ao clicar nele o carrinho do cliente é esvaziado</b> — é o único momento em que a página sabe que a compra terminou. O Pix estático não avisa ninguém quando o dinheiro cai: a conferência é sua, no extrato.</p>
+      </fieldset>
+    </div>
+  </div>
+
+  <div class="secao"><span class="secao-n">2</span> Produtos do catálogo</div>
+  <div class="grade">
+    <div>
+      <fieldset>
+        <legend>Cadastrar produto</legend>
+        <p class="ajuda">De <b>15 a 50 produtos</b> é o tamanho para o qual esta vitrine foi desenhada. Cada produto pode ter os seus próprios itens opcionais, como no Checkout.</p>
+        <div class="caixa-editor">
+          <label for="m-pnome">Nome do produto</label>
+          <input type="text" id="m-pnome" placeholder="Álbum 20x30">
+          <label for="m-pdesc">Descrição <small>(opcional, aparece no cartão de detalhe)</small></label>
+          <input type="text" id="m-pdesc" placeholder="Capa dura, 30 páginas, impressão fine art">
+          <label for="m-ppreco">Preço</label>
+          <input type="number" id="m-ppreco" placeholder="420" min="0" step="0.01">
+          <label for="m-pcat">Categoria <small>(livre; a lista sugere as que você já usou)</small></label>
+          <input type="text" id="m-pcat" list="m-cat-lista" placeholder="Álbuns">
+          <datalist id="m-cat-lista"></datalist>
+          <label for="m-pimg">Foto do produto <small>(endereço completo; use <b>Usar</b> na galeria importada ao lado)</small></label>
+          <input type="text" id="m-pimg" placeholder="https://storage.alboom.ninja/...">
+          <label>Vende por quantidade? <small>(um ensaio se vende uma vez; um álbum se vende em vários)</small></label>
+          <div class="radios">
+            <label><input type="radio" name="m-pqtd" value="nao" checked><span>Não</span></label>
+            <label><input type="radio" name="m-pqtd" value="sim"><span>Sim <small>(com seletor de quantidade)</small></span></label>
+          </div>
+          <label>Itens opcionais deste produto</label>
+          <div class="dupla">
+            <input type="text" id="m-op-nome" placeholder="Caixa de presente">
+            <input type="number" id="m-op-preco" placeholder="80" min="0" step="0.01">
+          </div>
+          <div class="radios">
+            <label><input type="checkbox" id="m-op-qtd"><span>Este opcional vende por quantidade</span></label>
+          </div>
+          <div class="acoes"><button class="botao claro" id="m-op-add">Adicionar opcional</button></div>
+          <ul class="lista-imgs" id="m-op-lista"></ul>
+          <p class="vazio" id="m-op-vazio">Nenhum opcional neste produto.</p>
+          <label>Seleção dos opcionais</label>
+          <div class="radios">
+            <label><input type="radio" name="m-opsel" value="unico" checked><span>Apenas 1</span></label>
+            <label><input type="radio" name="m-opsel" value="multiplo"><span>Vários</span></label>
+          </div>
+          <div id="m-opnenhum-campo">
+            <label>Permitir "sem opcional"?</label>
+            <div class="radios">
+              <label><input type="radio" name="m-opnenhum" value="nao" checked><span>Não</span></label>
+              <label><input type="radio" name="m-opnenhum" value="sim"><span>Sim</span></label>
+            </div>
+          </div>
+          <div class="acoes">
+            <button class="botao" id="m-prod-salvar">Adicionar produto</button>
+            <button class="botao claro" id="m-prod-cancelar" style="display:none">Cancelar edição</button>
+          </div>
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend>Importar as fotos de uma galeria inteira</legend>
+        <label for="m-imp-link">Link da galeria <small>(o endereço da barra do navegador)</small></label>
+        <input type="text" id="m-imp-link" placeholder="https://www.fotocerta.com.br/gallery/121894-estudio-tematico">
+        <label for="m-imp-fonte">Código-fonte da página <small>(Cmd ⌥ U, Cmd A, Cmd C — cole aqui)</small></label>
+        <textarea id="m-imp-fonte" spellcheck="false" placeholder="Cole aqui o codigo-fonte inteiro da pagina da galeria."></textarea>
+        <div class="acoes"><button class="botao claro" id="m-imp-conferir">Conferir a galeria</button></div>
+        <p class="ajuda s-alerta" id="m-imp-resultado" style="display:none"></p>
+        <p class="lista-conta" id="m-imp-conta" style="display:none"></p>
+        <ul class="lista-imgs lista-rolagem" id="m-imp-lista"></ul>
+        <p class="ajuda">Isto é a mesma leitura que a aba Slideshow faz, com outro destino: em vez de virar uma lista de fotos, os endereços ficam aqui para você <b>associar ao produto que estiver cadastrando</b>. Nada do que você cola nestes dois campos é salvo.</p>
+      </fieldset>
+    </div>
+    <div>
+      <fieldset>
+        <legend>Catálogo</legend>
+        <p class="lista-conta" id="m-prod-conta" style="display:none"></p>
+        <ul class="lista-imgs lista-rolagem" id="m-prod-lista"></ul>
+        <p class="vazio" id="m-prod-vazio">Nenhum produto cadastrado ainda. Use o formulário ao lado.</p>
+        <div class="acoes"><button class="botao claro" id="m-prod-limpar" disabled>Limpar catálogo</button></div>
+        <p class="ajuda" id="m-cat-aviso" style="display:none"></p>
+        <div id="m-qtdmax-campo">
+          <label for="m-qtdmax">Quantidade máxima por item <small>(de 2 a 99; fora da faixa o campo se corrige sozinho)</small></label>
+          <input type="number" id="m-qtdmax" value="10" min="2" max="99" step="1">
+          <p class="ajuda">Vale para <b>todos</b> os itens vendidos por quantidade. O seletor vai de <b>0</b> até esse número, e no carrinho <b>0 tira a linha</b>.</p>
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend>Cupons de desconto</legend>
+        <label for="m-cp-cod">Código do cupom</label>
+        <input type="text" id="m-cp-cod" placeholder="NATAL10">
+        <label>Tipo de desconto</label>
+        <div class="radios">
+          <label><input type="radio" name="m-cp-tipo" value="pct_produto"><span>% sobre os produtos <small>(sem os opcionais)</small></span></label>
+          <label><input type="radio" name="m-cp-tipo" value="pct_total" checked><span>% sobre o total</span></label>
+          <label><input type="radio" name="m-cp-tipo" value="fixo"><span>Valor fixo no total</span></label>
+        </div>
+        <div class="dupla">
+          <input type="number" id="m-cp-valor" placeholder="Valor do desconto" min="0" step="0.01">
+          <input type="date" id="m-cp-val">
+        </div>
+        <p class="ajuda">O segundo campo é a validade (opcional — vale até o fim do dia; vazio = sem validade).</p>
+        <div class="acoes"><button class="botao claro" id="m-cp-add">Adicionar cupom</button></div>
+        <ul class="lista-imgs" id="m-cp-lista"></ul>
+        <p class="vazio" id="m-cp-vazio">Nenhum cupom. O campo de cupom não aparecerá no carrinho.</p>
+        <p class="ajuda alerta"><b>Cupom não é secreto.</b> Ele fica escrito dentro do código desta página, e qualquer visitante que abrir o código-fonte consegue lê-lo. Serve para divulgar um desconto, não para dar desconto a uma pessoa só. Isto já vale hoje no Checkout.</p>
+      </fieldset>
+      <fieldset>
+        <legend>Cobrança de sinal</legend>
+        <div class="radios">
+          <label><input type="radio" name="m-sinal" value="nao" checked><span>Cobrar o valor cheio</span></label>
+          <label><input type="radio" name="m-sinal" value="sim"><span>Cobrar sinal agora, saldo na entrega</span></label>
+        </div>
+        <div id="m-sinal-campos">
+          <div class="radios">
+            <label><input type="radio" name="m-sinaltipo" value="pct" checked><span>Percentual do total</span></label>
+            <label><input type="radio" name="m-sinaltipo" value="fixo"><span>Valor fixo</span></label>
+          </div>
+          <div id="m-sinalpct-campo">
+            <label for="m-sinalpct">Percentual do sinal <small>(de 1 a 99)</small></label>
+            <input type="number" id="m-sinalpct" value="30" min="1" max="99" step="1">
+          </div>
+          <div id="m-sinalfixo-campo">
+            <label for="m-sinalfixo">Valor fixo do sinal</label>
+            <input type="number" id="m-sinalfixo" value="100" min="0.01" step="0.01">
+          </div>
+        </div>
+      </fieldset>
+    </div>
+  </div>
+
+  <div class="secao"><span class="secao-n">3</span> Vitrine, categorias e peso das fotos</div>
+  <div class="grade">
+    <div>
+      <fieldset>
+        <legend>Grade da vitrine</legend>
+        <label for="m-cols">Colunas no computador <small>(de 2 a 5)</small></label>
+        <input type="number" id="m-cols" value="3" min="2" max="5" step="1">
+        <label for="m-mob">Largura de corte do celular <small>(px, de 320 a 1024)</small></label>
+        <input type="number" id="m-mob" value="760" min="320" max="1024" step="10">
+        <p class="ajuda">Abaixo dessa largura o carrinho deixa de ficar ao lado e vai para baixo da vitrine, e a grade cai para no máximo 2 colunas. Os dois botões da prévia atravessam esse corte, então dá para conferir os dois layouts.</p>
+        <label>Proporção do quadro de cada foto</label>
+        <div class="radios">
+          <label><input type="radio" name="m-prop" value="1 / 1" checked><span>Quadrado</span></label>
+          <label><input type="radio" name="m-prop" value="3 / 2"><span>3:2 (horizontal)</span></label>
+          <label><input type="radio" name="m-prop" value="4 / 5"><span>4:5 (vertical)</span></label>
+        </div>
+        <label>Mostrar os botões de filtro por categoria?</label>
+        <div class="radios">
+          <label><input type="radio" name="m-filtro" value="sim" checked><span>Sim <small>("Todos" é o padrão)</small></span></label>
+          <label><input type="radio" name="m-filtro" value="nao"><span>Não</span></label>
+        </div>
+        <p class="ajuda">Os botões só aparecem se houver ao menos um produto com categoria. <b>Produto sem categoria aparece em "Todos" e em mais nada.</b></p>
+      </fieldset>
+    </div>
+    <div>
+      <fieldset>
+        <legend>Tamanho das fotos pedidas</legend>
+        <label for="m-imgvit">Largura da miniatura da vitrine <small>(px, de 200 a 900)</small></label>
+        <input type="number" id="m-imgvit" value="400" min="200" max="900" step="20">
+        <label for="m-imgdet">Largura da foto do cartão de detalhe <small>(px, de 400 a 1600)</small></label>
+        <input type="number" id="m-imgdet" value="1000" min="400" max="1600" step="20">
+        <p class="ajuda" id="m-peso" style="display:none"></p>
+        <p class="ajuda"><b>Por que isto é um campo e não um detalhe.</b> As fotos do storage da Alboom saem todas com 1200 px de largura e de <b>157 a 868 KB</b> cada (medido). Cinquenta delas numa grade seriam dezenas de megabytes. A página pede cada foto ao <b>redimensionador da Alboom</b> na largura escolhida aqui, e só pede a foto grande quando alguém abre o cartão de detalhe.</p>
+        <p class="ajuda alerta"><b>Foto que não passa pelo redimensionador não encolhe.</b> O redimensionador é um serviço da Alboom sobre o storage dela, e só alcança endereços completos em <code>storage.alboom.ninja</code> ou <code>alfred.alboompro.com</code>. Qualquer outra — outro servidor, ou um caminho do próprio site como <code>/fotos/promo.jpg</code> — vai <b>inteira</b> para a vitrine. O cadastro avisa quando isso acontece, e na lista do catálogo essas linhas aparecem com a origem em destaque. Quem decide é a <b>mesma função</b> que roda dentro do código gerado, então o aviso não tem como discordar da página publicada.</p>
+      </fieldset>
+    </div>
+  </div>
+
+  <div class="secao"><span class="secao-n">4</span> Textos e aparência</div>
+  <div class="grade">
+    <div>
+      <fieldset>
+        <legend>Textos</legend>
+        <label for="m-t1">Título da loja</label>
+        <input type="text" id="m-t1" value="Nossa loja">
+        <label for="m-t10">Título do carrinho</label>
+        <input type="text" id="m-t10" value="Seu carrinho">
+        <label for="m-t2">Rótulo dos opcionais</label>
+        <input type="text" id="m-t2" value="Itens opcionais">
+        <label for="m-t3">Rótulo do total</label>
+        <input type="text" id="m-t3" value="Total">
+        <label for="m-t7">Botão de adicionar ao carrinho</label>
+        <input type="text" id="m-t7" value="Adicionar ao carrinho">
+        <label for="m-t11">Botão de voltar à vitrine</label>
+        <input type="text" id="m-t11" value="Voltar para a vitrine">
+        <label for="m-t4">Botão do Pix</label>
+        <input type="text" id="m-t4" value="Pagar com Pix">
+        <label for="m-t8">Rótulo do sinal</label>
+        <input type="text" id="m-t8" value="Sinal agora">
+        <label for="m-t9">Rótulo do saldo</label>
+        <input type="text" id="m-t9" value="Restante na entrega">
+        <label for="m-t12">Rótulo do resumo</label>
+        <input type="text" id="m-t12" value="Resumo para conferencia">
+        <label for="m-t5">Mensagem de pagamento aprovado <small>(PayPal)</small></label>
+        <input type="text" id="m-t5" value="Pagamento aprovado! Em breve entramos em contato.">
+        <label for="m-t6">Mensagem de erro no pagamento</label>
+        <input type="text" id="m-t6" value="Nao foi possivel concluir o pagamento. Tente novamente.">
+      </fieldset>
+    </div>
+    <div>
+      <fieldset>
+        <legend>Aparência</legend>
+        <label for="m-larg">Largura máxima do bloco <small>(px, de 600 a 1600)</small></label>
+        <input type="number" id="m-larg" value="1080" min="600" max="1600" step="20">
+        <label>Cor de destaque</label>
+        <div class="cor-linha"><input type="color" id="m-c1" value="#0F3A30"><input type="text" id="m-c1-t" value="#0F3A30"></div>
+        <label>Cor do fundo dos cartões</label>
+        <div class="cor-linha"><input type="color" id="m-c2" value="#ffffff"><input type="text" id="m-c2-t" value="#ffffff"></div>
+        <label>Cor do texto</label>
+        <div class="cor-linha"><input type="color" id="m-c3" value="#333333"><input type="text" id="m-c3-t" value="#333333"></div>
+      </fieldset>
+      <fieldset>
+        <legend>Resumo copiável</legend>
+        <div class="radios">
+          <label><input type="radio" name="m-resumo" value="sim" checked><span>Mostrar o resumo do pedido no carrinho</span></label>
+          <label><input type="radio" name="m-resumo" value="nao"><span>Não mostrar</span></label>
+        </div>
+        <p class="ajuda">O resumo lista os itens, o cupom, o total e o sinal, com um botão de copiar — é o que o cliente manda para você quando quiser combinar alguma coisa antes de pagar.</p>
+      </fieldset>
+    </div>
+  </div>
+
+  <div class="secao"><span class="secao-n">5</span> Biblioteca de presets</div>
+  <div class="grade" id="fcp-m-box"></div>
+
+  <div class="secao"><span class="secao-n">6</span> Prévia e código gerado</div>
+  <div class="acoes" style="margin-bottom:14px">
+    <button class="botao" id="m-gerar">Gerar código</button>
+    <button class="botao claro" id="m-atualizar">Atualizar prévia</button>
+  </div>
+  <div class="grade">
+    <div>
+      <div class="pv-area">
+      <div class="c-pv-modos">
+      <span class="rotulo">Ver a loja em:</span>
+      <button type="button" class="botao mini" id="m-pv-desk" aria-pressed="true">Computador</button>
+      <button type="button" class="botao mini claro" id="m-pv-cel" aria-pressed="false">Celular</button>
+      </div>
+      <div id="m-pv-box"></div>
+      </div>
+      <p class="ajuda">A prévia <b>executa o código gerado de verdade</b>: é o mesmo bloco que sai na caixa ao lado, rodando dentro de um quadro isolado. Filtro, cartão de detalhe, carrinho, cupom e o Pix funcionam aqui como funcionarão na página. <b>O que ainda difere da página publicada:</b> o carrinho do quadro é guardado numa memória de mentira (o quadro não suja o carrinho do seu navegador, e por isso ele volta vazio a cada atualização da prévia); o QR Code é desenhado por uma biblioteca baixada da internet, então só aparece depois que ela carrega; o botão do PayPal <b>não é o botão de verdade</b> — o SDK não roda aqui e ele sai como desenho, com o <b>valor que iria na ordem</b> medido dentro do próprio bloco; o botão "Já paguei" <b>não abre o WhatsApp</b> — o quadro desliga a abertura de abas, e avisa em vermelho se não conseguir desligar; e o quadro não carrega o CSS do tema do site.</p>
+    </div>
+    <div>
+      <div class="saida">
+      <h3>Código da loja <small>(componente HTML)</small>
+      <button class="botao mini" id="m-copy" style="margin-left:8px">Copiar</button>
+      <span class="aviso-copiado" id="m-cop">Copiado!</span>
+      </h3>
+      <textarea id="m-out" readonly spellcheck="false" style="height:420px" placeholder="O código da loja aparece aqui."></textarea>
+      <p class="ajuda">Mudar produto, preço, cupom ou aparência <b>não</b> apaga o que está nesta caixa: quem avisa que o código ficou velho é o <b>painel consolidado</b>, ao lado das abas. Clique em <b>Gerar código</b> de novo antes de colar.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="instrucoes">
+  <h3>Instrução de uso do código gerado</h3>
+  <p class="ajuda"><b>Onde colar:</b> crie no Prosite a página da loja, ponha nela um <b>componente HTML</b> e cole ali o código acima. Publique — e teste na página <b>publicada</b>, não no editor: o Prosite processa o código na publicação.</p>
+  <p class="ajuda"><b>Como o cliente usa:</b> ele vê a grade, filtra por categoria se você tiver criado categorias, clica num item para abrir o cartão de detalhe na mesma página, escolhe os opcionais e a quantidade, adiciona ao carrinho e paga. Não há navegação entre páginas: tudo acontece nesta.</p>
+  <p class="ajuda"><b>Para atualizar o catálogo:</b> mude aqui, clique em <b>Gerar código</b> e cole por cima. É o mesmo fluxo de todas as outras abas — o catálogo vive dentro do código da página.</p>
+  <h3>O que esta loja não faz — leia antes de publicar</h3>
+  <p class="ajuda alerta"><b>Não há registro de pedidos.</b> Um pedido existe como três rastros: a mensagem que chega no seu WhatsApp, a transação no PayPal e o Pix na sua conta. Não existe uma lista de pedidos em lugar nenhum, e nenhuma tela para consultá-los.</p>
+  <p class="ajuda alerta"><b>Não há confirmação automática.</b> Nem o Pix estático nem o PayPal têm para onde avisar esta página quando o dinheiro cai. <b>Você confere e libera à mão</b>, pelo extrato.</p>
+  <p class="ajuda alerta"><b>Não há estoque.</b> Todos os itens são tratados como <b>sob encomenda</b>: o mesmo item pode ser comprado quantas vezes for. Se um dia você vender uma peça única, saiba que <b>não há como esta página impedir que duas pessoas a comprem</b> — impedir exigiria um servidor guardando o que já foi vendido, e este projeto não tem um.</p>
+  <p class="ajuda alerta"><b>O cupom não é secreto</b> — está dentro do código desta página, à vista de quem abrir o código-fonte.</p>
+  <p class="ajuda alerta"><b>O carrinho não atravessa aparelhos.</b> Ele fica no armazenamento do navegador: montado no celular, no computador aparece vazio. O carrinho sobrevive a recarregar a página; <b>o cupom não</b> — o cliente digita de novo (medido). E se você regerar o bloco com o catálogo mudado, as linhas que não existem mais são <b>descartadas com aviso</b> no carrinho do cliente, em vez de virarem uma compra de outro item.</p>
+  <p class="ajuda alerta"><b>O preço tem o mesmo limite do link de cobrança.</b> Tela, Pix e PayPal desta página não divergem entre si — eles leem a mesma conta. Mas o valor do PayPal é montado no navegador do cliente, e alguém determinado monta um pagamento com outro valor. A garantia é de <b>coerência</b>, não de valor: <b>confira o extrato antes de produzir</b>.</p>
+  <p class="ajuda alerta"><b>Uma Mini loja por página.</b> Dois blocos desta aba na mesma página do Prosite <b>não funcionam</b>: os dois procuram a mesma caixa (<code>id="fcmloja"</code>), então o primeiro bloco desenha o catálogo do segundo e o segundo não desenha nada. É a mesma limitação do Checkout (<code>id="fcuni"</code>), e ela é conhecida e não corrigida — corrigir mudaria o identificador dos dois blocos e de todo código já colado no site. Duas lojas, duas páginas.</p>
+  <p class="ajuda alerta"><b>Códigos de loja diferentes, mesmo em páginas diferentes.</b> O código da loja é a chave do carrinho no navegador do cliente. Se duas lojas usarem o mesmo código, o carrinho montado numa é lido pela outra — e agora ele é <b>descartado com aviso na tela do cliente</b> (cada bloco carrega a assinatura do próprio catálogo, e recusa carrinho que não seja dele). O aviso conserta o sintoma, não a causa: use códigos diferentes.</p>
+  <p class="ajuda"><b>Depois de publicar:</b> abra a página em <b>aba anônima</b>, monte um carrinho, gere o Pix e confira no aplicativo do banco que o valor lido do QR Code é o mesmo que a página mostra. Depois recarregue a página e confirme que o carrinho continua lá.</p>
   </div>
 </div>
 
@@ -2554,6 +2903,142 @@ function fcMoedaFmtGer(soReal){
   return c;
 }
 
+/* ===== o motor de dinheiro do carrinho: fonte unica =====
+   O que este bloco guarda e a CONTA -- cupom, sinal, desconto Pix e o seletor de quantidade --,
+   escrita uma vez como TEXTO e emitida identica dentro de cada bloco entregue que precise dela.
+   E o mesmo padrao de FC_PIX_SRC e de fcMoedaFmtGer: unifica-se a fonte que ESCREVE, nunca a
+   saida. Duas abas cobram dinheiro com estas regras (Checkout e Mini loja); uma terceira copia
+   e onde uma delas ganha uma regra que a outra nao ganha -- e aqui divergir nao e cosmetico,
+   e o cliente pagando um numero e a tela mostrando outro.
+   CONTRATO POR NOME, e nao por parametro. As funcoes abaixo chamam, por nome, coisas que o
+   bloco hospedeiro tem de declarar antes delas:
+     subtotal()      soma dos itens escolhidos, ja com os opcionais;
+     somaProdutos()  soma dos itens escolhidos SEM os opcionais (e o que 'pct_produto' desconta);
+     cupomAtivo      o cupom em vigor, ou null;
+     SINAL_TIPO / SINAL_VALOR / DESCONTO_PIX / TXT_SINAL_MAIOR / TXT_SINAL_ZERO.
+   Esses dois primeiros sao justamente o que NAO da para compartilhar: cada bloco le a escolha
+   do cliente da sua propria marcacao (o Checkout, de radios e checkboxes; a Mini loja, das
+   linhas do carrinho). O que se compartilha e tudo o que vem depois deles.
+   O texto abaixo e byte a byte o que o Checkout ja emitia -- a extracao nao pode mudar o que
+   sai, e a regressao das saidas existe para provar isso. */
+var FC_CARRINHO_SRC={};
+FC_CARRINHO_SRC.cupomVigente=
+  'function cupomVigente(cp){\n'+
+  'if(!cp.validade)return true;\n'+
+  "var lim=new Date(cp.validade+'T23:59:59');\n"+
+  'return new Date()<=lim;\n}\n\n';
+/* ARREDONDAMENTO EM CENTAVOS, NUM LUGAR SO -- e por que ele existe.
+   O desconto percentual produz centavo quebrado (600,00 com 5% => 570,00; 10,50 com 5% =>
+   9,975), e ate esta correcao o total saia com essa terceira casa intacta. Dai para baixo
+   cada consumidor arredondava do seu jeito: moedaFmt e o PayPal por toFixed(2), totalPix por
+   Math.round. Nos numeros terminados em meio centavo os dois discordam -- toFixed(2) de 9.975
+   devolve "9.97" (o double mais proximo de 9,975 e um fio MENOR que 9,975), Math.round devolve
+   9,98. Medido no bloco entregue: tela R$ 9,97, resumo R$ 9,97, PayPal 9.97 BRL e campo 54 do
+   Pix igual a 9.98 -- o cliente pagava um centavo a mais do que leu, e a aba prometia que isso
+   nao acontecia. Varredura de 2.002.000 combinacoes preco x cupom: 60.097 divergiam (3,00%),
+   sempre um centavo A MAIS no Pix.
+   O conserto e o mesmo padrao de sempre: arredondar na ORIGEM, uma vez, e deixar todo mundo
+   ler o mesmo numero. Duas linhas mudam:
+     descontoAtual -- porque ele TAMBEM aparece na tela e no resumo copiavel. Sem arredondar
+       aqui, o resumo imprimiria "Subtotal 10,50 / Desconto -0,53 / Total 9,98", tres numeros
+       que nao fecham entre si;
+     total -- que passa a ser sempre um valor de centavos exatos. totalPix, sinalAgora e
+       saldoDepois continuam com o Math.round deles, que a partir daqui e identidade: manter o
+       arredondamento la e barato e protege quem um dia mexer na conta acima.
+   Math.round e nao toFixed porque e a regra comercial (meio centavo sobe) e porque e o que o
+   resto deste motor ja fazia; a resposta de toFixed em ".xx5" e artefato do binario, nao regra.
+   Isto MUDA o que a aba Checkout emite, de proposito: o carrinho publicado hoje tem o mesmo
+   defeito, e a regressao byte a byte existe para pegar mudanca nao intencional -- esta e. */
+FC_CARRINHO_SRC.descontoAtual=
+  'function descontoAtual(){\n'+
+  'if(!cupomAtivo)return 0;\n'+
+  'var s=subtotal(),d=0;\n'+
+  "if(cupomAtivo.tipo==='pct_produto')d=somaProdutos()*cupomAtivo.valor/100;\n"+
+  "else if(cupomAtivo.tipo==='pct_total')d=s*cupomAtivo.valor/100;\n"+
+  'else d=cupomAtivo.valor;\n'+
+  'if(d>s)d=s;\nif(d<0)d=0;\nreturn Math.round(d*100)/100;\n}\n\n';
+FC_CARRINHO_SRC.total=
+  '/* Em CENTAVOS EXATOS, e este e o unico lugar onde o total e arredondado: a tela, o resumo\n'+
+  '   copiavel, o QR do Pix, o Copia e Cola, o valor da ordem do PayPal, o sinal e o saldo leem\n'+
+  '   todos daqui. Sem este arredondamento, toFixed(2) e Math.round discordam em um centavo nos\n'+
+  '   totais terminados em meio centavo, e a pagina mostra um valor e o banco cobra outro. */\n'+
+  'function total(){\nreturn Math.round((subtotal()-descontoAtual())*100)/100;\n}\n\n';
+FC_CARRINHO_SRC.sinal=
+  '/* O sinal sai do total JA com o cupom aplicado. Arredondado a duas casas aqui, uma vez\n'+
+  '   so: e este numero que vai para o PayPal, para o QR do Pix, para a tela e para a\n'+
+  '   mensagem do WhatsApp -- quatro leituras do MESMO valor, sem recalculo em nenhuma. */\n'+
+  'function sinalAgora(){\n'+
+  "var v=(SINAL_TIPO==='fixo')?SINAL_VALOR:(total()*SINAL_VALOR/100);\n"+
+  'return Math.round(v*100)/100;\n}\n\n'+
+  'function saldoDepois(){\n'+
+  'var d=total()-sinalAgora();\n'+
+  'if(d<0)d=0;\n'+
+  'return Math.round(d*100)/100;\n}\n\n'+
+  '/* UMA recusa so para o sinal, e ela devolve o MOTIVO: a linha vermelha do carrinho, o\n'+
+  '   clique do PayPal, o botao do Pix e o resumo copiavel leem daqui. Com quatro testes\n'+
+  '   separados, um poderia discordar dos outros -- e foi o que aconteceu com o resumo, que\n'+
+  '   imprimia "Total 250 / Sinal 700" enquanto as duas pontas de pagamento recusavam.\n'+
+  '   Sinal maior que o total e recusado, nao aparado: aparar cobraria um valor que o\n'+
+  '   operador nao configurou. Sinal que arredonda para zero tambem e recusado -- e o\n'+
+  '   espelho da guarda de total zero, que o pedido inteiro ja tinha. Com o pedido em zero\n'+
+  '   quem avisa e a recusa de total zero: dois avisos ao mesmo tempo se esconderiam. */\n'+
+  'function sinalRecusa(){\n'+
+  'if(total()<0.01)return \'\';\n'+
+  'if(sinalAgora()>total())return TXT_SINAL_MAIOR;\n'+
+  'if(sinalAgora()<0.01)return TXT_SINAL_ZERO;\n'+
+  "return '';\n}\n\n";
+/* As tres formas de totalPix sao mutuamente exclusivas e a escolha depende de tres
+   sinalizadores -- por isso ela e uma funcao, e nao um campo. Sem Pix nao se emite nada.
+   O ramo do meio e o que mais custaria repetir: com sinal ligado, o Pix cobra o SINAL, e o
+   desconto do Pix nao entra porque aplica-lo sobre o sinal seria desconto dobrado (o sinal ja
+   sai de um total que pode ter cupom). Quem gera zera o desconto na origem; aqui fica so a
+   consequencia. */
+function fcTotalPixSrc(descpix,usaPix,usaSinal){
+  if(descpix>0){
+    return 'function totalPix(){\n'+
+           'var t=total();\n'+
+           'if(DESCONTO_PIX>0)t=t*(1-DESCONTO_PIX/100);\n'+
+           'return Math.round(t*100)/100;\n}\n\n';
+  }
+  if(usaPix&&usaSinal)return 'function totalPix(){return sinalAgora();}\n\n';
+  if(usaPix)return 'function totalPix(){return Math.round(total()*100)/100;}\n\n';
+  return '';
+}
+/* O seletor de quantidade: um construtor so para todos os usos (produto, opcional, linha do
+   carrinho). O prefixo das classes entra por parametro porque cada bloco tem o seu -- fcu- no
+   Checkout, fcm- na Mini loja --, e dois blocos na MESMA pagina com as mesmas classes se
+   pisariam. Passando 'fcu' o texto sai byte a byte igual ao que o Checkout ja emitia.
+   O clamp em 0 e em QUANTIDADE_MAXIMA vive aqui, e e o motivo de a funcao ser compartilhada:
+   0 significa "item nao escolhido" nos dois blocos, e uma copia que esquecesse o piso deixaria
+   quantidade negativa entrar na conta do dinheiro. */
+function fcFazQtdSrc(pref){
+  return 'function fazQtd(inicial,aoMudar){\n'+
+    "var cx=document.createElement('div');cx.className='"+pref+"-qtd';\n"+
+    'var atual=inicial;\n'+
+    "var menos=document.createElement('button');menos.type='button';menos.className='"+pref+"-qtd-b';menos.textContent='-';menos.setAttribute('aria-label','Diminuir a quantidade');\n"+
+    "var vis=document.createElement('span');vis.className='"+pref+"-qtd-v';vis.textContent=String(inicial);\n"+
+    "var mais=document.createElement('button');mais.type='button';mais.className='"+pref+"-qtd-b';mais.textContent='+';mais.setAttribute('aria-label','Aumentar a quantidade');\n"+
+    'function por(n){\n'+
+    'if(n<0)n=0;\n'+
+    'if(n>QUANTIDADE_MAXIMA)n=QUANTIDADE_MAXIMA;\n'+
+    'if(n===atual)return;\n'+
+    'atual=n;vis.textContent=String(n);aoMudar(n);\n}\n'+
+    "menos.addEventListener('click',function(){por(atual-1);});\n"+
+    "mais.addEventListener('click',function(){por(atual+1);});\n"+
+    'cx.appendChild(menos);cx.appendChild(vis);cx.appendChild(mais);\n'+
+    'return cx;\n}\n';
+}
+/* O CSS do seletor anda junto do construtor: separar os dois deixaria um bloco com o
+   comportamento certo e a aparencia de outro. 'raiz' e o seletor da caixa do bloco e
+   'destaque' e a cor da borda ao passar o mouse -- os dois entram por parametro pelo mesmo
+   motivo do prefixo. */
+function fcQtdCssGer(raiz,pref,destaque){
+  return raiz+' .'+pref+'-qtd{display:flex;align-items:center;gap:6px;flex-shrink:0}\n'+
+    raiz+' .'+pref+'-qtd-b{border:1px solid #d8d2c4;border-radius:6px;background:#fff;color:inherit;width:26px;height:26px;padding:0;line-height:1;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit}\n'+
+    raiz+' .'+pref+'-qtd-b:hover{border-color:'+destaque+'}\n'+
+    raiz+' .'+pref+'-qtd-v{min-width:22px;text-align:center;font-size:13px;font-weight:600}\n';
+}
+
 /* ===== chave Pix: limpeza e limites do padrao BR Code =====
    NOME_RECEBEDOR e CIDADE ja passavam por semAcento() dentro do bloco entregue; a chave ia
    crua para o tlv('01', ...). Um espaco nao-quebravel vindo de copiar-e-colar do app do banco
@@ -2648,10 +3133,23 @@ function fcPvShim(o){
   s+='  }\n';
   s+="  trocar('localStorage');trocar('sessionStorage');\n";
   s+=o.extras||'';
+  /* window.open: neutralizado em toda previa cujo bloco tenha botao que abre o WhatsApp.
+     Estava so na aba Captacao de leads, e por isso o "Ja paguei" das previas do Checkout, do
+     Link de cobranca e da Mini loja abria ABA DE VERDADE em api.whatsapp.com, com o numero do
+     operador e um pedido de mentira -- em duas das tres a propria aba afirmava por escrito que
+     isso nao acontecia. E do AMBIENTE da previa, nunca do bloco entregue: o codigo que o
+     operador cola continua abrindo o WhatsApp como sempre.
+     Entra por sinalizador, e nao para todas as abas, porque a mensagem de falha descreve uma
+     consequencia -- anunciar "pode abrir o WhatsApp numa aba nova" na previa do Slideshow, que
+     nao tem botao nenhum de WhatsApp, seria aviso sobre coisa que nao existe. */
+  if(o.semAbrir)s+='  try{window.open=function(){return null;};window.open.fcPvSemAbrir=true;}catch(e){}\n';
   s+='  var falhou=[];\n';
   s+="  if(!instalado('localStorage'))falhou.push('localStorage');\n";
   s+="  if(!instalado('sessionStorage'))falhou.push('sessionStorage');\n";
   s+=o.conferencias||'';
+  /* conferida DEPOIS das conferencias da aba, para a ordem da lista continuar a de antes na
+     unica aba que ja tinha esta troca (Captacao de leads: foco e so entao abertura). */
+  if(o.semAbrir)s+='  try{if(!window.open.fcPvSemAbrir)falhou.push(\'abertura de aba nova\');}catch(e){falhou.push(\'abertura de aba nova\');}\n';
   s+='  if(falhou.length){\n';
   s+="    var av=document.createElement('div');\n";
   s+="    av.id='"+o.pref+"-pv-aviso-shim';\n";
@@ -2661,6 +3159,86 @@ function fcPvShim(o){
   s+='  }\n';
   s+=o.depois||'';
   s+='})();\n</scr'+'ipt>\n';
+  return s;
+}
+/* ===== a sonda do botao do PayPal nas previas: fonte unica =====
+   O SDK do PayPal nao roda em previa nenhuma -- baixa-lo mandaria o Client ID do operador para
+   fora a cada remontagem e, com o campo ainda vazio, desenharia um erro de pagamento falso. No
+   lugar dele o shim intercepta o pedido do script, desenha o botao (mockPP) e EXERCITA a
+   configuracao que o bloco passou para paypal.Buttons: chama o onClick do proprio bloco (com
+   reject/resolve de mentira) e o createOrder do proprio bloco (com order.create devolvendo o
+   objeto), e mostra o valor que iria na ordem e a decisao que o clique tomaria. E assim que a
+   previa prova, medido e nao presumido, que o valor do PayPal e o mesmo da tela.
+   A sonda RESTAURA a mensagem que o onClick tiver escrito: sonda que deixa rastro mostraria
+   uma recusa velha depois de o pedido voltar a ser valido.
+   Duas abas emitem carrinho com PayPal (Checkout e Mini loja) e as duas precisam disto. O que
+   muda entre elas sao tres nomes -- o id da raiz do bloco, a classe da linha de mensagem e o id
+   da caixa do desenho --, e por isso eles entram por parametro. Passando os do Checkout, o
+   texto sai byte a byte igual ao que ele ja emitia. */
+function fcPvSondaPP(o){
+  var s='';
+  s+="  var DESENHO_PP='"+escJs(mockPP(o.ppcor))+"';\n";
+  s+='  var inserir=document.head.appendChild;\n';
+  s+='  document.head.appendChild=function(n){\n';
+  s+="    if(n&&n.tagName==='SCRIPT'&&/paypal\\.com/.test(String(n.src||''))){\n";
+  s+='      window.paypal={Buttons:function(bt){return {render:function(alvo){\n';
+  s+='        if(!alvo)return;\n';
+  s+="        var caixa=document.createElement('div');\n";
+  s+="        caixa.id='"+o.caixaId+"';\n";
+  s+='        caixa.setAttribute(\'style\',\'border:1px dashed #b9b3a4;border-radius:8px;padding:6px 8px 10px\');\n';
+  s+="        alvo.innerHTML='';alvo.appendChild(caixa);\n";
+  s+='        function sondar(){\n';
+  s+="          var raiz=document.getElementById(\'"+o.raizId+"\');\n";
+  s+="          var cx=raiz?raiz.querySelector(\'."+o.msgSel+"\'):null;\n";
+  s+="          var antesT=cx?cx.textContent:'',antesC=cx?cx.className:'';\n";
+  s+='          var decisao=null,motivo=\'\';\n';
+  s+='          try{\n';
+  s+="            if(bt&&bt.onClick){\n";
+  s+="              var r=bt.onClick(null,{reject:function(){return 'RECUSA';},resolve:function(){return 'ACEITA';}});\n";
+  s+="              decisao=(r==='RECUSA')?'recusa':'aceita';\n";
+  s+="              if(cx&&cx.textContent!==antesT)motivo=cx.textContent;\n";
+  s+='            }\n';
+  s+='          }catch(e){decisao=\'erro\';motivo=String(e&&e.message||e);}\n';
+  s+='          if(cx){cx.textContent=antesT;cx.className=antesC;}\n';
+  s+="          var valor='',descricao='';\n";
+  s+='          try{\n';
+  s+="            var ped=bt.createOrder(null,{order:{create:function(o){return o;}}});\n";
+  s+='            var am=ped.purchase_units[0].amount;\n';
+  s+="            valor=am.value+' '+am.currency_code;\n";
+  s+='            descricao=ped.purchase_units[0].description;\n';
+  s+="          }catch(e2){valor='(erro: '+String(e2&&e2.message||e2)+')';}\n";
+  s+="          caixa.innerHTML='';\n";
+  s+="          var eti=document.createElement('div');\n";
+  s+='          eti.setAttribute(\'style\',\'font:600 10px/1.4 -apple-system,BlinkMacSystemFont,sans-serif;color:#8a8375;text-align:center;text-transform:uppercase;letter-spacing:.06em\');\n';
+  s+="          eti.textContent='desenho: o SDK do PayPal nao roda na previa';\n";
+  s+='          caixa.appendChild(eti);\n';
+  s+="          var des=document.createElement('div');des.innerHTML=DESENHO_PP;caixa.appendChild(des);\n";
+  s+="          var pai=document.createElement('div');\n";
+  s+='          pai.setAttribute(\'style\',\'margin-top:8px;border-top:1px dashed #d8d2c4;padding-top:7px;font:12px/1.5 -apple-system,BlinkMacSystemFont,sans-serif;color:#555;text-align:left\');\n';
+  s+='          function linha(rot,txt,cor){\n';
+  s+="            var l=document.createElement('div');\n";
+  s+="            var b=document.createElement('span');b.setAttribute('style','font-weight:700');b.textContent=rot;\n";
+  s+="            var v=document.createElement('span');v.textContent=' '+txt;\n";
+  s+="            if(cor)v.setAttribute('style','color:'+cor+';font-weight:700');\n";
+  s+='            l.appendChild(b);l.appendChild(v);pai.appendChild(l);\n';
+  s+='          }\n';
+  s+="          linha('Medido no proprio bloco -- valor que iria na ordem:',valor,'#1e7e34');\n";
+  s+="          linha('Ao clicar em pagar:',(decisao==='recusa')?('recusa -- '+motivo):(decisao==='aceita'?'segue para o PayPal':('erro -- '+motivo)),(decisao==='recusa')?'#c0392b':'');\n";
+  s+="          if(descricao)linha('Descricao da ordem:',descricao,'');\n";
+  s+='          caixa.appendChild(pai);\n';
+  s+='        }\n';
+  s+='        sondar();\n';
+  s+="        var r0=document.getElementById(\'"+o.raizId+"\');\n";
+  s+='        if(r0){\n';
+  s+="          r0.addEventListener('change',function(){setTimeout(sondar,0);});\n";
+  s+="          r0.addEventListener('click',function(){setTimeout(sondar,0);});\n";
+  s+='        }\n';
+  s+='      }};}};\n';
+  s+='      setTimeout(function(){if(n.onload)n.onload();},0);\n';
+  s+='      return n;\n';
+  s+='    }\n';
+  s+='    return inserir.call(document.head,n);\n';
+  s+='  };\n';
   return s;
 }
 /* ===== faixa declarada dos campos numericos, compartilhada por TODAS as abas =====
@@ -2995,7 +3573,17 @@ var ABAS=[
    resumo:pPresetResumo,redesenhar:pPresetDepois,antesDeSalvar:pPresetAntes,
    naoEmite:['url','desc','valor','txid','ppmodo','pplink'],
    exemplo:'ex.: Foto Certa - pagina /pagar',
-   guarda:'tudo o que está configurado nesta aba — os dados de quem recebe, o endereço da página, a aparência, os textos, e também a <b>cobrança que está na tela</b> (descrição, valor e identificador). Aplicar um preset troca também essa cobrança: ele é a fotografia da aba inteira.'}
+   guarda:'tudo o que está configurado nesta aba — os dados de quem recebe, o endereço da página, a aparência, os textos, e também a <b>cobrança que está na tela</b> (descrição, valor e identificador). Aplicar um preset troca também essa cobrança: ele é a fotografia da aba inteira.'},
+  {id:'loja', nome:'Mini loja',           chaves:['m'],         coleta:mColeta,restaura:mRestaura,
+   pref:'m',fora:[],
+   operacionais:[['client','o Client ID do PayPal'],['chave','a chave Pix'],['nomer','o nome do recebedor'],['cidade','a cidade do recebedor'],['zapnum','o WhatsApp do \u201cJá paguei\u201d']],
+   resumo:mPresetResumo,redesenhar:mPresetDepois,antesDeSalvar:mPresetAntes,
+   listas:[['m.prods',{nome:'',desc:'',preco:0,cat:'',img:'',opsel:'unico',opnenhum:'nao',qtd:false,ops:[{nome:'',preco:0,qtd:false}]},'nome'],
+           ['m.prods.ops',{nome:'',preco:0,qtd:false},'nome'],
+           ['m.cps',{codigo:'',tipo:'pct_total',valor:0,validade:''},'codigo']],
+   importar:mImportarLimpar,
+   exemplo:'ex.: Foto Certa - loja de albuns',
+   guarda:'tudo o que está configurado nesta aba — formas de pagamento, moeda, <b>o catálogo inteiro</b> (nome, descrição, preço, categoria, foto e os opcionais de cada produto), cupons, sinal, desconto Pix, a grade da vitrine, o tamanho pedido das fotos, textos e cores. Não guarda o que está no importador de galeria, que não é configuração e sim uma colagem de trabalho.'}
 ];
 var fcFrag={};       /* ultimo pedaco bom de cada aba, para nao apagar o que a aba quebrada tinha */
 var fcSoLeitura={};  /* abas que falharam ao restaurar: param de coletar do DOM ate recarregar */
@@ -3113,6 +3701,7 @@ function corAjustar(idBase,def){
 var CORES_LIVRES=[['l-corbtn','#25D366'],['l-c1','#075E54'],['l-c2','#ffffff'],['l-c3','#25D366'],['l-c4','#333333'],
   ['l-corujacorpo','#ffffff'],['l-corujadet','#075E54'],
   ['u-c1','#075E54'],['u-c2','#ffffff'],['u-c3','#333333'],
+  ['m-c1','#0F3A30'],['m-c2','#ffffff'],['m-c3','#333333'],
   ['b-f1','#8A4A32'],['b-f2','#B5674A'],['b-c1','#9C5638'],['b-c2','#FFC94A'],['b-c3','#FFF6D8'],
   ['b-c4','#F7EFDF'],['b-pvcor','#23281F'],
   ['c-cfundo','#0F3A30'],['c-ctexto','#FDFBF6'],['c-cdestaque','#FFC94A'],['c-cborda','#FFC94A'],
@@ -3141,6 +3730,7 @@ function fcCorRedesenhar(idBase){
   if(p==='b-'){bPreview();return;}
   if(p==='c-'){cPreview(true);return;}
   if(p==='p-'){pPreview(true);return;}
+  if(p==='m-'){mPreview(true);return;}
 }
 document.addEventListener('input',salvarEstado);
 document.addEventListener('change',salvarEstado);
@@ -3148,8 +3738,8 @@ document.addEventListener('change',salvarEstado);
 /* pareia seletor de cor com campo de texto */
 function parearCor(idCor){
   var c=$(idCor),t=$(idCor+'-t');
-  c.addEventListener('input',function(){t.value=c.value;salvarEstado();lBtnPreview();if(/^c-/.test(idCor))cPreview();if(/^p-/.test(idCor))pPreview();});
-  t.addEventListener('input',function(){if(corValida(t.value)){c.value=t.value;lBtnPreview();if(/^c-/.test(idCor))cPreview();if(/^p-/.test(idCor))pPreview();}});
+  c.addEventListener('input',function(){t.value=c.value;salvarEstado();lBtnPreview();if(/^c-/.test(idCor))cPreview();if(/^p-/.test(idCor))pPreview();if(/^m-/.test(idCor))mPreview();});
+  t.addEventListener('input',function(){if(corValida(t.value)){c.value=t.value;lBtnPreview();if(/^c-/.test(idCor))cPreview();if(/^p-/.test(idCor))pPreview();if(/^m-/.test(idCor))mPreview();}});
 }
 
 /* ============ biblioteca de presets por aba ============ */
@@ -5002,7 +5592,7 @@ function fcxConfirmar(plano,nomeArq){
   if(!plano.dados)
     linhas.push('Como o arquivo é “sem dados”, os campos de contato e pagamento que ele não traz mantêm o valor que já está aqui — importar este arquivo não esvazia nenhum campo preenchido.');
   if(plano.conta.forasteiras)
-    linhas.push('Atenção: '+plano.conta.forasteiras+' foto(s) deste arquivo não está(ão) no storage da Alboom ('+S_HOSTS_ALBOOM.join(', ')+') — elas serão carregadas do servidor de outra pessoa na sua página publicada. Isso é permitido, mas se o arquivo veio de fora, confira esses endereços: na lista da aba Slideshow eles aparecem com o host em destaque.');
+    linhas.push('Atenção: '+plano.conta.forasteiras+' foto(s) deste arquivo não está(ão) no storage da Alboom ('+S_HOSTS_ALBOOM.join(', ')+') — elas serão carregadas do servidor de outra pessoa na sua página publicada. Isso é permitido, mas se o arquivo veio de fora, confira esses endereços: na lista de fotos da aba a que eles pertencem, essas linhas aparecem com o host em destaque.');
   if(plano.codHead||plano.codBody)
     linhas.push('Atenção: o arquivo traz código manual nas caixas “Outros códigos meus” (Tag Head: '+plano.codHead+' caracteres; Tag Body: '+plano.codBody+'). Esse texto é guardado como está e vai para a sua página quando você o colar. Se o arquivo veio de outra pessoa, leia esse código antes de usar.');
   if(plano.travadas.length)
@@ -7219,10 +7809,9 @@ function lPvShim(){
   return fcPvShim({pref:'l',
     /* Duas trocas a mais que as outras abas: o bloco de Leads da foco ao primeiro campo do
        pop-up (roubaria o cursor do formulario da ferramenta) e abre o WhatsApp em aba nova. */
-    extras:'  try{HTMLElement.prototype.focus=function(){};HTMLElement.prototype.fcPvSemFoco=true;}catch(e){}\n'+
-           '  try{window.open=function(){return null;};window.open.fcPvSemAbrir=true;}catch(e){}\n',
-    conferencias:'  try{if(!HTMLElement.prototype.fcPvSemFoco)falhou.push(\'foco automatico\');}catch(e){falhou.push(\'foco automatico\');}\n'+
-                 '  try{if(!window.open.fcPvSemAbrir)falhou.push(\'abertura de aba nova\');}catch(e){falhou.push(\'abertura de aba nova\');}\n',
+    extras:'  try{HTMLElement.prototype.focus=function(){};HTMLElement.prototype.fcPvSemFoco=true;}catch(e){}\n',
+    conferencias:'  try{if(!HTMLElement.prototype.fcPvSemFoco)falhou.push(\'foco automatico\');}catch(e){falhou.push(\'foco automatico\');}\n',
+    semAbrir:true,
     abre:'',
     fecha:' neste quadro. A previa pode gravar nas chaves reais do navegador, roubar o cursor do formulario ao lado ou abrir o WhatsApp numa aba nova. O codigo gerado ao lado nao e afetado.'});
 }
@@ -7963,85 +8552,15 @@ document.addEventListener('change',function(e){
       previa antiga ja usava (mockPP), com etiqueta dizendo que e desenho. O bloco continua
       pedindo o SDK exatamente como na pagina publicada; quem responde e o ambiente. */
 function uPvShim(cfg){
-  /* A sonda do botao PayPal e a unica coisa desta previa que nao e do nucleo compartilhado:
-     ela e emitida DEPOIS do bloco de aviso, por isso entra em 'depois'. O restante -- storage
-     em memoria e a conferencia barulhenta -- vem de fcPvShim, igual as outras quatro abas. */
-  var s='';
-  if(cfg.usaPP){
-    /* O botao do PayPal e desenho, mas o que importa dele NAO e: o shim guarda a configuracao
-       que o bloco passou para paypal.Buttons e a EXERCITA a cada mudanca do carrinho --
-       chama o onClick do bloco (com reject/resolve de mentira) e o createOrder do bloco (com
-       actions.order.create devolvendo o proprio objeto), e mostra o valor que iria na ordem e
-       a decisao que o clique tomaria. Assim a previa prova o valor do sinal e as recusas do
-       lado PayPal SEM baixar o SDK e sem mandar o Client ID para fora.
-       A sonda RESTAURA o .fcu-msg que o onClick tiver escrito: uma sonda que deixa rastro
-       mostraria mensagem de recusa velha depois de o pedido voltar a ser valido. */
-    s+="  var DESENHO_PP='"+escJs(mockPP(cfg.ppcor))+"';\n";
-    s+='  var inserir=document.head.appendChild;\n';
-    s+='  document.head.appendChild=function(n){\n';
-    s+="    if(n&&n.tagName==='SCRIPT'&&/paypal\\.com/.test(String(n.src||''))){\n";
-    s+='      window.paypal={Buttons:function(bt){return {render:function(alvo){\n';
-    s+='        if(!alvo)return;\n';
-    s+="        var caixa=document.createElement('div');\n";
-    s+="        caixa.id='u-pv-pp';\n";
-    s+='        caixa.setAttribute(\'style\',\'border:1px dashed #b9b3a4;border-radius:8px;padding:6px 8px 10px\');\n';
-    s+="        alvo.innerHTML='';alvo.appendChild(caixa);\n";
-    s+='        function sondar(){\n';
-    s+="          var raiz=document.getElementById('fcuni');\n";
-    s+="          var cx=raiz?raiz.querySelector('.fcu-msg'):null;\n";
-    s+="          var antesT=cx?cx.textContent:'',antesC=cx?cx.className:'';\n";
-    s+='          var decisao=null,motivo=\'\';\n';
-    s+='          try{\n';
-    s+="            if(bt&&bt.onClick){\n";
-    s+="              var r=bt.onClick(null,{reject:function(){return 'RECUSA';},resolve:function(){return 'ACEITA';}});\n";
-    s+="              decisao=(r==='RECUSA')?'recusa':'aceita';\n";
-    s+="              if(cx&&cx.textContent!==antesT)motivo=cx.textContent;\n";
-    s+='            }\n';
-    s+='          }catch(e){decisao=\'erro\';motivo=String(e&&e.message||e);}\n';
-    s+='          if(cx){cx.textContent=antesT;cx.className=antesC;}\n';
-    s+="          var valor='',descricao='';\n";
-    s+='          try{\n';
-    s+="            var ped=bt.createOrder(null,{order:{create:function(o){return o;}}});\n";
-    s+='            var am=ped.purchase_units[0].amount;\n';
-    s+="            valor=am.value+' '+am.currency_code;\n";
-    s+='            descricao=ped.purchase_units[0].description;\n';
-    s+="          }catch(e2){valor='(erro: '+String(e2&&e2.message||e2)+')';}\n";
-    s+="          caixa.innerHTML='';\n";
-    s+="          var eti=document.createElement('div');\n";
-    s+='          eti.setAttribute(\'style\',\'font:600 10px/1.4 -apple-system,BlinkMacSystemFont,sans-serif;color:#8a8375;text-align:center;text-transform:uppercase;letter-spacing:.06em\');\n';
-    s+="          eti.textContent='desenho: o SDK do PayPal nao roda na previa';\n";
-    s+='          caixa.appendChild(eti);\n';
-    s+="          var des=document.createElement('div');des.innerHTML=DESENHO_PP;caixa.appendChild(des);\n";
-    s+="          var pai=document.createElement('div');\n";
-    s+='          pai.setAttribute(\'style\',\'margin-top:8px;border-top:1px dashed #d8d2c4;padding-top:7px;font:12px/1.5 -apple-system,BlinkMacSystemFont,sans-serif;color:#555;text-align:left\');\n';
-    s+='          function linha(rot,txt,cor){\n';
-    s+="            var l=document.createElement('div');\n";
-    s+="            var b=document.createElement('span');b.setAttribute('style','font-weight:700');b.textContent=rot;\n";
-    s+="            var v=document.createElement('span');v.textContent=' '+txt;\n";
-    s+="            if(cor)v.setAttribute('style','color:'+cor+';font-weight:700');\n";
-    s+='            l.appendChild(b);l.appendChild(v);pai.appendChild(l);\n';
-    s+='          }\n';
-    s+="          linha('Medido no proprio bloco -- valor que iria na ordem:',valor,'#1e7e34');\n";
-    s+="          linha('Ao clicar em pagar:',(decisao==='recusa')?('recusa -- '+motivo):(decisao==='aceita'?'segue para o PayPal':('erro -- '+motivo)),(decisao==='recusa')?'#c0392b':'');\n";
-    s+="          if(descricao)linha('Descricao da ordem:',descricao,'');\n";
-    s+='          caixa.appendChild(pai);\n';
-    s+='        }\n';
-    s+='        sondar();\n';
-    s+="        var r0=document.getElementById('fcuni');\n";
-    s+='        if(r0){\n';
-    s+="          r0.addEventListener('change',function(){setTimeout(sondar,0);});\n";
-    s+="          r0.addEventListener('click',function(){setTimeout(sondar,0);});\n";
-    s+='        }\n';
-    s+='      }};}};\n';
-    s+='      setTimeout(function(){if(n.onload)n.onload();},0);\n';
-    s+='      return n;\n';
-    s+='    }\n';
-    s+='    return inserir.call(document.head,n);\n';
-    s+='  };\n';
-  }
+  /* A sonda do botao PayPal e a unica coisa desta previa que nao e do nucleo compartilhado do
+     shim: ela e emitida DEPOIS do bloco de aviso, por isso entra em 'depois'. O restante --
+     storage em memoria e a conferencia barulhenta -- vem de fcPvShim, igual as outras abas; e a
+     sonda em si vem de fcPvSondaPP, que a Mini loja tambem usa. */
+  var s=cfg.usaPP?fcPvSondaPP({ppcor:cfg.ppcor,raizId:'fcuni',msgSel:'fcu-msg',caixaId:'u-pv-pp'}):'';
   return fcPvShim({pref:'u',
+    semAbrir:true,
     abre:'o ',
-    fecha:' deste quadro. A previa esta gravando nas chaves reais do navegador. O codigo gerado ao lado nao e afetado.',
+    fecha:' deste quadro. A previa pode estar gravando nas chaves reais do navegador ou abrindo o WhatsApp numa aba nova. O codigo gerado ao lado nao e afetado.',
     depois:s});
 }
 /* Sem conteudo abaixo do carrinho nao da para ver onde ele termina nem rolar ate a area do Pix
@@ -8315,10 +8834,7 @@ function uBloco(cfg){
   c+='.fcuni input:checked+.fcu-mark.rd:after{content:"";position:absolute;left:3px;top:3px;width:8px;height:8px;border-radius:50%;background:#fff}\n';
   c+='.fcuni input:checked+.fcu-mark.ck:after{content:"";position:absolute;left:4px;top:0;width:5px;height:10px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(40deg)}\n';
   if(usaQtd){
-    c+='.fcuni .fcu-qtd{display:flex;align-items:center;gap:6px;flex-shrink:0}\n';
-    c+='.fcuni .fcu-qtd-b{border:1px solid #d8d2c4;border-radius:6px;background:#fff;color:inherit;width:26px;height:26px;padding:0;line-height:1;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit}\n';
-    c+='.fcuni .fcu-qtd-b:hover{border-color:var(--fcu-destaque,#075E54)}\n';
-    c+='.fcuni .fcu-qtd-v{min-width:22px;text-align:center;font-size:13px;font-weight:600}\n';
+    c+=fcQtdCssGer('.fcuni','fcu','var(--fcu-destaque,#075E54)');
   }
   if(usaResumo){
     c+='.fcuni .fcu-resumo-c{margin-top:16px;border-top:1px solid #eee;padding-top:12px}\n';
@@ -8569,23 +9085,10 @@ function uBloco(cfg){
     c+='var qtdsProd=[],qtdsOp=[],precosProd=[],precosOp=[];\n';
     c+='function qtdProd(i){var q=qtdsProd[i];return (q==null)?1:q;}\n';
     c+='function qtdOp(i,j){var a=qtdsOp[i];var q=a?a[j]:null;return (q==null)?1:q;}\n';
-    /* Um construtor so para os dois usos (produto e opcional): o seletor do produto e o do
-       opcional tem o mesmo comportamento, e duas copias divergiriam. */
-    c+='function fazQtd(inicial,aoMudar){\n';
-    c+="var cx=document.createElement('div');cx.className='fcu-qtd';\n";
-    c+='var atual=inicial;\n';
-    c+="var menos=document.createElement('button');menos.type='button';menos.className='fcu-qtd-b';menos.textContent='-';menos.setAttribute('aria-label','Diminuir a quantidade');\n";
-    c+="var vis=document.createElement('span');vis.className='fcu-qtd-v';vis.textContent=String(inicial);\n";
-    c+="var mais=document.createElement('button');mais.type='button';mais.className='fcu-qtd-b';mais.textContent='+';mais.setAttribute('aria-label','Aumentar a quantidade');\n";
-    c+='function por(n){\n';
-    c+='if(n<0)n=0;\n';
-    c+='if(n>QUANTIDADE_MAXIMA)n=QUANTIDADE_MAXIMA;\n';
-    c+='if(n===atual)return;\n';
-    c+='atual=n;vis.textContent=String(n);aoMudar(n);\n}\n';
-    c+="menos.addEventListener('click',function(){por(atual-1);});\n";
-    c+="mais.addEventListener('click',function(){por(atual+1);});\n";
-    c+='cx.appendChild(menos);cx.appendChild(vis);cx.appendChild(mais);\n';
-    c+='return cx;\n}\n';
+    /* Um construtor so para os dois usos (produto e opcional) -- e, desde a Mini loja, para as
+       linhas do carrinho dela tambem: fcFazQtdSrc e a fonte unica, e o prefixo entra por
+       parametro. Duas copias divergiriam justamente no clamp, que e o que segura o dinheiro. */
+    c+=fcFazQtdSrc('fcu');
   }
   c+='\n';
   c+='PRODUTOS.forEach(function(p,i){\n';
@@ -8674,52 +9177,13 @@ function uBloco(cfg){
   if(usaQtd)c+='if(op&&!op.nenhum)t+=op.preco*qtdOp(i,parseInt(sel[k].value,10));\n}\n});\n';
   else c+='if(op&&!op.nenhum)t+=op.preco;\n}\n});\n';
   c+='return t;\n}\n\n';
-  c+='function descontoAtual(){\n';
-  c+='if(!cupomAtivo)return 0;\n';
-  c+='var s=subtotal(),d=0;\n';
-  c+="if(cupomAtivo.tipo==='pct_produto')d=somaProdutos()*cupomAtivo.valor/100;\n";
-  c+="else if(cupomAtivo.tipo==='pct_total')d=s*cupomAtivo.valor/100;\n";
-  c+='else d=cupomAtivo.valor;\n';
-  c+='if(d>s)d=s;\nif(d<0)d=0;\nreturn d;\n}\n\n';
-  c+='function total(){\nreturn subtotal()-descontoAtual();\n}\n\n';
-  if(usaSinal){
-    c+='/* O sinal sai do total JA com o cupom aplicado. Arredondado a duas casas aqui, uma vez\n';
-    c+='   so: e este numero que vai para o PayPal, para o QR do Pix, para a tela e para a\n';
-    c+='   mensagem do WhatsApp -- quatro leituras do MESMO valor, sem recalculo em nenhuma. */\n';
-    c+='function sinalAgora(){\n';
-    c+="var v=(SINAL_TIPO==='fixo')?SINAL_VALOR:(total()*SINAL_VALOR/100);\n";
-    c+='return Math.round(v*100)/100;\n}\n\n';
-    c+='function saldoDepois(){\n';
-    c+='var d=total()-sinalAgora();\n';
-    c+='if(d<0)d=0;\n';
-    c+='return Math.round(d*100)/100;\n}\n\n';
-    c+='/* UMA recusa so para o sinal, e ela devolve o MOTIVO: a linha vermelha do carrinho, o\n';
-    c+='   clique do PayPal, o botao do Pix e o resumo copiavel leem daqui. Com quatro testes\n';
-    c+='   separados, um poderia discordar dos outros -- e foi o que aconteceu com o resumo, que\n';
-    c+='   imprimia "Total 250 / Sinal 700" enquanto as duas pontas de pagamento recusavam.\n';
-    c+='   Sinal maior que o total e recusado, nao aparado: aparar cobraria um valor que o\n';
-    c+='   operador nao configurou. Sinal que arredonda para zero tambem e recusado -- e o\n';
-    c+='   espelho da guarda de total zero, que o pedido inteiro ja tinha. Com o pedido em zero\n';
-    c+='   quem avisa e a recusa de total zero: dois avisos ao mesmo tempo se esconderiam. */\n';
-    c+='function sinalRecusa(){\n';
-    c+='if(total()<0.01)return \'\';\n';
-    c+='if(sinalAgora()>total())return TXT_SINAL_MAIOR;\n';
-    c+='if(sinalAgora()<0.01)return TXT_SINAL_ZERO;\n';
-    c+="return '';\n}\n\n";
-  }
-  if(descpix>0){
-    c+='function totalPix(){\n';
-    c+='var t=total();\n';
-    c+='if(DESCONTO_PIX>0)t=t*(1-DESCONTO_PIX/100);\n';
-    c+='return Math.round(t*100)/100;\n}\n\n';
-  }else if(usaPix&&usaSinal){
-    /* O Pix cobra o SINAL. O desconto do Pix nao entra: com sinal ligado ele nem chega a ser
-       emitido (a uCfg ja o zera), porque aplica-lo sobre o sinal seria desconto dobrado -- o
-       sinal ja sai de um total que pode ter cupom. */
-    c+='function totalPix(){return sinalAgora();}\n\n';
-  }else if(usaPix){
-    c+='function totalPix(){return Math.round(total()*100)/100;}\n\n';
-  }
+  /* A conta do cupom e do total vem da fonte unica (FC_CARRINHO_SRC, no bloco de utilidades):
+     o mesmo texto entra no bloco da Mini loja. Este bloco declarou subtotal() e somaProdutos()
+     logo acima -- e esse o contrato por nome que a fonte compartilhada espera. */
+  c+=FC_CARRINHO_SRC.descontoAtual;
+  c+=FC_CARRINHO_SRC.total;
+  if(usaSinal)c+=FC_CARRINHO_SRC.sinal;
+  c+=fcTotalPixSrc(descpix,usaPix,usaSinal);
   c+='function linhaDesconto(){\n';
   c+="var l=raiz.querySelector('.fcu-desconto');\n";
   c+='if(cupomAtivo){\n';
@@ -8767,10 +9231,7 @@ function uBloco(cfg){
   c+='function msgCupom(t,ok){\n';
   c+="var m=raiz.querySelector('.fcu-cupom-msg');\n";
   c+="m.textContent=t;m.className='fcu-cupom-msg'+(t?(ok?' ok':' erro'):'');\n}\n\n";
-  c+='function cupomVigente(cp){\n';
-  c+='if(!cp.validade)return true;\n';
-  c+="var lim=new Date(cp.validade+'T23:59:59');\n";
-  c+='return new Date()<=lim;\n}\n\n';
+  c+=FC_CARRINHO_SRC.cupomVigente;
   c+='function aplicarCupom(){\n';
   c+="var v=raiz.querySelector('.fcu-cupom-l input').value.trim();\n";
   c+="if(!v){cupomAtivo=null;msgCupom('',true);atualizar();return;}\n";
@@ -11123,8 +11584,9 @@ function pPvShim(busca,cfg){
            pPvPayPal(cfg),
     conferencias:'  try{if(String(location.search||\'\')!==alvo)falhou.push(\'o endereco simulado\');}catch(e){falhou.push(\'o endereco simulado\');}\n'+
       (cfg.usapp?'  try{if(!document.head.appendChild.fcPvSemPayPal)falhou.push(\'o SDK do PayPal\');}catch(e){falhou.push(\'o SDK do PayPal\');}\n':''),
+    semAbrir:true,
     abre:'',
-    fecha:' deste quadro. A previa pode estar gravando nas chaves reais do navegador, mostrando a pagina sem a cobranca simulada ou mandando o seu Client ID para o PayPal -- o que aparece abaixo nao prova nada. O codigo gerado ao lado nao e afetado.'});
+    fecha:' deste quadro. A previa pode estar gravando nas chaves reais do navegador, mostrando a pagina sem a cobranca simulada, abrindo o WhatsApp numa aba nova ou mandando o seu Client ID para o PayPal -- o que aparece abaixo nao prova nada. O codigo gerado ao lado nao e afetado.'});
 }
 /* Enchimento cinzento abaixo do cartao: sem ele nao da para ver onde a pagina termina nem
    rolar ate o QR Code em cobranca com descricao longa. */
@@ -11273,6 +11735,1768 @@ function pPresetDepois(){
      clique em "Gerar link". */
   var ta=$('p-out2');if(ta)ta.value='';
   pToggles();pPvBotoes();pPreview(true);
+}
+
+/* ============================================================
+   MINI LOJA (vitrine com carrinho: um componente HTML, uma pagina so)
+   ============================================================ */
+/* O QUE E. Um catalogo com carrinho: vitrine em grade, cartao de detalhe na MESMA pagina,
+   carrinho ao lado e checkout embaixo. Nao e um e-commerce -- nao ha registro de pedidos,
+   nao ha confirmacao automatica de pagamento e nao ha estoque. Esses limites estao escritos
+   na aba e dentro do bloco entregue, e nao so aqui: texto que promete mais do que a pagina
+   entrega e pior do que texto nenhum, porque o operador confia nele.
+   O MOTOR DE DINHEIRO NAO E DESTA ABA. Cupom, total, sinal, saldo, desconto Pix e o seletor de
+   quantidade vem de FC_CARRINHO_SRC/fcTotalPixSrc/fcFazQtdSrc, a mesma fonte que o Checkout
+   emite -- e o BR Code vem de FC_PIX_SRC, e a formatacao de preco de fcMoedaFmtGer. O que esta
+   aba escreve por conta propria e so o que e dela: a vitrine, o filtro, o cartao de detalhe e
+   o carrinho que atravessa recarregamentos. */
+var mProds=[],mCps=[],mEditOps=[],mEditIdx=-1;
+var M_NUMS=[['m-larg',1080,600,1600,true],['m-cols',3,2,5,true],['m-mob',760,320,1024,true],
+  ['m-imgvit',400,200,900,true],['m-imgdet',1000,400,1600,true],
+  ['m-descpix',10,0,90,false],['m-sinalpct',30,1,99,false],['m-sinalfixo',100,0.01,999999,false],
+  ['m-qtdmax',10,2,99,true]];
+function mPreso(id){return fcPreso(M_NUMS,id);}
+function mFmt(v){return precoFmt(radio('m-metodo')==='paypal'?(radio('m-moeda')||'BRL'):'BRL',v);}
+
+/* ===== salvamento e restauracao (registradas em ABAS) ===== */
+function mColeta(){
+  return {m:{metodo:radio('m-metodo'),client:$('m-client').value,moeda:radio('m-moeda'),ppcor:radio('m-ppcor'),
+    chave:$('m-chave').value,nomer:$('m-nomer').value,cidade:$('m-cidade').value,
+    descpix:$('m-descpix').value,zap:radio('m-zap'),zapnum:$('m-zapnum').value,cod:$('m-cod').value,
+    prods:mProds,cps:mCps,
+    cols:$('m-cols').value,mob:$('m-mob').value,imgvit:$('m-imgvit').value,imgdet:$('m-imgdet').value,
+    prop:radio('m-prop'),filtro:radio('m-filtro'),
+    sinal:radio('m-sinal'),sinaltipo:radio('m-sinaltipo'),sinalpct:$('m-sinalpct').value,
+    sinalfixo:$('m-sinalfixo').value,qtdmax:$('m-qtdmax').value,resumo:radio('m-resumo'),
+    larg:$('m-larg').value,c1:$('m-c1-t').value,c2:$('m-c2-t').value,c3:$('m-c3-t').value,
+    t1:$('m-t1').value,t2:$('m-t2').value,t3:$('m-t3').value,t4:$('m-t4').value,t5:$('m-t5').value,
+    t6:$('m-t6').value,t7:$('m-t7').value,t8:$('m-t8').value,t9:$('m-t9').value,t10:$('m-t10').value,
+    t11:$('m-t11').value,t12:$('m-t12').value}};
+}
+function mRestaura(st){
+  var M=st.m;if(!M)return;
+  if(M.metodo)setRadio('m-metodo',M.metodo);
+  if(M.client!=null)$('m-client').value=M.client;
+  if(M.moeda)setRadio('m-moeda',M.moeda);
+  if(M.ppcor)setRadio('m-ppcor',M.ppcor);
+  if(M.chave!=null)$('m-chave').value=M.chave;
+  if(M.nomer!=null)$('m-nomer').value=M.nomer;
+  if(M.cidade!=null)$('m-cidade').value=M.cidade;
+  if(M.descpix!=null)$('m-descpix').value=M.descpix;
+  if(M.zap)setRadio('m-zap',M.zap);
+  if(M.zapnum!=null)$('m-zapnum').value=M.zapnum;
+  if(M.cod!=null)$('m-cod').value=M.cod;
+  if(fcEhArray(M.prods))mProds=M.prods;
+  if(fcEhArray(M.cps))mCps=M.cps;
+  if(M.cols!=null)$('m-cols').value=M.cols;
+  if(M.mob!=null)$('m-mob').value=M.mob;
+  if(M.imgvit!=null)$('m-imgvit').value=M.imgvit;
+  if(M.imgdet!=null)$('m-imgdet').value=M.imgdet;
+  if(M.prop)setRadio('m-prop',M.prop);
+  if(M.filtro)setRadio('m-filtro',M.filtro);
+  if(M.sinal)setRadio('m-sinal',M.sinal);
+  if(M.sinaltipo)setRadio('m-sinaltipo',M.sinaltipo);
+  if(M.sinalpct!=null)$('m-sinalpct').value=M.sinalpct;
+  if(M.sinalfixo!=null)$('m-sinalfixo').value=M.sinalfixo;
+  if(M.qtdmax!=null)$('m-qtdmax').value=M.qtdmax;
+  if(M.resumo)setRadio('m-resumo',M.resumo);
+  if(M.larg!=null)$('m-larg').value=M.larg;
+  /* Cor e numero se corrigem a vista (fcCoresAjustar/fcAjustarTodos rodam depois); texto livre
+     HONRA o vazio -- guarda de !=null, e nao de verdade, pelo motivo registrado na §4 da
+     documentacao: com if(M.t1) o operador que apaga um rotulo de proposito recebe o padrao de
+     volta ao aplicar um preset, em silencio. */
+  if(M.c1!=null){$('m-c1-t').value=M.c1;$('m-c1').value=corValida(M.c1)?M.c1:'#0F3A30';}
+  if(M.c2!=null){$('m-c2-t').value=M.c2;$('m-c2').value=corValida(M.c2)?M.c2:'#ffffff';}
+  if(M.c3!=null){$('m-c3-t').value=M.c3;$('m-c3').value=corValida(M.c3)?M.c3:'#333333';}
+  var i;for(i=1;i<=12;i++){if(M['t'+i]!=null)$('m-t'+i).value=M['t'+i];}
+}
+function mPresetResumo(v){
+  var M=(v&&v.m)||{},n=(M.prods||[]).length,c=(M.cps||[]).length;
+  return n+(n===1?' produto':' produtos')+', '+c+(c===1?' cupom':' cupons')+
+    ', '+({ambos:'PayPal e Pix',paypal:'so PayPal',pix:'so Pix'}[M.metodo||'ambos'])+
+    ', vitrine em '+(M.cols||3)+' colunas';
+}
+function mPresetAntes(){
+  if(fcAjustarTodos(M_NUMS))salvarEstado();
+  return '';
+}
+function mPresetDepois(){
+  var mudou=false;
+  if(fcAjustarTodos(M_NUMS))mudou=true;
+  if(fcCoresAjustar('m-'))mudou=true;
+  if(mudou)salvarEstado();
+  mProdRender();mCpRender();mCatsRender();mToggles();mPreview(true);
+}
+
+/* ===== categorias: campo livre com sugestao das ja usadas =====
+   Mesmo padrao do campo de campanha do preset geral: um <datalist> com o que ja existe, para
+   evitar que "Albuns" e "Álbuns" convivam por engano. Sugerir, nao fechar -- categoria nova
+   tem de poder ser digitada, senao o primeiro produto de uma categoria nunca entraria. */
+function mCats(){
+  var v=[],vistos={},i,c;
+  for(i=0;i<mProds.length;i++){
+    c=String(mProds[i].cat||'').trim();
+    if(!c)continue;
+    if(Object.prototype.hasOwnProperty.call(vistos,c.toLowerCase()))continue;
+    vistos[c.toLowerCase()]=1;v.push(c);
+  }
+  return v;
+}
+function mCatsRender(){
+  var dl=$('m-cat-lista'),cats=mCats(),h='',i,av=$('m-cat-aviso');
+  if(dl){
+    for(i=0;i<cats.length;i++)h+='<option value="'+escAttr(cats[i])+'"></option>';
+    dl.innerHTML=h;
+  }
+  if(av){
+    if(!cats.length){av.style.display='none';}
+    else{
+      av.style.display='block';
+      av.innerHTML='<b>Categorias em uso ('+cats.length+'):</b> '+escHtml(cats.join(' · '))+
+        '. Produto sem categoria aparece em <b>Todos</b> e em mais nada.';
+    }
+  }
+}
+
+/* ===== opcionais do produto em edicao ===== */
+function mOpPrecoAjustar(inp,i){
+  var v=parseFloat(String(inp.value).replace(',','.'));
+  if(!isNaN(v)&&v>=0){mEditOps[i].preco=v;return false;}
+  mEditOps[i].preco=0;
+  inp.value='0';
+  return true;
+}
+function mOpRender(){
+  var ul=$('m-op-lista');if(!ul)return;
+  ul.innerHTML='';
+  $('m-op-vazio').style.display=mEditOps.length?'none':'block';
+  mEditOps.forEach(function(op,i){
+    var li=document.createElement('li');
+    var info=document.createElement('div');info.className='info';
+    var n=document.createElement('input');n.type='text';n.value=op.nome;n.placeholder='Nome do opcional';
+    n.addEventListener('input',function(){mEditOps[i].nome=n.value;});
+    var pr=document.createElement('input');pr.type='number';pr.step='0.01';pr.min='0';pr.value=op.preco;pr.placeholder='Preco';
+    pr.addEventListener('input',function(){mEditOps[i].preco=pr.value;});
+    pr.addEventListener('change',function(){mOpPrecoAjustar(pr,i);});
+    pr.addEventListener('blur',function(){mOpPrecoAjustar(pr,i);});
+    info.appendChild(n);info.appendChild(pr);
+    var lq=document.createElement('label');
+    lq.style.cssText='display:flex;align-items:center;gap:6px;margin:5px 0 0;font-size:12px;font-weight:400;color:var(--tinta-suave)';
+    var cq=document.createElement('input');cq.type='checkbox';cq.checked=!!op.qtd;
+    cq.addEventListener('change',function(){mEditOps[i].qtd=cq.checked;});
+    lq.appendChild(cq);lq.appendChild(document.createTextNode('vende por quantidade'));
+    info.appendChild(lq);
+    var ctrl=document.createElement('div');ctrl.className='ctrl';
+    [['\u2191',function(){mOpMove(i,-1);},'Subir'],['\u2193',function(){mOpMove(i,1);},'Descer'],['\u2715',function(){mOpDel(i);},'Remover']]
+      .forEach(function(b){var bt=document.createElement('button');bt.textContent=b[0];bt.title=b[2];bt.setAttribute('aria-label',b[2]);bt.addEventListener('click',b[1]);ctrl.appendChild(bt);});
+    li.appendChild(info);li.appendChild(ctrl);
+    ul.appendChild(li);
+  });
+}
+function mOpAdd(){
+  var n=$('m-op-nome').value.trim();
+  if(!n){alert('Informe o nome do opcional.');return;}
+  var v=parseFloat(String($('m-op-preco').value).replace(',','.'));
+  if(isNaN(v)||v<0)v=0;
+  mEditOps.push({nome:n,preco:v,qtd:!!$('m-op-qtd').checked});
+  $('m-op-nome').value='';$('m-op-preco').value='';$('m-op-qtd').checked=false;
+  mOpRender();
+}
+function mOpMove(i,d){var j=i+d;if(j<0||j>=mEditOps.length)return;var t=mEditOps[i];mEditOps[i]=mEditOps[j];mEditOps[j]=t;mOpRender();}
+function mOpDel(i){mEditOps.splice(i,1);mOpRender();}
+
+/* ===== produtos ===== */
+function mProdLimpar(){
+  $('m-pnome').value='';$('m-pdesc').value='';$('m-ppreco').value='';
+  $('m-pcat').value='';$('m-pimg').value='';
+  mEditOps=[];mEditIdx=-1;mOpRender();
+  setRadio('m-opsel','unico');setRadio('m-opnenhum','nao');setRadio('m-pqtd','nao');
+  $('m-op-qtd').checked=false;
+  $('m-prod-salvar').textContent='Adicionar produto';
+  $('m-prod-cancelar').style.display='none';
+  mToggles();
+}
+function mProdSalvar(){
+  var n=$('m-pnome').value.trim(),img=String($('m-pimg').value).trim();
+  if(!n){alert('Informe o nome do produto.');return;}
+  var v=parseFloat(String($('m-ppreco').value).replace(',','.'));
+  if(isNaN(v)||v<0){alert('Informe o preco do produto.');return;}
+  /* Foto e OBRIGATORIA nesta aba, ao contrario do Checkout: a vitrine e feita de imagens, e um
+     produto sem foto sairia como um retangulo cinza no meio da grade. A recusa nomeia o campo
+     em vez de deixar passar e o defeito aparecer so na pagina publicada. */
+  if(!img){alert('Informe o endereco da foto do produto. A vitrine e feita de imagens: um produto sem foto sai como um retangulo vazio no meio da grade.');return;}
+  if(!sUrlOk(img)){alert('O endereco da foto nao parece valido. Use um endereco completo comecando por https:// ou um caminho do proprio site comecando por barra.');return;}
+  /* Foto que nao encolhe e DITA, nao recusada -- a mesma decisao da lista de imagens do
+     Slideshow: o operador pode ter motivo legitimo para hospedar uma foto em outro lugar. O que
+     ele perde, e o aviso diz, e o redimensionador da Alboom: a foto vai inteira para a vitrine.
+     A pergunta e mImgResize, e nao sHostEsperado: quem decide se a foto encolhe e a MESMA funcao
+     que o bloco entregue executa. Com sHostEsperado, '/fotos/promo.jpg' (que nao tem host) e
+     '//storage.alboom.ninja/foto.jpg' (que tem host, mas nao tem esquema) passavam calados --
+     um ia inteiro para a vitrine sem aviso nenhum. */
+  if(!mImgResize(img)&&!confirm('Esta foto nao passa pelo redimensionador da Alboom, que so alcanca enderecos completos em '+S_HOSTS_ALBOOM.join(' ou ')+'.\n\nEla vai funcionar, mas sera carregada no tamanho ORIGINAL na vitrine, e nao na miniatura. Com muitos produtos isso pesa.\n\nContinuar mesmo assim?'))return;
+  var p={nome:n,desc:$('m-pdesc').value.trim(),preco:v,cat:String($('m-pcat').value).trim(),img:img,
+    opsel:radio('m-opsel')||'unico',opnenhum:radio('m-opnenhum')||'nao',
+    qtd:radio('m-pqtd')==='sim',
+    ops:mEditOps.map(function(o){return {nome:o.nome,preco:o.preco,qtd:!!o.qtd};})};
+  if(mEditIdx>=0)mProds[mEditIdx]=p;else mProds.push(p);
+  mProdLimpar();mProdRender();mCatsRender();salvarEstado();mPreview();
+}
+function mProdEditar(i){
+  var p=mProds[i];
+  $('m-pnome').value=p.nome;$('m-pdesc').value=p.desc||'';$('m-ppreco').value=p.preco;
+  $('m-pcat').value=p.cat||'';$('m-pimg').value=p.img||'';
+  mEditOps=(p.ops||[]).map(function(o){return {nome:o.nome,preco:o.preco,qtd:!!o.qtd};});
+  mEditIdx=i;mOpRender();
+  setRadio('m-opsel',p.opsel);setRadio('m-opnenhum',p.opnenhum);
+  setRadio('m-pqtd',p.qtd?'sim':'nao');
+  $('m-prod-salvar').textContent='Salvar alteracoes';
+  $('m-prod-cancelar').style.display='inline-block';
+  mToggles();
+}
+function mProdMove(i,d){var j=i+d;if(j<0||j>=mProds.length)return;var t=mProds[i];mProds[i]=mProds[j];mProds[j]=t;mProdRender();salvarEstado();mPreview();}
+function mProdDel(i){
+  if(mEditIdx===i)mProdLimpar();
+  else if(mEditIdx>i)mEditIdx--;
+  mProds.splice(i,1);mProdRender();mCatsRender();salvarEstado();mPreview();
+}
+/* Acao destrutiva em lista tem confirmacao com NUMERO, e a linha .lista-conta acima da lista
+   existe para o numero poder ser conferido antes do clique -- com area de rolagem o operador
+   deixa de ver o fim da lista. Mesma redacao da limpeza da lista de imagens do Slideshow. */
+function mProdListaLimpar(){
+  var n=mProds.length;
+  if(!n)return;
+  if(!confirm('Remover '+(n===1?'o único produto':'os '+n+' produtos')+' do catálogo? Isto esvazia só a lista de produtos — cupons, formas de pagamento, aparência e textos ficam como estão, e nenhum código já colado no site é afetado. Não há como desfazer.'))return;
+  mProds=[];mProdLimpar();mProdRender();mCatsRender();salvarEstado();mPreview();
+}
+/* A LISTA SO E DESENHADA COM A ABA ABERTA -- e o mesmo motivo pelo qual a previa nao e montada
+   na carga. Cada linha da lista tem uma miniatura, e o navegador busca a foto assim que o src e
+   atribuido, painel escondido ou nao: medido, abrir a ferramenta baixava 250 KB de miniaturas
+   para quem nunca abre esta aba. O desenho fica PENDENTE e acontece no clique da aba. A conta
+   do peso continua saindo na carga: ela le mProds, nao o DOM, e nao custa rede nenhuma. */
+var mAbaAberta=false,mListaPendente=false;
+function mAbaAbrir(){
+  mAbaAberta=true;
+  if(mListaPendente)mProdRender();
+  mPreview(true);
+}
+function mProdRender(){
+  var ul=$('m-prod-lista');if(!ul)return;
+  if(!mAbaAberta){mListaPendente=true;mPesoRender();return;}
+  mListaPendente=false;
+  var rolagem=ul.scrollTop;
+  ul.innerHTML='';
+  $('m-prod-vazio').style.display=mProds.length?'none':'block';
+  $('m-prod-conta').textContent=mProds.length===1?'1 produto no catálogo.':mProds.length+' produtos no catálogo.';
+  $('m-prod-conta').style.display=mProds.length?'block':'none';
+  $('m-prod-limpar').disabled=!mProds.length;
+  mProds.forEach(function(p,i){
+    var li=document.createElement('li');
+    var img=document.createElement('img');img.src=mImgTamanho(p.img,120);img.alt='';img.loading='lazy';
+    var info=document.createElement('div');info.className='info';
+    var t=document.createElement('div');t.className='nome';
+    t.textContent=p.nome+' — '+mFmt(parseFloat(p.preco)||0)+(p.qtd?' (por quantidade)':'');
+    var partes=sUrlPartes(p.img||'');
+    var url=document.createElement('div');url.className='url partida';url.title=p.img||'';
+    /* O selo marca o que o AVISO do cadastro disse: esta foto nao encolhe. A pergunta e a
+       mesma (mImgResize), para o selo nunca contradizer o aviso. Endereco sem host -- caminho
+       a partir da raiz do site -- e dito com todas as letras, senao o selo sairia vazio. */
+    if(p.img&&!mImgResize(p.img)){
+      var host=document.createElement('span');host.className='host';
+      host.textContent=sUrlHost(p.img)||'caminho do site';
+      host.title='Esta foto não passa pelo redimensionador da Alboom: ela vai inteira para a vitrine.';
+      url.appendChild(host);
+    }
+    var pasta=document.createElement('span');pasta.className='pasta';pasta.textContent=partes.pasta;
+    var arq=document.createElement('span');arq.className='arq';arq.textContent=partes.arq;
+    url.appendChild(pasta);url.appendChild(arq);
+    var cat=document.createElement('div');cat.className='m-cat-selo';
+    cat.textContent=p.cat?p.cat:'sem categoria';
+    if(!p.cat)cat.className='m-cat-selo vazio';
+    var ops=document.createElement('div');ops.className='sub';
+    ops.textContent=(p.ops||[]).length?((p.ops.length===1?'1 opcional':p.ops.length+' opcionais')+' ('+(p.opsel==='multiplo'?'vários':'apenas 1')+')'):'sem opcionais';
+    info.appendChild(t);info.appendChild(url);info.appendChild(cat);info.appendChild(ops);
+    var ctrl=document.createElement('div');ctrl.className='ctrl';
+    [['\u2191',function(){mProdMove(i,-1);},'Subir'],['\u2193',function(){mProdMove(i,1);},'Descer'],
+     ['\u270E',function(){mProdEditar(i);},'Editar'],['\u2715',function(){mProdDel(i);},'Remover']]
+      .forEach(function(b){var bt=document.createElement('button');bt.textContent=b[0];bt.title=b[2];bt.setAttribute('aria-label',b[2]);bt.addEventListener('click',b[1]);ctrl.appendChild(bt);});
+    li.appendChild(img);li.appendChild(info);li.appendChild(ctrl);
+    ul.appendChild(li);
+  });
+  ul.scrollTop=rolagem;
+  /* A conta do peso acompanha a lista: ela fala do numero de produtos, entao deixa-la so no
+     'blur' dos campos de largura a faria descrever o catalogo anterior. */
+  mPesoRender();
+}
+
+/* ===== cupons ===== */
+function mCpCodAjustar(inp,i){
+  var alto=String(inp.value).toUpperCase();
+  mCps[i].codigo=alto;
+  if(alto===inp.value)return false;
+  inp.value=alto;
+  salvarEstado();mPreview();
+  return true;
+}
+function mCpPctErro(tipo,v){
+  if((tipo==='pct_total'||tipo==='pct_produto')&&v>100)return 'desconto de '+v+'% zera o pedido (o maximo e 100%).';
+  return '';
+}
+function mCpAdd(){
+  var cod=String($('m-cp-cod').value).trim().toUpperCase();
+  if(!cod){alert('Informe o codigo do cupom.');return;}
+  var v=parseFloat(String($('m-cp-valor').value).replace(',','.'));
+  if(isNaN(v)||v<=0){alert('Informe o valor do desconto do cupom.');return;}
+  var tipo=radio('m-cp-tipo')||'pct_total',e=mCpPctErro(tipo,v);
+  if(e){alert('Cupom "'+cod+'": '+e);return;}
+  mCps.push({codigo:cod,tipo:tipo,valor:v,validade:$('m-cp-val').value});
+  $('m-cp-cod').value='';$('m-cp-valor').value='';$('m-cp-val').value='';
+  mCpRender();salvarEstado();mPreview();
+}
+function mCpDel(i){mCps.splice(i,1);mCpRender();salvarEstado();mPreview();}
+function mCpRender(){
+  var ul=$('m-cp-lista');if(!ul)return;
+  ul.innerHTML='';
+  $('m-cp-vazio').style.display=mCps.length?'none':'block';
+  mCps.forEach(function(cp,i){
+    var li=document.createElement('li');
+    var info=document.createElement('div');info.className='info';
+    var cod=document.createElement('input');cod.type='text';cod.value=cp.codigo;cod.placeholder='CODIGO';
+    cod.addEventListener('input',function(){mCps[i].codigo=cod.value;});
+    cod.addEventListener('change',function(){mCpCodAjustar(cod,i);});
+    cod.addEventListener('blur',function(){mCpCodAjustar(cod,i);});
+    var val=document.createElement('input');val.type='number';val.step='0.01';val.min='0';val.value=cp.valor;
+    val.addEventListener('input',function(){mCps[i].valor=val.value;});
+    var sel=document.createElement('select');
+    [['pct_produto','% sobre os produtos'],['pct_total','% sobre o total'],['fixo','valor fixo']].forEach(function(o){
+      var op=document.createElement('option');op.value=o[0];op.textContent=o[1];
+      if(cp.tipo===o[0])op.selected=true;sel.appendChild(op);
+    });
+    sel.addEventListener('change',function(){mCps[i].tipo=sel.value;salvarEstado();mPreview();});
+    info.appendChild(cod);info.appendChild(sel);info.appendChild(val);
+    var ctrl=document.createElement('div');ctrl.className='ctrl';
+    var bt=document.createElement('button');bt.textContent='\u2715';bt.title='Remover';bt.setAttribute('aria-label','Remover');
+    bt.addEventListener('click',function(){mCpDel(i);});ctrl.appendChild(bt);
+    li.appendChild(info);li.appendChild(ctrl);
+    ul.appendChild(li);
+  });
+}
+
+/* ===== o redimensionador da Alboom: uma implementacao, dois lados =====
+   O peso da vitrine e requisito, nao otimizacao. Medido na rodada do importador de galeria, o
+   storage entrega TUDO com 1200 px de largura, de 157 a 868 KB por foto (mediana 340 KB):
+   cinquenta produtos numa grade seriam dezenas de megabytes, e a pagina levaria dezenas de
+   segundos no celular. O redimensionador resolve, e a forma dele ja esta medida -- so-largura
+   funciona, e o naturalWidth devolvido e exatamente o pedido.
+   Tres cuidados que a funcao carrega:
+   1. So embrulha host da Alboom. O resize e um servico da Alboom sobre o storage dela: pedir a
+      ele a foto de outro servidor devolveria erro, e a vitrine ficaria com buraco. Foto de fora
+      passa INTEIRA -- e por isso o cadastro avisa que ela nao encolhe.
+   2. Desembrulha antes de embrulhar. O importador de galeria ja pode ter guardado um endereco
+      que passa pelo resize; embrulhar de novo produziria /url/alfred.../url/storage..., e o
+      tamanho de dentro venceria o de fora.
+   3. Largura zero ou ausente devolve o endereco original, que e o que a lista da aba usa quando
+      o operador cadastra foto de fora.
+   A MESMA funcao roda na ferramenta (miniatura da lista de produtos, aviso do cadastro,
+   medicao de peso) e dentro do bloco entregue.
+
+   ATE ESTA CORRECAO ELA NAO ERA A MESMA -- eram duas, e ja divergiam. A ferramenta perguntava
+   sHostEsperado(v) e o bloco perguntava HOSTS_RESIZE.test(v), que respondem coisas diferentes
+   para dois formatos que o proprio cadastro aceita:
+     '//storage.alboom.ninja/foto.jpg' -> a ferramenta montava '.../url///storage...' (miniatura
+        quebrada) e o bloco nao redimensionava (foto INTEIRA na vitrine publicada);
+     '/fotos/promo.jpg'                -> a ferramenta montava '.../url//fotos/...' (miniatura
+        que nao carrega) e o bloco nao redimensionava.
+   E nenhum dos dois avisava no cadastro, porque sHostEsperado responde "e Alboom" para o
+   primeiro (o host esta la, so falta o esquema) e "sem host" para o segundo -- enquanto a aba
+   afirma por escrito que o cadastro avisa quando a foto nao encolhe.
+   O conserto e o padrao de FC_PIX_SRC: UMA fonte literal (M_IMG_SRC). A ferramenta a avalia
+   com new Function; o bloco leva o MESMO texto. Nao ha como divergirem, porque nao ha dois
+   textos. Junto vem imgResize(), a pergunta "esta foto passa pelo redimensionador?", que e a
+   pergunta que o aviso do cadastro e o selo da lista tinham de estar fazendo desde o comeco --
+   sHostEsperado responde outra ("o host e um dos conhecidos?") e continua valendo para o que
+   ela sempre serviu, o aviso de foto hospedada fora.
+   imgNorm resolve os dois formatos numa forma so ANTES de decidir: '//host/...' ganha o
+   esquema (a pagina e https, e o resize precisa do endereco absoluto) e o que ja veio
+   embrulhado pelo resize e desembrulhado. Caminho a partir da raiz do site ('/fotos/...') sai
+   inalterado e nao e redimensionado -- ele nao esta no storage da Alboom, e agora o cadastro
+   diz isso. */
+var M_RESIZE='https://alfred.alboompro.com/resize/width/';
+function mHostsResizeSrc(){
+  return '/^https?:\\/\\/('+S_HOSTS_ALBOOM.map(function(h){return h.replace(/\./g,'\\.');}).join('|')+')\\//i';
+}
+var M_IMG_SRC=
+  '/* Um endereco, uma forma so: o que veio embrulhado pelo resize e desembrulhado, e o\n'+
+  '   endereco sem esquema (//host/foto.jpg) ganha o https -- os dois viram o endereco\n'+
+  '   absoluto que o redimensionador precisa receber. */\n'+
+  'function imgNorm(u){\n'+
+  "var v=String(u||''),i;\n"+
+  "if(!v)return '';\n"+
+  "i=v.lastIndexOf('/url/');\n"+
+  "if(i>=0)return 'https://'+v.slice(i+5);\n"+
+  "if(v.indexOf('//')===0)return 'https:'+v;\n"+
+  'return v;\n}\n\n'+
+  '/* Esta foto passa pelo redimensionador? E a pergunta que decide se ela chega encolhida ou\n'+
+  '   inteira na vitrine. */\n'+
+  'function imgResize(u){\n'+
+  'return HOSTS_RESIZE.test(imgNorm(u));\n}\n\n'+
+  'function imgTamanho(u,larg){\n'+
+  'var v=imgNorm(u);\n'+
+  "if(!v)return '';\n"+
+  'if(!larg)return v;\n'+
+  'if(!HOSTS_RESIZE.test(v))return v;\n'+
+  "return RESIZE_BASE+larg+'/url/'+v.replace(/^https?:\\/\\//i,'');\n}\n\n";
+/* O que o bloco entregue leva: as duas constantes e o texto acima, nesta ordem. */
+function mImgTamanhoGer(){
+  return "var RESIZE_BASE='"+M_RESIZE+"';\n"+
+    'var HOSTS_RESIZE='+mHostsResizeSrc()+';\n'+
+    M_IMG_SRC;
+}
+/* O que a ferramenta usa: o MESMO texto, avaliado uma vez. Preguicoso de proposito -- assim
+   nao depende da ordem em que os 'var' deste arquivo sao inicializados. */
+var mImgApi=null;
+function mImgApiOb(){
+  if(!mImgApi)mImgApi=(new Function(mImgTamanhoGer()+'return {tamanho:imgTamanho,resize:imgResize};'))();
+  return mImgApi;
+}
+function mImgTamanho(u,larg){return mImgApiOb().tamanho(u,larg);}
+function mImgResize(u){return mImgApiOb().resize(u);}
+
+/* ===== importador de galeria: o mesmo da aba Slideshow, outro destino =====
+   Colar link a link cinquenta vezes e proibitivo -- foi essa medida que criou o importador na
+   fase 1. Aqui ele nao alimenta uma lista de fotos: ele enche um ESTOQUE de enderecos, e o
+   operador associa um deles ao produto que esta cadastrando. A extracao, o filtro por pasta, a
+   lista de hosts permitidos e a contagem de descartes sao as funcoes da aba Slideshow, chamadas
+   como estao: sImpAlvo, sImpExtrai, sImpPastas, sImpDescartes. Nao ha segunda extracao. */
+var mImpAchado=null;
+function mImpAviso(txt,ok){
+  var el=$('m-imp-resultado');if(!el)return;
+  if(!txt){el.style.display='none';el.innerHTML='';return;}
+  el.className='ajuda '+(ok?'s-ok':'s-alerta');
+  el.style.display='block';
+  el.innerHTML=txt;
+}
+function mImpInvalidar(){
+  if(!mImpAchado)return;
+  mImpAchado=null;mImpRender();
+  mImpAviso('O link ou o código-fonte mudou, então o resultado anterior foi descartado. Clique em <b>Conferir a galeria</b> de novo — sem isso, os endereços da galeria anterior continuariam disponíveis para associar, sem nada na tela indicando isso.',false);
+}
+function mImpConferir(){
+  var alvo=sImpAlvo($('m-imp-link').value),fonte=$('m-imp-fonte').value,a,pastas,i,ex,usadas,novos=0;
+  mImpAchado=null;mImpRender();
+  if(!alvo){mImpAviso('Não reconheci o link. Cole o endereço de uma <b>galeria</b> (<code>/gallery/121894-...</code>) ou de um <b>portfólio</b> (<code>/portfolio/nome/1518588-...</code>), copiado da barra do navegador.',false);return;}
+  if(!String(fonte).trim()){mImpAviso('Falta o código-fonte da página. Abra a galeria no navegador, use <b>Cmd ⌥ U</b> para ver o código-fonte, selecione tudo (<b>Cmd A</b>), copie (<b>Cmd C</b>) e cole no campo acima.',false);return;}
+  a=sImpExtrai(fonte,alvo.pasta);
+  if(!a.urls.length){
+    pastas=sImpPastas(fonte);
+    ex=sImpDescartes(a);
+    if(pastas.length)mImpAviso('Nenhuma foto d'+alvo.artigo+' <b>'+escHtml(alvo.rotulo)+'</b> neste código-fonte.'+ex+' O que este código-fonte realmente contém: '+escHtml(pastas.join(', '))+'. Você provavelmente colou a fonte de uma página e o link de outra.',false);
+    else mImpAviso('Não encontrei nenhuma foto neste código-fonte.'+ex+' Confira se copiou o código-fonte inteiro da página da galeria (e não o texto da página).',false);
+    return;
+  }
+  usadas={};
+  for(i=0;i<mProds.length;i++)if(mProds[i].img)usadas[sImpChave(mProds[i].img)]=1;
+  for(i=0;i<a.urls.length;i++)if(!usadas[sImpChave(a.urls[i])])novos++;
+  mImpAchado={urls:a.urls,rotulo:alvo.rotulo,artigo:alvo.artigo};
+  mImpRender();
+  mImpAviso('Encontrei <b>'+a.urls.length+'</b> foto'+(a.urls.length===1?'':'s')+' n'+alvo.artigo+' <b>'+escHtml(alvo.rotulo)+'</b>.'+sImpDescartes(a)+
+    ' Destas, <b>'+(a.urls.length-novos)+'</b> já está'+((a.urls.length-novos)===1?'':'ão')+' em algum produto e <b>'+novos+'</b> ainda não. Clique em <b>Usar</b> ao lado de uma foto para levá-la ao formulário de cadastro ao lado.',true);
+}
+function mImpUsar(url){
+  $('m-pimg').value=url;
+  mImpAviso('Foto levada para o campo <b>Foto do produto</b>, no formulário ao lado. Preencha o resto e clique em <b>'+escHtml($('m-prod-salvar').textContent)+'</b>.',true);
+  try{$('m-pnome').focus();}catch(e){}
+  mPreview();
+}
+function mImpRender(){
+  var ul=$('m-imp-lista'),usadas={},i;
+  if(!ul)return;
+  ul.innerHTML='';
+  if(!mImpAchado){$('m-imp-conta').style.display='none';return;}
+  for(i=0;i<mProds.length;i++)if(mProds[i].img)usadas[sImpChave(mProds[i].img)]=1;
+  $('m-imp-conta').style.display='block';
+  $('m-imp-conta').textContent=mImpAchado.urls.length+(mImpAchado.urls.length===1?' foto encontrada':' fotos encontradas')+' · '+mImpAchado.rotulo;
+  mImpAchado.urls.forEach(function(u){
+    var li=document.createElement('li');
+    var img=document.createElement('img');img.src=mImgTamanho(u,120);img.alt='';img.loading='lazy';
+    var info=document.createElement('div');info.className='info';
+    var partes=sUrlPartes(u);
+    var url=document.createElement('div');url.className='url partida';url.title=u;
+    var pasta=document.createElement('span');pasta.className='pasta';pasta.textContent=partes.pasta;
+    var arq=document.createElement('span');arq.className='arq';arq.textContent=partes.arq;
+    url.appendChild(pasta);url.appendChild(arq);
+    info.appendChild(url);
+    if(usadas[sImpChave(u)]){
+      var ja=document.createElement('div');ja.className='sub';ja.textContent='já está em um produto';
+      info.appendChild(ja);
+    }
+    var ctrl=document.createElement('div');ctrl.className='ctrl';
+    var bt=document.createElement('button');bt.textContent='Usar';bt.title='Levar este endereço para o formulário de cadastro';
+    bt.style.width='auto';bt.style.padding='0 8px';
+    bt.addEventListener('click',function(){mImpUsar(u);});
+    ctrl.appendChild(bt);
+    li.appendChild(img);li.appendChild(info);li.appendChild(ctrl);
+    ul.appendChild(li);
+  });
+}
+
+/* ===== o que aparece e o que some ===== */
+function mToggles(){
+  var m=radio('m-metodo')||'ambos',usaPP=(m!=='pix'),usaPix=(m!=='paypal'),sinalOn=(radio('m-sinal')==='sim');
+  function ver(id,b){var el=$(id);if(el)el.style.display=b?'block':'none';}
+  ver('m-pp-campos',usaPP);
+  ver('m-pix-campos',usaPix);
+  ver('m-moeda-campo',usaPP&&!usaPix);
+  ver('m-descpix-campo',m==='ambos');
+  ver('m-descpix-aviso',m==='ambos'&&sinalOn);
+  ver('m-zap-fieldset',usaPix);
+  ver('m-zap-campo',usaPix&&radio('m-zap')==='sim');
+  ver('m-sinal-campos',sinalOn);
+  ver('m-sinalpct-campo',sinalOn&&radio('m-sinaltipo')==='pct');
+  ver('m-sinalfixo-campo',sinalOn&&radio('m-sinaltipo')==='fixo');
+  ver('m-opnenhum-campo',radio('m-opsel')==='unico');
+  var temQtd=false,i,j;
+  for(i=0;i<mProds.length;i++){
+    if(mProds[i].qtd)temQtd=true;
+    for(j=0;j<(mProds[i].ops||[]).length;j++)if(mProds[i].ops[j].qtd)temQtd=true;
+  }
+  ver('m-qtdmax-campo',temQtd);
+}
+
+/* ===== configuracao da aba =====
+   Uma leitura so da interface, ja presa nas faixas. E o que mRecusa valida e o que mBloco
+   monta -- e como a previa executa o retorno de mBloco, nao existe segunda implementacao da
+   loja para divergir do bloco entregue. */
+function mCfg(){
+  var m=radio('m-metodo')||'ambos';
+  var usaPix=(m!=='paypal');
+  var descpix=mPreso('m-descpix');if(descpix==null)descpix=10;
+  if(m!=='ambos')descpix=0;
+  var sinalOn=(radio('m-sinal')==='sim');
+  if(sinalOn)descpix=0;
+  var sinalTipo=radio('m-sinaltipo')||'pct';
+  var sinalPct=mPreso('m-sinalpct');if(sinalPct==null)sinalPct=30;
+  var sinalFixo=mPreso('m-sinalfixo');if(sinalFixo==null)sinalFixo=100;
+  var temQtd=false,i,j;
+  for(i=0;i<mProds.length;i++){
+    if(mProds[i].qtd)temQtd=true;
+    for(j=0;j<(mProds[i].ops||[]).length;j++)if(mProds[i].ops[j].qtd)temQtd=true;
+  }
+  return {
+    m:m, usaPP:(m!=='pix'), usaPix:usaPix,
+    client:$('m-client').value.trim(),
+    moeda:usaPix?'BRL':(radio('m-moeda')||'BRL'),
+    ppcor:radio('m-ppcor')||'gold',
+    chave:pixLimpar($('m-chave').value), chaveBruta:$('m-chave').value,
+    nomer:$('m-nomer').value.trim(), cidade:$('m-cidade').value.trim(),
+    cod:$('m-cod').value.trim(),
+    zap:usaPix&&(radio('m-zap')==='sim'),
+    zapnum:String($('m-zapnum').value).replace(/\D/g,''),
+    descpix:descpix,
+    sinal:{ativo:sinalOn,tipo:sinalTipo,valor:(sinalTipo==='fixo')?(Math.round(sinalFixo*100)/100):sinalPct},
+    resumo:(radio('m-resumo')==='sim'),
+    prods:mProds, cps:mCps, cats:mCats(),
+    qtdLigada:temQtd, qtdmax:mPreso('m-qtdmax')||10,
+    /* mob alimenta uma @media do bloco: preso AQUI, na fonte da configuracao, e nao so na
+       largura da previa -- min/max de <input type="number"> nao sao impostos ao valor
+       digitado, e prender so a previa deixaria o quadro num numero e o CSS gerado em outro. */
+    larg:mPreso('m-larg')||1080, cols:mPreso('m-cols')||3, mob:mPreso('m-mob')||760,
+    imgvit:mPreso('m-imgvit')||400, imgdet:mPreso('m-imgdet')||1000,
+    prop:radio('m-prop')||'1 / 1', filtro:(radio('m-filtro')!=='nao'),
+    c1:corSegura('m-c1','#0F3A30'), c2:corSegura('m-c2','#ffffff'), c3:corSegura('m-c3','#333333'),
+    t1:$('m-t1').value, t2:$('m-t2').value, t3:$('m-t3').value, t4:$('m-t4').value,
+    t5:$('m-t5').value, t6:$('m-t6').value, t7:$('m-t7').value, t8:$('m-t8').value,
+    t9:$('m-t9').value, t10:$('m-t10').value, t11:$('m-t11').value, t12:$('m-t12').value
+  };
+}
+/* As guardas da geracao, sem efeito colateral. A previa usa as MESMAS: com elas so no gerador,
+   a previa executaria configuracao que o gerador se nega a produzir, e nesse instante deixaria
+   de ser prova do codigo. Nao mexe no DOM de proposito -- a correcao a vista e de mGerar, que e
+   o gesto deliberado do operador; a previa roda a cada tecla. */
+function mRecusa(cfg){
+  var i,cpv,cpc,cpe,tmax;
+  if(!cfg.cod)return 'Informe o codigo da loja. Ele identifica o carrinho no navegador do cliente (e a chave do armazenamento) e vira o comeco do identificador do pedido no extrato -- sem ele, duas lojas no mesmo site dividiriam o mesmo carrinho.';
+  if(!/^[A-Za-z0-9_-]+$/.test(cfg.cod))return 'O codigo da loja aceita apenas letras sem acento, numeros, hifen e sublinhado. Ele vira chave de armazenamento e identificador de pedido: espaco e acento ali produzem um identificador diferente do que voce esta lendo.';
+  if(!cfg.prods.length)return 'Cadastre ao menos um produto.';
+  for(i=0;i<cfg.prods.length;i++){
+    if(!String(cfg.prods[i].img||'').trim())return 'O produto "'+cfg.prods[i].nome+'" esta sem foto. A vitrine e feita de imagens: sem foto ele sai como um retangulo vazio no meio da grade.';
+  }
+  if(cfg.usaPP&&!cfg.client)return 'Informe o Client ID do PayPal.';
+  if(cfg.usaPix){
+    var erroChave=pixChaveErro(cfg.chave,cfg.chaveBruta);
+    if(erroChave)return erroChave;
+    if(!cfg.chave||!cfg.nomer||!cfg.cidade)return 'Preencha a chave Pix, o nome do recebedor e a cidade.';
+  }
+  if(cfg.zap&&!cfg.zapnum)return 'Informe o numero do WhatsApp de destino.';
+  for(i=0;i<cfg.cps.length;i++){
+    cpc=String(cfg.cps[i].codigo||'').trim();
+    if(!cpc)return 'O cupom na posicao '+(i+1)+' da lista esta sem codigo. Um cupom sem codigo nunca pode ser digitado pelo cliente: preencha o codigo ou remova a linha.';
+    cpv=parseFloat(String(cfg.cps[i].valor).replace(',','.'));
+    if(isNaN(cpv)||cpv<=0)return 'O cupom "'+cpc+'" esta com o valor do desconto vazio ou zerado. Ele seria entregue no codigo como desconto de zero: o cliente digitaria o cupom, veria "Cupom aplicado!" e "Desconto - R$ 0,00", e o total nao mudaria. Preencha o valor ou remova o cupom.';
+    cpe=mCpPctErro(cfg.cps[i].tipo,cpv);
+    if(cpe)return 'Cupom "'+cpc+'": '+cpe;
+  }
+  /* Sinal fixo acima do maior pedido possivel: aqui o "maior pedido" e a loja INTEIRA no
+     carrinho, cada item no teto da quantidade. Acima disso nenhum cliente conseguiria pagar. */
+  if(cfg.sinal.ativo&&cfg.sinal.tipo==='fixo'){
+    tmax=mTotalMaximo(cfg.prods,cfg.qtdmax);
+    if(cfg.sinal.valor>tmax)return 'O sinal fixo de '+mFmt(cfg.sinal.valor)+' e maior que o maior pedido que esta loja consegue montar ('+mFmt(tmax)+', com tudo no carrinho e cada item no teto da quantidade). Nenhum cliente conseguiria pagar. Reduza o sinal, use sinal percentual ou aumente os precos.';
+  }
+  return '';
+}
+/* O maior total alcancavel: tudo no carrinho, cada item vendido por quantidade no teto, e todos
+   os opcionais de cada produto quando ele aceita varios (quando aceita um so, o mais caro). */
+function mTotalMaximo(prods,qtdmax){
+  var t=0,i,j,p,ops,mais,v;
+  for(i=0;i<prods.length;i++){
+    p=prods[i];
+    t+=(parseFloat(p.preco)||0)*(p.qtd?qtdmax:1);
+    ops=p.ops||[];mais=0;
+    for(j=0;j<ops.length;j++){
+      v=(parseFloat(String(ops[j].preco).replace(',','.'))||0)*(ops[j].qtd?qtdmax:1);
+      if(p.opsel==='multiplo')t+=v;
+      else if(v>mais)mais=v;
+    }
+    if(p.opsel!=='multiplo')t+=mais;
+  }
+  return Math.round(t*100)/100;
+}
+function mGerar(){
+  fcPixChaveAjustar('m-chave');
+  if(fcAjustarTodos(M_NUMS))salvarEstado();
+  var cfg=mCfg();
+  var recusa=mRecusa(cfg);
+  if(recusa){alert(recusa);return;}
+  $('m-out').value=mBloco(cfg);
+  /* a conta do peso descreve o codigo que acabou de sair: gerar sem redesenha-la deixaria a
+     frase falando de uma configuracao anterior ao lado do bloco novo */
+  mPesoRender();
+  mPreview(true);
+  fccMarcar('loja');
+}
+
+/* ===== fonte unica do bloco entregue =====
+   mGerar escreve o retorno desta funcao na textarea e mPvMontar escreve o MESMO retorno dentro
+   do iframe da previa. Nao existe segunda formatacao em lugar nenhum -- e por isso que a previa
+   nao tem como divergir do que o operador vai colar. */
+function mBloco(cfg){
+  var usaPP=cfg.usaPP,usaPix=cfg.usaPix,usaQtd=cfg.qtdLigada,usaSinal=cfg.sinal.ativo;
+  var usaResumo=cfg.resumo,descpix=cfg.descpix,zap=cfg.zap;
+  var usaCupom=cfg.cps.length>0,usaFiltro=cfg.filtro&&cfg.cats.length>0;
+  var client=escJs(cfg.client||'COLE_AQUI_SEU_CLIENT_ID');
+  var cod=escJs(cfg.cod||'LOJA');
+  /* Nome, descricao, categoria, opcional, cupom e validade sao texto livre e viram strings JS
+     dentro do bloco: escJs. Uma descricao colada de um e-mail com abre-comentario de HTML faria
+     a loja inteira sumir da pagina publicada, em silencio. No bloco entregue todos saem por
+     textContent -- escHtml deixaria "&amp;" a vista do cliente. O endereco da foto passa por
+     urlLimpa antes, porque ele e o unico campo que vira src. */
+  var prods=cfg.prods.map(function(p){
+    var ops=(p.ops||[]).map(function(o){
+      var v=parseFloat(String(o.preco).replace(',','.'))||0;
+      return "{nome:'"+escJs(o.nome)+"', preco:"+v.toFixed(2)+(o.qtd?", qtd:true":"")+"}";
+    }).join(', ');
+    return "  {nome:'"+escJs(p.nome)+"', descricao:'"+escJs(p.desc||'')+"', preco:"+(parseFloat(p.preco)||0).toFixed(2)+",\n"+
+           "   categoria:'"+escJs(p.cat||'')+"', imagem:'"+escJs(urlLimpa(p.img||''))+"',\n"+
+           "   selecaoOpcionais:'"+p.opsel+"', permitirNenhum:"+(p.opnenhum==='sim'?'true':'false')+(p.qtd?", quantidade:true":"")+",\n"+
+           "   opcionais:["+ops+"]}";
+  }).join(',\n');
+  var cps=cfg.cps.map(function(cp){
+    var v=parseFloat(String(cp.valor).replace(',','.'))||0;
+    return "  {codigo:'"+escJs(String(cp.codigo).trim().toUpperCase())+"', tipo:'"+cp.tipo+"', valor:"+v+", validade:'"+escJs(cp.validade||'')+"'}";
+  }).join(',\n');
+  var cats=cfg.cats.map(function(c){return "'"+escJs(c)+"'";}).join(', ');
+
+  var c='';
+  c+='<div class="fcmloja" id="fcmloja"></div>\n\n';
+  c+='<sty'+'le>\n';
+  c+='.fcmloja{max-width:var(--fcm-larg,1080px);margin:0 auto;color:var(--fcm-texto,#333);font-family:inherit;text-align:left;line-height:1.5}\n';
+  c+='.fcmloja *{box-sizing:border-box}\n';
+  c+='.fcmloja .fcm-titulo{font-size:22px;font-weight:700;color:var(--fcm-destaque,#0F3A30);margin:0 0 14px;text-align:left}\n';
+  c+='.fcmloja .fcm-cols{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:24px;align-items:start}\n';
+  c+='.fcmloja .fcm-dir{position:sticky;top:16px}\n';
+  if(usaFiltro){
+    c+='.fcmloja .fcm-filtros{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 14px}\n';
+    c+='.fcmloja .fcm-filtro{border:1px solid #d8d2c4;background:#fff;color:inherit;border-radius:999px;padding:6px 14px;font:600 12px/1.2 inherit;cursor:pointer}\n';
+    c+='.fcmloja .fcm-filtro.on{background:var(--fcm-destaque,#0F3A30);border-color:var(--fcm-destaque,#0F3A30);color:#fff}\n';
+  }
+  c+='.fcmloja .fcm-grade{display:grid;grid-template-columns:repeat('+cfg.cols+',minmax(0,1fr));gap:16px}\n';
+  c+='.fcmloja .fcm-card{border:1px solid #e5dfd0;border-radius:14px;overflow:hidden;background:var(--fcm-fundo,#fff);cursor:pointer;padding:0;text-align:left;color:inherit;font:inherit;display:block;width:100%;transition:box-shadow .18s,transform .18s}\n';
+  c+='.fcmloja .fcm-card:hover{box-shadow:0 8px 22px rgba(0,0,0,.10);transform:translateY(-2px)}\n';
+  c+='.fcmloja .fcm-foto{width:100%;aspect-ratio:'+cfg.prop+';object-fit:cover;display:block;background:#EDEAE1}\n';
+  c+='.fcmloja .fcm-card-c{padding:10px 12px 12px}\n';
+  c+='.fcmloja .fcm-card-n{font-size:14px;font-weight:600;margin:0 0 2px;text-align:left}\n';
+  c+='.fcmloja .fcm-card-cat{font-size:11px;color:#8a8375;text-transform:uppercase;letter-spacing:.05em;margin:0 0 4px;text-align:left}\n';
+  c+='.fcmloja .fcm-card-p{font-size:14px;font-weight:700;color:var(--fcm-destaque,#0F3A30);margin:0;text-align:left}\n';
+  c+='.fcmloja .fcm-vazio-grade{border:1px dashed #d8d2c4;border-radius:12px;padding:18px;font-size:13px;color:#8a8375;text-align:left}\n';
+  /* cartao de detalhe */
+  c+='.fcmloja .fcm-detalhe{display:none}\n';
+  c+='.fcmloja .fcm-detalhe.on{display:block}\n';
+  c+='.fcmloja .fcm-det-grade{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px;align-items:start}\n';
+  c+='.fcmloja .fcm-det-foto{width:100%;border-radius:14px;display:block;background:#EDEAE1}\n';
+  c+='.fcmloja .fcm-det-n{font-size:20px;font-weight:700;margin:0 0 4px;text-align:left}\n';
+  c+='.fcmloja .fcm-det-p{font-size:18px;font-weight:700;color:var(--fcm-destaque,#0F3A30);margin:0 0 10px;text-align:left}\n';
+  c+='.fcmloja .fcm-det-d{font-size:13px;color:#666;margin:0 0 14px;text-align:left}\n';
+  c+='.fcmloja .fcm-voltar{border:1px solid #d8d2c4;background:#fff;color:inherit;border-radius:8px;padding:7px 14px;font:600 12px/1.2 inherit;cursor:pointer;margin:0 0 14px}\n';
+  c+='.fcmloja .fcm-add{width:100%;border:0;border-radius:10px;background:var(--fcm-destaque,#0F3A30);color:#fff;padding:12px;font:700 14px/1.2 inherit;cursor:pointer;margin-top:12px}\n';
+  c+='.fcmloja .fcm-linha-p{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px;font-size:13px;font-weight:600}\n';
+  /* opcionais: marcadores desenhados, porque o tema do Prosite esconde radio e checkbox nativos */
+  c+='.fcmloja .fcm-ops{margin:6px 0 2px}\n';
+  c+='.fcmloja .fcm-ops-t{font-size:12px;font-weight:600;margin:0 0 4px;text-align:left}\n';
+  c+='.fcmloja .fcm-op{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:4px 0;font-size:13px}\n';
+  c+='.fcmloja .fcm-op label{display:flex;align-items:center;gap:8px;cursor:pointer;margin:0;font-weight:400;position:relative;text-align:left}\n';
+  c+='.fcmloja input[type="radio"],.fcmloja input[type="checkbox"]{position:absolute;opacity:0;width:1px;height:1px;pointer-events:none}\n';
+  c+='.fcmloja .fcm-mark{width:18px;height:18px;min-width:18px;display:inline-block;position:relative;background:#fff;border:2px solid #b9b3a4;box-sizing:border-box}\n';
+  c+='.fcmloja .fcm-mark.rd{border-radius:50%}\n';
+  c+='.fcmloja .fcm-mark.ck{border-radius:5px}\n';
+  c+='.fcmloja input:checked+.fcm-mark{border-color:var(--fcm-destaque,#0F3A30);background:var(--fcm-destaque,#0F3A30)}\n';
+  c+='.fcmloja input:checked+.fcm-mark.rd:after{content:"";position:absolute;left:3px;top:3px;width:8px;height:8px;border-radius:50%;background:#fff}\n';
+  c+='.fcmloja input:checked+.fcm-mark.ck:after{content:"";position:absolute;left:4px;top:0;width:5px;height:10px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(40deg)}\n';
+  if(usaQtd)c+=fcQtdCssGer('.fcmloja','fcm','var(--fcm-destaque,#0F3A30)');
+  /* carrinho */
+  c+='.fcmloja .fcm-cesta{border:1px solid #e5dfd0;border-radius:16px;background:var(--fcm-fundo,#fff);padding:16px 18px;box-shadow:0 6px 24px rgba(0,0,0,.06)}\n';
+  c+='.fcmloja .fcm-rotulo{font-size:13px;font-weight:700;margin:0 0 8px;text-align:left}\n';
+  c+='.fcmloja .fcm-item{border-bottom:1px solid #eee;padding:8px 0}\n';
+  c+='.fcmloja .fcm-item-l{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:13px;font-weight:600}\n';
+  c+='.fcmloja .fcm-item-op{font-size:12px;color:#777;margin-left:2px;text-align:left}\n';
+  c+='.fcmloja .fcm-tirar{border:0;background:none;color:#8C1D18;cursor:pointer;font:700 13px/1 inherit;padding:2px 4px}\n';
+  c+='.fcmloja .fcm-cesta-vazia{font-size:13px;color:#8a8375;margin:0;text-align:left}\n';
+  c+='.fcmloja .fcm-aviso-cesta{display:none;font-size:12px;background:#FDF2F1;color:#5E1310;border-radius:8px;padding:8px 10px;margin:0 0 10px;text-align:left}\n';
+  c+='.fcmloja .fcm-aviso-cesta.on{display:block}\n';
+  if(usaCupom){
+    c+='.fcmloja .fcm-cupom{margin:10px 0 0}\n';
+    c+='.fcmloja .fcm-cupom-l{display:flex;gap:6px}\n';
+    c+='.fcmloja .fcm-cupom-l input{flex:1;min-width:0;border:1px solid #d8d2c4;border-radius:8px;padding:8px;font:inherit;font-size:13px}\n';
+    c+='.fcmloja .fcm-cupom-l button{border:1px solid var(--fcm-destaque,#0F3A30);background:#fff;color:var(--fcm-destaque,#0F3A30);border-radius:8px;padding:0 12px;font:600 12px/1 inherit;cursor:pointer}\n';
+    c+='.fcmloja .fcm-cupom-msg{font-size:12px;margin-top:5px;text-align:left}\n';
+    c+='.fcmloja .fcm-cupom-msg.ok{color:#1e7e34}\n';
+    c+='.fcmloja .fcm-cupom-msg.erro{color:#c0392b}\n';
+    c+='.fcmloja .fcm-desconto{display:none;justify-content:space-between;font-size:13px;color:#1e7e34;margin-top:8px}\n';
+    c+='.fcmloja .fcm-desconto.on{display:flex}\n';
+  }
+  c+='.fcmloja .fcm-total{display:flex;justify-content:space-between;align-items:baseline;font-size:16px;font-weight:700;color:var(--fcm-destaque,#0F3A30);border-top:2px solid var(--fcm-destaque,#0F3A30);margin-top:10px;padding-top:9px}\n';
+  if(usaSinal){
+    c+='.fcmloja .fcm-sinal,.fcmloja .fcm-saldo{display:flex;justify-content:space-between;font-size:13px;margin-top:6px}\n';
+    c+='.fcmloja .fcm-sinal{font-weight:700}\n';
+    c+='.fcmloja .fcm-saldo{color:#777}\n';
+    c+='.fcmloja .fcm-sinal-aviso{display:none;font-size:12px;color:#8C1D18;background:#FDF2F1;border-radius:8px;padding:7px 9px;margin-top:8px;text-align:left}\n';
+    c+='.fcmloja .fcm-sinal-aviso.on{display:block}\n';
+  }
+  if(descpix>0){
+    c+='.fcmloja .fcm-pixlinha{display:none;justify-content:space-between;font-size:13px;color:#1e7e34;margin-top:6px;font-weight:600}\n';
+    c+='.fcmloja .fcm-pixlinha.on{display:flex}\n';
+  }
+  if(usaPP){
+    c+='.fcmloja .fcm-botoes{margin-top:12px;min-height:44px}\n';
+    c+='.fcmloja .fcm-msg{font-size:12px;margin-top:6px;text-align:left}\n';
+    c+='.fcmloja .fcm-msg.ok{color:#1e7e34}\n';
+    c+='.fcmloja .fcm-msg.erro{color:#c0392b}\n';
+  }
+  if(usaPix){
+    if(usaPP)c+='.fcmloja .fcm-sep{display:flex;align-items:center;gap:8px;margin:14px 0 10px;font-size:12px;color:#8a8375}\n';
+    c+='.fcmloja .fcm-gerar{width:100%;border:0;border-radius:10px;background:var(--fcm-destaque,#0F3A30);color:#fff;padding:12px;font:700 14px/1.2 inherit;cursor:pointer}\n';
+    c+='.fcmloja .fcm-pixarea{display:none;margin-top:12px;text-align:left}\n';
+    c+='.fcmloja .fcm-pixarea.on{display:block}\n';
+    c+='.fcmloja .fcm-instrucao{font-size:12px;color:#666;margin:0 0 8px;text-align:left}\n';
+    c+='.fcmloja .fcm-pixval{font-size:14px;font-weight:700;margin:0 0 8px;text-align:left}\n';
+    c+='.fcmloja .fcm-qr{margin:0 0 8px}\n';
+    c+='.fcmloja .fcm-cola{width:100%;height:70px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:10px;border:1px solid #d8d2c4;border-radius:8px;padding:7px;resize:vertical}\n';
+    c+='.fcmloja .fcm-copiar{width:100%;border:1px solid var(--fcm-destaque,#0F3A30);background:#fff;color:var(--fcm-destaque,#0F3A30);border-radius:8px;padding:9px;font:600 13px/1.2 inherit;cursor:pointer;margin-top:6px}\n';
+    c+='.fcmloja .fcm-copiado{display:none;font-size:12px;color:#1e7e34;margin-top:5px;text-align:left}\n';
+    c+='.fcmloja .fcm-copiado.on{display:block}\n';
+    if(zap)c+='.fcmloja .fcm-zap{width:100%;border:0;border-radius:8px;background:#25D366;color:#fff;padding:10px;font:700 13px/1.2 inherit;cursor:pointer;margin-top:8px}\n';
+    c+='.fcmloja .fcm-nota{font-size:11px;color:#8a8375;margin-top:8px;text-align:left}\n';
+  }
+  if(usaResumo){
+    c+='.fcmloja .fcm-resumo-c{margin-top:14px}\n';
+    c+='.fcmloja .fcm-resumo{width:100%;height:120px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11px;border:1px solid #d8d2c4;border-radius:8px;padding:7px;resize:vertical}\n';
+    c+='.fcmloja .fcm-resumo-b{width:100%;border:1px solid #d8d2c4;background:#fff;color:inherit;border-radius:8px;padding:8px;font:600 12px/1.2 inherit;cursor:pointer;margin-top:6px}\n';
+    c+='.fcmloja .fcm-resumo-ok{display:none;font-size:12px;color:#1e7e34;margin-top:5px;text-align:left}\n';
+    c+='.fcmloja .fcm-resumo-ok.on{display:block}\n';
+  }
+  c+='.fcmloja .fcm-limites{font-size:11px;color:#8a8375;margin:14px 0 0;text-align:left;line-height:1.55}\n';
+  /* O corte de celular derruba as duas colunas: vitrine em cima, carrinho embaixo. A media
+     query fica AQUI, num <style> do proprio bloco -- o campo CSS Customizado do componente nao
+     aceita at-rules (item 9 do manual do Prosite). */
+  c+='@media (max-width:'+cfg.mob+'px){\n';
+  c+='.fcmloja .fcm-cols{grid-template-columns:minmax(0,1fr);gap:18px}\n';
+  c+='.fcmloja .fcm-dir{position:static}\n';
+  c+='.fcmloja .fcm-grade{grid-template-columns:repeat('+(cfg.cols>2?2:cfg.cols)+',minmax(0,1fr));gap:12px}\n';
+  c+='.fcmloja .fcm-det-grade{grid-template-columns:minmax(0,1fr)}\n';
+  c+='}\n';
+  /* Movimento reduzido desliga o que ESTA ferramenta criou, com a mesma especificidade das
+     regras de cima e depois delas no CSS -- vence sem !important e nao toca no tema do site. */
+  c+='@media (prefers-reduced-motion:reduce){\n';
+  c+='.fcmloja .fcm-card{transition:none}\n';
+  c+='.fcmloja .fcm-card:hover{transform:none}\n';
+  c+='}\n';
+  c+='</sty'+'le>\n\n';
+  return c+mBlocoJs(cfg,prods,cps,cats,client,cod);
+}
+
+/* A assinatura do catalogo: djb2 sobre o TEXTO do catalogo que este mesmo bloco leva -- nome,
+   preco, categoria, foto, opcionais, tudo. Nao e seguranca e nao precisa ser: ninguem ganha
+   nada forjando a assinatura do proprio carrinho. E um detector de troca de catalogo, e para
+   isso 32 bits sobram. Deriva do texto ja montado, e nao de uma segunda leitura de cfg.prods,
+   porque duas leituras do catalogo sao duas coisas para divergir. */
+function mAssinatura(txt){
+  var h=5381,s=String(txt||''),i;
+  for(i=0;i<s.length;i++)h=((h*33)^s.charCodeAt(i))>>>0;
+  return h.toString(36).toUpperCase();
+}
+function mBlocoJs(cfg,prods,cps,cats,client,cod){
+  var usaPP=cfg.usaPP,usaPix=cfg.usaPix,usaQtd=cfg.qtdLigada,usaSinal=cfg.sinal.ativo;
+  var usaResumo=cfg.resumo,descpix=cfg.descpix,zap=cfg.zap;
+  var usaCupom=cfg.cps.length>0,usaFiltro=cfg.filtro&&cfg.cats.length>0;
+  var c='';
+  c+='<scr'+'ipt>\n(function(){\n';
+  c+='/* ============================================================\n';
+  c+='   MINI LOJA -- Foto Certa (gerado pelos Construtores)\n';
+  c+='   Vitrine com carrinho numa pagina so. NAO ha registro de pedidos, confirmacao\n';
+  c+='   automatica de pagamento nem estoque: os limites estao escritos na propria pagina,\n';
+  c+='   no rodape do carrinho.\n';
+  c+='   ============================================================ */\n\n';
+  c+='/* ===== CODIGO DESTA LOJA =====\n';
+  c+='   Identifica o carrinho no navegador do cliente (a chave do armazenamento) e abre o\n';
+  c+='   identificador de cada pedido. Duas lojas no mesmo site precisam de codigos diferentes,\n';
+  c+='   senao dividem o mesmo carrinho. */\n';
+  c+="var CODIGO_LOJA='"+cod+"';\n";
+  c+='/* Assinatura do catalogo abaixo: gerada junto com ele, e gravada dentro do carrinho.\n';
+  c+='   AVISAR EM VEZ DE CONFIAR NO CODIGO. Duas lojas com o MESMO codigo nao apenas dividem o\n';
+  c+='   carrinho: a segunda le as linhas da primeira, encontra produto de mesmo nome na mesma\n';
+  c+='   posicao (a guarda de nome so protege quando os nomes diferem) e cobra o preco DELA.\n';
+  c+='   Medido antes desta linha existir: carrinho de R$ 21,00 montado na loja A aparecia na\n';
+  c+='   loja B como R$ 5.000,00, sem aviso nenhum e com o mesmo identificador de pedido. A aba\n';
+  c+='   avisa duas vezes que os codigos precisam ser diferentes, mas aviso na ferramenta nao\n';
+  c+='   alcanca o cliente. Com a assinatura, um carrinho de outro catalogo e DESCARTADO e a\n';
+  c+='   pagina diz o que aconteceu -- e o operador que errou o codigo descobre pelo sintoma.\n';
+  c+='   Ela muda sempre que voce reger este bloco com o catalogo alterado; quem tinha carrinho\n';
+  c+='   montado o perde com aviso, que e o mesmo tratamento do item que saiu do catalogo. */\n';
+  c+="var ASSINATURA_CATALOGO='"+mAssinatura(prods)+"';\n\n";
+  c+='/* ===== PRODUTOS =====\n';
+  c+='   preco: numero com ponto decimal | categoria: texto livre (vazio = so aparece em Todos)\n';
+  c+='   imagem: endereco da foto; a vitrine pede a miniatura e o detalhe pede a foto grande\n';
+  c+="   selecaoOpcionais: 'unico' = escolhe 1 | 'multiplo' = pode marcar varios\n";
+  c+='   permitirNenhum: true = inclui a opcao "sem opcional" (so no modo unico)\n';
+  if(usaQtd)c+='   quantidade: true no produto, qtd: true no opcional = mostra o seletor de quantidade */\n';
+  else c+='   */\n';
+  c+='var PRODUTOS=[\n'+prods+'\n];\n\n';
+  if(usaFiltro){
+    c+='/* ===== CATEGORIAS =====\n';
+    c+='   A ordem dos botoes de filtro. "Todos" e sempre o primeiro e e o estado inicial. */\n';
+    c+='var CATEGORIAS=['+cats+'];\n\n';
+  }
+  c+='/* ===== CUPONS DE DESCONTO =====\n';
+  c+="   tipo: 'pct_produto' = % sobre os produtos (sem opcionais) | 'pct_total' = % sobre tudo | 'fixo' = valor fixo\n";
+  c+="   validade: 'AAAA-MM-DD' (vale ate o fim do dia) | '' = sem validade\n";
+  c+='   ATENCAO: o cupom NAO e secreto -- ele esta escrito aqui, no codigo desta pagina, e\n';
+  c+='   qualquer visitante consegue le-lo. Serve para divulgar um desconto, nao para dar\n';
+  c+='   desconto a uma pessoa so. */\n';
+  c+='var CUPONS=[\n'+(cps||'')+'\n];\n\n';
+  if(usaQtd)c+='var QUANTIDADE_MAXIMA='+cfg.qtdmax+';   /* teto do seletor de quantidade; vai de 0 ate ele, e 0 = item nao escolhido */\n\n';
+  if(usaSinal){
+    c+='/* ===== COBRANCA DE SINAL (o saldo fica para a entrega) ===== */\n';
+    c+="var SINAL_TIPO='"+cfg.sinal.tipo+"';   /* 'pct' = percentual do total | 'fixo' = valor fixo */\n";
+    c+='var SINAL_VALOR='+cfg.sinal.valor+';   /* percentual do total (1 a 99) ou valor fixo, conforme SINAL_TIPO */\n';
+    c+='/* Ordem da conta: quantidade multiplica, o cupom incide sobre o total, e o sinal sai do\n';
+    c+='   total JA com o cupom. O desconto do Pix nao entra nesta conta: com sinal ligado ele\n';
+    c+='   nao e emitido, porque aplica-lo sobre o sinal seria desconto dobrado. */\n\n';
+  }
+  if(descpix>0||cfg.m==='ambos'){
+    c+='/* ===== DESCONTO PARA PAGAMENTO VIA PIX ===== */\n';
+    c+='var DESCONTO_PIX='+descpix+';         /* percentual de desconto ao pagar via Pix; 0 = sem desconto (aplica sobre o total ja com cupom) */\n\n';
+  }
+  if(usaPix){
+    c+='/* ===== AVISO DE PAGAMENTO VIA WHATSAPP ===== */\n';
+    c+='var ZAP_ATIVO='+(zap?'true':'false')+';          /* true = mostra o botao "Ja paguei" apos gerar o Pix */\n';
+    c+="var ZAP_NUMERO='"+cfg.zapnum+"';   /* WhatsApp de destino: DDI+DDD+numero, so digitos */\n\n";
+    c+='/* ===== DADOS DE QUEM RECEBE O PIX ===== */\n';
+    c+="var CHAVE_PIX='"+escJs(cfg.chave)+"';\n";
+    c+="var NOME_RECEBEDOR='"+escJs(cfg.nomer)+"';   /* max. 25 caracteres no codigo Pix */\n";
+    c+="var CIDADE='"+escJs(cfg.cidade)+"';          /* max. 15 caracteres no codigo Pix */\n\n";
+  }
+  if(usaPP){
+    c+='/* ===== PAYPAL ===== */\n';
+    c+="var PAYPAL_CLIENT_ID='"+client+"';   /* Client ID Live -- publico por definicao */\n";
+  }
+  /* MOEDA FORA do 'if(usaPP)', como no Checkout. A moedaFmt emitida por fcMoedaFmtGer(false) a
+     le por nome para escolher o prefixo (R$, $ ou EUR), e ela e usada em TODA loja -- inclusive
+     nas que so aceitam Pix. Declarada so quando havia PayPal, uma loja "somente Pix" morria na
+     primeira linha da vitrine com "MOEDA is not defined": nao aparecia produto nenhum, nem
+     carrinho, nem aviso. Medido executando o bloco -- a geracao do texto nunca acusaria isto,
+     e por isso a regressao de saidas passou por cima dele. */
+  c+="var MOEDA='"+cfg.moeda+"';"+(usaPix?"   /* fixa em reais: o Pix so existe em BRL */":"   /* 'BRL' | 'USD' | 'EUR' */")+"\n\n";
+  c+='/* ===== APARENCIA ===== */\n';
+  c+="var LARGURA_LOJA='"+cfg.larg+"px';   /* largura maxima do bloco inteiro */\n";
+  c+='var IMG_VITRINE='+cfg.imgvit+';        /* largura pedida ao redimensionador para a miniatura da vitrine */\n';
+  c+='var IMG_DETALHE='+cfg.imgdet+';       /* largura pedida ao abrir o cartao de detalhe (e so ai) */\n';
+  c+='var COLUNAS='+cfg.cols+';             /* quantas fotos por linha antes da primeira dobra ficarem sem lazy */\n';
+  c+="var COR_DESTAQUE='"+cfg.c1+"';          /* titulo, total e botoes */\n";
+  c+="var COR_FUNDO='"+cfg.c2+"';             /* fundo dos cartoes e do carrinho */\n";
+  c+="var COR_TEXTO='"+cfg.c3+"';             /* texto geral */\n\n";
+  c+='/* ===== TEXTOS ===== */\n';
+  c+="var TXT_TITULO='"+escJs(cfg.t1)+"';\n";
+  c+="var TXT_OPCIONAIS='"+escJs(cfg.t2)+"';\n";
+  c+="var TXT_TOTAL='"+escJs(cfg.t3)+"';\n";
+  c+="var TXT_ADICIONAR='"+escJs(cfg.t7)+"';\n";
+  c+="var TXT_ATUALIZAR='Atualizar no carrinho';\n";
+  c+="var TXT_VOLTAR='"+escJs(cfg.t11)+"';\n";
+  c+="var TXT_CESTA='"+escJs(cfg.t10)+"';\n";
+  c+="var TXT_CESTA_VAZIA='Seu carrinho esta vazio. Escolha um item na vitrine ao lado.';\n";
+  c+="var TXT_SEM_OPCIONAL='Sem opcional';\n";
+  c+="var TXT_TODOS='Todos';\n";
+  c+="var TXT_SUMIU='item do seu carrinho saiu do catalogo e foi removido.';\n";
+  c+="var TXT_SUMIRAM='itens do seu carrinho sairam do catalogo e foram removidos.';\n";
+  c+="var TXT_OP_SUMIU='opcional que voce tinha escolhido saiu do catalogo e foi removido.';\n";
+  c+="var TXT_OP_SUMIRAM='opcionais que voce tinha escolhido sairam do catalogo e foram removidos.';\n";
+  c+="var TXT_CESTA_ESTRAGADA='O carrinho guardado neste navegador estava ilegivel e foi descartado. Escolha os itens de novo.';\n";
+  c+="var TXT_OUTRA_LOJA='O carrinho guardado neste navegador era de outra versao desta loja e foi descartado, para voce nao pagar um preco que nao e o que esta na tela. Escolha os itens de novo.';\n";
+  if(usaSinal){
+    c+="var TXT_SINAL='"+escJs(cfg.t8)+"';\n";
+    c+="var TXT_SALDO='"+escJs(cfg.t9)+"';\n";
+    c+="var TXT_SINAL_MAIOR='O sinal deste pedido e maior que o total. Escolha mais itens, aumente a quantidade ou remova o cupom.';\n";
+    c+="var TXT_SINAL_ZERO='O sinal deste pedido arredonda para zero. Escolha mais itens ou aumente a quantidade.';\n";
+    c+="var TXT_SINAL_RECUSADO='pedido recusado';\n";
+  }
+  if(usaPP){
+    c+="var TXT_SUCESSO='"+escJs(cfg.t5)+"';\n";
+    c+="var TXT_ERRO='"+escJs(cfg.t6)+"';\n";
+    c+="var TXT_TOTAL_ZERO='Escolha ao menos um item: o pedido esta em zero.';\n";
+  }
+  if(usaPix){
+    if(usaPP){
+      c+="var TXT_OU='ou pague com Pix';\n";
+      c+="var TXT_OU_DESC='ou pague com Pix com {PCT}% de desconto';\n";
+    }
+    c+="var TXT_BOTAO_PIX='"+escJs(cfg.t4)+"';\n";
+    c+="var TXT_INSTRUCAO='Abra o app do seu banco e pague pelo QR Code ou Pix Copia e Cola';\n";
+    c+="var TXT_PIXVAL='Valor no Pix';\n";
+    c+="var TXT_COPIAR='Copiar codigo Pix';\n";
+    c+="var TXT_COPIADO='Codigo copiado!';\n";
+    if(zap)c+="var TXT_ZAP='Ja paguei - avisar no WhatsApp';\n";
+    c+="var TXT_NOTA='Confira o nome do recebedor antes de confirmar o pagamento';\n";
+    c+="var TXT_PEDIDO_ENVIADO='Pedido enviado. O carrinho foi esvaziado -- combine o restante pelo WhatsApp.';\n";
+  }
+  if(descpix>0)c+="var TXT_PIX_ROTULO='Pagando via Pix';\n";
+  if(usaResumo){
+    c+="var TXT_RESUMO='"+escJs(cfg.t12)+"';\n";
+    c+="var TXT_RESUMO_BOTAO='Copiar o resumo';\n";
+    c+="var TXT_RESUMO_COPIADO='Resumo copiado!';\n";
+    c+="var TXT_RESUMO_SUBTOTAL='Subtotal';\n";
+    c+="var TXT_RESUMO_PEDIDO='Pedido';\n";
+  }
+  if(usaCupom){
+    c+="var TXT_CUPOM_ROTULO='Cupom de desconto';\n";
+    c+="var TXT_CUPOM_BOTAO='Aplicar';\n";
+    c+="var TXT_CUPOM_OK='Cupom aplicado!';\n";
+    c+="var TXT_CUPOM_INVALIDO='Cupom invalido.';\n";
+    c+="var TXT_CUPOM_EXPIRADO='Cupom expirado.';\n";
+    c+="var TXT_DESCONTO='Desconto';\n";
+  }
+  /* Os limites da pagina sao TEXTO DA PAGINA, nao comentario: eles ficam a vista do cliente e
+     do dono no rodape do carrinho. Escritos como sao -- prometer menos e o unico jeito de o
+     texto continuar verdadeiro depois de publicado. */
+  c+="var TXT_LIMITES='"+escJs(mLimitesTexto(cfg))+"';\n\n";
+
+  c+='/* ============================================================\n   Daqui para baixo nao precisa mexer\n   ============================================================ */\n\n';
+  c+=fcMoedaFmtGer(false);
+  /* O identificador do pedido vive no escopo do BLOCO, e nao dentro de montar(): montarPayload
+     o le por nome (e a mesma fonte do Checkout, FC_PIX_SRC) e e emitida aqui em cima, fora de
+     montar. Declarado la dentro, ele existia so para quem estava dentro -- e o Pix quebrava com
+     "CODIGO_PEDIDO is not defined" no primeiro clique, medido. */
+  c+="var CODIGO_PEDIDO='';\n";
+  /* RESIZE_BASE, HOSTS_RESIZE e as tres funcoes de imagem saem juntos, do mesmo texto que a
+     ferramenta avalia: a linha do HOSTS_RESIZE morava aqui e a funcao morava la, e era por ai
+     que as duas implementacoes divergiam. */
+  c+=mImgTamanhoGer();
+  if(usaPix){
+    c+=FC_PIX_SRC.semAcento;
+    c+=FC_PIX_SRC.tlv;
+    c+=FC_PIX_SRC.crc16;
+    c+=FC_PIX_SRC.montarPayload;
+    c+='var qrPronto=false;\n';
+    c+="var qrsrc=document.createElement('script');\n";
+    c+="qrsrc.src='https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';\n";
+    c+='qrsrc.onload=function(){qrPronto=true;};\n';
+    c+='document.head.appendChild(qrsrc);\n\n';
+  }
+  return c+mBlocoRuntime(cfg,usaPP,usaPix,usaQtd,usaSinal,usaResumo,descpix,zap,usaCupom,usaFiltro);
+}
+/* O texto dos limites, montado a partir da configuracao -- so entra o que aquela loja tem.
+   Cada frase corresponde a um limite real e medido do desenho, e nenhuma promete conserto. */
+function mLimitesTexto(cfg){
+  var p=[];
+  p.push('Esta pagina nao guarda pedidos: cada compra existe como a mensagem que voce recebe, a transacao no PayPal e o Pix na conta.');
+  if(cfg.usaPix)p.push('O Pix estatico nao avisa ninguem quando o dinheiro cai -- a confirmacao e por conferencia do extrato.');
+  if(cfg.usaPP)p.push('O PayPal tambem nao tem como avisar esta pagina: a liberacao e manual.');
+  p.push('O carrinho fica guardado neste navegador e neste aparelho: montado no celular, no computador ele aparece vazio.');
+  p.push('Nao ha estoque: todos os itens sao sob encomenda e podem ser pedidos quantas vezes for preciso.');
+  if(cfg.cps.length)p.push('Os cupons ficam dentro do codigo desta pagina e nao sao secretos.');
+  return p.join(' ');
+}
+
+/* O miolo do bloco: a marcacao, o carrinho, a vitrine e o pagamento. Separado de mBlocoJs
+   apenas para nenhuma funcao desta aba passar de uma tela de leitura -- as duas escrevem o
+   MESMO texto, na ordem em que sao chamadas. */
+function mBlocoRuntime(cfg,usaPP,usaPix,usaQtd,usaSinal,usaResumo,descpix,zap,usaCupom,usaFiltro){
+  var c='';
+  c+='function montar(){\n';
+  c+="var raiz=document.getElementById('fcmloja');\nif(!raiz)return;\n";
+  c+="raiz.style.setProperty('--fcm-larg',LARGURA_LOJA);\n";
+  c+="raiz.style.setProperty('--fcm-destaque',COR_DESTAQUE);\n";
+  c+="raiz.style.setProperty('--fcm-fundo',COR_FUNDO);\n";
+  c+="raiz.style.setProperty('--fcm-texto',COR_TEXTO);\n\n";
+  c+="var h='<div class=\"fcm-titulo\"></div>';\n";
+  c+="h+='<div class=\"fcm-cols\"><div class=\"fcm-esq\">';\n";
+  if(usaFiltro)c+="h+='<div class=\"fcm-filtros\"></div>';\n";
+  c+="h+='<div class=\"fcm-grade\"></div><div class=\"fcm-detalhe\"></div>';\n";
+  c+="h+='</div><div class=\"fcm-dir\"><div class=\"fcm-cesta\">';\n";
+  c+="h+='<p class=\"fcm-rotulo fcm-cesta-t\"></p>';\n";
+  c+="h+='<div class=\"fcm-aviso-cesta\"></div>';\n";
+  c+="h+='<div class=\"fcm-itens\"></div><p class=\"fcm-cesta-vazia\"></p>';\n";
+  if(usaCupom){
+    c+="h+='<div class=\"fcm-cupom\"><p class=\"fcm-rotulo fcm-cupom-t\"></p><div class=\"fcm-cupom-l\"><input type=\"text\"><button type=\"button\"></button></div><div class=\"fcm-cupom-msg\"></div></div>';\n";
+    c+="h+='<div class=\"fcm-desconto\"><span class=\"fcm-desconto-t\"></span><span class=\"fcm-desconto-v\"></span></div>';\n";
+  }
+  c+="h+='<div class=\"fcm-total\"><span class=\"fcm-total-t\"></span><span class=\"fcm-total-v\"></span></div>';\n";
+  if(usaSinal){
+    c+="h+='<div class=\"fcm-sinal\"><span class=\"fcm-sinal-t\"></span><span class=\"fcm-sinal-v\"></span></div>';\n";
+    c+="h+='<div class=\"fcm-saldo\"><span class=\"fcm-saldo-t\"></span><span class=\"fcm-saldo-v\"></span></div>';\n";
+    c+="h+='<div class=\"fcm-sinal-aviso\"></div>';\n";
+  }
+  if(descpix>0)c+="h+='<div class=\"fcm-pixlinha\"><span class=\"fcm-pixlinha-t\"></span><span class=\"fcm-pixlinha-v\"></span></div>';\n";
+  if(usaPP)c+="h+='<div class=\"fcm-botoes\"></div><div class=\"fcm-msg\"></div>';\n";
+  if(usaPix){
+    if(usaPP)c+="h+='<div class=\"fcm-sep\"><span class=\"fcm-sep-t\"></span></div>';\n";
+    c+="h+='<button type=\"button\" class=\"fcm-gerar\"></button>';\n";
+    c+="h+='<div class=\"fcm-pixarea\"><p class=\"fcm-instrucao\"></p><div class=\"fcm-pixval\"><span class=\"fcm-pixval-t\"></span> <span class=\"fcm-pixval-v\"></span></div><div class=\"fcm-qr\"></div>';\n";
+    c+="h+='<textarea class=\"fcm-cola\" readonly></textarea>';\n";
+    c+="h+='<button type=\"button\" class=\"fcm-copiar\"></button><div class=\"fcm-copiado\"></div>';\n";
+    if(zap)c+="h+='<button type=\"button\" class=\"fcm-zap\"></button>';\n";
+    c+="h+='<div class=\"fcm-nota\"></div></div>';\n";
+  }
+  if(usaResumo){
+    c+="h+='<div class=\"fcm-resumo-c\"><p class=\"fcm-rotulo fcm-resumo-t\"></p><textarea class=\"fcm-resumo\" readonly></textarea>';\n";
+    c+="h+='<button type=\"button\" class=\"fcm-resumo-b\"></button><div class=\"fcm-resumo-ok\"></div></div>';\n";
+  }
+  c+="h+='<p class=\"fcm-limites\"></p>';\n";
+  c+="h+='</div></div></div>';\n";
+  c+='raiz.innerHTML=h;\n\n';
+  c+="raiz.querySelector('.fcm-titulo').textContent=TXT_TITULO;\n";
+  c+="raiz.querySelector('.fcm-cesta-t').textContent=TXT_CESTA;\n";
+  c+="raiz.querySelector('.fcm-cesta-vazia').textContent=TXT_CESTA_VAZIA;\n";
+  c+="raiz.querySelector('.fcm-total-t').textContent=TXT_TOTAL;\n";
+  c+="raiz.querySelector('.fcm-limites').textContent=TXT_LIMITES;\n";
+  if(usaCupom){
+    c+="raiz.querySelector('.fcm-cupom-t').textContent=TXT_CUPOM_ROTULO;\n";
+    c+="raiz.querySelector('.fcm-cupom-l button').textContent=TXT_CUPOM_BOTAO;\n";
+  }
+  if(usaSinal){
+    if(cfg.sinal.tipo==='pct')c+="raiz.querySelector('.fcm-sinal-t').textContent=TXT_SINAL+' ('+SINAL_VALOR+'%)';\n";
+    else c+="raiz.querySelector('.fcm-sinal-t').textContent=TXT_SINAL;\n";
+    c+="raiz.querySelector('.fcm-saldo-t').textContent=TXT_SALDO;\n";
+  }
+  if(usaPix){
+    c+="raiz.querySelector('.fcm-gerar').textContent=TXT_BOTAO_PIX;\n";
+    c+="raiz.querySelector('.fcm-instrucao').textContent=TXT_INSTRUCAO;\n";
+    c+="raiz.querySelector('.fcm-pixval-t').textContent=TXT_PIXVAL+':';\n";
+    c+="raiz.querySelector('.fcm-copiar').textContent=TXT_COPIAR;\n";
+    c+="raiz.querySelector('.fcm-copiado').textContent=TXT_COPIADO;\n";
+    c+="raiz.querySelector('.fcm-nota').textContent=TXT_NOTA;\n";
+    if(zap)c+="raiz.querySelector('.fcm-zap').textContent=TXT_ZAP;\n";
+    if(usaPP)c+="raiz.querySelector('.fcm-sep-t').textContent=(DESCONTO_PIX>0)?TXT_OU_DESC.replace('{PCT}',DESCONTO_PIX):TXT_OU;\n";
+  }
+  if(descpix>0){
+    c+="raiz.querySelector('.fcm-pixlinha-t').textContent=TXT_PIX_ROTULO+' (-'+DESCONTO_PIX+'%)';\n";
+  }
+  if(usaResumo){
+    c+="raiz.querySelector('.fcm-resumo-t').textContent=TXT_RESUMO;\n";
+    c+="raiz.querySelector('.fcm-resumo-b').textContent=TXT_RESUMO_BOTAO;\n";
+    c+="raiz.querySelector('.fcm-resumo-ok').textContent=TXT_RESUMO_COPIADO;\n";
+  }
+  c+='\n/* ===== o carrinho, que atravessa recarregamentos =====\n';
+  c+='   Chave derivada do codigo da loja: duas lojas no mesmo site nao se atrapalham. E do\n';
+  c+='   NAVEGADOR -- montado no celular, no computador aparece vazio, e a pagina diz isso.\n';
+  c+='   Cada linha guarda o NOME do produto junto com a posicao: se o catalogo mudar (voce\n';
+  c+='   regerar este bloco), a linha que nao confere e descartada e a pagina AVISA, em vez de\n';
+  c+='   o cliente comprar em silencio um item que nao e o que ele escolheu. */\n';
+  c+="var CHAVE_CESTA='fcmloja:'+CODIGO_LOJA;\n";
+  c+='var CARRINHO=[];\n';
+  c+='/* Tres coisas diferentes podem ter acontecido com o que estava guardado, e cada uma tem\n';
+  c+='   a sua frase. Carrinho que esvazia sem dizer por que e o cliente achando que perdeu a\n';
+  c+='   escolha por defeito da pagina. */\n';
+  c+='var sumidos=0;      /* linhas de produto descartadas: o produto saiu do catalogo */\n';
+  c+='var sumidosOp=0;    /* opcionais descartados de linhas que ficaram */\n';
+  c+='var cestaEstragada=false;  /* o que estava guardado nao era um carrinho */\n';
+  c+='var cestaDeOutra=false;    /* era carrinho de OUTRO catalogo com este mesmo codigo de loja */\n';
+  /* Uma funcao so apaga os quatro estados, e ela mora AQUI, ao lado deles -- com quatro linhas
+     soltas em cada ponto de limpeza, o proximo estado a nascer seria zerado num lugar e nao no
+     outro. */
+  c+='function avisosLimpar(){sumidos=0;sumidosOp=0;cestaEstragada=false;cestaDeOutra=false;}\n';
+  c+='function novoPedido(){\n';
+  c+="return CODIGO_LOJA+'-'+(new Date().getTime()).toString(36).toUpperCase();\n}\n";
+  c+='function cestaGravar(){\n';
+  c+='try{localStorage.setItem(CHAVE_CESTA,JSON.stringify({pedido:CODIGO_PEDIDO,cat:ASSINATURA_CATALOGO,itens:CARRINHO}));}catch(e){}\n}\n';
+  c+='function cestaLer(){\n';
+  c+='var raw=null,o,i,k,it,p,op,linha,ops;\n';
+  c+='try{raw=localStorage.getItem(CHAVE_CESTA);}catch(e){}\n';
+  c+='if(!raw)return;\n';
+  /* Cada saida silenciosa virou uma saida que AVISA. Antes, JSON quebrado, texto solto e
+     'itens' que nao e array caiam todos num 'return' mudo: a pagina abria com o carrinho
+     vazio e sem uma palavra, exatamente o sintoma que o cliente leria como defeito. */
+  c+='try{o=JSON.parse(raw);}catch(e){cestaEstragada=true;return;}\n';
+  c+="if(!o||typeof o!=='object'||Object.prototype.toString.call(o.itens)!=='[object Array]'){cestaEstragada=true;return;}\n";
+  c+='if(!o.itens.length)return;\n';
+  /* A assinatura vem antes de qualquer leitura de linha: com catalogo trocado, NENHUMA linha
+     vale -- nem as que "conferem" por nome, que sao justamente as perigosas (mesmo nome,
+     preco de outra loja). O identificador de pedido tambem morre aqui: ele identificava um
+     pedido daquela outra loja. */
+  c+="if(o.cat!==ASSINATURA_CATALOGO){cestaDeOutra=true;try{localStorage.removeItem(CHAVE_CESTA);}catch(e){}return;}\n";
+  c+="CODIGO_PEDIDO=(typeof o.pedido==='string')?o.pedido:'';\n";
+  c+='for(i=0;i<o.itens.length;i++){\n';
+  c+='it=o.itens[i];\n';
+  c+='p=(it&&typeof it.p===\'number\')?PRODUTOS[it.p]:null;\n';
+  c+='if(!p||p.nome!==it.n){sumidos++;continue;}\n';
+  c+='ops=[];\n';
+  c+='for(k=0;k<(it.ops||[]).length;k++){\n';
+  c+='op=(p.opcionais||[])[it.ops[k].j];\n';
+  c+='if(!op||op.nome!==it.ops[k].n){sumidosOp++;continue;}\n';
+  c+='ops.push({j:it.ops[k].j,n:op.nome,q:qtdBoa(it.ops[k].q)});\n}\n';
+  c+='linha={p:it.p,n:p.nome,q:qtdBoa(it.q),ops:ops};\n';
+  c+='CARRINHO.push(linha);\n}\n}\n';
+  /* Quantidade vinda do armazenamento e entrada nao confiavel: ela vira multiplicador de
+     dinheiro. Uma linha adulterada com quantidade negativa ou fracionaria produziria um total
+     que o cliente escolheu. Presa aqui, uma vez so, na porta de entrada. */
+  c+='function qtdBoa(v){\n';
+  c+='var n=parseInt(v,10);\n';
+  c+='if(isNaN(n)||n<1)return 1;\n';
+  if(usaQtd)c+='if(n>QUANTIDADE_MAXIMA)return QUANTIDADE_MAXIMA;\n';
+  else c+='if(n>1)return 1;\n';
+  c+='return n;\n}\n\n';
+  c+='function cestaLimpar(){\n';
+  c+="CARRINHO=[];CODIGO_PEDIDO='';\n";
+  c+='try{localStorage.removeItem(CHAVE_CESTA);}catch(e){}\n';
+  c+='desenharCesta();atualizar();\n}\n\n';
+  c+='/* ===== a conta =====\n';
+  c+='   somaProdutos e subtotal sao o que ESTE bloco sabe e o motor compartilhado nao: eles leem\n';
+  c+='   as linhas do carrinho. Do total para baixo, tudo vem da mesma fonte que o Checkout usa. */\n';
+  c+='function somaProdutos(){\n';
+  c+='var t=0,i;\n';
+  c+='for(i=0;i<CARRINHO.length;i++)t+=PRODUTOS[CARRINHO[i].p].preco*CARRINHO[i].q;\n';
+  c+='return t;\n}\n\n';
+  c+='function subtotal(){\n';
+  c+='var t=somaProdutos(),i,k,it,op;\n';
+  c+='for(i=0;i<CARRINHO.length;i++){\n';
+  c+='it=CARRINHO[i];\n';
+  c+='for(k=0;k<it.ops.length;k++){\n';
+  c+='op=PRODUTOS[it.p].opcionais[it.ops[k].j];\n';
+  c+='if(op)t+=op.preco*it.ops[k].q;\n}\n}\n';
+  c+='return t;\n}\n\n';
+  c+='var cupomAtivo=null;\n\n';
+  c+=FC_CARRINHO_SRC.descontoAtual;
+  c+=FC_CARRINHO_SRC.total;
+  if(usaSinal)c+=FC_CARRINHO_SRC.sinal;
+  c+=fcTotalPixSrc(descpix,usaPix,usaSinal);
+  if(usaQtd)c+=fcFazQtdSrc('fcm')+'\n';
+  return c+mBlocoVitrine(cfg,usaPP,usaPix,usaQtd,usaSinal,usaResumo,descpix,zap,usaCupom,usaFiltro);
+}
+
+/* A vitrine, o filtro, o cartao de detalhe e o desenho do carrinho. */
+function mBlocoVitrine(cfg,usaPP,usaPix,usaQtd,usaSinal,usaResumo,descpix,zap,usaCupom,usaFiltro){
+  var c='';
+  c+='/* ===== vitrine =====\n';
+  c+='   A miniatura pede IMG_VITRINE px ao redimensionador da Alboom; a foto grande so e pedida\n';
+  c+='   quando o cartao de detalhe abre. As fotos alem da primeira linha entram com\n';
+  c+='   loading="lazy": com dezenas de produtos e o que separa uma pagina que abre de uma que\n';
+  c+='   baixa a galeria inteira antes de aparecer. */\n';
+  c+="var filtroAtual='';\n";
+  c+="var grade=raiz.querySelector('.fcm-grade');\n";
+  c+="var caixaDet=raiz.querySelector('.fcm-detalhe');\n";
+  c+='function visiveis(){\n';
+  c+='var v=[],i;\n';
+  c+='for(i=0;i<PRODUTOS.length;i++){\n';
+  c+='if(!filtroAtual||PRODUTOS[i].categoria===filtroAtual)v.push(i);\n}\n';
+  c+='return v;\n}\n\n';
+  if(usaFiltro){
+    c+='function desenharFiltros(){\n';
+    c+="var cx=raiz.querySelector('.fcm-filtros');\n";
+    c+="cx.innerHTML='';\n";
+    c+="var lista=[''].concat(CATEGORIAS),i;\n";
+    c+='lista.forEach(function(cat){\n';
+    c+="var b=document.createElement('button');b.type='button';\n";
+    c+="b.className='fcm-filtro'+(cat===filtroAtual?' on':'');\n";
+    c+='b.textContent=cat||TXT_TODOS;\n';
+    c+="b.addEventListener('click',function(){filtroAtual=cat;fecharDetalhe();desenharFiltros();desenharGrade();});\n";
+    c+='cx.appendChild(b);\n});\n}\n\n';
+  }
+  c+='function desenharGrade(){\n';
+  c+='var vis=visiveis();\n';
+  c+="grade.innerHTML='';\n";
+  c+='if(!vis.length){\n';
+  c+="var vz=document.createElement('div');vz.className='fcm-vazio-grade';\n";
+  c+="vz.textContent='Nenhum item nesta categoria.';\n";
+  c+='grade.appendChild(vz);\nreturn;\n}\n';
+  c+='vis.forEach(function(i,pos){\n';
+  c+='var p=PRODUTOS[i];\n';
+  c+="var card=document.createElement('button');card.type='button';card.className='fcm-card';\n";
+  c+="var img=document.createElement('img');img.className='fcm-foto';\n";
+  c+='img.src=imgTamanho(p.imagem,IMG_VITRINE);\n';
+  c+='img.alt=p.nome;\n';
+  c+="img.loading=(pos<COLUNAS)?'eager':'lazy';\n";
+  c+="var cx=document.createElement('div');cx.className='fcm-card-c';\n";
+  c+='if(p.categoria){\n';
+  c+="var ct=document.createElement('p');ct.className='fcm-card-cat';ct.textContent=p.categoria;cx.appendChild(ct);\n}\n";
+  c+="var nm=document.createElement('p');nm.className='fcm-card-n';nm.textContent=p.nome;\n";
+  c+="var pr=document.createElement('p');pr.className='fcm-card-p';pr.textContent=moedaFmt(p.preco);\n";
+  c+='cx.appendChild(nm);cx.appendChild(pr);\n';
+  c+='card.appendChild(img);card.appendChild(cx);\n';
+  c+="card.addEventListener('click',function(){abrirDetalhe(i);});\n";
+  c+='grade.appendChild(card);\n});\n}\n\n';
+  c+='/* ===== cartao de detalhe, na mesma pagina =====\n';
+  c+='   Nao ha navegacao: a grade some, o cartao aparece no lugar dela e o botao Voltar desfaz.\n';
+  c+='   A foto grande e criada AQUI, no clique -- e este o "so quando aberto" que impede a\n';
+  c+='   pagina de baixar cinquenta fotos de 1000 px que ninguem pediu. */\n';
+  c+='function fecharDetalhe(){\n';
+  c+="caixaDet.className='fcm-detalhe';caixaDet.innerHTML='';\n";
+  c+="grade.style.display='';\n";
+  if(usaFiltro)c+="raiz.querySelector('.fcm-filtros').style.display='';\n";
+  c+='}\n';
+  c+='function abrirDetalhe(i){\n';
+  c+='var p=PRODUTOS[i],jaTem=indiceNoCarrinho(i);\n';
+  c+="grade.style.display='none';\n";
+  if(usaFiltro)c+="raiz.querySelector('.fcm-filtros').style.display='none';\n";
+  c+="caixaDet.innerHTML='';caixaDet.className='fcm-detalhe on';\n";
+  c+="var volta=document.createElement('button');volta.type='button';volta.className='fcm-voltar';\n";
+  c+='volta.textContent=TXT_VOLTAR;\n';
+  c+="volta.addEventListener('click',fecharDetalhe);\n";
+  c+='caixaDet.appendChild(volta);\n';
+  c+="var g=document.createElement('div');g.className='fcm-det-grade';\n";
+  c+="var img=document.createElement('img');img.className='fcm-det-foto';\n";
+  c+='img.src=imgTamanho(p.imagem,IMG_DETALHE);img.alt=p.nome;\n';
+  c+="var lado=document.createElement('div');\n";
+  c+="var nm=document.createElement('p');nm.className='fcm-det-n';nm.textContent=p.nome;lado.appendChild(nm);\n";
+  c+="var pr=document.createElement('p');pr.className='fcm-det-p';pr.textContent=moedaFmt(p.preco);lado.appendChild(pr);\n";
+  c+='if(p.descricao){\n';
+  c+="var d=document.createElement('p');d.className='fcm-det-d';d.textContent=p.descricao;lado.appendChild(d);\n}\n";
+  /* A ESCOLHA em edicao: quantidade do produto, quais opcionais estao marcados (sel) e a
+     quantidade de cada opcional (qtds). Guardar a quantidade FORA da lista de marcados e o que
+     o Checkout ja fazia: assim desmarcar e remarcar um opcional nao perde o numero que o
+     cliente acabou de escolher. */
+  c+='var escolha={q:1,sel:[],qtds:[]};\n';
+  c+='if(jaTem>=0){\n';
+  c+='escolha.q=CARRINHO[jaTem].q;\n';
+  c+='CARRINHO[jaTem].ops.forEach(function(o){escolha.sel.push(o.j);escolha.qtds[o.j]=o.q;});\n';
+  c+='}\n';
+  if(usaQtd){
+    c+='if(p.quantidade){\n';
+    c+="var lq=document.createElement('div');lq.className='fcm-linha-p';\n";
+    c+="var lqt=document.createElement('span');lqt.textContent='Quantidade';lq.appendChild(lqt);\n";
+    c+='lq.appendChild(fazQtd(escolha.q,function(n){escolha.q=n;linhaValor();}));\n';
+    c+='lado.appendChild(lq);\n}\n';
+  }
+  c+='var itens=(p.opcionais||[]).slice();\n';
+  c+="if(p.selecaoOpcionais!=='multiplo'&&p.permitirNenhum&&itens.length)itens.unshift({nome:TXT_SEM_OPCIONAL,preco:0,nenhum:true,deslocado:true});\n";
+  c+='if(itens.length){\n';
+  c+="var caixa=document.createElement('div');caixa.className='fcm-ops';\n";
+  c+="var t=document.createElement('p');t.className='fcm-ops-t';t.textContent=TXT_OPCIONAIS;caixa.appendChild(t);\n";
+  c+="var tipoOp=(p.selecaoOpcionais==='multiplo')?'checkbox':'radio';\n";
+  /* O "sem opcional" e um item DESLOCADO no comeco da lista, entao o indice real do opcional
+     passa a ser j-1. O ajuste vive numa variavel so: recalcula-lo em cada uso e como nascem os
+     indices que discordam entre a tela e a conta. */
+  c+='var desloca=(itens.length&&itens[0].deslocado)?1:0;\n';
+  /* Modo "escolhe 1" SEM a opcao "sem opcional": o primeiro ja nasce marcado, e nasce marcado
+     TAMBEM na conta. Marcar so o input deixaria a tela mostrando um opcional escolhido e o
+     valor do item sem ele -- a divergencia entre tela e dinheiro que esta ferramenta recusa. */
+  c+="if(tipoOp==='radio'&&!desloca&&itens.length&&!escolha.sel.length)marcarOpcional(escolha,0,true);\n";
+  c+='itens.forEach(function(op,j){\n';
+  c+='var real=j-desloca;\n';
+  c+="var row=document.createElement('div');row.className='fcm-op';\n";
+  c+="var lab=document.createElement('label');\n";
+  c+="var inp=document.createElement('input');inp.type=tipoOp;inp.name='fcm-op';inp.value=String(j);\n";
+  c+='if(op.nenhum)inp.checked=!escolha.sel.length;\n';
+  c+='else inp.checked=temOpcional(escolha,real);\n';
+  c+="var mk=document.createElement('span');mk.className='fcm-mark '+(tipoOp==='checkbox'?'ck':'rd');\n";
+  c+="var sp=document.createElement('span');sp.textContent=op.nome;\n";
+  c+='lab.appendChild(inp);lab.appendChild(mk);lab.appendChild(sp);\n';
+  c+="var pv=document.createElement('span');pv.textContent=op.nenhum?'':('+ '+moedaFmt(op.preco));\n";
+  c+='row.appendChild(lab);\n';
+  if(usaQtd)c+='if(op.qtd&&!op.nenhum)row.appendChild(fazQtd(qtdDoOpcional(escolha,real),function(n){escolha.qtds[real]=n;linhaValor();}));\n';
+  c+='row.appendChild(pv);\n';
+  c+="inp.addEventListener('change',function(){\n";
+  c+="if(tipoOp==='radio'){escolha.sel=[];if(!op.nenhum)marcarOpcional(escolha,real,true);}\n";
+  c+='else marcarOpcional(escolha,real,inp.checked);\n';
+  c+='linhaValor();\n});\n';
+  c+='caixa.appendChild(row);\n});\n';
+  c+='lado.appendChild(caixa);\n}\n';
+  c+="var val=document.createElement('div');val.className='fcm-linha-p';\n";
+  c+="var valt=document.createElement('span');valt.textContent='Este item';\n";
+  c+="var valv=document.createElement('span');\n";
+  c+='val.appendChild(valt);val.appendChild(valv);lado.appendChild(val);\n';
+  c+='function linhaValor(){valv.textContent=moedaFmt(valorDaEscolha(p,escolha));}\n';
+  c+='linhaValor();\n';
+  c+="var add=document.createElement('button');add.type='button';add.className='fcm-add';\n";
+  c+='add.textContent=(jaTem>=0)?TXT_ATUALIZAR:TXT_ADICIONAR;\n';
+  c+="add.addEventListener('click',function(){\n";
+  c+='guardarNoCarrinho(i,escolha);\n';
+  c+='fecharDetalhe();\n});\n';
+  c+='lado.appendChild(add);\n';
+  c+='g.appendChild(img);g.appendChild(lado);\n';
+  c+='caixaDet.appendChild(g);\n}\n\n';
+  c+='function temOpcional(escolha,j){\n';
+  c+='var k;for(k=0;k<escolha.sel.length;k++)if(escolha.sel[k]===j)return true;\nreturn false;\n}\n';
+  c+='function qtdDoOpcional(escolha,j){\n';
+  c+='var q=escolha.qtds[j];\nreturn (q==null)?1:q;\n}\n';
+  c+='function marcarOpcional(escolha,j,ligado){\n';
+  c+='var k;\n';
+  c+='for(k=0;k<escolha.sel.length;k++){\n';
+  c+='if(escolha.sel[k]!==j)continue;\n';
+  c+='if(!ligado)escolha.sel.splice(k,1);\n';
+  c+='return;\n}\n';
+  c+='if(ligado)escolha.sel.push(j);\n}\n';
+  c+='function valorDaEscolha(p,escolha){\n';
+  c+='var t=p.preco*escolha.q,k,op;\n';
+  c+='for(k=0;k<escolha.sel.length;k++){\n';
+  c+='op=(p.opcionais||[])[escolha.sel[k]];\n';
+  c+='if(op)t+=op.preco*qtdDoOpcional(escolha,escolha.sel[k]);\n}\n';
+  c+='return Math.round(t*100)/100;\n}\n';
+  c+='function indiceNoCarrinho(i){\n';
+  c+='var k;for(k=0;k<CARRINHO.length;k++)if(CARRINHO[k].p===i)return k;\nreturn -1;\n}\n';
+  c+='/* UMA linha por produto. Escolher de novo o mesmo produto ATUALIZA a linha em vez de\n';
+  c+='   criar uma segunda: duas linhas do mesmo item com opcionais diferentes seriam duas\n';
+  c+='   leituras do mesmo pedido, e o cliente nao teria como saber qual delas vale. O botao do\n';
+  c+='   cartao diz qual dos dois vai acontecer antes do clique. */\n';
+  c+='function guardarNoCarrinho(i,escolha){\n';
+  c+='var p=PRODUTOS[i],pos=indiceNoCarrinho(i),ops=[],k,j,op;\n';
+  c+='for(k=0;k<escolha.sel.length;k++){\n';
+  c+='j=escolha.sel[k];\n';
+  c+='op=(p.opcionais||[])[j];\n';
+  c+='if(op)ops.push({j:j,n:op.nome,q:qtdDoOpcional(escolha,j)});\n}\n';
+  c+='var linha={p:i,n:p.nome,q:escolha.q,ops:ops};\n';
+  c+='if(pos>=0)CARRINHO[pos]=linha;else CARRINHO.push(linha);\n';
+  c+='if(!CODIGO_PEDIDO)CODIGO_PEDIDO=novoPedido();\n';
+  /* O aviso do que aconteceu na LEITURA some quando o cliente mexe no carrinho: ele descreve
+     a abertura da pagina, e depois de uma escolha nova descreveria o passado. */
+  c+='avisosLimpar();\n';
+  c+='cestaGravar();desenharCesta();atualizar();\n}\n';
+  c+='function tirarDoCarrinho(pos){\n';
+  c+='CARRINHO.splice(pos,1);\n';
+  c+="if(!CARRINHO.length)CODIGO_PEDIDO='';\n";
+  c+='avisosLimpar();\n';
+  c+='cestaGravar();desenharCesta();atualizar();\n}\n\n';
+  c+='/* ===== o carrinho na tela ===== */\n';
+  c+='function desenharCesta(){\n';
+  c+="var cx=raiz.querySelector('.fcm-itens');\n";
+  c+="cx.innerHTML='';\n";
+  c+="raiz.querySelector('.fcm-cesta-vazia').style.display=CARRINHO.length?'none':'block';\n";
+  c+="var av=raiz.querySelector('.fcm-aviso-cesta');\n";
+  /* UMA caixa, varias frases: os estados nao sao exclusivos (o catalogo pode ter mudado E um
+     opcional ter sumido), e escolher so um deles para mostrar esconderia o outro. */
+  c+='var avisos=[];\n';
+  c+='if(cestaDeOutra)avisos.push(TXT_OUTRA_LOJA);\n';
+  c+='if(cestaEstragada)avisos.push(TXT_CESTA_ESTRAGADA);\n';
+  c+="if(sumidos)avisos.push(sumidos+' '+(sumidos===1?TXT_SUMIU:TXT_SUMIRAM));\n";
+  c+="if(sumidosOp)avisos.push(sumidosOp+' '+(sumidosOp===1?TXT_OP_SUMIU:TXT_OP_SUMIRAM));\n";
+  c+='if(avisos.length){\n';
+  c+="av.className='fcm-aviso-cesta on';\n";
+  c+="av.textContent=avisos.join(' ');\n";
+  c+="}else{av.className='fcm-aviso-cesta';av.textContent='';}\n";
+  c+='CARRINHO.forEach(function(it,pos){\n';
+  c+='var p=PRODUTOS[it.p];\n';
+  c+="var li=document.createElement('div');li.className='fcm-item';\n";
+  c+="var l=document.createElement('div');l.className='fcm-item-l';\n";
+  c+="var nm=document.createElement('span');nm.textContent=p.nome+(it.q>1?(' x'+it.q):'');\n";
+  c+="var pr=document.createElement('span');pr.textContent=moedaFmt(valorDaLinha(it));\n";
+  c+="var tira=document.createElement('button');tira.type='button';tira.className='fcm-tirar';\n";
+  c+="tira.textContent='\\u2715';tira.title='Tirar do carrinho';tira.setAttribute('aria-label','Tirar '+p.nome+' do carrinho');\n";
+  c+="tira.addEventListener('click',function(){tirarDoCarrinho(pos);});\n";
+  c+='l.appendChild(nm);l.appendChild(pr);l.appendChild(tira);\n';
+  c+='li.appendChild(l);\n';
+  if(usaQtd){
+    c+='if(p.quantidade){\n';
+    c+="var lq=document.createElement('div');lq.className='fcm-linha-p';\n";
+    c+="var lqt=document.createElement('span');lqt.textContent='Quantidade';lq.appendChild(lqt);\n";
+    c+='lq.appendChild(fazQtd(it.q,function(n){\n';
+    c+='if(n<1){tirarDoCarrinho(pos);return;}\n';
+    c+='it.q=n;cestaGravar();desenharCesta();atualizar();\n}));\n';
+    c+='li.appendChild(lq);\n}\n';
+  }
+  c+='it.ops.forEach(function(o){\n';
+  c+='var op=(p.opcionais||[])[o.j];\n';
+  c+='if(!op)return;\n';
+  c+="var d=document.createElement('div');d.className='fcm-item-op';\n";
+  c+="d.textContent='+ '+op.nome+(o.q>1?(' x'+o.q):'')+'  '+moedaFmt(op.preco*o.q);\n";
+  c+='li.appendChild(d);\n});\n';
+  c+='cx.appendChild(li);\n});\n}\n';
+  c+='function valorDaLinha(it){\n';
+  c+='return Math.round(PRODUTOS[it.p].preco*it.q*100)/100;\n}\n\n';
+  return c+mBlocoPagar(cfg,usaPP,usaPix,usaQtd,usaSinal,usaResumo,descpix,zap,usaCupom,usaFiltro);
+}
+
+/* O total na tela, o cupom, o resumo e as duas pontas de pagamento. */
+function mBlocoPagar(cfg,usaPP,usaPix,usaQtd,usaSinal,usaResumo,descpix,zap,usaCupom,usaFiltro){
+  var c='';
+  if(usaCupom){
+    c+='function linhaDesconto(){\n';
+    c+="var l=raiz.querySelector('.fcm-desconto');\n";
+    c+='if(cupomAtivo){\n';
+    c+="l.className='fcm-desconto on';\n";
+    c+="raiz.querySelector('.fcm-desconto-t').textContent=TXT_DESCONTO+' ('+cupomAtivo.codigo+')';\n";
+    c+="raiz.querySelector('.fcm-desconto-v').textContent='- '+moedaFmt(descontoAtual());\n";
+    c+="}else{l.className='fcm-desconto';}\n}\n\n";
+  }
+  if(usaPix){
+    c+='function esconderPix(){\n';
+    c+="raiz.querySelector('.fcm-pixarea').className='fcm-pixarea';\n";
+    c+="raiz.querySelector('.fcm-copiado').className='fcm-copiado';\n}\n\n";
+  }
+  c+='function atualizar(){\n';
+  c+="raiz.querySelector('.fcm-total-v').textContent=moedaFmt(total());\n";
+  if(usaSinal){
+    c+="raiz.querySelector('.fcm-sinal-v').textContent=moedaFmt(sinalAgora());\n";
+    c+="raiz.querySelector('.fcm-saldo-v').textContent=moedaFmt(saldoDepois());\n";
+    c+='var rec=sinalRecusa();\n';
+    c+="raiz.querySelector('.fcm-sinal-aviso').textContent=rec;\n";
+    c+="raiz.querySelector('.fcm-sinal-aviso').className='fcm-sinal-aviso'+(rec?' on':'');\n";
+  }
+  if(descpix>0){
+    c+="raiz.querySelector('.fcm-pixlinha-v').textContent=moedaFmt(totalPix());\n";
+    c+="raiz.querySelector('.fcm-pixlinha').className='fcm-pixlinha'+(CARRINHO.length?' on':'');\n";
+  }
+  if(usaCupom)c+='linhaDesconto();\n';
+  if(usaResumo){
+    c+="raiz.querySelector('.fcm-resumo').value=textoResumo();\n";
+    c+="raiz.querySelector('.fcm-resumo-ok').className='fcm-resumo-ok';\n";
+  }
+  if(usaPix)c+='esconderPix();\n';
+  c+='}\n\n';
+  if(usaCupom){
+    c+=FC_CARRINHO_SRC.cupomVigente;
+    c+='function msgCupom(t,ok){\n';
+    c+="var m=raiz.querySelector('.fcm-cupom-msg');\n";
+    c+="m.textContent=t;m.className='fcm-cupom-msg'+(t?(ok?' ok':' erro'):'');\n}\n\n";
+    c+='function aplicarCupom(){\n';
+    c+="var v=raiz.querySelector('.fcm-cupom-l input').value.trim();\n";
+    c+="if(!v){cupomAtivo=null;msgCupom('',true);atualizar();return;}\n";
+    c+='var achado=null,i;\n';
+    c+='for(i=0;i<CUPONS.length;i++){\n';
+    c+='if(CUPONS[i].codigo.toUpperCase()===v.toUpperCase()){achado=CUPONS[i];break;}\n}\n';
+    c+='if(!achado){cupomAtivo=null;msgCupom(TXT_CUPOM_INVALIDO,false);}\n';
+    c+='else if(!cupomVigente(achado)){cupomAtivo=null;msgCupom(TXT_CUPOM_EXPIRADO,false);}\n';
+    c+='else{cupomAtivo=achado;msgCupom(TXT_CUPOM_OK,true);}\n';
+    c+='atualizar();\n}\n';
+    c+="raiz.querySelector('.fcm-cupom-l button').addEventListener('click',aplicarCupom);\n\n";
+  }
+  /* Enumeracao UNICA dos itens do carrinho: ela alimenta o resumo copiavel E a mensagem do
+     WhatsApp. Dois lacos poderiam discordar sobre a mesma compra, e foi assim que o Checkout
+     imprimiu um resumo que as duas pontas de pagamento recusavam. */
+  c+='function itensEscolhidos(){\n';
+  c+='var lista=[],i,k,it,p,op;\n';
+  c+='for(i=0;i<CARRINHO.length;i++){\n';
+  c+='it=CARRINHO[i];p=PRODUTOS[it.p];\n';
+  c+="lista.push({rotulo:p.nome+(it.q>1?(' x'+it.q):''),valor:p.preco*it.q,opcional:false});\n";
+  c+='for(k=0;k<it.ops.length;k++){\n';
+  c+='op=(p.opcionais||[])[it.ops[k].j];\n';
+  c+='if(!op)continue;\n';
+  c+="lista.push({rotulo:op.nome+(it.ops[k].q>1?(' x'+it.ops[k].q):''),valor:op.preco*it.ops[k].q,opcional:true});\n";
+  c+='}\n}\n';
+  c+='return lista;\n}\n\n';
+  if(usaResumo){
+    c+='function textoResumo(){\n';
+    c+='var L=[],li=itensEscolhidos(),z;\n';
+    c+="if(!li.length)return '';\n";
+    c+="L.push(TXT_RESUMO_PEDIDO+' '+CODIGO_PEDIDO);\n";
+    c+="for(z=0;z<li.length;z++)L.push((li[z].opcional?'   + ':'- ')+li[z].rotulo+'  '+moedaFmt(li[z].valor));\n";
+    if(usaCupom){
+      c+="if(cupomAtivo)L.push(TXT_RESUMO_SUBTOTAL+': '+moedaFmt(subtotal()));\n";
+      c+="if(cupomAtivo)L.push(TXT_DESCONTO+' ('+cupomAtivo.codigo+'): - '+moedaFmt(descontoAtual()));\n";
+    }
+    c+="L.push(TXT_TOTAL+': '+moedaFmt(total()));\n";
+    if(usaSinal){
+      c+='var recR=sinalRecusa();\n';
+      c+='if(recR){\n';
+      c+="L.push(TXT_SINAL_RECUSADO.toUpperCase()+': '+recR);\n";
+      c+='}else{\n';
+      c+="L.push(TXT_SINAL+': '+moedaFmt(sinalAgora()));\n";
+      c+="L.push(TXT_SALDO+': '+moedaFmt(saldoDepois()));\n";
+      c+='}\n';
+    }
+    if(descpix>0)c+="L.push(TXT_PIX_ROTULO+' (-'+DESCONTO_PIX+'%): '+moedaFmt(totalPix()));\n";
+    c+="return L.join('\\n');\n}\n\n";
+    c+='function copiarResumo(){\n';
+    c+="var ta=raiz.querySelector('.fcm-resumo');\n";
+    c+='function ok(){\n';
+    c+="raiz.querySelector('.fcm-resumo-ok').className='fcm-resumo-ok on';\n}\n";
+    c+='if(navigator.clipboard&&navigator.clipboard.writeText){\n';
+    c+="navigator.clipboard.writeText(ta.value).then(ok,function(){ta.select();document.execCommand('copy');ok();});\n";
+    c+="}else{ta.select();document.execCommand('copy');ok();}\n}\n";
+    c+="raiz.querySelector('.fcm-resumo-b').addEventListener('click',copiarResumo);\n\n";
+  }
+  c+='function nomesSelecionados(){\n';
+  c+='var ns=[],i;\n';
+  c+="for(i=0;i<CARRINHO.length;i++)ns.push(PRODUTOS[CARRINHO[i].p].nome+(CARRINHO[i].q>1?(' x'+CARRINHO[i].q):''));\n";
+  c+='return ns;\n}\n\n';
+  if(usaPP){
+    c+='function msg(txt,ok){\n';
+    c+="var m=raiz.querySelector('.fcm-msg');\n";
+    c+="m.textContent=txt;m.className='fcm-msg '+(ok?'ok':'erro');\n}\n\n";
+    c+='/* ===== PayPal ===== */\n';
+    c+="var sdk=document.createElement('script');\n";
+    c+="sdk.src='https://www.paypal.com/sdk/js?client-id='+encodeURIComponent(PAYPAL_CLIENT_ID)+'&currency='+MOEDA+'&intent=capture&locale=pt_BR';\n";
+    c+='sdk.onload=function(){\n';
+    c+='if(!window.paypal){msg(TXT_ERRO,false);return;}\n';
+    c+='window.paypal.Buttons({\n';
+    c+="style:{layout:'vertical',shape:'rect',label:'pay',color:'"+cfg.ppcor+"'},  /* color: 'gold' | 'blue' | 'silver' | 'white' | 'black' */\n";
+    c+='onClick:function(data,actions){\n';
+    c+='if(total()<0.01){msg(TXT_TOTAL_ZERO,false);return actions.reject();}\n';
+    if(usaSinal)c+='var rec=sinalRecusa();\nif(rec){msg(rec,false);return actions.reject();}\n';
+    c+='return actions.resolve();\n},\n';
+    c+='createOrder:function(data,actions){\n';
+    c+='return actions.order.create({purchase_units:[{\n';
+    if(usaSinal)c+='amount:{value:sinalAgora().toFixed(2),currency_code:MOEDA},\n';
+    else c+='amount:{value:total().toFixed(2),currency_code:MOEDA},\n';
+    if(usaSinal)c+="description:(nomesSelecionados().join(' + ')+' (sinal - cod: '+CODIGO_PEDIDO+(cupomAtivo?(' cupom:'+cupomAtivo.codigo):'')+')').substring(0,127),\n";
+    else c+="description:(nomesSelecionados().join(' + ')+' (cod: '+CODIGO_PEDIDO+(cupomAtivo?(' cupom:'+cupomAtivo.codigo):'')+')').substring(0,127),\n";
+    c+='custom_id:CODIGO_PEDIDO\n}]});\n},\n';
+    /* Concluir o pedido esvazia o carrinho: e o unico momento em que a pagina SABE que a compra
+       terminou. Sem isso o cliente voltaria a loja no dia seguinte com o pedido pago ainda na
+       tela e pagaria duas vezes. */
+    c+='onApprove:function(data,actions){\n';
+    c+='return actions.order.capture().then(function(){msg(TXT_SUCESSO,true);cestaLimpar();});\n},\n';
+    c+='onError:function(){msg(TXT_ERRO,false);}\n';
+    c+="}).render(raiz.querySelector('.fcm-botoes'));\n};\n";
+    c+='sdk.onerror=function(){msg(TXT_ERRO,false);};\n';
+    c+='document.head.appendChild(sdk);\n\n';
+  }
+  if(usaPix){
+    c+='/* ===== Pix ===== */\n';
+    c+="var payloadAtual='';\n\n";
+    c+='function gerarPix(){\n';
+    c+='var v=totalPix();\n';
+    if(usaSinal){
+      c+="if(total()<0.01){alert('Escolha ao menos um item: o pedido esta em zero.');return;}\n";
+      c+='var rec=sinalRecusa();\nif(rec){alert(rec);return;}\n';
+    }else{
+      c+="if(v<0.01){alert('Escolha ao menos um item: o pedido esta em zero.');return;}\n";
+    }
+    c+='if(!CODIGO_PEDIDO)CODIGO_PEDIDO=novoPedido();\n';
+    c+='payloadAtual=montarPayload(v);\n';
+    c+="var qr=raiz.querySelector('.fcm-qr');\n";
+    c+="qr.innerHTML='';\n";
+    c+='if(qrPronto&&window.QRCode){\n';
+    c+="qr.style.display='inline-block';\n";
+    c+='new window.QRCode(qr,{text:payloadAtual,width:200,height:200,correctLevel:window.QRCode.CorrectLevel.M});\n';
+    c+="}else{qr.style.display='none';}\n";
+    c+="raiz.querySelector('.fcm-pixval-v').textContent=moedaFmt(v);\n";
+    c+="raiz.querySelector('.fcm-cola').value=payloadAtual;\n";
+    c+="raiz.querySelector('.fcm-pixarea').className='fcm-pixarea on';\n}\n";
+    c+="raiz.querySelector('.fcm-gerar').addEventListener('click',gerarPix);\n\n";
+    c+='function copiarPix(){\n';
+    c+="var ta=raiz.querySelector('.fcm-cola');\n";
+    c+='function ok(){\n';
+    c+="raiz.querySelector('.fcm-copiado').className='fcm-copiado on';\n}\n";
+    c+='if(navigator.clipboard&&navigator.clipboard.writeText){\n';
+    c+="navigator.clipboard.writeText(payloadAtual).then(ok,function(){ta.select();document.execCommand('copy');ok();});\n";
+    c+="}else{ta.select();document.execCommand('copy');ok();}\n}\n";
+    c+="raiz.querySelector('.fcm-copiar').addEventListener('click',copiarPix);\n\n";
+    if(zap){
+      c+='function avisarZap(){\n';
+      c+='var partes=[],li=itensEscolhidos(),z;\n';
+      if(usaSinal)c+="partes.push('Ola! Acabei de pagar o SINAL via Pix.');\n";
+      else c+="partes.push('Ola! Acabei de pagar via Pix.');\n";
+      c+="partes.push('Pedido cod: *'+CODIGO_PEDIDO+'*');\n";
+      c+="for(z=0;z<li.length;z++)partes.push(li[z].opcional?('   + '+li[z].rotulo+' '+moedaFmt(li[z].valor)):('- *'+li[z].rotulo+'* '+moedaFmt(li[z].valor)));\n";
+      if(usaCupom)c+="if(cupomAtivo)partes.push('Cupom: '+cupomAtivo.codigo);\n";
+      if(descpix>0)c+="if(DESCONTO_PIX>0)partes.push('Desconto Pix: -'+DESCONTO_PIX+'%');\n";
+      if(usaSinal){
+        c+="partes.push('Total do pedido: '+moedaFmt(total()));\n";
+        c+="partes.push('Sinal pago agora: *'+moedaFmt(sinalAgora())+'*');\n";
+        c+="partes.push(TXT_SALDO+': *'+moedaFmt(saldoDepois())+'*');\n";
+      }else{
+        c+="partes.push('Valor pago: *'+moedaFmt(totalPix())+'*');\n";
+      }
+      c+="var url='https://wa.me/'+ZAP_NUMERO+'?text='+encodeURIComponent(partes.join('\\n'));\n";
+      c+="window.open(url,'_blank');\n";
+      c+='cestaLimpar();\n';
+      c+="raiz.querySelector('.fcm-nota').textContent=TXT_PEDIDO_ENVIADO;\n}\n";
+      c+="raiz.querySelector('.fcm-zap').addEventListener('click',avisarZap);\n\n";
+    }
+  }
+  c+='cestaLer();\n';
+  if(usaFiltro)c+='desenharFiltros();\n';
+  c+='desenharGrade();\ndesenharCesta();\natualizar();\n';
+  c+='}\n\n';
+  c+="if(document.getElementById('fcmloja'))montar();\n";
+  c+="else document.addEventListener('DOMContentLoaded',montar);\n";
+  c+='})();\n</scr'+'ipt>';
+  return c;
+}
+
+/* ===== a regra desta aba na importacao de arquivo (camada 2) =====
+   O molde generico (camada 1) so sabe de forma. Aqui vale a mesma decisao do Slideshow: o
+   endereco da FOTO e o unico campo do catalogo que vira src dentro do bloco publicado, entao
+   produto cujo endereco nao passa em sUrlOk NAO entra -- e e contado, nunca descartado calado.
+   Produto sem foto tambem sai: a vitrine e feita de imagens, e um produto sem foto chegaria a
+   pagina publicada como um retangulo vazio que o cadastro manual ja recusa. Foto de host de
+   fora ENTRA (o cadastro manual a aceita), mas entra contada, para a confirmacao poder dizer
+   quantos enderecos de terceiros vieram no arquivo. */
+function mImportarLimpar(frag,conta){
+  var i,pr,ch,out=[];
+  if(!frag||!frag.m||!fcEhArray(frag.m.prods))return frag;
+  for(i=0;i<frag.m.prods.length;i++){
+    pr=frag.m.prods[i];
+    if(!fcEhObjeto(pr)||typeof pr.img!=='string'||!pr.img||!sUrlOk(pr.img)){conta.descartados++;continue;}
+    if(conta.forVistas&&!sHostEsperado(pr.img)){
+      ch='u:'+pr.img;
+      if(!Object.prototype.hasOwnProperty.call(conta.forVistas,ch)){conta.forVistas[ch]=1;conta.forasteiras++;}
+    }
+    out.push(pr);
+  }
+  frag.m.prods=out;
+  return frag;
+}
+
+/* ===== previa: executa o bloco gerado, nunca o imita =====
+   O mesmo padrao das outras abas com previa dinamica: mBloco e a fonte unica, e aqui o retorno
+   dela e escrito dentro de um <iframe> de mesma origem. Tres obrigacoes vem junto e estao
+   cumpridas abaixo: o shim de armazenamento em memoria com conferencia barulhenta (a loja GRAVA
+   o carrinho em localStorage -- sem o shim, a previa sujaria a chave real da origem da
+   ferramenta e nasceria com um carrinho velho na segunda abertura), o enchimento cinzento para
+   haver o que rolar, e o debounce de timer unico. */
+function mPvShim(cfg){
+  var s=cfg.usaPP?fcPvSondaPP({ppcor:cfg.ppcor,raizId:'fcmloja',msgSel:'fcm-msg',caixaId:'m-pv-pp'}):'';
+  return fcPvShim({pref:'m',
+    semAbrir:true,
+    abre:'o ',
+    fecha:' deste quadro. A previa pode estar gravando o carrinho nas chaves reais do navegador ou abrindo o WhatsApp numa aba nova. O codigo gerado ao lado nao e afetado.',
+    depois:s});
+}
+function mPvEnchimento(){
+  var s='',i;
+  for(i=0;i<6;i++)s+='<div class="m-pv-falso">conteudo da sua pagina</div>';
+  return s;
+}
+function mPvRecusaDoc(motivo){
+  var h='';
+  h+='<!DOCTYPE html>\n<html lang="pt-br">\n<head>\n<meta charset="utf-8">\n';
+  h+='<meta name="viewport" content="width=device-width,initial-scale=1">\n';
+  h+='<sty'+'le>\n';
+  h+='html,body{margin:0;padding:0}\n';
+  h+='body{background:#FFFFFF;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Ubuntu,sans-serif;padding:20px}\n';
+  h+='.m-pv-recusa{border:2px solid #8C1D18;border-radius:12px;background:#FDF2F1;color:#5E1310;padding:16px 18px;max-width:560px;margin:0 auto}\n';
+  h+='.m-pv-recusa .t{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin:0 0 8px}\n';
+  h+='.m-pv-recusa .m{font-size:13px;line-height:1.55;margin:0}\n';
+  h+='.m-pv-recusa .r{font-size:12px;line-height:1.5;margin:12px 0 0;color:#7A3B36}\n';
+  h+='</sty'+'le>\n</head>\n<body>\n';
+  h+='<div class="m-pv-recusa"><p class="t">Configuracao recusada &mdash; nao ha loja para mostrar</p>';
+  h+='<p class="m">'+escHtml(motivo)+'</p>';
+  h+='<p class="r">A previa executa o codigo gerado, e o gerador se recusa a produzir esta configuracao. Mostrar uma vitrine aqui seria mostrar um codigo que o botao <b>Gerar codigo</b> nao entrega. Corrija o campo acima e a previa volta sozinha.</p>';
+  h+='</div>\n</body>\n</html>';
+  return h;
+}
+function mPvDoc(cfg){
+  var h='';
+  h+='<!DOCTYPE html>\n<html lang="pt-br">\n<head>\n<meta charset="utf-8">\n';
+  h+='<meta name="viewport" content="width=device-width,initial-scale=1">\n';
+  h+='<sty'+'le>\n';
+  h+='html,body{margin:0;padding:0}\n';
+  h+='body{background:#FFFFFF;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Ubuntu,sans-serif;padding:16px 12px}\n';
+  h+='.m-pv-falso{background:#EDEAE1;color:#A9A294;border-radius:6px;margin:10px 0;padding:0 14px;';
+  h+='height:70px;display:flex;align-items:center;font-size:12px;letter-spacing:.04em}\n';
+  h+='</sty'+'le>\n</head>\n<body>\n';
+  h+=mPvShim(cfg);
+  h+=mBloco(cfg);
+  h+=mPvEnchimento();
+  h+='\n</body>\n</html>';
+  return h;
+}
+/* As duas larguras logicas ATRAVESSAM o corte configurado: e isso que faz a media query do
+   bloco ser avaliada pelo proprio quadro, em vez de a previa desenhar um layout que o CSS
+   gerado nunca produziria. O corte ja vem preso pela mCfg, entao os dois lados leem o mesmo
+   numero. */
+function mPvLargura(cfg){
+  if(mPvModo==='cel')return Math.min(380,cfg.mob);
+  return Math.max(1060,cfg.mob+280);
+}
+var mPvTimer=null,mPvModo='desk';
+var M_PV_ALTURA=620;
+function mPvMontar(){
+  var box=$('m-pv-box');if(!box)return;
+  var cfg=mCfg();
+  var recusa=mRecusa(cfg);
+  var larg=mPvLargura(cfg);
+  var disp=box.clientWidth||440;
+  var k=Math.min(1,disp/larg);
+  box.innerHTML='';
+  var moldura=document.createElement('div');
+  moldura.className='m-pv-moldura';
+  moldura.style.width=Math.round(larg*k)+'px';
+  moldura.style.height=M_PV_ALTURA+'px';
+  var ifr=document.createElement('iframe');
+  ifr.id='m-pv-frame';
+  ifr.setAttribute('title','Prévia da mini loja');
+  ifr.style.width=larg+'px';
+  ifr.style.height=Math.round(M_PV_ALTURA/k)+'px';
+  ifr.style.transform='scale('+k+')';
+  ifr.style.transformOrigin='top left';
+  moldura.appendChild(ifr);
+  box.appendChild(moldura);
+  var doc=ifr.contentDocument||(ifr.contentWindow&&ifr.contentWindow.document);
+  if(!doc)return;
+  doc.open();doc.write(recusa?mPvRecusaDoc(recusa):mPvDoc(cfg));doc.close();
+}
+function mPreview(imediato){
+  if(mPvTimer){clearTimeout(mPvTimer);mPvTimer=null;}
+  if(imediato){mPvMontar();return;}
+  mPvTimer=setTimeout(function(){mPvTimer=null;mPvMontar();},400);
+}
+function mPvBotoes(){
+  var d=$('m-pv-desk'),c=$('m-pv-cel');
+  if(d){d.className='botao mini'+(mPvModo==='desk'?'':' claro');d.setAttribute('aria-pressed',mPvModo==='desk'?'true':'false');}
+  if(c){c.className='botao mini'+(mPvModo==='cel'?'':' claro');c.setAttribute('aria-pressed',mPvModo==='cel'?'true':'false');}
+}
+function mPvModoSet(m){mPvModo=m;mPvBotoes();mPreview(true);}
+/* Nenhum campo do importador (m-imp-link, m-imp-fonte) alimenta a previa: remontar o quadro a
+   cada tecla do campo do codigo-fonte -- que chega a centenas de milhares de caracteres --
+   mandaria o navegador rebaixar todas as fotos sem nada mudar na tela. */
+document.addEventListener('input',function(e){
+  var id=e.target.id||'',nome=e.target.name||'';
+  if(id.indexOf('m-imp-')===0)return;
+  if(id.indexOf('m-')===0||nome.indexOf('m-')===0)mPreview();
+});
+/* mPesoRender ENTRA AQUI, e nao so no 'depois' de fcLigarFaixa. O 'depois' daquela funcao so
+   corre quando o clamp MUDOU o valor -- numero digitado dentro da faixa (300 num campo de 200
+   a 1600) nunca o acionava, e a frase ao lado continuava anunciando a largura anterior: campo
+   em 300, previa pedindo width/300, codigo com IMG_VITRINE=300 e a conta do peso dizendo "900
+   px". O instrumento criado para o requisito ser conferivel era justamente o que mentia.
+   No 'change' (e nao no 'input') pelo mesmo motivo de sempre: no 'change' o valor ja passou
+   pelo clamp do proprio elemento, entao a conta descreve o numero que mCfg vai usar. */
+document.addEventListener('change',function(e){
+  var id=e.target.id||'',nome=e.target.name||'';
+  if(id.indexOf('m-imp-')===0)return;
+  if(id.indexOf('m-')===0||nome.indexOf('m-')===0){mToggles();mPesoRender();mPreview();}
+});
+
+/* ===== peso da vitrine: a conta fica a vista do operador =====
+   O requisito e o peso das fotos, e requisito que ninguem consegue conferir vira promessa. Esta
+   funcao nao mede bytes de rede -- ela declara o que a pagina PEDE, e o numero de fotos que
+   entram no primeiro carregamento (as demais so entram quando o visitante rola). O aviso ao
+   lado da lista repete o teto de largura escolhido. */
+function mPesoTexto(cfg){
+  var n=cfg.prods.length,eager=Math.min(n,cfg.cols);
+  if(!n)return '';
+  var resto=n-eager;
+  return n+(n===1?' produto na vitrine.':' produtos na vitrine.')+
+    ' No primeiro carregamento a página pede <b>'+eager+'</b> '+(eager===1?'foto':'fotos')+
+    ' de <b>'+cfg.imgvit+' px</b> de largura'+
+    (resto?('; '+(resto===1?'a outra entra':'as outras <b>'+resto+'</b> entram')+' com <code>loading="lazy"</code>, só quando o visitante rola até '+(resto===1?'ela':'elas')+'.'):'.')+
+    ' A foto de <b>'+cfg.imgdet+' px</b> só é pedida quando alguém abre o cartão de detalhe — uma por vez.';
+}
+function mPesoRender(){
+  var el=$('m-peso');if(!el)return;
+  var cfg;
+  try{cfg=mCfg();}catch(e){el.style.display='none';return;}
+  var t=mPesoTexto(cfg);
+  if(!t){el.style.display='none';return;}
+  el.style.display='block';
+  el.innerHTML=t;
 }
 
 /* ============ painel consolidado (fase 5) ============ */
@@ -11440,6 +13664,8 @@ function fccDaAba(a,p,plano,vals){
        vidas que a aba acabou de separar. */
     plano.comps.push(fccItem(a,'p-out1','Link de cobrança — a página de pagamento','Componente HTML desta página',
       'Cola-se <b>uma vez só</b>. O <b>link de cada cobrança</b> é gerado na aba, muda a cada cliente e não vai em campo nenhum do Prosite.'));
+  }else if(a.id==='loja'){
+    plano.comps.push(fccItem(a,'m-out','Mini loja','Componente HTML desta página'));
   }else if(a.id==='tidy'){
     emb=(((v.t&&v.t.arq)||radio('t-arq'))==='embutida');
     if(!emb){
@@ -11692,6 +13918,9 @@ prep('Barra de abas','',function(){
   /* enquanto o painel esta escondido o box mede 0: a previa e remontada ao abrir a aba, ja com
      a largura real da coluna, senao o iframe nasceria na largura de emergencia. */
   liga('aba-cob',function(){trocarAba('cob');pPreview(true);});
+  /* enquanto o painel esta escondido o box mede 0: a previa e remontada ao abrir a aba, ja com
+     a largura real da coluna, senao o iframe nasceria na largura de emergencia. */
+  liga('aba-loja',function(){trocarAba('loja');mAbaAbrir();});
 });
 /* O logotipo do topo deixou de ser SVG colado no corpo da pagina e passa a ser desenhado a
    partir de CORUJA_PECAS, a mesma fonte que alimenta os blocos gerados. Passo proprio, e nao
@@ -11854,13 +14083,44 @@ prep('Link de cobrança','cob',function(){
     el.addEventListener('blur',function(){if(par[1]()){salvarEstado();pPreview(true);}});
   });
 });
+prep('Mini loja','loja',function(){
+  liga('m-op-add',mOpAdd);
+  liga('m-prod-salvar',mProdSalvar);
+  liga('m-prod-cancelar',mProdLimpar);
+  liga('m-prod-limpar',mProdListaLimpar);
+  liga('m-cp-add',mCpAdd);
+  liga('m-gerar',mGerar);
+  liga('m-atualizar',function(){mPreview(true);});
+  liga('m-pv-desk',function(){mPvModoSet('desk');});
+  liga('m-pv-cel',function(){mPvModoSet('cel');});
+  liga('m-copy',function(){copiar('m-out','m-cop');});
+  liga('m-imp-conferir',mImpConferir);
+  parearCor('m-c1');parearCor('m-c2');parearCor('m-c3');
+  /* A previa roda o bloco gerado e os nove numeros desta tabela chegam nele -- inclusive o
+     corte de celular, que vira uma @media: o 'blur' redesenha com o valor JA preso, imediato
+     porque 'blur' e um gesto deliberado e nao uma tecla. E o mPesoRender acompanha, senao a
+     conta do peso ficaria descrevendo a largura anterior. */
+  fcLigarFaixa(M_NUMS,function(){mPesoRender();mPreview(true);});
+  /* Ouvintes no proprio elemento, como no importador do Slideshow: mImpInvalidar precisa saber
+     que mudou o LINK ou a FONTE (que invalidam a conferencia). */
+  ['m-imp-link','m-imp-fonte'].forEach(function(id){
+    var el=$(id);if(!el)return;
+    el.addEventListener('input',mImpInvalidar);
+    el.addEventListener('change',mImpInvalidar);
+  });
+  var ch=$('m-chave');
+  if(ch){
+    ch.addEventListener('change',function(){if(fcPixChaveAjustar('m-chave'))salvarEstado();});
+    ch.addEventListener('blur',function(){if(fcPixChaveAjustar('m-chave')){salvarEstado();mPreview(true);}});
+  }
+});
 /* Cores de texto livre das abas que as tem: o campo se corrige a vista, como o c-mob.
    Mesmo motivo do listener no proprio elemento (roda antes dos de document, entao o
    salvarEstado/previa globais ja leem o valor corrigido); 'blur' nao borbulha, por isso esse
    ramo redesenha a previa por conta propria, e por prefixo (fcCorRedesenhar).
    So em 'change'/'blur', nunca em 'input': corrigir a cada tecla impediria digitar '#075E54',
    porque '#0' viraria o padrao antes do resto chegar. */
-prep('Correcao a vista das cores livres','leads uni bor cnt cob',function(){
+prep('Correcao a vista das cores livres','leads uni bor cnt cob loja',function(){
   CORES_LIVRES.forEach(function(par){
     var t=$(par[0]+'-t');if(!t)return;
     t.addEventListener('change',function(){if(corAjustar(par[0],par[1]))salvarEstado();});
@@ -11977,6 +14237,21 @@ prep('Link de cobrança','cob',function(){
      bloco -- inclusive o pedido do script do QR Code -- em toda abertura da ferramenta, mesmo
      para quem nunca abre esta aba, e com o painel escondido (largura de emergencia). */
   pPvBotoes();
+},'desenhar a aba com o estado restaurado');
+prep('Mini loja','loja',function(){
+  /* estado gravado antes desta regra pode trazer numero fora da faixa: prende na carga, para o
+     campo nunca exibir algo diferente do que mCfg vai usar. */
+  if(fcAjustarTodos(M_NUMS))salvarEstado();
+  mProdRender();
+  mCpRender();
+  mCatsRender();
+  mToggles();
+  mPesoRender();
+  /* A previa NAO e montada aqui, pelo mesmo motivo das outras abas: montar na carga executaria
+     o bloco -- inclusive o pedido do script do QR Code e a busca de todas as miniaturas da
+     vitrine -- em toda abertura da ferramenta, mesmo para quem nunca abre esta aba, e com o
+     painel escondido (largura de emergencia). */
+  mPvBotoes();
 },'desenhar a aba com o estado restaurado');
 
 /* O preset geral e o ULTIMO passo da partida, e nao por acaso: fcgValoresDaAba le o que esta na
