@@ -336,3 +336,39 @@ Zero Critical na revisão; **um Critical achado pela própria rodada de correç�
 | Sétima aba (link de cobrança) | 3h30 – 5h | 2h05 |
 | Oitava aba (mini loja) | 5h30 – 8h | 4h30 |
 | **Total** | **22h45 – 32h15** | **16h25** |
+
+---
+
+## Identidade global e paleta
+
+| | Estimado | Real |
+|---|---|---|
+| Identidade e paleta | 4h – 6h | **1h50** (14:56 → 16:46) |
+
+**Abaixo do piso**, mesmo com **dois Critical** encontrados — porque os dois tinham a mesma causa, e ela era conhecida.
+
+### Os dois Critical eram um só defeito
+
+Ambos eram perda de dado no backup, e ambos da família *"o arquivo diz uma coisa e a ferramenta faz outra"*:
+
+1. **Restaurar backup da versão anterior descartava a identidade**, anunciando o contrário. Arquivo com **48 valores não vazios**, importado em navegador limpo → cinco campos vazios e a mensagem *"a identidade não foi tocada"*. **No primeiro dia todo backup existente é do formato antigo**, então este era o caminho padrão, não a exceção.
+2. **Backup "com dados" tirado com decisão pendente gravava vazios por cima.** Os valores só existiam dentro da pendência, e ela não viajava no arquivo.
+
+**A causa do primeiro era duplicação:** existiam **dois garimpos** de identidade — o do `localStorage` recuperava dos presets, o do arquivo não. Extraído o único (`fciGarimpar`), alimentado pelos dois lados. É a mesma classe que este projeto persegue desde o começo, agora aparecendo em código escrito no mesmo dia.
+
+### A decisão do C2, e por que não foi "recusar"
+
+A pendência passou a viajar no **"com os dados"** e nunca no "sem dados". Recusar exportar com pendência viva bloquearia o backup **justamente quando existe um único exemplar dos valores** — contra a regra de preservar. Avisar sem levar deixaria o arquivo incompleto de pé.
+
+### Total acumulado das cinco rodadas
+
+| Rodada | Estimado | Real |
+|---|---|---|
+| Cinco fases (preset geral e painel) | 13h45 – 19h15 | 9h50 |
+| Sétima aba (link de cobrança) | 3h30 – 5h | 2h05 |
+| Oitava aba (mini loja) | 5h30 – 8h | 4h30 |
+| Terceira fonte de imagem (CDN) | 2h – 3h | 2h15 |
+| Identidade e paleta | 4h – 6h | 1h50 |
+| **Total** | **28h45 – 41h15** | **20h30** |
+
+Cinco rodadas, **todas dentro ou abaixo da faixa**.

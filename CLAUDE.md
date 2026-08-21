@@ -57,6 +57,6 @@ Ao criar campo novo que receba esse tipo de dado, siga a mesma regra: `value=""`
 ## Fluxo de manutenção (importante)
 
 1. Ao evoluir qualquer código destes arquivos, **atualizar o arquivo correspondente no repositório** (conteúdo completo, nunca trecho).
-2. Ao evoluir a ferramenta, editar o `index.html` e publicar por **commit + push** — o GitHub Pages atualiza `prosite.fotocerta.com.br` sozinho. A página `utl-construtor` do Prosite foi descontinuada; não existe mais o passo de republicar o miolo em componente.
+2. Ao evoluir a ferramenta, editar o `index.html` e mesclar na `main` normalmente. **`git push` só depois de o dono dizer que testou local e aprovou** — o GitHub Pages publica sozinho a cada envio, então *enviar é publicar*, e uma versão com defeito iria ao ar sem ninguém decidir. Combinado em 21/08/2026, quando `prosite.fotocerta.com.br` entrou no ar. Vale para o repositório inteiro, já que o envio leva tudo junto. A página `utl-construtor` do Prosite foi descontinuada; não existe mais o passo de republicar o miolo em componente.
 3. Ao mudar arquitetura, regra ou decisão, **atualizar a `docs/documentacao-fotocerta.md`** (e o inventário acima, se surgir arquivo novo).
 4. Sempre lembrar: **editor ≠ publicado** — vale para as páginas do Prosite (publicar para testar) e para o Pages (o deploy leva alguns instantes). Console do Safari (Cmd+Option+C) para diagnosticar.
