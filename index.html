@@ -3962,7 +3962,7 @@ function fciGravar(){
           /* A pendencia da migracao mora AQUI, e nao so na memoria: as abas param de gravar
              esses campos na primeira vez que o estado e salvo, e uma pergunta sem os valores
              que ela oferece nao e pergunta. Guardando-a, "decidir depois" nao custa nada. */
-          pendente:FCI.pendente&&FCI.pendente.perguntar&&FCI.pendente.perguntar.length?FCI.pendente:null,
+          pendente:fciPendenteViva(),
           migrou:FCI.migrou.slice(0)};
   try{localStorage.setItem(FCI_CHAVE,JSON.stringify(st));}
   catch(e){fcFalha('Identidade','gravar a identidade e a paleta -- armazenamento do navegador indisponivel',e,'');}
@@ -4073,49 +4073,20 @@ function fciCandidatos(st,rotuloDe,saco){
     }
   }
 }
-/* Monta o plano da migracao a partir do armazenamento BRUTO -- o estado das abas primeiro e,
-   so para os campos que ele nao tiver, as bibliotecas de presets e os presets gerais. A ordem
-   nao e arbitraria: o rascunho e o que esta na tela hoje; um preset e uma fotografia antiga.
-   Recorrer a fotografia so quando a tela nao tem nada e o que cumpre "nada se perde" sem
-   deixar um valor velho vencer um valor atual. */
-function fciPlanoMigracao(){
-  var abas=fciLerBruto('fcConstrutores','Identidade'),
-      gerais=fciLerBruto('fcConstrutoresGerais','Identidade'),
-      tela={},antigos={},plano={escolhido:{},perguntar:[],notas:[]},i,j,k,c;
-  fciCandidatos(abas,function(e){return e[1];},tela);
-  /* bibliotecas de presets de aba: elas moram dentro do fragmento da propria aba */
-  if(fcEhObjeto(abas)){
-    for(i=0;i<FCI_ANTIGO.length;i++){
-      (function(e){
-        var o=abas[e[2]],lista,n;
-        if(!fcEhObjeto(o)||!fcEhArray(o.presets))return;
-        lista=o.presets;
-        for(n=0;n<lista.length;n++){
-          if(!fcEhObjeto(lista[n]))continue;
-          (function(nome,vals){
-            fciCandidatos(vals,function(){return 'um preset da aba '+e[1]+' (“'+nome+'”)';},antigos);
-          })(String(lista[n].nome||lista[n].n||'sem nome'),fcEhObjeto(lista[n].valores)?lista[n].valores:null);
-        }
-      })(FCI_ANTIGO[i]);
-    }
-  }
-  /* presets gerais: uma campanha-pagina por vez */
-  if(fcEhObjeto(gerais)&&fcEhArray(gerais.presets)){
-    for(i=0;i<gerais.presets.length;i++){
-      (function(p){
-        var nome,id;
-        if(!fcEhObjeto(p)||!fcEhObjeto(p.abas))return;
-        nome=String(p.campanha||'sem nome');
-        for(id in p.abas){
-          if(!Object.prototype.hasOwnProperty.call(p.abas,id))continue;
-          if(!fcEhObjeto(p.abas[id])||!fcEhObjeto(p.abas[id].valores))continue;
-          (function(vals){
-            fciCandidatos(vals,function(){return 'um preset geral (“'+nome+'”)';},antigos);
-          })(p.abas[id].valores);
-        }
-      })(gerais.presets[i]);
-    }
-  }
+/* O GARIMPO -- UM SO, para os DOIS caminhos por onde a identidade de uma versao anterior pode
+   chegar: o armazenamento DESTE navegador (a migracao) e um ARQUIVO importado.
+   Ter dois garimpos foi o defeito medido: pelo localStorage a identidade era recuperada de
+   dentro dos presets, e pelo arquivo era jogada fora -- com a tela AFIRMANDO que o arquivo nao
+   trazia essa parte. E no primeiro dia desta versao TODO backup existente e do formato antigo,
+   entao o arquivo antigo e o caminho padrao, nao a excecao.
+   'topo' e o que estava na TELA (o rascunho): ele vence. 'fundo' sao as fotografias (presets),
+   consultadas so para o campo que o topo nao tiver -- recorrer a fotografia so quando a tela
+   nao tem nada e o que cumpre "nada se perde" sem deixar um valor velho vencer um atual.
+   Cada entrada e {vals:<objeto com fragmentos de aba>, rot:function(e){return 'de onde veio'}}. */
+function fciGarimpar(topo,fundo){
+  var tela={},antigos={},plano={escolhido:{},perguntar:[],notas:[]},i,k,c;
+  for(i=0;i<topo.length;i++)fciCandidatos(topo[i].vals,topo[i].rot,tela);
+  for(i=0;i<fundo.length;i++)fciCandidatos(fundo[i].vals,fundo[i].rot,antigos);
   for(i=0;i<FCI_CAMPOS.length;i++){
     k=FCI_CAMPOS[i][0];
     c=tela[k]&&tela[k].length?tela[k]:(antigos[k]||[]);
@@ -4129,33 +4100,112 @@ function fciPlanoMigracao(){
   }
   return plano;
 }
+/* As bibliotecas de presets de aba tem formatos de ARMAZENAMENTO diferentes (dentro do
+   fragmento da propria aba no localStorage; num mapa por aba no arquivo), entao quem conhece o
+   formato e quem as achata -- o garimpo recebe as duas ja achatadas, em lista de {nome,valores}. */
+function fciFundoDePresets(fundo,lista,sufixo){
+  var n;
+  if(!fcEhArray(lista))return;
+  for(n=0;n<lista.length;n++){
+    if(!fcEhObjeto(lista[n])||!fcEhObjeto(lista[n].valores))continue;
+    (function(nome,vals){
+      fundo.push({vals:vals,rot:function(e){return 'um preset da aba '+e[1]+' (“'+nome+'”)'+sufixo;}});
+    })(String(lista[n].nome||lista[n].n||'sem nome'),lista[n].valores);
+  }
+}
+/* lista = presets gerais, [{campanha, abas:{<id da aba>:{valores}}}, ...]. */
+function fciFundoDeGerais(fundo,lista,sufixo){
+  var i,id,p;
+  if(!fcEhArray(lista))return;
+  for(i=0;i<lista.length;i++){
+    p=lista[i];
+    if(!fcEhObjeto(p)||!fcEhObjeto(p.abas))continue;
+    for(id in p.abas){
+      if(!Object.prototype.hasOwnProperty.call(p.abas,id))continue;
+      if(!fcEhObjeto(p.abas[id])||!fcEhObjeto(p.abas[id].valores))continue;
+      (function(nome,vals){
+        fundo.push({vals:vals,rot:function(){return 'um preset geral (“'+nome+'”)'+sufixo;}});
+      })(String(p.campanha||'sem nome'),p.abas[id].valores);
+    }
+  }
+}
+/* Monta o plano da migracao a partir do armazenamento BRUTO. */
+function fciPlanoMigracao(){
+  var abas=fciLerBruto('fcConstrutores','Identidade'),
+      gerais=fciLerBruto('fcConstrutoresGerais','Identidade'),
+      topo=[],fundo=[],i,o;
+  if(fcEhObjeto(abas)){
+    topo.push({vals:abas,rot:function(e){return e[1];}});
+    /* bibliotecas de presets de aba: elas moram dentro do fragmento da propria aba */
+    for(i=0;i<FCI_ANTIGO.length;i++){
+      o=abas[FCI_ANTIGO[i][2]];
+      fciFundoDePresets(fundo,fcEhObjeto(o)?o.presets:null,'');
+    }
+  }
+  fciFundoDeGerais(fundo,fcEhObjeto(gerais)?gerais.presets:null,'');
+  return fciGarimpar(topo,fundo);
+}
+/* DOIS BOTOES IGUAIS NAO SAO ESCOLHA. Uma chave com espaco no fim e outra sem desenham o
+   mesmo rotulo, e o operador escolheria as cegas -- ainda por cima num campo que e uma chave
+   Pix. Aqui o valor vai entre aspas e as pontas invisiveis sao NOMEADAS. A faixa vai em
+   escape porque e faixa de caracteres em expressao regular. */
+var FCI_INVIS=/[\u0000-\u0020\u00a0\u1680\u2000-\u200f\u2028\u2029\u202f\u205f\u3000\ufeff]/;
+function fciMostrarValor(v){
+  var s=String(v==null?'':v),ini=s.length&&FCI_INVIS.test(s.charAt(0)),fim=s.length&&FCI_INVIS.test(s.charAt(s.length-1));
+  if(ini&&fim)return '“'+s+'” — com espaço (ou caractere invisível) nas duas pontas';
+  if(ini)return '“'+s+'” — com espaço (ou caractere invisível) no começo';
+  if(fim)return '“'+s+'” — com espaço (ou caractere invisível) no fim';
+  return '“'+s+'”';
+}
 /* Uma pergunta por campo divergente, encadeadas -- e a MESMA caixa do preset geral
    (fcgPerguntar), e nao uma segunda caixa de pergunta com outro comportamento de Esc, outro
    foco e outra aparencia. Sem resposta, nada e escolhido: a pergunta volta na proxima abertura
-   e os valores continuam onde estavam (nos presets e no estado gravado), intactos. */
-function fciPerguntarDivergencia(lista,i,escolhas,fim){
-  var it,ops,linhas,j;
+   e os valores continuam onde estavam (nos presets e no estado gravado), intactos.
+   'ctx' e opcional e troca so o texto de abertura: a mesma pergunta serve a migracao do
+   armazenamento e ao garimpo de um arquivo importado, e duas caixas seriam duas mecanicas.
+   O VALOR QUE ESTA NO CAMPO AGORA e sempre uma das saidas. O painel manda preencher e as abas
+   recusam gerar enquanto o campo estiver vazio, entao digitar com a pergunta adiada e o
+   comportamento ESPERADO -- e uma pergunta que voltasse oferecendo so os valores velhos
+   sobrescreveria o que o operador acabou de digitar sem nem mostrar o que apagou. */
+function fciPerguntarDivergencia(lista,i,escolhas,fim,ctx){
+  var it,ops,linhas,j,atual,jaTem;
   if(i>=lista.length){fim(escolhas,[]);return;}
   it=lista[i];
-  linhas=[
+  linhas=(ctx&&ctx.linhas)?ctx.linhas(it):[
     'Este campo saiu das abas e passou a ser um só para a ferramenta inteira. As abas abaixo estão com valores diferentes para '+it.rotulo+', e a ferramenta não escolhe sozinha qual vale.',
     'Escolher um não apaga nada nas outras abas: os campos delas deixaram de existir de qualquer jeito. O que você escolher aqui é o que os códigos gerados vão passar a usar.'
   ];
+  atual=fciBruto(it.chave);
+  jaTem=false;
+  for(j=0;j<it.ops.length;j++)if(it.ops[j].valor===atual)jaTem=true;
+  if(atual)linhas.push('O painel Identidade está agora com '+fciMostrarValor(atual)+' neste campo'+(jaTem?' — é um dos valores abaixo.':'. Escolher outro apaga esse valor.'));
   ops=[];
+  if(atual&&!jaTem)ops.push({rotulo:'Manter o que está aqui: '+fciMostrarValor(atual),valor:'atual'});
   for(j=0;j<it.ops.length;j++){
-    ops.push({rotulo:it.ops[j].valor+'  ('+fcLista(it.ops[j].de)+')',valor:'v'+j});
+    ops.push({rotulo:fciMostrarValor(it.ops[j].valor)+'  ('+fcLista(it.ops[j].de)+')'+((atual&&it.ops[j].valor===atual)?'  — é o que está no painel agora':''),valor:'v'+j});
   }
   ops.push({rotulo:'Decidir depois',valor:null,claro:true});
-  fcgPerguntar(it.curto+': as abas discordam',linhas,ops,function(v){
+  fcgPerguntar(it.curto+': há valores diferentes',linhas,ops,function(v){
     /* "Decidir depois" nao e cancelar: e adiar. O que ainda nao foi respondido volta como
        pendencia GRAVADA -- ver fciGravar --, com os valores que estavam nas abas dentro dela.
        Sem gravar a pendencia, a proxima gravacao do estado (que ja nao emite esses campos)
        apagaria das abas os valores que a pergunta oferecia, e a pergunta voltaria sem
        resposta possivel: exatamente a perda que esta migracao existe para impedir. */
     if(!v){fim(escolhas,lista.slice(i));return;}
-    escolhas[it.chave]={valor:it.ops[parseInt(v.substring(1),10)].valor,de:it.ops[parseInt(v.substring(1),10)].de};
-    fciPerguntarDivergencia(lista,i+1,escolhas,fim);
+    if(v==='atual')escolhas[it.chave]={valor:atual,de:[],manteve:true,anterior:atual};
+    else escolhas[it.chave]={valor:it.ops[parseInt(v.substring(1),10)].valor,de:it.ops[parseInt(v.substring(1),10)].de,anterior:atual};
+    fciPerguntarDivergencia(lista,i+1,escolhas,fim,ctx);
   });
+}
+/* A frase de UMA escolha, dita inteira: quando a escolha SUBSTITUIU um valor que estava no
+   campo, o que foi apagado e nomeado. Dizer so "voce escolheu o valor que estava em X" depois
+   de trocar uma chave Pix digitada a mao e omitir a metade que importa. */
+function fciNotaEscolha(k,esc){
+  var r=fciRotuloCurto(k);
+  if(esc.manteve)return r+': você manteve o valor que já estava no painel Identidade.';
+  r+=': você escolheu o valor que estava em '+fcLista(esc.de)+'.';
+  if(esc.anterior&&esc.anterior!==esc.valor)r+=' Ele substituiu '+fciMostrarValor(esc.anterior)+', que estava no painel.';
+  return r;
 }
 function fciMigrar(){
   var plano=fciPlanoMigracao(),k,mexeu=false;
@@ -4164,6 +4214,11 @@ function fciMigrar(){
     var el=$('fci-'+k);
     if(el){el.value=plano.escolhido[k];mexeu=true;}
   }
+  /* A chave recolhida de uma versao anterior pode trazer as pontas invisiveis que o campo da
+     aba nunca limpou. Limpar aqui e o mesmo que o 'change' do campo faz -- sem isto ela ficaria
+     suja ate o operador tocar no campo, e sumiria depois: defeito que se conserta sozinho e
+     defeito que some antes de ser entendido. */
+  if(mexeu)fcPixChaveAjustar('fci-chave');
   FCI.migrou=plano.notas.slice(0);
   if(!plano.perguntar.length){
     FCI.pendente=null;
@@ -4180,15 +4235,20 @@ function fciMigracaoPerguntar(){
   var plano=FCI.pendente;
   if(!plano||!plano.perguntar||!plano.perguntar.length)return;
   fciPerguntarDivergencia(plano.perguntar,0,{},function(escolhas,restantes){
-    var k,el;
+    var k,el,mexeu=false;
     for(k in escolhas){
       if(!Object.prototype.hasOwnProperty.call(escolhas,k))continue;
       el=$('fci-'+k);
-      if(el)el.value=escolhas[k].valor;
-      FCI.migrou.push(fciRotuloCurto(k)+': você escolheu o valor que estava em '+fcLista(escolhas[k].de)+'.');
+      if(el){el.value=escolhas[k].valor;mexeu=true;}
+      FCI.migrou.push(fciNotaEscolha(k,escolhas[k]));
     }
+    if(mexeu)fcPixChaveAjustar('fci-chave');
+    /* A linha "Ficou sem decisao" NAO entra em FCI.migrou. Ela e o estado de AGORA, e migrou e
+       o registro do que ja aconteceu: guardada ali, adiar duas vezes escrevia a mesma frase
+       duas vezes e, depois de responder, o aviso mostrava duas linhas vencidas seguidas da
+       nova -- um paragrafo se contradizendo. Quem sabe se ainda ha pendencia e FCI.pendente, e
+       e de la que fciAvisoRender tira essa frase. */
     FCI.pendente=restantes.length?{perguntar:restantes}:null;
-    if(restantes.length)FCI.migrou.push('Ficou sem decisão: '+fciNomesPendentes(restantes)+'. A pergunta volta na próxima vez que você abrir a ferramenta, com os mesmos valores — eles ficam guardados aqui, e não se perdem quando as abas forem regravadas.');
     FCI.avisoVisto=false;
     fciGravar();
     fciAvisoRender();
@@ -4196,6 +4256,12 @@ function fciMigracaoPerguntar(){
   });
 }
 function fciNomesPendentes(lista){var i,n=[];for(i=0;i<lista.length;i++)n.push(lista[i].curto);return fcLista(n);}
+/* A pendencia viva, ou nada. Uma leitura so serve a gravacao, ao aviso da tela e ao backup --
+   tres lugares perguntando "ha pergunta em aberto?" com tres condicoes escritas a mao seriam
+   tres oportunidades de discordarem. */
+function fciPendenteViva(){
+  return (FCI.pendente&&FCI.pendente.perguntar&&FCI.pendente.perguntar.length)?FCI.pendente:null;
+}
 /* Leitura defensiva da pendencia gravada: ela vem do armazenamento e nao pode derrubar a
    partida. Item que nao tiver a forma inteira e descartado -- e descartar aqui nao perde nada
    que a tela ja nao tenha, porque a pendencia so existe enquanto NINGUEM escolheu. */
@@ -4227,8 +4293,8 @@ function fciAvisoRender(){
   if(FCI.avisoVisto||(!FCI.migrou.length&&!FCI.podados&&!FCI.pendente)){caixa.style.display='none';return;}
   txt='A chave Pix, o recebedor, o Client ID do PayPal e o WhatsApp saíram das abas e passaram a ser um só, aqui. ';
   if(FCI.migrou.length)txt+='O que a ferramenta recolheu do que você já tinha — '+FCI.migrou.join(' ')+' ';
-  if(FCI.podados)txt+='Presets salvos antes desta versão guardavam esses campos: '+FCI.podados+' valor(es) de identidade foram ignorados ao ler esses presets, e aplicar um preset antigo não mexe mais na identidade. ';
-  if(FCI.pendente&&FCI.pendente.perguntar.length)txt+='Ainda há campo com valores diferentes entre abas esperando a sua decisão. ';
+  if(FCI.podados)txt+='O que foi salvo antes desta versão guardava esses campos dentro das abas: '+FCI.podados+' valor(es) de identidade foram ignorados ao ler esses presets (e o rascunho de um arquivo antigo), e aplicar um preset antigo não mexe mais na identidade. ';
+  if(FCI.pendente&&FCI.pendente.perguntar.length)txt+='Ficou sem decisão: '+fciNomesPendentes(FCI.pendente.perguntar)+'. A pergunta volta na próxima vez que você abrir a ferramenta, com os mesmos valores — eles ficam guardados aqui, e não se perdem quando as abas forem regravadas. Enquanto isso vale o que estiver escrito no painel — e as abas recusam gerar enquanto estiver vazio. ';
   txt+='Confira os campos abaixo antes de gerar qualquer código.';
   fcgTexto(p,txt);
   caixa.style.display='';
@@ -4251,7 +4317,7 @@ function fciPaletaDiferencas(){
   return out;
 }
 function fciPaletaAplicar(){
-  var difs=fciPaletaDiferencas(),i,prefs={},k,nomes=[],el;
+  var difs=fciPaletaDiferencas(),i,nomes=[],el;
   if(!difs.length){alert('As abas já estão com estas cores: não há nada para aplicar.');return;}
   for(i=0;i<FCI_PALETA.length;i++)nomes.push(FCI_PALETA[i][2]);
   if(!confirm('Aplicar a paleta às abas?\n\n'+
@@ -4262,7 +4328,6 @@ function fciPaletaAplicar(){
   for(i=0;i<difs.length;i++){
     el=$(difs[i].id+'-t');if(el)el.value=difs[i].para;
     el=$(difs[i].id);if(el)el.value=difs[i].para;
-    prefs[difs[i].id.slice(0,2)]=1;
   }
   FCI.aplicadaEm=fcAgora();
   fciGravar();
@@ -4734,13 +4799,6 @@ function fcgAcharPor(campanha,pagina){
   }
   return null;
 }
-/* A outra pagina da MESMA campanha. E o unico par que o aviso de divergencia compara: sem as
-   duas paginas nao ha o que comparar, e paginas de campanhas diferentes tem todo o direito de
-   levar dados diferentes. */
-function fcgIrmao(p){
-  if(!p)return null;
-  return fcgAcharPor(p.campanha,p.pagina==='hospedeira'?'embutida':'hospedeira');
-}
 function fcgCampanhas(){
   var vistas={},out=[],i,k;
   for(i=0;i<FCG.presets.length;i++){
@@ -5001,8 +5059,11 @@ function fcgCamposDiferentes(a,x,y){
    Fica registrado aqui, e nao so na documentacao, porque a alternativa era manter a funcao
    comparando listas vazias -- codigo que roda a cada redesenho, nunca acha nada e obriga o
    proximo leitor a provar por que. Se um dia voltar a existir campo operacional POR PAGINA
-   (algo que legitimamente mude entre a hospedeira e a embutida), a comparacao volta com ele.
-   fcgIrmao continua existindo: ele e quem sabe achar a outra pagina da campanha. */
+   (algo que legitimamente mude entre a hospedeira e a embutida), a comparacao volta com ele --
+   e junto volta 'fcgIrmao', a funcao de uma linha que achava a outra pagina da campanha
+   (fcgAcharPor(p.campanha, p.pagina==='hospedeira'?'embutida':'hospedeira')). Ela foi REMOVIDA
+   com esta revisao: ficou sem um unico chamador, e guardar a funcao "para quando voltar" e a
+   mesma forma de codigo morto que este commit tirou ao remover 'operacionais'. */
 
 /* ---- pergunta de tres saidas ----
    Construida com DOM, sem ID nenhum: a caixa nasce e morre a cada pergunta, e um ID repetido
@@ -5283,6 +5344,10 @@ function fcgPainelAbrir(abrir){
   if(abrir===undefined)abrir=!el.classList.contains('aberto');
   el.classList.toggle('aberto',!!abrir);
   if(b)b.setAttribute('aria-expanded',abrir?'true':'false');
+  /* O par de fciPainelAbrir: os dois paineis da barra sao o mesmo lugar da tela e nunca ficam
+     abertos juntos. So um dos dois fechava o outro, e os dois abertos somavam 2219 px de barra
+     antes da primeira aba -- a recursao nao acontece porque quem fecha chama sempre com falso. */
+  if(abrir)fciPainelAbrir(false);
 }
 /* Escreve nos CAMPOS (campanha, pagina, codigos manuais). So e chamada quando o preset ativo
    muda ou quando a ferramenta abre -- nunca no redesenho de cada tecla, senao o cursor do
@@ -5838,8 +5903,27 @@ function fcxLimparValores(a,valores,conta,manterFora){
    nome mentir, e o nome e exatamente o que decide se aquele arquivo pode ser enviado a alguem.
    Nao ha contradicao com "o preset geral nao carrega identidade": o REGISTRO do preset geral
    nao a carrega mesmo -- ela viaja no envelope, fora dele, e some do envelope no "sem dados". */
+/* A PERGUNTA EM ABERTO VIAJA JUNTO no "com os dados", e e por isso que ela viaja:
+   fciIdentidade() le os CAMPOS DA TELA, e com uma pergunta de divergencia adiada esses campos
+   estao vazios de proposito -- os valores reais estao dentro da pendencia, e nao em lugar
+   nenhum a mais. Sem esta linha, um arquivo chamado '...-com-dados.json' saia com a chave Pix,
+   o Client ID e o WhatsApp em branco, e restaurar esse arquivo escrevia os vazios por cima e
+   matava a pergunta: perda de dado num arquivo cujo NOME promete o contrario.
+   Das tres saidas possiveis -- recusar exportar, avisar e exportar mesmo assim, ou levar a
+   pendencia --, esta e a unica que nao perde nada. Recusar bloquearia o backup exatamente
+   quando ele e mais necessario (indeciso = o unico exemplar dos valores esta neste navegador);
+   so avisar deixaria o arquivo lossy de pe. Levando-a, o arquivo passa a ter os valores, e
+   restaurar faz a pergunta voltar com eles -- a mesma simetria com o localStorage que a
+   importacao de arquivo antigo tambem passou a ter.
+   No "sem os dados" ela NAO viaja: ela guarda chave Pix e Client ID, que e exatamente o que
+   esse arquivo existe para deixar de fora. */
 function fcxIdentidadeParaArquivo(comDados){
-  return comDados?{identidade:fciIdentidade(),paleta:fciPaletaAtual()}:{paleta:fciPaletaAtual()};
+  var o={paleta:fciPaletaAtual()},pend;
+  if(!comDados)return o;
+  o.identidade=fciIdentidade();
+  pend=fciPendenteViva();
+  if(pend)o.identidadePendente=fcClone(pend);
+  return o;
 }
 function fcxGeralParaArquivo(p){
   return fcClone(p);
@@ -5893,6 +5977,15 @@ function fcxSlug(s){
   return t||'sem-nome';
 }
 function fcxSufixo(comDados){return comDados?'-com-dados':'-sem-dados';}
+/* O que o recado depois do download precisa acrescentar sobre a identidade. Fica na tela
+   depois de a confirmacao sumir, e por isso repete a parte que o operador vai precisar
+   lembrar quando for restaurar o arquivo. */
+function fcxRecadoIdentidade(comDados){
+  var pend=fciPendenteViva();
+  if(!comDados)return ' A identidade (chave Pix, recebedor, Client ID e WhatsApp) ficou FORA deste arquivo.';
+  if(pend)return ' Atenção: '+fciNomesPendentes(pend.perguntar)+' saíram vazios porque a pergunta de identidade ainda não foi respondida; a pergunta foi junto no arquivo, com os valores dela, e volta quando você restaurar.';
+  return ' A identidade (chave Pix, recebedor, Client ID e WhatsApp) foi junto: guarde este arquivo como você guardaria a senha do banco.';
+}
 function fcxNomeTudo(comDados){return 'construtores-fotocerta-'+fcxData()+fcxSufixo(comDados)+'.json';}
 function fcxNomeUm(p,comDados){return 'preset-'+fcxSlug(p.campanha)+'-'+fcxSlug(p.pagina)+fcxSufixo(comDados)+'.json';}
 /* Download sem servidor: Blob + createObjectURL + <a download>, e o endereco temporario e
@@ -5922,8 +6015,12 @@ function fcxBaixar(nome,texto){
    botoes, porque o nome e a salvaguarda: e olhando para ele que o operador decide se aquele
    arquivo pode ser enviado a alguem. */
 function fcxPerguntarDados(titulo,linhas,nomeCom,nomeSem,cb){
-  var ops=[],ls=linhas.slice(0);
+  var ops=[],ls=linhas.slice(0),pend=fciPendenteViva();
   ls.push('Com os dados: o arquivo leva o número do WhatsApp, a chave Pix, o Client ID do PayPal e o nome e a cidade do recebedor, como estão. É o que serve de backup para você mesmo.');
+  /* Dito ANTES de escolher, e nao depois: o operador esta decidindo se aquele arquivo e o
+     backup dele. Um campo vazio dentro de um arquivo "com os dados" precisa ser anunciado no
+     momento em que ainda da para decidir a pergunta e exportar de novo. */
+  if(pend)ls.push('Atenção: '+fciNomesPendentes(pend.perguntar)+' — este(s) campo(s) ainda esperam a sua decisão e por isso estão VAZIOS no painel Identidade. No arquivo “com os dados” eles saem vazios do mesmo jeito, mas a pergunta viaja junto, com os valores que ela oferece: restaurar este arquivo faz a pergunta voltar em vez de perder os valores. No “sem os dados” nem os campos nem a pergunta viajam. Se preferir um backup simples, responda a pergunta antes (ela está no painel Identidade) e exporte de novo.');
   ls.push('Sem os dados: esses campos ficam de fora do arquivo. É o que serve para repassar a configuração a outra pessoa. Atenção: as caixas “Outros códigos meus” vão como estão nos dois casos — o que fica de fora são os campos de contato e pagamento, e nada mais.');
   ls.push('O nome do arquivo diz qual é: '+nomeCom+' ou '+nomeSem+'.');
   ops.push({rotulo:'Com os dados',valor:'com'});
@@ -5953,7 +6050,7 @@ function fcxExportarTudo(){
         return;
       }
       if(fcxBaixar(fcxNomeTudo(comDados),JSON.stringify(o,null,2)))
-        fcxAviso('Arquivo gerado: '+fcxNomeTudo(comDados)+' — '+FCG.presets.length+' preset(s) geral(is), as '+fcAbasTxt()+' bibliotecas de aba e o rascunho.');
+        fcxAviso('Arquivo gerado: '+fcxNomeTudo(comDados)+' — '+FCG.presets.length+' preset(s) geral(is), as '+fcAbasTxt()+' bibliotecas de aba e o rascunho.'+fcxRecadoIdentidade(comDados));
     });
 }
 function fcxExportarUm(){
@@ -5976,7 +6073,7 @@ function fcxExportarUm(){
         return;
       }
       if(fcxBaixar(fcxNomeUm(p,comDados),JSON.stringify(o,null,2)))
-        fcxAviso('Arquivo gerado: '+fcxNomeUm(p,comDados)+' — só o preset geral “'+fcgNome(p)+'”.');
+        fcxAviso('Arquivo gerado: '+fcxNomeUm(p,comDados)+' — só o preset geral “'+fcgNome(p)+'”.'+fcxRecadoIdentidade(comDados));
     });
 }
 /* Linha de recado abaixo dos botoes. Texto por no de texto, nunca innerHTML: parte do que ela
@@ -6059,14 +6156,75 @@ function fcxDataDoArquivo(v){
 /* Monta o PLANO: o que o arquivo traz, o que ja existe aqui, o que foi descartado. Nada e
    escrito nesta funcao -- ela so le e conta, para a confirmacao poder dizer a verdade ANTES. */
 function fcxPlano(obj){
-  var conta=fcxConta(),
+  var conta=fcxConta(),podadosAntes=FCI.podados,x,
       plano={tipo:(obj.tipo==='preset')?'preset':'tudo',dados:obj.dados!==false,
              geradoEm:fcxDataDoArquivo(obj.geradoEm),
              gerais:[],abas:[],rascunho:null,rascunhoGeral:null,
              identidade:null,paleta:null,
+             garimpo:null,identPerguntar:[],identNotas:[],pendente:null,podados:0,
              travadas:[],codHead:0,codBody:0,conta:conta};
+  /* O GARIMPO CORRE ANTES DE QUALQUER LEITURA DE PRESET, e nao por gosto de ordem: fcgLerPreset
+     e fcPresetConverter podam a identidade DENTRO do objeto que veio do arquivo (eles nao
+     clonam 'valores'), e depois deles nao haveria mais o que garimpar. */
+  /* 'garimpo' so fica preenchido quando ele ACHOU alguma coisa. Um arquivo desta versao gerado
+     "sem os dados" tambem chega sem envelope de identidade, e um garimpo vazio nao pode fazer a
+     tela chamar de "versao anterior" um arquivo que nao e: a bandeira do arquivo nao distingue
+     os dois casos, mas o achado distingue -- e quando nao ha achado os dois se comportam igual. */
+  if(!fcEhObjeto(obj.identidade)){
+    x=fcxGarimparDoArquivo(obj);
+    plano.garimpo=(fcxTemAlgo(x.escolhido)||x.perguntar.length)?x:null;
+  }
   fcxTpl={};
-  try{return fcxPlanoMiolo(obj,conta,plano);}finally{fcxTpl=null;}
+  try{fcxPlanoMiolo(obj,conta,plano);}finally{fcxTpl=null;}
+  /* Podar conta para a TELA, e a tela so deve contar o que foi mesmo importado: somar aqui
+     faria um cancelamento deixar rastro. O numero e guardado no plano e so entra em FCI quando
+     fcxAplicar escreve. */
+  plano.podados=FCI.podados-podadosAntes;
+  FCI.podados=podadosAntes;
+  return plano;
+}
+/* ARQUIVO DO FORMATO ANTERIOR: a identidade nao esta no envelope, esta espalhada dentro do
+   rascunho e dos presets, exatamente como estava no localStorage antes desta versao. E o mesmo
+   garimpo, pelo mesmo caminho -- e nao uma segunda regra que decide jogar fora o que a outra
+   recupera. Ver o comentario de fciGarimpar. */
+function fcxGarimparDoArquivo(obj){
+  var topo=[],fundo=[],i,a;
+  /* O rotulo nomeia A ABA, e nao so "o rascunho do arquivo": quando o arquivo traz duas chaves
+     Pix diferentes, dois botoes dizendo a mesma origem nao ajudam a escolher entre elas. */
+  if(fcEhObjeto(obj.rascunho))topo.push({vals:obj.rascunho,rot:function(e){return e[1]+' do arquivo';}});
+  if(fcEhObjeto(obj.presetsDeAba)){
+    for(i=0;i<ABAS.length;i++){
+      a=ABAS[i];
+      fciFundoDePresets(fundo,obj.presetsDeAba[a.id],' do arquivo');
+    }
+  }
+  fciFundoDeGerais(fundo,obj.presetsGerais,' do arquivo');
+  return fciGarimpar(topo,fundo);
+}
+/* A pendencia que vem DE UM ARQUIVO passa por dois filtros: o tamanho (ela e texto de arquivo)
+   e depois fciLerPendente, que e a mesma leitura defensiva do armazenamento. */
+function fcxPendenteDoArquivo(x,conta){
+  var lista=[],i,j,it,ops,op,de,k;
+  if(!fcEhObjeto(x)||!fcEhArray(x.perguntar))
+    {if(x!==undefined&&x!==null)conta.descartados++;return null;}
+  for(i=0;i<x.perguntar.length;i++){
+    it=x.perguntar[i];
+    /* O teto e por ITEM, e nao uma recusa do bloco inteiro: um item a mais no fim da lista nao
+       pode fazer sumir calada a pergunta legitima que vinha antes dele. O que nao couber e
+       descartado e CONTADO, como todo o resto deste bloco. */
+    if(lista.length>=FCI_CAMPOS.length){conta.descartados++;continue;}
+    if(!fcEhObjeto(it)||!fcEhArray(it.ops)||it.ops.length>FCX_ARR_MAX){conta.descartados++;continue;}
+    ops=[];
+    for(j=0;j<it.ops.length;j++){
+      op=it.ops[j];
+      if(!fcEhObjeto(op)||typeof op.valor!=='string'||op.valor.length>FCI_TEXTO_MAX){conta.descartados++;continue;}
+      de=[];
+      if(fcEhArray(op.de))for(k=0;k<op.de.length&&k<10;k++)if(typeof op.de[k]==='string'&&op.de[k].length<=FCI_TEXTO_MAX)de.push(op.de[k]);
+      ops.push({valor:op.valor,de:de});
+    }
+    lista.push({chave:it.chave,ops:ops});
+  }
+  return fciLerPendente({perguntar:lista});
 }
 function fcxPlanoMiolo(obj,conta,plano){
   var i,j,k,a,p,x,lista,item,vals,ok,vazio;
@@ -6117,6 +6275,12 @@ function fcxPlanoMiolo(obj,conta,plano){
   }else if(obj.presetsDeAba!==undefined&&obj.presetsDeAba!==null)conta.descartados++;
 
   if(plano.tipo==='tudo'&&fcEhObjeto(obj.rascunho)){
+    /* A identidade do rascunho de um arquivo antigo sai por PODA, e nao como "item nao
+       reconhecido": sem isto ela caia no contador generico de descartes e a tela dizia
+       "16 itens do arquivo NAO foram reconhecidos" sobre os mesmos valores que o paragrafo
+       acima acabara de dizer que foram aproveitados. Poda e descarte contam coisas
+       diferentes, e sao numeros que o operador soma. */
+    fciPodarConta(obj.rascunho);
     plano.rascunho={};vazio=true;
     for(i=0;i<ABAS.length;i++){
       a=ABAS[i];
@@ -6153,6 +6317,15 @@ function fcxPlanoMiolo(obj,conta,plano){
     }
     if(!fcxTemAlgo(plano.paleta))plano.paleta=null;
   }else if(obj.paleta!==undefined&&obj.paleta!==null)conta.descartados++;
+  /* O que o garimpo achou dentro de um arquivo do formato anterior entra pela MESMA porta:
+     o que tiver um valor unico e adotado, e o que divergir dentro do arquivo vira pergunta --
+     nunca escolha calada. */
+  if(!plano.identidade&&plano.garimpo){
+    if(fcxTemAlgo(plano.garimpo.escolhido))plano.identidade=plano.garimpo.escolhido;
+    plano.identPerguntar=plano.garimpo.perguntar;
+    plano.identNotas=plano.garimpo.notas.slice(0);
+  }
+  plano.pendente=fcxPendenteDoArquivo(obj.identidadePendente,conta);
   return plano;
 }
 var FCI_TEXTO_MAX=300;
@@ -6187,9 +6360,13 @@ function fcxConfirmar(plano,nomeArq){
   for(i=0;i<plano.abas.length;i++){if(plano.abas[i].colide)colidemA++;else novosA++;}
 
   linhas=[];
+  /* "marcado como": esta metade da frase vem da BANDEIRA do arquivo, e a bandeira e uma
+     promessa, nao uma constatacao. Dita como constatacao, ela contradizia na mesma tela o
+     paragrafo seguinte, que descreve o que a ferramenta achou de verdade la dentro. Quem
+     descreve a realidade e o paragrafo da identidade, logo abaixo. */
   linhas.push('Arquivo: “'+nomeArq+'” — '+(plano.tipo==='preset'?'um preset geral':'backup completo')+
-    ', gerado '+(plano.geradoEm?('em '+plano.geradoEm):'em data desconhecida')+', '+
-    (plano.dados?'COM':'SEM')+' os dados de contato e pagamento.');
+    ', gerado '+(plano.geradoEm?('em '+plano.geradoEm):'em data desconhecida')+
+    ', marcado como '+(plano.dados?'“com os dados”':'“sem os dados”')+' de contato e pagamento.');
   var itens=[];
   itens.push(novosG+' preset(s) geral(is) novo(s)');
   itens.push(colidemG+' preset(s) geral(is) que já existem aqui'+(nomesG.length?(': '+fcLista(nomesG)):''));
@@ -6199,10 +6376,20 @@ function fcxConfirmar(plano,nomeArq){
   if(plano.conta.descartados)itens.push(plano.conta.descartados+' item(ns) do arquivo NÃO foram reconhecidos e ficam de fora');
   if(plano.conta.ajustados)itens.push(plano.conta.ajustados+' nome(s) longo(s) demais foram encurtados');
   linhas.push(itens);
-  if(plano.identidade)
+  if(plano.identidade&&plano.garimpo)
+    linhas.push('ATENÇÃO — este arquivo é de uma versão ANTERIOR da ferramenta, de quando a chave Pix, o recebedor, o Client ID do PayPal e o WhatsApp moravam dentro de cada aba. Esses valores foram encontrados dentro dele e vão para o painel Identidade, em vez de serem descartados: '+plano.identNotas.join(' ')+' Isso SUBSTITUI a identidade que está neste navegador. É o dado mais sensível do arquivo: se ele não veio de você, o que os seus códigos gerados passarem a cobrar vai para a conta de quem fez o arquivo. Confira o painel Identidade logo depois de importar.');
+  else if(plano.identidade)
     linhas.push('ATENÇÃO — o arquivo traz a IDENTIDADE (chave Pix, nome e cidade do recebedor, Client ID do PayPal e WhatsApp) e ela SUBSTITUI a que está neste navegador. É o dado mais sensível do arquivo: se ele não veio de você, o que os seus códigos gerados passarem a cobrar vai para a conta de quem fez o arquivo. Confira o painel Identidade logo depois de importar.');
-  else
+  else if(!plano.identPerguntar.length)
     linhas.push('O arquivo NÃO traz a identidade (chave Pix, recebedor, Client ID, WhatsApp): a que está neste navegador fica exatamente como está. Importar um arquivo “sem dados” não esvazia nenhum desses campos.');
+  if(plano.identPerguntar.length)
+    linhas.push('Dentro deste arquivo há valores DIFERENTES entre abas para: '+fciNomesPendentes(plano.identPerguntar)+'. Depois desta tela a ferramenta pergunta qual vale, um campo por vez, mostrando também o que está no painel agora — ela não escolhe sozinha, e você pode adiar.');
+  if(plano.pendente)
+    linhas.push('O arquivo traz também uma pergunta de identidade que ficou SEM DECISÃO no computador onde o backup foi feito ('+fciNomesPendentes(plano.pendente.perguntar)+'). Ela volta aqui depois da importação, com os mesmos valores.');
+  if(plano.dados&&!plano.identidade&&!plano.identPerguntar.length&&!plano.pendente)
+    linhas.push('Observação: o arquivo está marcado como “com os dados”, mas não há identidade legível dentro dele — nenhum desses campos vai ser escrito.');
+  if(plano.podados)
+    linhas.push('Este arquivo guarda a identidade dentro das abas, do jeito antigo: '+plano.podados+' valor(es) ficam de fora do rascunho e dos presets que entrarem aqui, porque a chave Pix não pertence a uma campanha. Isso não perde nada — o que estava lá é o que está no parágrafo acima.');
   if(plano.paleta)
     linhas.push('O arquivo também traz a PALETA global, e ela substitui a que está aqui. As cores das abas só mudam se você clicar em “Aplicar a paleta às abas” depois — a paleta nunca se aplica sozinha.');
   if(plano.conta.forasteiras)
@@ -6223,9 +6410,30 @@ function fcxConfirmar(plano,nomeArq){
   ops.push({rotulo:'Cancelar',valor:null,claro:true});
   fcgPerguntar('Importar este arquivo?',linhas,ops,function(politica){
     if(!politica)return;
-    if(!plano.rascunho){fcxAplicar(plano,politica,false);return;}
+    if(!plano.rascunho){fcxIdentidadePerguntar(plano,politica,false);return;}
     fcxPerguntarRascunho(plano,politica);
   });
+}
+/* Ultimo degrau antes da escrita: a divergencia de identidade DENTRO de um arquivo antigo. E a
+   mesma caixa e a mesma funcao da migracao (fciPerguntarDivergencia) -- so o texto de abertura
+   muda, porque a origem e outra. O que ficar sem resposta vira pendencia GRAVADA, com os
+   valores dentro: adiar aqui nao custa os valores, exatamente como na migracao. */
+function fcxIdentidadePerguntar(plano,politica,comRascunho){
+  if(!plano.identPerguntar.length){fcxAplicar(plano,politica,comRascunho);return;}
+  fciPerguntarDivergencia(plano.identPerguntar,0,{},function(escolhas,restantes){
+    var k;
+    for(k in escolhas){
+      if(!Object.prototype.hasOwnProperty.call(escolhas,k))continue;
+      if(!plano.identidade)plano.identidade={};
+      plano.identidade[k]=escolhas[k].valor;
+      plano.identNotas.push(fciNotaEscolha(k,escolhas[k]));
+    }
+    if(restantes.length)plano.pendente=plano.pendente?{perguntar:plano.pendente.perguntar.concat(restantes)}:{perguntar:restantes};
+    fcxAplicar(plano,politica,comRascunho);
+  },{linhas:function(it){
+    return ['Este arquivo é de uma versão anterior da ferramenta, quando '+it.rotulo+' ainda morava dentro de cada aba. Dentro do arquivo as abas estão com valores diferentes, e a ferramenta não escolhe sozinha qual vale.',
+            'O que você escolher aqui vai para o painel Identidade — é o que os códigos gerados vão passar a usar.'];
+  }});
 }
 function fcxPerguntarRascunho(plano,politica){
   var p=fcgAtivo(),motivos=p?fcgMotivos():[],linhas=[];
@@ -6246,7 +6454,7 @@ function fcxPerguntarRascunho(plano,politica){
      {rotulo:'Cancelar tudo',valor:null,claro:true}],
     function(v){
       if(!v)return;
-      fcxAplicar(plano,politica,v==='sim');
+      fcxIdentidadePerguntar(plano,politica,v==='sim');
     });
 }
 /* Nome de preset de aba que ainda nao esteja em uso. Mesmo desenho de fcgCampanhaLivre, e pelo
@@ -6354,10 +6562,23 @@ function fcxAplicar(plano,politica,comRascunho){
   /* 4. identidade e paleta -- um bloco so, e so quando o arquivo traz. Vem DEPOIS das abas
         porque escrever nos campos do painel dispara o gravador dele, e antes disso o resto ja
         precisa estar consistente. */
-  if(plano.identidade||plano.paleta){
+  if(plano.identidade||plano.paleta||plano.pendente||plano.podados){
     fciEscreverParcial(plano.identidade,plano.paleta);
+    /* A pergunta que veio no arquivo (ou a que o operador adiou na tela anterior) fica GRAVADA
+       aqui, com os valores dentro dela -- e feita logo depois do alerta final. */
+    if(plano.pendente)FCI.pendente=plano.pendente;
+    if(plano.identNotas.length)FCI.migrou=FCI.migrou.concat(plano.identNotas);
+    /* O que a poda tirou dos presets DESTE arquivo entra na contagem da tela agora, e nao na
+       leitura: cancelar a importacao nao pode deixar rastro. E o aviso volta a aparecer --
+       fcxAplicar nunca chamava fciAvisoRender, e por isso esses valores nem entravam na conta. */
+    if(plano.podados)FCI.podados+=plano.podados;
+    if(plano.podados||plano.identNotas.length||plano.pendente)FCI.avisoVisto=false;
     fciGravar();
     fciEstadoRender();
+    fciAvisoRender();
+    /* A previa da aba aberta foi desenhada com a identidade anterior: sem isto ela continuaria
+       mostrando a chave Pix antiga ate o operador tocar em algum campo. */
+    fciPreviaDaAberta(true);
   }
 
   fcgGravar();
@@ -6376,8 +6597,14 @@ function fcxAplicar(plano,politica,comRascunho){
      acrescimo independente e fica DEPOIS do par. */
   if(comRascunho&&plano.rascunho)r+=' O rascunho do arquivo foi aplicado na tela.';
   else if(plano.rascunho)r+=' O rascunho do arquivo NÃO foi aplicado: a tela ficou como estava.';
-  if(plano.identidade)r+=' A identidade (chave Pix, recebedor, Client ID e WhatsApp) foi substituída pela do arquivo — confira o painel Identidade.';
-  else r+=' A identidade que estava neste navegador não foi tocada: o arquivo não trazia essa parte.';
+  if(plano.identidade&&plano.garimpo)r+=' A identidade veio de dentro do arquivo (ele é de uma versão anterior, em que ela morava nas abas) e substituiu a que estava neste navegador — confira o painel Identidade.';
+  else if(plano.identidade)r+=' A identidade (chave Pix, recebedor, Client ID e WhatsApp) foi substituída pela do arquivo — confira o painel Identidade.';
+  else if(!plano.pendente)r+=' A identidade que estava neste navegador não foi tocada: não havia identidade legível no arquivo.';
+  /* Dito SEMPRE que houver pendencia, e nao so quando nao houve identidade escrita: o arquivo
+     pode trazer dois campos resolvidos e tres em aberto, e a frase de cima sozinha faria
+     parecer que os cinco chegaram inteiros. */
+  if(plano.pendente)r+=' Ainda sem valor: '+fciNomesPendentes(plano.pendente.perguntar)+'. A pergunta sobre esse(s) campo(s) veio junto no arquivo e aparece agora.';
+  if(plano.podados)r+=' '+plano.podados+' valor(es) de identidade que o arquivo guardava dentro das abas ficaram de fora do rascunho e dos presets: a identidade agora é uma só, no painel.';
   if(plano.paleta)r+=' A paleta global foi substituída pela do arquivo; as cores das abas só mudam se você mandar aplicar.';
   if(caiuNoRascunho)r+=' O arquivo dizia estar num preset geral que não veio junto: a barra ficou em Rascunho, e as caixas “Outros códigos meus” ficaram vazias porque elas são de uma página e o Rascunho não é uma página.';
   if(conta.descartados)r+=' '+conta.descartados+' item(ns) não reconhecido(s) ficaram de fora.';
@@ -6386,6 +6613,9 @@ function fcxAplicar(plano,politica,comRascunho){
   if(travou.length)r+=' Estas abas não receberam o rascunho: '+fcLista(travou)+'.';
   fcxAviso(r);
   alert(r);
+  /* Depois do alerta, nunca antes: a caixa da pergunta precisa da tela ja desenhada por tras
+     dela, e e a mesma ordem que a partida usa (fciMigracaoPerguntar corre no fim de tudo). */
+  fciMigracaoPerguntar();
 }
 
 function fcxIniciar(){
