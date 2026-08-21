@@ -5469,7 +5469,7 @@ function fcxImportarTexto(txt,nomeArq){
     alert('“'+nomeArq+'” não diz em que versão do formato foi gerado, então não dá para saber como lê-lo. Nada foi alterado.');return;
   }
   if(obj.versao>FCX_VERSAO){
-    alert('“'+nomeArq+'” foi gerado por uma versão MAIS NOVA da ferramenta (formato '+obj.versao+'; esta versão lê até o '+FCX_VERSAO+').\n\nImportar assim traria a configuração pela metade, sem avisar qual metade. Atualize a ferramenta (recarregue construtores.fotocerta.com.br) e tente de novo. Nada foi alterado.');return;
+    alert('“'+nomeArq+'” foi gerado por uma versão MAIS NOVA da ferramenta (formato '+obj.versao+'; esta versão lê até o '+FCX_VERSAO+').\n\nImportar assim traria a configuração pela metade, sem avisar qual metade. Atualize a ferramenta (recarregue prosite.fotocerta.com.br) e tente de novo. Nada foi alterado.');return;
   }
   plano=fcxPlano(obj);
   if(!plano.gerais.length&&!plano.abas.length&&!plano.rascunho){
@@ -7747,7 +7747,7 @@ function lBloco(v){
   c+='     ONDE COLAR: campo Tag Body da pagina hospedeira\n';
   c+='     Substitua apenas o bloco anterior COM ESTE MESMO cabecalho.\n';
   c+='     Outros blocos da ferramenta (ex.: a barra de contagem) convivem aqui.\n';
-  c+='     Gerado pela ferramenta em construtores.fotocerta.com.br\n';
+  c+='     Gerado pela ferramenta em prosite.fotocerta.com.br\n';
   c+='     ============================================================ -->\n\n';
   c+=lCss(v);
   c+=lJs(v);
@@ -10652,7 +10652,7 @@ function cBloco(cfg){
     c+='     Substitua apenas o bloco anterior COM ESTE MESMO cabecalho.\n';
     c+='     Outros blocos da ferramenta (ex.: o botao flutuante) convivem aqui.\n';
   }
-  c+='     Gerado pela ferramenta em construtores.fotocerta.com.br\n';
+  c+='     Gerado pela ferramenta em prosite.fotocerta.com.br\n';
   c+='     ============================================================ -->\n\n';
   c+='<sty'+'le>\n'+cCssBase(cfg)+'</sty'+'le>\n\n';
   c+='<div class="fcb-barra" id="fcb-barra"></div>\n\n';
@@ -11533,7 +11533,7 @@ function pBloco(cfg){
   c+='     FOTO CERTA - PAGINA DE COBRANCA (PIX + PAYPAL)\n';
   c+='     ONDE COLAR: componente HTML de uma pagina fixa do site (ex.: /pagar)\n';
   c+='     COLA-SE UMA VEZ SO. O que muda a cada cobranca e o LINK, gerado na ferramenta.\n';
-  c+='     Gerado pela ferramenta em construtores.fotocerta.com.br\n';
+  c+='     Gerado pela ferramenta em prosite.fotocerta.com.br\n';
   c+='     ============================================================ -->\n\n';
   c+='<sty'+'le>\n'+pCss(cfg)+'</sty'+'le>\n\n';
   c+='<div class="fcpg-caixa" id="fcpg-caixa"></div>\n\n';

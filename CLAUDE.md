@@ -8,12 +8,12 @@ Consulte a `docs/documentacao-fotocerta.md` — especialmente o **Manual do Pros
 
 ## Estrutura do repositório
 
-Repositório **público**, servido pelo GitHub Pages em **construtores.fotocerta.com.br**. A raiz é o que o Pages publica; o resto é material de apoio.
+Repositório **público**, servido pelo GitHub Pages em **prosite.fotocerta.com.br**. A raiz é o que o Pages publica; o resto é material de apoio.
 
 | Caminho | O que é / onde é usado |
 |---|---|
 | `index.html` | A ferramenta geradora (8 abas: slideshow, captação de leads, agendamento TidyCal, checkout, bordas com efeito, contagem regressiva, link de cobrança, mini loja) mais o **painel consolidado** na faixa à direita, que monta a Tag Head e a Tag Body da página selecionada no preset geral. É a página servida pelo Pages. |
-| `CNAME` | Domínio próprio do Pages: `construtores.fotocerta.com.br`. |
+| `CNAME` | Domínio próprio do Pages: `prosite.fotocerta.com.br`. |
 | `.nojekyll` | Impede o Pages de processar o repositório como Jekyll. |
 | `docs/documentacao-fotocerta.md` | Contexto completo: arquitetura, manual do Prosite, decisões, estado atual. Fonte da verdade. |
 | `docs/specs/` | Specs de design das funcionalidades, um arquivo por feature, nomeados `AAAA-MM-DD-topico-design.md`. |
@@ -55,6 +55,6 @@ Ao criar campo novo que receba esse tipo de dado, siga a mesma regra: `value=""`
 ## Fluxo de manutenção (importante)
 
 1. Ao evoluir qualquer código destes arquivos, **atualizar o arquivo correspondente no repositório** (conteúdo completo, nunca trecho).
-2. Ao evoluir a ferramenta, editar o `index.html` e publicar por **commit + push** — o GitHub Pages atualiza `construtores.fotocerta.com.br` sozinho. A página `utl-construtor` do Prosite foi descontinuada; não existe mais o passo de republicar o miolo em componente.
+2. Ao evoluir a ferramenta, editar o `index.html` e publicar por **commit + push** — o GitHub Pages atualiza `prosite.fotocerta.com.br` sozinho. A página `utl-construtor` do Prosite foi descontinuada; não existe mais o passo de republicar o miolo em componente.
 3. Ao mudar arquitetura, regra ou decisão, **atualizar a `docs/documentacao-fotocerta.md`** (e o inventário acima, se surgir arquivo novo).
 4. Sempre lembrar: **editor ≠ publicado** — vale para as páginas do Prosite (publicar para testar) e para o Pages (o deploy leva alguns instantes). Console do Safari (Cmd+Option+C) para diagnosticar.

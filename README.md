@@ -2,7 +2,7 @@
 
 Ferramenta interna da [Foto Certa](https://fotocerta.com.br) para gerar códigos prontos para colar no site, que roda na plataforma **Alboom Prosite**.
 
-**Publicada em: [construtores.fotocerta.com.br](https://construtores.fotocerta.com.br)**
+**Publicada em: [prosite.fotocerta.com.br](https://prosite.fotocerta.com.br)**
 
 A página é um único arquivo HTML sem dependências e sem servidor: todo o processamento acontece no navegador, e as configurações ficam no `localStorage` da própria máquina.
 

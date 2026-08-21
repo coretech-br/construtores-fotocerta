@@ -14,7 +14,7 @@
 
 - **Página hospedeira**: `fotocerta.com.br/natal-2026` — página de venda. Contém hero com botão âncora `#reserva`, slideshow, preço, e embute a intermediária via iframe.
 - **Página intermediária**: `fotocerta.com.br/iframe-agendamento-natal` — contém o embed do TidyCal. É embutida na hospedeira por um `<iframe>` manual (mesmo domínio, o que permite scripts atravessarem via `contentDocument`).
-- **Ferramenta de construtores**: `construtores.fotocerta.com.br` — repositório público servido pelo GitHub Pages, raiz `index.html`. Substituiu a página oculta `fotocerta.com.br/utl-construtor`, **descontinuada** em ago/2026.
+- **Ferramenta de construtores**: `prosite.fotocerta.com.br` — repositório público servido pelo GitHub Pages, raiz `index.html`. Substituiu a página oculta `fotocerta.com.br/utl-construtor`, **descontinuada** em ago/2026.
 
 ### Onde cada código mora
 
@@ -27,7 +27,7 @@
 | Intermediária → Tag Head | vazia |
 | Intermediária → Tag Body | script `ajustarAltura` (usa `window.frameElement.style.height = scrollHeight`, com load/resize/ResizeObserver + reforços em 300/1000/2500ms) |
 | Intermediária → componente HTML | embed TidyCal + style transição + script dos sinais do modal |
-| construtores.fotocerta.com.br | `index.html` do repositório, servido pelo GitHub Pages |
+| prosite.fotocerta.com.br | `index.html` do repositório, servido pelo GitHub Pages |
 | Componentes com destaque visual → campo CSS Customizado | propriedades da borda com efeito / fundo em degradê (ver `bordas-css-componentes.md`) |
 
 Os códigos completos estão nos arquivos anexos do projeto e podem ser regenerados pela ferramenta.
@@ -54,7 +54,7 @@ Os códigos completos estão nos arquivos anexos do projeto e podem ser regenera
 10. **Sem acentos/emojis em código colado** (precaução com o validador); textos visíveis com acento OK.
 11. Tag Body aceita `<style>` + `<script>`.
 
-## 4. Ferramenta de construtores (arquivo `index.html`, em construtores.fotocerta.com.br)
+## 4. Ferramenta de construtores (arquivo `index.html`, em prosite.fotocerta.com.br)
 
 Ferramenta de geração de códigos com **8 abas**, estado persistido em localStorage (chave `fcConstrutores`, por navegador/domínio). Cada aba tem também uma **biblioteca de presets** — configurações salvas com nome, para aplicar depois (ago/2026, fase 2 da evolução). Acima das abas há a barra do **preset geral**, que agrupa a configuração das **oito** abas para uma página de uma campanha, em chave própria (`fcConstrutoresGerais`, ago/2026, fase 3). Tudo isso **sai e entra em arquivo `.json`**, pelo painel de detalhes do preset geral (ago/2026, fase 4). À direita das abas fica o **painel consolidado**, que junta num campo só tudo o que vai para a Tag Head e para a Tag Body da página selecionada e lista, sem juntar, as saídas que vão para componentes (ago/2026, fase 5).
 
@@ -738,7 +738,7 @@ Provado servindo a ferramenta dentro de um ancestral com `text-align:center`: as
 
 - Publicado e testado: hospedeira (leads + âncora + plano B), intermediária (TidyCal), a ferramenta de construtores, checkouts PayPal e Pix validados com pagamentos reais, e as bordas animadas nos blocos da landing de Natal.
 - Pendente de teste na página publicada (gerado e validado tecnicamente em ago/2026): a aba **Bordas com efeito**, a aba **Checkout** na versão com seletor de formas de pagamento e múltiplos produtos — e, da fase 5, **cobrança de sinal, quantidade por item e resumo copiável**, cuja aritmética foi conferida no navegador mas ainda não passou por um pagamento real de sinal (PayPal e Pix) —, a aba **Contagem regressiva** e a aba **Mini loja** (a vitrine, o carrinho, o cupom e o Pix foram exercitados no navegador, inclusive com o bloco rodando num arquivo avulso, mas ainda não passaram por um pedido real numa página publicada do Prosite).
-- **Fluxo de atualização**: editar o arquivo correspondente no repositório → commit + push. O GitHub Pages republica `construtores.fotocerta.com.br` sozinho, sem o antigo passo de colar o miolo em componente do Prosite. Os arquivos em `prosite/` continuam sendo colados à mão no painel da Alboom, pois são o espelho do que vive lá.
+- **Fluxo de atualização**: editar o arquivo correspondente no repositório → commit + push. O GitHub Pages republica `prosite.fotocerta.com.br` sozinho, sem o antigo passo de colar o miolo em componente do Prosite. Os arquivos em `prosite/` continuam sendo colados à mão no painel da Alboom, pois são o espelho do que vive lá.
 - **Pendência de teste — movimento reduzido no Safari**: a correção de acessibilidade das Bordas se apoia em redefinir o `@keyframes` dentro do `@media (prefers-reduced-motion: reduce)`, e foi medida em Chromium. É comportamento especificado (a última declaração daquele nome vence quando a media casa) e o WebKit moderno implementa, mas o projeto valida em Safari e o público da landing é majoritariamente Safari móvel. Confirmar na página publicada, em **aba anônima no iPhone com "Reduzir movimento" ligado**, que a borda **congela num estado visível** — nem continua animando (redefinição ignorada), nem some (que era o defeito antigo).
 - **Pendência conhecida da landing de Natal**: `prosite/natal-2026/bordas-css-componentes.md` (espelho do que está publicado) ainda traz a regra antiga `[style], * { animation-duration: 0.01ms !important; … }` no bloco do head do site. Ela continua matando toda animação do site para quem tem movimento reduzido. Para trocá-la, regerar o código 1 na aba Bordas com o efeito usado no bloco, colar no lugar do bloco antigo e atualizar o espelho.
 - **Decidido (ago/2026) — o teto de `c-horas` é 8760.** A contradição registrada aqui (`value="48"` contra `max="23"`) foi resolvida pelo dono a favor do padrão: **o `max="23"` é que estava errado**. Os três campos de duração se **somam** — `duracaoMs = ((dias*24+horas)*60+mins)*60000` —, então "horas" significa horas *adicionais*, não hora dentro de um dia, e não há motivo para parar em 23. O teto passou a ser **8760** (um ano em horas): preserva a liberdade real de quem prefere contar em horas e barra só o número absurdo, do tipo que nasce de um zero a mais. O número está nos **dois lados** — na linha de `c-horas` em `C_NUMS` e no atributo `max` do `input` — porque nenhum dos dois basta sozinho: o `max` não impede valor digitado, e a tabela sozinha deixaria a seta do teclado passar do teto. Nada encurta em silêncio: estado salvo acima de 8760 é corrigido **no próprio campo**, na carga e no `change`/`blur`, pela mecânica de `fcPreso`/`fcAjustar` que a aba já usa. Medido: campo em 48 e uma seta para baixo → 47 (era esse o risco do `max="23"`, que levava direto a 23); 99999 digitado → 8760 à vista no blur; −5 → 0; `localStorage` gravado com 99999 → campo em 8760 depois de recarregar. O rótulo do campo passou a declarar a faixa e a dizer que as horas se somam aos dias, para o próximo leitor não refazer a mesma pergunta.
@@ -748,13 +748,13 @@ Provado servindo a ferramenta dentro de um ancestral com `text-align:center`: as
   - **Formatação de preço.** `uFmt` (o que a ferramenta mostra) e a `moedaFmt` que ela escreve dentro do carrinho passaram a sair da mesma tabela `PRECO_MOEDAS`. O real fica fora da tabela de propósito: é o padrão e é o único com vírgula decimal. A grafia `\u20AC` do bloco gerado é **derivada** do próprio símbolo por `precoJsTexto` — guardá-la como segunda coluna seria criar outra vez duas grafias para divergir.
 
   **A restrição que governa as duas últimas:** o bloco que o operador cola no site é **autossuficiente** e não pode depender desta ferramenta. As cópias que vão *para dentro* do código gerado continuam existindo lá — o que se unificou foi a **fonte que escreve essas cópias**, nunca a saída. Fazer o bloco gerado chamar algo de fora seria parar no lugar errado.
-- **Migração do estado da ferramenta**: o `localStorage` é por origem, então o que estava salvo em `fotocerta.com.br/utl-construtor` não acompanha a mudança para `construtores.fotocerta.com.br`. Produtos, cupons e imagens cadastrados precisam ser recadastrados no novo endereço.
+- **Migração do estado da ferramenta**: o `localStorage` é por origem, então o que estava salvo em `fotocerta.com.br/utl-construtor` não acompanha a mudança para `prosite.fotocerta.com.br`. Produtos, cupons e imagens cadastrados precisam ser recadastrados no novo endereço.
 
 ## 7. Arquivos do projeto
 
 Repositório público servido pelo GitHub Pages. A raiz é o que o Pages publica; `prosite/` guarda o espelho do que está colado no painel da Alboom.
 
-- `index.html` — a ferramenta de 8 abas mais o painel consolidado à direita, servida em construtores.fotocerta.com.br
+- `index.html` — a ferramenta de 8 abas mais o painel consolidado à direita, servida em prosite.fotocerta.com.br
 - `CNAME`, `.nojekyll` — configuração do GitHub Pages (domínio próprio e desligamento do Jekyll)
 - `docs/documentacao-fotocerta.md` — este documento (fonte da verdade do contexto)
 - `docs/specs/` — specs de design das funcionalidades, um arquivo por feature
