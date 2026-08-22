@@ -372,3 +372,42 @@ A pendência passou a viajar no **"com os dados"** e nunca no "sem dados". Recus
 | **Total** | **28h45 – 41h15** | **20h30** |
 
 Cinco rodadas, **todas dentro ou abaixo da faixa**.
+
+---
+
+## As quatro últimas rodadas
+
+| Rodada | Estimado | Real |
+|---|---|---|
+| Validade e selo (aba de cobrança) | 2h – 3h | **2h06** (18:46 → 20:52) |
+| Rolagem concatenada (contagem) | 1h – 1h30 | **1h23** (20:52 → 22:15) |
+| Página `/cobrar` e a primeira extração | 3h – 4h30 | **2h22** (22:16 → 00:38) |
+| Desconto Pix e endereço completo | 2h – 3h | **~2h** de trabalho medido |
+
+A última não tem relógio confiável: **três tentativas caíram por limite de uso da conta**, e o intervalo de calendário (00:38 → 11:07) inclui a espera pelo reset. O trabalho medido soma cerca de duas horas.
+
+### Total de tudo
+
+| Rodada | Estimado | Real |
+|---|---|---|
+| Cinco fases (preset geral e painel) | 13h45 – 19h15 | 9h50 |
+| Sétima aba (link de cobrança) | 3h30 – 5h | 2h05 |
+| Oitava aba (mini loja) | 5h30 – 8h | 4h30 |
+| Terceira fonte de imagem (CDN) | 2h – 3h | 2h15 |
+| Identidade e paleta | 4h – 6h | 1h50 |
+| Validade e selo | 2h – 3h | 2h06 |
+| Rolagem concatenada | 1h – 1h30 | 1h23 |
+| `/cobrar` e a extração | 3h – 4h30 | 2h22 |
+| Desconto e endereço | 2h – 3h | ~2h |
+| **Total** | **36h45 – 53h15** | **~28h20** |
+
+**Nove rodadas, todas dentro ou abaixo da faixa.**
+
+### O que a última rodada ensinou sobre método
+
+**Commit por bloco de verificação salvou o trabalho.** Três quedas por limite de conta, e na terceira o Bloco A já estava commitado — a verificação parou onde parou em vez de recomeçar do zero. Antes disso, duas quedas perderam a medição inteira porque ela só existia dentro da execução do agente.
+
+**Duas armadilhas de medição, registradas porque deram falso positivo:**
+
+1. **As duas versões servidas na mesma origem contaminam a passagem seguinte** — a configuração que uma deixa salva entra na outra. Uma configuração divergiu em 49 bytes e não era vazamento, era o arnês. Só vale comparar com o estado inteiro sob controle.
+2. **Medir por `textContent` do corpo dá falso positivo em tudo** — ele inclui o CSS e os textos-modelo que o bloco carrega como constantes, então as palavras da recusa aparecem mesmo quando a recusa não aconteceu. Medir pelos **elementos desenhados**, ignorando `style` e `script`.
