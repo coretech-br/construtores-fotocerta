@@ -1823,7 +1823,7 @@
       <label for="c-msgcurta">Versão curta para o celular <small>(opcional)</small></label>
       <input type="text" id="c-msgcurta" value="" placeholder="Termina em {contador}">
       <div class="acoes"><button class="botao" id="c-msg-add">Adicionar mensagem</button></div>
-      <p class="ajuda">Sem o marcador <code>{contador}</code>, o relógio aparece depois do texto. Com <b>duas ou mais</b> mensagens, os efeitos de alternância da seção 4 passam a fazer sentido; com uma só, a barra fica estática ou rolando.</p>
+      <p class="ajuda">Sem o marcador <code>{contador}</code>, o relógio aparece depois do texto. Com <b>duas ou mais</b> mensagens, o que acontece com elas depende do movimento escolhido na seção 4: a <b>alternância</b> mostra uma de cada vez, e a <b>rolagem</b> emenda <b>todas</b> numa faixa contínua, na ordem desta lista. No movimento <b>estático</b> só a primeira aparece — a barra não tem como mostrar mais de uma parada.</p>
       </fieldset>
     </div>
     <div>
@@ -1986,6 +1986,7 @@
       <div id="c-vel-campo">
       <label for="c-vel">Duração do ciclo de rolagem <small>(segundos — maior = mais lento)</small></label>
       <input type="number" id="c-vel" value="18" min="2" max="60" step="1">
+      <p class="ajuda">Com <b>duas ou mais</b> mensagens, a faixa que rola é a <b>emenda de todas</b>, na ordem da seção 2, separadas por <code>•</code> — a rolagem mostra todas de uma vez, em vez de trocar de mensagem. Cada uma leva o próprio relógio, e todos andam juntos. <b>Um ciclo é a faixa inteira passando uma vez:</b> mais mensagens no mesmo número de segundos significa texto andando mais rápido, então aumente a duração se quiser manter a velocidade de leitura. A prévia ao lado mostra o resultado real.</p>
       </div>
       <div id="c-alt-campo">
       <label for="c-alt">Intervalo entre mensagens <small>(segundos)</small></label>
@@ -11604,12 +11605,29 @@ function cCssBase(cfg){
   s+=cCssEfeitos(cfg);
   return s;
 }
+/* Fonte unica da condicao "esta faixa concatena mensagens": o CSS do separador, o JS que monta
+   a faixa e a linha da pintarMensagem tem de concordar sempre. Escrita em tres lugares, a
+   condicao viraria tres condicoes -- e um dia o separador sairia sem faixa, ou a faixa sem
+   separador. Com UMA mensagem ela e falsa e nada disto e emitido: a concatenacao de uma
+   mensagem e a propria mensagem, e o bloco sai byte a byte igual ao de antes deste recurso. */
+function cRolaFaixa(cfg){
+  return (cfg.mov==='rolaesq'||cfg.mov==='roladir')&&cfg.msgs.length>1;
+}
 function cCssEfeitos(cfg){
   var s='',anim=[];
   if(cfg.mov==='rolaesq'||cfg.mov==='roladir'){
     s+='.fcb-trilho{display:inline-flex;white-space:nowrap;will-change:transform;'+
        'animation:fcb-rola '+cfg.vel+'s linear infinite'+(cfg.mov==='roladir'?' reverse':'')+'}\n';
     s+='.fcb-trilho > span{padding-right:3em}\n';
+    /* Separador entre as mensagens concatenadas na faixa. Existe so com duas ou mais: com uma
+       so a concatenacao E a propria mensagem, nao ha o que separar, e o bloco sai byte a byte
+       igual ao de antes deste recurso. O espaco vem de c-gap -- o MESMO numero que ja separa
+       os itens da barra (coruja, miolo, botao de acao, fechar) --, e nao de uma unidade nova:
+       "espacamento entre os itens da barra" e exatamente o que o operador esta configurando.
+       O ponto desenhado nao e enfeite: so espaco, do tamanho de uma palavra, se leria como
+       espaco duplo entre duas frases, ou seja como erro de digitacao. Seletor novo, declarado
+       uma vez so -- nenhuma outra funcao emite regra para .fcb-msgsep. */
+    if(cRolaFaixa(cfg))s+='.fcb-msgsep{opacity:.55;margin:0 '+cfg.gap+'px}\n';
     s+='@keyframes fcb-rola{from{transform:translateX(0)}to{transform:translateX(-50%)}}\n';
     anim.push('.fcb-trilho');
   }
@@ -11894,12 +11912,34 @@ function cJsBase(cfg){
     j+='    if(!trilhoN)return;\n';
     j+='    var n=Math.max(1,Math.ceil((conteudo.offsetWidth||0)/trilhoUm));\n';
     j+='    if(n!==trilhoN){pintarMensagem();tick();}\n  }\n';
+    if(cRolaFaixa(cfg)){
+      j+='  /* A faixa que rola e a CONCATENACAO de TODAS as mensagens, na ordem cadastrada e\n';
+      j+='     separadas por um marcador -- e assim que um letreiro funciona. O temporizador que\n';
+      j+='     troca de mensagem so existe nos dois modos de alternancia; com rolagem ele nao\n';
+      j+='     existe, entao montar a faixa a partir de UMA mensagem deixaria as demais\n';
+      j+='     cadastradas, salvas e listadas na ferramenta sem nunca chegar ao visitante.\n';
+      j+='     Cada mensagem leva o proprio marcador do relogio, e o tick de cada segundo\n';
+      j+='     escreve em TODOS os [data-fcb-rel] de uma vez -- as duas metades do trilho e as\n';
+      j+='     copias dentro de cada metade continuam identicas, que e o que faz a emenda sumir. */\n';
+      j+="  var SEP_MSG='<span class=\"fcb-msgsep\" aria-hidden=\"true\">•</span>';\n";
+      j+='  function textoDaFaixa(){\n';
+      j+="    var h='',i;\n";
+      j+='    for(i=0;i<MENSAGENS.length;i++){\n';
+      j+='      if(i)h+=SEP_MSG;\n';
+      j+='      h+=textoCom(MENSAGENS[i]);\n';
+      j+='    }\n';
+      j+='    return h;\n  }\n';
+    }
   }
   j+='  /* pintarMensagem roda so na montagem e na troca de mensagem: o marcador do relogio\n';
   j+='     volta a ficar vazio, entao forca a proxima atualizarRelogio a remontar do zero. */\n';
   j+='  function pintarMensagem(){\n';
   j+='    chaveAnterior=null;\n';
-  j+='    var html=textoCom(MENSAGENS[msgAtual%MENSAGENS.length]);\n';
+  /* Rolagem com DUAS OU MAIS mensagens monta a faixa inteira; com uma so, a concatenacao e a
+     propria mensagem e a linha continua sendo exatamente a de antes -- por isso o bloco
+     gerado para esse caso sai byte a byte igual ao de main. Alternancia (altfade/altdesliza)
+     nao passa por aqui: ela continua trocando a mensagem da vez, como sempre. */
+  j+='    var html='+(cRolaFaixa(cfg)?'textoDaFaixa()':'textoCom(MENSAGENS[msgAtual%MENSAGENS.length])')+';\n';
   j+='    if(ROLANDO)montarTrilho(html);\n';
   j+='    else conteudo.innerHTML=html;\n';
   j+='  }\n';
