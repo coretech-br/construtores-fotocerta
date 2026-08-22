@@ -13,6 +13,9 @@ Repositório **público**, servido pelo GitHub Pages em **prosite.fotocerta.com.
 | Caminho | O que é / onde é usado |
 |---|---|
 | `index.html` | A ferramenta geradora (8 abas: slideshow, captação de leads, agendamento TidyCal, checkout, bordas com efeito, contagem regressiva, link de cobrança, mini loja) mais o **painel consolidado** na faixa à direita, que monta a Tag Head e a Tag Body da página selecionada no preset geral. É a página servida pelo Pages. |
+| `fc-compartilhado.js` | A fonte que as **duas** páginas executam: BR Code (`FC_PIX_SRC`), selo e prazo (`P_SELO_SRC`), PayPal (`P_PP_SRC`), as recusas da cobrança, a montagem do link e a leitura da identidade guardada. Carregado com endereço **versionado** pelas duas. |
+| `cobrar/index.html` | A página `/cobrar`: uso diário, mobile-first, gera o link de uma cobrança. Não reimplementa nada — chama as mesmas funções da aba. |
+| `cobrar/manifest.json` + `cobrar/icone-{180,192,512}.png` | Manifesto e ícones da tela de início. **Sem service worker**, por decisão registrada. |
 | `CNAME` | Domínio próprio do Pages: `prosite.fotocerta.com.br`. |
 | `.nojekyll` | Impede o Pages de processar o repositório como Jekyll. |
 | `docs/documentacao-fotocerta.md` | Contexto completo: arquitetura, manual do Prosite, decisões, estado atual. Fonte da verdade. |
@@ -51,6 +54,14 @@ Ao criar campo novo que receba esse tipo de dado, siga a mesma regra: `value=""`
 **Número de abas não se escreve em frase nenhuma.** Ele sai de `ABAS.length` (`fcAbasTxt`, por extenso) nas mensagens e de `fcAbasIds()` nas listas de identificadores. Uma lista fechada de N abas é onde a aba N+1 quebra em silêncio — foi o que aconteceu com `trocarAba`, e o que teria feito catorze mensagens da interface mentirem por um.
 
 **Regra que governa o reúso entre abas: unifica-se a fonte que ESCREVE, nunca a saída.** O bloco entregue é autossuficiente e não pode chamar nada da ferramenta — o que se compartilha é o **texto** que escreve aquele pedaço do bloco (`FC_PIX_SRC`, `FC_CARRINHO_SRC`, `fcMoedaFmtGer`, `fcFazQtdSrc`, `fcPvShim`, `fcPvSondaPP`, `CORUJA_PECAS`). Duas obrigações vêm junto: **se a extração mudar um byte de uma saída já existente, a extração está errada — não o teste** (a regressão byte a byte das saídas dos geradores anteriores é a prova, e é obrigatória); e o que **não** vale extrair — porque está preso ao DOM daquele bloco — fica declarado **com a medição**, em vez de ser forçado. Extração parcial bem justificada é melhor que completa e frágil.
+
+**Duas páginas, uma fonte — e o versionamento que a mantém honesta.** Desde 21/08/2026 o `index.html` **não precisa mais ser autocontido** (a ferramenta é servida, não colada), e o que a ferramenta e a `/cobrar` **executam** vive em `fc-compartilhado.js`. Três regras vêm junto:
+
+1. **Os blocos GERADOS continuam autossuficientes.** Eles vão para o Prosite, onde não existe importar arquivo. As funções que o bloco carrega continuam vivendo como **texto literal**, e as páginas *avaliam* esse mesmo texto. Unifica-se a fonte que escreve, nunca a saída — se a unificação levar o bloco a chamar algo de fora, parou no lugar errado.
+2. **Extrair só o que as DUAS páginas executam.** Mover código compartilhado já tem custo (ele passa a ter dois donos); mover o que só um lado usa troca duplicação por acoplamento, que não é melhor, é diferente. Invólucro que toca o DOM fica na página; a parte pura vai para o arquivo (`pValDia` → `fcValDia`, `fciLerBruto` → `fcLerJson`).
+3. **Ao publicar mudança no arquivo compartilhado, troque a versão nos três lugares:** `FC_COMPART_VERSAO` dentro dele, o `?v=` do `<script>` no `index.html`, e o `?v=` mais o `FC_COMPART_ESPERADA` em `cobrar/index.html`. Sem isso o navegador pode servir uma cópia velha para uma página e a nova para a outra, e o resultado são **links que a própria `/pagar` recusa**, sem erro na tela. As duas páginas conferem ao carregar e **param com aviso** se as versões não baterem. Confira com `grep -c "fc-compartilhado.js?v=<versao>" index.html cobrar/index.html`.
+
+**A prova de que uma página nova não divergiu da aba: o invariante byte a byte.** Para a mesma entrada, o link que a `/cobrar` gera é idêntico, caractere por caractere, ao que a aba gera — se diferisse em um, o selo não fecharia e a `/pagar` recusaria. Toda mudança que toque a montagem do link refaz essa comparação, e junto a regressão dos **oito geradores**, também byte a byte.
 
 **CSS gerado programaticamente:** nunca emitir uma segunda regra para um seletor que outra função já declarou. Propriedades shorthand (`transition`, `background`, `animation`) não se fundem entre duas regras do mesmo seletor com a mesma especificidade — a que vier depois no CSS vence por inteiro e apaga a primeira. Acumular tudo (transições, camadas de background, animações) numa única regra existente para aquele seletor.
 
