@@ -70,7 +70,7 @@
   label.rot .opc{font-weight:400;color:var(--tinta-suave)}
   .campo{margin:0 0 16px}
   .dica{font-size:13px;color:var(--tinta-suave);margin:6px 0 0}
-  input[type=text],input[type=date],input[type=tel],textarea{
+  input[type=text],input[type=date],input[type=tel],input[type=number],textarea{
     width:100%;font:inherit;font-size:17px;color:var(--tinta);background:#fff;
     border:1px solid var(--linha);border-radius:10px;padding:13px 12px;
     -webkit-appearance:none;appearance:none}
@@ -176,7 +176,8 @@
     <div class="campo">
       <label class="rot" for="cb-url">Endereço da página de pagamento</label>
       <input type="text" id="cb-url" value="" placeholder="https://www.fotocerta.com.br/pagar" autocapitalize="off" autocorrect="off" spellcheck="false">
-      <p class="dica">É a página fixa onde o bloco de cobrança está colado. O link desta cobrança nasce dela.</p>
+      <p class="dica" id="cb-url-aviso" style="display:none"></p>
+      <p class="dica">É a página fixa onde o bloco de cobrança está colado. O link desta cobrança nasce dela. Escreva o endereço <b>inteiro</b>, com <code>https://</code> e o domínio: o link vai colado numa conversa, fora do site, e ali um caminho como <code>/pagar</code> não abre nada.</p>
     </div>
     <button type="button" class="botao" id="cb-salvar">Salvar no aparelho</button>
     <p class="dica" id="cb-salvo" style="display:none"></p>
@@ -195,6 +196,18 @@
       <input type="text" id="cb-valor" value="" inputmode="decimal" placeholder="1200,00" autocapitalize="off" autocorrect="off" spellcheck="false">
       <p class="dica">O valor vai preso dentro do código Pix: o cliente não consegue mudar.</p>
     </div>
+
+    <!-- O DESCONTO SÓ APARECE SE O BLOCO PUBLICADO SOUBER CONFERI-LO. Um código 1 antigo não
+         traz a conferência da relação (valor do Pix = total − desconto) e recusa qualquer link
+         com desconto: oferecer o campo aqui seria oferecer um link que a própria página do dono
+         rejeita, descoberto com o cliente na frente. Mesma regra da escolha de PayPal logo
+         abaixo, que já se apaga quando a página foi publicada só com Pix. -->
+    <div class="campo" id="cb-descpix-campo" style="display:none">
+      <label class="rot" for="cb-descpix">Desconto no Pix <span class="opc">— opcional, em %</span></label>
+      <input type="number" id="cb-descpix" value="0" min="0" max="90" step="0.5" inputmode="decimal">
+      <p class="dica">Com desconto, a cobrança tem <b>dois valores</b>: o total acima (que o PayPal cobra) e o valor do Pix, que é o total menos o desconto. Zero ou em branco = sem desconto.</p>
+    </div>
+    <p class="dica" id="cb-descpix-nota" style="display:none"></p>
 
     <div class="campo">
       <label class="rot" for="cb-validade">Válido até <span class="opc">— opcional</span></label>
@@ -260,7 +273,7 @@
      construção, porque quem declara a versão é o próprio arquivo cuja atualidade está em
      dúvida. Quem confere é scripts/conferir-versoes.sh, que compara o CONTEÚDO com a versão
      declarada e falha quando o arquivo mudou sem o troco. -->
-<script src="../fc-compartilhado.js?v=2026-08-22a"></script>
+<script src="../fc-compartilhado.js?v=2026-08-22b"></script>
 <script>
 'use strict';
 (function(){
@@ -307,7 +320,7 @@
    pior: esta página selaria o link com uma conta e a /pagar conferiria com
    outra, sem um sinal na tela. Então ou a versão pedida chegou, ou a página diz
    o que houve e não faz mais nada. */
-var FC_COMPART_ESPERADA='2026-08-22a';
+var FC_COMPART_ESPERADA='2026-08-22b';
 if(!window.FCCOMPART||FCCOMPART.versao!==FC_COMPART_ESPERADA){
   cbParar(FC_COMPART_ESPERADA,window.FCCOMPART?FCCOMPART.versao:null);
   return;
@@ -389,9 +402,18 @@ function cbUrlVigente(){
 function cbBloco(){
   var st=cbLer('fcConstrutores','configurações das abas'),p=(st&&st.p&&typeof st.p==='object')?st.p:{};
   return {
-    url:(typeof p.url==='string')?p.url:'/pagar',
+    /* O padrão do endereço é VAZIO, o mesmo do HTML da aba desde que o campo passou a exigir o
+       endereço inteiro. Nascer com "/pagar" seria nascer com um valor que a própria geração
+       recusa — e o dono leria a recusa sem ter digitado nada. */
+    url:(typeof p.url==='string')?p.url:'',
     usapp:(p.usapp==='nao')?'nao':'sim',
     zap:(p.zap==='nao')?'nao':'sim',
+    /* O DESCONTO É UMA ESCOLHA DO BLOCO PUBLICADO, e não só desta cobrança: quem decide se a
+       página sabe conferir a relação (valor do Pix = total − desconto) é o código 1 que está
+       colado lá. Por isso ele entra pela mesma porta das outras três escolhas do bloco, e pela
+       mesma normalização da ferramenta (C.fcDescNum) — senão "sem desconto" poderia significar
+       uma coisa aqui e outra lá. */
+    descpix:C.fcDescNum(p.descpix),
     /* AS TRÊS ESCOLHAS DA ABA, e não duas. A aba tem 'sdk', 'link' e 'nao'; enquanto esta
        linha era (p.ppmodo==='link')?'link':'sdk', um 'nao' guardado virava 'sdk' calado. */
     ppmodo:(p.ppmodo==='link'||p.ppmodo==='nao')?p.ppmodo:'sdk'
@@ -462,6 +484,9 @@ function cbCfg(){
     url:cbTrim(cbUrlVigente()),
     desc:$('cb-desc').value,
     valor:C.pValorNum($('cb-valor').value), valorBruto:$('cb-valor').value,
+    /* Com o bloco publicado sem desconto, o campo nem aparece e o percentual é zero: o link sai
+       exatamente como saía antes desta rodada. */
+    descpix:(blo.descpix>0)?C.fcDescNum($('cb-descpix').value):0,
     txid:C.pTxidLimpo($('cb-txid').value),
     valdia:C.fcValDia($('cb-validade').value), valbruto:$('cb-validade').value,
     ppmodo:(usapp?ppmodo:'nao'), pplink:cbTrim($('cb-pplink').value)
@@ -486,6 +511,10 @@ function cbCampoAjustar(id,regra){
 }
 function cbValorAjustar(){return cbCampoAjustar('cb-valor',C.fcValorCorrigido);}
 function cbTxidAjustar(){return cbCampoAjustar('cb-txid',C.fcTxidCorrigido);}
+/* O percentual do desconto, pela mesma regra da aba (C.fcDescCorrigido): 95 vira 90 NA TELA, e
+   não só por dentro. Prender por dentro consertaria o link e deixaria o dono lendo 95 numa
+   cobrança de 90 — trocar defeito visível por invisível. */
+function cbDescAjustar(){return cbCampoAjustar('cb-descpix',C.fcDescCorrigido);}
 function cbChaveAjustar(){return cbCampoAjustar('cb-chave',C.fcChaveCorrigida);}
 /* Nome e cidade do recebedor: o maxlength do campo barra o que se DIGITA, e estas duas barram
    o que CHEGA de outro lugar (do armazenamento, da migração, do backup, da outra página). Sem
@@ -614,7 +643,8 @@ function cbRecusar(msg){
   el.textContent=msg;
   el.style.display='block';
   try{el.scrollIntoView(true);}catch(e){}
-  cbApontarSe(msg);
+  if(cbApontarSe(msg))return;
+  cbUrlApontarSe(msg);
 }
 function cbLimparRecusa(){
   var el=$('cb-recusa');el.textContent='';el.style.display='none';
@@ -633,9 +663,45 @@ function cbApontarSe(msg){
   return true;
 }
 
+/* ---- o desconto no Pix: só quando o bloco publicado sabe conferi-lo ----
+   A nota do caso "sem desconto" existe pela mesma razão da nota do PayPal: sem ela, a ausência
+   do campo seria indistinguível de um campo que a página esqueceu de desenhar. */
+function cbDescToggle(blo){
+  var campo=$('cb-descpix-campo'),nota=$('cb-descpix-nota');
+  if(!campo||!nota)return;
+  if(blo.descpix>0){campo.style.display='block';nota.style.display='none';return;}
+  campo.style.display='none';
+  nota.style.display='block';
+  nota.textContent='A página de pagamento foi publicada sem desconto no Pix, então esta cobrança não leva desconto. Um código 1 gerado sem desconto não sabe conferir a conta e recusaria o link. Para usar, configure o desconto na ferramenta completa e cole o bloco novo no site.';
+}
+
+/* ---- o endereço da página: o aviso da migração, à vista e sem tocar no campo ----
+   Mesma frase da aba, do mesmo arquivo compartilhado. Quem tem "/pagar" guardado precisa
+   descobrir isso ao abrir a página, e não depois de digitar a cobrança inteira — e a página não
+   pode completar sozinha, porque ela não sabe qual é o domínio do dono. */
+function cbUrlAvisoRender(){
+  var el=$('cb-url-aviso'),campo=$('cb-url');
+  if(!el||!campo)return;
+  var t=C.fcUrlAvisoMigracao(cbPainelAberto()?campo.value:cbBloco().url);
+  el.textContent=t;
+  el.style.display=t?'block':'none';
+  el.style.color=t?'#8C1D18':'';
+  el.style.fontWeight=t?'700':'';
+}
+/* A recusa do ENDEREÇO abre o painel, do mesmo jeito que a recusa da identidade abre. Sem
+   procurar frase no texto: pergunta-se ao próprio pUrlRecusa se a recusa é dele. */
+function cbUrlApontarSe(msg){
+  if(!msg||msg!==C.pUrlRecusa(cbTrim(cbUrlVigente())))return false;
+  cbConfigAbrir(true,true);
+  cbUrlAvisoRender();
+  try{$('cb-url').focus();}catch(e){}
+  return true;
+}
+
 /* ---- mostra/esconde conforme o que o bloco publicado tem ---- */
 function cbToggles(){
   var blo=cbBloco(),lk=$('cb-pplink-campo'),pp=$('cb-pp-campos'),nota=$('cb-pp-nota');
+  cbDescToggle(blo);
   if(blo.usapp==='nao'){
     pp.style.display='none';
     lk.style.display='none';
@@ -673,7 +739,9 @@ function cbGerarLink(){
   cbToggles();
   cbValorAjustar();
   cbTxidAjustar();
+  cbDescAjustar();
   cbChaveGravadaAjustar();
+  cbUrlAvisoRender();
   if(erroGravar){cbRecusar(erroGravar);return;}
   if(cbFalhaLeitura){cbRecusar(cbFalhaLeitura);return;}
   var cfg=cbCfg(),r=C.pRecusaCobranca(cfg);
@@ -728,7 +796,7 @@ function cbCopiarPlanoB(ta){
    Os campos do PAINEL entram na lista pelo mesmo motivo dos da cobrança: desde que a
    identidade vigente é a que está na tela, mexer na chave, no nome, na cidade ou no endereço
    muda o link — e um link antigo parado na caixa seria um link com a identidade anterior. */
-var CB_VENCEM=['cb-desc','cb-valor','cb-txid','cb-validade','cb-pplink',
+var CB_VENCEM=['cb-desc','cb-valor','cb-txid','cb-validade','cb-descpix','cb-pplink',
                'cb-chave','cb-nomer','cb-cidade','cb-client','cb-zapnum','cb-url'];
 var CB_PAINEL=['cb-chave','cb-nomer','cb-cidade','cb-client','cb-zapnum','cb-url'];
 /* "O operador mexeu no painel desde que ele foi enchido?" — a única coisa que separa um painel
@@ -739,6 +807,7 @@ function cbEhDoPainel(nome){var i;for(i=0;i<CB_PAINEL.length;i++)if(nome===CB_PA
 function cbMexeu(e){
   var t=e&&e.target,nome=(t&&(t.name||t.id))||'',i;
   if(cbEhDoPainel(nome))cbPainelMexido=true;
+  if(nome==='cb-url')cbUrlAvisoRender();
   if(nome==='cb-ppmodo'){cbToggles();cbVencer();return;}
   for(i=0;i<CB_VENCEM.length;i++)if(nome===CB_VENCEM[i]){cbVencer();return;}
 }
@@ -775,6 +844,7 @@ liga('cb-gerar',cbGerarLink);
 liga('cb-copiar',cbCopiar);
 cbAjuste('cb-valor',cbValorAjustar);
 cbAjuste('cb-txid',cbTxidAjustar);
+cbAjuste('cb-descpix',cbDescAjustar);
 cbAjuste('cb-chave',cbChaveAjustar);
 /* Nome e cidade se corrigem à vista pela mesma mecânica, e por isso o corte deixou de ser
    invisível: o campo passa a mostrar o texto exato que vai nos campos 59 e 60 do BR Code. */
@@ -784,11 +854,20 @@ cbAjuste('cb-cidade',function(){if(cbCidadeAjustar())cbQuemRender();});
 /* ---- a partida ---- */
 (function(){
   var id=cbIdentidade(),blo=cbBloco(),vazio=!cbTrim(id.chave)||!cbTrim(id.nomer)||!cbTrim(id.cidade);
+  /* O ENDEREÇO ENTRA NA MESMA CONTA DO "ainda falta configurar". Endereço vazio ou escrito como
+     caminho do site ("/pagar", o padrão de fábrica até esta rodada) faz a geração recusar, e
+     descobrir isso só depois de digitar a cobrança inteira seria a mesma armadilha que a
+     abertura automática do painel existe para evitar. */
+  var urlFalta=!!C.pUrlRecusa(cbTrim(blo.url));
   cbConfigEncher();
   var alvo=document.querySelector('input[name="cb-ppmodo"][value="'+blo.ppmodo+'"]');
   if(alvo)alvo.checked=true;
+  /* O percentual nasce com o que a ferramenta configurou para o bloco publicado: é o desconto
+     de sempre do dono, e ele muda por cobrança quando quiser. */
+  if(blo.descpix>0&&$('cb-descpix'))$('cb-descpix').value=String(blo.descpix);
   cbToggles();
   cbQuemRender();
+  cbUrlAvisoRender();
   $('cb-versao').textContent='Fonte compartilhada com a ferramenta: versão '+C.versao+'.';
   /* PRIMEIRO USO NESTE APARELHO: o painel nasce aberto, e o texto diz por quê.
      Sem isso o dono veria uma página pronta que recusa gerar, e a recusa só

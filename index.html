@@ -2102,7 +2102,7 @@
 
 <!-- ==================== CONSTRUTOR: LINK DE COBRANCA ==================== -->
 <div class="painel" id="painel-cob" role="tabpanel">
-  <p class="descricao"><b>Link de cobrança</b> — para quando o serviço já foi combinado e falta receber. Você publica <b>uma vez</b> um componente HTML numa página fixa do site (por exemplo <code>/pagar</code>) e, a cada cobrança, gera aqui um <b>link diferente</b> para mandar ao cliente. A página abre com a descrição do serviço, o valor, o <b>Pix</b> (copia e cola mais QR Code) e, se você quiser, o <b>PayPal</b> — mais o botão “Já paguei”, que avisa você pelo WhatsApp. O valor mostrado na tela e o valor cobrado saem os dois <b>de dentro do próprio código Pix</b> que viaja no link: não existe um segundo lugar de onde eles possam divergir. Todo link leva um <b>selo</b> calculado sobre os seus parâmetros: mexer em qualquer um deles — descrição, data, código Pix, link do PayPal — ou apagar o selo faz a página <b>recusar</b> a cobrança (com a ressalva de tamanho do selo explicada na seção 3). Um código montado com a chave Pix de outra pessoa também é recusado: a página só exibe uma cobrança que ela consegue remontar a partir dos <b>seus</b> dados de recebedor. A cobrança pode ter uma <b>data de validade</b>, que é um recado ao cliente e não um cancelamento — o código Pix em si não vence.</p>
+  <p class="descricao"><b>Link de cobrança</b> — para quando o serviço já foi combinado e falta receber. Você publica <b>uma vez</b> um componente HTML numa página fixa do site (por exemplo <code>/pagar</code>) e, a cada cobrança, gera aqui um <b>link diferente</b> para mandar ao cliente. A página abre com a descrição do serviço, o valor, o <b>Pix</b> (copia e cola mais QR Code) e, se você quiser, o <b>PayPal</b> — mais o botão “Já paguei”, que avisa você pelo WhatsApp. O valor mostrado na tela e o valor cobrado saem os dois <b>de dentro do próprio código Pix</b> que viaja no link: não existe um segundo lugar de onde eles possam divergir. Todo link leva um <b>selo</b> calculado sobre os seus parâmetros: mexer em qualquer um deles — descrição, data, código Pix, link do PayPal — ou apagar o selo faz a página <b>recusar</b> a cobrança (com a ressalva de tamanho do selo explicada na seção 3). Um código montado com a chave Pix de outra pessoa também é recusado: a página só exibe uma cobrança que ela consegue remontar a partir dos <b>seus</b> dados de recebedor. A cobrança pode ter uma <b>data de validade</b>, que é um recado ao cliente e não um cancelamento — o código Pix em si não vence. E pode ter <b>desconto para quem pagar via Pix</b>: aí a cobrança tem dois valores (o total, que o PayPal cobra, e o valor do Pix), e a página <b>refaz a conta</b> ao abrir o link — se o valor do Pix não for exatamente o total menos o desconto, ela recusa.</p>
 
   <div class="secao primeira"><span class="secao-n">1</span> Quem recebe</div>
   <div class="grade">
@@ -2152,9 +2152,11 @@
     <div>
       <fieldset>
       <legend>Endereço da página</legend>
-      <label for="p-url">Endereço onde o componente está publicado <small>(endereço completo, ou caminho do site começando com barra)</small></label>
-      <input type="text" id="p-url" value="/pagar" placeholder="https://www.fotocerta.com.br/pagar">
-      <p class="ajuda">Serve só para montar o link. A página em si não precisa saber o próprio endereço.</p>
+      <label for="p-url">Endereço onde o componente está publicado <small>(o endereço <b>inteiro</b>, com <code>https://</code> e o domínio)</small></label>
+      <input type="text" id="p-url" value="" placeholder="https://www.fotocerta.com.br/pagar">
+      <p class="ajuda alerta" id="p-url-aviso" style="display:none"></p>
+      <p class="ajuda"><b>Tem de ser o endereço inteiro.</b> O link desta cobrança vai colado numa conversa de WhatsApp, <i>fora</i> do site: um caminho como <code>/pagar</code> funciona dentro do site e não abre nada numa conversa. Escrever só o caminho obrigava você a completar o endereço à mão a cada cobrança — que é justamente o trabalho que esta aba existe para eliminar —, então a ferramenta agora <b>recusa</b> o caminho solto em vez de aceitá-lo em silêncio.</p>
+      <p class="ajuda">Serve só para montar o link. A página em si não precisa saber o próprio endereço, e mexer aqui <b>não</b> muda o código 1.</p>
       </fieldset>
       <fieldset>
       <legend>Textos</legend>
@@ -2233,8 +2235,12 @@
       <input type="text" id="p-txid" value="" placeholder="ENSAIO2026">
       <label for="p-validade">Válido até <small>(opcional; vazio = link sem prazo)</small></label>
       <input type="date" id="p-validade" value="" max="2099-12-31">
+      <label for="p-descpix">Desconto para quem pagar via Pix <small>(opcional; em %, 0 ou vazio = sem desconto)</small></label>
+      <input type="number" id="p-descpix" value="0" min="0" max="90" step="0.5">
+      <p class="ajuda">Com desconto, a cobrança passa a ter <b>dois valores</b>: o <b>total</b> — que é o valor digitado acima, e é o que o PayPal cobra — e o <b>valor do Pix</b>, que é o total menos o desconto. O cartão mostra os dois. A conta do desconto é <b>a mesma do Checkout e da Mini loja</b>, escrita uma vez só, e a página de pagamento <b>refaz essa conta</b> ao abrir o link: se o valor do Pix não for exatamente o total menos o desconto, ela recusa a cobrança.</p>
+      <p class="ajuda alerta"><b>Ligar o desconto muda o código 1.</b> Enquanto a página tiver colado um código 1 gerado <i>sem</i> desconto, ela não sabe conferir a conta do desconto e vai <b>recusar</b> qualquer link com desconto. Então: gere o código 1 de novo, cole no site, e só depois mande links com desconto. Os links <b>sem</b> desconto continuam funcionando nos dois códigos — colar o código 1 novo não derruba nenhum link já enviado.</p>
       <p class="ajuda"><b>O prazo é um recado, não uma tranca.</b> Até o fim do dia escolhido (23:59:59 no horário de Brasília) o cliente vê o prazo escrito no cartão; passando disso, a página para de mostrar o pagamento e manda falar com você. O que ele <b>não</b> faz: o <b>código Pix não tem validade</b> — quem copiou o “copia e cola” antes do prazo consegue pagar depois, e o mesmo vale para quem atrasar o relógio do próprio aparelho. Quem fecha a conta continua sendo você, conferindo <b>valor e data no extrato</b>.</p>
-      <p class="ajuda"><b>Alterar o link quase sempre não funciona.</b> Todo link gerado leva um <b>selo</b>: uma conta feita sobre a descrição, a data, o código Pix e o link do PayPal. Mexer em qualquer um deles — ou apagar o selo — faz a conta não fechar, e a página recusa a cobrança. <b>“Quase sempre”, e não “sempre”:</b> o selo tem 16 bits, então uma alteração feita <b>ao acaso</b> tem uma chance em 65 mil de a conta fechar assim mesmo e a página exibir a cobrança alterada. Na prática ninguém edita um link ao acaso — e quem edita de propósito não precisa dessa chance, porque <b>o selo não é segredo nem é segurança:</b> quem abrir o código da página lê a regra e sabe refazer a conta. O que o selo impede é a <b>edição</b> de um link que você mandou, que é o que acontece na prática. O que impede o dinheiro de ir para outra conta não é ele, e sim a página só exibir cobrança que ela consegue remontar com a <b>sua</b> chave Pix.</p>
+      <p class="ajuda"><b>Alterar o link quase sempre não funciona.</b> Todo link gerado leva um <b>selo</b>: uma conta feita sobre a descrição, a data, o código Pix, o link do PayPal e — quando a cobrança tem desconto — o total e o percentual. Mexer em qualquer um deles — ou apagar o selo — faz a conta não fechar, e a página recusa a cobrança. <b>“Quase sempre”, e não “sempre”:</b> o selo tem 16 bits, então uma alteração feita <b>ao acaso</b> tem uma chance em 65 mil de a conta fechar assim mesmo e a página exibir a cobrança alterada. Na prática ninguém edita um link ao acaso — e quem edita de propósito não precisa dessa chance, porque <b>o selo não é segredo nem é segurança:</b> quem abrir o código da página lê a regra e sabe refazer a conta. O que o selo impede é a <b>edição</b> de um link que você mandou, que é o que acontece na prática. O que impede o dinheiro de ir para outra conta não é ele, e sim a página só exibir cobrança que ela consegue remontar com a <b>sua</b> chave Pix.</p>
       <p class="ajuda"><b>A descrição é cosmética</b> no sentido do dinheiro: o valor cobrado está dentro do código Pix, e é de lá que a tela o lê. O selo existe para que ela também não possa ser <b>trocada</b> no caminho — descrição adulterada não muda um centavo, mas mente para o cliente.</p>
       </fieldset>
     </div>
@@ -2300,7 +2306,7 @@
       </h3>
       <textarea id="p-out2" readonly spellcheck="false" style="height:120px" placeholder="O link desta cobranca aparece aqui."></textarea>
       <p class="ajuda"><b>As duas saídas têm vidas diferentes:</b> o <b>código 1</b> vai uma vez só para o componente HTML da página fixa; o <b>código 2</b> é gerado a cada cobrança e vai para o cliente. Mudar a descrição ou o valor <b>não</b> exige colar o código 1 de novo.</p>
-      <p class="ajuda"><b>Mexeu na cobrança, a caixa do link esvazia.</b> Trocar a descrição, o valor, o identificador, o endereço da página, o modo de PayPal ou os dados do recebedor apaga o link que estava aqui — para não existir a chance de copiar um link com o valor da cobrança anterior. Clique em <b>Gerar link desta cobrança</b> de novo. Mexer só na aparência ou nos textos do cartão não apaga nada: isso muda o <b>código 1</b>, e aí quem avisa é o painel consolidado.</p>
+      <p class="ajuda"><b>Mexeu na cobrança, a caixa do link esvazia.</b> Trocar a descrição, o valor, o identificador, o desconto no Pix, o endereço da página, o modo de PayPal ou os dados do recebedor apaga o link que estava aqui — para não existir a chance de copiar um link com o valor da cobrança anterior. Clique em <b>Gerar link desta cobrança</b> de novo. Mexer só na aparência ou nos textos do cartão não apaga nada: isso muda o <b>código 1</b>, e aí quem avisa é o painel consolidado.</p>
       </div>
     </div>
   </div>
@@ -2308,7 +2314,9 @@
   <div class="instrucoes">
   <h3>Instrução de uso do código gerado</h3>
   <p class="ajuda"><b>Uma vez só:</b> crie no Prosite uma página fixa (sugestão: <code>/pagar</code>), ponha nela um <b>componente HTML</b> e cole ali o <b>código 1</b>. Publique. Não há nada para colar na Tag Head nem na Tag Body.</p>
-  <p class="ajuda"><b>A cada cobrança:</b> preencha a seção 3 (descrição, valor e, se quiser, um identificador e uma data de validade), clique em <b>Gerar link desta cobrança</b> e mande o <b>código 2</b> ao cliente. Você pode ter <b>quantas cobranças quiser abertas ao mesmo tempo</b>: a página não guarda nada, lê tudo do endereço.</p>
+  <p class="ajuda"><b>O endereço da página, inteiro.</b> Na seção 2, escreva o endereço <b>completo</b> onde você colou o código 1 — com <code>https://</code> e o domínio. O link vai colado numa conversa de WhatsApp, fora do site, e ali um caminho como <code>/pagar</code> não abre nada. A ferramenta recusa o caminho solto; e se você já tinha <code>/pagar</code> guardado, ela <b>avisa e não troca sozinha</b> — ela não tem como saber qual é o seu domínio.</p>
+  <p class="ajuda"><b>Desconto no Pix, quando você quiser dar um.</b> Com desconto a cobrança passa a ter dois valores: o <b>total</b> (que é o que o PayPal cobra e o que aparece em destaque no cartão) e o <b>valor do Pix</b> (total menos o desconto, e é ele que está dentro do código copia e cola). O link carrega o total num parâmetro próprio, <b>coberto pelo selo</b>, e a página <b>refaz a conta</b>: se o valor do Pix não for exatamente o total menos o desconto — pela mesma regra de arredondamento da ferramenta —, ela recusa a cobrança. São duas redes, não uma: o selo pega o parâmetro editado, e a conferência da conta pega o que passar pelo selo. <b>Antes do primeiro link com desconto, cole o código 1 novo:</b> um código 1 antigo não sabe conferir essa conta e vai recusar. Links sem desconto continuam funcionando nos dois.</p>
+  <p class="ajuda"><b>A cada cobrança:</b> preencha a seção 3 (descrição, valor e, se quiser, um identificador, uma data de validade e um desconto no Pix), clique em <b>Gerar link desta cobrança</b> e mande o <b>código 2</b> ao cliente. Você pode ter <b>quantas cobranças quiser abertas ao mesmo tempo</b>: a página não guarda nada, lê tudo do endereço.</p>
   <p class="ajuda"><b>O que a página garante, dito sem exagero.</b> O link carrega o código Pix já pronto, com o valor dentro dele, e um <b>selo</b> calculado sobre todos os parâmetros do endereço. A página confere o selo, confere a verificação interna do código, remonta o código a partir dos <b>seus</b> dados de recebedor e só exibe a cobrança se tudo fechar. Aí ela lê o valor <b>de dentro do código</b> e usa esse mesmo valor na tela e no botão do PayPal. Disso saem quatro garantias e um limite:</p>
   <p class="ajuda">1. <b>Tela, Pix e PayPal não podem divergir</b>, porque leem o mesmo lugar — não existe um segundo parâmetro de valor para ficar desatualizado.<br>2. <b>Link editado é recusado:</b> mudar um caractere da descrição, um dígito da data, o código Pix ou o link do PayPal quebra o selo. <b>Apagar</b> qualquer um deles, ou apagar o próprio selo, também.<br>3. <b>Link com a chave de outra pessoa é recusado:</b> a remontagem não fecha, então ninguém usa a sua página de pagamento para receber na conta dele.<br>4. <b>O link do PayPal não pode ser trocado no caminho.</b> Antes do selo, esse parâmetro só precisava continuar sendo um endereço do PayPal — o que aceitava a cobrança de <b>outra conta</b>. Era a única porta do link que levava dinheiro para fora, e o selo a fechou.</p>
   <p class="ajuda"><b>O selo não é segredo, e isso importa.</b> Ele é uma conta escrita dentro do código da própria página: quem abrir o código-fonte lê a regra e sabe refazer a conta. Ele impede a <b>edição</b> de um link que você mandou — que é o que acontece na vida real, com quem recebeu o link. Ele não é uma senha, não é criptografia e não é segurança; chamá-lo assim seria prometer o que a página não entrega.</p>
@@ -2676,7 +2684,7 @@
      nova para a outra, e o resultado seriam links que a propria /pagar recusa -- sem
      erro nenhum na tela. Ao mexer no arquivo, troque a versao AQUI, em cobrar/index.html
      e no FC_COMPART_VERSAO de dentro dele. -->
-<script src="fc-compartilhado.js?v=2026-08-22a"></script>
+<script src="fc-compartilhado.js?v=2026-08-22b"></script>
 <script>
 'use strict';
 (function(){
@@ -2699,7 +2707,7 @@
    OS APELIDOS ABAIXO NAO SAO COPIA: sao o mesmo objeto, com o nome que o resto
    deste arquivo sempre usou. Trocar os nomes em cem lugares so para dizer
    FCCOMPART.x mudaria muito codigo para nao mudar comportamento nenhum. */
-var FC_COMPART_ESPERADA='2026-08-22a';
+var FC_COMPART_ESPERADA='2026-08-22b';
 if(!window.FCCOMPART||FCCOMPART.versao!==FC_COMPART_ESPERADA){
   fcCompartParar(FC_COMPART_ESPERADA,window.FCCOMPART?FCCOMPART.versao:null);
   return;
@@ -2708,19 +2716,23 @@ var C=FCCOMPART;
 var FC_PIX_SRC=C.FC_PIX_SRC, fcPixApi=C.fcPixApi;
 var PRECO_MOEDAS=C.PRECO_MOEDAS, PRECO_PADRAO=C.PRECO_PADRAO, precoFmt=C.precoFmt;
 var PIX_CHAVE_MAX=C.PIX_CHAVE_MAX, pixLimpar=C.pixLimpar, pixChaveErro=C.pixChaveErro;
-var urlLimpa=C.urlLimpa, pUrlOk=C.pUrlOk;
+var urlLimpa=C.urlLimpa, pUrlOk=C.pUrlOk, fcUrlRelativo=C.fcUrlRelativo;
+var FC_URL_EXEMPLO=C.FC_URL_EXEMPLO, pUrlRecusa=C.pUrlRecusa, fcUrlAvisoMigracao=C.fcUrlAvisoMigracao;
 var FCI_CHAVE=C.FCI_CHAVE, FCI_CAMPOS=C.FCI_CAMPOS, FCI_PADRAO=C.FCI_PADRAO;
 var FCI_APONTA=C.FCI_APONTA, fciRecusa=C.fciRecusa;
 var fcLerJson=C.fcLerJson, fcIdentidadeDe=C.fcIdentidadeDe;
 var P_VALOR_MAX=C.P_VALOR_MAX, P_DESC_MAX=C.P_DESC_MAX;
 var pValorNum=C.pValorNum, pTxidLimpo=C.pTxidLimpo;
 var fcTrim=C.fcTrim, fcValorCorrigido=C.fcValorCorrigido, fcTxidCorrigido=C.fcTxidCorrigido;
-var fcChaveCorrigida=C.fcChaveCorrigida;
+var fcChaveCorrigida=C.fcChaveCorrigida, fcDescCorrigido=C.fcDescCorrigido;
+var fcTotalPixSrc=C.fcTotalPixSrc, fcPixDesc=C.fcPixDesc;
+var P_DESC_PCT_MAX=C.P_DESC_PCT_MAX, fcDescNum=C.fcDescNum;
+var pDescPct=C.pDescPct, pValorPix=C.pValorPix, pTotCod=C.pTotCod, pDescCod=C.pDescCod;
 var FC_NOMER_MAX=C.FC_NOMER_MAX, FC_CIDADE_MAX=C.FC_CIDADE_MAX;
 var fcPixTexto=C.fcPixTexto, fcPixTextoCorrigido=C.fcPixTextoCorrigido;
 var P_VAL_NADA=C.P_VAL_NADA, fcValDia=C.fcValDia, pValCod=C.pValCod, pValTexto=C.pValTexto;
 var P_PP_HOSTS=C.P_PP_HOSTS, P_PP_SRC=C.P_PP_SRC, pPpHostOk=C.pPpHostOk;
-var P_SELO_SRC=C.P_SELO_SRC, pSeloApi=C.pSeloApi;
+var pSeloSrc=C.pSeloSrc, pSeloApi=C.pSeloApi;
 var pRecusaBloco=C.pRecusaBloco, pRecusaCobranca=C.pRecusaCobranca;
 var pPayload=C.pPayload, pConferir=C.pConferir;
 var pPpParam=C.pPpParam, pEncOk=C.pEncOk, pBusca=C.pBusca, pLinkDe=C.pLinkDe;
@@ -3007,23 +3019,10 @@ FC_CARRINHO_SRC.sinal=
   'if(sinalAgora()>total())return TXT_SINAL_MAIOR;\n'+
   'if(sinalAgora()<0.01)return TXT_SINAL_ZERO;\n'+
   "return '';\n}\n\n";
-/* As tres formas de totalPix sao mutuamente exclusivas e a escolha depende de tres
-   sinalizadores -- por isso ela e uma funcao, e nao um campo. Sem Pix nao se emite nada.
-   O ramo do meio e o que mais custaria repetir: com sinal ligado, o Pix cobra o SINAL, e o
-   desconto do Pix nao entra porque aplica-lo sobre o sinal seria desconto dobrado (o sinal ja
-   sai de um total que pode ter cupom). Quem gera zera o desconto na origem; aqui fica so a
-   consequencia. */
-function fcTotalPixSrc(descpix,usaPix,usaSinal){
-  if(descpix>0){
-    return 'function totalPix(){\n'+
-           'var t=total();\n'+
-           'if(DESCONTO_PIX>0)t=t*(1-DESCONTO_PIX/100);\n'+
-           'return Math.round(t*100)/100;\n}\n\n';
-  }
-  if(usaPix&&usaSinal)return 'function totalPix(){return sinalAgora();}\n\n';
-  if(usaPix)return 'function totalPix(){return Math.round(total()*100)/100;}\n\n';
-  return '';
-}
+/* FONTE COMPARTILHADA com a pagina /cobrar: fcTotalPixSrc vive em fc-compartilhado.js desde
+   que a pagina de cobranca passou a oferecer desconto no Pix. O texto que ela escreve nao
+   mudou -- o que mudou foi so onde ele e escrito --, e por isso o Checkout e a Mini loja
+   continuam saindo byte a byte iguais. Agora sao TRES blocos usando a mesma conta. */
 /* O seletor de quantidade: um construtor so para todos os usos (produto, opcional, linha do
    carrinho). O prefixo das classes entra por parametro porque cada bloco tem o seu -- fcu- no
    Checkout, fcm- na Mini loja --, e dois blocos na MESMA pagina com as mesmas classes se
@@ -3560,7 +3559,7 @@ var ABAS=[
    pref:'p',fora:[],resumo:pPresetResumo,redesenhar:pPresetDepois,antesDeSalvar:pPresetAntes,
    naoEmite:['url','desc','valor','txid','validade','ppmodo','pplink'],
    exemplo:'ex.: Foto Certa - pagina /pagar',
-   guarda:'tudo o que está configurado nesta aba — o endereço da página, a aparência, os textos, e também a <b>cobrança que está na tela</b> (descrição, valor, identificador e a data de validade). Aplicar um preset troca também essa cobrança: ele é a fotografia da aba inteira. Os dados de quem recebe <b>não</b> estão aqui: eles saíram desta aba para o painel Identidade, e nenhum preset os toca.'},
+   guarda:'tudo o que está configurado nesta aba — o endereço da página, a aparência, os textos, e também a <b>cobrança que está na tela</b> (descrição, valor, identificador, a data de validade e o desconto no Pix). Aplicar um preset troca também essa cobrança: ele é a fotografia da aba inteira. Os dados de quem recebe <b>não</b> estão aqui: eles saíram desta aba para o painel Identidade, e nenhum preset os toca.'},
   {id:'loja', nome:'Mini loja',           chaves:['m'],         coleta:mColeta,restaura:mRestaura,
    pref:'m',fora:[],resumo:mPresetResumo,redesenhar:mPresetDepois,antesDeSalvar:mPresetAntes,
    listas:[['m.prods',{nome:'',desc:'',preco:0,cat:'',img:'',opsel:'unico',opnenhum:'nao',qtd:false,ops:[{nome:'',preco:0,qtd:false}]},'nome'],
@@ -12159,10 +12158,28 @@ function fcCampoAjustar(id,regra){
   return true;
 }
 function pValorAjustar(){return fcCampoAjustar('p-valor',fcValorCorrigido);}
+/* FONTE COMPARTILHADA com a pagina /cobrar: fcDescNum, fcDescCorrigido e P_DESC_PCT_MAX vivem
+   em fc-compartilhado.js. O percentual NAO entra em P_NUMS de proposito, pelo mesmo motivo do
+   valor: o campo vazio ali significa "sem desconto", e escrever "0" por cima seria reescrever
+   um campo que o operador deixou em branco. O que se corrige a vista e o que ficou fora da
+   faixa -- 95 virando 90 --, e so em 'change'/'blur'. */
+function pDescAjustar(){return fcCampoAjustar('p-descpix',fcDescCorrigido);}
 /* FONTE COMPARTILHADA com a pagina /cobrar: pTxidLimpo vive em fc-compartilhado.js. */
 function pTxidAjustar(){return fcCampoAjustar('p-txid',fcTxidCorrigido);}
 
-/* FONTE COMPARTILHADA com a pagina /cobrar: pUrlOk vive em fc-compartilhado.js. */
+/* FONTE COMPARTILHADA com a pagina /cobrar: pUrlOk, fcUrlRelativo, pUrlRecusa e
+   fcUrlAvisoMigracao vivem em fc-compartilhado.js. */
+/* O AVISO DA MIGRACAO, a vista e sem tocar no campo. Quem tem "/pagar" guardado (o padrao de
+   fabrica ate esta rodada, ou um backup, ou a outra pagina) precisa saber ANTES de digitar a
+   cobranca inteira -- e a ferramenta nao pode completar sozinha, porque ela nao sabe qual e o
+   dominio do dono. Mesma frase da /cobrar, do mesmo arquivo. */
+function pUrlAvisoRender(){
+  var el=$('p-url-aviso'),campo=$('p-url');
+  if(!el||!campo)return;
+  var t=fcUrlAvisoMigracao(campo.value);
+  el.textContent=t;
+  el.style.display=t?'block':'none';
+}
 /* FONTE COMPARTILHADA com a pagina /cobrar: P_PP_HOSTS, P_PP_SRC e pPpHostOk vive em fc-compartilhado.js. */
 /* A mesma lista, escrita como codigo dentro do bloco. Unifica-se a fonte que escreve. */
 function pPpHostsJs(){
@@ -12208,6 +12225,9 @@ function pCfg(){
     t8:$('p-t8').value, t9:$('p-t9').value,
     /* daqui para baixo: ESTA cobranca -- entra no link, nunca no bloco */
     desc:$('p-desc').value, valor:pValorNum($('p-valor').value), valorBruto:$('p-valor').value,
+    /* O percentual entra por fcDescNum, a mesma porta da /cobrar: e ele que faz "sem desconto"
+       ser a mesma coisa nos dois lados, e por consequencia o link sair identico. */
+    descpix:fcDescNum($('p-descpix').value),
     txid:pTxidLimpo($('p-txid').value),
     valdia:pValDia(), valbruto:$('p-validade').value,
     ppmodo:(usapp?ppmodo:'nao'), pplink:$('p-pplink').value.trim()
@@ -12246,6 +12266,9 @@ function pCss(cfg){
   s+='.fcpg-desc{font-size:14px;line-height:1.5;margin:0 0 14px;word-wrap:break-word;overflow-wrap:break-word}\n';
   s+='.fcpg-valor-rot{font-size:12px;letter-spacing:.06em;text-transform:uppercase;opacity:.7;margin:0 0 2px}\n';
   s+='.fcpg-valor{font-size:30px;font-weight:800;line-height:1.1;color:'+cfg.c1+';margin:0 0 4px}\n';
+  /* A linha do desconto so existe quando a cobranca tem desconto: sem ele nenhuma regra nova
+     entra no CSS, e o codigo 1 sai byte a byte igual ao de antes de o desconto existir. */
+  if(pDescPct(cfg)>0)s+='.fcpg-pixlinha{font-size:15px;font-weight:700;color:'+cfg.c1+';margin:0 0 4px}\n';
   /* O prazo fica JUNTO do valor, e nao no rodape: ele muda o comportamento de quem le, e para
      isso precisa ser lido antes de o cliente decidir deixar para depois. */
   s+='.fcpg-prazo{font-size:13px;font-weight:700;color:'+cfg.c1+';margin:0 0 4px}\n';
@@ -12266,7 +12289,7 @@ function pCss(cfg){
   return s;
 }
 function pJs(cfg){
-  var j='';
+  var j='',comDesc=pDescPct(cfg)>0;
   j+='  /* ===== CONFIGURACAO ===== */\n';
   j+="  var CHAVE_PIX='"+escJs(cfg.chave)+"';\n";
   j+="  var NOME_RECEBEDOR='"+escJs(cfg.nomer)+"';\n";
@@ -12295,6 +12318,9 @@ function pJs(cfg){
   j+="  var TXT_COPIADO='Código copiado! Cole no aplicativo do seu banco.';\n";
   j+="  var TXT_NAO_COPIOU='Não consegui copiar. Selecione o código acima e copie na mão.';\n";
   j+="  var TXT_REF='Identificador da cobrança: ';\n";
+  /* O mesmo rotulo que o carrinho do Checkout escreve, pela mesma razao de sempre: o cliente
+     que ja viu a loja le a mesma frase na pagina de cobranca. */
+  if(comDesc)j+="  var TXT_PIX_ROTULO='Pagando via Pix';\n";
   if(cfg.usapp)j+="  var TXT_PAYPAL_FORA='Não foi possível carregar o PayPal agora. Use o Pix acima, ou fale com a gente para receber outro link.';\n";
   j+='\n  /* ============================================================\n     Daqui para baixo nao precisa mexer\n     ============================================================ */\n\n';
   /* A maquinaria do BR Code vem da FONTE UNICA. Aqui ela e usada ao contrario do Checkout: em
@@ -12308,11 +12334,26 @@ function pJs(cfg){
   j+=pInd(FC_PIX_SRC.pixLer);
   /* O selo e o prazo, da mesma fonte unica que a ferramenta avalia (ver P_SELO_SRC). seloDe usa
      o crc16 emitido tres linhas acima: a conta do selo e a mesma que confere o BR Code. */
-  j+=pInd(P_SELO_SRC);
+  j+=pInd(pSeloSrc(comDesc));
   /* montarPayload le CODIGO_PEDIDO; aqui o txid nao e fixo, ele vem do codigo recebido */
   j+='  var CODIGO_PEDIDO=\'\';\n';
   j+=pInd(FC_PIX_SRC.montarPayload);
   j+=pInd(fcMoedaFmtGer(true));
+  if(comDesc){
+    j+='  /* ===== O DESCONTO NO PIX =====\n';
+    j+='     Esta pagina passa a receber DOIS valores em vez de um: o TOTAL, que chega no\n';
+    j+='     parametro t do endereco e e o que o PayPal cobra, e o VALOR DO PIX, que continua\n';
+    j+='     morando dentro do proprio codigo Pix e de lugar nenhum mais. O percentual chega em x.\n';
+    j+='     Os dois entram na conta do selo, entao nenhum deles pode ser editado no caminho.\n';
+    j+='     A conta abaixo e a MESMA que o carrinho do Checkout e a Mini loja usam -- mesma fonte,\n';
+    j+='     mesmo arredondamento em centavos. Ela nao esta aqui para calcular o que o cliente\n';
+    j+='     paga (isso ja veio pronto dentro do codigo Pix): esta para RECONFERIR que o valor do\n';
+    j+='     Pix e exatamente o total menos o desconto. Se nao bater, a cobranca e recusada. */\n';
+    j+='  var TOTAL_COBRADO=0;   /* o total desta cobranca, lido do parametro t */\n';
+    j+='  var DESCONTO_PIX=0;    /* o percentual de desconto no Pix, lido do parametro x */\n';
+    j+='  function total(){return TOTAL_COBRADO;}\n';
+    j+=pInd(fcTotalPixSrc(1,true,false));
+  }
   j+='  /* le um parametro do endereco, em ES5 -- sem URLSearchParams */\n';
   j+='  function param(nome){\n';
   j+="    var q=String(location.search||''),ps,i,ig;\n";
@@ -12387,7 +12428,14 @@ function pJs(cfg){
   j+='       impede a EDICAO de um link existente; ele nao e seguranca, e as conferencias 2 e 3\n';
   j+='       abaixo continuam sendo o que impede o dinheiro de ir para outra conta. */\n';
   j+="    var selo=param('s');\n";
-  j+="    if(!selo||seloDe(codigo,param('d'),param('pp'),pv)!==selo){recado(TXT_CODIGO_RUIM);return;}\n";
+  if(comDesc){
+    /* A conta de seis: os quatro de sempre mais o par t/x. Ela e um SUPERCONJUNTO da de quatro
+       -- com t e x vazios, a lista e a mesma --, e e por isso que este bloco continua aceitando
+       os links gerados antes de o desconto existir. */
+    j+="    if(!selo||seloDe(codigo,param('d'),param('pp'),pv,param('t'),param('x'))!==selo){recado(TXT_CODIGO_RUIM);return;}\n";
+  }else{
+    j+="    if(!selo||seloDe(codigo,param('d'),param('pp'),pv)!==selo){recado(TXT_CODIGO_RUIM);return;}\n";
+  }
   j+='    /* 2. forma e verificacao interna (CRC) */\n';
   j+='    var lido=pixLer(codigo);\n';
   j+='    if(!lido.ok){recado(TXT_CODIGO_RUIM);return;}\n';
@@ -12397,6 +12445,29 @@ function pJs(cfg){
   j+='       anteriores, mas nao tem a chave daqui, entao nao passa nesta */\n';
   j+='    CODIGO_PEDIDO=lido.txid;\n';
   j+='    if(montarPayload(valor)!==codigo){recado(TXT_CODIGO_RUIM);return;}\n';
+  if(comDesc){
+    j+='    /* 4b. O DESCONTO, quando este link traz um -- a SEGUNDA REDE, atras do selo.\n';
+    j+='       O selo ja recusaria um t, um x ou um codigo Pix trocados. Esta conferencia existe\n';
+    j+='       porque o selo tem 16 bits e porque ela pergunta outra coisa: nao "estes parametros\n';
+    j+='       chegaram inteiros?", e sim "eles fazem sentido JUNTOS?". O valor de dentro do codigo\n';
+    j+='       Pix tem de ser exatamente o total menos o desconto, pela mesma conta que a\n';
+    j+='       ferramenta fez ao montar o link. Se nao for, nao ha numero certo a exibir, e a\n';
+    j+='       pagina recusa em vez de escolher um dos dois.\n';
+    j+='       SEM t e sem x, nada disto acontece: o link e um link sem desconto e segue o caminho\n';
+    j+='       de sempre, com o valor saindo do codigo Pix e mais lugar nenhum. */\n';
+    j+="    var pt=param('t'),px=param('x');\n";
+    j+='    if(pt||px){\n';
+    j+="      if(!/^[0-9]{1,10}(\\.[0-9]{1,2})?$/.test(pt)){recado(TXT_CODIGO_RUIM);return;}\n";
+    j+="      if(!/^[0-9]{1,2}(\\.[0-9])?$/.test(px)){recado(TXT_CODIGO_RUIM);return;}\n";
+    j+='      TOTAL_COBRADO=parseFloat(pt);DESCONTO_PIX=parseFloat(px);\n';
+    j+='      if(!(TOTAL_COBRADO>0)||!(DESCONTO_PIX>0)||DESCONTO_PIX>'+P_DESC_PCT_MAX+'){recado(TXT_CODIGO_RUIM);return;}\n';
+    j+='      if(Math.abs(totalPix()-valor)>0.0001){recado(TXT_CODIGO_RUIM);return;}\n';
+    j+='      /* daqui para baixo "valor" e o TOTAL: e ele que a tela mostra em destaque, que o\n';
+    j+='         PayPal cobra e que volta na mensagem do WhatsApp. O valor do Pix aparece na sua\n';
+    j+='         propria linha, e continua sendo o que esta dentro do codigo copia e cola. */\n';
+    j+='      valor=TOTAL_COBRADO;\n';
+    j+='    }\n';
+  }
   j+="    var desc=param('d');\n";
   j+='    /* 5. o prazo, se este link tiver um. Sem parametro v, nada disto acontece e a pagina\n';
   j+='       nao menciona prazo nenhum. O instante comparado vem do relogio do APARELHO do\n';
@@ -12408,6 +12479,7 @@ function pJs(cfg){
   j+="    if(desc)c.appendChild(novo('div','fcpg-desc',desc));\n";
   j+="    c.appendChild(novo('div','fcpg-valor-rot',TXT_VALOR));\n";
   j+="    c.appendChild(novo('div','fcpg-valor',moedaFmt(valor)));\n";
+  if(comDesc)j+="    if(DESCONTO_PIX>0)c.appendChild(novo('div','fcpg-pixlinha',TXT_PIX_ROTULO+' (-'+DESCONTO_PIX+'%): '+moedaFmt(totalPix())));\n";
   j+="    if(dia>0)c.appendChild(novo('div','fcpg-prazo',TXT_PRAZO.replace(/\\{data\\}/g,prazoTexto(dia))));\n";
   j+="    if(lido.txid&&lido.txid!=='***')c.appendChild(novo('div','fcpg-ref',TXT_REF+lido.txid));\n";
   j+='    pix(c,codigo);\n';
@@ -12515,6 +12587,9 @@ function pJs(cfg){
     j+='  function zap(c,valor,desc,txid){\n';
     j+="    var b=novo('div','fcpg-bloco');\n";
     j+="    var msg='Ola! Acabei de pagar: '+desc+' -- '+moedaFmt(valor);\n";
+    /* Com desconto o cliente pode ter pago o total (PayPal) ou o valor com desconto (Pix). A
+       mensagem cita os dois: um numero so aqui obrigaria o dono a adivinhar qual chegou. */
+    if(comDesc)j+="    if(DESCONTO_PIX>0)msg+=' (via Pix: '+moedaFmt(totalPix())+')';\n";
     j+="    if(txid&&txid!=='***')msg+=' ('+txid+')';\n";
     j+="    var a=novo('a','fcpg-bt fcpg-bt2',TXT_ZAP);\n";
     j+="    a.setAttribute('href','https://wa.me/'+WHATSAPP+'?text='+encodeURIComponent(msg));\n";
@@ -12542,12 +12617,15 @@ function pInd(t){
    isso, um link com o valor da cobranca ANTERIOR.
    O criterio nao vale para a aparencia nem para os textos do cartao: eles mudam o BLOCO, nao o
    link, e ali continua valendo a regra das outras abas (a caixa fica, e o painel consolidado
-   avisa que o codigo e mais velho que a aba). Esta e exatamente a lista 'naoEmite' do registro
-   ABAS mais os tres campos do recebedor -- o que nao entra no bloco, entra no link.
+   avisa que o codigo e mais velho que a aba). Esta lista e a 'naoEmite' do registro ABAS mais
+   os tres campos do recebedor e mais o 'p-descpix' -- o que muda o LINK, e nao "o que nao entra
+   no bloco": desde o desconto, os dois conjuntos deixaram de ser o mesmo. O 'p-descpix' e o
+   unico campo desta aba que muda as DUAS saidas (o link ganha o total e o percentual; o bloco
+   ganha a conferencia da relacao), entao ele esta aqui E fora da 'naoEmite'.
    Os tres do recebedor moram no painel Identidade desde que a identidade saiu das abas, e por
    isso aparecem aqui com o prefixo 'fci-': o campo mudou de lugar, o efeito dele sobre o link
    nao mudou nada. */
-var P_LINK_CAMPOS=['fci-chave','fci-nomer','fci-cidade','p-url','p-desc','p-valor','p-txid','p-validade','p-ppmodo','p-pplink'];
+var P_LINK_CAMPOS=['fci-chave','fci-nomer','fci-cidade','p-url','p-desc','p-valor','p-txid','p-validade','p-descpix','p-ppmodo','p-pplink'];
 function pSaidaVence(alvo){
   var i,ta=$('p-out2');
   if(!ta||!ta.value)return;
@@ -12564,6 +12642,7 @@ function pMexeu(e){
   if(/^fci-/.test(alvo)){pSaidaVence(alvo);return;}
   if(!/^p-/.test(alvo))return;
   pSaidaVence(alvo);
+  if(alvo==='p-url')pUrlAvisoRender();
   pToggles();
   pPreview();
 }
@@ -12576,6 +12655,9 @@ function pGerar(){
   if(fcAjustarTodos(P_NUMS))mudou=true;
   if(fcPixChaveAjustar('fci-chave'))fciGravar();
   if(fcCoresAjustar('p-'))mudou=true;
+  /* O percentual entra no CODIGO 1 (e ele que decide se o bloco leva a conferencia da relacao),
+     entao ele se corrige a vista aqui tambem, e nao so em "Gerar link". */
+  if(pDescAjustar())mudou=true;
   if(mudou)salvarEstado();
   var cfg=pCfg(),r=pRecusaBloco(cfg);
   if(r){alert(r);fciApontarSe(r);return;}
@@ -12588,9 +12670,10 @@ function pGerarLink(){
   if(fcPixChaveAjustar('fci-chave'))fciGravar();
   if(pValorAjustar())mudou=true;
   if(pTxidAjustar())mudou=true;
+  if(pDescAjustar())mudou=true;
   if(mudou)salvarEstado();
   var cfg=pCfg(),r=pRecusaCobranca(cfg);
-  if(r){alert(r);fciApontarSe(r);return;}
+  if(r){alert(r);fciApontarSe(r);pUrlAvisoRender();return;}
   var codigo=pPayload(cfg),erro=pConferir(cfg,codigo);
   if(erro){alert(erro);return;}
   $('p-out2').value=pLinkDe(cfg,codigo);
@@ -12600,7 +12683,9 @@ function pLimpar(){
   if(!confirm('Isto devolve a aba inteira aos padroes de fabrica: a aparencia da pagina, os textos e a cobranca que esta na tela. Os dados do recebedor NAO sao tocados -- eles sao da ferramenta inteira, no painel Identidade. Nenhum codigo ja colado no site e afetado, e os links ja enviados continuam funcionando. Continuar?'))return;
   /* A identidade nao entra aqui: ela nao pertence a esta aba, e "restaurar os padroes desta
      aba" nao pode apagar a chave Pix que as outras duas abas tambem usam. */
-  $('p-url').value='/pagar';
+  /* O endereco volta VAZIO, e nao para "/pagar": o padrao de fabrica nao pode ser um valor que
+     a propria ferramenta recusa. Quem limpa a aba digita o endereco inteiro uma vez. */
+  $('p-url').value='';
   setRadio('p-usapp','sim');setRadio('p-ppcor','gold');setRadio('p-zap','sim');
   setRadio('p-coruja','esq');setRadio('p-ppmodo','sdk');
   $('p-larg').value='420';$('p-qr').value='180';$('p-corujaalt').value='30';
@@ -12616,9 +12701,9 @@ function pLimpar(){
   $('p-t8').value='Este link de pagamento vale até {data}.';
   $('p-t9').value='Este link de pagamento venceu em {data} e não mostra mais o pagamento. Fale com a gente pelo WhatsApp que enviamos um link novo.';
   $('p-desc').value='';$('p-valor').value='';$('p-txid').value='';$('p-pplink').value='';
-  $('p-validade').value='';
+  $('p-validade').value='';$('p-descpix').value='0';
   $('p-out1').value='';$('p-out2').value='';
-  pToggles();pPreview(true);salvarEstado();
+  pToggles();pUrlAvisoRender();pPreview(true);salvarEstado();
 }
 
 /* ===== mostra/esconde conforme as escolhas ===== */
@@ -12850,7 +12935,7 @@ function pColeta(){
     t5:$('p-t5').value,t6:$('p-t6').value,t7:$('p-t7').value,
     t8:$('p-t8').value,t9:$('p-t9').value,
     desc:$('p-desc').value,valor:$('p-valor').value,txid:$('p-txid').value,
-    validade:$('p-validade').value,
+    validade:$('p-validade').value,descpix:$('p-descpix').value,
     ppmodo:radio('p-ppmodo'),pplink:$('p-pplink').value}};
 }
 function pRestaura(st){
@@ -12873,8 +12958,13 @@ function pRestaura(st){
   if(P.valor!==undefined)$('p-valor').value=P.valor;
   if(P.txid!==undefined)$('p-txid').value=P.txid;
   if(P.validade!==undefined)$('p-validade').value=P.validade;
+  if(P.descpix!==undefined)$('p-descpix').value=P.descpix;
   if(P.ppmodo)setRadio('p-ppmodo',P.ppmodo);
   if(P.pplink!==undefined)$('p-pplink').value=P.pplink;
+  /* O aviso do endereco e redesenhado aqui porque restaurar escreve nos campos SEM disparar
+     'input'/'change': sem esta linha, um estado guardado com "/pagar" voltaria para a tela sem
+     uma palavra, e o operador so descobriria ao tentar gerar. */
+  pUrlAvisoRender();
 }
 /* ===== O que esta aba poe na biblioteca de presets (ver o bloco compartilhado) ===== */
 function pPresetResumo(v){
@@ -12889,6 +12979,7 @@ function pPresetAntes(){
   if(fcAjustarTodos(P_NUMS))mudou=true;
   if(pValorAjustar())mudou=true;
   if(pTxidAjustar())mudou=true;
+  if(pDescAjustar())mudou=true;
   if(mudou)salvarEstado();
   return '';
 }
@@ -12905,7 +12996,7 @@ function pPresetDepois(){
      antes e depois exigiria uma segunda leitura dos campos, e o custo de esvaziar a toa e um
      clique em "Gerar link". */
   var ta=$('p-out2');if(ta)ta.value='';
-  pToggles();pPvBotoes();pPreview(true);
+  pToggles();pUrlAvisoRender();pPvBotoes();pPreview(true);
 }
 
 /* ============================================================
@@ -15369,11 +15460,15 @@ prep('Link de cobrança','cob',function(){
      document: quando o salvarEstado global rodar, o valor ja esta limpo. A chave Pix saiu
      desta lista junto com o campo: quem a corrige agora e o painel Identidade. */
   [['p-valor',pValorAjustar],
-   ['p-txid',pTxidAjustar]].forEach(function(par){
+   ['p-txid',pTxidAjustar],
+   ['p-descpix',pDescAjustar]].forEach(function(par){
     var el=$(par[0]);if(!el)return;
     el.addEventListener('change',function(){if(par[1]())salvarEstado();});
     el.addEventListener('blur',function(){if(par[1]()){salvarEstado();pPreview(true);}});
   });
+  /* O aviso do endereco tambem nasce com a aba: quem tem "/pagar" guardado precisa ler isso ao
+     abrir a ferramenta, e nao depois de digitar a cobranca inteira. */
+  pUrlAvisoRender();
 });
 prep('Mini loja','loja',function(){
   liga('m-op-add',mOpAdd);
