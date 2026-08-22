@@ -49,7 +49,7 @@
    ============================================================================ */
 'use strict';
 var FCCOMPART=(function(){
-var FC_COMPART_VERSAO='2026-08-22c';
+var FC_COMPART_VERSAO='2026-08-22d';
 
 /* Limpeza compartilhada pelos DOIS validadores de endereco -- cUrlOk (botao de acao da
    Contagem regressiva) e tUrlOk (pagina intermediaria do TidyCal). Ela faz o que o NAVEGADOR
@@ -236,11 +236,78 @@ function pixLimpar(t){
 /* Charset ANTES do tamanho: uma chave de 80 caracteres com emoji reportaria "tem 80
    caracteres" quando o problema e o emoji -- o operador cortaria a chave certa e continuaria
    sem QR valido. O defeito mais especifico e o que deve ser nomeado. */
+/* ===== O FORMATO DA CHAVE, e o defeito que ele existe para impedir =====
+   Ate 22/08/2026 esta funcao conferia so o CONJUNTO DE CARACTERES e o TAMANHO. A palavra
+   "contato" passava nas duas -- e passou: um bloco foi gerado com CHAVE_PIX='contato', colado
+   na pagina, e o cliente so descobriu no aplicativo do banco, que respondeu "a instituicao
+   recebedora nao conseguiu processar o pagamento". O erro apareceu no ULTIMO lugar possivel,
+   que e o pior deles: a tela de quem esta pagando.
+   O diretorio do Banco Central conhece CINCO formatos e mais nenhum. Texto fora deles nao e
+   uma chave -- e o gerador consegue saber disso sozinho, sem consultar ninguem, entao ele deve
+   saber. Nos digitos vale a pena ir alem do tamanho: um telefone digitado sem o +55
+   (27999998888) tem exatamente os 11 digitos de um CPF, e passaria por uma conferencia que so
+   contasse. Os digitos verificadores separam os dois casos sem consultar nada.
+
+   O QUE ESTA FUNCAO NAO FAZ, e nao pode fazer: dizer se a chave EXISTE. Ela sabe que "contato"
+   nunca poderia ser chave; nao sabe se contato@fotocerta.com.br esta registrada, nem em qual
+   banco. Isso so o diretorio responde, e este projeto nao tem servidor -- o teste do dono
+   continua sendo a cobranca de um centavo.
+
+   RECUSA, nunca correcao. Nao ha como adivinhar o que faltou: "contato" pode virar
+   contato@fotocerta.com.br ou contato@outracoisa.com, e escrever no lugar do operador o
+   destino de um dinheiro e o que este projeto ja recusou no endereco da pagina. */
+function fcDigitosOk(d,pesos1,pesos2){
+  /* CPF e CNPJ: o mesmo algoritmo com pesos diferentes. Sequencia de digitos repetidos
+     (00000000000, 11111111111) passa na conta e nao e documento -- e recusada a parte. */
+  function dv(pesos){
+    var soma=0,i,r;
+    for(i=0;i<pesos.length;i++)soma+=parseInt(d.charAt(i),10)*pesos[i];
+    r=soma%11;
+    return r<2?0:11-r;
+  }
+  if(/^(\d)\1+$/.test(d))return false;
+  return dv(pesos1)===parseInt(d.charAt(pesos1.length),10)&&
+         dv(pesos2)===parseInt(d.charAt(pesos2.length),10);
+}
+var FC_CPF_P1=[10,9,8,7,6,5,4,3,2];
+var FC_CPF_P2=[11,10,9,8,7,6,5,4,3,2];
+var FC_CNPJ_P1=[5,4,3,2,9,8,7,6,5,4,3,2];
+var FC_CNPJ_P2=[6,5,4,3,2,9,8,7,6,5,4,3,2];
+function pixChaveFormato(c){
+  /* 1. aleatoria (EVP): UUID canonico de 36 caracteres */
+  if(/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(c))return '';
+  /* 2. e-mail: tem arroba, entao a intencao esta clara e a recusa pode ser especifica */
+  if(c.indexOf('@')>=0){
+    if(/^[^@]+@[^@.]+(\.[^@.]+)+$/.test(c))return '';
+    return 'A chave Pix "'+c+'" tem arroba, entao seria um e-mail -- mas nao esta escrito como um. Um e-mail precisa de algo antes do arroba, um dominio depois dele e pelo menos um ponto no dominio (exemplo: contato@fotocerta.com.br).';
+  }
+  /* 3. telefone: comeca com + */
+  if(c.charAt(0)==='+'){
+    if(/^\+55[0-9]{10,11}$/.test(c))return '';
+    return 'A chave Pix "'+c+'" comeca com + e por isso seria um telefone, mas nao esta no formato do Banco Central: +55, o DDD com dois digitos e o numero com oito ou nove -- por exemplo +5527999998888. Sem espaco, sem parenteses e sem traco.';
+  }
+  /* 4. so digitos: CPF (11) ou CNPJ (14), conferidos pelos digitos verificadores */
+  if(/^[0-9]+$/.test(c)){
+    if(c.length===11&&fcDigitosOk(c,FC_CPF_P1,FC_CPF_P2))return '';
+    if(c.length===14&&fcDigitosOk(c,FC_CNPJ_P1,FC_CNPJ_P2))return '';
+    if(c.length===11)return 'A chave Pix "'+c+'" tem 11 digitos, o tamanho de um CPF, mas os digitos verificadores nao fecham -- entao ela nao e um CPF. Se voce quis usar o TELEFONE, ele precisa vir com o +55 e o DDD: +55'+c+'. Se quis o CPF, confira os numeros.';
+    if(c.length===14)return 'A chave Pix "'+c+'" tem 14 digitos, o tamanho de um CNPJ, mas os digitos verificadores nao fecham. Confira os numeros, e digite so os digitos -- sem ponto, barra ou traco.';
+    return 'A chave Pix "'+c+'" so tem numeros, entao seria um CPF (11 digitos) ou um CNPJ (14) -- mas tem '+c.length+'. Se for telefone, a chave precisa do +55 na frente e do DDD: +5527999998888. Se for CPF ou CNPJ, digite so os digitos, sem ponto, barra ou traco.';
+  }
+  /* 5. parecia uma aleatoria e nao e: 32 hexadecimais sem hifen, ou hexadecimais com hifen
+     fora do desenho 8-4-4-4-12 */
+  if(/^[0-9a-fA-F]{32}$/.test(c)||(c.indexOf('-')>=0&&/^[0-9a-fA-F-]+$/.test(c)))
+    return 'A chave Pix "'+c+'" parece uma chave aleatoria, mas nao esta no desenho que o Banco Central usa: 32 caracteres hexadecimais em cinco grupos separados por hifen, 8-4-4-4-12 (exemplo: 123e4567-e89b-12d3-a456-426614174000). Copie a chave inteira do aplicativo do banco, com os hifens.';
+  /* 6. nao e nenhum dos cinco. E aqui que "contato" para. */
+  return 'A chave Pix "'+c+'" nao e nenhum dos cinco formatos que o Banco Central aceita: e-mail, telefone com +55, CPF, CNPJ ou chave aleatoria. Do jeito que esta, o codigo Pix sai bem formado e o aplicativo do banco do seu cliente recusa o pagamento dizendo que a instituicao recebedora nao conseguiu processar -- e voce so descobre pelo cliente. Copie a chave do aplicativo do seu banco.';
+}
 function pixChaveErro(chave,bruta){
   if(!chave)return String(bruta||'').length?fciRecusa('A chave Pix so tinha espacos ou caracteres invisiveis (vindos de copiar-e-colar) e ficou vazia depois da limpeza das pontas. Digite a chave novamente.'):'';
   if(!/^[!-~]+$/.test(chave))return 'A chave Pix tem, no meio, um espaco ou um caractere fora do padrao -- pode ser um caractere invisivel que veio junto do copiar-e-colar do app do banco e que voce nao esta vendo. O codigo do QR conta os caracteres em bytes, e qualquer um fora da faixa comum (letras, numeros e sinais, sem espacos) faz o banco recusar o pagamento sem explicacao. Apague o campo e digite a chave de novo.';
   if(chave.length>PIX_CHAVE_MAX)return 'A chave Pix tem '+chave.length+' caracteres e o padrao do Banco Central aceita no maximo '+PIX_CHAVE_MAX+' no campo da chave. Uma chave maior desmonta o codigo do QR sem que ele pareca invalido: confira se nao colou algo a mais.';
-  return '';
+  /* O formato vem DEPOIS do charset e do tamanho, de proposito: os dois anteriores nomeiam
+     acidentes de copiar-e-colar, que sao mais especificos e mais provaveis. */
+  return pixChaveFormato(chave);
 }
 
 var FCI_CHAVE='fcConstrutoresIdentidade';
@@ -866,6 +933,7 @@ return {
   PRECO_MOEDAS:PRECO_MOEDAS, PRECO_PADRAO:PRECO_PADRAO, precoFmt:precoFmt,
   /* chave Pix */
   PIX_CHAVE_MAX:PIX_CHAVE_MAX, pixLimpar:pixLimpar, pixChaveErro:pixChaveErro,
+  pixChaveFormato:pixChaveFormato,
   /* endereco da pagina de pagamento: inteiro, e a migracao do que estava guardado */
   urlLimpa:urlLimpa, pUrlOk:pUrlOk, fcUrlRelativo:fcUrlRelativo,
   FC_URL_EXEMPLO:FC_URL_EXEMPLO, pUrlRecusa:pUrlRecusa, fcUrlAvisoMigracao:fcUrlAvisoMigracao,

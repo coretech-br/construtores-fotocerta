@@ -1,4 +1,4 @@
 # Gerado por scripts/conferir-versoes.sh --registrar. Uma linha por arquivo servido
 # com ?v=: <arquivo>  <versao declarada>  <sha256 do conteudo>.
-fc-compartilhado.js  2026-08-22c  aa0f6c382e96047c96b3b27e13e51959c9a116fa56480e612336f58408929fee
+fc-compartilhado.js  2026-08-22d  1c64bfd4fb7777d497f2f19b5a09842b8ab6e4e72354d3c00e83bfd91d5609b6
 cobrar/manifest.json  2026-08-21a  24f17032ec53dda30e8ac8489beee9d2124db8c617e4700713b2355a3f556dad

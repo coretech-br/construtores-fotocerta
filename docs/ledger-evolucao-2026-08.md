@@ -434,3 +434,24 @@ Spec: `docs/specs/2026-08-22-bloco-sempre-com-desconto-design.md`.
 **A regressão só prova alguma coisa se as saídas não estiverem vazias.** A primeira passagem do arnês devolveu 9 das 12 saídas em branco: as abas recusavam por falta de conteúdo (imagem, produto, código de campanha), e a comparação passava com folga sobre nada. Preencher o mínimo de cada aba foi o que transformou a regressão em prova.
 
 **Compatibilidade para trás se exercita, não se argumenta.** Em vez de afirmar que "a conta de seis é um superconjunto da de quatro", os oito links sem desconto gerados pela versão anterior foram abertos **dentro do bloco novo**, numa página servida de verdade. Oito aceitos.
+
+
+---
+
+## Décima primeira rodada — o formato da chave Pix (22/08/2026)
+
+Não estava planejada: saiu do **primeiro pagamento real**, que o app do banco recusou. Spec: `docs/specs/2026-08-22-formato-da-chave-pix-design.md`.
+
+### O que a rodada ensinou sobre método
+
+**A mensagem de erro já dizia onde olhar.** *"A **instituição recebedora** não conseguiu processar"* e *"ou pague via chave Pix"* — o app leu o código e extraiu a chave; o que falhou foi resolvê-la. Ler a frase inteira, e não só o título ("O QR Code não é válido"), poupou a investigação do lado errado.
+
+**A primeira suspeita do dono era plausível e estava errada — e descartá-la foi barato.** Ele notou o espaço em "Foto Certa" dentro do código. Dois minutos de medição (o `10` do campo 59 conta o espaço; a estrutura fecha; o Checkout já recebera pagamentos reais com esse mesmo nome) fecharam a hipótese sem discussão. **Descartar por medida é mais rápido que argumentar.**
+
+**A evidência decisiva estava na página publicada, e dava para lê-la daqui.** `curl` na `/pagar` mostrou `var CHAVE_PIX='contato'`. Antes disso a investigação era inferência; depois virou fato. **Quando um dos lados do contrato é público, leia o lado público.**
+
+**Uma causa raiz explicou dois sintomas.** O banco recusando o pagamento e, depois da correção da chave, a `/pagar` recusando o link novo. Duas telas diferentes, o mesmo bloco desatualizado. Se os dois tivessem sido tratados como problemas separados, o segundo teria virado uma caça a um defeito que não existia.
+
+**O risco de uma validação nova é o falso positivo, e é onde ela deve ser mais medida.** Recusar uma chave legítima seria pior que o defeito original — o dono ficaria sem gerar cobrança nenhuma. Daí os **800 documentos válidos gerados pelo próprio algoritmo** antes de qualquer teste de recusa.
+
+**A pergunta do dono valia mais que a correção.** *"Não sei se isso também acontece no Checkout e na Mini loja."* Acontecia. Como `pixChaveErro` já era compartilhada, a correção alcançou os cinco caminhos de graça — mas isso só é verdade porque a unificação tinha sido feita antes. **É aqui que a regra "unifica-se a fonte que escreve" se paga.**
