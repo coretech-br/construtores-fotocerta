@@ -49,7 +49,7 @@
    ============================================================================ */
 'use strict';
 var FCCOMPART=(function(){
-var FC_COMPART_VERSAO='2026-08-22a';
+var FC_COMPART_VERSAO='2026-08-22b';
 
 /* Limpeza compartilhada pelos DOIS validadores de endereco -- cUrlOk (botao de acao da
    Contagem regressiva) e tUrlOk (pagina intermediaria do TidyCal). Ela faz o que o NAVEGADOR
@@ -341,6 +341,57 @@ var P_DESC_MAX=200;
    "ENSAIO2026" no extrato. */
 function pTxidLimpo(t){return String(t==null?'':t).replace(/[^A-Za-z0-9]/g,'').substring(0,25);}
 
+/* ===== O DESCONTO NO PIX: uma conta so, tres blocos e duas paginas =====
+   Ago/2026: subiu da aba Checkout para ca quando a aba Link de cobranca (e a /cobrar) passaram
+   a oferecer desconto no Pix. O texto que fcTotalPixSrc escreve NAO mudou uma virgula na
+   mudanca de arquivo -- os blocos do Checkout e da Mini loja continuam saindo byte a byte
+   iguais --, e agora o bloco da pagina de cobranca leva o MESMO ramo de desconto dentro dele.
+   Ele depende de duas coisas que quem o emite fornece: total() e DESCONTO_PIX. No carrinho,
+   total() e a soma do pedido; na pagina de cobranca, e o total que veio no link. A conta de
+   arredondamento e a mesma nos tres, e e por isso que ela nao e reescrita em lugar nenhum. */
+/* As tres formas de totalPix sao mutuamente exclusivas e a escolha depende de tres
+   sinalizadores -- por isso ela e uma funcao, e nao um campo. Sem Pix nao se emite nada.
+   O ramo do meio e o que mais custaria repetir: com sinal ligado, o Pix cobra o SINAL, e o
+   desconto do Pix nao entra porque aplica-lo sobre o sinal seria desconto dobrado (o sinal ja
+   sai de um total que pode ter cupom). Quem gera zera o desconto na origem; aqui fica so a
+   consequencia. */
+function fcTotalPixSrc(descpix,usaPix,usaSinal){
+  if(descpix>0){
+    return 'function totalPix(){\n'+
+           'var t=total();\n'+
+           'if(DESCONTO_PIX>0)t=t*(1-DESCONTO_PIX/100);\n'+
+           'return Math.round(t*100)/100;\n}\n\n';
+  }
+  if(usaPix&&usaSinal)return 'function totalPix(){return sinalAgora();}\n\n';
+  if(usaPix)return 'function totalPix(){return Math.round(total()*100)/100;}\n\n';
+  return '';
+}
+/* O lado da FERRAMENTA, no molde de fcPixApi: em vez de reescrever "t*(1-pct/100) arredondado
+   para centavos" em JavaScript de verdade -- que seria a segunda implementacao da conta que
+   decide quanto o cliente paga --, a ferramenta AVALIA o mesmo ramo de fcTotalPixSrc que o
+   bloco leva dentro. total() e DESCONTO_PIX entram como argumentos. Nada digitado pelo
+   operador entra nesta fonte. */
+var fcDescFn=null;
+function fcPixDesc(total,pct){
+  if(!(pct>0))return Math.round(total*100)/100;
+  if(!fcDescFn)fcDescFn=(new Function('TOTAL','DESCONTO_PIX',
+    'function total(){return TOTAL;}\n'+fcTotalPixSrc(1,true,false)+'return totalPix();'));
+  return fcDescFn(total,pct);
+}
+/* Teto do percentual, o mesmo do campo do Checkout (max="90"). Acima disso o desconto deixa de
+   ser desconto: 100% seria um Pix de valor zero, que e exatamente o que estas abas existem para
+   impedir. */
+var P_DESC_PCT_MAX=90;
+/* O percentual desta cobranca, normalizado, e a UNICA porta por onde ele entra nas duas
+   paginas. Vazio, zero, negativo e ilegivel sao a MESMA coisa aqui -- sem desconto --, e e por
+   isso que "sem desconto" nao tem como sair diferente de um lado e do outro: o numero que vai
+   no link e String() deste retorno, nos dois. */
+function fcDescNum(t){
+  var n=parseFloat(String(t==null?'':t).replace(',','.'));
+  if(!isFinite(n)||n<=0)return 0;
+  return n>P_DESC_PCT_MAX?P_DESC_PCT_MAX:n;
+}
+
 /* ===== correcao a vista: a PARTE PURA =====
    A ferramenta e a /cobrar tinham, cada uma, a sua versao das mesmas quatro regras -- o trim
    (fciVal / cbTrim), o valor (pValorAjustar / cbValorAjustar), o identificador (pTxidAjustar /
@@ -370,6 +421,17 @@ function fcChaveCorrigida(v){
   var s=String(v==null?'':v),novo=pixLimpar(s);
   return (novo===s)?null:novo;
 }
+/* Percentual do desconto no Pix, pelo mesmo contrato. Campo VAZIO nao se corrige: vazio ja
+   significa "sem desconto" e escrever "0" ali seria reescrever, a toa, um campo que o operador
+   deixou em branco de proposito. O que se corrige e o que fcDescNum aparou -- 95 virando 90,
+   -3 virando 0 --, e ele se corrige NA TELA justamente para o operador nao ler 95 e mandar um
+   link de 90: prender so por dentro conserta a saida e mente para quem esta olhando. */
+function fcDescCorrigido(v){
+  var s=String(v==null?'':v),novo;
+  if(!s.replace(/\s/g,''))return null;
+  novo=String(fcDescNum(s));
+  return (novo===s)?null:novo;
+}
 
 /* ===== nome e cidade do recebedor: o que o BANCO DE QUEM PAGA vai mostrar =====
    Os campos 59 e 60 do BR Code tem teto (25 e 15) e so aceitam ASCII sem acento -- e quem
@@ -392,15 +454,54 @@ function fcPixTextoCorrigido(v,max){
   return (novo===s)?null:novo;
 }
 
-/* Endereco da pagina de pagamento. Mesmo criterio de cUrlOk e tUrlOk, pela mesma urlLimpa:
-   ancora nao serve aqui (a pagina precisa de um endereco de verdade), entao sao aceitos
-   http(s) e caminho do proprio site comecando com UMA barra. */
+/* ===== Endereco da pagina de pagamento: INTEIRO, e a razao =====
+   Ate ago/2026 este campo aceitava as duas formas -- endereco completo OU caminho do proprio
+   site ("/pagar") --, e o padrao de fabrica era o caminho. Funcionava DENTRO do site e nao
+   funcionava no unico lugar onde o link e usado: colado numa conversa de WhatsApp, "/pagar"
+   nao leva a lugar nenhum. Na pratica o dono montava o prefixo a mao a cada cobranca, que e
+   exatamente o trabalho que a /cobrar existe para eliminar.
+   Entao o campo passou a EXIGIR o endereco inteiro. Aceitar as duas formas e recusar so na
+   hora de colar seria manter o incomodo e mover a descoberta para depois do envio -- e aceitar
+   em silencio foi o que produziu o incomodo. Aqui a recusa acontece antes do link existir.
+   Mesma urlLimpa de cUrlOk e tUrlOk: o teste enxerga o endereco que o navegador resolveria.
+   A autoridade tem de existir ("https://" sozinho nao passa), pelo mesmo motivo de sempre --
+   um endereco pela metade e um link quebrado com cara de link. */
 function pUrlOk(v){
   var limpo=urlLimpa(v);
   if(!limpo)return false;
-  if(/^https?:\/\//i.test(limpo))return true;
+  return /^https?:\/\/[^\/?#]+/i.test(limpo);
+}
+/* "Isto e um caminho do proprio site?" -- a forma que ANTES era aceita, e que por isso merece
+   recusa com nome proprio em vez de cair no "nao entendi": quem tem "/pagar" guardado nao
+   digitou nada errado, ele digitou o que a ferramenta pedia ate ontem. */
+function fcUrlRelativo(v){
+  var limpo=urlLimpa(v);
+  if(!limpo)return false;
   if(/^[a-zA-Z][a-zA-Z0-9+.\-]*:/.test(limpo))return false;
   return limpo.charAt(0)==='/'&&limpo.charAt(1)!=='/';
+}
+var FC_URL_EXEMPLO='https://www.fotocerta.com.br/pagar';
+/* As TRES recusas do endereco, numa funcao so, para as duas paginas recusarem a mesma entrada
+   com a mesma palavra. Elas sao tres e nao uma porque descrevem situacoes diferentes, e uma
+   recusa que nao nomeia o defeito manda o operador procurar no lugar errado. */
+function pUrlRecusa(v){
+  var s=String(v==null?'':v);
+  if(!s.replace(/\s/g,''))return 'Informe o endereco da pagina de pagamento, e ele precisa ser o endereco INTEIRO: com https:// e o dominio (exemplo: '+FC_URL_EXEMPLO+'). O link desta cobranca vai colado numa conversa, fora do site, e ali um endereco pela metade nao leva a lugar nenhum.';
+  if(fcUrlRelativo(s))return 'O endereco da pagina de pagamento esta escrito como caminho do proprio site ("'+s+'"). Isso funciona dentro do site e NAO funciona no WhatsApp: colado numa conversa, "'+s+'" nao abre nada. Escreva o endereco INTEIRO, com https:// e o dominio (exemplo: '+FC_URL_EXEMPLO+'). Nenhum link foi gerado.';
+  if(!pUrlOk(s))return 'Nao entendi o endereco da pagina de pagamento ("'+s+'"). Ele precisa ser um endereco INTEIRO, comecando com http:// ou https:// e trazendo o dominio do site (exemplo: '+FC_URL_EXEMPLO+'). Nenhum link foi gerado.';
+  return '';
+}
+/* ---- a MIGRACAO do que ja estava guardado: avisa, nunca sobrescreve ----
+   O valor guardado neste navegador (ou vindo de um backup, ou da outra pagina) pode ser o
+   "/pagar" de fabrica. Trocar por conta propria e impossivel de fazer certo: a ferramenta NAO
+   SABE qual e o dominio do dono -- ela nunca soube, e chutar "www.fotocerta.com.br" seria
+   escrever uma credencial de destino no lugar dele. Entao o campo fica exatamente como estava,
+   com um aviso a vista, e quem completa e o dono. Trocar em silencio um endereco que o operador
+   esta lendo na tela e a classe de defeito que este projeto ja recusou no valor, no
+   identificador e no limiar de urgencia. */
+function fcUrlAvisoMigracao(v){
+  if(!fcUrlRelativo(v))return '';
+  return 'O endereco da pagina de pagamento guardado aqui e um caminho do proprio site ("'+String(v)+'"), e ele nao serve mais: o link precisa do endereco INTEIRO para funcionar colado numa conversa de WhatsApp. Nada foi trocado sozinho -- a ferramenta nao sabe qual e o seu dominio. Complete o campo com https:// e o dominio (exemplo: '+FC_URL_EXEMPLO+').';
 }
 
 /* Lista de permissao do link de cobranca do PayPal. O endereco viaja NO LINK, entao ele e
@@ -506,17 +607,43 @@ function pPpHostOk(v){
    sem horario de verao desde 2019), o mesmo fuso fixo da Contagem regressiva: sem isso um
    cliente viajando veria outro prazo. A comparacao e feita em milissegundos desde a epoca, que
    nao dependem do fuso do aparelho -- so do RELOGIO dele, e isso e um limite declarado. */
-var P_SELO_SRC=
+/* ===== O SELO E O DESCONTO: por que a fonte e PARAMETRIZADA, e nao duplicada =====
+   Com desconto no Pix o endereco ganha dois parametros -- t (o total, que o PayPal cobra) e x
+   (o percentual) -- e os dois precisam entrar na conta do selo, senao a unica coisa que o
+   desconto acrescentaria ao link seria uma porta nova para editar.
+   O PROBLEMA: um selo de arita fixa em SEIS mudaria a conta de TODO link, inclusive dos que nao
+   tem desconto -- e isso derrubaria, sem ganho nenhum, todas as cobrancas ja enviadas e o bloco
+   ja colado na /pagar (que nao e versionado e confere do jeito que estava no dia da colagem).
+   A REGRA ADOTADA: os quatro de sempre contam SEMPRE, na ordem de sempre; t e x entram DEPOIS
+   deles e SO quando pelo menos um dos dois vem preenchido. Disso saem quatro propriedades, e as
+   quatro sao verificaveis:
+     1. link sem desconto sela EXATAMENTE como antes -- byte a byte;
+     2. um bloco com a conta nova aceita os links antigos (a conta e um superconjunto);
+     3. apagar o t, ou o x, ou os dois, muda a contagem e derruba o link;
+     4. acrescentar t e x a um link que nao os tinha tambem derruba.
+   Os dois entram JUNTOS -- se um deles vem, os dois contam, mesmo vazio -- de proposito: com
+   entrada condicional independente, "t=10 sem x" e "x=10 sem t" produziriam a MESMA lista e o
+   mesmo selo. Sao dois parametros que so fazem sentido em par, e a conta os trata como par.
+   A FONTE E UMA SO, parametrizada: nao existem duas seloDe escritas por extenso para divergir.
+   A serializacao, o laco e o crc16 sao os mesmos objetos de texto nos dois casos; o que o
+   parametro decide sao a assinatura e as duas linhas do par. O bloco leva o texto que
+   pSeloSrc(comDesc) devolve, e a ferramenta AVALIA esse mesmo texto (pSeloApi(comDesc)). */
+function pSeloDeSrc(comDesc){
+  return "function seloDe(pc,pd,pp,pv"+(comDesc?",pt,px":"")+"){\n"+
+    "  var ps=[pc,pd,pp,pv],t='',i,s"+(comDesc?",a,b":"")+";\n"+
+    (comDesc?"  a=String(pt==null?'':pt);b=String(px==null?'':px);\n  if(a!==''||b!==''){ps.push(a);ps.push(b);}\n":"")+
+    "  for(i=0;i<ps.length;i++){s=String(ps[i]==null?'':ps[i]);t+=s.length+':'+s+'|';}\n"+
+    "  return crc16(seloBytes(t));\n"+
+    "}\n";
+}
+function pSeloSrc(comDesc){return P_SELO_ANTES+pSeloDeSrc(comDesc)+P_SELO_DEPOIS;}
+var P_SELO_ANTES=
 "function seloBytes(s){\n"+
 "  var o='',i,c;\n"+
 "  for(i=0;i<s.length;i++){c=s.charCodeAt(i);o+=String.fromCharCode((c>>8)&255,c&255);}\n"+
 "  return o;\n"+
-"}\n"+
-"function seloDe(pc,pd,pp,pv){\n"+
-"  var ps=[pc,pd,pp,pv],t='',i,s;\n"+
-"  for(i=0;i<ps.length;i++){s=String(ps[i]==null?'':ps[i]);t+=s.length+':'+s+'|';}\n"+
-"  return crc16(seloBytes(t));\n"+
-"}\n"+
+"}\n";
+var P_SELO_DEPOIS=
 "function prazoDia(pv){\n"+
 "  var s=String(pv||''),d;\n"+
 "  if(!/^[0-9a-z]+$/.test(s))return -1;\n"+
@@ -531,13 +658,19 @@ var P_SELO_SRC=
 "  var dt=new Date(dia*86400000),dd=dt.getUTCDate(),mm=dt.getUTCMonth()+1;\n"+
 "  return (dd<10?'0':'')+dd+'/'+(mm<10?'0':'')+mm+'/'+dt.getUTCFullYear();\n"+
 "}\n\n";
-/* O lado da FERRAMENTA: as mesmas quatro funcoes, avaliadas a partir do mesmo texto, e sobre o
-   MESMO crc16 que o bloco usa. Nada digitado pelo operador entra nesta fonte. */
-var pSeloFns=null;
-function pSeloApi(){
-  if(!pSeloFns)pSeloFns=(new Function(FC_PIX_SRC.crc16+P_SELO_SRC+
+/* O lado da FERRAMENTA: as mesmas cinco funcoes, avaliadas a partir do mesmo texto, e sobre o
+   MESMO crc16 que o bloco usa. Nada digitado pelo operador entra nesta fonte.
+   DUAS CAIXAS, e nao uma: comDesc decide qual TEXTO e avaliado, e o texto avaliado e sempre o
+   que o bloco daquela configuracao leva dentro. Avaliar sempre a versao de seis e comparar
+   daria o mesmo numero (a de seis com t e x vazios e identica a de quatro), mas seria a
+   ferramenta rodando um codigo que o bloco nao tem -- e a regra deste arquivo e o contrario
+   disso. As funcoes de prazo sao as mesmas nas duas caixas. */
+var pSeloFns={};
+function pSeloApi(comDesc){
+  var k=comDesc?'d':'s';
+  if(!pSeloFns[k])pSeloFns[k]=(new Function(FC_PIX_SRC.crc16+pSeloSrc(!!comDesc)+
     'return {seloDe:seloDe,prazoDia:prazoDia,prazoFim:prazoFim,prazoTexto:prazoTexto};'))();
-  return pSeloFns;
+  return pSeloFns[k];
 }
 /* A data escolhida, em numero de dias desde 1970-01-01.
    Date.UTC evita o fuso do computador do operador: "2026-08-25" e o dia civil 2026-08-25, e nao
@@ -594,7 +727,9 @@ function pRecusaBloco(cfg){
 function pRecusaCobranca(cfg){
   var r=pRecusaBloco(cfg);
   if(r)return r;
-  if(!cfg.url||!pUrlOk(cfg.url))return 'Informe o endereco da pagina de pagamento: um endereco http(s) completo, ou um caminho do proprio site comecando com barra (/pagar).';
+  /* O ENDERECO INTEIRO: as tres recusas moram em pUrlRecusa, e as duas paginas usam a mesma. */
+  var erroUrl=pUrlRecusa(cfg.url);
+  if(erroUrl)return erroUrl;
   if(!String(cfg.desc).replace(/\s/g,''))return 'Escreva a descricao do que esta sendo cobrado. E o que o cliente le na pagina e o que volta na mensagem do WhatsApp.';
   /* Caractere que NAO CABE num endereco. encodeURIComponent LANCA (URIError) diante de uma
      metade solta de par substituto -- o que acontece quando um emoji e cortado ao meio numa
@@ -611,6 +746,12 @@ function pRecusaCobranca(cfg){
      conferindo a grafia de um numero que esta escrito certo. */
   if(cfg.valor<=0)return 'O valor "'+cfg.valorBruto+'" arredonda para zero. O Pix cobra em centavos, entao o minimo e R$ 0,01. Um codigo Pix com valor zero deixa o pagador digitar o que quiser -- que e exatamente o que esta aba existe para impedir.';
   if(cfg.valor>P_VALOR_MAX)return 'O valor passa de '+precoFmt('BRL',P_VALOR_MAX)+'. Confira se nao sobrou um zero.';
+  /* O DESCONTO NO PIX. Ele e opcional: campo vazio ou zero = link sem desconto, exatamente como
+     antes de ele existir. O que se recusa e o desconto que derruba o Pix abaixo de um centavo --
+     o Pix cobra em centavos, e um payload de valor zero nem passaria na propria conferencia
+     (pConferir), com uma frase que falaria do codigo montado em vez de falar do desconto. O
+     defeito mais especifico e o que deve ser nomeado. */
+  if(pDescPct(cfg)>0&&pValorPix(cfg)<0.01)return 'O desconto de '+pDescPct(cfg)+'% derruba o valor do Pix para menos de um centavo (o total e '+precoFmt('BRL',cfg.valor)+'). O Pix cobra em centavos, entao o minimo e R$ 0,01: escolha um desconto menor ou um valor maior.';
   /* A validade e opcional: campo vazio = link sem prazo, como antes de ela existir. O que se
      recusa e data que a ferramenta nao entendeu, e data JA VENCIDA -- um link que nasce
      vencido chega ao cliente como uma pagina que nao mostra o pagamento, e o operador so
@@ -639,17 +780,37 @@ function pRecusaCobranca(cfg){
    Monta pelo MESMO caminho do carrinho publicado: fcPixApi avalia a fonte unica FC_PIX_SRC, a
    mesma que os dois blocos entregues levam dentro. Nao ha uma segunda montagem de payload
    nesta ferramenta -- nem podia haver, porque e o payload que carrega o valor. */
+/* ===== os DOIS valores desta cobranca, e onde cada um mora =====
+   Sem desconto existe UM valor, e ele mora dentro do codigo Pix -- foi essa decisao que fez
+   tela, Pix e PayPal nao terem como divergir. Com desconto passam a existir dois: o TOTAL (que
+   o PayPal cobra, e que viaja no parametro t, coberto pelo selo) e o VALOR DO PIX (que continua
+   morando dentro do codigo Pix, e de lugar nenhum mais).
+   Nao sao duas contas independentes: pValorPix e feita AQUI e RECONFERIDA na pagina, pela mesma
+   fcTotalPixSrc que o bloco leva dentro. E o mesmo principio que ja faz a /pagar remontar o
+   payload com os dados do recebedor e exigir igualdade byte a byte.
+   Sem desconto, pValorPix devolve cfg.valor arredondado a centavos -- que e o que cfg.valor ja
+   e (pValorNum arredonda) --, entao o payload sai identico ao de antes do desconto existir. */
+function pDescPct(cfg){return fcDescNum(cfg&&cfg.descpix);}
+function pValorPix(cfg){return fcPixDesc(cfg.valor,pDescPct(cfg));}
+/* Os dois parametros novos do endereco, na forma EXATA em que viajam nele -- e a mesma forma
+   que entra na conta do selo. Vazios quando nao ha desconto, e e por isso que o link sem
+   desconto continua sendo o de antes. */
+function pTotCod(cfg){return pDescPct(cfg)>0?cfg.valor.toFixed(2):'';}
+function pDescCod(cfg){return pDescPct(cfg)>0?String(pDescPct(cfg)):'';}
 function pPayload(cfg){
-  return fcPixApi().montar(cfg.chave,cfg.nomer,cfg.cidade,cfg.txid)(cfg.valor);
+  return fcPixApi().montar(cfg.chave,cfg.nomer,cfg.cidade,cfg.txid)(pValorPix(cfg));
 }
 /* A conferencia que o gerador faz em cima do que ele mesmo produziu. Parece redundante e nao
    e: e ela que garante que NENHUM link saia daqui sem o campo 54, com o campo 54 ilegivel, ou
    com um valor diferente do que o operador digitou. Roda a MESMA pixLer que a pagina publicada
    vai rodar, entao o que passa aqui passa la. */
 function pConferir(cfg,codigo){
-  var api=fcPixApi(),lido=api.pixLer(codigo);
+  var api=fcPixApi(),lido=api.pixLer(codigo),alvo=pValorPix(cfg);
   if(!lido.ok)return 'O codigo Pix montado para esta cobranca nao passou na propria conferencia ('+lido.erro+'). Nenhum link foi gerado. Confira a chave, o nome e a cidade.';
-  if(Math.abs(lido.valor-cfg.valor)>0.0001)return 'O valor dentro do codigo Pix ('+precoFmt('BRL',lido.valor)+') nao bate com o valor digitado ('+precoFmt('BRL',cfg.valor)+'). Nenhum link foi gerado.';
+  /* COM DESCONTO, o alvo e o valor JA DESCONTADO -- e o que vai dentro do codigo Pix. Comparar
+     com o total aqui recusaria toda cobranca com desconto; comparar com o desconto sem dizer
+     isso ao operador faria a frase mentir sobre qual numero nao bateu. */
+  if(Math.abs(lido.valor-alvo)>0.0001)return 'O valor dentro do codigo Pix ('+precoFmt('BRL',lido.valor)+') nao bate com o valor que esta cobranca cobra no Pix ('+precoFmt('BRL',alvo)+'). Nenhum link foi gerado.';
   return '';
 }
 /* ===== a consulta do link: UMA montagem =====
@@ -673,11 +834,16 @@ function pEncOk(s){
   try{encodeURIComponent(String(s==null?'':s));return true;}catch(e){return false;}
 }
 function pBusca(cfg,codigo){
-  var pp=pPpParam(cfg),v=pValCod(cfg);
+  var pp=pPpParam(cfg),v=pValCod(cfg),t=pTotCod(cfg),x=pDescCod(cfg);
   var q='?c='+encodeURIComponent(codigo)+'&d='+encodeURIComponent(cfg.desc);
   if(pp)q+='&pp='+encodeURIComponent(pp);
   if(v)q+='&v='+encodeURIComponent(v);
-  q+='&s='+pSeloApi().seloDe(codigo,cfg.desc,pp,v);
+  /* t e x entram DEPOIS do v, e so quando ha desconto -- e e nessa ordem que os dois lados
+     contam o selo. Sem desconto nao ha t nem x, a conta volta a ser a de quatro, e o endereco
+     inteiro sai byte a byte igual ao que esta aba gerava antes de o desconto existir. */
+  if(t)q+='&t='+encodeURIComponent(t);
+  if(x)q+='&x='+encodeURIComponent(x);
+  q+='&s='+pSeloApi(!!t).seloDe(codigo,cfg.desc,pp,v,t,x);
   return q;
 }
 function pLinkDe(cfg,codigo){
@@ -693,8 +859,9 @@ return {
   PRECO_MOEDAS:PRECO_MOEDAS, PRECO_PADRAO:PRECO_PADRAO, precoFmt:precoFmt,
   /* chave Pix */
   PIX_CHAVE_MAX:PIX_CHAVE_MAX, pixLimpar:pixLimpar, pixChaveErro:pixChaveErro,
-  /* endereco */
-  urlLimpa:urlLimpa, pUrlOk:pUrlOk,
+  /* endereco da pagina de pagamento: inteiro, e a migracao do que estava guardado */
+  urlLimpa:urlLimpa, pUrlOk:pUrlOk, fcUrlRelativo:fcUrlRelativo,
+  FC_URL_EXEMPLO:FC_URL_EXEMPLO, pUrlRecusa:pUrlRecusa, fcUrlAvisoMigracao:fcUrlAvisoMigracao,
   /* identidade guardada */
   FCI_CHAVE:FCI_CHAVE, FCI_CAMPOS:FCI_CAMPOS, FCI_PADRAO:FCI_PADRAO,
   FCI_APONTA:FCI_APONTA, fciRecusa:fciRecusa,
@@ -704,15 +871,19 @@ return {
   pValorNum:pValorNum, pTxidLimpo:pTxidLimpo,
   /* correcao a vista: a parte pura das quatro regras que as duas paginas aplicam */
   fcTrim:fcTrim, fcValorCorrigido:fcValorCorrigido, fcTxidCorrigido:fcTxidCorrigido,
-  fcChaveCorrigida:fcChaveCorrigida,
+  fcChaveCorrigida:fcChaveCorrigida, fcDescCorrigido:fcDescCorrigido,
+  /* desconto no Pix: a fonte que escreve totalPix nos tres blocos, e o lado que a ferramenta avalia */
+  fcTotalPixSrc:fcTotalPixSrc, fcPixDesc:fcPixDesc,
+  P_DESC_PCT_MAX:P_DESC_PCT_MAX, fcDescNum:fcDescNum,
+  pDescPct:pDescPct, pValorPix:pValorPix, pTotCod:pTotCod, pDescCod:pDescCod,
   /* nome e cidade do recebedor, como o banco de quem paga vai mostrar */
   FC_NOMER_MAX:FC_NOMER_MAX, FC_CIDADE_MAX:FC_CIDADE_MAX,
   fcPixTexto:fcPixTexto, fcPixTextoCorrigido:fcPixTextoCorrigido,
   P_VAL_NADA:P_VAL_NADA, fcValDia:fcValDia, pValCod:pValCod, pValTexto:pValTexto,
   /* PayPal */
   P_PP_HOSTS:P_PP_HOSTS, P_PP_SRC:P_PP_SRC, pPpHostOk:pPpHostOk,
-  /* selo e prazo (texto literal + o avaliador) */
-  P_SELO_SRC:P_SELO_SRC, pSeloApi:pSeloApi,
+  /* selo e prazo (a fonte parametrizada + o avaliador) */
+  pSeloSrc:pSeloSrc, pSeloApi:pSeloApi,
   /* as recusas e a montagem do link -- o coracao do invariante */
   pRecusaBloco:pRecusaBloco, pRecusaCobranca:pRecusaCobranca,
   pPayload:pPayload, pConferir:pConferir,
