@@ -56,6 +56,11 @@
      dois mundos (defeito que so aparece publicado). Quem centra de PROPOSITO (.pv-vazia e os
      estilos em atributo das previas) declara no proprio elemento e continua centrado. */
   body,.topo,.fcg-fixa,.fcg-painel,.app,.rodape{text-align:left}
+  /* PARADA DE VERSAO (ver fcCompartParar): a ferramenta some e fica so o aviso. A marca vai no
+     elemento RAIZ porque o script que a poe roda no meio do <body>, antes de o resto da pagina
+     existir -- esconder pelo DOM alcancaria so a metade ja analisada. O aviso vence por ID. */
+  html.fc-parado body>*{display:none}
+  html.fc-parado body>#fc-parado{display:block}
   .topo{max-width:var(--larg);margin:0 auto;padding:28px 20px 8px;display:flex;align-items:center;gap:14px}
   .topo svg{width:40px;height:48px;flex-shrink:0}
   .topo h1{font-size:22px;font-weight:600;margin:0;letter-spacing:.3px}
@@ -2671,7 +2676,7 @@
      nova para a outra, e o resultado seriam links que a propria /pagar recusa -- sem
      erro nenhum na tela. Ao mexer no arquivo, troque a versao AQUI, em cobrar/index.html
      e no FC_COMPART_VERSAO de dentro dele. -->
-<script src="fc-compartilhado.js?v=2026-08-21a"></script>
+<script src="fc-compartilhado.js?v=2026-08-22a"></script>
 <script>
 'use strict';
 (function(){
@@ -2694,7 +2699,7 @@
    OS APELIDOS ABAIXO NAO SAO COPIA: sao o mesmo objeto, com o nome que o resto
    deste arquivo sempre usou. Trocar os nomes em cem lugares so para dizer
    FCCOMPART.x mudaria muito codigo para nao mudar comportamento nenhum. */
-var FC_COMPART_ESPERADA='2026-08-21a';
+var FC_COMPART_ESPERADA='2026-08-22a';
 if(!window.FCCOMPART||FCCOMPART.versao!==FC_COMPART_ESPERADA){
   fcCompartParar(FC_COMPART_ESPERADA,window.FCCOMPART?FCCOMPART.versao:null);
   return;
@@ -2709,6 +2714,10 @@ var FCI_APONTA=C.FCI_APONTA, fciRecusa=C.fciRecusa;
 var fcLerJson=C.fcLerJson, fcIdentidadeDe=C.fcIdentidadeDe;
 var P_VALOR_MAX=C.P_VALOR_MAX, P_DESC_MAX=C.P_DESC_MAX;
 var pValorNum=C.pValorNum, pTxidLimpo=C.pTxidLimpo;
+var fcTrim=C.fcTrim, fcValorCorrigido=C.fcValorCorrigido, fcTxidCorrigido=C.fcTxidCorrigido;
+var fcChaveCorrigida=C.fcChaveCorrigida;
+var FC_NOMER_MAX=C.FC_NOMER_MAX, FC_CIDADE_MAX=C.FC_CIDADE_MAX;
+var fcPixTexto=C.fcPixTexto, fcPixTextoCorrigido=C.fcPixTextoCorrigido;
 var P_VAL_NADA=C.P_VAL_NADA, fcValDia=C.fcValDia, pValCod=C.pValCod, pValTexto=C.pValTexto;
 var P_PP_HOSTS=C.P_PP_HOSTS, P_PP_SRC=C.P_PP_SRC, pPpHostOk=C.pPpHostOk;
 var P_SELO_SRC=C.P_SELO_SRC, pSeloApi=C.pSeloApi;
@@ -2721,8 +2730,19 @@ var pPpParam=C.pPpParam, pEncOk=C.pEncOk, pBusca=C.pBusca, pLinkDe=C.pLinkDe;
    ausente. */
 function fcCompartParar(pedida,chegou){
   var d=document.createElement('div');
+  /* A FERRAMENTA TEM DE SUMIR JUNTO COM O AVISO. Medido antes desta rodada: a barra vermelha
+     aparecia e a ferramenta inteira continuava desenhada -- abas, campos, botoes --, so que
+     INERTE, porque o IIFE retorna aqui e nunca chega a ligar os eventos. Interface viva que
+     nao responde e pior do que interface ausente: o operador digita a cobranca inteira e conclui
+     que o computador travou, em vez de ler o aviso.
+     Esconder pelo DOM aqui nao serve: este <script> roda no MEIO do <body>, e tudo o que vem
+     depois ainda nem foi analisado. Quem alcanca o que ainda vai nascer e a folha de estilo do
+     <head> -- por isso a marca vai no elemento raiz, e a regra 'html.fc-parado' esconde os
+     filhos diretos do body menos este aviso (que vence por ID). */
+  d.id='fc-parado';
   d.style.cssText='position:fixed;left:0;right:0;top:0;z-index:99999;background:#8C1D18;color:#fff;'+
     'padding:14px 18px;font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;text-align:left';
+  try{document.documentElement.className+=' fc-parado';}catch(e){}
   d.textContent=chegou
     ? 'A ferramenta parou antes de comecar: o arquivo compartilhado que chegou e a versao "'+chegou+'", e esta pagina pediu a "'+pedida+'". Isso costuma ser uma copia velha guardada pelo navegador. Recarregue segurando Shift; se continuar, avise que a publicacao saiu pela metade. Nada foi gerado, e nada do que estava salvo foi tocado.'
     : 'A ferramenta parou antes de comecar: o arquivo fc-compartilhado.js (versao "'+pedida+'") nao carregou. Sem ele nao ha como montar codigo Pix nem selar um link. Confira a conexao e recarregue. Nada foi gerado, e nada do que estava salvo foi tocado.';
@@ -3046,13 +3066,9 @@ function fcQtdCssGer(raiz,pref,destaque){
    copia da limpeza por aba seria a mesma correcao em tres lugares. Hoje o campo e um so
    ('fci-chave'), no painel Identidade, e o parametro sobrevive porque a funcao nao tem por que
    saber onde o campo mora -- quem sabe e quem a chama. */
-function fcPixChaveAjustar(id){
-  var el=$(id);if(!el)return false;
-  var limpo=pixLimpar(el.value);
-  if(limpo===el.value)return false;
-  el.value=limpo;
-  return true;
-}
+/* A REGRA e compartilhada (fcChaveCorrigida, em fc-compartilhado.js); aqui fica o que toca o
+   DOM, por fcCampoAjustar -- o mesmo molde de pValorAjustar e pTxidAjustar. */
+function fcPixChaveAjustar(id){return fcCampoAjustar(id,fcChaveCorrigida);}
 /* FONTE COMPARTILHADA com a pagina /cobrar: pixChaveErro vive em fc-compartilhado.js. */
 
 /* ===== o shim do ambiente da previa: fonte unica =====
@@ -3794,7 +3810,9 @@ var FCI={
 
 /* ---- leitura dos campos: caminho unico, o mesmo para gerador e previa ---- */
 function fciBruto(k){var el=$('fci-'+k);return el?String(el.value):'';}
-function fciVal(k){return fciBruto(k).replace(/^\s+/,'').replace(/\s+$/,'');}
+/* FONTE COMPARTILHADA com a pagina /cobrar: o trim (fcTrim) vive em fc-compartilhado.js -- e
+   ele que decide o que entra no payload, e "quase igual" nos dois lados e um payload diferente. */
+function fciVal(k){return fcTrim(fciBruto(k));}
 function fciDigitos(k){return fciVal(k).replace(/\D/g,'');}
 function fciIdentidade(){var o={},i;for(i=0;i<FCI_CAMPOS.length;i++)o[FCI_CAMPOS[i][0]]=fciBruto(FCI_CAMPOS[i][0]);return o;}
 function fciPaletaAtual(){var o={},i;for(i=0;i<FCI_PALETA.length;i++)o[FCI_PALETA[i][0]]=corSegura('fci-'+FCI_PALETA[i][0],FCI_PALETA[i][1]);return o;}
@@ -4163,6 +4181,13 @@ function fciAvisoRender(){
   txt+='Confira os campos abaixo antes de gerar qualquer código.';
   fcgTexto(p,txt);
   caixa.style.display='';
+  /* O RECADO MORA DENTRO DO PAINEL, E O PAINEL NASCE FECHADO. Medido antes desta rodada: a
+     migração sobrescrevia a chave Pix com o valor recolhido das abas antigas e o recado que
+     conta isso ficava invisível (a caixa com display vazio, o painel sem a classe 'aberto') —
+     ou seja, o único aviso de que o dinheiro passou a ir para outra chave não aparecia na tela.
+     Quem tem notícia abre o painel. Só aqui, no ramo que MOSTRA: fechar o recado passa por
+     avisoVisto e cai no ramo de cima, que esconde e não abre nada. */
+  fciPainelAbrir(true);
 }
 
 /* ---- a paleta: copia com origem visivel (R3), nunca amarracao ---- */
@@ -12122,27 +12147,20 @@ function pPreso(id,def){var v=fcPreso(P_NUMS,id);return v==null?def:v;}
 
 /* FONTE COMPARTILHADA com a pagina /cobrar: pValorNum, P_VALOR_MAX e P_DESC_MAX vive em fc-compartilhado.js. */
 /* Correcao a vista, no padrao do c-mob: o campo passa a exibir o valor exatamente como ele vai
-   entrar no codigo Pix. So em 'change'/'blur', nunca em 'input'. Valor que NAO da para
-   interpretar fica como esta -- reescrever o que nao se entendeu seria assumir, e quem recusa
-   com nome e a geracao. */
-function pValorAjustar(){
-  var el=$('p-valor');if(!el)return false;
-  if(!String(el.value).replace(/\s/g,''))return false;
-  var n=pValorNum(el.value);
-  if(isNaN(n)||n<=0||n>P_VALOR_MAX)return false;
-  var novo=n.toFixed(2).replace('.',',');
-  if(novo===el.value)return false;
+   entrar no codigo Pix. So em 'change'/'blur', nunca em 'input'.
+   FONTE COMPARTILHADA com a /cobrar: a REGRA (fcValorCorrigido, fcTxidCorrigido,
+   fcChaveCorrigida) vive em fc-compartilhado.js e devolve o texto corrigido ou null; aqui fica
+   so o que toca o DOM -- o mesmo molde de pValDia/fcValDia. */
+function fcCampoAjustar(id,regra){
+  var el=$(id);if(!el)return false;
+  var novo=regra(el.value);
+  if(novo===null)return false;
   el.value=novo;
   return true;
 }
+function pValorAjustar(){return fcCampoAjustar('p-valor',fcValorCorrigido);}
 /* FONTE COMPARTILHADA com a pagina /cobrar: pTxidLimpo vive em fc-compartilhado.js. */
-function pTxidAjustar(){
-  var el=$('p-txid');if(!el)return false;
-  var v=pTxidLimpo(el.value);
-  if(v===el.value)return false;
-  el.value=v;
-  return true;
-}
+function pTxidAjustar(){return fcCampoAjustar('p-txid',fcTxidCorrigido);}
 
 /* FONTE COMPARTILHADA com a pagina /cobrar: pUrlOk vive em fc-compartilhado.js. */
 /* FONTE COMPARTILHADA com a pagina /cobrar: P_PP_HOSTS, P_PP_SRC e pPpHostOk vive em fc-compartilhado.js. */

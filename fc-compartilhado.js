@@ -35,15 +35,21 @@
    (fc-compartilhado.js?v=...) e por isso cada pagina confere, ao carregar, se
    a versao que chegou e a que ela pediu; se nao for, ela para e diz.
    AO PUBLICAR UMA MUDANCA AQUI: troque FC_COMPART_VERSAO abaixo E o ?v= das
-   duas paginas. A conferencia:
-     grep -c "fc-compartilhado.js?v=2026-08-21a" index.html cobrar/index.html
-   tem de sair 1 nos dois.
+   duas paginas. A conferencia NAO e um grep a olho, e sim:
+     scripts/conferir-versoes.sh
+   Ela existe porque a guarda de versao das duas paginas e CEGA POR CONSTRUCAO:
+   quem declara a versao e o proprio arquivo cuja atualidade esta em duvida.
+   Medido: mudando o comportamento de seloDe (':' -> ';') SEM trocar a versao,
+   sob 'immutable', o navegador seguiu servindo a copia velha, os dois arquivos
+   passaram a selar diferente (D57C contra 625D) e nenhuma pagina avisou nada.
+   O script compara o CONTEUDO com a versao declarada e falha se o arquivo mudou
+   sem o troco -- disciplina que depende de lembrar nao e disciplina.
 
    ES5, sem dependencia externa, sem acesso ao DOM.
    ============================================================================ */
 'use strict';
 var FCCOMPART=(function(){
-var FC_COMPART_VERSAO='2026-08-21a';
+var FC_COMPART_VERSAO='2026-08-22a';
 
 /* Limpeza compartilhada pelos DOIS validadores de endereco -- cUrlOk (botao de acao da
    Contagem regressiva) e tUrlOk (pagina intermediaria do TidyCal). Ela faz o que o NAVEGADOR
@@ -265,14 +271,26 @@ function fciRecusa(t){return t+FCI_APONTA;}
    As duas paginas leem a MESMA chave ('fcConstrutoresIdentidade') e a mesma
    forma. Quem trata a falha e diferente em cada uma -- a ferramenta tem a barra
    vermelha, a /cobrar tem o proprio aviso --, entao o tratamento entra por
-   funcao, e nao por copia da leitura. */
+   funcao, e nao por copia da leitura.
+
+   TRES ARGUMENTOS NA FALHA, e o terceiro e o que importa: aoFalhar(fase, erro, codigo).
+     fase   frase pronta, SEM ACENTO, do jeito que a barra vermelha da ferramenta escreve;
+     erro   a excecao, para o console;
+     codigo 'ler' ou 'entender' -- estavel, para quem chama DECIDIR e para quem escreve
+            com acento montar a propria frase.
+   O codigo nasceu de dois defeitos que a frase pronta nao resolvia. Um: a /cobrar embutia
+   'fase' no meio de um texto acentuado e saia "Nao deu para entender o que estava gravado --
+   o conteudo salvo esta corrompido (configuracoes das abas)", acento e nao-acento na MESMA
+   frase. Dois: "nao havia nada gravado" e "nao deu para ler o que estava gravado" chegavam os
+   dois como null, e quem funde antes de gravar precisa distinguir -- fundir com null quando a
+   leitura FALHOU apaga o que estava la. */
 function fcLerJson(chave,aoFalhar){
   var raw,st;
   try{raw=localStorage.getItem(chave);}
-  catch(e){if(aoFalhar)aoFalhar('ler o que estava gravado -- armazenamento do navegador indisponivel',e);return null;}
+  catch(e){if(aoFalhar)aoFalhar('ler o que estava gravado -- armazenamento do navegador indisponivel',e,'ler');return null;}
   if(!raw)return null;
   try{st=JSON.parse(raw);}
-  catch(e){if(aoFalhar)aoFalhar('entender o que estava gravado -- o conteudo salvo esta corrompido',e);return null;}
+  catch(e){if(aoFalhar)aoFalhar('entender o que estava gravado -- o conteudo salvo esta corrompido',e,'entender');return null;}
   if(!st||typeof st!=='object')return null;
   return (Object.prototype.toString.call(st)==='[object Array]')?null:st;
 }
@@ -322,6 +340,57 @@ var P_DESC_MAX=200;
    acontece A VISTA, senao o operador leria "ENSAIO-2026" na tela e conciliaria por
    "ENSAIO2026" no extrato. */
 function pTxidLimpo(t){return String(t==null?'':t).replace(/[^A-Za-z0-9]/g,'').substring(0,25);}
+
+/* ===== correcao a vista: a PARTE PURA =====
+   A ferramenta e a /cobrar tinham, cada uma, a sua versao das mesmas quatro regras -- o trim
+   (fciVal / cbTrim), o valor (pValorAjustar / cbValorAjustar), o identificador (pTxidAjustar /
+   cbTxidAjustar) e a chave Pix (fcPixChaveAjustar / cbChaveAjustar). Nenhuma divergia em bytes,
+   mas as quatro decidem o que o operador LE na tela antes de mandar o link, e e ai que divergir
+   custa caro. O argumento "toca o DOM" nao segura a duplicacao: o molde certo ja existia no
+   proprio projeto -- pValDia le o campo e chama fcValDia, que e puro. As quatro passaram para
+   o mesmo molde.
+   CONTRATO DE TODAS: recebem o TEXTO do campo e devolvem o texto corrigido, ou null quando nao
+   ha nada a corrigir. Quem toca o DOM sao as duas paginas, cada uma com o seu involucro. */
+function fcTrim(s){return String(s==null?'':s).replace(/^\s+/,'').replace(/\s+$/,'');}
+/* Valor: campo vazio nao se corrige, e valor que NAO da para interpretar fica como esta --
+   reescrever o que nao se entendeu seria assumir, e quem recusa com nome e a geracao. */
+function fcValorCorrigido(v){
+  var s=String(v==null?'':v),n;
+  if(!s.replace(/\s/g,''))return null;
+  n=pValorNum(s);
+  if(isNaN(n)||n<=0||n>P_VALOR_MAX)return null;
+  n=n.toFixed(2).replace('.',',');
+  return (n===s)?null:n;
+}
+function fcTxidCorrigido(v){
+  var s=String(v==null?'':v),novo=pTxidLimpo(s);
+  return (novo===s)?null:novo;
+}
+function fcChaveCorrigida(v){
+  var s=String(v==null?'':v),novo=pixLimpar(s);
+  return (novo===s)?null:novo;
+}
+
+/* ===== nome e cidade do recebedor: o que o BANCO DE QUEM PAGA vai mostrar =====
+   Os campos 59 e 60 do BR Code tem teto (25 e 15) e so aceitam ASCII sem acento -- e quem
+   aplica isso e semAcento, dentro de montarPayload. Enquanto o teto morava so no maxlength do
+   <input> da ferramenta, um nome guardado maior (vindo da migracao, de um backup ou da outra
+   pagina) era CORTADO em silencio: medido, "Fotografia Luciano Pacheco Ltda ME" virava
+   "Fotografia Luciano Pachec" dentro do payload enquanto a tela seguia mostrando o texto
+   inteiro. O selo fecha do mesmo jeito, entao nada quebra -- o que se falseia e o RECEBEDOR no
+   aplicativo de quem paga, que e pior do que quebrar.
+   fcPixTexto e a verdade (o que vai no payload) e serve as linhas que dizem "Recebendo em...".
+   fcPixTextoCorrigido e o involucro do contrato acima, com uma guarda: se a normalizacao
+   ESVAZIAR um campo que tinha algo (nome escrito so em caracteres que o BR Code nao aceita),
+   ela devolve null e o campo fica como esta. Esvaziar mudaria a recusa de uma pagina so, e as
+   duas paginas tem de recusar a mesma entrada com a mesma palavra. */
+var FC_NOMER_MAX=25, FC_CIDADE_MAX=15;
+function fcPixTexto(v,max){return fcPixApi().semAcento(String(v==null?'':v),max);}
+function fcPixTextoCorrigido(v,max){
+  var s=String(v==null?'':v),novo=fcPixTexto(s,max);
+  if(!novo&&s)return null;
+  return (novo===s)?null:novo;
+}
 
 /* Endereco da pagina de pagamento. Mesmo criterio de cUrlOk e tUrlOk, pela mesma urlLimpa:
    ancora nao serve aqui (a pagina precisa de um endereco de verdade), entao sao aceitos
@@ -633,6 +702,12 @@ return {
   /* valor, identificador e prazo desta cobranca */
   P_VALOR_MAX:P_VALOR_MAX, P_DESC_MAX:P_DESC_MAX,
   pValorNum:pValorNum, pTxidLimpo:pTxidLimpo,
+  /* correcao a vista: a parte pura das quatro regras que as duas paginas aplicam */
+  fcTrim:fcTrim, fcValorCorrigido:fcValorCorrigido, fcTxidCorrigido:fcTxidCorrigido,
+  fcChaveCorrigida:fcChaveCorrigida,
+  /* nome e cidade do recebedor, como o banco de quem paga vai mostrar */
+  FC_NOMER_MAX:FC_NOMER_MAX, FC_CIDADE_MAX:FC_CIDADE_MAX,
+  fcPixTexto:fcPixTexto, fcPixTextoCorrigido:fcPixTextoCorrigido,
   P_VAL_NADA:P_VAL_NADA, fcValDia:fcValDia, pValCod:pValCod, pValTexto:pValTexto,
   /* PayPal */
   P_PP_HOSTS:P_PP_HOSTS, P_PP_SRC:P_PP_SRC, pPpHostOk:pPpHostOk,

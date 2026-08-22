@@ -94,7 +94,11 @@
     border-radius:10px;padding:14px;margin:0 0 16px;color:var(--vermelho);
     font-size:15px;line-height:1.55;white-space:pre-wrap;word-wrap:break-word;overflow-wrap:break-word}
   #cb-saida{display:none}
-  #cb-out{width:100%;margin:0 0 12px;min-height:110px;font:13px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;
+  /* 17px, e não 13px: esta é a mesma regra do piso lá em cima, e ela vale aqui com mais força,
+     porque cbCopiarPlanoB dá focus() nesta caixa — abaixo de 17px o Safari do iPhone amplia a
+     página no exato momento em que o dono vai copiar o link. Caixa mais alta para o link
+     continuar cabendo sem rolagem no tamanho novo. */
+  #cb-out{width:100%;margin:0 0 12px;min-height:150px;font:17px/1.45 ui-monospace,SFMono-Regular,Menlo,monospace;
     background:#fff;border:1px solid var(--linha);border-radius:10px;padding:12px;
     color:var(--tinta);resize:vertical;word-break:break-all}
   #cb-copiado{display:none;margin:10px 0 0;font-size:15px;font-weight:700;color:var(--ok)}
@@ -153,12 +157,13 @@
     </div>
     <div class="campo">
       <label class="rot" for="cb-nomer">Nome do recebedor</label>
-      <input type="text" id="cb-nomer" value="" placeholder="Foto Certa">
-      <p class="dica">Como aparece no aplicativo do banco de quem paga. Sem acento, até 25 letras.</p>
+      <input type="text" id="cb-nomer" value="" maxlength="25" placeholder="Foto Certa">
+      <p class="dica">Como aparece no aplicativo do banco de quem paga. Sem acento, até 25 letras — o campo se corrige sozinho ao sair dele.</p>
     </div>
     <div class="campo">
       <label class="rot" for="cb-cidade">Cidade do recebedor</label>
-      <input type="text" id="cb-cidade" value="" placeholder="Vitoria">
+      <input type="text" id="cb-cidade" value="" maxlength="15" placeholder="Vitoria">
+      <p class="dica">Sem acento, até 15 letras — o campo se corrige sozinho ao sair dele.</p>
     </div>
     <div class="campo">
       <label class="rot" for="cb-client">Client ID do PayPal</label>
@@ -208,6 +213,13 @@
       <div class="escolhas">
         <label><input type="radio" name="cb-ppmodo" value="sdk" checked><span>Botão do PayPal <span class="opc">— prático; o valor é calculado no navegador do cliente e pode ser alterado por ele</span></span></label>
         <label><input type="radio" name="cb-ppmodo" value="link"><span>Link criado no PayPal <span class="opc">— à prova de alteração; custa um passo a mais em cada cobrança</span></span></label>
+        <!-- A TERCEIRA ESCOLHA EXISTE PORQUE A ABA TEM TRÊS. Sem ela, um aparelho com
+             ppmodo='nao' guardado (o dono desligou o PayPal desta cobrança na ferramenta)
+             abria aqui com "Botão do PayPal" marcado e gerava link sem &pp= — e o bloco
+             publicado mostra o botão do PayPal quando o link não traz o parâmetro. Ou seja: a
+             página rebaixava a escolha em silêncio e o cliente via de volta o botão que o dono
+             tinha desligado. -->
+        <label><input type="radio" name="cb-ppmodo" value="nao"><span>Sem PayPal nesta cobrança <span class="opc">— só Pix, mesmo que a página tenha PayPal</span></span></label>
       </div>
     </div>
 
@@ -243,8 +255,12 @@
      sem o ?v= o navegador serviria uma cópia velha deste arquivo para uma página e a
      nova para a outra, e o resultado seriam links que a própria /pagar recusa — sem
      erro nenhum na tela. Ao mexer no arquivo, troque a versão AQUI, no index.html da
-     raiz e no FC_COMPART_VERSAO de dentro dele. -->
-<script src="../fc-compartilhado.js?v=2026-08-21a"></script>
+     raiz e no FC_COMPART_VERSAO de dentro dele.
+     A conferência de que isso foi feito NÃO é a guarda das duas páginas — ela é cega por
+     construção, porque quem declara a versão é o próprio arquivo cuja atualidade está em
+     dúvida. Quem confere é scripts/conferir-versoes.sh, que compara o CONTEÚDO com a versão
+     declarada e falha quando o arquivo mudou sem o troco. -->
+<script src="../fc-compartilhado.js?v=2026-08-22a"></script>
 <script>
 'use strict';
 (function(){
@@ -291,7 +307,7 @@
    pior: esta página selaria o link com uma conta e a /pagar conferiria com
    outra, sem um sinal na tela. Então ou a versão pedida chegou, ou a página diz
    o que houve e não faz mais nada. */
-var FC_COMPART_ESPERADA='2026-08-21a';
+var FC_COMPART_ESPERADA='2026-08-22a';
 if(!window.FCCOMPART||FCCOMPART.versao!==FC_COMPART_ESPERADA){
   cbParar(FC_COMPART_ESPERADA,window.FCCOMPART?FCCOMPART.versao:null);
   return;
@@ -310,22 +326,62 @@ var C=FCCOMPART;
 function $(id){return document.getElementById(id);}
 function radio(nome){var r=document.querySelector('input[name="'+nome+'"]:checked');return r?r.value:'';}
 function liga(id,fn){var el=$(id);if(el)el.addEventListener('click',fn);}
-/* O MESMO trim que fciVal faz na ferramenta, escrito igual de propósito: é ele
-   que decide o que entra no payload, e "quase igual" aqui é um payload diferente. */
-function cbTrim(s){return String(s==null?'':s).replace(/^\s+/,'').replace(/\s+$/,'');}
+/* O trim é o MESMO que a ferramenta usa: ele decide o que entra no payload, e "quase igual"
+   aqui é um payload diferente. Por isso ele não é escrito de novo nesta página — é o
+   C.fcTrim de fc-compartilhado.js, a mesma função que o fciVal da aba chama. */
+function cbTrim(s){return C.fcTrim(s);}
 
 /* ---- o que está guardado neste aparelho ----
    Duas leituras, das duas chaves que a ferramenta usa. Falha de armazenamento
-   não pode ser muda: ela vira o aviso vermelho, com o mesmo peso de uma recusa. */
-var cbFalhaLeitura='';
+   não pode ser muda: ela vira o aviso vermelho, com o mesmo peso de uma recusa.
+
+   FALHA DE LEITURA TEM DOIS EFEITOS, e os dois importam:
+     1. o aviso vermelho na tela (cbFalhaLeitura), que agora ZERA a cada gesto — antes ele
+        nascia e ficava, e a página seguia recusando gerar até alguém recarregar, sem nem
+        mandar recarregar;
+     2. a proibição de GRAVAR (cbLeituraFalhou). Fundir por cima de uma leitura que falhou não
+        é fusão, é sobrescrita: medido, com 'fcConstrutores' corrompido, salvar o endereço
+        deixava {"p":{"url":"/pagar"}} no lugar da configuração de todas as abas — e a página
+        dizia "Guardado neste aparelho" logo abaixo do aviso vermelho. É exatamente o caso em
+        que a fusão importava. */
+var cbFalhaLeitura='',cbLeituraFalhou=false;
+function cbZerarFalha(){cbFalhaLeitura='';cbLeituraFalhou=false;}
+/* A frase é escrita AQUI, inteira e acentuada, a partir do código estável que fcLerJson
+   devolve. Antes esta página embutia a frase pronta do arquivo compartilhado — que é escrito
+   sem acento, por norma — no meio do próprio texto acentuado, e saía "Não deu para entender o
+   que estava gravado -- o conteudo salvo esta corrompido (configurações das abas)": duas
+   convenções de acentuação na MESMA frase, na emenda entre os dois arquivos. */
 function cbLer(chave,rotulo){
-  return C.fcLerJson(chave,function(fase){
-    cbFalhaLeitura='Não deu para '+fase+' ('+rotulo+'). O que você digitar aqui pode não ser guardado, e a identidade pode não ser a sua. Confira antes de mandar o link.';
+  return C.fcLerJson(chave,function(fase,e,codigo){
+    cbLeituraFalhou=true;
+    cbFalhaLeitura=(codigo==='entender')
+      ? 'Não deu para entender o que está guardado neste aparelho (' + rotulo + '): o conteúdo salvo está corrompido. Nada foi gravado por cima — gravar apagaria o resto da configuração. Recarregue a página; se continuar, ajuste a identidade pela ferramenta completa.'
+      : 'Não deu para ler o que está guardado neste aparelho (' + rotulo + '): o armazenamento do navegador está indisponível, o que costuma ser navegação privada. A identidade pode não ser a sua e o que você digitar não fica guardado. Recarregue a página fora da navegação privada antes de mandar o link.';
   });
 }
 function cbIdentidade(){
   var st=cbLer(C.FCI_CHAVE,'identidade');
   return C.fcIdentidadeDe(st?st.identidade:null);
+}
+/* ---- A IDENTIDADE VIGENTE É A QUE ESTÁ NA TELA ----
+   Com o painel ABERTO, o que vale são os campos dele; com o painel fechado, o que vale é o
+   armazenamento. Antes desta rodada o painel lia de um lado e a geração lia do outro, e o
+   mesmo gesto dava resultados opostos: medido, painel mostrando chave-CORRIGIDA@… e o link
+   saindo com chave-velha@…, sem aviso nenhum. E era o caminho mais provável de todos — o dono
+   vê a chave errada na linha "Recebendo em…", toca em Ajustar, corrige e aperta o botão grande.
+   A regra passou a ser uma só, e é a que o operador consegue conferir: o que está escrito na
+   tela é o que vai no link. Gerar também GRAVA o painel (cbPainelGravar), então o armazenamento
+   nunca fica para trás do que se vê. */
+function cbPainelAberto(){var el=$('cb-config');return !!el&&el.style.display!=='none';}
+function cbIdentidadeVigente(){
+  var id=cbIdentidade(),i,k,el;
+  if(!cbPainelAberto())return id;
+  for(i=0;i<C.FCI_CAMPOS.length;i++){k=C.FCI_CAMPOS[i][0];el=$('cb-'+k);if(el)id[k]=String(el.value);}
+  return id;
+}
+function cbUrlVigente(){
+  var blo=cbBloco(),el=$('cb-url');
+  return (cbPainelAberto()&&el)?String(el.value):blo.url;
 }
 /* O fragmento 'p' do estado das abas: o endereço da página e as três escolhas do
    bloco já publicado. Os padrões são os mesmos do HTML da aba — um aparelho novo
@@ -336,7 +392,9 @@ function cbBloco(){
     url:(typeof p.url==='string')?p.url:'/pagar',
     usapp:(p.usapp==='nao')?'nao':'sim',
     zap:(p.zap==='nao')?'nao':'sim',
-    ppmodo:(p.ppmodo==='link')?'link':'sdk'
+    /* AS TRÊS ESCOLHAS DA ABA, e não duas. A aba tem 'sdk', 'link' e 'nao'; enquanto esta
+       linha era (p.ppmodo==='link')?'link':'sdk', um 'nao' guardado virava 'sdk' calado. */
+    ppmodo:(p.ppmodo==='link'||p.ppmodo==='nao')?p.ppmodo:'sdk'
   };
 }
 
@@ -346,17 +404,36 @@ function cbBloco(){
    que já existe, campo a campo, preservando o resto do registro (a paleta, as
    marcas da migração) — apagar o que não se entende seria pior do que não gravar. */
 function cbGravarIdentidade(vals){
-  var st=cbLer(C.FCI_CHAVE,'identidade')||{},i,k,ident;
+  var st,i,k,ident;
+  cbLeituraFalhou=false;
+  st=cbLer(C.FCI_CHAVE,'identidade')||{};
+  if(cbLeituraFalhou)return cbFalhaLeitura;
   ident=(st.identidade&&typeof st.identidade==='object')?st.identidade:{};
   for(i=0;i<C.FCI_CAMPOS.length;i++){k=C.FCI_CAMPOS[i][0];ident[k]=String(vals[k]==null?'':vals[k]);}
   st.v=1;st.identidade=ident;
+  /* A MARCA 'migrada' É PARTE DA GRAVAÇÃO, e não um detalhe da ferramenta.
+     A ferramenta lê 'if(!st||!st.migrada)fciMigrar()' e, sem a marca, a migração roda de novo
+     e SOBRESCREVE a identidade com o candidato garimpado no fragmento antigo das abas. Medido
+     num aparelho com estado anterior à centralização: a /cobrar gravava chave-NOVA@…, o link
+     saía com a NOVA, o dono abria a ferramenta UMA vez e a chave voltava a ser
+     chave-velha@exemplo.com — e o link seguinte da /cobrar levava a chave velha. Dinheiro na
+     chave errada, sem uma palavra na tela.
+     Marcar aqui é dizer a verdade: quem preencheu este painel decidiu qual é a identidade, e
+     garimpar de novo desfaria uma edição deliberada do operador — que é exatamente a regra
+     que a própria ferramenta declara no comentário de fciIniciar. */
+  st.migrada=true;
   return cbGravar(C.FCI_CHAVE,st,'a identidade');
 }
 /* O endereço da página vive no fragmento da ABA, e por isso a gravação é uma
    FUSÃO: escrever {p:{url}} por cima apagaria a configuração das outras abas
-   deste navegador, que é justamente o que um backup existe para evitar. */
+   deste navegador, que é justamente o que um backup existe para evitar.
+   E fusão só é fusão se a leitura DEU CERTO: com o conteúdo corrompido, 'ler|| {}' produzia
+   uma sobrescrita total com cara de fusão. Leitura que falhou vira recusa de gravar. */
 function cbGravarUrl(url){
-  var st=cbLer('fcConstrutores','configurações das abas')||{};
+  var st;
+  cbLeituraFalhou=false;
+  st=cbLer('fcConstrutores','configurações das abas')||{};
+  if(cbLeituraFalhou)return cbFalhaLeitura;
   if(!st.p||typeof st.p!=='object')st.p={};
   st.p.url=String(url==null?'':url);
   return cbGravar('fcConstrutores',st,'o endereço da página de pagamento');
@@ -371,7 +448,7 @@ function cbGravar(chave,obj,rotulo){
    página lê do armazenamento; daí para a frente é tudo função compartilhada, e
    é isso que faz o link sair byte a byte igual. */
 function cbCfg(){
-  var id=cbIdentidade(),blo=cbBloco();
+  var id=cbIdentidadeVigente(),blo=cbBloco();
   var usapp=(blo.usapp!=='nao');
   var ppmodo=radio('cb-ppmodo')||'sdk';
   return {
@@ -382,7 +459,7 @@ function cbCfg(){
     client:cbTrim(id.client),
     zap:(blo.zap!=='nao'),
     zapnum:cbTrim(id.zapnum).replace(/\D/g,''),
-    url:cbTrim(blo.url),
+    url:cbTrim(cbUrlVigente()),
     desc:$('cb-desc').value,
     valor:C.pValorNum($('cb-valor').value), valorBruto:$('cb-valor').value,
     txid:C.pTxidLimpo($('cb-txid').value),
@@ -395,28 +472,29 @@ function cbCfg(){
    O campo passa a exibir o valor exatamente como ele vai entrar no código Pix.
    Só em 'change'/'blur', nunca em 'input': corrigir a cada tecla impediria
    digitar. Valor que não dá para interpretar fica como está — reescrever o que
-   não se entendeu seria assumir, e quem recusa com nome é a geração. */
-function cbValorAjustar(){
-  var el=$('cb-valor');if(!el)return false;
-  if(!String(el.value).replace(/\s/g,''))return false;
-  var n=C.pValorNum(el.value);
-  if(isNaN(n)||n<=0||n>C.P_VALOR_MAX)return false;
-  var novo=n.toFixed(2).replace('.',',');
-  if(novo===el.value)return false;
+   não se entendeu seria assumir, e quem recusa com nome é a geração.
+   A REGRA de cada uma é COMPARTILHADA com a ferramenta (C.fcValorCorrigido, C.fcTxidCorrigido,
+   C.fcChaveCorrigida, C.fcPixTextoCorrigido, em fc-compartilhado.js): elas recebem o texto do
+   campo e devolvem o texto corrigido ou null. Aqui fica só o que toca o DOM. Era o último
+   naco de duplicação desta rodada — quatro regras escritas duas vezes, concordando hoje e
+   decidindo o que o operador LÊ na tela antes de mandar o link. */
+function cbCampoAjustar(id,regra){
+  var el=$(id);if(!el)return false;
+  var novo=regra(el.value);
+  if(novo===null)return false;
   el.value=novo;return true;
 }
-function cbTxidAjustar(){
-  var el=$('cb-txid');if(!el)return false;
-  var v=C.pTxidLimpo(el.value);
-  if(v===el.value)return false;
-  el.value=v;return true;
-}
-function cbChaveAjustar(){
-  var el=$('cb-chave');if(!el)return false;
-  var limpo=C.pixLimpar(el.value);
-  if(limpo===el.value)return false;
-  el.value=limpo;return true;
-}
+function cbValorAjustar(){return cbCampoAjustar('cb-valor',C.fcValorCorrigido);}
+function cbTxidAjustar(){return cbCampoAjustar('cb-txid',C.fcTxidCorrigido);}
+function cbChaveAjustar(){return cbCampoAjustar('cb-chave',C.fcChaveCorrigida);}
+/* Nome e cidade do recebedor: o maxlength do campo barra o que se DIGITA, e estas duas barram
+   o que CHEGA de outro lugar (do armazenamento, da migração, do backup, da outra página). Sem
+   elas o corte acontecia lá dentro do payload, calado: medido, "Fotografia Luciano Pacheco
+   Ltda ME" virava "Fotografia Luciano Pachec" no código Pix enquanto a linha "Recebendo em…"
+   exibia o nome inteiro. O selo fecha do mesmo jeito — o que se falseia é o RECEBEDOR no
+   aplicativo do banco de quem paga. */
+function cbNomerAjustar(){return cbCampoAjustar('cb-nomer',function(v){return C.fcPixTextoCorrigido(v,C.FC_NOMER_MAX);});}
+function cbCidadeAjustar(){return cbCampoAjustar('cb-cidade',function(v){return C.fcPixTextoCorrigido(v,C.FC_CIDADE_MAX);});}
 /* A MESMA limpeza, mas sobre a chave GUARDADA, e é o primeiro ato de gerar —
    como pGerarLink limpa o campo antes de montar a configuração. Sem isto as
    duas páginas recusavam com palavras diferentes a mesma chave: medido com uma
@@ -436,9 +514,15 @@ function cbChaveGravadaAjustar(){
   return true;
 }
 
-/* ---- a identidade em uso, à vista ---- */
+/* ---- a identidade em uso, à vista ----
+   ESTA LINHA TEM DE DIZER O QUE VAI NO LINK, e não o que está digitado. Ela mostra a chave
+   depois de pixLimpar e o nome e a cidade depois de C.fcPixTexto — a MESMA transformação que
+   montarPayload aplica nos campos 59 e 60 do BR Code. Enquanto ela reproduzia o texto cru,
+   afirmava um recebedor que o link não carregava: "Fotografia Luciano Pacheco Ltda ME" na tela
+   e "Fotografia Luciano Pachec" no aplicativo do banco de quem paga. Uma linha que existe para
+   o dono conferir não pode ser a que mente. */
 function cbQuemRender(){
-  var id=cbIdentidade(),blo=cbBloco(),el=$('cb-quem'),falta=[],i,k;
+  var id=cbIdentidadeVigente(),blo=cbBloco(),el=$('cb-quem'),falta=[],i,k;
   if(!el)return;
   el.innerHTML='';
   for(i=0;i<C.FCI_CAMPOS.length;i++){
@@ -453,8 +537,8 @@ function cbQuemRender(){
   }
   el.appendChild(document.createTextNode('Recebendo em '));
   el.appendChild(cbTexto('b','',C.pixLimpar(id.chave)));
-  el.appendChild(document.createTextNode(' — '+cbTrim(id.nomer)+', '+cbTrim(id.cidade)+'. Página: '));
-  el.appendChild(cbTexto('b','',cbTrim(blo.url)));
+  el.appendChild(document.createTextNode(' — '+C.fcPixTexto(id.nomer,C.FC_NOMER_MAX)+', '+C.fcPixTexto(id.cidade,C.FC_CIDADE_MAX)+'. Página: '));
+  el.appendChild(cbTexto('b','',cbTrim(cbUrlVigente())));
 }
 function cbTexto(tag,cls,txt){
   var e=document.createElement(tag);
@@ -480,17 +564,36 @@ function cbConfigEncher(){
   var id=cbIdentidade(),blo=cbBloco(),i,k;
   for(i=0;i<C.FCI_CAMPOS.length;i++){k=C.FCI_CAMPOS[i][0];if($('cb-'+k))$('cb-'+k).value=id[k];}
   $('cb-url').value=blo.url;
+  /* CORREÇÃO NA CARGA, e não só no 'change' — a mesma mecânica que a ferramenta já usa nos
+     campos numéricos. O maxlength do <input> barra o que se DIGITA; o que vem do armazenamento
+     (da migração, de um backup, da outra página) entra por aqui e passaria inteiro, deixando o
+     campo mostrando um nome que o código Pix vai cortar. */
+  cbChaveAjustar();cbNomerAjustar();cbCidadeAjustar();
+  /* Encher e o marco zero: o que estiver nos campos daqui em diante e o que veio do
+     armazenamento, ate alguem digitar. */
+  cbPainelMexido=false;
 }
-function cbConfigSalvar(){
+/* Grava o que está NO PAINEL. Devolve '' ou a frase do que impediu. Duas portas chamam:
+   o botão "Salvar no aparelho" e a própria geração do link — porque o que se vê é o que vai
+   no link, e o armazenamento não pode ficar para trás disso. */
+function cbPainelGravar(){
   var vals={},i,k,erro='';
-  cbChaveAjustar();
+  cbChaveAjustar();cbNomerAjustar();cbCidadeAjustar();
   for(i=0;i<C.FCI_CAMPOS.length;i++){k=C.FCI_CAMPOS[i][0];vals[k]=$('cb-'+k)?$('cb-'+k).value:'';}
   erro=cbGravarIdentidade(vals);
   if(!erro)erro=cbGravarUrl(cbTrim($('cb-url').value));
-  var av=$('cb-salvo');
+  /* Gravou: campos e armazenamento voltaram a concordar, entao o painel deixa de estar
+     "mexido" e volta a aceitar atualizacao vinda da outra aba. */
+  if(!erro)cbPainelMexido=false;
+  return erro;
+}
+function cbConfigSalvar(){
+  cbZerarFalha();
+  var erro=cbPainelGravar(),av=$('cb-salvo');
   av.style.display='block';
   av.textContent=erro||'Guardado neste aparelho. A ferramenta completa passa a usar estes mesmos dados.';
   av.style.color=erro?'#8C1D18':'#1B5E20';
+  if(erro)cbRecusar(erro); else cbLimparRecusa();
   cbQuemRender();cbToggles();cbVencer();
 }
 
@@ -548,6 +651,19 @@ function cbToggles(){
 /* ---- gerar: o MESMO caminho de pGerarLink ---- */
 function cbGerarLink(){
   cbLimparRecusa();
+  /* O AVISO DE FALHA ZERA AQUI. Ele é do gesto, não da sessão: enquanto ficava pendurado, uma
+     falha de leitura de dez minutos atrás travava a página em recusa até alguém recarregar --
+     e a mensagem nem mandava recarregar. Agora cada geração começa limpa e, se a falha
+     persistir, as leituras logo abaixo a levantam de novo. */
+  cbZerarFalha();
+  /* GERAR TAMBÉM GRAVA O PAINEL ABERTO. É o caminho mais provável do dia a dia: o dono lê a
+     chave errada na linha "Recebendo em…", toca em Ajustar, corrige e aperta o botão grande —
+     que é este. Sem gravar aqui, cbCfg leria o armazenamento antigo e o link sairia com a
+     identidade ANTIGA, contradizendo o que o dono acabou de corrigir na tela.
+     Gravação que falha PARA a geração, com a frase do que houve: um aparelho onde a identidade
+     não fica guardada é um aparelho onde a próxima cobrança nasce errada, e emitir um link
+     bom no meio disso ensinaria a ignorar o aviso. */
+  var erroGravar=cbPainelAberto()?cbPainelGravar():'';
   /* A linha "Recebendo em ..." e redesenhada A CADA geracao, e nao so na
      partida: a ferramenta completa pode estar aberta noutra aba do mesmo
      navegador e ter trocado a identidade no meio do caminho. Uma linha que
@@ -558,6 +674,7 @@ function cbGerarLink(){
   cbValorAjustar();
   cbTxidAjustar();
   cbChaveGravadaAjustar();
+  if(erroGravar){cbRecusar(erroGravar);return;}
   if(cbFalhaLeitura){cbRecusar(cbFalhaLeitura);return;}
   var cfg=cbCfg(),r=C.pRecusaCobranca(cfg);
   if(r){cbRecusar(r);return;}
@@ -607,15 +724,44 @@ function cbCopiarPlanoB(ta){
   else cbAvisoCopia('Não consegui copiar sozinho. O link já está selecionado acima: copie na mão.',true);
 }
 
-/* ---- ligação dos eventos ---- */
-var CB_VENCEM=['cb-desc','cb-valor','cb-txid','cb-validade','cb-pplink'];
+/* ---- ligação dos eventos ----
+   Os campos do PAINEL entram na lista pelo mesmo motivo dos da cobrança: desde que a
+   identidade vigente é a que está na tela, mexer na chave, no nome, na cidade ou no endereço
+   muda o link — e um link antigo parado na caixa seria um link com a identidade anterior. */
+var CB_VENCEM=['cb-desc','cb-valor','cb-txid','cb-validade','cb-pplink',
+               'cb-chave','cb-nomer','cb-cidade','cb-client','cb-zapnum','cb-url'];
+var CB_PAINEL=['cb-chave','cb-nomer','cb-cidade','cb-client','cb-zapnum','cb-url'];
+/* "O operador mexeu no painel desde que ele foi enchido?" — a única coisa que separa um painel
+   aberto com uma edição em curso de um painel aberto que ninguém tocou. É por ela que o evento
+   'storage' sabe se pode reescrever os campos. */
+var cbPainelMexido=false;
+function cbEhDoPainel(nome){var i;for(i=0;i<CB_PAINEL.length;i++)if(nome===CB_PAINEL[i])return true;return false;}
 function cbMexeu(e){
   var t=e&&e.target,nome=(t&&(t.name||t.id))||'',i;
+  if(cbEhDoPainel(nome))cbPainelMexido=true;
   if(nome==='cb-ppmodo'){cbToggles();cbVencer();return;}
   for(i=0;i<CB_VENCEM.length;i++)if(nome===CB_VENCEM[i]){cbVencer();return;}
 }
 document.addEventListener('input',cbMexeu);
 document.addEventListener('change',cbMexeu);
+
+/* ---- A OUTRA ABA DO MESMO NAVEGADOR ----
+   A ferramenta completa aberta noutra aba grava nas MESMAS chaves. Sem isto, trocar a chave
+   Pix lá deixava aqui um link já gerado, na tela, montado com a identidade anterior — e o
+   evento 'storage' só chega às OUTRAS abas, então esta é a única forma de saber.
+   A caixa do link vence e a linha "Recebendo em…" é redesenhada. Os campos do painel só são
+   reescritos se NINGUÉM os tocou desde que foram enchidos: com uma edição em curso eles são a
+   fonte da verdade, e sobrescrevê-los apagaria no meio da digitação exatamente o que o dono
+   está corrigindo. Sem a marca, a outra ponta ficava pior — medido: no primeiro uso do
+   aparelho o painel nasce aberto e vazio, e a identidade preenchida na ferramenta ao lado não
+   chegava aqui: a página recusava "Preencha a chave Pix…" com a chave já guardada. */
+window.addEventListener('storage',function(e){
+  var k=e&&e.key;
+  if(k&&k!==C.FCI_CHAVE&&k!=='fcConstrutores')return;   /* chave nula = localStorage.clear() */
+  cbZerarFalha();
+  if(cbPainelAberto()&&!cbPainelMexido)cbConfigEncher();
+  cbQuemRender();cbToggles();cbVencer();
+});
 
 function cbAjuste(id,fn){
   var el=$(id);if(!el)return;
@@ -630,6 +776,10 @@ liga('cb-copiar',cbCopiar);
 cbAjuste('cb-valor',cbValorAjustar);
 cbAjuste('cb-txid',cbTxidAjustar);
 cbAjuste('cb-chave',cbChaveAjustar);
+/* Nome e cidade se corrigem à vista pela mesma mecânica, e por isso o corte deixou de ser
+   invisível: o campo passa a mostrar o texto exato que vai nos campos 59 e 60 do BR Code. */
+cbAjuste('cb-nomer',function(){if(cbNomerAjustar())cbQuemRender();});
+cbAjuste('cb-cidade',function(){if(cbCidadeAjustar())cbQuemRender();});
 
 /* ---- a partida ---- */
 (function(){
