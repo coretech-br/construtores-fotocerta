@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1F5C4D">
+<title>Cobrar — Foto Certa</title>
+<!-- manifest.json, e nao .webmanifest: o navegador so aceita o manifesto se a resposta
+     vier com um tipo JSON, e ".json" e servido como application/json em qualquer
+     hospedagem. A extensao .webmanifest depende de o servidor conhece-la, e o GitHub
+     Pages nao e nosso para conferir. Sem service worker, por decisao registrada na spec:
+     ele serviria a versao antiga depois de uma publicacao, e offline nao serve aqui --
+     mandar o link exige rede de qualquer jeito. -->
+<link rel="manifest" href="manifest.json?v=2026-08-21a">
+<link rel="apple-touch-icon" href="icone-180.png">
+<link rel="icon" href="icone-192.png" sizes="192x192">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Cobrar">
+<style>
+  /* ===== /cobrar — a página de uso diário =====
+     MOBILE-FIRST DE VERDADE, e não a ferramenta espremida: uma coluna, campos
+     grandes o bastante para o polegar, um botão de ação e um de copiar. O piso
+     de 17px nos campos não é estética — abaixo disso o Safari do iPhone dá
+     zoom sozinho ao focar o campo, e a página sai do lugar no meio da digitação.
+     A largura máxima existe para o desktop não esticar a linha; no celular ela
+     nunca é alcançada. Nada aqui depende de rolagem horizontal em 360px. */
+  :root{
+    --areia:#E9E3D3; --papel:#FDFBF6; --tinta:#2E2A22; --tinta-suave:#6B6455;
+    --verde:#1F5C4D; --verde-escuro:#0F3A30; --linha:#D8D0BC;
+    --vermelho:#8C1D18; --ok:#1B5E20;
+  }
+  *{box-sizing:border-box}
+  /* SEM overflow-x:hidden no <body>. Medido: 'overflow-x:hidden' faz o navegador
+     calcular 'overflow-y:auto' no MESMO elemento, e o body vira o container de
+     rolagem no lugar da janela -- window.scrollY congelado em 0, rolagem por
+     gesto sem inercia no iPhone e scrollIntoView acertando o lugar errado. A
+     defesa contra rolagem lateral e o conteudo nao vazar (quebra de palavra nos
+     tres lugares que podem vazar: a chave Pix, a recusa e o link); 'clip' no
+     elemento raiz e a rede, e ele nao cria container de rolagem. */
+  html{margin:0;padding:0;overflow-x:clip}
+  body{margin:0;padding:0;max-width:100%}
+  body{background:var(--areia);color:var(--tinta);text-align:left;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Ubuntu,sans-serif;
+    font-size:17px;line-height:1.5;
+    padding:0 16px calc(40px + env(safe-area-inset-bottom,0px));
+    -webkit-text-size-adjust:100%}
+  .faixa{max-width:560px;margin:0 auto}
+
+  .topo{display:flex;align-items:center;gap:12px;padding:calc(18px + env(safe-area-inset-top,0px)) 0 10px}
+  .topo svg{width:34px;height:41px;flex:0 0 auto;display:block}
+  .topo .nome{font-size:21px;font-weight:800;letter-spacing:-.01em;line-height:1.1}
+  .topo .sub{font-size:13px;color:var(--tinta-suave);line-height:1.3}
+
+  .quem{background:var(--papel);border:1px solid var(--linha);border-radius:12px;
+    padding:10px 12px;margin:0 0 14px;font-size:13px;color:var(--tinta-suave);
+    display:flex;gap:10px;align-items:flex-start}
+  .quem .txt{flex:1 1 auto;min-width:0;word-wrap:break-word;overflow-wrap:break-word}
+  .quem b{color:var(--tinta);font-weight:700}
+  .quem .falta{color:var(--vermelho);font-weight:700}
+  .quem button{flex:0 0 auto}
+
+  .cartao{background:var(--papel);border:1px solid var(--linha);border-radius:14px;
+    padding:16px;margin:0 0 16px}
+  .cartao h2{margin:0 0 4px;font-size:17px;font-weight:800}
+  .cartao .nota{margin:0 0 14px;font-size:13px;color:var(--tinta-suave)}
+
+  label.rot{display:block;font-size:14px;font-weight:700;margin:0 0 6px}
+  label.rot .opc{font-weight:400;color:var(--tinta-suave)}
+  .campo{margin:0 0 16px}
+  .dica{font-size:13px;color:var(--tinta-suave);margin:6px 0 0}
+  input[type=text],input[type=date],input[type=tel],textarea{
+    width:100%;font:inherit;font-size:17px;color:var(--tinta);background:#fff;
+    border:1px solid var(--linha);border-radius:10px;padding:13px 12px;
+    -webkit-appearance:none;appearance:none}
+  input:focus,textarea:focus{outline:2px solid var(--verde);outline-offset:1px;border-color:var(--verde)}
+  textarea{resize:vertical;min-height:76px;line-height:1.45}
+  #cb-valor{font-size:24px;font-weight:800;letter-spacing:-.01em;padding:14px 12px}
+  .escolhas{display:flex;flex-direction:column;gap:8px}
+  .escolhas label{display:flex;align-items:flex-start;gap:10px;background:#fff;
+    border:1px solid var(--linha);border-radius:10px;padding:12px;cursor:pointer;font-size:15px}
+  .escolhas label span{flex:1 1 auto;min-width:0}
+  .escolhas input{margin:2px 0 0;width:20px;height:20px;flex:0 0 auto}
+
+  .botao{display:block;width:100%;min-height:54px;border:0;border-radius:12px;
+    background:var(--verde);color:#fff;font:inherit;font-size:18px;font-weight:800;
+    padding:14px 16px;cursor:pointer;text-align:center}
+  .botao:active{background:var(--verde-escuro)}
+  .botao.claro{background:transparent;color:var(--verde);border:1px solid var(--verde);font-size:16px;min-height:48px}
+  .botao.mini{width:auto;min-height:38px;padding:8px 12px;font-size:14px;border-radius:9px}
+
+  #cb-recusa{display:none;background:#FDECEA;border:1px solid #E5B4B0;border-left:5px solid var(--vermelho);
+    border-radius:10px;padding:14px;margin:0 0 16px;color:var(--vermelho);
+    font-size:15px;line-height:1.55;white-space:pre-wrap;word-wrap:break-word;overflow-wrap:break-word}
+  #cb-saida{display:none}
+  #cb-out{width:100%;margin:0 0 12px;min-height:110px;font:13px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;
+    background:#fff;border:1px solid var(--linha);border-radius:10px;padding:12px;
+    color:var(--tinta);resize:vertical;word-break:break-all}
+  #cb-copiado{display:none;margin:10px 0 0;font-size:15px;font-weight:700;color:var(--ok)}
+  #cb-copiado.erro{color:var(--vermelho)}
+
+  .rodape{max-width:560px;margin:0 auto;font-size:13px;color:var(--tinta-suave);line-height:1.6}
+  .rodape a{color:var(--verde)}
+  .versao{font-size:12px;opacity:.75;margin-top:8px}
+
+  #cb-parado{background:var(--vermelho);color:#fff;border-radius:12px;padding:16px;
+    margin:16px auto;max-width:560px;font-size:16px;line-height:1.55;white-space:pre-wrap}
+
+  /* Acima de 560px a coluna para de crescer e ganha respiro; nada muda de forma. */
+  @media (min-width:600px){
+    body{padding-left:24px;padding-right:24px}
+    .topo .nome{font-size:24px}
+  }
+</style>
+</head>
+<body>
+
+<div class="faixa" id="cb-tudo">
+
+  <div class="topo">
+    <svg viewBox="0 0 32 38" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <ellipse cx="16" cy="25" rx="8.5" ry="11" fill="#FDFBF6"/>
+      <path fill="none" stroke="#1F5C4D" stroke-width="1.2" d="M9 22 Q11 30 14 35 M23 22 Q21 30 18 35"/>
+      <path fill="#FDFBF6" d="M16 3.8 C13.7 1.6 8 2.3 7.6 8 C7.3 12.9 11 18 16 21 C21 18 24.7 12.9 24.4 8 C24 2.3 18.3 1.6 16 3.8 Z"/>
+      <circle cx="12.6" cy="9.6" r="1.6" fill="#1F5C4D"/>
+      <circle cx="19.4" cy="9.6" r="1.6" fill="#1F5C4D"/>
+      <path fill="#1F5C4D" d="M16 11 L15.2 14.4 Q16 15.5 16.8 14.4 Z"/>
+      <path stroke="#1F5C4D" stroke-width="1.4" stroke-linecap="round" fill="none" d="M13 35.5 L13 37.2 M16 36 L16 37.8 M19 35.5 L19 37.2"/>
+    </svg>
+    <div>
+      <div class="nome">Cobrar</div>
+      <div class="sub">Gera o link de pagamento desta cobrança</div>
+    </div>
+  </div>
+
+  <!-- A IDENTIDADE EM USO FICA À VISTA. É discreta de propósito: ninguém lê isso todo
+       dia — mas no dia em que a chave estiver errada, o dono percebe antes de o link ir
+       para o cliente, e não depois. -->
+  <div class="quem">
+    <div class="txt" id="cb-quem"></div>
+    <button type="button" class="botao claro mini" id="cb-abrir">Ajustar</button>
+  </div>
+
+  <!-- ===== Identidade: também é a configuração inicial do aparelho ===== -->
+  <div class="cartao" id="cb-config" style="display:none">
+    <h2>Identidade</h2>
+    <p class="nota" id="cb-config-nota"></p>
+
+    <div class="campo">
+      <label class="rot" for="cb-chave">Chave Pix</label>
+      <input type="text" id="cb-chave" value="" placeholder="ex.: contato@fotocerta.com.br" autocapitalize="off" autocorrect="off" spellcheck="false">
+    </div>
+    <div class="campo">
+      <label class="rot" for="cb-nomer">Nome do recebedor</label>
+      <input type="text" id="cb-nomer" value="" placeholder="Foto Certa">
+      <p class="dica">Como aparece no aplicativo do banco de quem paga. Sem acento, até 25 letras.</p>
+    </div>
+    <div class="campo">
+      <label class="rot" for="cb-cidade">Cidade do recebedor</label>
+      <input type="text" id="cb-cidade" value="" placeholder="Vitoria">
+    </div>
+    <div class="campo">
+      <label class="rot" for="cb-client">Client ID do PayPal</label>
+      <input type="text" id="cb-client" value="" placeholder="ex.: AeH2k...9pQ" autocapitalize="off" autocorrect="off" spellcheck="false">
+    </div>
+    <div class="campo">
+      <label class="rot" for="cb-zapnum">WhatsApp do comprovante</label>
+      <input type="tel" id="cb-zapnum" value="" placeholder="ex.: 5527999998888" autocapitalize="off" autocorrect="off" spellcheck="false">
+    </div>
+    <div class="campo">
+      <label class="rot" for="cb-url">Endereço da página de pagamento</label>
+      <input type="text" id="cb-url" value="" placeholder="https://www.fotocerta.com.br/pagar" autocapitalize="off" autocorrect="off" spellcheck="false">
+      <p class="dica">É a página fixa onde o bloco de cobrança está colado. O link desta cobrança nasce dela.</p>
+    </div>
+    <button type="button" class="botao" id="cb-salvar">Salvar no aparelho</button>
+    <p class="dica" id="cb-salvo" style="display:none"></p>
+  </div>
+
+  <!-- ===== esta cobrança ===== -->
+  <div class="cartao" id="cb-form">
+    <div class="campo">
+      <label class="rot" for="cb-desc">O que está sendo cobrado</label>
+      <textarea id="cb-desc" rows="2" placeholder="Ensaio de gestante — 2 horas"></textarea>
+      <p class="dica">É o que o cliente lê na página de pagamento.</p>
+    </div>
+
+    <div class="campo">
+      <label class="rot" for="cb-valor">Valor</label>
+      <input type="text" id="cb-valor" value="" inputmode="decimal" placeholder="1200,00" autocapitalize="off" autocorrect="off" spellcheck="false">
+      <p class="dica">O valor vai preso dentro do código Pix: o cliente não consegue mudar.</p>
+    </div>
+
+    <div class="campo">
+      <label class="rot" for="cb-validade">Válido até <span class="opc">— opcional</span></label>
+      <input type="date" id="cb-validade" value="" max="2099-12-31">
+      <p class="dica">Em branco, o link não tem prazo.</p>
+    </div>
+
+    <div class="campo">
+      <label class="rot" for="cb-txid">Identificador <span class="opc">— opcional</span></label>
+      <input type="text" id="cb-txid" value="" placeholder="ENSAIO2026" autocapitalize="characters" autocorrect="off" spellcheck="false">
+      <p class="dica">Só letras e números. Aparece no extrato e ajuda a conciliar.</p>
+    </div>
+
+    <div class="campo" id="cb-pp-campos">
+      <label class="rot">PayPal desta cobrança</label>
+      <div class="escolhas">
+        <label><input type="radio" name="cb-ppmodo" value="sdk" checked><span>Botão do PayPal <span class="opc">— prático; o valor é calculado no navegador do cliente e pode ser alterado por ele</span></span></label>
+        <label><input type="radio" name="cb-ppmodo" value="link"><span>Link criado no PayPal <span class="opc">— à prova de alteração; custa um passo a mais em cada cobrança</span></span></label>
+      </div>
+    </div>
+
+    <div class="campo" id="cb-pplink-campo" style="display:none">
+      <label class="rot" for="cb-pplink">Link de cobrança do PayPal</label>
+      <input type="text" id="cb-pplink" value="" placeholder="https://www.paypal.com/ncp/payment/..." autocapitalize="off" autocorrect="off" spellcheck="false">
+    </div>
+
+    <p class="dica" id="cb-pp-nota" style="display:none"></p>
+
+    <button type="button" class="botao" id="cb-gerar">Gerar link</button>
+  </div>
+
+  <div id="cb-recusa"></div>
+
+  <div class="cartao" id="cb-saida">
+    <h2>Link desta cobrança</h2>
+    <p class="nota">Mande individualmente. A descrição e o valor aparecem na pré-visualização do link.</p>
+    <textarea id="cb-out" readonly></textarea>
+    <button type="button" class="botao" id="cb-copiar">Copiar link</button>
+    <p id="cb-copiado"></p>
+  </div>
+
+</div>
+
+<div class="rodape" id="cb-rodape">
+  <p>Nada do que você digita aqui é enviado para lugar nenhum: não há servidor, e o link é montado no próprio aparelho.</p>
+  <p>Para mudar a aparência da página de pagamento, os textos do cartão ou qualquer outra coisa, use a <a href="../index.html">ferramenta completa</a> — a aba <b>Link de cobrança</b>. Esta página só gera o link do dia.</p>
+  <p class="versao" id="cb-versao"></p>
+</div>
+
+<!-- A FONTE COMPARTILHADA COM A FERRAMENTA. O endereço é VERSIONADO de propósito:
+     sem o ?v= o navegador serviria uma cópia velha deste arquivo para uma página e a
+     nova para a outra, e o resultado seriam links que a própria /pagar recusa — sem
+     erro nenhum na tela. Ao mexer no arquivo, troque a versão AQUI, no index.html da
+     raiz e no FC_COMPART_VERSAO de dentro dele. -->
+<script src="../fc-compartilhado.js?v=2026-08-21a"></script>
+<script>
+'use strict';
+(function(){
+
+/* ============================================================================
+   /cobrar — GERAR O LINK DE COBRANÇA DO DIA
+   ============================================================================
+   O QUE ESTA PÁGINA É. A aba "Link de cobrança" da ferramenta é completa demais
+   para o uso diário: gerar um link exige abrir a ferramenta inteira, achar a aba
+   e passar por seções de aparência e textos que não mudam nunca. Aqui ficam só
+   os dados que mudam a cada cobrança.
+
+   A REGRA QUE GOVERNA TUDO: esta página NÃO reimplementa a montagem do Pix nem o
+   cálculo do selo. Ela chama as MESMAS funções que a aba chama, do mesmo
+   fc-compartilhado.js. Duas implementações divergem, e aqui divergir produziria
+   links que a própria /pagar recusa — descoberto com o cliente na frente.
+
+   O INVARIANTE, que é o que prova que não divergiram: para os mesmos dados de
+   entrada, o link gerado aqui é BYTE A BYTE idêntico ao gerado pela aba. Por
+   isso cbCfg abaixo monta o mesmo objeto que pCfg monta, campo a campo, com as
+   mesmas limpezas (o mesmo pixLimpar, o mesmo trim, os mesmos dígitos) — e daí
+   para a frente é tudo função compartilhada.
+
+   DE ONDE VÊM OS DADOS QUE NÃO SÃO DESTA COBRANÇA:
+     - a identidade (chave Pix, nome, cidade, Client ID, WhatsApp) sai de
+       'fcConstrutoresIdentidade', a MESMA chave que a ferramenta lê e grava;
+     - o endereço da página de pagamento e as três escolhas do bloco publicado
+       (tem PayPal? tem "Já paguei"? qual o modo padrão de PayPal?) saem de
+       'fcConstrutores', o estado das abas, no fragmento 'p'.
+   Ler o fragmento da aba é acoplamento, e ele está aqui declarado: sem isso a
+   escolha "este cartão foi publicado só com Pix" viveria em dois lugares, e a
+   página geraria um link com botão de PayPal para um cartão que não tem PayPal.
+
+   PREFIXO 'cb-' em tudo o que esta página desenha. A ferramenta usa prefixos de
+   UMA letra por aba (s-, l-, t-, u-, b-, c-, p-, m-); 'cb-' não colide com
+   nenhum deles, então um grep por 'p-' continua trazendo só a aba.
+
+   ES5, sem dependência externa. Nada daqui é colado no Prosite: quem vai para o
+   Prosite é o BLOCO, e ele continua sendo gerado pela ferramenta.
+   ============================================================================ */
+
+/* ---- a conferência de versão vem antes de tudo, e ela para a página ----
+   Sem o arquivo compartilhado não há o que gerar. Com a versão ERRADA seria
+   pior: esta página selaria o link com uma conta e a /pagar conferiria com
+   outra, sem um sinal na tela. Então ou a versão pedida chegou, ou a página diz
+   o que houve e não faz mais nada. */
+var FC_COMPART_ESPERADA='2026-08-21a';
+if(!window.FCCOMPART||FCCOMPART.versao!==FC_COMPART_ESPERADA){
+  cbParar(FC_COMPART_ESPERADA,window.FCCOMPART?FCCOMPART.versao:null);
+  return;
+}
+function cbParar(pedida,chegou){
+  var d=document.createElement('div'),alvo=document.getElementById('cb-tudo');
+  d.id='cb-parado';
+  d.textContent=chegou
+    ? 'Esta página parou antes de começar: o arquivo compartilhado que chegou é a versão "'+chegou+'", e esta página pediu a "'+pedida+'". Costuma ser uma cópia velha guardada pelo navegador. Recarregue segurando Shift; se continuar, a publicação saiu pela metade. Nenhum link foi gerado.'
+    : 'Esta página parou antes de começar: o arquivo fc-compartilhado.js (versão "'+pedida+'") não carregou. Sem ele não há como montar código Pix nem selar um link. Confira a conexão e recarregue. Nenhum link foi gerado.';
+  if(alvo&&alvo.parentNode){alvo.parentNode.insertBefore(d,alvo);alvo.style.display='none';}
+  else if(document.body)document.body.insertBefore(d,document.body.firstChild);
+}
+
+var C=FCCOMPART;
+function $(id){return document.getElementById(id);}
+function radio(nome){var r=document.querySelector('input[name="'+nome+'"]:checked');return r?r.value:'';}
+function liga(id,fn){var el=$(id);if(el)el.addEventListener('click',fn);}
+/* O MESMO trim que fciVal faz na ferramenta, escrito igual de propósito: é ele
+   que decide o que entra no payload, e "quase igual" aqui é um payload diferente. */
+function cbTrim(s){return String(s==null?'':s).replace(/^\s+/,'').replace(/\s+$/,'');}
+
+/* ---- o que está guardado neste aparelho ----
+   Duas leituras, das duas chaves que a ferramenta usa. Falha de armazenamento
+   não pode ser muda: ela vira o aviso vermelho, com o mesmo peso de uma recusa. */
+var cbFalhaLeitura='';
+function cbLer(chave,rotulo){
+  return C.fcLerJson(chave,function(fase){
+    cbFalhaLeitura='Não deu para '+fase+' ('+rotulo+'). O que você digitar aqui pode não ser guardado, e a identidade pode não ser a sua. Confira antes de mandar o link.';
+  });
+}
+function cbIdentidade(){
+  var st=cbLer(C.FCI_CHAVE,'identidade');
+  return C.fcIdentidadeDe(st?st.identidade:null);
+}
+/* O fragmento 'p' do estado das abas: o endereço da página e as três escolhas do
+   bloco já publicado. Os padrões são os mesmos do HTML da aba — um aparelho novo
+   se comporta como uma aba recém-aberta, e não de um jeito próprio. */
+function cbBloco(){
+  var st=cbLer('fcConstrutores','configurações das abas'),p=(st&&st.p&&typeof st.p==='object')?st.p:{};
+  return {
+    url:(typeof p.url==='string')?p.url:'/pagar',
+    usapp:(p.usapp==='nao')?'nao':'sim',
+    zap:(p.zap==='nao')?'nao':'sim',
+    ppmodo:(p.ppmodo==='link')?'link':'sdk'
+  };
+}
+
+/* ---- a configuração, gravada no MESMO lugar que a ferramenta lê ----
+   Nada de chave própria: uma segunda cópia da chave Pix é exatamente o que a
+   ferramenta desfez quando centralizou a identidade. Aqui se escreve por CIMA do
+   que já existe, campo a campo, preservando o resto do registro (a paleta, as
+   marcas da migração) — apagar o que não se entende seria pior do que não gravar. */
+function cbGravarIdentidade(vals){
+  var st=cbLer(C.FCI_CHAVE,'identidade')||{},i,k,ident;
+  ident=(st.identidade&&typeof st.identidade==='object')?st.identidade:{};
+  for(i=0;i<C.FCI_CAMPOS.length;i++){k=C.FCI_CAMPOS[i][0];ident[k]=String(vals[k]==null?'':vals[k]);}
+  st.v=1;st.identidade=ident;
+  return cbGravar(C.FCI_CHAVE,st,'a identidade');
+}
+/* O endereço da página vive no fragmento da ABA, e por isso a gravação é uma
+   FUSÃO: escrever {p:{url}} por cima apagaria a configuração das outras abas
+   deste navegador, que é justamente o que um backup existe para evitar. */
+function cbGravarUrl(url){
+  var st=cbLer('fcConstrutores','configurações das abas')||{};
+  if(!st.p||typeof st.p!=='object')st.p={};
+  st.p.url=String(url==null?'':url);
+  return cbGravar('fcConstrutores',st,'o endereço da página de pagamento');
+}
+function cbGravar(chave,obj,rotulo){
+  try{localStorage.setItem(chave,JSON.stringify(obj));return '';}
+  catch(e){return 'Não deu para guardar '+rotulo+' neste aparelho — o armazenamento do navegador está indisponível (pode ser navegação privada). Os dados valem só até fechar esta aba.';}
+}
+
+/* ---- a configuração da cobrança: o MESMO objeto que pCfg monta ----
+   Campo a campo, com as mesmas limpezas. O que a aba lê de campos da tela, esta
+   página lê do armazenamento; daí para a frente é tudo função compartilhada, e
+   é isso que faz o link sair byte a byte igual. */
+function cbCfg(){
+  var id=cbIdentidade(),blo=cbBloco();
+  var usapp=(blo.usapp!=='nao');
+  var ppmodo=radio('cb-ppmodo')||'sdk';
+  return {
+    chave:C.pixLimpar(id.chave), chaveBruta:id.chave,
+    nomer:cbTrim(id.nomer),
+    cidade:cbTrim(id.cidade),
+    usapp:usapp,
+    client:cbTrim(id.client),
+    zap:(blo.zap!=='nao'),
+    zapnum:cbTrim(id.zapnum).replace(/\D/g,''),
+    url:cbTrim(blo.url),
+    desc:$('cb-desc').value,
+    valor:C.pValorNum($('cb-valor').value), valorBruto:$('cb-valor').value,
+    txid:C.pTxidLimpo($('cb-txid').value),
+    valdia:C.fcValDia($('cb-validade').value), valbruto:$('cb-validade').value,
+    ppmodo:(usapp?ppmodo:'nao'), pplink:cbTrim($('cb-pplink').value)
+  };
+}
+
+/* ---- correção à vista, a mesma regra da ferramenta ----
+   O campo passa a exibir o valor exatamente como ele vai entrar no código Pix.
+   Só em 'change'/'blur', nunca em 'input': corrigir a cada tecla impediria
+   digitar. Valor que não dá para interpretar fica como está — reescrever o que
+   não se entendeu seria assumir, e quem recusa com nome é a geração. */
+function cbValorAjustar(){
+  var el=$('cb-valor');if(!el)return false;
+  if(!String(el.value).replace(/\s/g,''))return false;
+  var n=C.pValorNum(el.value);
+  if(isNaN(n)||n<=0||n>C.P_VALOR_MAX)return false;
+  var novo=n.toFixed(2).replace('.',',');
+  if(novo===el.value)return false;
+  el.value=novo;return true;
+}
+function cbTxidAjustar(){
+  var el=$('cb-txid');if(!el)return false;
+  var v=C.pTxidLimpo(el.value);
+  if(v===el.value)return false;
+  el.value=v;return true;
+}
+function cbChaveAjustar(){
+  var el=$('cb-chave');if(!el)return false;
+  var limpo=C.pixLimpar(el.value);
+  if(limpo===el.value)return false;
+  el.value=limpo;return true;
+}
+/* A MESMA limpeza, mas sobre a chave GUARDADA, e é o primeiro ato de gerar —
+   como pGerarLink limpa o campo antes de montar a configuração. Sem isto as
+   duas páginas recusavam com palavras diferentes a mesma chave: medido com uma
+   chave feita só de espaços, a aba dizia “Preencha a chave Pix…” (porque limpa
+   o campo antes de ler) e esta página dizia “A chave Pix só tinha espaços…”
+   (porque lia o valor sujo). Mesma entrada, dois textos — a divergência que
+   esta rodada existe para não ter. E de quebra a chave guardada suja neste
+   aparelho para de ficar suja até alguém abrir o painel. */
+function cbChaveGravadaAjustar(){
+  var id=cbIdentidade(),limpo=C.pixLimpar(id.chave),i,k,vals={};
+  if(limpo===id.chave)return false;
+  for(i=0;i<C.FCI_CAMPOS.length;i++){k=C.FCI_CAMPOS[i][0];vals[k]=id[k];}
+  vals.chave=limpo;
+  cbGravarIdentidade(vals);
+  if($('cb-chave'))$('cb-chave').value=limpo;
+  cbQuemRender();
+  return true;
+}
+
+/* ---- a identidade em uso, à vista ---- */
+function cbQuemRender(){
+  var id=cbIdentidade(),blo=cbBloco(),el=$('cb-quem'),falta=[],i,k;
+  if(!el)return;
+  el.innerHTML='';
+  for(i=0;i<C.FCI_CAMPOS.length;i++){
+    k=C.FCI_CAMPOS[i][0];
+    if(k==='client'&&blo.usapp==='nao')continue;
+    if(k==='zapnum'&&blo.zap==='nao')continue;
+    if(!cbTrim(id[k]))falta.push(C.FCI_CAMPOS[i][2]);
+  }
+  if(falta.length){
+    el.appendChild(cbTexto('span','falta','Faltando: '+falta.join(', ')+'. Toque em Ajustar antes de gerar.'));
+    return;
+  }
+  el.appendChild(document.createTextNode('Recebendo em '));
+  el.appendChild(cbTexto('b','',C.pixLimpar(id.chave)));
+  el.appendChild(document.createTextNode(' — '+cbTrim(id.nomer)+', '+cbTrim(id.cidade)+'. Página: '));
+  el.appendChild(cbTexto('b','',cbTrim(blo.url)));
+}
+function cbTexto(tag,cls,txt){
+  var e=document.createElement(tag);
+  if(cls)e.className=cls;
+  e.textContent=txt;
+  return e;
+}
+
+/* ---- o painel de identidade, que também é a configuração inicial ---- */
+function cbConfigAbrir(abrir,rolar){
+  var el=$('cb-config');if(!el)return;
+  if(abrir===undefined)abrir=(el.style.display==='none');
+  el.style.display=abrir?'block':'none';
+  if(abrir){
+    cbConfigEncher();
+    /* Rolar so quando o painel foi PEDIDO -- pelo botao ou por uma recusa. Na
+       primeira abertura do aparelho ele ja nasce aberto, e rolar ali esconderia
+       o cabecalho e a linha que diz com qual chave a pagina esta gerando. */
+    if(rolar){try{el.scrollIntoView(true);}catch(e){}}
+  }
+}
+function cbConfigEncher(){
+  var id=cbIdentidade(),blo=cbBloco(),i,k;
+  for(i=0;i<C.FCI_CAMPOS.length;i++){k=C.FCI_CAMPOS[i][0];if($('cb-'+k))$('cb-'+k).value=id[k];}
+  $('cb-url').value=blo.url;
+}
+function cbConfigSalvar(){
+  var vals={},i,k,erro='';
+  cbChaveAjustar();
+  for(i=0;i<C.FCI_CAMPOS.length;i++){k=C.FCI_CAMPOS[i][0];vals[k]=$('cb-'+k)?$('cb-'+k).value:'';}
+  erro=cbGravarIdentidade(vals);
+  if(!erro)erro=cbGravarUrl(cbTrim($('cb-url').value));
+  var av=$('cb-salvo');
+  av.style.display='block';
+  av.textContent=erro||'Guardado neste aparelho. A ferramenta completa passa a usar estes mesmos dados.';
+  av.style.color=erro?'#8C1D18':'#1B5E20';
+  cbQuemRender();cbToggles();cbVencer();
+}
+
+/* ---- MUDOU A COBRANÇA, A CAIXA DO LINK ESVAZIA ----
+   Mesma regra do pSaidaVence da aba, e pelo mesmo motivo: o link reproduz
+   literalmente a descrição, o valor e o identificador, e o payload dentro dele
+   reproduz a chave, o nome e a cidade. Trocar qualquer um e ficar com o link
+   antigo na tela faria o dono copiar, sem nada indicando isso, um link com o
+   valor da cobrança ANTERIOR. */
+function cbVencer(){
+  var ta=$('cb-out');
+  if(ta&&ta.value){ta.value='';}
+  $('cb-saida').style.display='none';
+  $('cb-copiado').style.display='none';
+}
+function cbRecusar(msg){
+  var el=$('cb-recusa');
+  el.textContent=msg;
+  el.style.display='block';
+  try{el.scrollIntoView(true);}catch(e){}
+  cbApontarSe(msg);
+}
+function cbLimparRecusa(){
+  var el=$('cb-recusa');el.textContent='';el.style.display='none';
+}
+/* A recusa que fala do painel ABRE o painel. É o mesmo sufixo único que a
+   ferramenta usa (FCI_APONTA, no arquivo compartilhado), então não há dois
+   textos para divergir — e apontar é mostrar onde, não só dizer onde. */
+function cbApontarSe(msg){
+  var i,k,el;
+  if(String(msg==null?'':msg).indexOf(C.FCI_APONTA)<0)return false;
+  cbConfigAbrir(true,true);
+  for(i=0;i<C.FCI_CAMPOS.length;i++){
+    k=C.FCI_CAMPOS[i][0];el=$('cb-'+k);
+    if(el&&!cbTrim(el.value)){try{el.focus();}catch(e){}break;}
+  }
+  return true;
+}
+
+/* ---- mostra/esconde conforme o que o bloco publicado tem ---- */
+function cbToggles(){
+  var blo=cbBloco(),lk=$('cb-pplink-campo'),pp=$('cb-pp-campos'),nota=$('cb-pp-nota');
+  if(blo.usapp==='nao'){
+    pp.style.display='none';
+    lk.style.display='none';
+    nota.style.display='block';
+    nota.textContent='A página de pagamento foi publicada só com Pix, então esta cobrança não leva PayPal. Para mudar isso, use a ferramenta completa e cole o bloco novo no site.';
+    return;
+  }
+  pp.style.display='block';
+  nota.style.display='none';
+  lk.style.display=(radio('cb-ppmodo')==='link')?'block':'none';
+}
+
+/* ---- gerar: o MESMO caminho de pGerarLink ---- */
+function cbGerarLink(){
+  cbLimparRecusa();
+  /* A linha "Recebendo em ..." e redesenhada A CADA geracao, e nao so na
+     partida: a ferramenta completa pode estar aberta noutra aba do mesmo
+     navegador e ter trocado a identidade no meio do caminho. Uma linha que
+     mostra a chave antiga enquanto o link sai com a nova e pior do que nao ter
+     linha nenhuma -- ela existe justamente para o dono notar a chave errada. */
+  cbQuemRender();
+  cbToggles();
+  cbValorAjustar();
+  cbTxidAjustar();
+  cbChaveGravadaAjustar();
+  if(cbFalhaLeitura){cbRecusar(cbFalhaLeitura);return;}
+  var cfg=cbCfg(),r=C.pRecusaCobranca(cfg);
+  if(r){cbRecusar(r);return;}
+  var codigo=C.pPayload(cfg),erro=C.pConferir(cfg,codigo);
+  if(erro){cbRecusar(erro);return;}
+  $('cb-out').value=C.pLinkDe(cfg,codigo);
+  $('cb-saida').style.display='block';
+  $('cb-copiado').style.display='none';
+  try{$('cb-saida').scrollIntoView(true);}catch(e){}
+}
+
+/* ---- copiar, com confirmação VISÍVEL ----
+   Um botão de copiar que não diz nada é um botão que o dono aperta duas vezes e
+   cola o que estava antes. A confirmação some sozinha para não virar paisagem.
+   O caminho antigo (select + execCommand) fica como plano B: em http:// sem
+   TLS, e em navegador mais velho, navigator.clipboard simplesmente não existe. */
+var cbCopiaTimer=null;
+function cbAvisoCopia(txt,erro){
+  var el=$('cb-copiado');
+  el.textContent=txt;
+  el.className=erro?'erro':'';
+  el.style.display='block';
+  if(cbCopiaTimer){clearTimeout(cbCopiaTimer);cbCopiaTimer=null;}
+  if(!erro)cbCopiaTimer=setTimeout(function(){el.style.display='none';cbCopiaTimer=null;},4000);
+}
+function cbCopiar(){
+  var ta=$('cb-out');
+  if(!ta||!ta.value){cbAvisoCopia('Não há link para copiar: gere o link primeiro.',true);return;}
+  if(window.navigator&&navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(ta.value).then(
+      function(){cbAvisoCopia('Link copiado. Agora é só colar no WhatsApp.',false);},
+      function(){cbCopiarPlanoB(ta);}
+    );
+    return;
+  }
+  cbCopiarPlanoB(ta);
+}
+function cbCopiarPlanoB(ta){
+  var ok=false;
+  try{
+    ta.removeAttribute('readonly');
+    ta.focus();ta.setSelectionRange(0,ta.value.length);
+    ok=document.execCommand('copy');
+  }catch(e){ok=false;}
+  try{ta.setAttribute('readonly','readonly');}catch(e){}
+  if(ok)cbAvisoCopia('Link copiado. Agora é só colar no WhatsApp.',false);
+  else cbAvisoCopia('Não consegui copiar sozinho. O link já está selecionado acima: copie na mão.',true);
+}
+
+/* ---- ligação dos eventos ---- */
+var CB_VENCEM=['cb-desc','cb-valor','cb-txid','cb-validade','cb-pplink'];
+function cbMexeu(e){
+  var t=e&&e.target,nome=(t&&(t.name||t.id))||'',i;
+  if(nome==='cb-ppmodo'){cbToggles();cbVencer();return;}
+  for(i=0;i<CB_VENCEM.length;i++)if(nome===CB_VENCEM[i]){cbVencer();return;}
+}
+document.addEventListener('input',cbMexeu);
+document.addEventListener('change',cbMexeu);
+
+function cbAjuste(id,fn){
+  var el=$(id);if(!el)return;
+  el.addEventListener('change',fn);
+  el.addEventListener('blur',fn);
+}
+
+liga('cb-abrir',function(){cbConfigAbrir(undefined,true);});
+liga('cb-salvar',cbConfigSalvar);
+liga('cb-gerar',cbGerarLink);
+liga('cb-copiar',cbCopiar);
+cbAjuste('cb-valor',cbValorAjustar);
+cbAjuste('cb-txid',cbTxidAjustar);
+cbAjuste('cb-chave',cbChaveAjustar);
+
+/* ---- a partida ---- */
+(function(){
+  var id=cbIdentidade(),blo=cbBloco(),vazio=!cbTrim(id.chave)||!cbTrim(id.nomer)||!cbTrim(id.cidade);
+  cbConfigEncher();
+  var alvo=document.querySelector('input[name="cb-ppmodo"][value="'+blo.ppmodo+'"]');
+  if(alvo)alvo.checked=true;
+  cbToggles();
+  cbQuemRender();
+  $('cb-versao').textContent='Fonte compartilhada com a ferramenta: versão '+C.versao+'.';
+  /* PRIMEIRO USO NESTE APARELHO: o painel nasce aberto, e o texto diz por quê.
+     Sem isso o dono veria uma página pronta que recusa gerar, e a recusa só
+     apareceria depois de ele digitar a cobrança inteira. */
+  $('cb-config-nota').textContent=vazio
+    ? 'Primeira vez neste aparelho. Estes dados ficam guardados só aqui, no navegador, e são os mesmos que a ferramenta completa usa.'
+    : 'Estes dados ficam guardados só neste navegador, e são os mesmos que a ferramenta completa usa.';
+  if(vazio)cbConfigAbrir(true);
+  if(cbFalhaLeitura)cbRecusar(cbFalhaLeitura);
+})();
+
+})();
+</script>
+</body>
+</html>
