@@ -2238,7 +2238,7 @@
       <label for="p-descpix">Desconto para quem pagar via Pix <small>(opcional; em %, 0 ou vazio = sem desconto)</small></label>
       <input type="number" id="p-descpix" value="0" min="0" max="90" step="0.5">
       <p class="ajuda">Com desconto, a cobrança passa a ter <b>dois valores</b>: o <b>total</b> — que é o valor digitado acima, e é o que o PayPal cobra — e o <b>valor do Pix</b>, que é o total menos o desconto. O cartão mostra os dois. A conta do desconto é <b>a mesma do Checkout e da Mini loja</b>, escrita uma vez só, e a página de pagamento <b>refaz essa conta</b> ao abrir o link: se o valor do Pix não for exatamente o total menos o desconto, ela recusa a cobrança.</p>
-      <p class="ajuda alerta"><b>Ligar o desconto muda o código 1.</b> Enquanto a página tiver colado um código 1 gerado <i>sem</i> desconto, ela não sabe conferir a conta do desconto e vai <b>recusar</b> qualquer link com desconto. Então: gere o código 1 de novo, cole no site, e só depois mande links com desconto. Os links <b>sem</b> desconto continuam funcionando nos dois códigos — colar o código 1 novo não derruba nenhum link já enviado.</p>
+      <p class="ajuda alerta"><b>O desconto não mexe mais no código 1.</b> Todo código 1 gerado por esta versão já leva a conta do desconto dentro dele, com ou sem desconto configurado aqui — então ligar, desligar ou trocar o percentual muda só o <b>link</b>, nunca o código da página. <b>Falta um passo, e uma vez só:</b> se a página ainda estiver com um código 1 gerado <i>antes</i> desta versão, ele não sabe conferir a conta e vai <b>recusar</b> links com desconto. Gere o código 1 de novo e cole no site; daí em diante o desconto funciona em qualquer aparelho, sem colar nada. Links <b>sem</b> desconto continuam funcionando nos dois códigos.</p>
       <p class="ajuda"><b>O prazo é um recado, não uma tranca.</b> Até o fim do dia escolhido (23:59:59 no horário de Brasília) o cliente vê o prazo escrito no cartão; passando disso, a página para de mostrar o pagamento e manda falar com você. O que ele <b>não</b> faz: o <b>código Pix não tem validade</b> — quem copiou o “copia e cola” antes do prazo consegue pagar depois, e o mesmo vale para quem atrasar o relógio do próprio aparelho. Quem fecha a conta continua sendo você, conferindo <b>valor e data no extrato</b>.</p>
       <p class="ajuda"><b>Alterar o link quase sempre não funciona.</b> Todo link gerado leva um <b>selo</b>: uma conta feita sobre a descrição, a data, o código Pix, o link do PayPal e — quando a cobrança tem desconto — o total e o percentual. Mexer em qualquer um deles — ou apagar o selo — faz a conta não fechar, e a página recusa a cobrança. <b>“Quase sempre”, e não “sempre”:</b> o selo tem 16 bits, então uma alteração feita <b>ao acaso</b> tem uma chance em 65 mil de a conta fechar assim mesmo e a página exibir a cobrança alterada. Na prática ninguém edita um link ao acaso — e quem edita de propósito não precisa dessa chance, porque <b>o selo não é segredo nem é segurança:</b> quem abrir o código da página lê a regra e sabe refazer a conta. O que o selo impede é a <b>edição</b> de um link que você mandou, que é o que acontece na prática. O que impede o dinheiro de ir para outra conta não é ele, e sim a página só exibir cobrança que ela consegue remontar com a <b>sua</b> chave Pix.</p>
       <p class="ajuda"><b>A descrição é cosmética</b> no sentido do dinheiro: o valor cobrado está dentro do código Pix, e é de lá que a tela o lê. O selo existe para que ela também não possa ser <b>trocada</b> no caminho — descrição adulterada não muda um centavo, mas mente para o cliente.</p>
@@ -2315,7 +2315,7 @@
   <h3>Instrução de uso do código gerado</h3>
   <p class="ajuda"><b>Uma vez só:</b> crie no Prosite uma página fixa (sugestão: <code>/pagar</code>), ponha nela um <b>componente HTML</b> e cole ali o <b>código 1</b>. Publique. Não há nada para colar na Tag Head nem na Tag Body.</p>
   <p class="ajuda"><b>O endereço da página, inteiro.</b> Na seção 2, escreva o endereço <b>completo</b> onde você colou o código 1 — com <code>https://</code> e o domínio. O link vai colado numa conversa de WhatsApp, fora do site, e ali um caminho como <code>/pagar</code> não abre nada. A ferramenta recusa o caminho solto; e se você já tinha <code>/pagar</code> guardado, ela <b>avisa e não troca sozinha</b> — ela não tem como saber qual é o seu domínio.</p>
-  <p class="ajuda"><b>Desconto no Pix, quando você quiser dar um.</b> Com desconto a cobrança passa a ter dois valores: o <b>total</b> (que é o que o PayPal cobra e o que aparece em destaque no cartão) e o <b>valor do Pix</b> (total menos o desconto, e é ele que está dentro do código copia e cola). O link carrega o total num parâmetro próprio, <b>coberto pelo selo</b>, e a página <b>refaz a conta</b>: se o valor do Pix não for exatamente o total menos o desconto — pela mesma regra de arredondamento da ferramenta —, ela recusa a cobrança. São duas redes, não uma: o selo pega o parâmetro editado, e a conferência da conta pega o que passar pelo selo. <b>Antes do primeiro link com desconto, cole o código 1 novo:</b> um código 1 antigo não sabe conferir essa conta e vai recusar. Links sem desconto continuam funcionando nos dois.</p>
+  <p class="ajuda"><b>Desconto no Pix, quando você quiser dar um.</b> Com desconto a cobrança passa a ter dois valores: o <b>total</b> (que é o que o PayPal cobra e o que aparece em destaque no cartão) e o <b>valor do Pix</b> (total menos o desconto, e é ele que está dentro do código copia e cola). O link carrega o total num parâmetro próprio, <b>coberto pelo selo</b>, e a página <b>refaz a conta</b>: se o valor do Pix não for exatamente o total menos o desconto — pela mesma regra de arredondamento da ferramenta —, ela recusa a cobrança. São duas redes, não uma: o selo pega o parâmetro editado, e a conferência da conta pega o que passar pelo selo. <b>Antes do primeiro link com desconto, cole o código 1 novo:</b> um código 1 gerado antes desta versão não sabe conferir essa conta e vai recusar. É uma vez só — o código 1 desta versão já leva a conta dentro dele, tenha ou não desconto configurado, então depois disso trocar o percentual não pede nada de você. Links sem desconto continuam funcionando nos dois.</p>
   <p class="ajuda"><b>A cada cobrança:</b> preencha a seção 3 (descrição, valor e, se quiser, um identificador, uma data de validade e um desconto no Pix), clique em <b>Gerar link desta cobrança</b> e mande o <b>código 2</b> ao cliente. Você pode ter <b>quantas cobranças quiser abertas ao mesmo tempo</b>: a página não guarda nada, lê tudo do endereço.</p>
   <p class="ajuda"><b>O que a página garante, dito sem exagero.</b> O link carrega o código Pix já pronto, com o valor dentro dele, e um <b>selo</b> calculado sobre todos os parâmetros do endereço. A página confere o selo, confere a verificação interna do código, remonta o código a partir dos <b>seus</b> dados de recebedor e só exibe a cobrança se tudo fechar. Aí ela lê o valor <b>de dentro do código</b> e usa esse mesmo valor na tela e no botão do PayPal. Disso saem quatro garantias e um limite:</p>
   <p class="ajuda">1. <b>Tela, Pix e PayPal não podem divergir</b>, porque leem o mesmo lugar — não existe um segundo parâmetro de valor para ficar desatualizado.<br>2. <b>Link editado é recusado:</b> mudar um caractere da descrição, um dígito da data, o código Pix ou o link do PayPal quebra o selo. <b>Apagar</b> qualquer um deles, ou apagar o próprio selo, também.<br>3. <b>Link com a chave de outra pessoa é recusado:</b> a remontagem não fecha, então ninguém usa a sua página de pagamento para receber na conta dele.<br>4. <b>O link do PayPal não pode ser trocado no caminho.</b> Antes do selo, esse parâmetro só precisava continuar sendo um endereço do PayPal — o que aceitava a cobrança de <b>outra conta</b>. Era a única porta do link que levava dinheiro para fora, e o selo a fechou.</p>
@@ -2684,7 +2684,7 @@
      nova para a outra, e o resultado seriam links que a propria /pagar recusa -- sem
      erro nenhum na tela. Ao mexer no arquivo, troque a versao AQUI, em cobrar/index.html
      e no FC_COMPART_VERSAO de dentro dele. -->
-<script src="fc-compartilhado.js?v=2026-08-22b"></script>
+<script src="fc-compartilhado.js?v=2026-08-22c"></script>
 <script>
 'use strict';
 (function(){
@@ -2707,7 +2707,7 @@
    OS APELIDOS ABAIXO NAO SAO COPIA: sao o mesmo objeto, com o nome que o resto
    deste arquivo sempre usou. Trocar os nomes em cem lugares so para dizer
    FCCOMPART.x mudaria muito codigo para nao mudar comportamento nenhum. */
-var FC_COMPART_ESPERADA='2026-08-22b';
+var FC_COMPART_ESPERADA='2026-08-22c';
 if(!window.FCCOMPART||FCCOMPART.versao!==FC_COMPART_ESPERADA){
   fcCompartParar(FC_COMPART_ESPERADA,window.FCCOMPART?FCCOMPART.versao:null);
   return;
@@ -2725,9 +2725,13 @@ var P_VALOR_MAX=C.P_VALOR_MAX, P_DESC_MAX=C.P_DESC_MAX;
 var pValorNum=C.pValorNum, pTxidLimpo=C.pTxidLimpo;
 var fcTrim=C.fcTrim, fcValorCorrigido=C.fcValorCorrigido, fcTxidCorrigido=C.fcTxidCorrigido;
 var fcChaveCorrigida=C.fcChaveCorrigida, fcDescCorrigido=C.fcDescCorrigido;
-var fcTotalPixSrc=C.fcTotalPixSrc, fcPixDesc=C.fcPixDesc;
+/* Do desconto, a ferramenta so consome estes tres. Os apelidos de fcPixDesc, pDescPct,
+   pValorPix, pTotCod e pDescCod sairam daqui: os quatro ultimos so sao chamados DENTRO do
+   arquivo compartilhado, e o de pDescPct ficou sem uso quando o bloco passou a emitir a
+   maquinaria do desconto sempre. Apelido que ninguem chama nao documenta a dependencia --
+   so parece documentar. */
+var fcTotalPixSrc=C.fcTotalPixSrc;
 var P_DESC_PCT_MAX=C.P_DESC_PCT_MAX, fcDescNum=C.fcDescNum;
-var pDescPct=C.pDescPct, pValorPix=C.pValorPix, pTotCod=C.pTotCod, pDescCod=C.pDescCod;
 var FC_NOMER_MAX=C.FC_NOMER_MAX, FC_CIDADE_MAX=C.FC_CIDADE_MAX;
 var fcPixTexto=C.fcPixTexto, fcPixTextoCorrigido=C.fcPixTextoCorrigido;
 var P_VAL_NADA=C.P_VAL_NADA, fcValDia=C.fcValDia, pValCod=C.pValCod, pValTexto=C.pValTexto;
@@ -3557,7 +3561,7 @@ var ABAS=[
    guarda:'tudo o que está configurado nesta aba — modo e duração da contagem, o código da campanha, as <b>mensagens cadastradas</b>, aparência, posição, extras, coruja, efeitos, movimento, urgência e entrada.'},
   {id:'cob',  nome:'Link de cobrança',    chaves:['p'],         coleta:pColeta,restaura:pRestaura,
    pref:'p',fora:[],resumo:pPresetResumo,redesenhar:pPresetDepois,antesDeSalvar:pPresetAntes,
-   naoEmite:['url','desc','valor','txid','validade','ppmodo','pplink'],
+   naoEmite:['url','desc','valor','txid','validade','descpix','ppmodo','pplink'],
    exemplo:'ex.: Foto Certa - pagina /pagar',
    guarda:'tudo o que está configurado nesta aba — o endereço da página, a aparência, os textos, e também a <b>cobrança que está na tela</b> (descrição, valor, identificador, a data de validade e o desconto no Pix). Aplicar um preset troca também essa cobrança: ele é a fotografia da aba inteira. Os dados de quem recebe <b>não</b> estão aqui: eles saíram desta aba para o painel Identidade, e nenhum preset os toca.'},
   {id:'loja', nome:'Mini loja',           chaves:['m'],         coleta:mColeta,restaura:mRestaura,
@@ -12266,9 +12270,11 @@ function pCss(cfg){
   s+='.fcpg-desc{font-size:14px;line-height:1.5;margin:0 0 14px;word-wrap:break-word;overflow-wrap:break-word}\n';
   s+='.fcpg-valor-rot{font-size:12px;letter-spacing:.06em;text-transform:uppercase;opacity:.7;margin:0 0 2px}\n';
   s+='.fcpg-valor{font-size:30px;font-weight:800;line-height:1.1;color:'+cfg.c1+';margin:0 0 4px}\n';
-  /* A linha do desconto so existe quando a cobranca tem desconto: sem ele nenhuma regra nova
-     entra no CSS, e o codigo 1 sai byte a byte igual ao de antes de o desconto existir. */
-  if(pDescPct(cfg)>0)s+='.fcpg-pixlinha{font-size:15px;font-weight:700;color:'+cfg.c1+';margin:0 0 4px}\n';
+  /* A regra da linha do desconto entra SEMPRE, como todo o resto da maquinaria do desconto:
+     o bloco nao pode depender do desconto que estava configurado no dia em que foi gerado
+     (ver "o desconto nao e mais uma escolha do bloco", em pJs). Quem decide se a linha aparece
+     e o par t/x do endereco, em tempo de execucao. */
+  s+='.fcpg-pixlinha{font-size:15px;font-weight:700;color:'+cfg.c1+';margin:0 0 4px}\n';
   /* O prazo fica JUNTO do valor, e nao no rodape: ele muda o comportamento de quem le, e para
      isso precisa ser lido antes de o cliente decidir deixar para depois. */
   s+='.fcpg-prazo{font-size:13px;font-weight:700;color:'+cfg.c1+';margin:0 0 4px}\n';
@@ -12285,11 +12291,34 @@ function pCss(cfg){
   s+='.fcpg-qr img,.fcpg-qr canvas{display:block;max-width:100%;height:auto}\n';
   s+='.fcpg-aviso{font-size:12px;margin:8px 0 0;color:#8C1D18;font-weight:700}\n';
   s+='.fcpg-recado{font-size:15px;line-height:1.6;margin:0}\n';
+  /* O "OU" entre o Pix e o PayPal: o mesmo desenho que o Checkout e a Mini loja ja usam entre
+     as duas formas de pagamento (.fcu-sep / .fcm-sep), e pelo mesmo motivo -- sem ele as duas
+     secoes parecem ETAPAS de um caminho, e nao caminhos alternativos.
+     A ORDEM DESTAS DUAS REGRAS IMPORTA: .fcpg-semtopo desliga a linha de cima do .fcpg-bloco do
+     PayPal, e as duas tem a mesma especificidade -- quem vier depois vence. Sem isso o cliente
+     veria duas linhas horizontais coladas, a do separador e a do bloco. */
+  s+='.fcpg-sep{display:flex;align-items:center;gap:10px;margin:16px 0 0;font-size:12px;font-weight:700;letter-spacing:.10em;color:'+cfg.c1+';opacity:.7}\n';
+  s+='.fcpg-sep:before,.fcpg-sep:after{content:"";flex:1 1 auto;height:1px;background:rgba(0,0,0,.14)}\n';
+  s+='.fcpg-semtopo{border-top:0;margin-top:6px;padding-top:0}\n';
   s+='.fcpg-pp{margin-top:10px}\n';
   return s;
 }
+/* ===== O DESCONTO NAO E MAIS UMA ESCOLHA DO BLOCO (ago/2026) =====
+   Ate esta rodada, a maquinaria do desconto so entrava no bloco quando havia desconto
+   configurado na hora de gerar. Isso amarrava uma decisao POR COBRANCA a uma configuracao DO
+   BLOCO, e o preco apareceu no aparelho do dono: a /cobrar so mostra o campo de desconto se o
+   bloco publicado souber conferi-lo, e "o bloco publicado" ela le do armazenamento DAQUELE
+   navegador -- o dono configurou o desconto no computador e no celular o campo nao apareceu,
+   em nenhum navegador nem no aplicativo instalado.
+   Agora o bloco leva a maquinaria SEMPRE. Quem manda em cada cobranca e o par t/x do endereco:
+   ausente ou zero = sem desconto, exatamente como antes. Com isso some uma classe inteira de
+   "num aparelho aparece, no outro nao", e trocar o desconto deixa de mexer no codigo 1.
+   O INVARIANTE que isto nao pode quebrar, e nao quebra: o LINK de uma cobranca SEM desconto
+   continua byte a byte identico. Ele nao muda porque nada aqui toca a montagem do link -- e o
+   selo tambem nao muda, porque quem decide contar t e x e um "if" de tempo de execucao dentro
+   da propria seloDe, e nao o texto que este gerador emite (ver pSeloDeSrc). */
 function pJs(cfg){
-  var j='',comDesc=pDescPct(cfg)>0;
+  var j='';
   j+='  /* ===== CONFIGURACAO ===== */\n';
   j+="  var CHAVE_PIX='"+escJs(cfg.chave)+"';\n";
   j+="  var NOME_RECEBEDOR='"+escJs(cfg.nomer)+"';\n";
@@ -12320,7 +12349,8 @@ function pJs(cfg){
   j+="  var TXT_REF='Identificador da cobrança: ';\n";
   /* O mesmo rotulo que o carrinho do Checkout escreve, pela mesma razao de sempre: o cliente
      que ja viu a loja le a mesma frase na pagina de cobranca. */
-  if(comDesc)j+="  var TXT_PIX_ROTULO='Pagando via Pix';\n";
+  j+="  var TXT_PIX_ROTULO='Pagando via Pix';\n";
+  if(cfg.usapp)j+="  var TXT_OU='OU';\n";
   if(cfg.usapp)j+="  var TXT_PAYPAL_FORA='Não foi possível carregar o PayPal agora. Use o Pix acima, ou fale com a gente para receber outro link.';\n";
   j+='\n  /* ============================================================\n     Daqui para baixo nao precisa mexer\n     ============================================================ */\n\n';
   /* A maquinaria do BR Code vem da FONTE UNICA. Aqui ela e usada ao contrario do Checkout: em
@@ -12334,26 +12364,24 @@ function pJs(cfg){
   j+=pInd(FC_PIX_SRC.pixLer);
   /* O selo e o prazo, da mesma fonte unica que a ferramenta avalia (ver P_SELO_SRC). seloDe usa
      o crc16 emitido tres linhas acima: a conta do selo e a mesma que confere o BR Code. */
-  j+=pInd(pSeloSrc(comDesc));
+  j+=pInd(pSeloSrc());
   /* montarPayload le CODIGO_PEDIDO; aqui o txid nao e fixo, ele vem do codigo recebido */
   j+='  var CODIGO_PEDIDO=\'\';\n';
   j+=pInd(FC_PIX_SRC.montarPayload);
   j+=pInd(fcMoedaFmtGer(true));
-  if(comDesc){
-    j+='  /* ===== O DESCONTO NO PIX =====\n';
-    j+='     Esta pagina passa a receber DOIS valores em vez de um: o TOTAL, que chega no\n';
-    j+='     parametro t do endereco e e o que o PayPal cobra, e o VALOR DO PIX, que continua\n';
-    j+='     morando dentro do proprio codigo Pix e de lugar nenhum mais. O percentual chega em x.\n';
-    j+='     Os dois entram na conta do selo, entao nenhum deles pode ser editado no caminho.\n';
-    j+='     A conta abaixo e a MESMA que o carrinho do Checkout e a Mini loja usam -- mesma fonte,\n';
-    j+='     mesmo arredondamento em centavos. Ela nao esta aqui para calcular o que o cliente\n';
-    j+='     paga (isso ja veio pronto dentro do codigo Pix): esta para RECONFERIR que o valor do\n';
-    j+='     Pix e exatamente o total menos o desconto. Se nao bater, a cobranca e recusada. */\n';
-    j+='  var TOTAL_COBRADO=0;   /* o total desta cobranca, lido do parametro t */\n';
-    j+='  var DESCONTO_PIX=0;    /* o percentual de desconto no Pix, lido do parametro x */\n';
-    j+='  function total(){return TOTAL_COBRADO;}\n';
-    j+=pInd(fcTotalPixSrc(1,true,false));
-  }
+  j+='  /* ===== O DESCONTO NO PIX =====\n';
+  j+='     Esta pagina passa a receber DOIS valores em vez de um: o TOTAL, que chega no\n';
+  j+='     parametro t do endereco e e o que o PayPal cobra, e o VALOR DO PIX, que continua\n';
+  j+='     morando dentro do proprio codigo Pix e de lugar nenhum mais. O percentual chega em x.\n';
+  j+='     Os dois entram na conta do selo, entao nenhum deles pode ser editado no caminho.\n';
+  j+='     A conta abaixo e a MESMA que o carrinho do Checkout e a Mini loja usam -- mesma fonte,\n';
+  j+='     mesmo arredondamento em centavos. Ela nao esta aqui para calcular o que o cliente\n';
+  j+='     paga (isso ja veio pronto dentro do codigo Pix): esta para RECONFERIR que o valor do\n';
+  j+='     Pix e exatamente o total menos o desconto. Se nao bater, a cobranca e recusada. */\n';
+  j+='  var TOTAL_COBRADO=0;   /* o total desta cobranca, lido do parametro t */\n';
+  j+='  var DESCONTO_PIX=0;    /* o percentual de desconto no Pix, lido do parametro x */\n';
+  j+='  function total(){return TOTAL_COBRADO;}\n';
+  j+=pInd(fcTotalPixSrc(1,true,false));
   j+='  /* le um parametro do endereco, em ES5 -- sem URLSearchParams */\n';
   j+='  function param(nome){\n';
   j+="    var q=String(location.search||''),ps,i,ig;\n";
@@ -12412,7 +12440,12 @@ function pJs(cfg){
   j+='    var c=cartao();\n';
   j+="    if(desc)c.appendChild(novo('div','fcpg-desc',desc));\n";
   j+="    c.appendChild(novo('div','fcpg-recado',TXT_VENCIDO.replace(/\\{data\\}/g,prazoTexto(dia))));\n";
-  if(cfg.zap)j+='    zap(c,valor,desc,txid);\n';
+  /* Aqui nao ha secao do Pix para o botao morar dentro, entao ele ganha um bloco proprio. */
+  if(cfg.zap){
+    j+="    var bz=novo('div','fcpg-bloco');\n";
+    j+='    bz.appendChild(zapBotao(valor,desc,txid));\n';
+    j+='    c.appendChild(bz);\n';
+  }
   j+='  }\n';
   j+='  function montar(){\n';
   j+='    if(!raiz)return;\n';
@@ -12428,14 +12461,10 @@ function pJs(cfg){
   j+='       impede a EDICAO de um link existente; ele nao e seguranca, e as conferencias 2 e 3\n';
   j+='       abaixo continuam sendo o que impede o dinheiro de ir para outra conta. */\n';
   j+="    var selo=param('s');\n";
-  if(comDesc){
-    /* A conta de seis: os quatro de sempre mais o par t/x. Ela e um SUPERCONJUNTO da de quatro
-       -- com t e x vazios, a lista e a mesma --, e e por isso que este bloco continua aceitando
-       os links gerados antes de o desconto existir. */
-    j+="    if(!selo||seloDe(codigo,param('d'),param('pp'),pv,param('t'),param('x'))!==selo){recado(TXT_CODIGO_RUIM);return;}\n";
-  }else{
-    j+="    if(!selo||seloDe(codigo,param('d'),param('pp'),pv)!==selo){recado(TXT_CODIGO_RUIM);return;}\n";
-  }
+  /* A conta passa os seis, sempre. Ela e um SUPERCONJUNTO da de quatro -- com t e x vazios a
+     lista e a mesma, e o selo sai igual --, e e por isso que este bloco aceita, sem excecao,
+     todos os links sem desconto gerados antes de o desconto existir. */
+  j+="    if(!selo||seloDe(codigo,param('d'),param('pp'),pv,param('t'),param('x'))!==selo){recado(TXT_CODIGO_RUIM);return;}\n";
   j+='    /* 2. forma e verificacao interna (CRC) */\n';
   j+='    var lido=pixLer(codigo);\n';
   j+='    if(!lido.ok){recado(TXT_CODIGO_RUIM);return;}\n';
@@ -12445,29 +12474,27 @@ function pJs(cfg){
   j+='       anteriores, mas nao tem a chave daqui, entao nao passa nesta */\n';
   j+='    CODIGO_PEDIDO=lido.txid;\n';
   j+='    if(montarPayload(valor)!==codigo){recado(TXT_CODIGO_RUIM);return;}\n';
-  if(comDesc){
-    j+='    /* 4b. O DESCONTO, quando este link traz um -- a SEGUNDA REDE, atras do selo.\n';
-    j+='       O selo ja recusaria um t, um x ou um codigo Pix trocados. Esta conferencia existe\n';
-    j+='       porque o selo tem 16 bits e porque ela pergunta outra coisa: nao "estes parametros\n';
-    j+='       chegaram inteiros?", e sim "eles fazem sentido JUNTOS?". O valor de dentro do codigo\n';
-    j+='       Pix tem de ser exatamente o total menos o desconto, pela mesma conta que a\n';
-    j+='       ferramenta fez ao montar o link. Se nao for, nao ha numero certo a exibir, e a\n';
-    j+='       pagina recusa em vez de escolher um dos dois.\n';
-    j+='       SEM t e sem x, nada disto acontece: o link e um link sem desconto e segue o caminho\n';
-    j+='       de sempre, com o valor saindo do codigo Pix e mais lugar nenhum. */\n';
-    j+="    var pt=param('t'),px=param('x');\n";
-    j+='    if(pt||px){\n';
-    j+="      if(!/^[0-9]{1,10}(\\.[0-9]{1,2})?$/.test(pt)){recado(TXT_CODIGO_RUIM);return;}\n";
-    j+="      if(!/^[0-9]{1,2}(\\.[0-9])?$/.test(px)){recado(TXT_CODIGO_RUIM);return;}\n";
-    j+='      TOTAL_COBRADO=parseFloat(pt);DESCONTO_PIX=parseFloat(px);\n';
-    j+='      if(!(TOTAL_COBRADO>0)||!(DESCONTO_PIX>0)||DESCONTO_PIX>'+P_DESC_PCT_MAX+'){recado(TXT_CODIGO_RUIM);return;}\n';
-    j+='      if(Math.abs(totalPix()-valor)>0.0001){recado(TXT_CODIGO_RUIM);return;}\n';
-    j+='      /* daqui para baixo "valor" e o TOTAL: e ele que a tela mostra em destaque, que o\n';
-    j+='         PayPal cobra e que volta na mensagem do WhatsApp. O valor do Pix aparece na sua\n';
-    j+='         propria linha, e continua sendo o que esta dentro do codigo copia e cola. */\n';
-    j+='      valor=TOTAL_COBRADO;\n';
-    j+='    }\n';
-  }
+  j+='    /* 4b. O DESCONTO, quando este link traz um -- a SEGUNDA REDE, atras do selo.\n';
+  j+='       O selo ja recusaria um t, um x ou um codigo Pix trocados. Esta conferencia existe\n';
+  j+='       porque o selo tem 16 bits e porque ela pergunta outra coisa: nao "estes parametros\n';
+  j+='       chegaram inteiros?", e sim "eles fazem sentido JUNTOS?". O valor de dentro do codigo\n';
+  j+='       Pix tem de ser exatamente o total menos o desconto, pela mesma conta que a\n';
+  j+='       ferramenta fez ao montar o link. Se nao for, nao ha numero certo a exibir, e a\n';
+  j+='       pagina recusa em vez de escolher um dos dois.\n';
+  j+='       SEM t e sem x, nada disto acontece: o link e um link sem desconto e segue o caminho\n';
+  j+='       de sempre, com o valor saindo do codigo Pix e mais lugar nenhum. */\n';
+  j+="    var pt=param('t'),px=param('x');\n";
+  j+='    if(pt||px){\n';
+  j+="      if(!/^[0-9]{1,10}(\\.[0-9]{1,2})?$/.test(pt)){recado(TXT_CODIGO_RUIM);return;}\n";
+  j+="      if(!/^[0-9]{1,2}(\\.[0-9])?$/.test(px)){recado(TXT_CODIGO_RUIM);return;}\n";
+  j+='      TOTAL_COBRADO=parseFloat(pt);DESCONTO_PIX=parseFloat(px);\n';
+  j+='      if(!(TOTAL_COBRADO>0)||!(DESCONTO_PIX>0)||DESCONTO_PIX>'+P_DESC_PCT_MAX+'){recado(TXT_CODIGO_RUIM);return;}\n';
+  j+='      if(Math.abs(totalPix()-valor)>0.0001){recado(TXT_CODIGO_RUIM);return;}\n';
+  j+='      /* daqui para baixo "valor" e o TOTAL: e ele que a tela mostra em destaque, que o\n';
+  j+='         PayPal cobra e que volta na mensagem do WhatsApp. O valor do Pix aparece na sua\n';
+  j+='         propria linha, e continua sendo o que esta dentro do codigo copia e cola. */\n';
+  j+='      valor=TOTAL_COBRADO;\n';
+  j+='    }\n';
   j+="    var desc=param('d');\n";
   j+='    /* 5. o prazo, se este link tiver um. Sem parametro v, nada disto acontece e a pagina\n';
   j+='       nao menciona prazo nenhum. O instante comparado vem do relogio do APARELHO do\n';
@@ -12479,14 +12506,19 @@ function pJs(cfg){
   j+="    if(desc)c.appendChild(novo('div','fcpg-desc',desc));\n";
   j+="    c.appendChild(novo('div','fcpg-valor-rot',TXT_VALOR));\n";
   j+="    c.appendChild(novo('div','fcpg-valor',moedaFmt(valor)));\n";
-  if(comDesc)j+="    if(DESCONTO_PIX>0)c.appendChild(novo('div','fcpg-pixlinha',TXT_PIX_ROTULO+' (-'+DESCONTO_PIX+'%): '+moedaFmt(totalPix())));\n";
+  j+="    if(DESCONTO_PIX>0)c.appendChild(novo('div','fcpg-pixlinha',TXT_PIX_ROTULO+' (-'+DESCONTO_PIX+'%): '+moedaFmt(totalPix())));\n";
   j+="    if(dia>0)c.appendChild(novo('div','fcpg-prazo',TXT_PRAZO.replace(/\\{data\\}/g,prazoTexto(dia))));\n";
   j+="    if(lido.txid&&lido.txid!=='***')c.appendChild(novo('div','fcpg-ref',TXT_REF+lido.txid));\n";
-  j+='    pix(c,codigo);\n';
+  /* O "Ja paguei" mora DENTRO da secao do Pix, logo depois da orientacao -- ver pix(). Ele e
+     um botao exclusivo do Pix: quem paga por PayPal recebe notificacao e recibo do proprio
+     PayPal, e nao precisa avisar ninguem. No fim da pagina, depois do PayPal, ele parecia o
+     ultimo passo de um caminho unico. */
+  j+='    pix(c,codigo'+(cfg.zap?',valor,desc,lido.txid':'')+');\n';
   if(cfg.usapp)j+='    paypal(c,valor,desc);\n';
-  if(cfg.zap)j+='    zap(c,valor,desc,lido.txid);\n';
   j+='  }\n';
-  j+='  function pix(c,codigo){\n';
+  /* Sem WhatsApp no bloco a secao do Pix nao precisa dos tres: o bloco entregue continua
+     carregando so a maquinaria escolhida, como no resto da ferramenta. */
+  j+='  function pix(c,codigo'+(cfg.zap?',valor,desc,txid':'')+'){\n';
   j+="    var b=novo('div','fcpg-bloco');\n";
   j+="    b.appendChild(novo('div','fcpg-rot','Pix'));\n";
   j+="    var ta=document.createElement('textarea');\n";
@@ -12509,6 +12541,7 @@ function pJs(cfg){
   j+="    var qr=novo('div','fcpg-qr');\n";
   j+='    b.appendChild(qr);\n';
   j+="    b.appendChild(novo('div','fcpg-ajuda',TXT_INSTRUCAO_PIX));\n";
+  if(cfg.zap)j+='    b.appendChild(zapBotao(valor,desc,txid));\n';
   j+='    c.appendChild(b);\n';
   j+='    desenharQr(qr,codigo);\n';
   j+='  }\n';
@@ -12535,7 +12568,10 @@ function pJs(cfg){
     j+='  function paypal(c,valor,desc){\n';
     j+="    var modo=param('pp');\n";
     j+="    if(modo==='nao')return;\n";
-    j+="    var b=novo('div','fcpg-bloco');\n";
+    /* O separador entra DEPOIS da recusa acima: numa cobranca sem PayPal nao existe segunda
+       forma de pagamento, e um "OU" solto embaixo do Pix prometeria uma que nao vem. */
+    j+="    c.appendChild(novo('div','fcpg-sep',TXT_OU));\n";
+    j+="    var b=novo('div','fcpg-bloco fcpg-semtopo');\n";
     j+="    b.appendChild(novo('div','fcpg-rot','PayPal, cartão de crédito ou débito'));\n";
     j+='    if(modo){\n';
     j+='      if(!paypalLinkOk(modo)){c.appendChild(b);return;}\n';
@@ -12584,19 +12620,21 @@ function pJs(cfg){
     j+='  }\n';
   }
   if(cfg.zap){
-    j+='  function zap(c,valor,desc,txid){\n';
-    j+="    var b=novo('div','fcpg-bloco');\n";
+    /* Devolve o BOTAO, e nao a secao: ele e colocado dentro da secao do Pix na pagina normal e
+       dentro de um bloco proprio na pagina vencida. Uma funcao so para os dois lugares -- se
+       ela montasse a secao, o caminho vencido precisaria de uma segunda montagem da mensagem,
+       que e justamente o que o dono le no WhatsApp. */
+    j+='  function zapBotao(valor,desc,txid){\n';
     j+="    var msg='Ola! Acabei de pagar: '+desc+' -- '+moedaFmt(valor);\n";
     /* Com desconto o cliente pode ter pago o total (PayPal) ou o valor com desconto (Pix). A
        mensagem cita os dois: um numero so aqui obrigaria o dono a adivinhar qual chegou. */
-    if(comDesc)j+="    if(DESCONTO_PIX>0)msg+=' (via Pix: '+moedaFmt(totalPix())+')';\n";
+    j+="    if(DESCONTO_PIX>0)msg+=' (via Pix: '+moedaFmt(totalPix())+')';\n";
     j+="    if(txid&&txid!=='***')msg+=' ('+txid+')';\n";
     j+="    var a=novo('a','fcpg-bt fcpg-bt2',TXT_ZAP);\n";
     j+="    a.setAttribute('href','https://wa.me/'+WHATSAPP+'?text='+encodeURIComponent(msg));\n";
     j+="    a.setAttribute('target','_blank');\n";
     j+="    a.setAttribute('rel','noopener noreferrer');\n";
-    j+='    b.appendChild(a);\n';
-    j+='    c.appendChild(b);\n';
+    j+='    return a;\n';
     j+='  }\n';
   }
   j+='  /* uma falha aqui nao pode deixar a pagina em branco: o recado ainda sai */\n';
@@ -12618,10 +12656,12 @@ function pInd(t){
    O criterio nao vale para a aparencia nem para os textos do cartao: eles mudam o BLOCO, nao o
    link, e ali continua valendo a regra das outras abas (a caixa fica, e o painel consolidado
    avisa que o codigo e mais velho que a aba). Esta lista e a 'naoEmite' do registro ABAS mais
-   os tres campos do recebedor e mais o 'p-descpix' -- o que muda o LINK, e nao "o que nao entra
-   no bloco": desde o desconto, os dois conjuntos deixaram de ser o mesmo. O 'p-descpix' e o
-   unico campo desta aba que muda as DUAS saidas (o link ganha o total e o percentual; o bloco
-   ganha a conferencia da relacao), entao ele esta aqui E fora da 'naoEmite'.
+   os tres campos do recebedor: o que muda o LINK.
+   O 'p-descpix' esteve, por uma rodada, aqui E fora da 'naoEmite' -- ele era o unico campo que
+   mudava as DUAS saidas. Desde que o bloco passou a levar a maquinaria do desconto SEMPRE (ver
+   pJs), ele voltou a mudar so o link, e por isso entrou na 'naoEmite': deixa-lo fora faria o
+   painel consolidado anunciar "o codigo e mais velho que a aba" sobre um codigo 1 byte a byte
+   identico -- exatamente o aviso falso que custou a correcao do 'p-url'.
    Os tres do recebedor moram no painel Identidade desde que a identidade saiu das abas, e por
    isso aparecem aqui com o prefixo 'fci-': o campo mudou de lugar, o efeito dele sobre o link
    nao mudou nada. */

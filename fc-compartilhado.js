@@ -49,7 +49,7 @@
    ============================================================================ */
 'use strict';
 var FCCOMPART=(function(){
-var FC_COMPART_VERSAO='2026-08-22b';
+var FC_COMPART_VERSAO='2026-08-22c';
 
 /* Limpeza compartilhada pelos DOIS validadores de endereco -- cUrlOk (botao de acao da
    Contagem regressiva) e tUrlOk (pagina intermediaria do TidyCal). Ela faz o que o NAVEGADOR
@@ -607,36 +607,45 @@ function pPpHostOk(v){
    sem horario de verao desde 2019), o mesmo fuso fixo da Contagem regressiva: sem isso um
    cliente viajando veria outro prazo. A comparacao e feita em milissegundos desde a epoca, que
    nao dependem do fuso do aparelho -- so do RELOGIO dele, e isso e um limite declarado. */
-/* ===== O SELO E O DESCONTO: por que a fonte e PARAMETRIZADA, e nao duplicada =====
+/* ===== O SELO E O DESCONTO: uma conta so, com o par condicional DENTRO dela =====
    Com desconto no Pix o endereco ganha dois parametros -- t (o total, que o PayPal cobra) e x
    (o percentual) -- e os dois precisam entrar na conta do selo, senao a unica coisa que o
    desconto acrescentaria ao link seria uma porta nova para editar.
-   O PROBLEMA: um selo de arita fixa em SEIS mudaria a conta de TODO link, inclusive dos que nao
-   tem desconto -- e isso derrubaria, sem ganho nenhum, todas as cobrancas ja enviadas e o bloco
-   ja colado na /pagar (que nao e versionado e confere do jeito que estava no dia da colagem).
+   O PROBLEMA: uma seloDe que contasse t e x SEMPRE mudaria a conta de TODO link, inclusive dos
+   que nao tem desconto -- e isso derrubaria, sem ganho nenhum, todas as cobrancas ja enviadas e
+   o bloco ja colado na /pagar (que nao e versionado e confere do jeito que estava no dia da
+   colagem).
    A REGRA ADOTADA: os quatro de sempre contam SEMPRE, na ordem de sempre; t e x entram DEPOIS
-   deles e SO quando pelo menos um dos dois vem preenchido. Disso saem quatro propriedades, e as
-   quatro sao verificaveis:
+   deles e SO quando pelo menos um dos dois vem preenchido. Quem decide isso e um "if" em TEMPO
+   DE EXECUCAO, dentro da propria seloDe. Disso saem quatro propriedades, e as quatro sao
+   verificaveis:
      1. link sem desconto sela EXATAMENTE como antes -- byte a byte;
-     2. um bloco com a conta nova aceita os links antigos (a conta e um superconjunto);
+     2. um bloco com esta conta aceita os links antigos (a conta e um superconjunto);
      3. apagar o t, ou o x, ou os dois, muda a contagem e derruba o link;
      4. acrescentar t e x a um link que nao os tinha tambem derruba.
    Os dois entram JUNTOS -- se um deles vem, os dois contam, mesmo vazio -- de proposito: com
    entrada condicional independente, "t=10 sem x" e "x=10 sem t" produziriam a MESMA lista e o
    mesmo selo. Sao dois parametros que so fazem sentido em par, e a conta os trata como par.
-   A FONTE E UMA SO, parametrizada: nao existem duas seloDe escritas por extenso para divergir.
-   A serializacao, o laco e o crc16 sao os mesmos objetos de texto nos dois casos; o que o
-   parametro decide sao a assinatura e as duas linhas do par. O bloco leva o texto que
-   pSeloSrc(comDesc) devolve, e a ferramenta AVALIA esse mesmo texto (pSeloApi(comDesc)). */
-function pSeloDeSrc(comDesc){
-  return "function seloDe(pc,pd,pp,pv"+(comDesc?",pt,px":"")+"){\n"+
-    "  var ps=[pc,pd,pp,pv],t='',i,s"+(comDesc?",a,b":"")+";\n"+
-    (comDesc?"  a=String(pt==null?'':pt);b=String(px==null?'':px);\n  if(a!==''||b!==''){ps.push(a);ps.push(b);}\n":"")+
+
+   POR QUE ELA DEIXOU DE SER PARAMETRIZADA (ago/2026). Ate esta rodada existiam DUAS formas
+   desta funcao -- uma de quatro parametros e outra de seis --, e o bloco levava dentro a que
+   correspondesse ao desconto configurado no momento de gerar. Isso amarrava uma decisao POR
+   COBRANCA a uma escolha DO BLOCO, e o preco apareceu no aparelho do dono: com o bloco gerado
+   sem desconto, a /cobrar escondia o campo de desconto -- ele configurou no computador e no
+   celular o campo nao apareceu. Agora o bloco leva SEMPRE esta forma, e quem manda em cada
+   cobranca e o par t/x do endereco. A propriedade 1 nao dependia da parametrizacao e continua
+   valendo: quem decide e o "if" de dentro, nao o texto emitido -- e isso e verificavel byte a
+   byte, que e como foi verificado. */
+function pSeloDeSrc(){
+  return "function seloDe(pc,pd,pp,pv,pt,px){\n"+
+    "  var ps=[pc,pd,pp,pv],t='',i,s,a,b;\n"+
+    "  a=String(pt==null?'':pt);b=String(px==null?'':px);\n"+
+    "  if(a!==''||b!==''){ps.push(a);ps.push(b);}\n"+
     "  for(i=0;i<ps.length;i++){s=String(ps[i]==null?'':ps[i]);t+=s.length+':'+s+'|';}\n"+
     "  return crc16(seloBytes(t));\n"+
     "}\n";
 }
-function pSeloSrc(comDesc){return P_SELO_ANTES+pSeloDeSrc(comDesc)+P_SELO_DEPOIS;}
+function pSeloSrc(){return P_SELO_ANTES+pSeloDeSrc()+P_SELO_DEPOIS;}
 var P_SELO_ANTES=
 "function seloBytes(s){\n"+
 "  var o='',i,c;\n"+
@@ -660,17 +669,15 @@ var P_SELO_DEPOIS=
 "}\n\n";
 /* O lado da FERRAMENTA: as mesmas cinco funcoes, avaliadas a partir do mesmo texto, e sobre o
    MESMO crc16 que o bloco usa. Nada digitado pelo operador entra nesta fonte.
-   DUAS CAIXAS, e nao uma: comDesc decide qual TEXTO e avaliado, e o texto avaliado e sempre o
-   que o bloco daquela configuracao leva dentro. Avaliar sempre a versao de seis e comparar
-   daria o mesmo numero (a de seis com t e x vazios e identica a de quatro), mas seria a
-   ferramenta rodando um codigo que o bloco nao tem -- e a regra deste arquivo e o contrario
-   disso. As funcoes de prazo sao as mesmas nas duas caixas. */
-var pSeloFns={};
-function pSeloApi(comDesc){
-  var k=comDesc?'d':'s';
-  if(!pSeloFns[k])pSeloFns[k]=(new Function(FC_PIX_SRC.crc16+pSeloSrc(!!comDesc)+
+   UMA CAIXA, e nao duas: desde que o bloco passou a levar sempre a mesma seloDe, o texto
+   avaliado aqui e, caractere por caractere, o que o bloco leva dentro. Avaliar outra coisa
+   seria a ferramenta rodando um codigo que o bloco nao tem -- e a regra deste arquivo e o
+   contrario disso. */
+var pSeloFn=null;
+function pSeloApi(){
+  if(!pSeloFn)pSeloFn=(new Function(FC_PIX_SRC.crc16+pSeloSrc()+
     'return {seloDe:seloDe,prazoDia:prazoDia,prazoFim:prazoFim,prazoTexto:prazoTexto};'))();
-  return pSeloFns[k];
+  return pSeloFn;
 }
 /* A data escolhida, em numero de dias desde 1970-01-01.
    Date.UTC evita o fuso do computador do operador: "2026-08-25" e o dia civil 2026-08-25, e nao
@@ -843,7 +850,7 @@ function pBusca(cfg,codigo){
      inteiro sai byte a byte igual ao que esta aba gerava antes de o desconto existir. */
   if(t)q+='&t='+encodeURIComponent(t);
   if(x)q+='&x='+encodeURIComponent(x);
-  q+='&s='+pSeloApi(!!t).seloDe(codigo,cfg.desc,pp,v,t,x);
+  q+='&s='+pSeloApi().seloDe(codigo,cfg.desc,pp,v,t,x);
   return q;
 }
 function pLinkDe(cfg,codigo){

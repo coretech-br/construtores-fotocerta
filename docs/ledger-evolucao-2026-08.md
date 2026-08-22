@@ -383,6 +383,7 @@ Cinco rodadas, **todas dentro ou abaixo da faixa**.
 | Rolagem concatenada (contagem) | 1h – 1h30 | **1h23** (20:52 → 22:15) |
 | Página `/cobrar` e a primeira extração | 3h – 4h30 | **2h22** (22:16 → 00:38) |
 | Desconto Pix e endereço completo | 2h – 3h | **~2h** de trabalho medido |
+| Bloco sempre com desconto, "Já paguei" e "OU" | 1h15 – 2h | **1h25** (13:15 → 14:40) |
 
 A última não tem relógio confiável: **três tentativas caíram por limite de uso da conta**, e o intervalo de calendário (00:38 → 11:07) inclui a espera pelo reset. O trabalho medido soma cerca de duas horas.
 
@@ -399,9 +400,10 @@ A última não tem relógio confiável: **três tentativas caíram por limite de
 | Rolagem concatenada | 1h – 1h30 | 1h23 |
 | `/cobrar` e a extração | 3h – 4h30 | 2h22 |
 | Desconto e endereço | 2h – 3h | ~2h |
-| **Total** | **36h45 – 53h15** | **~28h20** |
+| Bloco sempre com desconto, "Já paguei" e "OU" | 1h15 – 2h | 1h25 |
+| **Total** | **38h – 55h15** | **~29h45** |
 
-**Nove rodadas, todas dentro ou abaixo da faixa.**
+**Dez rodadas, todas dentro ou abaixo da faixa.**
 
 ### O que a última rodada ensinou sobre método
 
@@ -411,3 +413,24 @@ A última não tem relógio confiável: **três tentativas caíram por limite de
 
 1. **As duas versões servidas na mesma origem contaminam a passagem seguinte** — a configuração que uma deixa salva entra na outra. Uma configuração divergiu em 49 bytes e não era vazamento, era o arnês. Só vale comparar com o estado inteiro sob controle.
 2. **Medir por `textContent` do corpo dá falso positivo em tudo** — ele inclui o CSS e os textos-modelo que o bloco carrega como constantes, então as palavras da recusa aparecem mesmo quando a recusa não aconteceu. Medir pelos **elementos desenhados**, ignorando `style` e `script`.
+
+
+---
+
+## Décima rodada — o bloco sempre com desconto, o "Já paguei" no lugar certo e o "OU" (22/08/2026)
+
+Estimado **1h15 – 2h**, real **1h25**. Os três itens da pendência, numa rodada só, com uma revisão só — que era exatamente o motivo de eles terem sido agrupados.
+
+Spec: `docs/specs/2026-08-22-bloco-sempre-com-desconto-design.md`.
+
+### O que a rodada ensinou sobre método
+
+**O defeito não estava na tela onde ele apareceu.** O campo de desconto sumia na `/cobrar` do celular, e a correção tentadora seria na `/cobrar`. A causa estava no **gerador do bloco**, que amarrava uma decisão por cobrança a uma configuração do bloco — e é por isso que a correção mexeu em três arquivos e a `/cobrar` foi o que menos mudou.
+
+**O invariante que separa "adicionou" de "parou de omitir".** A medida mais forte do item 1 foi tirada **antes** dos itens 2 e 3: o código 1 da versão nova era byte a byte igual ao que a versão anterior produzia **com** desconto. Isso prova, sem argumento, que a mudança não escreveu nada de novo — ela só deixou de esconder. Se os três itens tivessem entrado juntos, essa medida seria impossível de ler, porque o "OU" e o botão movido mudam o bloco. **Item que tem invariante próprio se mede sozinho, antes do próximo entrar.**
+
+**Um teste barato que virou obrigatório:** o código 1 tem de sair com o **mesmo hash** com a capacidade ligada e desligada. Ele é o que distingue "capacidade do bloco" de "escolha da cobrança" — e é o que teria pegado este defeito no dia em que o desconto nasceu.
+
+**A regressão só prova alguma coisa se as saídas não estiverem vazias.** A primeira passagem do arnês devolveu 9 das 12 saídas em branco: as abas recusavam por falta de conteúdo (imagem, produto, código de campanha), e a comparação passava com folga sobre nada. Preencher o mínimo de cada aba foi o que transformou a regressão em prova.
+
+**Compatibilidade para trás se exercita, não se argumenta.** Em vez de afirmar que "a conta de seis é um superconjunto da de quatro", os oito links sem desconto gerados pela versão anterior foram abertos **dentro do bloco novo**, numa página servida de verdade. Oito aceitos.
