@@ -455,3 +455,22 @@ Não estava planejada: saiu do **primeiro pagamento real**, que o app do banco r
 **O risco de uma validação nova é o falso positivo, e é onde ela deve ser mais medida.** Recusar uma chave legítima seria pior que o defeito original — o dono ficaria sem gerar cobrança nenhuma. Daí os **800 documentos válidos gerados pelo próprio algoritmo** antes de qualquer teste de recusa.
 
 **A pergunta do dono valia mais que a correção.** *"Não sei se isso também acontece no Checkout e na Mini loja."* Acontecia. Como `pixChaveErro` já era compartilhada, a correção alcançou os cinco caminhos de graça — mas isso só é verdade porque a unificação tinha sido feita antes. **É aqui que a regra "unifica-se a fonte que escreve" se paga.**
+
+
+---
+
+## Décima segunda rodada — o contador da barra virou opcional (22/08/2026)
+
+Estimado **45 min – 1h15** depois de ler o código; real dentro da faixa. Spec: `docs/specs/2026-08-22-contador-opcional-design.md`.
+
+### O que a rodada ensinou sobre método
+
+**Estimar depois de ler, não antes.** O dono pediu a estimativa junto com o pedido. Ler o gerador antes de responder mostrou que o relógio já estava isolado em quatro funções e que `if(cfg.prog)`/`if(cfg.urg.ativo)` já eram o molde — daí "esforço baixo" ser um fato e não uma impressão.
+
+**A primeira aplicação do método econômico.** O arnês que executa a barra foi escrito por um subagente em Sonnet, em segundo plano, enquanto as edições do gerador seguiam no modelo principal. A divisão que funcionou: **delega-se o que é mecânico e separável; não se delega o que decide o comportamento emitido.** As edições foram em batelada, com `assert` por trecho, e a suíte inteira rodou uma vez ao final.
+
+**A batelada precisa de conferência própria.** Uma das substituições introduziu dois espaços a mais na indentação de uma linha *emitida* — invisível no código da ferramenta, visível no bloco entregue. Pegou na releitura imediata, antes de qualquer medição. Editar em bloco é mais barato e concentra o erro num lugar só: reler o que acabou de ser escrito é parte do método, não um extra.
+
+**Falso positivo de substring custa tempo.** A varredura por restos de relógio no bloco desligado acusou `DIG` — que era `CODIGO`. Varredura por identificador usa fronteira de palavra; sem ela, a caça produz suspeita onde não há defeito. Mas ela **também** achou dois defeitos reais: comentários que descreviam maquinaria que o bloco não carrega mais.
+
+**Um pedido pequeno expôs um buraco antigo.** A pílula de `.radios` nunca teve estilo de desabilitado — três casos anteriores estavam com metade do padrão "desabilitado com aviso âmbar" faltando desde que ele nasceu. Só apareceu porque desta vez alguém olhou a tela depois de desabilitar.
