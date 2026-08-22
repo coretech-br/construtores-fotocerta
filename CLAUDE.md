@@ -69,6 +69,19 @@ Ao criar campo novo que receba esse tipo de dado, siga a mesma regra: `value=""`
 
 **CSS gerado programaticamente:** nunca emitir uma segunda regra para um seletor que outra função já declarou. Propriedades shorthand (`transition`, `background`, `animation`) não se fundem entre duas regras do mesmo seletor com a mesma especificidade — a que vier depois no CSS vence por inteiro e apaga a primeira. Acumular tudo (transições, camadas de background, animações) numa única regra existente para aquele seletor.
 
+## Método de execução: econômico por padrão (combinado em 22/08/2026)
+
+Rodada nova segue este método, sem precisar ser pedido:
+
+1. **Delegar a Sonnet o que é mecânico e separável** — escrever arnês de verificação, varreduras, levantamentos, conferências repetitivas. De preferência **em segundo plano**, enquanto o trabalho principal continua.
+2. **Não delegar o que decide comportamento** — edições no gerador, qualquer coisa que toque payload, dinheiro, selo ou recusa, e a leitura das regressões byte a byte. É onde os defeitos deste projeto são silenciosos, e é onde o histórico mostra que eles aparecem.
+3. **Editar em batelada**: um script com todas as substituições de uma vez, com `assert` em cada trecho procurado, em vez de uma ida e volta por linha.
+4. **Não reler arquivo grande que já está em contexto**, e ler por fatia (`sed -n`) quando precisar de um trecho.
+5. **Reaproveitar a fotografia de referência já capturada** na mesma sessão em vez de recapturá-la; rodar a suíte inteira **uma vez ao final**, não a cada edição.
+6. **Medir antes de estimar**: ler o código e dizer o alcance real, em vez de estimar por impressão.
+
+O que **não** se corta: a regressão byte a byte, o teste do bloco entregue executando de verdade, e a conferência de versões. Economia que apaga medição não é economia — é o defeito de amanhã.
+
 ## Fluxo de manutenção (importante)
 
 1. Ao evoluir qualquer código destes arquivos, **atualizar o arquivo correspondente no repositório** (conteúdo completo, nunca trecho).

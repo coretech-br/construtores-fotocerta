@@ -174,6 +174,15 @@
     font-size:13px;cursor:pointer;background:#fff;color:var(--tinta-suave)}
   .radios input:checked + span{background:var(--verde);border-color:var(--verde);color:#fff}
   .radios input:focus-visible + span{outline:2px solid var(--verde-escuro);outline-offset:2px}
+  /* DESABILITADO PRECISA PARECER DESABILITADO. O input de .radios e escondido e quem se ve e a
+     pilha do <span>, que nao herdava nada do estado do controle: um campo desligado ficava
+     identico a um ligado, e o operador clicava sem entender por que nada acontecia. Foi visto
+     no interruptor do contador da Contagem, mas o buraco ja alcancava tres casos anteriores --
+     o "reiniciar" fora do modo abertura, o pulsar com alternancia deslizante e o pulsar de
+     urgencia. Mesma opacidade e mesmo cursor de .botao[disabled], que ja e a linguagem da casa. */
+  .radios input:disabled + span{opacity:.45;cursor:not-allowed}
+  .radios input:disabled + span:hover{background:transparent}
+  .radios input:disabled:checked + span{background:var(--verde);opacity:.45}
   .radios label{margin:0;font-weight:400}
 
   .botao{border:none;border-radius:8px;background:var(--verde);color:#fff;font-size:14px;font-weight:600;
@@ -1789,7 +1798,15 @@
     </div>
     <div>
       <fieldset>
-      <legend>Unidades exibidas</legend>
+      <legend>O contador</legend>
+      <label>Mostrar o tempo restante na barra?</label>
+      <div class="radios">
+      <label><input type="radio" name="c-contador" value="sim" checked><span>Sim <small>(a barra mostra o relógio)</small></span></label>
+      <label><input type="radio" name="c-contador" value="nao"><span>Não <small>(só a mensagem; a contagem continua correndo por dentro)</small></span></label>
+      </div>
+      <p class="ajuda"><b>Desligar o contador não desliga a contagem.</b> O prazo continua correndo do mesmo jeito: a <b>urgência</b> entra na hora marcada, a <b>barra de progresso</b> continua andando e, ao zerar, acontece o que você escolheu em “Quando a contagem zerar”. O que some é só o relógio na tela — útil quando você quer a pressão do prazo sem o número piscando na cara do visitante.</p>
+      <p class="ajuda alerta" id="c-contador-aviso"><b>Com o contador desligado, os campos abaixo não valem.</b> Unidades, rótulos, formato, “esconder os dias zerados”, a animação dos dígitos e o efeito <b>piscar</b> (que pisca o separador do relógio) descrevem um relógio que não vai aparecer. Os valores ficam guardados e voltam a valer quando você religar o contador. Se alguma mensagem tiver o marcador <code>{contador}</code>, ele é <b>removido</b> do texto — deixá-lo apareceria a palavra literal na barra.</p>
+      <label>Unidades exibidas</label>
       <div class="radios">
       <label><input type="checkbox" id="c-un-d" checked><span>Dias</span></label>
       <label><input type="checkbox" id="c-un-h" checked><span>Horas</span></label>
@@ -11050,6 +11067,19 @@ function cToggles(){
   el=$('c-borda-campo');if(el)el.style.display=(radio('c-borda')==='sim')?'block':'none';
   el=$('c-cta-campos');if(el)el.style.display=(radio('c-cta')==='sim')?'block':'none';
   el=$('c-prog-campo');if(el)el.style.display=(radio('c-prog')==='sim')?'block':'none';
+  /* CONTADOR DESLIGADO: cinco escolhas descrevem um relogio que nao vai aparecer. Elas ficam
+     A VISTA, desabilitadas e com aviso ambar -- o mesmo tratamento do desconto Pix com sinal
+     ligado e do pulsar com alternancia deslizante. Esconder faria os valores sumirem sem
+     explicacao, e trocar defeito visivel por invisivel e o que este projeto recusa. */
+  var semRel=(radio('c-contador')==='nao'),iq,qs;
+  el=$('c-contador-aviso');if(el)el.style.display=semRel?'block':'none';
+  ['c-un-d','c-un-h','c-un-m','c-un-s','c-rd','c-rh','c-rm','c-rs','c-ef-piscar'].forEach(function(id){
+    var e=$(id);if(e)e.disabled=semRel;
+  });
+  ['c-diaszero','c-formato','c-dig'].forEach(function(nome){
+    qs=document.querySelectorAll('input[name="'+nome+'"]');
+    for(iq=0;iq<qs.length;iq++)qs[iq].disabled=semRel;
+  });
   el=$('c-coruja-campos');if(el)el.style.display=(radio('c-coruja')!=='nao')?'block':'none';
   var mov=radio('c-mov');
   el=$('c-vel-campo');if(el)el.style.display=(mov==='rolaesq'||mov==='roladir')?'block':'none';
@@ -11101,6 +11131,7 @@ function cColeta(){
     cmsgs:cMsgs,
     c:{modo:radio('c-modo'),dias:$('c-dias').value,horas:$('c-horas').value,mins:$('c-mins').value,
       alvo:$('c-alvo').value,cod:$('c-cod').value,
+      contador:radio('c-contador'),
       und:$('c-un-d').checked,unh:$('c-un-h').checked,unm:$('c-un-m').checked,uns:$('c-un-s').checked,
       diaszero:radio('c-diaszero'),fim:radio('c-fim'),fimtxt:$('c-fimtxt').value,
       cfundo:$('c-cfundo-t').value,ctexto:$('c-ctexto-t').value,cdestaque:$('c-cdestaque-t').value,
@@ -11129,6 +11160,9 @@ function cRestaura(st){
   setRadio('c-modo',C.modo);setRadio('c-diaszero',C.diaszero);setRadio('c-fim',C.fim);
   $('c-dias').value=C.dias;$('c-horas').value=C.horas;$('c-mins').value=C.mins;
   $('c-alvo').value=C.alvo||'';$('c-cod').value=C.cod||'';$('c-fimtxt').value=C.fimtxt;
+  /* Estado gravado por uma versao anterior nao traz 'contador'. O ausente vale LIGADO, que e
+     como a barra sempre se comportou -- restaurar um preset antigo nao pode apagar o relogio. */
+  setRadio('c-contador',C.contador==='nao'?'nao':'sim');
   $('c-un-d').checked=!!C.und;$('c-un-h').checked=!!C.unh;$('c-un-m').checked=!!C.unm;$('c-un-s').checked=!!C.uns;
   setRadio('c-fonte',C.fonte);setRadio('c-peso',C.peso);setRadio('c-formato',C.formato);
   setRadio('c-alinha',C.alinha);setRadio('c-borda',C.borda);setRadio('c-fixa',C.fixa);
@@ -11301,6 +11335,11 @@ function cCfg(){
     duracaoMs:((dias*24+horas)*60+mins)*60000,
     alvoIso:cAlvoIso(),
     cod:$('c-cod').value.trim()||'padrao',
+    /* O CONTADOR E UMA COISA, A CONTAGEM E OUTRA. Desligar aqui tira o relogio da tela e
+       mais nada: o prazo continua correndo, a urgencia entra na hora, a barra de progresso
+       anda e o "quando zerar" acontece igual -- quem cuida disso e o tick, que olha o
+       restante, nunca o relogio. */
+    contador:(radio('c-contador')!=='nao'),
     unidades:{d:$('c-un-d').checked,h:$('c-un-h').checked,m:$('c-un-m').checked,s:$('c-un-s').checked},
     diaszero:radio('c-diaszero')==='sim',
     fim:radio('c-fim'),fimtxt:$('c-fimtxt').value,
@@ -11378,7 +11417,9 @@ function cGerar(){
   if(cfg.modo==='data'&&!$('c-alvo').value){alert('Informe a data e hora do encerramento.');return;}
   if(cfg.modo==='abertura'&&cfg.duracaoMs<=0){alert('Informe uma duração maior que zero.');return;}
   if(!$('c-cod').value.trim()){alert('Informe o código da campanha. Sem ele, duas campanhas diferentes dividem a mesma chave no navegador do visitante e a segunda nasce já encerrada para quem visitou a primeira.');return;}
-  if(!cfg.unidades.d&&!cfg.unidades.h&&!cfg.unidades.m&&!cfg.unidades.s){alert('Marque pelo menos uma unidade (dias, horas, minutos ou segundos). Sem nenhuma, a barra sai sem contador.');return;}
+  /* So vale com o contador ligado: com ele desligado, "nenhuma unidade" e a configuracao
+     pedida, e nao um descuido. */
+  if(cfg.contador&&!cfg.unidades.d&&!cfg.unidades.h&&!cfg.unidades.m&&!cfg.unidades.s){alert('Marque pelo menos uma unidade (dias, horas, minutos ou segundos). Sem nenhuma, a barra sai sem contador. Se e isso que voce quer, desligue o contador em "Mostrar o tempo restante na barra?" -- assim os campos do relogio param de valer e a barra sai sem eles.');return;}
   if(cfg.cta.ativo&&!cUrlOk(cfg.cta.url)){alert('O link do botão de ação precisa ser uma âncora (#reserva), um caminho do site (/natal-2026) ou um endereço http(s). Outros esquemas, como javascript:, não são aceitos.');return;}
   if(cfg.urg.ativo){
     var totalMs=(cfg.modo==='data')?(Date.parse(cfg.alvoIso)-(new Date()).getTime()):cfg.duracaoMs;
@@ -11445,13 +11486,18 @@ function cCssBase(cfg){
   s+='.fcb-interno{display:flex;align-items:center;gap:'+cfg.gap+'px;max-width:'+cfg.largmax+'px;margin:0 auto;'+
      'justify-content:'+(cfg.alinha==='centro'?'center':'flex-start')+'}\n';
   s+='.fcb-conteudo{flex:1 1 auto;min-width:0;overflow:hidden;text-align:'+(cfg.alinha==='centro'?'center':'left')+'}\n';
-  s+='.fcb-num{font-weight:700;color:'+cfg.cores.destaque+'}\n';
-  s+='.fcb-sep,.fcb-suf{opacity:.65;margin:0 1px}\n';
-  s+='.fcb-rel{white-space:nowrap}\n';
-  if(cfg.formato==='blocos'){
-    s+='.fcb-bloco{display:inline-block;text-align:center;margin:0 5px}\n';
-    s+='.fcb-bloco .fcb-num{display:block;font-size:1.3em;line-height:1.1}\n';
-    s+='.fcb-bloco .fcb-rot{display:block;font-size:.62em;opacity:.75;text-transform:uppercase;letter-spacing:.04em}\n';
+  /* Sem contador nao existe .fcb-num nem .fcb-rel na pagina: emitir a regra seria deixar
+     CSS morto dentro do bloco que o operador cola. O bloco entregue carrega so a maquinaria
+     escolhida, aqui como no resto da ferramenta. */
+  if(cfg.contador){
+    s+='.fcb-num{font-weight:700;color:'+cfg.cores.destaque+'}\n';
+    s+='.fcb-sep,.fcb-suf{opacity:.65;margin:0 1px}\n';
+    s+='.fcb-rel{white-space:nowrap}\n';
+    if(cfg.formato==='blocos'){
+      s+='.fcb-bloco{display:inline-block;text-align:center;margin:0 5px}\n';
+      s+='.fcb-bloco .fcb-num{display:block;font-size:1.3em;line-height:1.1}\n';
+      s+='.fcb-bloco .fcb-rot{display:block;font-size:.62em;opacity:.75;text-transform:uppercase;letter-spacing:.04em}\n';
+    }
   }
   s+='.fcb-curta{display:none}\n';
   s+='@media (max-width:'+cfg.mob+'px){.fcb-longa{display:none}.fcb-curta{display:inline}}\n';
@@ -11587,7 +11633,8 @@ function cCssEfeitos(cfg){
       s+='.fcb-barra.fcb-urgente{background-image:'+bgUrg.join(',')+'}\n';
     }
   }
-  if(cfg.efeitos.piscar&&cfg.formato==='compacto'){
+  /* O piscar pisca o SEPARADOR do relogio; sem relogio nao ha o que piscar. */
+  if(cfg.efeitos.piscar&&cfg.formato==='compacto'&&cfg.contador){
     s+='.fcb-sep{animation:fcb-piscar 1s steps(1) infinite}\n';
     s+='@keyframes fcb-piscar{0%,49%{opacity:.65}50%,100%{opacity:0}}\n';
     anim.push('.fcb-sep');
@@ -11602,10 +11649,10 @@ function cCssEfeitos(cfg){
     s+='@keyframes fcb-urgpulsar{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}\n';
     anim.push('.fcb-barra.fcb-urgente .fcb-conteudo');
   }
-  if(cfg.dig==='fade'){
+  if(cfg.dig==='fade'&&cfg.contador){
     s+='.fcb-num{transition:opacity .25s ease}\n.fcb-num.fcb-virando{opacity:.15}\n';
   }
-  if(cfg.dig==='flip'){
+  if(cfg.dig==='flip'&&cfg.contador){
     s+='.fcb-num{display:inline-block;transition:transform .25s ease}\n.fcb-num.fcb-virando{transform:rotateX(90deg)}\n';
   }
   if(cfg.entrada==='deslizar'||cfg.entrada==='aposrolar'){
@@ -11633,7 +11680,7 @@ function cCssEfeitos(cfg){
     if(anim.length)s+='  '+anim.join(',')+'{animation:none}\n';
     s+='  .fcb-barra{transition:none}\n';
     if(cfg.mov==='altfade'||cfg.mov==='altdesliza')s+='  .fcb-conteudo{transition:none}\n';
-    if(cfg.dig==='fade'||cfg.dig==='flip')s+='  .fcb-num{transition:none}\n';
+    if((cfg.dig==='fade'||cfg.dig==='flip')&&cfg.contador)s+='  .fcb-num{transition:none}\n';
     if(cfg.prog)s+='  .fcb-prog{transition:none}\n';
     s+='}\n';
   }
@@ -11664,11 +11711,19 @@ function cJsBase(cfg){
     j+="    {texto:'"+esc(escHtml(m.texto))+"',curta:'"+esc(escHtml(m.curta||''))+"'}"+(i<cfg.msgs.length-1?',':'')+'\n';
   });
   j+='  ];\n';
-  j+='  var UNIDADES={d:'+cfg.unidades.d+',h:'+cfg.unidades.h+',m:'+cfg.unidades.m+',s:'+cfg.unidades.s+'};  /* true|false: quais unidades aparecem no relogio */\n';
-  j+="  var ROTULOS={d:'"+esc(escHtml(cfg.rotulos.d))+"',h:'"+esc(escHtml(cfg.rotulos.h))+"',m:'"+esc(escHtml(cfg.rotulos.m))+"',s:'"+esc(escHtml(cfg.rotulos.s))+"'};  /* nomes das unidades, escritos por extenso no formato 'blocos' */\n";
-  j+='  var ESCONDE_DIAS_ZERADOS='+cfg.diaszero+';  /* true = o bloco de dias some quando chega a zero */\n';
-  j+="  var FORMATO='"+cfg.formato+"';           /* 'compacto' | 'blocos' */\n";
-  j+="  var DIG='"+cfg.dig+"';                    /* 'nenhuma' | 'fade' | 'flip' */\n";
+  /* ===== O CONTADOR E OPCIONAL, A CONTAGEM NAO =====
+     Com o contador desligado nada abaixo desta linha existe no bloco: nem as unidades, nem os
+     rotulos, nem as quatro funcoes do relogio. O que NAO muda e a contagem: o tick continua
+     rodando, a urgencia entra na hora marcada, a barra de progresso anda e o "quando zerar"
+     acontece igual -- essas tres olham o RESTANTE, nunca o relogio. E a barra continua sendo
+     uma barra: a mensagem, o botao e a coruja seguem onde estavam. */
+  if(cfg.contador){
+    j+='  var UNIDADES={d:'+cfg.unidades.d+',h:'+cfg.unidades.h+',m:'+cfg.unidades.m+',s:'+cfg.unidades.s+'};  /* true|false: quais unidades aparecem no relogio */\n';
+    j+="  var ROTULOS={d:'"+esc(escHtml(cfg.rotulos.d))+"',h:'"+esc(escHtml(cfg.rotulos.h))+"',m:'"+esc(escHtml(cfg.rotulos.m))+"',s:'"+esc(escHtml(cfg.rotulos.s))+"'};  /* nomes das unidades, escritos por extenso no formato 'blocos' */\n";
+    j+='  var ESCONDE_DIAS_ZERADOS='+cfg.diaszero+';  /* true = o bloco de dias some quando chega a zero */\n';
+    j+="  var FORMATO='"+cfg.formato+"';           /* 'compacto' | 'blocos' */\n";
+    j+="  var DIG='"+cfg.dig+"';                    /* 'nenhuma' | 'fade' | 'flip' */\n";
+  }
   j+='  var EMPURRA_CONTEUDO='+(cfg.fixa&&cfg.empurrar)+';  /* true = reserva espaco no topo da pagina para a barra fixa */\n';
   if(cfg.urg.ativo)j+='  var LIMITE_URGENCIA='+(cfg.urg.lim*60000)+';   /* ms restantes para entrar em urgencia ('+cfg.urg.lim+' min) */\n';
   j+='\n  /* Daqui para baixo nao precisa mexer */\n\n';
@@ -11683,6 +11738,7 @@ function cJsBase(cfg){
   j+="    if(MODO==='data'){var v=Date.parse(ALVO_ISO);return isNaN(v)?inicio:v;}\n";
   j+='    return inicio+DURACAO_MS;\n  }\n';
   j+='  var alvo=alvoMs();\n\n';
+  if(cfg.contador){
   j+='  function dois(n){return (n<10?\'0\':\'\')+n;}\n';
   j+='  function partes(ms){\n';
   j+='    if(ms<0)ms=0;\n    var t=Math.floor(ms/1000);\n';
@@ -11710,14 +11766,31 @@ function cJsBase(cfg){
   j+='        h+=\'<span class="fcb-num">\'+itens[i][0]+\'</span><span class="fcb-suf">\'+itens[i][2]+\'</span>\';\n';
   j+='      }\n    }\n';
   j+="    return '<span class=\"fcb-rel\">'+h+'</span>';\n  }\n\n";
-  j+='  /* O relogio NAO e reescrito junto com a mensagem: a mensagem entra uma vez,\n';
-  j+='     com marcadores [data-fcb-rel] vazios, e o tick de cada segundo preenche\n';
-  j+='     apenas esses marcadores. Reescrever o innerHTML inteiro reiniciaria a\n';
-  j+='     animacao CSS da rolagem a cada segundo. */\n';
-  j+="  var MARCA='<span data-fcb-rel></span>';\n";
-  j+='  function comMarca(t){\n';
-  j+="    if(t.indexOf('{contador}')<0)return t+' '+MARCA;\n";
-  j+="    return t.split('{contador}').join(MARCA);\n  }\n";
+  }
+  /* O comentario descreve o que ESTE bloco faz, e nao o que a aba sabe fazer -- mesma regra
+     da linha do movimento, acima. Sem contador nao ha marcador nem tick do relogio, e a
+     versao longa prometeria, dentro do codigo colado, uma maquinaria que nao esta la. */
+  if(cfg.contador){
+    j+='  /* O relogio NAO e reescrito junto com a mensagem: a mensagem entra uma vez,\n';
+    j+='     com marcadores [data-fcb-rel] vazios, e o tick de cada segundo preenche\n';
+    j+='     apenas esses marcadores. Reescrever o innerHTML inteiro reiniciaria a\n';
+    j+='     animacao CSS da rolagem a cada segundo. */\n';
+  }else{
+    j+='  /* Esta barra nao mostra o tempo restante: o {contador} das mensagens e removido\n';
+    j+='     do texto. A contagem continua correndo -- ver o tick, adiante. */\n';
+  }
+  /* Sem contador nao ha marcador para inserir. O {contador} que estiver na mensagem e
+     REMOVIDO do texto -- deixa-lo apareceria a palavra literal na barra --, e a aba avisa
+     isso na tela, no aviso ambar ao lado do interruptor. */
+  if(cfg.contador){
+    j+="  var MARCA='<span data-fcb-rel></span>';\n";
+    j+='  function comMarca(t){\n';
+    j+="    if(t.indexOf('{contador}')<0)return t+' '+MARCA;\n";
+    j+="    return t.split('{contador}').join(MARCA);\n  }\n";
+  }else{
+    j+='  function comMarca(t){\n';
+    j+="    return t.split('{contador}').join('');\n  }\n";
+  }
   j+='  function textoCom(msg){\n';
   j+='    var longa=comMarca(msg.texto);\n';
   j+='    if(!msg.curta)return longa;\n';
@@ -11773,8 +11846,10 @@ function cJsBase(cfg){
      a faixa e a emenda de todas e ninguem troca -- a variavel ia para o bloco entregue sem
      nunca ser lida. Nos demais casos ela continua saindo, na mesma linha de antes. */
   if(!cRolaFaixa(cfg))j+='  var msgAtual=0;\n';
-  j+='  var chaveAnterior=null;         /* forca remontagem do relogio na 1a vez e apos pintarMensagem */\n';
-  j+='  var VIRANDO_MS=250;             /* bate com a duracao da transicao css de fade/flip */\n';
+  if(cfg.contador){
+    j+='  var chaveAnterior=null;         /* forca remontagem do relogio na 1a vez e apos pintarMensagem */\n';
+    j+='  var VIRANDO_MS=250;             /* bate com a duracao da transicao css de fade/flip */\n';
+  }
   if((cfg.mov==='altfade'||cfg.mov==='altdesliza')&&cfg.msgs.length>1){
     j+='  altTimer=setInterval(function(){\n';
     j+="    conteudo.classList.add('fcb-saindo');\n";
@@ -11868,10 +11943,12 @@ function cJsBase(cfg){
       j+='    return h;\n  }\n';
     }
   }
-  j+='  /* pintarMensagem roda so na montagem e na troca de mensagem: o marcador do relogio\n';
-  j+='     volta a ficar vazio, entao forca a proxima atualizarRelogio a remontar do zero. */\n';
+  if(cfg.contador){
+    j+='  /* pintarMensagem roda so na montagem e na troca de mensagem: o marcador do relogio\n';
+    j+='     volta a ficar vazio, entao forca a proxima atualizarRelogio a remontar do zero. */\n';
+  }
   j+='  function pintarMensagem(){\n';
-  j+='    chaveAnterior=null;\n';
+  if(cfg.contador)j+='    chaveAnterior=null;\n';
   /* Rolagem com DUAS OU MAIS mensagens monta a faixa inteira; com uma so, a concatenacao e a
      propria mensagem e a linha continua sendo exatamente a de antes -- por isso o bloco
      gerado para esse caso sai byte a byte igual ao de main. Alternancia (altfade/altdesliza)
@@ -11880,6 +11957,7 @@ function cJsBase(cfg){
   j+='    if(ROLANDO)montarTrilho(html);\n';
   j+='    else conteudo.innerHTML=html;\n';
   j+='  }\n';
+  if(cfg.contador){
   j+='  /* atualizarRelogio roda a cada segundo. Normalmente so troca o texto dos digitos que\n';
   j+='     mudaram (sem tocar nos nos do DOM), para a transicao css de fade/flip poder animar\n';
   j+='     e para nao gerar churn de innerHTML a cada tick. So remonta o marcador inteiro\n';
@@ -11907,6 +11985,7 @@ function cJsBase(cfg){
   j+='      }\n';
   j+='    }\n';
   j+='  }\n\n';
+  }
   j+='  function tick(){\n';
   j+='    var restante=alvo-(new Date()).getTime();\n';
   j+='    if(restante<=0){\n';
@@ -11930,7 +12009,7 @@ function cJsBase(cfg){
     j+="      raiz.style.backgroundColor='"+cfg.cores.fundo+"';\n";
     j+='    }\n';
   }
-  j+='    atualizarRelogio(restante);\n';
+  if(cfg.contador)j+='    atualizarRelogio(restante);\n';
   if(cfg.prog)j+='    pintarProgresso(restante);\n';
   j+='  }\n\n';
   j+='  pintarMensagem();\n';
@@ -11968,6 +12047,7 @@ function cLimpar(){
    ['c-z','99980'],['c-ctatxt','Quero garantir'],['c-ctaurl','#reserva'],['c-gap','16'],
    ['c-corujaalt','26'],['c-vel','18'],['c-alt','5'],['c-urglim','60'],['c-entradapx','300']]
     .forEach(function(p){var el=$(p[0]);if(el)el.value=p[1];});
+  setRadio('c-contador','sim');
   ['c-un-d','c-un-h','c-un-m','c-un-s'].forEach(function(id){$(id).checked=true;});
   ['c-ef-pulsar','c-ef-brilho','c-ef-degrade','c-ef-piscar','c-ef-tremor'].forEach(function(id){$(id).checked=false;});
   [['c-cfundo','#0F3A30'],['c-ctexto','#FDFBF6'],['c-cdestaque','#FFC94A'],['c-cborda','#FFC94A'],
