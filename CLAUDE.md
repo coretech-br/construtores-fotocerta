@@ -22,6 +22,8 @@ Repositório **público**, servido pelo GitHub Pages em **prosite.fotocerta.com.
 | `scripts/conferir-versoes.sh` | Conferência **mecânica** das versões dos arquivos servidos com `?v=` (`fc-compartilhado.js`, `cobrar/manifest.json`): compara o conteúdo com a versão declarada e falha se um mudou sem o outro. Rodar sempre que mexer nesses arquivos; `--registrar` depois de trocar a versão de verdade. |
 | `scripts/versoes.txt` | O registro que o script compara: `<arquivo> <versão declarada> <sha256 do conteúdo>`. |
 | `docs/specs/` | Specs de design das funcionalidades, um arquivo por feature, nomeados `AAAA-MM-DD-topico-design.md`. |
+| `docs/pendencias.md` | A lista **viva** do que ficou combinado e ainda não foi feito. Ler antes de propor a próxima rodada; atualizar ao fim de cada uma. |
+| `docs/ledger-evolucao-2026-08.md` | O histórico das rodadas já entregues, com os tempos reais. |
 | `prosite/natal-2026/hospedeira-tag-body.html` | Tag Body da página hospedeira `/natal-2026`: captação de leads + âncora inteligente + plano B. |
 | `prosite/natal-2026/hospedeira-componente-iframe.html` | Componente HTML da hospedeira que embute a intermediária (a coluna dele leva ID Html `reserva`). |
 | `prosite/natal-2026/intermediaria-tag-body.html` | Tag Body da página intermediária: script `ajustarAltura` do iframe. |
