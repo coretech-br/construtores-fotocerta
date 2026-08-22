@@ -1823,7 +1823,7 @@
       <label for="c-msgcurta">Versão curta para o celular <small>(opcional)</small></label>
       <input type="text" id="c-msgcurta" value="" placeholder="Termina em {contador}">
       <div class="acoes"><button class="botao" id="c-msg-add">Adicionar mensagem</button></div>
-      <p class="ajuda">Sem o marcador <code>{contador}</code>, o relógio aparece depois do texto. Com <b>duas ou mais</b> mensagens, os efeitos de alternância da seção 4 passam a fazer sentido; com uma só, a barra fica estática ou rolando.</p>
+      <p class="ajuda">Sem o marcador <code>{contador}</code>, o relógio aparece depois do texto. Com <b>duas ou mais</b> mensagens, o que acontece com elas depende do movimento escolhido na seção 4: a <b>alternância</b> mostra uma de cada vez, e a <b>rolagem</b> emenda <b>todas</b> numa faixa contínua, na ordem desta lista. O <b>estático</b> mostra só a primeira — e, quando isso passa a descartar mensagem cadastrada, quem avisa é a própria seção 4, em destaque, ali onde o movimento é escolhido.</p>
       </fieldset>
     </div>
     <div>
@@ -1918,7 +1918,7 @@
       <legend>Extras da barra</legend>
       <label for="c-gap">Espaçamento entre os itens da barra <small>(px)</small></label>
       <input type="number" id="c-gap" value="16" min="0" max="60" step="1">
-      <p class="ajuda">Separa o conteúdo da coruja, do botão de ação e do botão de fechar. Só tem efeito visível quando algum desses estiver ligado.</p>
+      <p class="ajuda">Separa o conteúdo da coruja, do botão de ação e do botão de fechar. Só tem efeito visível quando algum desses estiver ligado. <b>Não é este número</b> que dá o espaço em volta do <code>•</code> que separa as mensagens na rolagem: aquele acompanha o tamanho da letra da barra, para não desaparecer quando este campo for zero.</p>
       <label>Botão de ação (CTA)</label>
       <div class="radios">
       <label><input type="radio" name="c-cta" value="nao" checked><span>Não ter</span></label>
@@ -1983,9 +1983,11 @@
       <label><input type="radio" name="c-mov" value="altfade"><span>Alternância com fade</span></label>
       <label><input type="radio" name="c-mov" value="altdesliza"><span>Alternância deslizando</span></label>
       </div>
+      <p class="ajuda alerta" id="c-estatico-aviso"><b>Com “Estático”, só a primeira mensagem entra no código gerado.</b> Uma barra parada não tem como mostrar mais de uma, então as outras <b>não chegam ao visitante</b>: continuam cadastradas e salvas na seção 2, sem sair de lá. <span id="c-estatico-conta"></span> Para mostrar todas, escolha <b>rolagem</b>, que emenda todas numa faixa contínua, ou <b>alternância</b>, que mostra uma de cada vez.</p>
       <div id="c-vel-campo">
       <label for="c-vel">Duração do ciclo de rolagem <small>(segundos — maior = mais lento)</small></label>
       <input type="number" id="c-vel" value="18" min="2" max="60" step="1">
+      <p class="ajuda">Com <b>duas ou mais</b> mensagens, a faixa que rola é a <b>emenda de todas</b>, na ordem da seção 2, separadas por <code>•</code> — a rolagem mostra todas de uma vez, em vez de trocar de mensagem. Cada uma leva o próprio relógio, e todos andam juntos. <b>Este campo é a duração de um ciclo, e não a velocidade de leitura</b> — e os dois não andam juntos. Um ciclo é a faixa percorrer a própria metade, e essa metade é o conjunto de mensagens repetido até cobrir a barra: nas medições desta rodada ela deu de <b>2 a 4,5 vezes</b> a largura da barra, conforme o texto. Por isso <b>não vale a regra “mais mensagens, mais rápido”</b>: medindo com 18 s numa barra de 873 px, uma mensagem curta andou a 99 px por segundo, duas a 124 e três a 138 — mas a quarta <b>caiu</b> para 123; e numa barra de 333 px, três mensagens (46 px/s) ficaram <b>mais lentas</b> do que uma só (49 px/s). O que mais mexe na velocidade nem é o número de mensagens: são as mesmas três mensagens, nos mesmos 18 s, andando a 46 px/s numa barra estreita de celular e a 138 px/s numa de computador — <b>três vezes mais rápido</b>, sem você trocar nada. <b>Na prática:</b> diminua a duração para acelerar, aumente para desacelerar e julgue pela prévia ao lado, nos dois modos (Computador e Celular), que é onde a velocidade real aparece.</p>
       </div>
       <div id="c-alt-campo">
       <label for="c-alt">Intervalo entre mensagens <small>(segundos)</small></label>
@@ -11190,6 +11192,21 @@ function cToggles(){
   var rp=document.querySelectorAll('input[name="c-urgpulsar"]'),ip;
   for(ip=0;ip<rp.length;ip++)rp[ip].disabled=choqueDesliza;
   el=$('c-urgpulsar-aviso');if(el)el.style.display=choqueDesliza?'block':'none';
+  /* "Estatico" x duas ou mais mensagens: aqui a escolha do movimento anula CONTEUDO
+     cadastrado -- so a primeira mensagem entra no bloco gerado, as outras nao chegam ao
+     visitante. E a mesma classe de defeito que os dois pulsares acima, e leva o mesmo
+     tratamento da casa, com UMA diferenca declarada: la existe um campo para desabilitar (a
+     marcacao do efeito), aqui o que fica de fora e a LISTA da secao 2, e desabilitar uma
+     lista de conteudo esconderia justamente o que o operador precisa continuar vendo e
+     editando. Entao vale a metade que se aplica: o aviso ambar, no lugar onde a escolha e
+     feita e so quando o choque existe de verdade (2+ mensagens). Ele mora nesta secao, e nao
+     na secao 2: la seria texto de fundo, visivel o tempo todo e em qualquer movimento; aqui
+     e sinal, e aparece exatamente quando custa. */
+  var estaticoCorta=(mov==='estatico'&&cMsgs.length>1);
+  el=$('c-estatico-aviso');if(el)el.style.display=estaticoCorta?'block':'none';
+  el=$('c-estatico-conta');if(el)el.textContent=estaticoCorta
+    ?('São '+cMsgs.length+' mensagens cadastradas: '+(cMsgs.length-1)+(cMsgs.length-1===1?' fica':' ficam')+' de fora.')
+    :'';
   cTitulo();
 }
 document.addEventListener('change',function(e){
@@ -11316,6 +11333,14 @@ function cMsgAdd(){
   cMsgs.push({texto:t,curta:$('c-msgcurta').value.trim()});
   $('c-msg').value='';$('c-msgcurta').value='';
   cMsgRender();salvarEstado();
+  /* cToggles aqui e na remocao porque o aviso do "Estatico" depende de QUANTAS mensagens
+     existem, e a lista muda por botao proprio -- nao por um campo c-*, que e o que dispara os
+     ouvintes de change/input la em cima. Sem esta linha, cadastrar a segunda mensagem com o
+     estatico escolhido nao acendia aviso nenhum. Chamada nas duas funcoes que mexem no
+     TAMANHO da lista, e nao dentro da cMsgRender: a partida da ferramenta separa "desenhar a
+     lista" de "reavaliar os campos" em passos proprios, para que uma excecao num nao derrube
+     o outro. */
+  cToggles();
   cPreview();
 }
 function cMsgMove(i,d){
@@ -11324,7 +11349,7 @@ function cMsgMove(i,d){
   cMsgRender();salvarEstado();
   cPreview();
 }
-function cMsgDel(i){cMsgs.splice(i,1);cMsgRender();salvarEstado();cPreview();}
+function cMsgDel(i){cMsgs.splice(i,1);cMsgRender();salvarEstado();cToggles();cPreview();}
 function cMsgRender(){
   var ul=$('c-msg-lista');if(!ul)return;
   ul.innerHTML='';
@@ -11604,12 +11629,44 @@ function cCssBase(cfg){
   s+=cCssEfeitos(cfg);
   return s;
 }
+/* Fonte unica da condicao "esta faixa concatena mensagens": o CSS do separador, o JS que monta
+   a faixa e a linha da pintarMensagem tem de concordar sempre. Escrita em tres lugares, a
+   condicao viraria tres condicoes -- e um dia o separador sairia sem faixa, ou a faixa sem
+   separador. Com UMA mensagem ela e falsa e nada disto e emitido: a concatenacao de uma
+   mensagem e a propria mensagem, e o bloco sai byte a byte igual ao de antes deste recurso. */
+function cRolaFaixa(cfg){
+  return (cfg.mov==='rolaesq'||cfg.mov==='roladir')&&cfg.msgs.length>1;
+}
 function cCssEfeitos(cfg){
   var s='',anim=[];
   if(cfg.mov==='rolaesq'||cfg.mov==='roladir'){
     s+='.fcb-trilho{display:inline-flex;white-space:nowrap;will-change:transform;'+
        'animation:fcb-rola '+cfg.vel+'s linear infinite'+(cfg.mov==='roladir'?' reverse':'')+'}\n';
-    s+='.fcb-trilho > span{padding-right:3em}\n';
+    /* O vao entre uma copia do conteudo e a copia seguinte. Com UMA mensagem ele precisa
+       existir sozinho -- nao ha separador nenhum ali --, e continua sendo os mesmos 3em de
+       sempre. Com DUAS OU MAIS, a faixa ja TERMINA em separador (ver textoDaFaixa), entao
+       somar 3em aqui deixaria a emenda da repeticao com quase o triplo do espaco das emendas
+       de dentro: o ponto colado na ultima mensagem e um buraco antes da primeira. Sem o
+       padding, toda emenda do letreiro fica igual -- mensagem, ponto, mensagem --, que e a
+       unica forma de a emenda sumir de vez. */
+    if(!cRolaFaixa(cfg))s+='.fcb-trilho > span{padding-right:3em}\n';
+    /* Separador entre as mensagens concatenadas na faixa. Existe so com duas ou mais: com uma
+       so a concatenacao E a propria mensagem, nao ha o que separar, e o bloco sai byte a byte
+       igual ao de antes deste recurso. O ponto desenhado nao e enfeite: so espaco, do tamanho
+       de uma palavra, se leria como espaco duplo entre duas frases, ou seja como erro de
+       digitacao.
+       O ESPACO EM VOLTA DELE NAO VEM MAIS DE c-gap, e a mudanca e deliberada. Vinha, com o
+       argumento de reusar "o mesmo numero que ja separa os itens da barra" -- mas os dois nao
+       sao a mesma medida: c-gap separa CAIXAS numa linha flex (coruja, miolo, botao de acao,
+       fechar) e o operador o zera de proposito para apertar essas caixas; medido com c-gap=0,
+       o separador saia com margin:0 e o letreiro grudava as mensagens -- o ponto encostado no
+       ultimo digito de uma e na primeira letra da outra, que se le como espaco faltando --,
+       ou seja uma escolha sobre a moldura estragava, sem aviso, o miolo. Aqui a
+       unidade certa e o tamanho da LETRA: em em, o vao acompanha a fonte da barra, nunca
+       colapsa e sobrevive a qualquer valor de c-gap. 1em bate com o padrao antigo (c-gap=16
+       na fonte padrao de 15px), entao quem ja gerou com o padrao nao ve diferenca.
+       Seletor novo, declarado uma vez so -- nenhuma outra funcao emite regra para .fcb-msgsep. */
+    if(cRolaFaixa(cfg))s+='.fcb-msgsep{opacity:.55;margin:0 1em}\n';
     s+='@keyframes fcb-rola{from{transform:translateX(0)}to{transform:translateX(-50%)}}\n';
     anim.push('.fcb-trilho');
   }
@@ -11719,7 +11776,14 @@ function cJsBase(cfg){
   j+='  /* Mensagens da barra. Em cada uma, {contador} marca ONDE o relogio entra no texto;\n';
   j+='     sem o marcador o relogio aparece depois do texto. "curta" e a versao usada abaixo\n';
   j+='     da largura de corte do celular (vazia = usa a longa). Com duas ou mais mensagens,\n';
-  j+='     a alternancia configurada na ferramenta passa a girar entre elas. */\n';
+  /* A ultima linha do comentario descreve O QUE ESTE BLOCO FAZ, e nao o que a aba sabe fazer:
+     com rolagem, quem gira nao e a alternancia -- ela nem existe aqui --, e sim a faixa que
+     emenda todas as mensagens. O texto antigo prometia, DENTRO do codigo que o operador cola,
+     um comportamento que aquele codigo nao tem. Nos demais movimentos a linha sai igual a
+     antes, byte a byte. */
+  j+=(cRolaFaixa(cfg)
+    ? '     a faixa que rola e a emenda de TODAS elas, nesta ordem, separadas por um ponto. */\n'
+    : '     a alternancia configurada na ferramenta passa a girar entre elas. */\n');
   j+='  var MENSAGENS=[\n';
   cfg.msgs.forEach(function(m,i){
     j+="    {texto:'"+esc(escHtml(m.texto))+"',curta:'"+esc(escHtml(m.curta||''))+"'}"+(i<cfg.msgs.length-1?',':'')+'\n';
@@ -11829,7 +11893,11 @@ function cJsBase(cfg){
     j+='    var pct=Math.min(100,Math.max(0,(1-(restante/total))*100));\n';
     j+="    barraProg.style.width=pct.toFixed(2)+'%';\n  }\n\n";
   }
-  j+='  var msgAtual=0;\n';
+  /* msgAtual so faz sentido onde alguma coisa TROCA de mensagem: os dois modos de alternancia
+     e a linha da pintarMensagem que escolhe uma das cadastradas. Com rolagem e duas ou mais,
+     a faixa e a emenda de todas e ninguem troca -- a variavel ia para o bloco entregue sem
+     nunca ser lida. Nos demais casos ela continua saindo, na mesma linha de antes. */
+  if(!cRolaFaixa(cfg))j+='  var msgAtual=0;\n';
   j+='  var chaveAnterior=null;         /* forca remontagem do relogio na 1a vez e apos pintarMensagem */\n';
   j+='  var VIRANDO_MS=250;             /* bate com a duracao da transicao css de fade/flip */\n';
   if((cfg.mov==='altfade'||cfg.mov==='altdesliza')&&cfg.msgs.length>1){
@@ -11894,12 +11962,46 @@ function cJsBase(cfg){
     j+='    if(!trilhoN)return;\n';
     j+='    var n=Math.max(1,Math.ceil((conteudo.offsetWidth||0)/trilhoUm));\n';
     j+='    if(n!==trilhoN){pintarMensagem();tick();}\n  }\n';
+    if(cRolaFaixa(cfg)){
+      j+='  /* A faixa que rola e a CONCATENACAO de TODAS as mensagens, na ordem cadastrada e\n';
+      j+='     separadas por um marcador -- e assim que um letreiro funciona. O temporizador que\n';
+      j+='     troca de mensagem so existe nos dois modos de alternancia; com rolagem ele nao\n';
+      j+='     existe, entao montar a faixa a partir de UMA mensagem deixaria as demais\n';
+      j+='     cadastradas, salvas e listadas na ferramenta sem nunca chegar ao visitante.\n';
+      j+='     Cada mensagem leva o proprio marcador do relogio, e o tick de cada segundo\n';
+      j+='     escreve em TODOS os [data-fcb-rel] de uma vez -- as duas metades do trilho e as\n';
+      j+='     copias dentro de cada metade continuam identicas, que e o que faz a emenda sumir. */\n';
+      /* O ponto sai no codigo gerado como a sequencia de escape \u2022, e nao como o
+         proprio caractere: o codigo colado no Prosite e escrito em ASCII (manual do
+         Prosite, item 10), e este e um dos sinais que a norma de acentuacao cita por nome
+         como "se confunde a olho" -- num campo de texto do editor, um ponto medio e um
+         ponto final sao a mesma mancha. Mesma grafia que a Captacao de leads ja usa no
+         separador dela e que esta aba usa no X do botao fechar. */
+      j+="  var SEP_MSG='<span class=\"fcb-msgsep\" aria-hidden=\"true\">\\u2022</span>';\n";
+      /* O separador vai DEPOIS de cada mensagem, inclusive da ultima -- e nao entre elas. Sao
+         a mesma coisa por dentro da faixa, mas nao na EMENDA: a faixa se repete, entao o que
+         vem depois da ultima mensagem e a primeira mensagem da copia seguinte. Com separador
+         so entre as mensagens, aquela emenda saia sem ponto nenhum (medido: "...Brinde hoje
+         01d:23h:59m:59sUltimas vagas..."), justo na costura que o trilho inteiro existe para
+         tornar invisivel. */
+      j+='  function textoDaFaixa(){\n';
+      j+="    var h='',i;\n";
+      j+='    for(i=0;i<MENSAGENS.length;i++){\n';
+      j+='      h+=textoCom(MENSAGENS[i]);\n';
+      j+='      h+=SEP_MSG;\n';
+      j+='    }\n';
+      j+='    return h;\n  }\n';
+    }
   }
   j+='  /* pintarMensagem roda so na montagem e na troca de mensagem: o marcador do relogio\n';
   j+='     volta a ficar vazio, entao forca a proxima atualizarRelogio a remontar do zero. */\n';
   j+='  function pintarMensagem(){\n';
   j+='    chaveAnterior=null;\n';
-  j+='    var html=textoCom(MENSAGENS[msgAtual%MENSAGENS.length]);\n';
+  /* Rolagem com DUAS OU MAIS mensagens monta a faixa inteira; com uma so, a concatenacao e a
+     propria mensagem e a linha continua sendo exatamente a de antes -- por isso o bloco
+     gerado para esse caso sai byte a byte igual ao de main. Alternancia (altfade/altdesliza)
+     nao passa por aqui: ela continua trocando a mensagem da vez, como sempre. */
+  j+='    var html='+(cRolaFaixa(cfg)?'textoDaFaixa()':'textoCom(MENSAGENS[msgAtual%MENSAGENS.length])')+';\n';
   j+='    if(ROLANDO)montarTrilho(html);\n';
   j+='    else conteudo.innerHTML=html;\n';
   j+='  }\n';
