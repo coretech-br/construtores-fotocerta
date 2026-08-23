@@ -29,6 +29,7 @@ Repositório **público**, servido pelo GitHub Pages em **prosite.fotocerta.com.
 | `prosite/natal-2026/hospedeira-componente-iframe.html` | Componente HTML da hospedeira que embute a intermediária (a coluna dele leva ID Html `reserva`). |
 | `prosite/natal-2026/intermediaria-tag-body.html` | Tag Body da página intermediária: script `ajustarAltura` do iframe. |
 | `prosite/natal-2026/intermediaria-componente-tidycal.html` | Componente HTML da intermediária: embed TidyCal + expansão/recolhimento do modal. |
+| `prosite/natal-2026/titulo-neve-componente.html` | Componente HTML avulso (fora dos construtores): título de Natal com letras douradas/azuis e neve caindo, adaptado de um exemplo de CodePen. **Não vai no campo CSS Customizado** — precisa de seletores, `@keyframes` e script, e componente HTML aceita os três. |
 | `prosite/natal-2026/bordas-css-componentes.md` | Bloco global do head + o CSS das bordas animadas/degradês aplicados em componentes da landing de Natal. |
 | `CLAUDE.md` | Este arquivo. |
 
