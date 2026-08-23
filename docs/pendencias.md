@@ -24,13 +24,17 @@ A próxima sai do que o dono encontrar no uso.
 
 ## O que depende só do dono
 
-1. **Regerar e recolar o código 1 na `/pagar` — é o que destrava tudo.** O bloco que está lá foi gerado quando a Identidade tinha `contato` no lugar do e-mail inteiro; por isso a página recusa os links novos. Corrija a chave no painel Identidade, clique em **Gerar código da página**, e cole. Essa única colagem resolve as três coisas: a chave certa, a conferência do desconto e o layout novo ("Já paguei" no Pix e o "OU"). A página precisa ser *Landing Page* no Prosite, não *Página*, porque Páginas sempre carregam o menu.
-2. **Recolar o código 1 antes do primeiro link com desconto.** Um código 1 gerado antes de 22/08/2026 não sabe conferir a conta do desconto e **recusa** links com desconto. É **uma vez só**: depois disso, ligar, desligar ou trocar o percentual não pede nada — nem colar, nem regerar o bloco. Links **sem** desconto não são afetados, e o bloco novo aceita os já enviados.
-3. **Cobrança de teste de R$ 0,01** para si mesmo, indo até o app do banco. É o único trecho do caminho que não é verificável daqui. Vale fazer uma segunda, **com desconto**, para ver os dois valores no cartão e conferir no extrato qual chegou.
-4. **Levar a configuração para o celular** — *Exportar tudo → Com os dados* no computador, *Importar* no celular. Leva desconto, identidade e endereço de uma vez. Continua valendo, mas **deixou de ser necessário para o campo de desconto aparecer**: ele agora aparece em qualquer aparelho, mesmo sem nada configurado.
-5. **Colar a página de obrigado e conferir duas coisas.** Primeira: se o editor de texto do Prosite aceita `{{` e `}}` sem transformar em outra coisa. Segunda: se a Tag Body roda a tempo dos componentes do tema — o script reobserva a página por cinco segundos justamente para isso, mas o comportamento real numa página publicada só uma colagem responde. Faça um agendamento de teste e veja o nome aparecer.
-6. **Atualizar o espelho da Tag Body da hospedeira.** Os blocos de captação de leads e slideshow foram regerados e recolados na landing de Natal em 23/08/2026, então `prosite/natal-2026/hospedeira-tag-body.html` está mais velho que o que está publicado. A regra do repositório é que os arquivos de `prosite/` espelhem o Prosite: mande o conteúdo do campo Tag Body de lá e eu atualizo o arquivo.
-7. **A `/cobrar` na tela de início do iPhone** — instalar é gesto de aparelho, e o manifesto só foi conferido pelo servidor e pelo navegador. Confirmar que o ícone da coruja aparece e que a página abre em tela cheia.
+Em 23/08/2026 o dono fechou os **sete** itens desta lista. **Nada depende dele no momento.**
+
+O sétimo — atualizar o espelho da Tag Body da hospedeira — foi resolvido **eliminando a causa**: os espelhos deixaram de existir. Ao classificar o que havia em `prosite/`, tudo era reproduzível pelos construtores, inclusive a âncora inteligente e o plano B. Ver a decisão registrada na `CLAUDE.md` e na documentação.
+
+### Fechado em 23/08/2026, com o que cada um provou
+
+- **O código 1 recolado na `/pagar`**, com a chave Pix corrigida. Fecha de uma vez a chave certa, a conferência do desconto e o layout novo ("Já paguei" no Pix e o "OU").
+- **Cobrança real de R$ 0,01 paga pelo app do banco.** É o único trecho do caminho que nunca foi verificável daqui, e ele fecha o percurso inteiro: link gerado → página remonta e aceita → aplicativo do banco processa.
+- **A configuração foi levada para o celular** por *Exportar tudo → Com os dados* / *Importar*.
+- **A página de obrigado foi colada e testada com um agendamento de verdade** — e com ela caem as **duas incógnitas** que a spec declarava: o editor de texto do Prosite **aceita** `{{` e `}}` sem transformar, e a **Tag Body roda a tempo** dos componentes do tema.
+- **A `/cobrar` na tela de início do iPhone**, com ícone e abertura em tela cheia. Fecha a pendência de PWA que estava aberta desde ago/2026.
 
 ---
 
@@ -48,4 +52,4 @@ Nenhuma destas atrapalha o uso; ficam anotadas para não serem redescobertas.
 2. **`.fcpg-pp` e `.fcpg-sep` saem no CSS mesmo quando o bloco não tem PayPal** (cerca de 250 bytes de regra que nada usa). É consistente entre si — `.fcpg-pp` já era assim —, e condicionar as duas mexeria no código 1 sem que nenhum recurso peça.
 3. **O nome de um item opcional pode ser esvaziado pelo editor em linha** do Checkout e da Mini loja, e sai como `{nome:''}`. Registrado desde a rodada 3 da oitava aba.
 4. **O arnês que EXECUTA os blocos entregues ainda é por rodada.** O da regressão foi versionado; o que roda o bloco numa página de verdade (a `/pagar`, a barra de contagem, a guirlanda) continua sendo reescrito a cada vez. É o próximo candidato a `scripts/verificar/`, mas cada um tem forma própria e não há molde comum ainda.
-5. **`prosite/natal-2026/bordas-css-componentes.md`** ainda espelha a regra antiga de movimento reduzido no bloco do head (o head do site ainda tem a regra antiga; a recolagem de leads e slideshow, feita em 23/08/2026, não a alcança — quem a troca é o código 1 da aba Bordas).
+5. **O head do site ainda tem a regra antiga de movimento reduzido** (`[style], * { animation-duration: 0.01ms !important }`), que mata toda animação do site para quem pede menos movimento. Quem a substitui é o **código 1 da aba Bordas com efeito**: gerar com o efeito em uso e colar no lugar do bloco antigo. Não é urgente, mas alcança o site inteiro.

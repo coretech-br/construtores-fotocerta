@@ -25,14 +25,13 @@ Repositório **público**, servido pelo GitHub Pages em **prosite.fotocerta.com.
 | `docs/specs/` | Specs de design das funcionalidades, um arquivo por feature, nomeados `AAAA-MM-DD-topico-design.md`. |
 | `docs/pendencias.md` | A lista **viva** do que ficou combinado e ainda não foi feito. Ler antes de propor a próxima rodada; atualizar ao fim de cada uma. |
 | `docs/ledger-evolucao-2026-08.md` | O histórico das rodadas já entregues, com os tempos reais. |
-| `prosite/natal-2026/hospedeira-tag-body.html` | Tag Body da página hospedeira `/natal-2026`: captação de leads + âncora inteligente + plano B. |
-| `prosite/natal-2026/hospedeira-componente-iframe.html` | Componente HTML da hospedeira que embute a intermediária (a coluna dele leva ID Html `reserva`). |
-| `prosite/natal-2026/intermediaria-tag-body.html` | Tag Body da página intermediária: script `ajustarAltura` do iframe. |
-| `prosite/natal-2026/intermediaria-componente-tidycal.html` | Componente HTML da intermediária: embed TidyCal + expansão/recolhimento do modal. |
-| `prosite/natal-2026/bordas-css-componentes.md` | Bloco global do head + o CSS das bordas animadas/degradês aplicados em componentes da landing de Natal. |
 | `CLAUDE.md` | Este arquivo. |
 
-Os arquivos em `prosite/` são o espelho fiel do que está publicado no Prosite, organizados por campanha. Códigos de checkout, slideshow e bordas com efeito não têm arquivo próprio: são gerados sob demanda pela ferramenta, já customizados por campanha ou componente.
+**Não existe mais espelho do que está publicado no Prosite** (decisão de 23/08/2026). A pasta `prosite/` foi removida: ao classificar o que havia nela, **tudo** era reproduzível pelos construtores — inclusive a âncora inteligente e o plano B, que saem da aba Captação de leads. Espelho de código gerado envelhece a cada regeração e, pior, **parece autoritativo**: um arquivo velho lido como se fosse o publicado leva a diagnóstico errado com confiança. O que substitui cada uso que ele tinha:
+
+- **Saber o que está publicado** → ler a página publicada (`curl`), que é a fonte de verdade e não envelhece. Foi assim que se achou o `CHAVE_PIX='contato'`.
+- **Recuperar um bloco** → regerar na aba. Isso depende da configuração, que vive no `localStorage`; a rede de segurança real é o **backup do dono** (*Exportar tudo → Com os dados*), não um arquivo no repositório.
+- **Histórico** → o Git ainda tem os arquivos removidos, para quem precisar olhar para trás.
 
 ## Dados operacionais não entram no repositório
 
@@ -97,7 +96,7 @@ O que **não** se corta: a regressão byte a byte (`scripts/verificar/regressao.
 ## Fluxo de manutenção (importante)
 
 0. **`git push` só quando o dono pedir, sempre — sem exceção para arquivo "inerte".** Combinado em 23/08/2026, depois de um componente de teste (fora dos construtores) ser enviado por iniciativa própria com o argumento de que não mudava a ferramenta. O argumento não vale: **enviar é publicar**, e quem decide o que fica no repositório público é o dono. Vale também para material que ele peça "fora do projeto": entrega-se o arquivo, não se versiona sem pedir.
-1. Ao evoluir qualquer código destes arquivos, **atualizar o arquivo correspondente no repositório** (conteúdo completo, nunca trecho).
+1. **Não recriar espelhos do Prosite.** Bloco gerado por construtor não é versionado; quem precisa saber o que está no ar lê a página publicada. Se um dia existir código escrito à mão que não saia de construtor nenhum, ele entra no repositório como **fonte**, com esse nome — nunca como "espelho do Prosite", que é a promessa que envelhece.
 2. Ao evoluir a ferramenta, editar o `index.html` e mesclar na `main` normalmente. **`git push` só depois de o dono dizer que testou local e aprovou** — o GitHub Pages publica sozinho a cada envio, então *enviar é publicar*, e uma versão com defeito iria ao ar sem ninguém decidir. Combinado em 21/08/2026, quando `prosite.fotocerta.com.br` entrou no ar. Vale para o repositório inteiro, já que o envio leva tudo junto. A página `utl-construtor` do Prosite foi descontinuada; não existe mais o passo de republicar o miolo em componente.
 3. Ao mudar arquitetura, regra ou decisão, **atualizar a `docs/documentacao-fotocerta.md`** (e o inventário acima, se surgir arquivo novo).
 4. Ao mexer em `fc-compartilhado.js` ou em `cobrar/manifest.json`, **trocar a versão em todos os lugares e rodar `scripts/conferir-versoes.sh`** (`--registrar` depois de trocar). A guarda que as duas páginas fazem ao carregar é **cega por construção** — quem declara a versão é o próprio arquivo cuja atualidade está em dúvida —, então arquivo mudado sem troco de versão passa por ela sem aviso: medido, dois selos diferentes (`D57C` contra `625D`) para a mesma cobrança. E "só atrasa a publicação" é falso: o contrato tem três participantes, e os outros dois são o outro aparelho do dono e o bloco já colado na `/pagar`, que não é versionado.

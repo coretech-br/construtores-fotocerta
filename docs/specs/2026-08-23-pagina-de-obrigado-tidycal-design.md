@@ -62,7 +62,14 @@ O invariante que isso não pode quebrar: o `p-out1` sai **byte a byte idêntico*
 - **`t-out4`** — o endereço para colar no TidyCal, com só as variáveis marcadas.
 - **`t-out5`** — o script da Tag Body da página de confirmação.
 
-## 6. O limite que só o dono fecha
+## 6. O limite que era do dono — fechado em 23/08/2026
+
+O dono colou a Tag Body na página de confirmação e fez um agendamento de verdade. As duas incógnitas caíram:
+
+- **O editor de texto do Prosite aceita `{{` e `}}`** sem transformar em outra coisa. Os marcadores sobrevivem à publicação.
+- **A Tag Body roda a tempo** dos componentes do tema. O reobservador de cinco segundos cobre o caso do componente tardio, mas na prática nem foi preciso esperar por ele.
+
+## 7. O limite original, para registro
 
 **Quando a Tag Body roda em relação aos componentes do tema.** Há precedente (a intermediária de Natal faz trabalho de DOM pela Tag Body), e o script está preparado para conteúdo tardio — mas o comportamento exato numa página publicada do Prosite só uma colagem responde. Junto: confirmar que o editor de texto do Prosite aceita `{{` e `}}` sem transformar em outra coisa.
 

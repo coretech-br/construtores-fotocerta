@@ -569,3 +569,22 @@ Correção do dono sobre a rodada anterior: a Tag Body da página de obrigado es
 **Quatro iterações perdidas num arnês que mentia.** Ele preenchia a referência antes de gerar; trocava o modo antes de trocar o preset (e o preset sobrescreve os campos); e, o pior, trocava o preset com `sel.value=...` mais um evento sintético, o que **falhava depois de gerar**. Cheguei a suspeitar de defeito no produto. Com `selectOption` — a seleção de verdade — funciona sempre. **Controle que a ferramenta redesenha exige interação real, não atribuição de valor.** E quando a medida acusa falhas só em algumas combinações, desconfiar da medida.
 
 **A saída boa dessa perda:** as medidas passaram a ser feitas em **carga limpa**, uma combinação por página aberta. Mais lento e sem estado arrastado entre casos.
+
+
+---
+
+## Décima oitava rodada — os espelhos do Prosite acabaram (23/08/2026)
+
+O dono perguntou para que serviam. A resposta honesta foi que serviam cada vez menos, e a classificação mostrou por quê.
+
+### O que a rodada ensinou sobre método
+
+**A pergunta "para que serve?" merecia ser levada a sério, não defendida.** A pasta `prosite/` era regra escrita no `CLAUDE.md` desde o começo. Bastou classificar o conteúdo arquivo por arquivo para descobrir que **nada ali era insubstituível**: até a âncora inteligente e o plano B, que eu supunha feitos à mão, saem da aba Captação de leads.
+
+**Espelho de código gerado é pior que nenhum espelho.** Ele envelhece a cada regeração e **parece autoritativo** — e essa combinação leva a diagnóstico errado com confiança. A dívida sobre o `bordas-css-componentes.md` já registrava um espelho declaradamente velho; a lista de pendências tinha um item pedindo ao dono que mandasse conteúdo só para manter cópias de coisas que a ferramenta refaz sozinha.
+
+**O uso que parecia justificar tudo já tinha sido substituído na prática.** Quando precisei saber o que estava publicado na `/pagar`, li a página com `curl` — e o espelho não teria a informação certa de qualquer jeito. A fonte de verdade do que está no ar é o que está no ar.
+
+**A rede de segurança real era outra.** Os espelhos pareciam backup e não eram: o que reproduz um bloco é a **configuração** do dono, que vive no `localStorage`, e o que a protege é o *Exportar tudo → Com os dados*. Nomear a proteção certa vale mais que manter uma que só parece.
+
+**Verificar antes de apagar.** A tentação era remover a pasta assim que ele autorizou. Classificar primeiro foi o que permitiu dizer, com medida, que nada se perderia — e transformou "remover lixo" em uma decisão registrada, com o que substitui cada uso.

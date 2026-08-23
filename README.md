@@ -35,7 +35,6 @@ Vale lembrar que Client ID do PayPal e chave Pix são públicos por definição 
 index.html                  a ferramenta (é o que o GitHub Pages serve)
 CNAME .nojekyll             configuração do Pages
 docs/                       documentação do projeto e specs de design
-prosite/natal-2026/         espelho dos códigos colados no painel da Alboom
 ```
 
 ## Desenvolvimento
