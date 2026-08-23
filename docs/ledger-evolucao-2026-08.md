@@ -493,3 +493,22 @@ Estimada em **3h – 5h** (passos 1 e 2 juntos, a pedido do dono). Spec: `docs/s
 **O tamanho só apareceu porque foi medido.** O efeito passou em todas as checagens funcionais na primeira execução — e entregava **68 KB** com os sete enfeites, o que provavelmente nenhum campo de CSS de painel aceita. A tabela de bytes no arnês foi o que transformou "funciona" em "funciona e cabe". Duas correções estruturais (propriedade customizada para cada desenho aparecer uma vez em vez de oito; codificação escapando só os quatro caracteres necessários em vez de tudo) levaram a 22 KB. **Checagem funcional que passa não é o fim da medição.**
 
 **A restrição foi lida antes de prometer.** O código 2 são propriedades soltas, sem seletor — foi isso que decidiu que os enfeites seriam `background-image`, e foi isso que permitiu dizer, na análise, que "cada enfeite girando no próprio eixo" não é possível. Dizer o limite na análise é mais barato que descobri-lo no meio.
+
+
+---
+
+## Décima quarta rodada — o arnês saiu de /tmp (22/08/2026)
+
+Pequena, e a razão dela é uma lição das duas anteriores: o arnês da regressão byte a byte era reescrito a cada sessão numa pasta temporária, e **sumiu duas vezes no meio de uma rodada**. Agora é `scripts/verificar/`, com um comando: `scripts/verificar/regressao.sh`.
+
+### O que a rodada ensinou sobre método
+
+**Ferramenta de medição que depende de ser recriada não é ferramenta, é ritual.** Cada perda custou recapturar a fotografia inteira da referência — e, pior, criou a janela em que seria tentador seguir sem medir.
+
+**A referência sai de `git archive`, não de um checkout.** Não mexe na árvore de trabalho, não exige limpar nada, e aceita qualquer commit ou branch como base de comparação.
+
+**Uma ferramenta de regressão que nunca falha não serve.** Antes de commitar, uma mutação proposital foi injetada no `cCssBase` — o script acusou `DIFERE saida c-out1` e saiu com código 1. Só depois disso ela foi considerada pronta. Vale para qualquer verificação nova: **provar que ela reprova.**
+
+**A dependência é declarada, e a falha ensina.** O repositório não tem `package.json` de propósito. A busca pelo Playwright é por ordem (variável de ambiente, módulo instalado, cache do npx) e, quando não acha, a mensagem diz o comando exato para instalar em vez de estourar uma pilha.
+
+**Um `*/` dentro de um comentário de bloco fechou o comentário cedo** — o caminho `_npx/*/node_modules` no cabeçalho explicativo. Custou um `node --check`. É o mesmo gênero da armadilha que o Manual do Prosite já registra para `</script` dentro de string.

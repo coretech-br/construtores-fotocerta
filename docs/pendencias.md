@@ -10,6 +10,8 @@ Entregues em 22/08/2026: os três itens que estavam aqui — o bloco sempre carr
 
 Entregue também em 22/08/2026, a pedido do dono: o **contador da barra virou opcional** (`docs/specs/2026-08-22-contador-opcional-design.md`) — a barra pode mostrar só a mensagem, com a contagem correndo por dentro.
 
+Entregue também em 22/08/2026: o **arnês da regressão** saiu da pasta temporária e virou `scripts/verificar/` — um comando (`scripts/verificar/regressao.sh`) compara a árvore de trabalho com qualquer referência.
+
 Entregue também em 22/08/2026: a **guirlanda de Natal**, sexto efeito da aba Bordas (`docs/specs/2026-08-22-borda-natal-design.md`).
 
 A próxima sai do que o dono encontrar no uso.
@@ -41,4 +43,5 @@ Nenhuma destas atrapalha o uso; ficam anotadas para não serem redescobertas.
 1. **A recusa de formato da chave não abre o painel Identidade.** Ela devolve texto simples, como já faziam as recusas de charset e de tamanho. As recusas de campo *vazio* abrem o painel (via `FCI_APONTA`), mas a frase daquele sufixo diz "preencha", que não serve para um campo preenchido errado. Mudar o sufixo mexeria em cinco mensagens cobertas pelo invariante "as recusas dizem as mesmas palavras nos dois lados", e nenhuma medição pediu isso ainda.
 2. **`.fcpg-pp` e `.fcpg-sep` saem no CSS mesmo quando o bloco não tem PayPal** (cerca de 250 bytes de regra que nada usa). É consistente entre si — `.fcpg-pp` já era assim —, e condicionar as duas mexeria no código 1 sem que nenhum recurso peça.
 3. **O nome de um item opcional pode ser esvaziado pelo editor em linha** do Checkout e da Mini loja, e sai como `{nome:''}`. Registrado desde a rodada 3 da oitava aba.
-4. **`prosite/natal-2026/bordas-css-componentes.md`** ainda espelha a regra antiga de movimento reduzido no bloco do head (item 5 acima resolve os dois de uma vez).
+4. **O arnês que EXECUTA os blocos entregues ainda é por rodada.** O da regressão foi versionado; o que roda o bloco numa página de verdade (a `/pagar`, a barra de contagem, a guirlanda) continua sendo reescrito a cada vez. É o próximo candidato a `scripts/verificar/`, mas cada um tem forma própria e não há molde comum ainda.
+5. **`prosite/natal-2026/bordas-css-componentes.md`** ainda espelha a regra antiga de movimento reduzido no bloco do head (item 5 acima resolve os dois de uma vez).
