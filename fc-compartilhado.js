@@ -49,7 +49,7 @@
    ============================================================================ */
 'use strict';
 var FCCOMPART=(function(){
-var FC_COMPART_VERSAO='2026-08-22d';
+var FC_COMPART_VERSAO='2026-08-23a';
 
 /* Limpeza compartilhada pelos DOIS validadores de endereco -- cUrlOk (botao de acao da
    Contagem regressiva) e tUrlOk (pagina intermediaria do TidyCal). Ela faz o que o NAVEGADOR
@@ -303,11 +303,15 @@ function pixChaveFormato(c){
 }
 function pixChaveErro(chave,bruta){
   if(!chave)return String(bruta||'').length?fciRecusa('A chave Pix so tinha espacos ou caracteres invisiveis (vindos de copiar-e-colar) e ficou vazia depois da limpeza das pontas. Digite a chave novamente.'):'';
-  if(!/^[!-~]+$/.test(chave))return 'A chave Pix tem, no meio, um espaco ou um caractere fora do padrao -- pode ser um caractere invisivel que veio junto do copiar-e-colar do app do banco e que voce nao esta vendo. O codigo do QR conta os caracteres em bytes, e qualquer um fora da faixa comum (letras, numeros e sinais, sem espacos) faz o banco recusar o pagamento sem explicacao. Apague o campo e digite a chave de novo.';
-  if(chave.length>PIX_CHAVE_MAX)return 'A chave Pix tem '+chave.length+' caracteres e o padrao do Banco Central aceita no maximo '+PIX_CHAVE_MAX+' no campo da chave. Uma chave maior desmonta o codigo do QR sem que ele pareca invalido: confira se nao colou algo a mais.';
+  if(!/^[!-~]+$/.test(chave))return fciRecusa('A chave Pix tem, no meio, um espaco ou um caractere fora do padrao -- pode ser um caractere invisivel que veio junto do copiar-e-colar do app do banco e que voce nao esta vendo. O codigo do QR conta os caracteres em bytes, e qualquer um fora da faixa comum (letras, numeros e sinais, sem espacos) faz o banco recusar o pagamento sem explicacao. Apague o campo e digite a chave de novo.');
+  if(chave.length>PIX_CHAVE_MAX)return fciRecusa('A chave Pix tem '+chave.length+' caracteres e o padrao do Banco Central aceita no maximo '+PIX_CHAVE_MAX+' no campo da chave. Uma chave maior desmonta o codigo do QR sem que ele pareca invalido: confira se nao colou algo a mais.');
   /* O formato vem DEPOIS do charset e do tamanho, de proposito: os dois anteriores nomeiam
-     acidentes de copiar-e-colar, que sao mais especificos e mais provaveis. */
-  return pixChaveFormato(chave);
+     acidentes de copiar-e-colar, que sao mais especificos e mais provaveis.
+     AS TRES APONTAM O PAINEL desde 23/08/2026: antes so a recusa de campo VAZIO levava o
+     operador ate la, e as tres que dizem "a chave esta errada assim" o deixavam procurando
+     onde consertar. Sao a mesma classe de problema e passaram a ter o mesmo tratamento. */
+  var f=pixChaveFormato(chave);
+  return f?fciRecusa(f):'';
 }
 
 var FCI_CHAVE='fcConstrutoresIdentidade';
@@ -331,8 +335,29 @@ var FCI_PADRAO={chave:'',nomer:'Foto Certa',cidade:'Vitoria',client:'',zapnum:''
    esta seria trocar uma recusa util por uma caca ao tesouro. A frase e um sufixo unico, e e
    ela tambem que fciApontarSe reconhece para abrir o painel -- sem estado escondido entre a
    funcao que recusa e a que reage a recusa. */
-var FCI_APONTA=' Este campo agora e um so para a ferramenta inteira: preencha no painel Identidade, no topo da pagina.';
+/* "abra o painel", e nao "preencha": desde 23/08/2026 a recusa de FORMATO da chave tambem
+   aponta, e ali o campo esta preenchido -- errado, mas preenchido. Uma frase que serve aos
+   dois casos e melhor que duas frases parecidas para divergir. */
+var FCI_APONTA=' Este campo agora e um so para a ferramenta inteira: abra o painel Identidade, no topo da pagina.';
 function fciRecusa(t){return t+FCI_APONTA;}
+/* ===== QUAL CAMPO A RECUSA DEVE APONTAR =====
+   Ate 23/08/2026 quem reagia a recusa focava o primeiro campo VAZIO. Servia para "preencha a
+   chave" e nao servia para "a chave nao e nenhum dos cinco formatos": ali nada esta vazio, e o
+   operador lia a recusa sem ser levado a lugar nenhum.
+   A regra passou a ser "o primeiro campo com PROBLEMA", e problema inclui o formato da chave --
+   conferido pela MESMA pixChaveErro que recusa a geracao, entao nao existe uma segunda ideia
+   do que e uma chave boa. Os valores chegam por uma funcao de leitura, para as duas paginas
+   usarem a regra com os campos de cada uma. */
+function fciPrimeiroProblema(lerCampo){
+  var i,k,v;
+  for(i=0;i<FCI_CAMPOS.length;i++){
+    k=FCI_CAMPOS[i][0];
+    v=String(lerCampo(k)==null?'':lerCampo(k)).replace(/^\s+|\s+$/g,'');
+    if(!v)return k;
+    if(k==='chave'&&pixChaveErro(pixLimpar(v),v))return k;
+  }
+  return '';
+}
 
 /* ===== leitura do que esta guardado no navegador =====
    As duas paginas leem a MESMA chave ('fcConstrutoresIdentidade') e a mesma
@@ -939,7 +964,7 @@ return {
   FC_URL_EXEMPLO:FC_URL_EXEMPLO, pUrlRecusa:pUrlRecusa, fcUrlAvisoMigracao:fcUrlAvisoMigracao,
   /* identidade guardada */
   FCI_CHAVE:FCI_CHAVE, FCI_CAMPOS:FCI_CAMPOS, FCI_PADRAO:FCI_PADRAO,
-  FCI_APONTA:FCI_APONTA, fciRecusa:fciRecusa,
+  FCI_APONTA:FCI_APONTA, fciRecusa:fciRecusa, fciPrimeiroProblema:fciPrimeiroProblema,
   fcLerJson:fcLerJson, fcIdentidadeDe:fcIdentidadeDe,
   /* valor, identificador e prazo desta cobranca */
   P_VALOR_MAX:P_VALOR_MAX, P_DESC_MAX:P_DESC_MAX,

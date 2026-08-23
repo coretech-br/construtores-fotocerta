@@ -588,3 +588,22 @@ O dono perguntou para que serviam. A resposta honesta foi que serviam cada vez m
 **A rede de segurança real era outra.** Os espelhos pareciam backup e não eram: o que reproduz um bloco é a **configuração** do dono, que vive no `localStorage`, e o que a protege é o *Exportar tudo → Com os dados*. Nomear a proteção certa vale mais que manter uma que só parece.
 
 **Verificar antes de apagar.** A tentação era remover a pasta assim que ele autorizou. Classificar primeiro foi o que permitiu dizer, com medida, que nada se perderia — e transformou "remover lixo" em uma decisão registrada, com o que substitui cada uso.
+
+
+---
+
+## Décima nona rodada — as dívidas pequenas, e um texto falso (23/08/2026)
+
+O dono pediu a lista das dívidas para avaliar, e mandou fazer todas. No meio disso, corrigiu um entendimento que virou a descoberta mais importante da rodada.
+
+### O que a rodada ensinou sobre método
+
+**"Deixa eu só ajustar um entendimento" era um defeito de onze lugares.** Ele disse, de passagem, que o Prosite não tem cabeçalho global. A ferramenta afirmava o contrário em onze textos e chegava a dar um caminho de menu inexistente. Nada quebrou porque ele fez certo apesar da instrução errada — o que é o pior tipo de falha documental: **ela não aparece enquanto o operador souber mais que a ferramenta.**
+
+**Uma dívida "cosmética" e uma "improvável" custaram vinte minutos cada.** As estimativas estavam certas; o que eu tinha subestimado era o valor de fechá-las junto: uma rodada só, uma regressão só, uma spec só. Agrupar dívidas pequenas é mais barato que a soma delas.
+
+**A dívida 1 estava bloqueada por uma frase, não por código.** O ponteiro dizia "preencha", que não serve para campo preenchido errado. Trocar cinco palavras destravou o resto — e, como a frase mora no arquivo compartilhado, as duas páginas mudaram juntas e o invariante se manteve por construção.
+
+**A regra nova não inventou um segundo critério.** "Campo com problema" pergunta à **mesma `pixChaveErro`** que recusa a geração. Se tivesse escrito uma segunda checagem ali, teria criado exatamente a divergência que este projeto passou o mês fechando.
+
+**O molde do arnês nasceu das perdas.** As duas armadilhas registradas dentro dele são as duas que me custaram mais tempo no mês: o `textContent` que inclui o próprio script, e o `<select>` que não reage a evento sintético. Registrá-las no código que as evita vale mais que registrá-las só no ledger.

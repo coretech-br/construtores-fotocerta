@@ -46,10 +46,17 @@ O sétimo — atualizar o espelho da Tag Body da hospedeira — foi resolvido **
 
 ## Dívidas registradas, pequenas, sem dono
 
-Nenhuma destas atrapalha o uso; ficam anotadas para não serem redescobertas.
+Em 23/08/2026 o dono pediu que **todas** fossem feitas. Ficou uma, e ela é dele:
 
-1. **A recusa de formato da chave não abre o painel Identidade.** Ela devolve texto simples, como já faziam as recusas de charset e de tamanho. As recusas de campo *vazio* abrem o painel (via `FCI_APONTA`), mas a frase daquele sufixo diz "preencha", que não serve para um campo preenchido errado. Mudar o sufixo mexeria em cinco mensagens cobertas pelo invariante "as recusas dizem as mesmas palavras nos dois lados", e nenhuma medição pediu isso ainda.
-2. **`.fcpg-pp` e `.fcpg-sep` saem no CSS mesmo quando o bloco não tem PayPal** (cerca de 250 bytes de regra que nada usa). É consistente entre si — `.fcpg-pp` já era assim —, e condicionar as duas mexeria no código 1 sem que nenhum recurso peça.
-3. **O nome de um item opcional pode ser esvaziado pelo editor em linha** do Checkout e da Mini loja, e sai como `{nome:''}`. Registrado desde a rodada 3 da oitava aba.
-4. **O arnês que EXECUTA os blocos entregues ainda é por rodada.** O da regressão foi versionado; o que roda o bloco numa página de verdade (a `/pagar`, a barra de contagem, a guirlanda) continua sendo reescrito a cada vez. É o próximo candidato a `scripts/verificar/`, mas cada um tem forma própria e não há molde comum ainda.
-5. **O head do site ainda tem a regra antiga de movimento reduzido** (`[style], * { animation-duration: 0.01ms !important }`), que mata toda animação do site para quem pede menos movimento. Quem a substitui é o **código 1 da aba Bordas com efeito**: gerar com o efeito em uso e colar no lugar do bloco antigo. Não é urgente, mas alcança o site inteiro.
+1. **A Tag Head da landing de Natal pode ainda ter a regra antiga de movimento reduzido** (`[style], * { animation-duration: 0.01ms !important }`), que mata toda animação **daquela página** para quem pede menos movimento. Quem a substitui é o **código 1 da aba Bordas com efeito**: gerar com o efeito em uso e colar no lugar do bloco antigo. Não é urgente, e o alcance é de uma página só — não do site, porque **o Prosite não tem cabeçalho global**.
+
+### Fechadas em 23/08/2026
+
+Spec: `docs/specs/2026-08-23-dividas-pequenas-design.md`.
+
+- **A recusa da chave Pix agora abre o painel Identidade e leva o foco ao campo** — as três recusas de "chave errada", não só a de campo vazio.
+- **As regras de CSS do PayPal só saem quando o bloco tem PayPal.**
+- **O nome de um item opcional não fica mais vazio** no editor em linha do Checkout e da Mini loja: ele se corrige à vista.
+- **O arnês que executa os blocos entregues virou molde versionado** (`scripts/verificar/pagina.mjs`), com as duas armadilhas que custaram caro registradas dentro dele.
+
+Junto delas, uma correção que não era dívida e sim **texto falso**: a ferramenta afirmava em onze lugares que existe um cabeçalho global do site, e um deles dava um caminho de menu inexistente. O Prosite só tem Tag Head e Tag Body **por página**.

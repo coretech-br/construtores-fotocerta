@@ -272,7 +272,7 @@
      construção, porque quem declara a versão é o próprio arquivo cuja atualidade está em
      dúvida. Quem confere é scripts/conferir-versoes.sh, que compara o CONTEÚDO com a versão
      declarada e falha quando o arquivo mudou sem o troco. -->
-<script src="../fc-compartilhado.js?v=2026-08-22d"></script>
+<script src="../fc-compartilhado.js?v=2026-08-23a"></script>
 <script>
 'use strict';
 (function(){
@@ -319,7 +319,7 @@
    pior: esta página selaria o link com uma conta e a /pagar conferiria com
    outra, sem um sinal na tela. Então ou a versão pedida chegou, ou a página diz
    o que houve e não faz mais nada. */
-var FC_COMPART_ESPERADA='2026-08-22d';
+var FC_COMPART_ESPERADA='2026-08-23a';
 if(!window.FCCOMPART||FCCOMPART.versao!==FC_COMPART_ESPERADA){
   cbParar(FC_COMPART_ESPERADA,window.FCCOMPART?FCCOMPART.versao:null);
   return;
@@ -653,13 +653,13 @@ function cbLimparRecusa(){
    ferramenta usa (FCI_APONTA, no arquivo compartilhado), então não há dois
    textos para divergir — e apontar é mostrar onde, não só dizer onde. */
 function cbApontarSe(msg){
-  var i,k,el;
+  var k,el;
   if(String(msg==null?'':msg).indexOf(C.FCI_APONTA)<0)return false;
   cbConfigAbrir(true,true);
-  for(i=0;i<C.FCI_CAMPOS.length;i++){
-    k=C.FCI_CAMPOS[i][0];el=$('cb-'+k);
-    if(el&&!cbTrim(el.value)){try{el.focus();}catch(e){}break;}
-  }
+  /* Mesma regra da ferramenta, do mesmo arquivo: o primeiro campo com PROBLEMA -- vazio ou,
+     no caso da chave, num formato que o Banco Central nao aceita. */
+  k=C.fciPrimeiroProblema(function(x){var e=$('cb-'+x);return e?e.value:'';});
+  if(k){el=$('cb-'+k);if(el){try{el.focus();}catch(e){}}}
   return true;
 }
 

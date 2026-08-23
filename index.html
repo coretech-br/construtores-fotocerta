@@ -1670,7 +1670,7 @@
 
 <!-- ==================== CONSTRUTOR: BORDAS COM EFEITO ==================== -->
 <div class="painel" id="painel-bor" role="tabpanel">
-  <p class="descricao"><b>Bordas com efeito</b> — gera o CSS para destacar um componente do Prosite com borda animada e <b>fundo interno customizável</b> (cor sólida ou degradê, para componentes que não oferecem degradê nativo). Seis efeitos à escolha: <b>brilho giratório</b> (o facho de luz que percorre a moldura), <b>degradê contínuo</b>, <b>halo pulsante</b>, <b>listras em movimento</b>, <b>guirlanda de Natal</b> (enfeites desenhados na moldura) e <b>borda fixa</b> (sem animação). Gera dois códigos: um global para a Tag Head do site (uma vez só) e o CSS do componente. É 100% CSS, sem JavaScript, e já inclui a regra de acessibilidade que reduz o movimento para quem prefere.</p>
+  <p class="descricao"><b>Bordas com efeito</b> — gera o CSS para destacar um componente do Prosite com borda animada e <b>fundo interno customizável</b> (cor sólida ou degradê, para componentes que não oferecem degradê nativo). Seis efeitos à escolha: <b>brilho giratório</b> (o facho de luz que percorre a moldura), <b>degradê contínuo</b>, <b>halo pulsante</b>, <b>listras em movimento</b>, <b>guirlanda de Natal</b> (enfeites desenhados na moldura) e <b>borda fixa</b> (sem animação). Gera dois códigos: um para a <b>Tag Head da própria página</b> (o Prosite não tem cabeçalho global) e o CSS do componente. É 100% CSS, sem JavaScript, e já inclui a regra de acessibilidade que reduz o movimento para quem prefere.</p>
 
   <div class="secao primeira"><span class="secao-n">1</span> Efeito e fundo</div>
   <div class="grade">
@@ -1853,11 +1853,11 @@
       <legend>Código 1 para dois efeitos no mesmo site</legend>
       <label for="b-consol">Incluir também a animação de um preset salvo</label>
       <select id="b-consol"><option value="">Não incluir — só o efeito desta tela</option></select>
-      <p class="ajuda"><b>Para que serve:</b> o código 1 é colado <b>uma vez</b> no cabeçalho do site e vale para o site inteiro. Quando o site usa dois efeitos diferentes — na mesma página ou em páginas diferentes —, em vez de colar dois blocos concorrentes nesse campo, escolha aqui o preset do outro componente e o código 1 sai com as <b>duas</b> animações e as duas regras de movimento reduzido, num bloco só.</p>
+      <p class="ajuda"><b>Para que serve:</b> o código 1 é colado na <b>Tag Head da página</b> onde o efeito aparece — o Prosite não tem cabeçalho global, cada página tem o seu. Quando a <b>mesma página</b> usa dois efeitos diferentes, em vez de colar dois blocos concorrentes nesse campo, escolha aqui o preset do outro componente e o código 1 sai com as <b>duas</b> animações e as duas regras de movimento reduzido, num bloco só.</p>
       <p class="ajuda"><b>O que ele não resolve:</b> efeitos <b>diferentes</b> têm nomes de animação diferentes e convivem; o <b>mesmo</b> efeito com parâmetros diferentes colide — os dois se chamariam <code>fc-borda-listras</code> e valeria o último. Por isso a ferramenta <b>recusa</b> consolidar um preset do mesmo efeito da tela, em vez de emitir dois <code>@keyframes</code> de mesmo nome. Dois componentes com o mesmo efeito precisam dos <b>mesmos</b> parâmetros de animação.</p>
       </fieldset>
       <div class="saida">
-      <h3>1) Código global — Tag Head do site
+      <h3>1) Tag Head <b>desta página</b>
       <button class="botao mini" id="b-copy1" style="margin-left:8px">Copiar</button>
       <span class="aviso-copiado" id="b-cop1">Copiado!</span>
       </h3>
@@ -1875,7 +1875,7 @@
 
   <div class="instrucoes">
   <h3>Instrução de uso do código gerado</h3>
-  <p class="ajuda"><b>Onde colar o código 1 (global):</b> em <b>Configurações → Códigos personalizados → campo do cabeçalho (head)</b> do site, com a tag style inclusa. Cola-se <b>uma única vez</b>: ele define a animação e vale para o site inteiro. Se usar efeitos diferentes em componentes diferentes, salve o primeiro como <b>preset</b> e use a <b>consolidação do código 1</b> (seção 4): sai um bloco só com as duas animações, em vez de dois blocos concorrentes no mesmo campo. Colar os dois blocos separados continua funcionando — cada efeito tem nome próprio e não conflita —, mas aí são dois trechos para manter.</p>
+  <p class="ajuda"><b>Onde colar o código 1:</b> na <b>Tag Head da própria página</b> onde o componente está, com a tag style inclusa. <b>O Prosite não tem cabeçalho global</b> — cada página tem o seu —, então uma página nova que use borda animada precisa do código 1 no head <i>dela</i>: sem isso o CSS do componente fica lá, a animação não existe, e a borda simplesmente não se mexe, sem erro nenhum. Se a mesma página usar efeitos diferentes em componentes diferentes, salve o primeiro como <b>preset</b> e use a <b>consolidação do código 1</b> (seção 4): sai um bloco só com as duas animações, em vez de dois blocos concorrentes no mesmo campo. Colar os dois blocos separados continua funcionando — cada efeito tem nome próprio e não conflita —, mas aí são dois trechos para manter.</p>
   <p class="ajuda"><b>A regra de acessibilidade que vem junto:</b> ela desliga <b>apenas esta animação</b> para quem escolheu "reduzir movimento" no sistema — redefinindo a própria animação com um único quadro. A borda para de se mexer e continua visível (o degradê fica parado, o halo vira um anel estático). Nada mais do site é afetado: a versão anterior deste código usava <code>*</code> e apagava a animação de todas as páginas, inclusive as do tema. Se o efeito escolhido for <b>borda fixa</b>, não há animação nenhuma e o código 1 não existe.</p>
   <p class="ajuda"><b>Onde colar o código 2 (componente):</b> no campo <b>CSS Customizado</b> do próprio componente, no editor. São propriedades soltas, sem seletor — o Prosite as aplica direto no elemento do componente, então <b>não é preciso ID Html nem classe</b>. Se em algum componente o campo não aceitar propriedades soltas, inspecione o elemento publicado, pegue a classe que a Alboom gera e envolva tudo em <code>.classe { ... }</code> — nesse caso, coloque a regra completa no head.</p>
   <p class="ajuda"><b>Regra de ouro:</b> at-rules (<code>@keyframes</code>, <code>@media</code>) <b>só funcionam no head</b>; o campo do componente aceita apenas propriedades. Se a borda aparecer parada, é quase sempre porque o código 1 não foi colado no head — ou porque o nome da animação foi alterado em um dos dois lugares.</p>
@@ -2819,7 +2819,7 @@
      nova para a outra, e o resultado seriam links que a propria /pagar recusa -- sem
      erro nenhum na tela. Ao mexer no arquivo, troque a versao AQUI, em cobrar/index.html
      e no FC_COMPART_VERSAO de dentro dele. -->
-<script src="fc-compartilhado.js?v=2026-08-22d"></script>
+<script src="fc-compartilhado.js?v=2026-08-23a"></script>
 <script>
 'use strict';
 (function(){
@@ -2842,7 +2842,7 @@
    OS APELIDOS ABAIXO NAO SAO COPIA: sao o mesmo objeto, com o nome que o resto
    deste arquivo sempre usou. Trocar os nomes em cem lugares so para dizer
    FCCOMPART.x mudaria muito codigo para nao mudar comportamento nenhum. */
-var FC_COMPART_ESPERADA='2026-08-22d';
+var FC_COMPART_ESPERADA='2026-08-23a';
 if(!window.FCCOMPART||FCCOMPART.versao!==FC_COMPART_ESPERADA){
   fcCompartParar(FC_COMPART_ESPERADA,window.FCCOMPART?FCCOMPART.versao:null);
   return;
@@ -2854,7 +2854,7 @@ var PIX_CHAVE_MAX=C.PIX_CHAVE_MAX, pixLimpar=C.pixLimpar, pixChaveErro=C.pixChav
 var urlLimpa=C.urlLimpa, pUrlOk=C.pUrlOk, fcUrlRelativo=C.fcUrlRelativo;
 var FC_URL_EXEMPLO=C.FC_URL_EXEMPLO, pUrlRecusa=C.pUrlRecusa, fcUrlAvisoMigracao=C.fcUrlAvisoMigracao;
 var FCI_CHAVE=C.FCI_CHAVE, FCI_CAMPOS=C.FCI_CAMPOS, FCI_PADRAO=C.FCI_PADRAO;
-var FCI_APONTA=C.FCI_APONTA, fciRecusa=C.fciRecusa;
+var FCI_APONTA=C.FCI_APONTA, fciRecusa=C.fciRecusa, fciPrimeiroProblema=C.fciPrimeiroProblema;
 var fcLerJson=C.fcLerJson, fcIdentidadeDe=C.fcIdentidadeDe;
 var P_VALOR_MAX=C.P_VALOR_MAX, P_DESC_MAX=C.P_DESC_MAX;
 var pValorNum=C.pValorNum, pTxidLimpo=C.pTxidLimpo;
@@ -3959,13 +3959,14 @@ function fciPaletaAtual(){var o={},i;for(i=0;i<FCI_PALETA.length;i++)o[FCI_PALET
 /* Abre o painel e leva o foco ao primeiro campo de identidade vazio. Chamada pelos geradores
    depois de um alert(): 'apontar' e mostrar onde, nao so dizer onde. */
 function fciApontarSe(msg){
-  var i,el;
+  var el,k;
   if(String(msg==null?'':msg).indexOf(FCI_APONTA)<0)return false;
   fciPainelAbrir(true);
-  for(i=0;i<FCI_CAMPOS.length;i++){
-    el=$('fci-'+FCI_CAMPOS[i][0]);
-    if(el&&!fciVal(FCI_CAMPOS[i][0])){try{el.focus();}catch(e){}break;}
-  }
+  /* O primeiro campo com PROBLEMA, e nao o primeiro vazio: com a chave preenchida num formato
+     impossivel nada esta vazio, e o operador era aberto no painel sem ser levado ao campo.
+     A regra mora no arquivo compartilhado, entao as duas paginas apontam igual. */
+  k=fciPrimeiroProblema(fciVal);
+  if(k){el=$('fci-'+k);if(el){try{el.focus();}catch(e){}}}
   try{var p=$('fci-painel');if(p&&p.scrollIntoView)p.scrollIntoView(true);}catch(e){}
   return true;
 }
@@ -9277,7 +9278,7 @@ function tObBloco(cfg){
   var j='',i,v;
   j+='<!-- ============================================================\n';
   j+='     FOTO CERTA - PAGINA DE OBRIGADO DO AGENDAMENTO\n';
-  j+='     ONDE COLAR: campo Tag Body DESTA pagina (nao no head do site)\n';
+  j+='     ONDE COLAR: campo Tag Body DESTA pagina (nao no head)\n';
   j+='     Escreva os marcadores no texto normal da pagina; este script os troca\n';
   j+='     pelos dados que o TidyCal manda no endereco.\n';
   j+='     Gerado pela ferramenta em prosite.fotocerta.com.br\n';
@@ -9808,7 +9809,21 @@ function uOpRender(){
     var li=document.createElement('li');
     var info=document.createElement('div');info.className='info';
     var n=document.createElement('input');n.type='text';n.value=op.nome;n.placeholder='Nome do opcional';
-    n.addEventListener('input',function(){uEditOps[i].nome=n.value;});
+    /* NOME VAZIO NAO E CONFIGURACAO LEGITIMA, e aqui a diferenca com o PRECO importa: opcional
+       de graca existe (a propria aba emite "Sem opcional" a preco zero), opcional sem nome nao
+       -- ele sairia como {nome:''} e o cliente veria uma opcao em branco na tela. Como o item
+       so entra na lista com nome (uOpAdd/mOpAdd recusam vazio), sempre ha um nome bom para
+       devolver: o campo se corrige A VISTA no change/blur, como o preco, em vez de recusar.
+       Nunca no 'input' -- corrigir a cada tecla impediria apagar para redigitar. */
+    var bom=op.nome;
+    n.addEventListener('input',function(){uEditOps[i].nome=n.value;if(n.value.replace(/^\s+|\s+$/g,''))bom=n.value;});
+    (function(){
+      function volta(){
+        if(n.value.replace(/^\s+|\s+$/g,''))return;
+        n.value=bom;uEditOps[i].nome=bom;
+      }
+      n.addEventListener('change',volta);n.addEventListener('blur',volta);
+    })();
     var pr=document.createElement('input');pr.type='number';pr.step='0.01';pr.min='0';pr.value=op.preco;pr.placeholder='Preco';
     pr.addEventListener('input',function(){uEditOps[i].preco=pr.value;});
     /* Preco apagado na lista virava preco:0.00 no codigo com o campo em branco na tela. Aqui a
@@ -11588,7 +11603,7 @@ function bGerar(){
     /* Sem animacao, sem bloco: o codigo 1 antes trazia um <style> so com a regra de
        acessibilidade, ou seja, um bloco para colar no head que nao dizia respeito a este
        efeito. Aqui ele vira so a explicacao. */
-    c1='/* O efeito "borda fixa" nao usa animacao: nao ha nada para colar no head do site. */\n';
+    c1='/* O efeito "borda fixa" nao usa animacao: nao ha nada para colar na Tag Head. */\n';
     c1+='/* Cole apenas o codigo 2 no campo CSS Customizado do componente. */';
     $('b-out1').value=c1;
     $('b-out2').value=m.props;
@@ -11601,7 +11616,7 @@ function bGerar(){
   var extra=bConsolidar(m);
   if(extra&&extra.erro){alert(extra.erro);return;}
   c1+='<sty'+'le>\n';
-  c1+='/* Animacao da borda com efeito - cole uma vez no head do site */\n'+m.keys+'\n';
+  c1+='/* Animacao da borda com efeito - cole na Tag Head DESTA pagina */\n'+m.keys+'\n';
   if(extra){
     /* O nome do preset NAO entra no comentario: e texto livre do operador, e a sequencia que
        fecha comentario CSS (asterisco + barra) digitada ali fecharia este comentario mais
@@ -11610,8 +11625,8 @@ function bGerar(){
     c1+='/* Segunda animacao, do outro componente desta pagina - efeito "'+extra.efeito+'" */\n'+extra.keys+'\n';
   }
   /* Acessibilidade ESCOPADA. O bloco antigo era "* { animation-duration: 0.01ms !important;
-     animation-iteration-count: 1 !important; }": como este codigo vai para o head do SITE,
-     ele matava toda animacao de todas as paginas para quem tem movimento reduzido --
+     animation-iteration-count: 1 !important; }": como este codigo vai para a Tag Head da
+     PAGINA, ele matava toda animacao daquela pagina para quem tem movimento reduzido --
      inclusive as do tema Alboom, o botao de captacao de leads, o slideshow e a barra de
      contagem regressiva, que ja traz o proprio bloco escopado. E, no halo pulsante, congelar
      em uma iteracao de 0,01 ms parava a animacao no quadro 100%, que e halo nenhum: o
@@ -12959,11 +12974,16 @@ function pCss(cfg){
      secoes parecem ETAPAS de um caminho, e nao caminhos alternativos.
      A ORDEM DESTAS DUAS REGRAS IMPORTA: .fcpg-semtopo desliga a linha de cima do .fcpg-bloco do
      PayPal, e as duas tem a mesma especificidade -- quem vier depois vence. Sem isso o cliente
-     veria duas linhas horizontais coladas, a do separador e a do bloco. */
-  s+='.fcpg-sep{display:flex;align-items:center;gap:10px;margin:16px 0 0;font-size:12px;font-weight:700;letter-spacing:.10em;color:'+cfg.c1+';opacity:.7}\n';
-  s+='.fcpg-sep:before,.fcpg-sep:after{content:"";flex:1 1 auto;height:1px;background:rgba(0,0,0,.14)}\n';
-  s+='.fcpg-semtopo{border-top:0;margin-top:6px;padding-top:0}\n';
-  s+='.fcpg-pp{margin-top:10px}\n';
+     veria duas linhas horizontais coladas, a do separador e a do bloco.
+     AS TRES SO SAEM COM PAYPAL. Sem ele nao existe separador nem segunda secao na pagina, e as
+     regras eram CSS morto dentro do bloco colado. O '.fcpg-pp' saia solto pelo mesmo descuido
+     desde antes do separador -- os tres estao juntos agora porque a condicao e a mesma. */
+  if(cfg.usapp){
+    s+='.fcpg-sep{display:flex;align-items:center;gap:10px;margin:16px 0 0;font-size:12px;font-weight:700;letter-spacing:.10em;color:'+cfg.c1+';opacity:.7}\n';
+    s+='.fcpg-sep:before,.fcpg-sep:after{content:"";flex:1 1 auto;height:1px;background:rgba(0,0,0,.14)}\n';
+    s+='.fcpg-semtopo{border-top:0;margin-top:6px;padding-top:0}\n';
+    s+='.fcpg-pp{margin-top:10px}\n';
+  }
   return s;
 }
 /* ===== O DESCONTO NAO E MAIS UMA ESCOLHA DO BLOCO (ago/2026) =====
@@ -13822,7 +13842,21 @@ function mOpRender(){
     var li=document.createElement('li');
     var info=document.createElement('div');info.className='info';
     var n=document.createElement('input');n.type='text';n.value=op.nome;n.placeholder='Nome do opcional';
-    n.addEventListener('input',function(){mEditOps[i].nome=n.value;});
+    /* NOME VAZIO NAO E CONFIGURACAO LEGITIMA, e aqui a diferenca com o PRECO importa: opcional
+       de graca existe (a propria aba emite "Sem opcional" a preco zero), opcional sem nome nao
+       -- ele sairia como {nome:''} e o cliente veria uma opcao em branco na tela. Como o item
+       so entra na lista com nome (uOpAdd/mOpAdd recusam vazio), sempre ha um nome bom para
+       devolver: o campo se corrige A VISTA no change/blur, como o preco, em vez de recusar.
+       Nunca no 'input' -- corrigir a cada tecla impediria apagar para redigitar. */
+    var bom=op.nome;
+    n.addEventListener('input',function(){mEditOps[i].nome=n.value;if(n.value.replace(/^\s+|\s+$/g,''))bom=n.value;});
+    (function(){
+      function volta(){
+        if(n.value.replace(/^\s+|\s+$/g,''))return;
+        n.value=bom;mEditOps[i].nome=bom;
+      }
+      n.addEventListener('change',volta);n.addEventListener('blur',volta);
+    })();
     var pr=document.createElement('input');pr.type='number';pr.step='0.01';pr.min='0';pr.value=op.preco;pr.placeholder='Preco';
     pr.addEventListener('input',function(){mEditOps[i].preco=pr.value;});
     pr.addEventListener('change',function(){mOpPrecoAjustar(pr,i);});
@@ -15729,7 +15763,7 @@ function fccDaAba(a,p,plano,vals){
     plano.comps.push(fccItem(a,'u-out','Checkout','Componente HTML desta página'));
   }else if(a.id==='bor'){
     plano.head.push(fccItem(a,'b-out1','Bordas com efeito — código 1','Tag Head',
-      'O código 1 é o bloco global das animações. Se você já o mantém no cabeçalho do site (Configurações \u2192 Códigos personalizados), não cole nos dois lugares: dois <code>@keyframes</code> de mesmo nome colidem.'));
+      'O código 1 traz os <code>@keyframes</code> <b>desta página</b> — o Prosite não tem cabeçalho global. Se a página já tiver uma versão anterior deste bloco na Tag Head, <b>substitua</b> em vez de acrescentar: dois <code>@keyframes</code> de mesmo nome no mesmo campo colidem, e vale o último.'));
     plano.comps.push(fccItem(a,'b-out2','Bordas com efeito — código 2','Campo CSS Customizado do componente'));
   }else if(a.id==='cnt'){
     fixa=(v.c&&v.c.fixa)||radio('c-fixa');
