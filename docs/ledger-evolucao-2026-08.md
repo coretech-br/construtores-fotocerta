@@ -512,3 +512,22 @@ Pequena, e a razão dela é uma lição das duas anteriores: o arnês da regress
 **A dependência é declarada, e a falha ensina.** O repositório não tem `package.json` de propósito. A busca pelo Playwright é por ordem (variável de ambiente, módulo instalado, cache do npx) e, quando não acha, a mensagem diz o comando exato para instalar em vez de estourar uma pilha.
 
 **Um `*/` dentro de um comentário de bloco fechou o comentário cedo** — o caminho `_npx/*/node_modules` no cabeçalho explicativo. Custou um `node --check`. É o mesmo gênero da armadilha que o Manual do Prosite já registra para `</script` dentro de string.
+
+
+---
+
+## Décima quinta rodada — a página de obrigado do TidyCal (23/08/2026)
+
+Estimada em **2h – 3h30**. Spec: `docs/specs/2026-08-23-pagina-de-obrigado-tidycal-design.md`.
+
+### O que a rodada ensinou sobre método
+
+**A análise antes da implementação pagou de novo.** O dono propôs marcar os campos com o ID Html do Prosite. Ler o que o projeto já sabia — o ID vai na **coluna**, registrado desde a landing de Natal — mostrou que a ideia funcionaria destruindo a tipografia do tema. A variante (marcadores dentro do texto) manteve a intenção e resolveu os dois defeitos, e ele aprovou. **Avaliar a ideia é mais barato que implementá-la e descobrir depois.**
+
+**Delegar contra contrato que existe funcionou — porque agora o contrato existe.** O arnês foi escrito por um subagente em Sonnet apontando para `scripts/verificar/lib.mjs`, versionado na rodada anterior. Dessa vez ele bateu de primeira, ao contrário da tentativa da guirlanda, quando a biblioteca vivia numa pasta temporária que sumiu. A lição da rodada passada se pagou na seguinte.
+
+**O arnês achou um defeito de produto, não só de código.** A geração da página de obrigado vinha depois das recusas do widget, então o caminho do booking type vazio a bloqueava — um campo que nada tem a ver com ela. O subagente não preenchia esse campo, e por isso o defeito apareceu. **Arnês que não conhece as suposições do implementador testa o que o implementador não pensou em testar.**
+
+**Medir o DOM inteiro inclui o código que age sobre ele.** A checagem "sobrou marcador na tela?" lia o `textContent` do `body` e dava falso negativo sempre: o texto-fonte do próprio script contém `{{`, porque ele precisa dessa string para procurar. Corrigido clonando o body e removendo os `script` do clone antes de ler.
+
+**Uma expectativa do arnês estava mais estrita que a spec** — ele esperava o mês por extenso ("dezembro") onde a spec e a interface prometem `12/12/2026 às 15:00`. A asserção foi corrigida para conferir o **prometido**, e não a suposição. Mas ela rendeu: expôs um `as` sem acento num texto que o cliente lê.

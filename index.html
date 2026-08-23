@@ -1269,10 +1269,65 @@
     </div>
   </div>
 
-  <div class="secao"><span class="secao-n">2</span> Biblioteca de presets</div>
+  <div class="secao"><span class="secao-n">2</span> Página de obrigado <small style="text-transform:none;letter-spacing:0;font-weight:400;opacity:.75">— opcional</small></div>
+  <fieldset>
+  <legend>Mostrar os dados do agendamento na página de confirmação</legend>
+  <p class="ajuda">O TidyCal pode <b>redirecionar quem agenda</b> para uma página sua (nas configurações do tipo de agendamento, <i>Redirect to custom page after booking</i>). Esta seção gera duas coisas: o <b>endereço com as variáveis</b> para colar lá, e um <b>script para a Tag Body</b> daquela página, que preenche o texto com os dados do agendamento.</p>
+  <div class="radios">
+  <label><input type="radio" name="t-ob-usar" value="nao" checked><span>Não usar</span></label>
+  <label><input type="radio" name="t-ob-usar" value="sim"><span>Gerar o código da página de obrigado</span></label>
+  </div>
+  <div id="t-ob-campos" style="display:none">
+    <label for="t-ob-url">Endereço da página de confirmação <small>(completo, com https:// e o domínio)</small></label>
+    <input type="text" id="t-ob-url" value="" placeholder="https://www.fotocerta.com.br/natal-agendamento-confirmado">
+    <div class="grade">
+      <div>
+      <label>Quais dados a página vai receber</label>
+      <div class="radios">
+      <label><input type="checkbox" id="t-ob-nome" checked><span>Nome de quem agendou</span></label>
+      <label><input type="checkbox" id="t-ob-tipo" checked><span>Tipo de agendamento</span></label>
+      <label><input type="checkbox" id="t-ob-data" checked><span>Data</span></label>
+      <label><input type="checkbox" id="t-ob-hora" checked><span>Horário</span></label>
+      <label><input type="checkbox" id="t-ob-quando"><span>Data e horário juntos</span></label>
+      </div>
+      <p class="ajuda"><b>No texto da sua página</b>, escreva o marcador onde o dado deve entrar — num componente de texto normal, com a fonte e o tamanho que você quiser. Exemplo: <code>Obrigado, {{nome}}! Seu {{tipo}} está confirmado para {{data}} às {{hora}}.</code></p>
+      <table class="ajuda" style="width:100%;border-collapse:collapse;margin-top:6px">
+      <tr><th style="text-align:left;padding:2px 8px 2px 0">Marcador</th><th style="text-align:left">O que entra ali</th></tr>
+      <tr><td style="padding:2px 8px 2px 0"><code>{{nome}}</code></td><td>o nome de quem agendou</td></tr>
+      <tr><td style="padding:2px 8px 2px 0"><code>{{tipo}}</code></td><td>o nome do tipo de agendamento</td></tr>
+      <tr><td style="padding:2px 8px 2px 0"><code>{{data}}</code></td><td>a data</td></tr>
+      <tr><td style="padding:2px 8px 2px 0"><code>{{hora}}</code></td><td>o horário</td></tr>
+      <tr><td style="padding:2px 8px 2px 0"><code>{{quando}}</code></td><td>data e horário juntos</td></tr>
+      </table>
+      <p class="ajuda"><b>O e-mail ficou de fora de propósito.</b> Ele não é necessário numa página de obrigado, e o endereço com nome e e-mail do cliente entra no histórico do navegador dele, em qualquer estatística do site e no cabeçalho que a página envia a recursos externos. Menos dado pessoal circulando por menos lugares.</p>
+      </div>
+      <div>
+      <label>O que aparece quando o dado não vem <small>(alguém abre a página direto, sem passar pelo agendamento)</small></label>
+      <label for="t-ob-fb-nome" class="ajuda" style="margin-top:6px">no lugar de <code>{{nome}}</code></label>
+      <input type="text" id="t-ob-fb-nome" value="tudo certo">
+      <label for="t-ob-fb-tipo" class="ajuda">no lugar de <code>{{tipo}}</code></label>
+      <input type="text" id="t-ob-fb-tipo" value="seu agendamento">
+      <label for="t-ob-fb-data" class="ajuda">no lugar de <code>{{data}}</code></label>
+      <input type="text" id="t-ob-fb-data" value="a data combinada">
+      <label for="t-ob-fb-hora" class="ajuda">no lugar de <code>{{hora}}</code></label>
+      <input type="text" id="t-ob-fb-hora" value="o horário combinado">
+      <label for="t-ob-fb-quando" class="ajuda">no lugar de <code>{{quando}}</code></label>
+      <input type="text" id="t-ob-fb-quando" value="a data e o horário combinados">
+      <label style="margin-top:10px">Data e horário juntos</label>
+      <div class="radios">
+      <label><input type="radio" name="t-ob-fmt" value="comoveio" checked><span>Como o TidyCal mandar</span></label>
+      <label><input type="radio" name="t-ob-fmt" value="bonito"><span>Reescrever em português</span></label>
+      </div>
+      <p class="ajuda">O TidyCal manda esse campo num formato técnico (<code>2026-12-12T15:00:00-03:00</code>). Com <b>Reescrever</b>, ele vira <b>12/12/2026 às 15:00</b> — <b>mas só se chegar exatamente nesse formato</b>. Qualquer outra coisa é exibida como veio: a página não inventa data.</p>
+      </div>
+    </div>
+  </div>
+  </fieldset>
+
+  <div class="secao"><span class="secao-n">3</span> Biblioteca de presets</div>
   <div class="grade" id="fcp-t-box"></div>
 
-  <div class="secao"><span class="secao-n">3</span> Códigos gerados</div>
+  <div class="secao"><span class="secao-n">4</span> Códigos gerados</div>
   <div class="acoes" style="margin-bottom:14px"><button class="botao" id="t-gerar">Gerar código</button></div>
   <div class="grade">
     <div>
@@ -1298,6 +1353,20 @@
       <span class="aviso-copiado" id="t-cop3">Copiado!</span>
       </h3>
       <textarea id="t-out3" readonly spellcheck="false" style="height:150px"></textarea>
+      </div>
+      <div class="saida" id="t-s4" style="display:none;margin-top:14px">
+      <h3>4. Endereço de redirecionamento <small>(cole no TidyCal)</small>
+      <button class="botao mini" id="t-copy4" style="margin-left:8px">Copiar</button>
+      <span class="aviso-copiado" id="t-cop4">Copiado!</span>
+      </h3>
+      <textarea id="t-out4" readonly spellcheck="false" style="height:90px"></textarea>
+      </div>
+      <div class="saida" id="t-s5" style="display:none;margin-top:14px">
+      <h3>5. Tag Body da página de confirmação
+      <button class="botao mini" id="t-copy5" style="margin-left:8px">Copiar</button>
+      <span class="aviso-copiado" id="t-cop5">Copiado!</span>
+      </h3>
+      <textarea id="t-out5" readonly spellcheck="false" style="height:220px"></textarea>
       </div>
     </div>
   </div>
@@ -9134,10 +9203,161 @@ document.addEventListener('change',function(e){
    TIDYCAL
    ============================================================ */
 /* Salvamento e restauracao desta aba (registradas em ABAS). */
+/* ===== PAGINA DE OBRIGADO DO TIDYCAL =====
+   O TidyCal redireciona quem agenda para uma pagina escolhida e deixa passar dados do
+   agendamento na consulta do endereco. Esta secao gera as duas pontas: o ENDERECO com as
+   variaveis dele (para colar la) e o SCRIPT da Tag Body daquela pagina.
+   POR QUE MARCADORES NO TEXTO, e nao ID Html. O ID Html do Prosite vai na COLUNA, nao no
+   texto (registrado desde a landing de Natal, onde a coluna do iframe leva ID reserva):
+   escrever textContent nela substitui todos os filhos por um no de texto solto, e o <p> do
+   tema some junto da tipografia. Alem disso, um ID por variavel seria um componente por
+   variavel -- impossivel pos o nome no meio de uma frase. Marcando o lugar DENTRO do texto,
+   o tema continua mandando no visual e a troca mexe so em nos de texto.
+   O E-MAIL FICOU DE FORA por decisao: nao e necessario numa pagina de obrigado, e a URL com
+   nome e e-mail entra no historico do navegador do cliente, nas estatisticas do site e no
+   cabecalho enviado a recursos externos. */
+var T_OB_VARS=[
+  {id:'nome',  tidy:'contact.name',      rot:'nome de quem agendou'},
+  {id:'tipo',  tidy:'booking_type.title',rot:'tipo de agendamento'},
+  {id:'data',  tidy:'booking.date',      rot:'data'},
+  {id:'hora',  tidy:'booking.time',      rot:'horario'},
+  {id:'quando',tidy:'booking.starts_at', rot:'data e horario juntos'}
+];
+/* Sempre na ordem de T_OB_VARS, pelo mesmo motivo dos enfeites da guirlanda: a ordem em que o
+   operador clicou nao pode mudar o endereco gerado. */
+function tObMarcadas(){
+  var r=[],i,el;
+  for(i=0;i<T_OB_VARS.length;i++){
+    el=$('t-ob-'+T_OB_VARS[i].id);
+    if(el&&el.checked)r.push(T_OB_VARS[i].id);
+  }
+  return r;
+}
+function tObMarcar(t){
+  var g=String(t||'').split(','),i,el;
+  for(i=0;i<T_OB_VARS.length;i++){
+    el=$('t-ob-'+T_OB_VARS[i].id);
+    if(el)el.checked=(g.indexOf(T_OB_VARS[i].id)>=0);
+  }
+}
+function tObCfg(){
+  var fb={},i;
+  for(i=0;i<T_OB_VARS.length;i++)fb[T_OB_VARS[i].id]=$('t-ob-fb-'+T_OB_VARS[i].id).value;
+  return {usar:(radio('t-ob-usar')==='sim'), url:$('t-ob-url').value.trim(),
+          vars:tObMarcadas(), fmt:radio('t-ob-fmt'), fb:fb};
+}
+/* O endereco para colar no TidyCal. As variaveis dele ficam CRUAS ({{contact.name}}): quem
+   substitui e o TidyCal, no momento do redirecionamento -- codificar aqui entregaria a chave
+   escrita como %7B%7B e ele nao reconheceria. */
+function tObEndereco(cfg){
+  var q=[],i,v;
+  for(i=0;i<T_OB_VARS.length;i++){
+    v=T_OB_VARS[i];
+    if(cfg.vars.indexOf(v.id)<0)continue;
+    q.push(v.id+'={{'+v.tidy+'}}');
+  }
+  return cfg.url.replace(/[?#].*$/,'')+'?'+q.join('&');
+}
+/* O bloco da Tag Body. Ele NAO desenha nada: so troca marcador por valor dentro do texto que
+   ja existe na pagina. */
+function tObBloco(cfg){
+  var j='',i,v;
+  j+='<!-- ============================================================\n';
+  j+='     FOTO CERTA - PAGINA DE OBRIGADO DO AGENDAMENTO\n';
+  j+='     ONDE COLAR: campo Tag Body DESTA pagina (nao no head do site)\n';
+  j+='     Escreva os marcadores no texto normal da pagina; este script os troca\n';
+  j+='     pelos dados que o TidyCal manda no endereco.\n';
+  j+='     Gerado pela ferramenta em prosite.fotocerta.com.br\n';
+  j+='     ============================================================ -->\n\n';
+  j+='<scr'+'ipt>\n(function () {\n';
+  j+='  /* ===== CONFIGURACAO ===== */\n';
+  j+='  /* marcador no texto -> parametro do endereco -> o que mostrar quando ele nao vier */\n';
+  j+='  var CAMPOS = [\n';
+  /* Sem virgula depois do ultimo item, e a virgula ANTES do comentario: quem abre o codigo
+     colado le uma lista normal, sem sobra e sem virgula pendurada no fim da frase. */
+  var itens=[];
+  for(i=0;i<T_OB_VARS.length;i++){
+    v=T_OB_VARS[i];
+    if(cfg.vars.indexOf(v.id)<0)continue;
+    itens.push({txt:"{marca:'"+v.id+"', reserva:'"+escJs(cfg.fb[v.id])+"'}", rot:v.rot});
+  }
+  for(i=0;i<itens.length;i++){
+    var corpo='    '+itens[i].txt+(i<itens.length-1?',':'');
+    do{corpo+=' ';}while(corpo.length<48);
+    j+=corpo+'/* '+itens[i].rot+' */\n';
+  }
+  j+='  ];\n';
+  j+='  var DATA_LEGIVEL = '+(cfg.fmt==='bonito')+';   /* reescreve {{quando}} em portugues, SE ele vier no formato tecnico */\n';
+  j+='\n  /* ============================================================\n     Daqui para baixo nao precisa mexer\n     ============================================================ */\n\n';
+  j+=tObInd(FC_PARAM_SRC);
+  j+='  /* O TidyCal manda data e hora juntas no formato tecnico (2026-12-12T15:00:00-03:00).\n';
+  j+='     A reescrita so acontece se o valor casar EXATAMENTE com ele; qualquer outra coisa\n';
+  j+='     sai como veio. A pagina nao inventa data. */\n';
+  j+='  function legivel(v){\n';
+  j+='    if(!DATA_LEGIVEL)return v;\n';
+  j+="    var m=/^(\\d{4})-(\\d{2})-(\\d{2})[T ](\\d{2}):(\\d{2})/.exec(v);\n";
+  j+='    if(!m)return v;\n';
+  /* Texto que o CLIENTE le leva acento, como os textos fixos do bloco da /pagar. O Manual
+     proibe acento em codigo, nao em conteudo visivel. */
+  j+="    return m[3]+'/'+m[2]+'/'+m[1]+' \u00e0s '+m[4]+':'+m[5];\n";
+  j+='  }\n';
+  j+='  function valor(c){\n';
+  j+="    var v=param(c.marca);\n";
+  j+="    if(c.marca==='quando')v=legivel(v);\n";
+  j+='    return v||c.reserva;\n';
+  j+='  }\n';
+  j+='  /* Nos de texto DENTRO destes nao sao conteudo: um marcador ali e codigo, ou o valor\n';
+  j+='     digitado num campo de formulario. */\n';
+  j+="  var PULAR={SCRIPT:1,STYLE:1,TEXTAREA:1,INPUT:1,SELECT:1,NOSCRIPT:1};\n";
+  j+='  /* A troca mexe SO no texto: nunca innerHTML. O que chega vem do endereco, que qualquer\n';
+  j+='     pessoa edita -- escrito como marcacao, um nome poderia virar script nesta pagina. */\n';
+  j+='  function trocar(raiz){\n';
+  j+='    if(!raiz)return;\n';
+  j+='    var and=document.createTreeWalker(raiz,NodeFilter.SHOW_TEXT,null,false),n,t,i,c,novo;\n';
+  j+='    var lista=[];\n';
+  j+='    while((n=and.nextNode()))lista.push(n);\n';
+  j+='    for(i=0;i<lista.length;i++){\n';
+  j+='      n=lista[i];\n';
+  j+='      if(!n.parentNode||PULAR[n.parentNode.nodeName])continue;\n';
+  j+='      t=n.nodeValue;\n';
+  j+="      if(t.indexOf('{{')<0)continue;\n";
+  j+='      novo=t;\n';
+  j+='      for(c=0;c<CAMPOS.length;c++)\n';
+  j+="        novo=novo.split('{{'+CAMPOS[c].marca+'}}').join(valor(CAMPOS[c]));\n";
+  j+='      if(novo!==t)n.nodeValue=novo;\n';
+  j+='    }\n';
+  j+='  }\n';
+  j+='  /* O tema pode montar componentes DEPOIS que a Tag Body roda. A troca passa uma vez ao\n';
+  j+='     carregar e reobserva por um instante curto -- sem isso, um componente que chegasse\n';
+  j+='     tarde ficaria com o marcador cru na tela. O observador se desliga sozinho: ele existe\n';
+  j+='     para a montagem inicial, nao para vigiar a pagina inteira para sempre. */\n';
+  j+='  function comecar(){\n';
+  j+='    trocar(document.body);\n';
+  j+="    if(!window.MutationObserver)return;\n";
+  j+='    var ob=new MutationObserver(function(muts){\n';
+  j+='      var k;\n';
+  j+='      for(k=0;k<muts.length;k++)if(muts[k].addedNodes.length){trocar(document.body);return;}\n';
+  j+='    });\n';
+  j+='    ob.observe(document.body,{childList:true,subtree:true});\n';
+  j+='    setTimeout(function(){ob.disconnect();},'+T_OB_JANELA+');\n';
+  j+='  }\n';
+  j+="  if(document.body)comecar();\n";
+  j+="  else document.addEventListener('DOMContentLoaded',comecar);\n";
+  j+='})();\n</scr'+'ipt>';
+  return j;
+}
+/* Quanto tempo o observador fica de pe depois da carga. Cinco segundos cobre montagem tardia
+   de tema e nao deixa um observador vivo na pagina do cliente. */
+var T_OB_JANELA=5000;
+function tObInd(t){return String(t).replace(/^(?!$)/gm,'  ');}
+
 function tColeta(){
   return {
     t:{path:$('t-path').value,desk:$('t-desk').value,mob:$('t-mob').value,larg:$('t-larg').value,
-      arq:radio('t-arq'),url:$('t-url').value,alt0:$('t-alt0').value,preset:radio('t-preset')}
+      arq:radio('t-arq'),url:$('t-url').value,alt0:$('t-alt0').value,preset:radio('t-preset'),
+      obusar:radio('t-ob-usar'),oburl:$('t-ob-url').value,obfmt:radio('t-ob-fmt'),
+      obvars:tObMarcadas().join(','),
+      obfb:T_OB_VARS.map(function(v){return $('t-ob-fb-'+v.id).value;}).join('\u0001')}
   };
 }
 function tRestaura(st){
@@ -9149,6 +9369,18 @@ function tRestaura(st){
      deixar o radio no padrao do HTML (que diria "formulario padrao" sobre alturas que podem
      ser outras), a marca e deduzida das alturas restauradas. */
   setRadio('t-preset',st.t.preset||tPresetInferir());
+  /* Estado gravado antes desta versao nao traz nenhum campo da pagina de obrigado. O ausente
+     vale o padrao de fabrica -- e o padrao de 'obusar' e NAO, para quem nunca usou o recurso
+     continuar vendo a aba exatamente como ela era. */
+  setRadio('t-ob-usar',st.t.obusar==='sim'?'sim':'nao');
+  $('t-ob-url').value=(typeof st.t.oburl==='string')?st.t.oburl:'';
+  setRadio('t-ob-fmt',st.t.obfmt==='bonito'?'bonito':'comoveio');
+  tObMarcar(typeof st.t.obvars==='string'?st.t.obvars:'nome,tipo,data,hora');
+  if(typeof st.t.obfb==='string'&&st.t.obfb){
+    var fb=st.t.obfb.split('\u0001'),ifb;
+    for(ifb=0;ifb<T_OB_VARS.length;ifb++)
+      if(fb[ifb]!==undefined)$('t-ob-fb-'+T_OB_VARS[ifb].id).value=fb[ifb];
+  }
 }
 
 /* ===== O que esta aba poe na biblioteca de presets (ver o bloco compartilhado) =====
@@ -9157,7 +9389,9 @@ function tRestaura(st){
    salvas pelo operador. */
 function tPresetResumo(v){
   var T=v.t||{};
-  return (T.arq==='embutida'?'embutido na intermediaria':'direto na pagina')+' — '+T.desk+'/'+T.mob+' px, corte '+T.larg+' px';
+  var t=(T.arq==='embutida'?'embutido na intermediaria':'direto na pagina')+' — '+T.desk+'/'+T.mob+' px, corte '+T.larg+' px';
+  if(T.obusar==='sim')t+=' + pagina de obrigado';
+  return t;
 }
 function tPresetAntes(){
   if(fcAjustarTodos(T_NUMS))salvarEstado();
@@ -9285,16 +9519,45 @@ function tArqToggle(){
   $('t-emb').style.display=emb?'block':'none';
   $('t-s2').style.display=(emb&&$('t-out2').value)?'block':'none';
   $('t-s3').style.display=(emb&&$('t-out3').value)?'block':'none';
+  /* A pagina de obrigado nasce desligada: quem nao a usa nao ve secao nem saida nova. */
+  var ob=(radio('t-ob-usar')==='sim');
+  $('t-ob-campos').style.display=ob?'block':'none';
+  $('t-s4').style.display=(ob&&$('t-out4').value)?'block':'none';
+  $('t-s5').style.display=(ob&&$('t-out5').value)?'block':'none';
 }
 document.addEventListener('change',function(e){
-  if(e.target.name==='t-arq')tArqToggle();
+  if(e.target.name==='t-arq'||e.target.name==='t-ob-usar')tArqToggle();
 });
 
 function tGerar(){
+  /* ===== A PAGINA DE OBRIGADO VEM PRIMEIRO, e a razao e um acoplamento que nao existe =====
+     Ela e independente do calendario: o dono pode ja ter o widget publicado e querer so a
+     pagina de confirmacao. Gerada DEPOIS das recusas do widget, ela nao saia enquanto o
+     caminho do booking type estivesse vazio -- um campo que nada tem a ver com ela. Agora
+     cada parte recusa pelo proprio motivo, e a recusa do caminho diz o que ja foi gerado. */
+  var ob=tObCfg(),obFeita=false;
+  if(ob.usar){
+    if(!ob.vars.length){
+      alert('Escolha pelo menos um dado para a pagina de obrigado receber (nome, tipo, data, horario). Sem nenhum, nao ha o que preencher na pagina -- ou desligue a pagina de obrigado na secao 2.');
+      $('t-out4').value='';$('t-out5').value='';tArqToggle();return;
+    }
+    if(!/^https?:\/\//i.test(urlLimpa(ob.url))){
+      alert('Informe o endereco COMPLETO da pagina de confirmacao, com https:// e o dominio (https://www.fotocerta.com.br/natal-agendamento-confirmado). O TidyCal redireciona para fora do editor, entao um caminho comecando com barra nao resolve para lugar nenhum.');
+      $('t-out4').value='';$('t-out5').value='';tArqToggle();return;
+    }
+    $('t-out4').value=tObEndereco(ob);
+    $('t-out5').value=tObBloco(ob);
+    obFeita=true;
+  }else{
+    $('t-out4').value='';$('t-out5').value='';
+  }
   /* mesma normalizacao que o botao de teste usa: uma implementacao so, senao o endereco
      conferido no botao e o endereco embutido no codigo poderiam divergir. */
   var path=tPathNorm();
-  if(!path){alert('Informe o caminho do booking type.');return;}
+  if(!path){
+    alert('Informe o caminho do booking type.'+(obFeita?' Os codigos 4 e 5, da pagina de obrigado, foram gerados normalmente -- eles nao dependem dele.':''));
+    tArqToggle();return;
+  }
   var emb=radio('t-arq')==='embutida';
   var u=$('t-url').value.trim();
   /* Validacao ANTES de montar qualquer coisa: recusar no fim deixaria as textareas com o
@@ -10708,6 +10971,29 @@ function bRestaura(st){
    A lista alimenta fcPreso/fcAjustar (bloco compartilhado), que servem aos DOIS lados -- o que
    sai no codigo e o que fica na tela --, entao nao ha como a saida ser presa numa faixa e o
    campo em outra. */
+/* ===== O LEITOR DA CONSULTA DO ENDERECO: fonte unica =====
+   Dois blocos entregues leem parametros da URL -- a pagina de cobranca (que recebe a cobranca
+   inteira pelo endereco) e a pagina de obrigado do TidyCal (que recebe os dados do
+   agendamento). Escrito duas vezes, o detalhe que divergiria primeiro e o mais silencioso:
+   o '+' que precisa virar espaco. Sem ele, "Ana Paula" chega como "Ana+Paula" -- e ninguem
+   olha um leitor de query esperando defeito.
+   Como sempre neste projeto, o que se unifica e a FONTE QUE ESCREVE: cada bloco entregue
+   continua levando a propria copia dentro dele e nao depende da ferramenta para nada. */
+var FC_PARAM_SRC=
+"/* le um parametro do endereco, em ES5 -- sem URLSearchParams */\n"+
+"function param(nome){\n"+
+"  var q=String(location.search||''),ps,i,ig;\n"+
+"  if(q.charAt(0)==='?')q=q.substring(1);\n"+
+"  ps=q.split('&');\n"+
+"  for(i=0;i<ps.length;i++){\n"+
+"    ig=ps[i].indexOf('=');\n"+
+"    if(ig<0)continue;\n"+
+"    if(ps[i].substring(0,ig)!==nome)continue;\n"+
+"    try{return decodeURIComponent(ps[i].substring(ig+1).replace(/\\+/g,' '));}catch(e){return '';}\n"+
+"  }\n"+
+"  return '';\n"+
+"}\n";
+
 /* ===== GUIRLANDA DE NATAL: os motivos, o ladrilho e o data URI =====
    O codigo 2 desta aba sao PROPRIEDADES SOLTAS, aplicadas no elemento raiz do componente:
    sem seletor, entao sem ::before, sem ::after e sem elementos filhos. A unica porta para
@@ -12746,19 +13032,7 @@ function pJs(cfg){
   j+='  var DESCONTO_PIX=0;    /* o percentual de desconto no Pix, lido do parametro x */\n';
   j+='  function total(){return TOTAL_COBRADO;}\n';
   j+=pInd(fcTotalPixSrc(1,true,false));
-  j+='  /* le um parametro do endereco, em ES5 -- sem URLSearchParams */\n';
-  j+='  function param(nome){\n';
-  j+="    var q=String(location.search||''),ps,i,ig;\n";
-  j+="    if(q.charAt(0)==='?')q=q.substring(1);\n";
-  j+="    ps=q.split('&');\n";
-  j+='    for(i=0;i<ps.length;i++){\n';
-  j+="      ig=ps[i].indexOf('=');\n";
-  j+='      if(ig<0)continue;\n';
-  j+="      if(ps[i].substring(0,ig)!==nome)continue;\n";
-  j+="      try{return decodeURIComponent(ps[i].substring(ig+1).replace(/\\+/g,' '));}catch(e){return '';}\n";
-  j+='    }\n';
-  j+="    return '';\n";
-  j+='  }\n';
+  j+=pInd(FC_PARAM_SRC);
   j+='  /* texto sempre por no de texto, nunca por innerHTML: a descricao vem do ENDERECO, que e\n';
   j+='     entrada de fora, e nenhuma marcacao dela pode virar marcacao desta pagina */\n';
   j+='  function texto(el,t){while(el.firstChild)el.removeChild(el.firstChild);el.appendChild(document.createTextNode(t));return el;}\n';
@@ -15771,6 +16045,8 @@ prep('Agendamento TidyCal','tidy',function(){
   liga('t-copy1',function(){copiar('t-out1','t-cop1');});
   liga('t-copy2',function(){copiar('t-out2','t-cop2');});
   liga('t-copy3',function(){copiar('t-out3','t-cop3');});
+  liga('t-copy4',function(){copiar('t-out4','t-cop4');});
+  liga('t-copy5',function(){copiar('t-out5','t-cop5');});
   /* Os listeners ficam nos PROPRIOS elementos, e nao em document: os de elemento correm antes
      dos de document (fase de bolha, alvo primeiro), entao o salvarEstado global ja grava as
      alturas escritas pelo preset e a marca ja recalculada. Em document eles correriam depois
