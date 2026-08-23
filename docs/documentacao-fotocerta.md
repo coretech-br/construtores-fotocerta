@@ -971,7 +971,15 @@ Spec: `docs/specs/2026-08-23-pagina-de-obrigado-tidycal-design.md`. Plano: `docs
 
 **Um segundo defeito apareceu no caminho.** O campo `nota` de `fccItem` existia, era preenchido, e a **lista de saídas por componente simplesmente o ignorava** — ele só era exibido nos campos fundidos. Ou seja: a explicação de para onde a saída vai, e para onde ela **não** vai, ficava invisível justamente na lista das saídas que vão para outro lugar. Corrigido; e o `destino` passou a ser texto puro, porque ele é escapado (um `<i>` ali saía literal na tela).
 
-**Verificação.** Varredura das **8 combinações** (TidyCal direto/embutido × Contagem fixa/fluxo × página hospedeira/embutida), com as oito abas ligadas no preset geral e todas com conteúdo: **nenhuma saída órfã**, e toda saída gerada com destino — caixa própria ou dentro do campo fundido, conferido pelo texto. Preset de aba e estado gravado devolvem os cinco campos novos; recarregar traz tudo de volta. Regressão dos oito geradores OK.
+**A página de obrigado virou um tipo de página do preset geral (23/08/2026, correção do dono).** A primeira entrega mandava a saída 5 para a lista "é de outra página", com caixa própria. Estava errado: **a página de obrigado é uma página que o dono constrói e customiza**, e o código dela tem de entrar **consolidado** na Tag Body dela, junto das demais customizações daquela página — que é para isso que o painel existe.
+
+O que impedia isso era o preset geral conhecer só **Hospedeira** e **Embutida**: sem um terceiro tipo, o painel não teria como saber que a Tag Body que está montando é a da página de obrigado, e mandar a saída 5 para "a hospedeira selecionada" arriscaria colá-la na landing do calendário. `FCG_PAGINAS` ganhou **`Página de obrigado`**, e com ele a aba TidyCal passou a servir **três** páginas: o calendário (hospedeira, ou hospedeira + embutida no modo iframe), e a de obrigado.
+
+Duas coisas vieram junto, pela lição de sempre sobre lista fechada: a validação de preset deixou de ter a dupla cravada (`pagina!=='hospedeira'&&pagina!=='embutida'`) e passou a derivar de `FCG_PAGINAS`; e a linha de identificação, que vai **dentro** do código colado e não pode ter acento, ganhou uma **terceira coluna ASCII** na lista (`PAGINA DE OBRIGADO`), em vez de um ternário de duas opções.
+
+Nas outras páginas a saída 5 continua aparecendo como de outra página, agora dizendo **como** consolidá-la: *"selecione o preset geral dessa página — o tipo Página de obrigado"*.
+
+**Verificação.** Seis combinações medidas em **carga limpa** (três tipos de página × dois modos do TidyCal): na página de obrigado a saída 5 entra na **Tag Body consolidada** e convive ali com a barra de contagem, com a identificação dizendo `PAGINA DE OBRIGADO`; na hospedeira e na embutida ela **não** entra, e aparece nomeada na lista de outra página. Nenhuma saída órfã em nenhuma. Varredura das **8 combinações** (TidyCal direto/embutido × Contagem fixa/fluxo × página hospedeira/embutida), com as oito abas ligadas no preset geral e todas com conteúdo: **nenhuma saída órfã**, e toda saída gerada com destino — caixa própria ou dentro do campo fundido, conferido pelo texto. Preset de aba e estado gravado devolvem os cinco campos novos; recarregar traz tudo de volta. Regressão dos oito geradores OK.
 
 ## 5. Decisões de arquitetura registradas
 

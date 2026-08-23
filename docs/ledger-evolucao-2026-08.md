@@ -550,3 +550,22 @@ Não foi rodada planejada: o dono encontrou a Tag Body da página de obrigado fa
 **O defeito que só apareceu porque fui olhar o texto renderizado.** O campo `nota` de `fccItem` existia, era preenchido e a lista de saídas por componente o **ignorava** — a explicação de destino ficava invisível justamente onde ela mais importa. Nenhuma asserção sobre "a saída está no painel" pegaria isso; pegou ler a tela. E junto veio o `<i>` saindo literal, porque `destino` é escapado.
 
 **A varredura de combinações é o formato certo para "algo mais ficou esquecido?".** Oito combinações (TidyCal × Contagem × página) com as oito abas ligadas respondem a pergunta por medida, e não por leitura de código.
+
+
+---
+
+## Décima sétima rodada — a página de obrigado virou um tipo de página (23/08/2026)
+
+Correção do dono sobre a rodada anterior: a Tag Body da página de obrigado estava sendo listada como "de outra página", com caixa própria, quando deveria entrar **consolidada** na Tag Body daquela página.
+
+### O que a rodada ensinou sobre método
+
+**A ambiguidade valia uma pergunta.** "Ela é considerada hospedeira" podia significar *é do tipo hospedeira* ou *é aquela hospedeira específica*, e as duas levam a ferramentas diferentes — uma delas colando um script na página errada. Perguntar custou dez segundos; adivinhar custaria uma rodada.
+
+**Lista fechada de dois é onde o terceiro quebra.** A validação de preset tinha `pagina!=='hospedeira'&&pagina!=='embutida'` cravado, e a linha de identificação era um ternário. Os dois passaram a derivar de `FCG_PAGINAS` — a mesma lição de `trocarAba` e das abas, agora nas páginas.
+
+**A identificação vai dentro do código colado, então não pode ter acento.** "Página de obrigado" precisou de uma terceira coluna ASCII na lista. É o item 10 do Manual do Prosite alcançando um lugar onde ninguém procuraria.
+
+**Quatro iterações perdidas num arnês que mentia.** Ele preenchia a referência antes de gerar; trocava o modo antes de trocar o preset (e o preset sobrescreve os campos); e, o pior, trocava o preset com `sel.value=...` mais um evento sintético, o que **falhava depois de gerar**. Cheguei a suspeitar de defeito no produto. Com `selectOption` — a seleção de verdade — funciona sempre. **Controle que a ferramenta redesenha exige interação real, não atribuição de valor.** E quando a medida acusa falhas só em algumas combinações, desconfiar da medida.
+
+**A saída boa dessa perda:** as medidas passaram a ser feitas em **carga limpa**, uma combinação por página aberta. Mais lento e sem estado arrastado entre casos.

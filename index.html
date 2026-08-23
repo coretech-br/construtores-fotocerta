@@ -646,6 +646,7 @@
           <div class="radios">
             <label><input type="radio" name="fcg-pagina" value="hospedeira" checked><span>Hospedeira</span></label>
             <label><input type="radio" name="fcg-pagina" value="embutida"><span>Embutida</span></label>
+            <label><input type="radio" name="fcg-pagina" value="obrigado"><span>Página de obrigado</span></label>
           </div>
           <div class="acoes">
             <button class="botao" type="button" id="fcg-criar">Salvar como preset geral</button>
@@ -4803,7 +4804,15 @@ var FCG={
   pronto:false       /* so depois de fcgIniciar; antes disso nada aqui pode gravar nem desenhar */
 };
 var FCG_CHAVE='fcConstrutoresGerais';
-var FCG_PAGINAS=[['hospedeira','Hospedeira'],['embutida','Embutida']];
+/* [valor, rotulo na tela, marca ASCII para a linha de identificacao]. A terceira coluna
+   existe porque a linha de identificacao vai DENTRO do codigo colado, e o Manual do Prosite
+   proibe acento em codigo -- "Pagina de obrigado" nao pode virar "Página de obrigado" la.
+   A PAGINA DE OBRIGADO entrou em 23/08/2026: ela e uma pagina que o dono constroi e
+   customiza, como a hospedeira, mas NAO e a hospedeira -- e o painel precisa saber qual e
+   qual para nao mandar a Tag Body de uma para o campo da outra. */
+var FCG_PAGINAS=[['hospedeira','Hospedeira','HOSPEDEIRA'],
+                 ['embutida','Embutida','EMBUTIDA'],
+                 ['obrigado','Página de obrigado','PAGINA DE OBRIGADO']];
 var FCG_CAMPANHA_MAX=60;
 var fcgTimer=null;       /* timer UNICO do redesenho adiado; cancelado antes de reagendar */
 var fcgCacheInt={};      /* ultimo HTML de cada bloco de aviso, para nao redesenhar a toa */
@@ -4815,6 +4824,7 @@ function fcgTexto(el,txt){while(el.firstChild)el.removeChild(el.firstChild);el.a
 var fcgAvisouFora=false;
 var fcgAvisouDup=false;
 function fcgPaginaRotulo(v){var i;for(i=0;i<FCG_PAGINAS.length;i++){if(FCG_PAGINAS[i][0]===v)return FCG_PAGINAS[i][1];}return '';}
+function fcgPaginaMarca(v){var i;for(i=0;i<FCG_PAGINAS.length;i++){if(FCG_PAGINAS[i][0]===v)return FCG_PAGINAS[i][2];}return 'DESCONHECIDA';}
 function fcgNome(p){return p?(p.campanha+' \u00B7 '+fcgPaginaRotulo(p.pagina)):'';}
 function fcgChaveCampanha(s){return String(s==null?'':s).trim().toLowerCase();}
 function fcgAtivo(){return FCG.ativo?fcgAchar(FCG.ativo):null;}
@@ -4915,7 +4925,9 @@ function fcgLerPreset(x){
   var p,i,a,ab,vals;
   if(!fcEhObjeto(x))return null;
   if(typeof x.campanha!=='string'||!x.campanha.trim())return null;
-  if(x.pagina!=='hospedeira'&&x.pagina!=='embutida')return null;
+  /* Derivado de FCG_PAGINAS, e nao uma dupla cravada: lista fechada de N e onde a opcao
+     N+1 quebra em silencio -- foi assim com trocarAba e as abas. */
+  if(!fcgPaginaRotulo(x.pagina))return null;
   p={id:(typeof x.id==='string'&&x.id)?x.id:fcgNovoId(),
      campanha:x.campanha.trim(),pagina:x.pagina,abas:{},
      codigos:{head:'',body:''},
@@ -15683,7 +15695,7 @@ function fccSeguro(s){
 }
 function fccIdent(p,qual){
   return '<!-- '+FCC_MARCA+' -- '+fccSeguro(p.campanha)+' -- pagina '+
-    (p.pagina==='hospedeira'?'HOSPEDEIRA':'EMBUTIDA')+' -- '+
+    fcgPaginaMarca(p.pagina)+' -- '+
     (qual==='head'?'Tag Head':'Tag Body')+' -->';
 }
 function fccFim(s){return String(s==null?'':s).replace(/\s+$/,'');}
@@ -15734,7 +15746,22 @@ function fccDaAba(a,p,plano,vals){
     plano.comps.push(fccItem(a,'m-out','Mini loja','Componente HTML desta página'));
   }else if(a.id==='tidy'){
     emb=(((v.t&&v.t.arq)||radio('t-arq'))==='embutida');
-    if(!emb){
+    /* ===== A ABA TIDYCAL SERVE ATE TRES PAGINAS =====
+       O calendario mora na hospedeira (modo direto) ou se divide entre hospedeira e embutida
+       (modo iframe); a pagina de obrigado e uma TERCEIRA, e ela e o destino do redirecionamento
+       depois do agendamento. O destino de cada saida depende de qual pagina o preset geral
+       selecionou -- e e por isso que 'Pagina de obrigado' precisou virar um tipo de pagina:
+       sem ele o painel nao teria como saber que a Tag Body que ele esta montando e a DELA. */
+    if(p.pagina==='obrigado'){
+      /* Nesta pagina, as saidas do calendario sao de outra pagina -- todas. */
+      if(!emb){
+        plano.outra.push(fccItem(a,'t-out1','TidyCal — saída 1','Componente HTML da página do calendário'));
+      }else{
+        plano.outra.push(fccItem(a,'t-out1','TidyCal — saída 1','Componente HTML da página Embutida'));
+        plano.outra.push(fccItem(a,'t-out2','TidyCal — saída 2','Tag Body da página Embutida'));
+        plano.outra.push(fccItem(a,'t-out3','TidyCal — saída 3','Componente HTML da página Hospedeira'));
+      }
+    }else if(!emb){
       plano.comps.push(fccItem(a,'t-out1','Agendamento TidyCal','Componente HTML desta página'));
     }else if(p.pagina==='embutida'){
       plano.comps.push(fccItem(a,'t-out1','TidyCal — saída 1','Componente HTML desta página'));
@@ -15754,12 +15781,23 @@ function fccDaAba(a,p,plano,vals){
        publicada e nunca visitada -- que e o tipo de esquecimento que este painel existe para
        impedir. */
     if((((v.t&&v.t.obusar)||radio('t-ob-usar'))==='sim')){
+      /* O endereco nao e campo do Prosite: vai na configuracao do proprio TidyCal. Ele entra
+         na lista de qualquer pagina, porque esquecer de cola-LO deixa a pagina de obrigado
+         publicada e nunca visitada. */
       plano.outra.push(fccItem(a,'t-out4','TidyCal — saída 4: o endereço de redirecionamento',
         'Configuração do TidyCal — campo “Redirect to custom page after booking”',
         'Não é campo do Prosite: vai no próprio TidyCal, no tipo de agendamento.'));
-      plano.outra.push(fccItem(a,'t-out5','TidyCal — saída 5: a página de obrigado',
-        'Tag Body da página de confirmação',
-        'É a página para onde o TidyCal redireciona depois do agendamento — <b>não</b> é esta página nem a intermediária.'));
+      /* A Tag Body da pagina de obrigado entra CONSOLIDADA quando o preset selecionado e o
+         dela -- junto das demais customizacoes daquela pagina, que e o que o painel existe
+         para fazer. Nas outras paginas ela aparece como "e de outra pagina", nomeando-a: a
+         mesma disciplina que impede a Tag Body da intermediaria de cair na da hospedeira. */
+      if(p.pagina==='obrigado'){
+        plano.body.push(fccItem(a,'t-out5','TidyCal — saída 5: a página de obrigado','Tag Body'));
+      }else{
+        plano.outra.push(fccItem(a,'t-out5','TidyCal — saída 5: a página de obrigado',
+          'Tag Body da página de obrigado',
+          'É a página para onde o TidyCal redireciona depois do agendamento. Para consolidá-la, selecione o preset geral dessa página — o tipo <b>Página de obrigado</b>.'));
+      }
     }
   }
 }
