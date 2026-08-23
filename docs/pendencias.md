@@ -16,6 +16,8 @@ Entregue também em 22/08/2026: a **guirlanda de Natal**, sexto efeito da aba Bo
 
 Entregue em 23/08/2026: a **página de obrigado do TidyCal** (`docs/specs/2026-08-23-pagina-de-obrigado-tidycal-design.md`) — marcadores no texto da página de confirmação, preenchidos com os dados do agendamento.
 
+Entregue em 23/08/2026: a **consolidação da página de obrigado no painel**, mais a **regra** de que todo construtor que toca Tag Head, Tag Body ou o CSS de um componente customizado precisa consolidar — e a **rede** que denuncia a saída esquecida.
+
 A próxima sai do que o dono encontrar no uso.
 
 ---

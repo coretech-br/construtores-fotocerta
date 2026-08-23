@@ -531,3 +531,22 @@ Estimada em **2h – 3h30**. Spec: `docs/specs/2026-08-23-pagina-de-obrigado-tid
 **Medir o DOM inteiro inclui o código que age sobre ele.** A checagem "sobrou marcador na tela?" lia o `textContent` do `body` e dava falso negativo sempre: o texto-fonte do próprio script contém `{{`, porque ele precisa dessa string para procurar. Corrigido clonando o body e removendo os `script` do clone antes de ler.
 
 **Uma expectativa do arnês estava mais estrita que a spec** — ele esperava o mês por extenso ("dezembro") onde a spec e a interface prometem `12/12/2026 às 15:00`. A asserção foi corrigida para conferir o **prometido**, e não a suposição. Mas ela rendeu: expôs um `as` sem acento num texto que o cliente lê.
+
+
+---
+
+## Décima sexta rodada — o painel consolidado, a regra e a rede (23/08/2026)
+
+Não foi rodada planejada: o dono encontrou a Tag Body da página de obrigado faltando no painel.
+
+### O que a rodada ensinou sobre método
+
+**O mapa escrito à mão foi o defeito, não a distração de quem o escreveu.** `fccDaAba` lista à mão para onde vai cada saída, e acrescentar um construtor sem atualizá-lo não gera erro nenhum. Consertar só a linha faltante deixaria a mesma armadilha armada para o próximo. A correção real foi a **rede**: o painel compara as saídas com conteúdo contra o plano e denuncia a que sobrar.
+
+**Provar que a rede reprova — de novo por mutação.** Tirando o `t-out5` do mapa, o painel acusou a órfã nos dois modos do TidyCal. Sem esse passo, teria sido uma rede não testada, que é o mesmo que nenhuma.
+
+**Duas asserções erradas do meu próprio arnês custaram duas rodadas de execução** — eu supus que toda saída ganha caixa própria no painel, quando as de Tag Head/Body entram **fundidas** num campo único, e depois errei o id desse campo. As duas vezes o produto estava certo e a medida errada. **Quando a medida acusa oito falhas idênticas em combinações diferentes, desconfiar da medida antes do produto.**
+
+**O defeito que só apareceu porque fui olhar o texto renderizado.** O campo `nota` de `fccItem` existia, era preenchido e a lista de saídas por componente o **ignorava** — a explicação de destino ficava invisível justamente onde ela mais importa. Nenhuma asserção sobre "a saída está no painel" pegaria isso; pegou ler a tela. E junto veio o `<i>` saindo literal, porque `destino` é escapado.
+
+**A varredura de combinações é o formato certo para "algo mais ficou esquecido?".** Oito combinações (TidyCal × Contagem × página) com as oito abas ligadas respondem a pergunta por medida, e não por leitura de código.

@@ -513,6 +513,7 @@
   .fcc-perigo{font-size:11.5px;line-height:1.5;padding:8px 10px;border-radius:8px;
     border:1px solid #E7B9B4;background:#FBEAE8;color:#5E1310;margin:8px 0 0}
   .fcc-perigo b{color:#8C1D18}
+  .fcc-nota{font-size:12px;line-height:1.55;color:var(--tinta-suave);margin:4px 0 0}
   .fcc-falta{font-size:12px;line-height:1.55;padding:9px 11px;border-radius:8px;
     border:1px solid #E3B23C;background:#FFF6DF;color:#6B5210;margin:8px 0 0}
   .fcc-falta b{color:#6B5210}
@@ -15744,6 +15745,22 @@ function fccDaAba(a,p,plano,vals){
       plano.outra.push(fccItem(a,'t-out1','TidyCal — saída 1','Componente HTML da página Embutida'));
       plano.outra.push(fccItem(a,'t-out2','TidyCal — saída 2','Tag Body da página Embutida'));
     }
+    /* A PAGINA DE OBRIGADO E UMA TERCEIRA PAGINA. Ela nao e a hospedeira nem a embutida: e o
+       destino do redirecionamento depois do agendamento. Por isso as duas saidas dela nunca
+       entram nos campos DESTA pagina -- juntar a Tag Body dela na Tag Body da hospedeira e
+       exatamente o erro que a linha de identificacao existe para denunciar depois.
+       O endereco (saida 4) nao e campo do Prosite: vai na configuracao do proprio TidyCal.
+       Ele entra na lista mesmo assim, porque esquecer de colar ELE deixa a pagina de obrigado
+       publicada e nunca visitada -- que e o tipo de esquecimento que este painel existe para
+       impedir. */
+    if((((v.t&&v.t.obusar)||radio('t-ob-usar'))==='sim')){
+      plano.outra.push(fccItem(a,'t-out4','TidyCal — saída 4: o endereço de redirecionamento',
+        'Configuração do TidyCal — campo “Redirect to custom page after booking”',
+        'Não é campo do Prosite: vai no próprio TidyCal, no tipo de agendamento.'));
+      plano.outra.push(fccItem(a,'t-out5','TidyCal — saída 5: a página de obrigado',
+        'Tag Body da página de confirmação',
+        'É a página para onde o TidyCal redireciona depois do agendamento — <b>não</b> é esta página nem a intermediária.'));
+    }
   }
 }
 /* Esta aba ainda tem ALGUM codigo na tela? Existe por causa da contradicao que o aviso de
@@ -15751,6 +15768,48 @@ function fccDaAba(a,p,plano,vals){
    o painel entao mostrava "o que esta abaixo e o codigo antigo" e, logo abaixo, "Ainda nao
    gerado". Caixa vazia nao tem codigo velho -- tem codigo nenhum, que e o caso mais forte e ja
    e dito no proprio campo. */
+/* ===== A REDE CONTRA O ESQUECIMENTO =====
+   Em 23/08/2026 a Tag Body da pagina de obrigado foi gerada por uma aba e NAO entrou no
+   painel: o mapa acima e escrito a mao, e quem acrescenta uma saida pode esquecer de
+   mapea-la. O esquecimento e silencioso -- a saida existe na aba, o painel monta sem ela, e
+   o operador so descobre pela pagina publicada sem o codigo.
+   A guarda inverte isso: toda caixa de saida que TEM CONTEUDO precisa aparecer no plano ou
+   estar declarada aqui como "nao vai para campo do Prosite". Caixa vazia nao conta -- ela nao
+   e esquecimento, e saida que aquela configuracao nao usa.
+   Ela nao conserta o mapa; ela faz o buraco APARECER, que e o que faltava. */
+var FCC_FORA={
+  'p-out2':'o link de cada cobranca vai para o CLIENTE e muda a cada uma: nao e campo do Prosite nem passo de montagem desta pagina'
+};
+function fccAbaDoOut(id){
+  var pref=id.split('-')[0],i;
+  for(i=0;i<ABAS.length;i++)if(ABAS[i].pref===pref)return ABAS[i];
+  return null;
+}
+function fccOrfas(plano){
+  var dentro={},ls=['head','body','comps','outra'],i,j,arr,tas,el,a,r=[];
+  for(i=0;i<ls.length;i++){arr=plano[ls[i]];for(j=0;j<arr.length;j++)dentro[arr[j].id]=1;}
+  tas=document.getElementsByTagName('textarea');
+  for(i=0;i<tas.length;i++){
+    el=tas[i];
+    if(!/^[a-z]-out[0-9]*$/.test(el.id))continue;
+    if(!el.value)continue;
+    if(dentro[el.id]||FCC_FORA[el.id])continue;
+    a=fccAbaDoOut(el.id);
+    /* Aba fora desta pagina nao e esquecimento: as saidas dela nao pertencem a este plano. */
+    if(!a||!FCG.ativas[a.id])continue;
+    r.push({id:el.id,aba:a.nome});
+  }
+  return r;
+}
+function fccOrfasHTML(plano){
+  var o=fccOrfas(plano),h,i;
+  if(!o.length)return '';
+  h='<div class="fcc-comp"><p class="fcc-perigo"><b>Saída gerada que o painel não soube onde colocar.</b> '+
+    'Isto é falha da ferramenta, não sua: o código existe na aba e o painel não o consolidou. '+
+    'Copie-o direto da aba e avise, para o mapa do painel ser corrigido.</p><ul>';
+  for(i=0;i<o.length;i++)h+='<li>'+escHtml(o[i].aba)+' — <code>'+escHtml(o[i].id)+'</code></li>';
+  return h+'</ul></div>';
+}
 function fccTemCodigo(plano,abaId){
   var ls=['head','body','comps','outra'],i,j,arr;
   for(i=0;i<ls.length;i++){
@@ -15899,6 +15958,11 @@ function fccListaHTML(titulo,itens,explica,vals){
          '<span class="aviso-copiado" id="'+it.alvo+'-cop">Copiado!</span>';
     }
     h+='</div><div class="destino">'+escHtml(it.destino)+'</div>';
+    /* A NOTA ERA ACEITA E JOGADA FORA. fccItem sempre teve o campo, o campo consolidado o
+       exibia, e esta lista nao -- entao a explicacao de para onde a saida vai (e para onde ela
+       NAO vai) ficava invisivel justamente na lista das saidas que vao para outro lugar. Ela
+       e HTML de texto nosso, nao do operador, como as demais explicacoes deste painel. */
+    if(it.nota)h+='<div class="fcc-nota">'+it.nota+'</div>';
     if(it.vazio){
       h+='<div class="fcc-falta">Ainda não gerado. Abra a aba <b>'+escHtml(it.aba.nome)+'</b> e clique em <b>Gerar código</b>.</div>';
     }else{
@@ -15941,8 +16005,9 @@ function fccRender(){
     h+=fccCampoHTML(plano,'body',vals);
     h+=fccListaHTML('Saídas por componente',plano.comps,
       'Cada uma vai para o campo de <b>um componente</b>, e por isso não são juntadas: não há campo comum onde elas caibam.',vals);
-    h+=fccListaHTML('É de outra página desta campanha',plano.outra,
-      'Estas saídas o TidyCal produz para a <b>outra</b> página. Não entram nos campos acima: selecione o preset geral daquela página para consolidá-las lá.',vals);
+    h+=fccListaHTML('É de outra página, ou de fora do Prosite',plano.outra,
+      'Estas saídas <b>não</b> entram nos campos acima — cada item diz para onde ela vai. Se o destino for uma página desta campanha, selecione o preset geral dela para consolidar lá; se for uma configuração fora do Prosite, cole direto lá.',vals);
+    h+=fccOrfasHTML(plano);
   }
   /* assinatura = desenho + conteudo das caixas. Sem ela, cada tecla digitada em qualquer aba
      refaria o innerHTML e mataria uma selecao em andamento -- e selecionar tudo para copiar e
