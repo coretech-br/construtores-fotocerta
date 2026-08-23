@@ -1120,7 +1120,6 @@ Repositório público servido pelo GitHub Pages. A raiz é o que o Pages publica
 - `prosite/natal-2026/hospedeira-componente-iframe.html` — componente que embute a intermediária (coluna com ID Html `reserva`)
 - `prosite/natal-2026/intermediaria-tag-body.html` — Tag Body da intermediária (ajustarAltura)
 - `prosite/natal-2026/intermediaria-componente-tidycal.html` — componente do TidyCal (embed + modal expande/recolhe)
-- `prosite/natal-2026/titulo-neve-componente.html` — componente avulso (não sai de construtor): título de Natal com letras douradas e azuis e neve caindo. Adaptado de um exemplo de CodePen, com cinco correções registradas no cabeçalho do arquivo — a mais importante é que o original estilizava `body` com `overflow:hidden`, o que mataria a rolagem do site inteiro
 - `prosite/natal-2026/bordas-css-componentes.md` — bloco global do head + o CSS das bordas/degradês aplicados nos componentes da landing de Natal
 - `CLAUDE.md` — instruções do projeto e fluxo de manutenção (carregado automaticamente pelo Claude Code)
 

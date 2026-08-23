@@ -29,7 +29,6 @@ Repositório **público**, servido pelo GitHub Pages em **prosite.fotocerta.com.
 | `prosite/natal-2026/hospedeira-componente-iframe.html` | Componente HTML da hospedeira que embute a intermediária (a coluna dele leva ID Html `reserva`). |
 | `prosite/natal-2026/intermediaria-tag-body.html` | Tag Body da página intermediária: script `ajustarAltura` do iframe. |
 | `prosite/natal-2026/intermediaria-componente-tidycal.html` | Componente HTML da intermediária: embed TidyCal + expansão/recolhimento do modal. |
-| `prosite/natal-2026/titulo-neve-componente.html` | Componente HTML avulso (fora dos construtores): título de Natal com letras douradas/azuis e neve caindo, adaptado de um exemplo de CodePen. **Não vai no campo CSS Customizado** — precisa de seletores, `@keyframes` e script, e componente HTML aceita os três. |
 | `prosite/natal-2026/bordas-css-componentes.md` | Bloco global do head + o CSS das bordas animadas/degradês aplicados em componentes da landing de Natal. |
 | `CLAUDE.md` | Este arquivo. |
 
@@ -88,6 +87,7 @@ O que **não** se corta: a regressão byte a byte (`scripts/verificar/regressao.
 
 ## Fluxo de manutenção (importante)
 
+0. **`git push` só quando o dono pedir, sempre — sem exceção para arquivo "inerte".** Combinado em 23/08/2026, depois de um componente de teste (fora dos construtores) ser enviado por iniciativa própria com o argumento de que não mudava a ferramenta. O argumento não vale: **enviar é publicar**, e quem decide o que fica no repositório público é o dono. Vale também para material que ele peça "fora do projeto": entrega-se o arquivo, não se versiona sem pedir.
 1. Ao evoluir qualquer código destes arquivos, **atualizar o arquivo correspondente no repositório** (conteúdo completo, nunca trecho).
 2. Ao evoluir a ferramenta, editar o `index.html` e mesclar na `main` normalmente. **`git push` só depois de o dono dizer que testou local e aprovou** — o GitHub Pages publica sozinho a cada envio, então *enviar é publicar*, e uma versão com defeito iria ao ar sem ninguém decidir. Combinado em 21/08/2026, quando `prosite.fotocerta.com.br` entrou no ar. Vale para o repositório inteiro, já que o envio leva tudo junto. A página `utl-construtor` do Prosite foi descontinuada; não existe mais o passo de republicar o miolo em componente.
 3. Ao mudar arquitetura, regra ou decisão, **atualizar a `docs/documentacao-fotocerta.md`** (e o inventário acima, se surgir arquivo novo).
