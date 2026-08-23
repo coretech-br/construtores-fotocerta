@@ -939,6 +939,28 @@ Spec: `docs/specs/2026-08-22-borda-natal-design.md`. Plano: `docs/superpowers/pl
 
 **Verificação.** As 12 saídas dos oito geradores e as 9 cobranças **byte a byte idênticas** à `main`. O CSS aplicado num elemento de verdade em seis cenários, com o número de camadas, a espessura, a animação e o movimento do `background-position` conferidos — mais movimento reduzido (a guirlanda para e as camadas ficam) e a recusa sem enfeite. Na interface: campos, aviso âmbar, prévia e preset. 582 IDs, nenhum repetido, zero erro de console.
 
+### Página de obrigado do TidyCal: marcadores no próprio texto (23/08/2026)
+
+Spec: `docs/specs/2026-08-23-pagina-de-obrigado-tidycal-design.md`. Plano: `docs/superpowers/plans/2026-08-23-pagina-de-obrigado.md`. Alcance: aba **Agendamento TidyCal**.
+
+**O que é.** O TidyCal redireciona quem agenda para uma página escolhida e deixa passar dados do agendamento na consulta do endereço. A aba passou a gerar as duas pontas: o **endereço com as variáveis** para colar no TidyCal (`t-out4`) e o **script da Tag Body** daquela página (`t-out5`), que preenche o texto com os dados.
+
+**Por que marcadores, e não ID Html.** A ideia inicial era marcar cada campo com o ID Html do Prosite. Ela tem dois defeitos: **o ID vai na coluna, não no texto** (registrado desde a landing de Natal, onde a coluna do iframe leva `ID Html = reserva`), então escrever `textContent` nela substitui todos os filhos por um nó de texto solto e o `<p>` do tema some junto da tipografia; e **um ID por variável é um componente por variável**, o que impede pôr o nome no meio de uma frase. Marcando o lugar **dentro do texto** (`Obrigado, {{nome}}! Seu {{tipo}} está confirmado para {{data}} às {{hora}}.`), o tema continua mandando no visual e a troca mexe só em nós de texto.
+
+**As cinco variáveis** são as que o dono escolheu: `{{contact.name}}`, `{{booking_type.title}}`, `{{booking.date}}`, `{{booking.time}}` e `{{booking.starts_at}}`. **O e-mail ficou de fora por decisão:** não é necessário numa página de obrigado, e o endereço com nome e e-mail entra no histórico do navegador do cliente, nas estatísticas do site e no cabeçalho enviado a recursos externos.
+
+**Quatro decisões.** Só **nós de texto**, nunca `innerHTML` — o valor vem do endereço, que qualquer pessoa edita. Nós dentro de `script`, `style`, `textarea`, `input` e `select` são **pulados**. Sem parâmetro, cada marcador cai num **texto reserva** configurável, e ninguém vê `{{nome}}` na tela. E o `{{quando}}` só é reescrito em `12/12/2026 às 15:00` **se chegar em ISO**; qualquer outra coisa sai como veio — a página não inventa data.
+
+**Conteúdo tardio.** O tema pode montar componentes depois que a Tag Body roda, então o script passa uma vez ao carregar e **reobserva o documento por cinco segundos**, refazendo a troca no que aparecer. O observador se desliga sozinho: ele existe para a montagem inicial, não para vigiar a página para sempre.
+
+**Fonte única do leitor.** O `param()` — incluindo o `+` que vira espaço, que é o que faz nome composto chegar certo — já existia escrito dentro do gerador da `/pagar`. Virou `FC_PARAM_SRC`, texto literal consumido pelos dois geradores, com o invariante de sempre: o `p-out1` saiu **byte a byte idêntico** depois da extração.
+
+**Um acoplamento desfeito, encontrado pelo arnês.** A geração da página de obrigado vinha depois das recusas do widget, então o **caminho do booking type vazio a bloqueava** — um campo que nada tem a ver com ela. Agora ela é gerada primeiro, cada parte recusa pelo próprio motivo, e a recusa do caminho diz que os códigos 4 e 5 saíram normalmente.
+
+**Verificação.** Regressão OK. O script executado numa página que imita uma do Prosite, em oito cenários — completo, data legível, valor não-ISO, sem parâmetros, parcial, hostil (`<img onerror>` e `</script>` saem literais), acentos com `+`, e conteúdo inserido 300 ms depois. Em todos, a estrutura sobrevive e não há erro de JS. Interface e recusas medidas; 602 IDs, nenhum repetido.
+
+**O limite que só o dono fecha:** quando a Tag Body roda em relação aos componentes do tema numa página publicada, e se o editor de texto do Prosite aceita `{{` e `}}` sem transformar.
+
 ## 5. Decisões de arquitetura registradas
 
 - **Ferramenta de medição mora no repositório** (22/08/2026). A regressão byte a byte é o que sustenta o invariante deste projeto — mexer numa aba não muda um byte do que as outras produzem —, e ela exige uma fotografia de referência e um comparador. Enquanto o arnês era reescrito a cada sessão numa pasta temporária, ele **sumiu duas vezes no meio de uma rodada**, e cada perda custou recapturar tudo. Agora ele é `scripts/verificar/`, versionado, com um comando só. A regra que sai daí: **medição que depende de ser recriada não é medição, é ritual** — e vale para o que vier depois (o arnês que executa os blocos entregues ainda é por rodada, e é o próximo candidato).
