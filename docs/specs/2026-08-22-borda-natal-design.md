@@ -63,7 +63,13 @@ A aba já redefine a própria animação com um único quadro dentro de `@media 
 
 Os **cinco efeitos que já existem** têm de sair byte a byte idênticos, e as **12 saídas** dos oito geradores também. Nada aqui muda o que a ferramenta já produzia.
 
-## 8. O limite que só o dono fecha
+## 8. O limite que era do dono — fechado em 23/08/2026
+
+**O campo CSS Customizado do Prosite aceitou.** O dono colou a guirlanda num componente e confirmou que funcionou. Era a única pergunta desta rodada que não se respondia daqui, e o raciocínio que a sustentava (SVG URL-codificado, nenhum `<` literal chegando ao sanitizador) se confirmou na prática.
+
+**O que continua não sabido:** o **teto** do campo. Sabemos que passou; não sabemos a partir de quantos KB ele recusaria. Por isso a ferramenta continua mostrando o tamanho na tela e avisando acima de 12 KB — o aviso deixou de ser "não sabemos se cabe" e passou a ser "não sabemos até onde cabe".
+
+## 9. O limite original, para registro
 
 Se o campo **CSS Customizado do Prosite** aceita alguns KB de CSS com data URI. O SVG vai **URL-codificado** (`%3Csvg`), então nenhum `<` chega ao sanitizador — mas isso é raciocínio, não medida. Uma colagem na página real resolve. Por isso a interface mostra o **tamanho em bytes** do código 2.
 
