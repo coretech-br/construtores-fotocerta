@@ -21,6 +21,7 @@ Repositório **público**, servido pelo GitHub Pages em **prosite.fotocerta.com.
 | `docs/documentacao-fotocerta.md` | Contexto completo: arquitetura, manual do Prosite, decisões, estado atual. Fonte da verdade. |
 | `scripts/conferir-versoes.sh` | Conferência **mecânica** das versões dos arquivos servidos com `?v=` (`fc-compartilhado.js`, `cobrar/manifest.json`): compara o conteúdo com a versão declarada e falha se um mudou sem o outro. Rodar sempre que mexer nesses arquivos; `--registrar` depois de trocar a versão de verdade. |
 | `scripts/versoes.txt` | O registro que o script compara: `<arquivo> <versão declarada> <sha256 do conteúdo>`. |
+| `scripts/verificar/` | O **arnês da regressão byte a byte**: `regressao.sh` compara o que a árvore de trabalho gera com o que uma referência gera (`main` por padrão), `geradores.mjs` fotografa as 12 saídas e as 9 cobranças, `lib.mjs` traz as peças comuns. Um comando: `scripts/verificar/regressao.sh`. Precisa de Node e Playwright; a falha diz o que instalar. |
 | `docs/specs/` | Specs de design das funcionalidades, um arquivo por feature, nomeados `AAAA-MM-DD-topico-design.md`. |
 | `docs/pendencias.md` | A lista **viva** do que ficou combinado e ainda não foi feito. Ler antes de propor a próxima rodada; atualizar ao fim de cada uma. |
 | `docs/ledger-evolucao-2026-08.md` | O histórico das rodadas já entregues, com os tempos reais. |
@@ -80,7 +81,9 @@ Rodada nova segue este método, sem precisar ser pedido:
 5. **Reaproveitar a fotografia de referência já capturada** na mesma sessão em vez de recapturá-la; rodar a suíte inteira **uma vez ao final**, não a cada edição.
 6. **Medir antes de estimar**: ler o código e dizer o alcance real, em vez de estimar por impressão.
 
-O que **não** se corta: a regressão byte a byte, o teste do bloco entregue executando de verdade, e a conferência de versões. Economia que apaga medição não é economia — é o defeito de amanhã.
+O que **não** se corta: a regressão byte a byte (`scripts/verificar/regressao.sh`), o teste do bloco entregue executando de verdade, e a conferência de versões. Economia que apaga medição não é economia — é o defeito de amanhã.
+
+7. **Delegar contra contrato que existe, nunca contra um que será recriado.** Um subagente que escreve arnês precisa poder LER a biblioteca que vai usar. Em 22/08/2026 um deles escreveu 400 linhas contra uma API suposta, porque a pasta temporária tinha sido limpa — reescrever custou menos que remendar. Foi por isso que o arnês saiu de `/tmp` e entrou em `scripts/verificar/`.
 
 ## Fluxo de manutenção (importante)
 
