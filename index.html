@@ -1599,7 +1599,7 @@
 
 <!-- ==================== CONSTRUTOR: BORDAS COM EFEITO ==================== -->
 <div class="painel" id="painel-bor" role="tabpanel">
-  <p class="descricao"><b>Bordas com efeito</b> — gera o CSS para destacar um componente do Prosite com borda animada e <b>fundo interno customizável</b> (cor sólida ou degradê, para componentes que não oferecem degradê nativo). Cinco efeitos à escolha: <b>brilho giratório</b> (o facho de luz que percorre a moldura), <b>degradê contínuo</b>, <b>halo pulsante</b>, <b>listras em movimento</b> e <b>borda fixa</b> (sem animação). Gera dois códigos: um global para a Tag Head do site (uma vez só) e o CSS do componente. É 100% CSS, sem JavaScript, e já inclui a regra de acessibilidade que reduz o movimento para quem prefere.</p>
+  <p class="descricao"><b>Bordas com efeito</b> — gera o CSS para destacar um componente do Prosite com borda animada e <b>fundo interno customizável</b> (cor sólida ou degradê, para componentes que não oferecem degradê nativo). Seis efeitos à escolha: <b>brilho giratório</b> (o facho de luz que percorre a moldura), <b>degradê contínuo</b>, <b>halo pulsante</b>, <b>listras em movimento</b>, <b>guirlanda de Natal</b> (enfeites desenhados na moldura) e <b>borda fixa</b> (sem animação). Gera dois códigos: um global para a Tag Head do site (uma vez só) e o CSS do componente. É 100% CSS, sem JavaScript, e já inclui a regra de acessibilidade que reduz o movimento para quem prefere.</p>
 
   <div class="secao primeira"><span class="secao-n">1</span> Efeito e fundo</div>
   <div class="grade">
@@ -1611,9 +1611,10 @@
       <label><input type="radio" name="b-efeito" value="gradiente"><span>Degradê contínuo <small>(cores fluindo)</small></span></label>
       <label><input type="radio" name="b-efeito" value="pulso"><span>Halo pulsante <small>(borda fixa + onda de brilho)</small></span></label>
       <label><input type="radio" name="b-efeito" value="listras"><span>Listras em movimento</span></label>
+      <label><input type="radio" name="b-efeito" value="natal"><span>Guirlanda de Natal <small>(enfeites na moldura)</small></span></label>
       <label><input type="radio" name="b-efeito" value="fixa"><span>Borda fixa <small>(sem animação)</small></span></label>
       </div>
-      <p class="ajuda"><b>Qual usar:</b> o <b>brilho giratório</b> chama atenção sem cansar (ideal para bloco de oferta ou plano recomendado); o <b>degradê contínuo</b> é mais moderno e constante; o <b>halo pulsante</b> é o mais insistente (use com moderação, em um único elemento da página); as <b>listras</b> lembram fita/promoção; a <b>borda fixa</b> serve quando você quer só o fundo em degradê ou uma moldura discreta.</p>
+      <p class="ajuda"><b>Qual usar:</b> o <b>brilho giratório</b> chama atenção sem cansar (ideal para bloco de oferta ou plano recomendado); o <b>degradê contínuo</b> é mais moderno e constante; o <b>halo pulsante</b> é o mais insistente (use com moderação, em um único elemento da página); as <b>listras</b> lembram fita/promoção; a <b>guirlanda de Natal</b> é sazonal e pede uma borda grossa, porque é ela que mostra o desenho; a <b>borda fixa</b> serve quando você quer só o fundo em degradê ou uma moldura discreta.</p>
       </fieldset>
     </div>
     <div>
@@ -1644,6 +1645,51 @@
     </div>
   </div>
 
+  <div id="b-natal-campos" style="display:none">
+  <fieldset>
+  <legend>Guirlanda de Natal</legend>
+  <label>Quais enfeites entram na moldura <small>(um ou mais; eles se repetem na ordem abaixo)</small></label>
+  <div class="radios">
+  <label><input type="checkbox" id="b-nt-bola" checked><span>Bola de Natal</span></label>
+  <label><input type="checkbox" id="b-nt-estrela" checked><span>Estrela</span></label>
+  <label><input type="checkbox" id="b-nt-pisca"><span>Pisca-pisca</span></label>
+  <label><input type="checkbox" id="b-nt-rena"><span>Rena</span></label>
+  <label><input type="checkbox" id="b-nt-ginger"><span>Gingerbread</span></label>
+  <label><input type="checkbox" id="b-nt-bengala"><span>Bengala doce</span></label>
+  <label><input type="checkbox" id="b-nt-floco"><span>Floco de neve</span></label>
+  </div>
+  <div class="grade">
+    <div>
+    <label>Movimento</label>
+    <div class="radios">
+    <label><input type="radio" name="b-nt-mov" value="girar" checked><span>Girando <small>(a guirlanda dá a volta na moldura)</small></span></label>
+    <label><input type="radio" name="b-nt-mov" value="parado"><span>Parada</span></label>
+    </div>
+    <p class="ajuda"><b>Girando</b> faz a fila de enfeites <b>dar a volta</b> pela moldura — topo para a direita, lateral para baixo, e assim por diante. O que <b>não</b> acontece, e não tem como acontecer: cada enfeite girar no próprio eixo. Um desenho usado como fundo é imagem parada para o navegador, e não há como criar um elemento por enfeite dentro do campo de CSS do componente. A duração do ciclo é o campo da seção 2.</p>
+    <label>Cores dos enfeites</label>
+    <div class="radios">
+    <label><input type="radio" name="b-nt-paleta" value="campanha" checked><span>Seguir as cores da campanha</span></label>
+    <label><input type="radio" name="b-nt-paleta" value="natural"><span>Vermelho e dourado</span></label>
+    </div>
+    <p class="ajuda">Cada enfeite tem <b>cores próprias</b> que não mudam — o gingerbread é marrom, a rena é marrom, a bengala é vermelha e branca. O que muda são os <b>pontos de destaque</b> (o corpo da bola, a estrela, as lâmpadas do pisca-pisca, o laço da rena): eles seguem a <b>cor 1</b> e a <b>cor 2</b> da seção 2, ou o vermelho e dourado de Natal se você escolher a segunda opção. O fundo da faixa é a <b>cor 3</b>.</p>
+    </div>
+    <div>
+    <label>Enfeite nos quatro cantos?</label>
+    <div class="radios">
+    <label><input type="radio" name="b-nt-cantos" value="sim" checked><span>Sim <small>(fecha a moldura)</small></span></label>
+    <label><input type="radio" name="b-nt-cantos" value="nao"><span>Não</span></label>
+    </div>
+    <label for="b-nt-tam">Tamanho do enfeite <small>(px — é também a espessura da borda; 16 a 64)</small></label>
+    <input type="number" id="b-nt-tam" value="34" min="16" max="64" step="1">
+    <label for="b-nt-gap">Espaço entre os enfeites <small>(0 = colados; 60 = bem espaçados)</small></label>
+    <input type="number" id="b-nt-gap" value="18" min="0" max="60" step="1">
+    <p class="ajuda alerta" id="b-peso" style="display:none"></p>
+    </div>
+  </div>
+  <p class="ajuda"><b>Os desenhos viajam dentro do próprio CSS</b>, então este efeito gera um código 2 bem maior que os outros — o tamanho aparece acima assim que você gerar. Se o campo <b>CSS Customizado</b> do Prosite recusar por tamanho, tire enfeites da lista: cada um que sai encolhe as duas tiras.</p>
+  </fieldset>
+  </div>
+
   <div class="secao"><span class="secao-n">2</span> Borda, cores e acabamento</div>
   <div class="grade">
     <div>
@@ -1651,6 +1697,7 @@
       <legend>Borda e cores do efeito</legend>
       <label for="b-esp">Espessura da borda <small>(px — 3 discreto, 4 equilibrado, 5+ dramático)</small></label>
       <input type="number" id="b-esp" value="4" min="0" max="20" step="1">
+      <p class="ajuda alerta" id="b-esp-aviso"><b>Na guirlanda de Natal este campo não vale.</b> Ali a espessura da borda <i>é</i> o tamanho do enfeite — quem manda é o campo <b>Tamanho do enfeite</b>, na seção 1. O número acima fica guardado e volta a valer nos outros efeitos.</p>
       <label for="b-raio">Arredondamento dos cantos <small>(px — 0 deixa quadrado)</small></label>
       <input type="number" id="b-raio" value="14" min="0" max="60" step="1">
       <label>Cor de base da borda <small>(a parte "parada" da moldura)</small></label>
@@ -10595,7 +10642,20 @@ function bCampos(){
     /* o fundo da previa entra: e como o operador confere aquele efeito, e um preset que
        volta com o fundo errado esconde justamente o que o R18 veio mostrar. Nao sai no
        codigo gerado -- ver bPvFundo. */
-    pvfundo:radio('b-pvfundo'),pvcor:$('b-pvcor-t').value};
+    pvfundo:radio('b-pvfundo'),pvcor:$('b-pvcor-t').value,
+    ntmotivos:bNatalMarcados().join(','),ntmov:radio('b-nt-mov'),ntpaleta:radio('b-nt-paleta'),
+    ntcantos:radio('b-nt-cantos'),nttam:$('b-nt-tam').value,ntgap:$('b-nt-gap').value};
+}
+/* Os motivos marcados, SEMPRE na ordem de B_NATAL_PECAS. A ordem da lista e a ordem em que
+   eles se repetem na moldura, e ela nao pode depender da ordem em que o operador clicou --
+   senao a mesma selecao produziria guirlandas diferentes. */
+function bNatalMarcados(){
+  var r=[],i,el;
+  for(i=0;i<B_NATAL_PECAS.length;i++){
+    el=$('b-nt-'+B_NATAL_PECAS[i].id);
+    if(el&&el.checked)r.push(B_NATAL_PECAS[i].id);
+  }
+  return r;
 }
 function bColeta(){
   var o=bCampos();
@@ -10621,6 +10681,15 @@ function bAplicarCampos(B){
   $('b-pad').value=B.pad;
   /* Campos da fase 5: estado gravado antes dela nao os tem. Sem o "||" o campo exibiria a
      palavra "undefined" -- e o padrao do HTML e o mesmo que bPvFundo assume. */
+  /* Estado ou preset gravado antes da guirlanda nao traz nenhum destes. O ausente vale o
+     padrao de fabrica, e nao vazio: um preset antigo aplicado nao pode deixar a aba num
+     estado que o gerador recusa. */
+  bNatalMarcar(typeof B.ntmotivos==='string'?B.ntmotivos:'bola,estrela');
+  setRadio('b-nt-mov',B.ntmov||'girar');
+  setRadio('b-nt-paleta',B.ntpaleta||'campanha');
+  setRadio('b-nt-cantos',B.ntcantos||'sim');
+  $('b-nt-tam').value=(B.nttam!=null&&B.nttam!=='')?B.nttam:34;
+  $('b-nt-gap').value=(B.ntgap!=null&&B.ntgap!=='')?B.ntgap:18;
   setRadio('b-pvfundo',B.pvfundo||'papel');
   var pc=corValida(B.pvcor)?B.pvcor:'#23281F';
   $('b-pvcor-t').value=pc;$('b-pvcor').value=pc;
@@ -10639,10 +10708,97 @@ function bRestaura(st){
    A lista alimenta fcPreso/fcAjustar (bloco compartilhado), que servem aos DOIS lados -- o que
    sai no codigo e o que fica na tela --, entao nao ha como a saida ser presa numa faixa e o
    campo em outra. */
+/* ===== GUIRLANDA DE NATAL: os motivos, o ladrilho e o data URI =====
+   O codigo 2 desta aba sao PROPRIEDADES SOLTAS, aplicadas no elemento raiz do componente:
+   sem seletor, entao sem ::before, sem ::after e sem elementos filhos. A unica porta para
+   desenhar alguma coisa na moldura e o background-image -- e e por isso que cada enfeite e
+   um SVG embutido como data URI, e nao uma tag.
+   PALETA HIBRIDA: cada peca traz as cores naturais dela cravadas (o gingerbread e marrom, a
+   rena e marrom) e deixa dois pontos abertos -- {A} para o destaque e {B} para o secundario.
+   currentColor NAO funciona aqui: um SVG usado como background e um documento a parte e nao
+   enxerga o 'color' do componente. As cores entram no texto na hora de gerar, e e por isso
+   que trocar a cor exige gerar e colar o codigo 2 de novo.
+   A altura do viewBox de toda peca e 100; a largura ('w') varia. */
+var B_NATAL_PECAS=[
+  {id:'bola', nome:'Bola de Natal', w:70, corpo:'<circle cx="35" cy="60" r="32" fill="{A}" stroke="#2B2118" stroke-width="3"/><ellipse cx="23" cy="46" rx="5" ry="12" fill="#FFFFFF"/><rect x="24" y="20" width="22" height="11" rx="2" fill="#B8B8B8" stroke="#2B2118" stroke-width="3"/><circle cx="35" cy="12" r="7" fill="{B}" stroke="#2B2118" stroke-width="3"/><circle cx="35" cy="12" r="3" fill="#2B2118"/>'},
+  {id:'estrela', nome:'Estrela', w:90, corpo:'<polygon points="45,6 55,36.3 86.9,36.4 61.2,55.3 70.9,85.6 45,67 19.1,85.6 28.8,55.3 3.2,36.4 35,36.3" fill="{A}" stroke="#2B2118" stroke-width="3" stroke-linejoin="round"/><circle cx="45" cy="38" r="13" fill="#FFF4C2"/><path d="M45 27 L48.5 35 L56 38 L48.5 41 L45 49 L41.5 41 L34 38 L41.5 35 Z" fill="{B}" stroke="#2B2118" stroke-width="2" stroke-linejoin="round"/>'},
+  {id:'pisca', nome:'Pisca-pisca', w:100, corpo:'<path d="M0 10 C 15 10 10 32 25 32 C 40 32 35 10 50 10 C 65 10 60 32 75 32 C 90 32 85 10 100 10" fill="none" stroke="#2B2118" stroke-width="6" stroke-linecap="round"/><path d="M0 10 C 15 10 10 32 25 32 C 40 32 35 10 50 10 C 65 10 60 32 75 32 C 90 32 85 10 100 10" fill="none" stroke="{B}" stroke-width="3" stroke-linecap="round"/><rect x="20" y="30" width="10" height="8" rx="2" fill="#4A4A4A" stroke="#2B2118" stroke-width="2"/><ellipse cx="25" cy="63" rx="10" ry="25" fill="{A}" stroke="#2B2118" stroke-width="3"/><ellipse cx="21" cy="54" rx="3" ry="7" fill="#FFFFFF"/><rect x="70" y="30" width="10" height="8" rx="2" fill="#4A4A4A" stroke="#2B2118" stroke-width="2"/><ellipse cx="75" cy="63" rx="10" ry="25" fill="{A}" stroke="#2B2118" stroke-width="3"/><ellipse cx="71" cy="54" rx="3" ry="7" fill="#FFFFFF"/>'},
+  {id:'rena', nome:'Rena', w:80, corpo:'<ellipse cx="12" cy="40" rx="9" ry="15" fill="#8B5A2B" stroke="#2B2118" stroke-width="3"/><ellipse cx="68" cy="40" rx="9" ry="15" fill="#8B5A2B" stroke="#2B2118" stroke-width="3"/><ellipse cx="40" cy="58" rx="24" ry="28" fill="#8B5A2B" stroke="#2B2118" stroke-width="3"/><line x1="12" y1="34" x2="5" y2="8" stroke="#2B2118" stroke-width="8" stroke-linecap="round"/><line x1="12" y1="34" x2="5" y2="8" stroke="#5C3A21" stroke-width="5" stroke-linecap="round"/><line x1="12" y1="34" x2="20" y2="10" stroke="#2B2118" stroke-width="8" stroke-linecap="round"/><line x1="12" y1="34" x2="20" y2="10" stroke="#5C3A21" stroke-width="5" stroke-linecap="round"/><line x1="68" y1="34" x2="75" y2="8" stroke="#2B2118" stroke-width="8" stroke-linecap="round"/><line x1="68" y1="34" x2="75" y2="8" stroke="#5C3A21" stroke-width="5" stroke-linecap="round"/><line x1="68" y1="34" x2="60" y2="10" stroke="#2B2118" stroke-width="8" stroke-linecap="round"/><line x1="68" y1="34" x2="60" y2="10" stroke="#5C3A21" stroke-width="5" stroke-linecap="round"/><ellipse cx="40" cy="76" rx="14" ry="12" fill="#D9AE7E" stroke="#2B2118" stroke-width="3"/><circle cx="40" cy="68" r="6" fill="#D6362B" stroke="#2B2118" stroke-width="3"/><circle cx="31" cy="52" r="3" fill="#2B2118"/><circle cx="49" cy="52" r="3" fill="#2B2118"/><circle cx="40" cy="89" r="3.5" fill="{A}" stroke="#2B2118" stroke-width="2"/><polygon points="33,85 40,89 33,93" fill="{A}" stroke="#2B2118" stroke-width="2"/><polygon points="47,85 40,89 47,93" fill="{A}" stroke="#2B2118" stroke-width="2"/>'},
+  {id:'ginger', nome:'Gingerbread', w:72, corpo:'<rect x="3" y="38" width="20" height="10" rx="5" fill="#A9683C" stroke="#2B2118" stroke-width="3"/><rect x="49" y="38" width="20" height="10" rx="5" fill="#A9683C" stroke="#2B2118" stroke-width="3"/><rect x="16" y="66" width="13" height="26" rx="6" fill="#A9683C" stroke="#2B2118" stroke-width="3"/><rect x="43" y="66" width="13" height="26" rx="6" fill="#A9683C" stroke="#2B2118" stroke-width="3"/><rect x="21" y="34" width="30" height="34" rx="10" fill="#A9683C" stroke="#2B2118" stroke-width="3"/><rect x="21" y="50" width="30" height="6" rx="3" fill="#FFFFFF" stroke="#2B2118" stroke-width="2"/><circle cx="36" cy="43" r="3" fill="{A}" stroke="#2B2118" stroke-width="1.5"/><circle cx="36" cy="60" r="3" fill="{A}" stroke="#2B2118" stroke-width="1.5"/><circle cx="36" cy="22" r="14" fill="#A9683C" stroke="#2B2118" stroke-width="3"/><circle cx="36" cy="33" r="3.5" fill="{B}" stroke="#2B2118" stroke-width="2"/><polygon points="29,30 36,33 29,36" fill="{B}" stroke="#2B2118" stroke-width="2"/><polygon points="43,30 36,33 43,36" fill="{B}" stroke="#2B2118" stroke-width="2"/><circle cx="31" cy="20" r="2" fill="#2B2118"/><circle cx="41" cy="20" r="2" fill="#2B2118"/><path d="M29 26 Q36 30 43 26" stroke="#FFFFFF" stroke-width="3" fill="none" stroke-linecap="round"/>'},
+  {id:'bengala', nome:'Bengala doce', w:62, corpo:'<path d="M44 40 Q44 8 20 8 Q4 8 4 24" fill="none" stroke="#2B2118" stroke-width="19" stroke-linecap="round" stroke-linejoin="round"/><path d="M44 40 Q44 8 20 8 Q4 8 4 24" fill="none" stroke="#FFFFFF" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/><rect x="36" y="38" width="16" height="54" rx="8" fill="#FFFFFF" stroke="#2B2118" stroke-width="3"/><polygon points="36,53 52,45 52,53 36,61" fill="{A}"/><polygon points="36,69 52,61 52,69 36,77" fill="{A}"/><polygon points="36,85 52,77 52,85 36,92" fill="{A}"/><circle cx="40" cy="36" r="4" fill="{B}" stroke="#2B2118" stroke-width="2"/><polygon points="33,32 40,36 33,40" fill="{B}" stroke="#2B2118" stroke-width="2"/><polygon points="47,32 40,36 47,40" fill="{B}" stroke="#2B2118" stroke-width="2"/>'},
+  {id:'floco', nome:'Floco de neve', w:90, corpo:'<g transform="rotate(0 45 50)"><line x1="45" y1="50" x2="45" y2="10" stroke="#2B2118" stroke-width="9" stroke-linecap="round"/><line x1="45" y1="50" x2="45" y2="10" stroke="{A}" stroke-width="6" stroke-linecap="round"/><line x1="45" y1="27" x2="38" y2="19" stroke="#2B2118" stroke-width="8" stroke-linecap="round"/><line x1="45" y1="27" x2="38" y2="19" stroke="{A}" stroke-width="5" stroke-linecap="round"/><line x1="45" y1="27" x2="52" y2="19" stroke="#2B2118" stroke-width="8" stroke-linecap="round"/><line x1="45" y1="27" x2="52" y2="19" stroke="{A}" stroke-width="5" stroke-linecap="round"/><circle cx="45" cy="10" r="4" fill="{B}" stroke="#2B2118" stroke-width="2"/></g><g transform="rotate(60 45 50)"><line x1="45" y1="50" x2="45" y2="10" stroke="#2B2118" stroke-width="9" stroke-linecap="round"/><line x1="45" y1="50" x2="45" y2="10" stroke="{A}" stroke-width="6" stroke-linecap="round"/><line x1="45" y1="27" x2="38" y2="19" stroke="#2B2118" stroke-width="8" stroke-linecap="round"/><line x1="45" y1="27" x2="38" y2="19" stroke="{A}" stroke-width="5" stroke-linecap="round"/><line x1="45" y1="27" x2="52" y2="19" stroke="#2B2118" stroke-width="8" stroke-linecap="round"/><line x1="45" y1="27" x2="52" y2="19" stroke="{A}" stroke-width="5" stroke-linecap="round"/><circle cx="45" cy="10" r="4" fill="{B}" stroke="#2B2118" stroke-width="2"/></g><g transform="rotate(120 45 50)"><line x1="45" y1="50" x2="45" y2="10" stroke="#2B2118" stroke-width="9" stroke-linecap="round"/><line x1="45" y1="50" x2="45" y2="10" stroke="{A}" stroke-width="6" stroke-linecap="round"/><line x1="45" y1="27" x2="38" y2="19" stroke="#2B2118" stroke-width="8" stroke-linecap="round"/><line x1="45" y1="27" x2="38" y2="19" stroke="{A}" stroke-width="5" stroke-linecap="round"/><line x1="45" y1="27" x2="52" y2="19" stroke="#2B2118" stroke-width="8" stroke-linecap="round"/><line x1="45" y1="27" x2="52" y2="19" stroke="{A}" stroke-width="5" stroke-linecap="round"/><circle cx="45" cy="10" r="4" fill="{B}" stroke="#2B2118" stroke-width="2"/></g><g transform="rotate(180 45 50)"><line x1="45" y1="50" x2="45" y2="10" stroke="#2B2118" stroke-width="9" stroke-linecap="round"/><line x1="45" y1="50" x2="45" y2="10" stroke="{A}" stroke-width="6" stroke-linecap="round"/><line x1="45" y1="27" x2="38" y2="19" stroke="#2B2118" stroke-width="8" stroke-linecap="round"/><line x1="45" y1="27" x2="38" y2="19" stroke="{A}" stroke-width="5" stroke-linecap="round"/><line x1="45" y1="27" x2="52" y2="19" stroke="#2B2118" stroke-width="8" stroke-linecap="round"/><line x1="45" y1="27" x2="52" y2="19" stroke="{A}" stroke-width="5" stroke-linecap="round"/><circle cx="45" cy="10" r="4" fill="{B}" stroke="#2B2118" stroke-width="2"/></g><g transform="rotate(240 45 50)"><line x1="45" y1="50" x2="45" y2="10" stroke="#2B2118" stroke-width="9" stroke-linecap="round"/><line x1="45" y1="50" x2="45" y2="10" stroke="{A}" stroke-width="6" stroke-linecap="round"/><line x1="45" y1="27" x2="38" y2="19" stroke="#2B2118" stroke-width="8" stroke-linecap="round"/><line x1="45" y1="27" x2="38" y2="19" stroke="{A}" stroke-width="5" stroke-linecap="round"/><line x1="45" y1="27" x2="52" y2="19" stroke="#2B2118" stroke-width="8" stroke-linecap="round"/><line x1="45" y1="27" x2="52" y2="19" stroke="{A}" stroke-width="5" stroke-linecap="round"/><circle cx="45" cy="10" r="4" fill="{B}" stroke="#2B2118" stroke-width="2"/></g><g transform="rotate(300 45 50)"><line x1="45" y1="50" x2="45" y2="10" stroke="#2B2118" stroke-width="9" stroke-linecap="round"/><line x1="45" y1="50" x2="45" y2="10" stroke="{A}" stroke-width="6" stroke-linecap="round"/><line x1="45" y1="27" x2="38" y2="19" stroke="#2B2118" stroke-width="8" stroke-linecap="round"/><line x1="45" y1="27" x2="38" y2="19" stroke="{A}" stroke-width="5" stroke-linecap="round"/><line x1="45" y1="27" x2="52" y2="19" stroke="#2B2118" stroke-width="8" stroke-linecap="round"/><line x1="45" y1="27" x2="52" y2="19" stroke="{A}" stroke-width="5" stroke-linecap="round"/><circle cx="45" cy="10" r="4" fill="{B}" stroke="#2B2118" stroke-width="2"/></g><circle cx="45" cy="50" r="7" fill="#DCEEF5" stroke="#2B2118" stroke-width="3"/>'}
+];
+/* Monta o ladrilho. Horizontal: as pecas lado a lado. Vertical: as mesmas pecas empilhadas,
+   centradas -- e por isso que sao DOIS desenhos e nao um: nao ha como girar uma camada de
+   fundo, e sem o segundo os enfeites das laterais sairiam deitados.
+   O espaco entra como meio-vao nas duas pontas, para o vao ENTRE ladrilhos vizinhos ser
+   igual ao vao de dentro: com o vao inteiro nas pontas, a emenda mostraria o dobro. */
+function bNatalRed(n){return String(Math.round(n*100)/100);}
+function bNatalPecas(ids){
+  var r=[],i;
+  for(i=0;i<B_NATAL_PECAS.length;i++)
+    if(ids.indexOf(B_NATAL_PECAS[i].id)>=0)r.push(B_NATAL_PECAS[i]);
+  return r;
+}
+function bNatalEnv(w,h,corpo,corA,corB){
+  /* Sem width/height: o viewBox ja da a proporcao, e e a proporcao que o background-size
+     'auto' usa. Dois atributos a menos por desenho, e sao tres desenhos por guirlanda. */
+  var svg='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+bNatalRed(w)+' '+bNatalRed(h)+'">'+corpo+'</svg>';
+  return svg.split('{A}').join(corA).split('{B}').join(corB);
+}
+function bNatalSvg(ids,gap,vertical,corA,corB){
+  var pecas=bNatalPecas(ids),corpo='',pos,i,largMax=0;
+  if(!pecas.length)return '';
+  if(!vertical){
+    pos=gap/2;
+    for(i=0;i<pecas.length;i++){
+      corpo+='<g transform="translate('+bNatalRed(pos)+',0)">'+pecas[i].corpo+'</g>';
+      pos+=pecas[i].w+gap;
+    }
+    return {svg:bNatalEnv(pos-gap/2,100,corpo,corA,corB),w:pos-gap/2,h:100};
+  }
+  for(i=0;i<pecas.length;i++)if(pecas[i].w>largMax)largMax=pecas[i].w;
+  pos=gap/2;
+  for(i=0;i<pecas.length;i++){
+    corpo+='<g transform="translate('+bNatalRed((largMax-pecas[i].w)/2)+','+bNatalRed(pos)+')">'+pecas[i].corpo+'</g>';
+    pos+=100+gap;
+  }
+  return {svg:bNatalEnv(largMax,pos-gap/2,corpo,corA,corB),w:largMax,h:pos-gap/2};
+}
+/* O canto e uma peca so, centrada numa celula quadrada -- a camada dele e quadrada (tam x tam)
+   e um viewBox retangular sairia esticado. */
+function bNatalCanto(ids,corA,corB){
+  var pecas=bNatalPecas(ids);
+  if(!pecas.length)return '';
+  return bNatalEnv(100,100,'<g transform="translate('+bNatalRed((100-pecas[0].w)/2)+',0)">'+pecas[0].corpo+'</g>',corA,corB);
+}
+/* ===== A CODIFICACAO, e por que ela nao e encodeURIComponent =====
+   O primeiro corte usava encodeURIComponent, e o desenho INFLAVA 4,5 vezes: ele escapa a aspa
+   dupla e o espaco, que sao os dois caracteres mais frequentes num SVG, e cada um vira tres
+   bytes. Com os sete enfeites o codigo 2 batia em 68 KB.
+   O que precisa mesmo ser escapado dentro de url("..."):
+     %  primeiro, senao as proprias fugas seguintes seriam re-escapadas
+     #  senao o navegador corta ali achando que e fragmento
+     <  e  >  -- e esta e tambem a protecao contra o sanitizador do Prosite, que corrompe
+        marcacao literal: nenhum '<' chega ao campo
+   A aspa dupla nao precisa de fuga: ela e TROCADA por aspa simples dentro do SVG (XML aceita
+   as duas), e o url() fica delimitado por aspa dupla. Espaco fica literal, que e valido
+   dentro das aspas. As quebras de linha e os espacos repetidos somem.
+   Medido: os sete enfeites cairam de 68 KB para menos de um terco disso. */
+function bDataUri(svg){
+  var t=svg.replace(/"/g,"'").replace(/\s+/g,' ')
+    .replace(/%/g,'%25').replace(/#/g,'%23').replace(/</g,'%3C').replace(/>/g,'%3E');
+  return 'url("data:image/svg+xml,'+t+'")';
+}
+
 var B_NUMS=[
   ['b-esp',4,0,20,true],['b-raio',14,0,60,true],['b-fang',150,0,360,true],
   ['b-facholarg',5,2,25,false],['b-listra',10,3,40,true],['b-vel',4,0.5,30,false],
-  ['b-haloraio',26,0,80,true],['b-haloop',0.35,0,1,false]
+  ['b-haloraio',26,0,80,true],['b-haloop',0.35,0,1,false],
+  /* O tamanho do enfeite E a espessura da borda na guirlanda: um desenho reconhecivel pede
+     24-48px, e o 'b-esp' vai so ate 20. Em vez de alargar a faixa de um campo que os outros
+     cinco efeitos usam, este efeito traz a propria. */
+  ['b-nt-tam',34,16,64,true],['b-nt-gap',18,0,60,true]
 ];
 function bPreso(id){return fcPreso(B_NUMS,id);}
 /* O espacamento interno e o unico texto livre desta aba e o destino dele e o CSS do
@@ -10686,6 +10842,8 @@ function bCfgDom(){
     f1:corSegura('b-f1','#8A4A32'),f2:corSegura('b-f2','#B5674A'),fang:bPreso('b-fang'),
     fallback:(radio('b-fallback')==='sim'),
     comTexto:(radio('b-txt')==='sim'),corTexto:corSegura('b-c4','#F7EFDF'),
+    ntMotivos:bNatalMarcados(),ntMov:radio('b-nt-mov'),ntPaleta:radio('b-nt-paleta'),
+    ntCantos:(radio('b-nt-cantos')!=='nao'),ntTam:bPreso('b-nt-tam'),ntGap:bPreso('b-nt-gap'),
     pad:$('b-pad').value.trim()};
 }
 /* A mesma configuracao, vinda de um preset salvo (formato de bCampos). */
@@ -10701,7 +10859,29 @@ function bCfgPreset(C){
     f1:cor(C.f1,'#8A4A32'),f2:cor(C.f2,'#B5674A'),fang:bPresoDe('b-fang',C.fang),
     fallback:(C.fallback==='sim'),
     comTexto:(C.txt==='sim'),corTexto:cor(C.c4,'#F7EFDF'),
+    /* Mesma leitura defensiva do bAplicarCampos, e pelo mesmo motivo: preset gravado antes
+       da guirlanda nao traz nenhum destes campos. */
+    ntMotivos:bNatalDaLista(C.ntmotivos),ntMov:(C.ntmov==='parado')?'parado':'girar',
+    ntPaleta:(C.ntpaleta==='natural')?'natural':'campanha',ntCantos:(C.ntcantos!=='nao'),
+    ntTam:bPresoDe('b-nt-tam',C.nttam),ntGap:bPresoDe('b-nt-gap',C.ntgap),
     pad:String(C.pad||'').trim()};
+}
+/* Le a lista guardada e devolve so os ids que existem HOJE, na ordem de B_NATAL_PECAS.
+   Um preset que cite um motivo que saiu do registro nao pode derrubar a geracao. */
+function bNatalDaLista(t){
+  var g=String(t==null?'bola,estrela':t).split(','),r=[],i;
+  for(i=0;i<B_NATAL_PECAS.length;i++){
+    if(g.indexOf(B_NATAL_PECAS[i].id)>=0)r.push(B_NATAL_PECAS[i].id);
+  }
+  return r;
+}
+/* Marca na tela a lista guardada. */
+function bNatalMarcar(t){
+  var g=String(t||'').split(','),i,el;
+  for(i=0;i<B_NATAL_PECAS.length;i++){
+    el=$('b-nt-'+B_NATAL_PECAS[i].id);
+    if(el)el.checked=(g.indexOf(B_NATAL_PECAS[i].id)>=0);
+  }
 }
 
 /* ===== Fundo da previa (R18) =====
@@ -10725,10 +10905,17 @@ function bPvTinta(hex){
 
 /* ===== O que esta aba poe na biblioteca compartilhada (R19) ===== */
 var B_EFEITO_NOME={brilho:'brilho giratorio',gradiente:'degrade continuo',pulso:'halo pulsante',
-  listras:'listras em movimento',fixa:'borda fixa'};
+  listras:'listras em movimento',natal:'guirlanda de Natal',fixa:'borda fixa'};
 function bPresetResumo(v){
   var C=v.b||{};
   var t=B_EFEITO_NOME[C.efeito]||String(C.efeito||'');
+  if(C.efeito==='natal'){
+    var pecas=bNatalPecas(bNatalDaLista(C.ntmotivos)),nomes=[],ip;
+    for(ip=0;ip<pecas.length;ip++)nomes.push(pecas[ip].nome);
+    t+=' — '+(nomes.length?nomes.join(', ').toLowerCase():'sem enfeite')+', '+(C.nttam||34)+'px';
+    t+=(C.ntmov==='parado')?', parada':', girando em '+C.vel+'s';
+    return t;
+  }
   t+=' — borda '+C.esp+'px, cantos '+C.raio+'px';
   if(C.efeito!=='fixa')t+=', ciclo '+C.vel+'s';
   return t;
@@ -10784,11 +10971,21 @@ function bToggles(){
   var ef=radio('b-efeito');
   var fu=radio('b-fundo');
   var el;
+  /* GUIRLANDA: os campos proprios aparecem so nela, e a espessura da borda passa a ser o
+     tamanho do enfeite -- entao 'b-esp' fica A VISTA, desabilitado e com aviso ambar, o
+     mesmo tratamento que o desconto Pix recebe com o sinal ligado. */
+  var natal=(ef==='natal');
+  el=$('b-natal-campos');if(el)el.style.display=natal?'block':'none';
+  el=$('b-esp');if(el)el.disabled=natal;
+  el=$('b-esp-aviso');if(el)el.style.display=natal?'block':'none';
+  el=$('b-peso');if(el&&!natal)el.style.display='none';
   el=$('b-fundo-campos');if(el)el.style.display=(fu==='manter')?'none':'block';
   el=$('b-degrade-campos');if(el)el.style.display=(fu==='degrade')?'block':'none';
   el=$('b-nucleo-campo');if(el)el.style.display=(ef==='brilho')?'block':'none';
   el=$('b-listra-campo');if(el)el.style.display=(ef==='listras')?'block':'none';
-  el=$('b-vel-campo');if(el)el.style.display=(ef==='fixa')?'none':'block';
+  /* Sem animacao nao ha ciclo: vale para a borda fixa e para a guirlanda parada. */
+  var semAnim=(ef==='fixa')||(natal&&radio('b-nt-mov')==='parado');
+  el=$('b-vel-campo');if(el)el.style.display=semAnim?'none':'block';
   /* No efeito "halo pulsante" o halo E o efeito: nao existe pulso sem halo. O radio
      "com/sem halo" ficava visivel ali e nao desligava nada -- marcado em "sem halo", o
      gerador so trocava os campos por 18px/0.5 fixos, os campos de alcance e intensidade
@@ -10852,9 +11049,11 @@ function bMontar(cfg){
   var comTexto=cfg.comTexto;
   var corTexto=cfg.corTexto;
   var pad=cfg.pad;
+  /* A guirlanda tambem pinta o miolo (e a camada padding-box que confina os enfeites a
+     faixa), entao ela cai na mesma recusa dos outros efeitos de camadas. */
   var camadas=(ef==='brilho'||ef==='gradiente'||ef==='listras');
 
-  if(camadas&&fu==='manter'){
+  if((camadas||ef==='natal')&&fu==='manter'){
     return {erro:'Para este efeito, o fundo interno precisa ser cor solida ou degrade: a tecnica de borda animada pinta o miolo do componente. Dica: capture a cor atual do componente com o conta-gotas e use como cor solida.'};
   }
   if(pad&&!bPadOk(pad)){
@@ -10896,6 +11095,73 @@ function bMontar(cfg){
     props.push('background-position: 0 0, 0 0;');
     if(halo)props.push('box-shadow: 0 0 '+haloraio+'px rgba('+bHexRgb(c2)+', '+haloop+');');
     props.push('animation: '+anim+' '+vel+'s linear infinite;');
+  }else if(ef==='natal'){
+    /* ===== A GUIRLANDA =====
+       Dez camadas no mesmo elemento, da frente para tras: o miolo (que e o que confina os
+       enfeites a faixa), os quatro cantos, as quatro tiras e a cor de base da faixa.
+       So as TIRAS andam: background-position e uma lista por camada, e a animacao repete as
+       outras identicas nos dois quadros. */
+    if(!cfg.ntMotivos.length){
+      return {erro:'Escolha pelo menos um enfeite para a guirlanda (bola, estrela, pisca-pisca...). Sem nenhum nao ha o que desenhar na moldura.'};
+    }
+    var corA=(cfg.ntPaleta==='natural')?'#C62828':c1;
+    var corB=(cfg.ntPaleta==='natural')?'#F4C430':c2;
+    var tam=cfg.ntTam;
+    var th=bNatalSvg(cfg.ntMotivos,cfg.ntGap,false,corA,corB);
+    var tv=bNatalSvg(cfg.ntMotivos,cfg.ntGap,true,corA,corB);
+    /* O ladrilho e escalado pela ALTURA da faixa (tam). Dai sai o passo da animacao: uma
+       volta completa e exatamente um ladrilho, senao a emenda apareceria como um salto. */
+    var passoH=th.w/th.h*tam;
+    var passoV=tv.h/tv.w*tam;
+    /* ===== CADA DESENHO APARECE UMA VEZ, e nao oito =====
+       As tiras usam o mesmo ladrilho duas vezes cada (topo/base e esquerda/direita) e o canto
+       aparece nos quatro cantos: escrito direto, o texto levava OITO copias dos desenhos.
+       Guardando cada um numa propriedade customizada, o desenho aparece UMA vez e as camadas
+       o referenciam por var(). Medido: com os sete enfeites, de 44 KB para menos da metade.
+       Propriedade customizada e uma declaracao solta como qualquer outra -- cabe no campo do
+       componente do mesmo jeito que 'border' cabe. */
+    var uriH='var(--fcn-h)',uriV='var(--fcn-v)';
+    props.push('--fcn-h: '+bDataUri(th.svg)+';');
+    props.push('--fcn-v: '+bDataUri(tv.svg)+';');
+    var camadas=[],tamanhos=[],repete=[],pIni=[],pFim=[];
+    camadas.push(interna+' padding-box');tamanhos.push('auto auto');repete.push('no-repeat');
+    pIni.push('0 0');pFim.push('0 0');
+    if(cfg.ntCantos){
+      props.push('--fcn-c: '+bDataUri(bNatalCanto(cfg.ntMotivos,corA,corB))+';');
+      var uriC='var(--fcn-c)';
+      var cantos=['left top','right top','left bottom','right bottom'],ic;
+      for(ic=0;ic<4;ic++){
+        camadas.push(uriC+' border-box');tamanhos.push(tam+'px '+tam+'px');repete.push('no-repeat');
+        pIni.push(cantos[ic]);pFim.push(cantos[ic]);
+      }
+    }
+    /* topo anda para a direita, direita desce, base anda para a esquerda, esquerda sobe:
+       lidas em sequencia, as quatro fazem a guirlanda dar a volta no sentido horario. */
+    camadas.push(uriH+' border-box');tamanhos.push('auto '+tam+'px');repete.push('repeat-x');
+    pIni.push('0 top');pFim.push(bNatalRed(passoH)+'px top');
+    camadas.push(uriV+' border-box');tamanhos.push(tam+'px auto');repete.push('repeat-y');
+    pIni.push('right 0');pFim.push('right '+bNatalRed(passoV)+'px');
+    camadas.push(uriH+' border-box');tamanhos.push('auto '+tam+'px');repete.push('repeat-x');
+    pIni.push('0 bottom');pFim.push(bNatalRed(-passoH)+'px bottom');
+    camadas.push(uriV+' border-box');tamanhos.push(tam+'px auto');repete.push('repeat-y');
+    pIni.push('left 0');pFim.push('left '+bNatalRed(-passoV)+'px');
+    camadas.push('linear-gradient('+c3+', '+c3+') border-box');tamanhos.push('auto auto');
+    repete.push('no-repeat');pIni.push('0 0');pFim.push('0 0');
+    props.push('border: '+tam+'px solid transparent;');
+    props.push('border-radius: '+raio+'px;');
+    props.push('background:\n  '+camadas.join(',\n  ')+';');
+    props.push('background-size: '+tamanhos.join(', ')+';');
+    props.push('background-repeat: '+repete.join(', ')+';');
+    props.push('background-position: '+pIni.join(', ')+';');
+    if(halo)props.push('box-shadow: 0 0 '+haloraio+'px rgba('+bHexRgb(c2)+', '+haloop+');');
+    if(cfg.ntMov==='girar'){
+      anim='fc-borda-natal';
+      keys='@keyframes fc-borda-natal {\n  0%   { background-position: '+pIni.join(', ')+'; }\n'+
+           '  100% { background-position: '+pFim.join(', ')+'; }\n}';
+      /* Congelar na posicao de partida: a guirlanda para e continua inteira a vista. */
+      keysRm='  @keyframes fc-borda-natal {\n    0%, 100% { background-position: '+pIni.join(', ')+'; }\n  }';
+      props.push('animation: '+anim+' '+vel+'s linear infinite;');
+    }
   }else if(ef==='pulso'){
     anim='fc-borda-pulso';
     /* pr/po vinham de um ternario sobre "halo": marcar "sem halo" nao apagava o pulso, so
@@ -10998,6 +11264,22 @@ function bConsolidar(mAtual){
   return {keys:m2.keys,keysRm:m2.keysRm,nome:p.nome,efeito:m2.efeito};
 }
 
+/* O TAMANHO A VISTA. So a guirlanda precisa disto: nos outros efeitos o codigo 2 tem menos
+   de 1 KB e ninguem nunca vai esbarrar em limite de campo. Aqui os desenhos viajam dentro do
+   CSS, e "o Prosite aceita este tamanho?" e a unica pergunta desta rodada que nao se responde
+   daqui -- entao o numero fica na tela, em vez de o operador descobrir pelo campo recusando.
+   O limiar de 12 KB nao e uma medida do Prosite (nao temos essa medida): e o ponto a partir do
+   qual vale a pena avisar antes de colar. O texto diz isso com essas palavras. */
+function bPeso(props,ef){
+  var el=$('b-peso');
+  if(!el)return;
+  if(ef!=='natal'){el.style.display='none';return;}
+  var kb=Math.round(props.length/102.4)/10;
+  el.style.display='block';
+  el.textContent=(kb>12)
+    ? 'O codigo 2 ficou com '+kb+' KB. Campos de CSS de painel costumam ter limite de tamanho, e nao sabemos qual e o do Prosite: cole e confira que ele aceitou. Se recusar, tire enfeites da lista.'
+    : 'Tamanho do codigo 2: '+kb+' KB.';
+}
 function bGerar(){
   if(fcAjustarTodos(B_NUMS))salvarEstado();
   var m=bMontar(bCfgDom());
@@ -11011,6 +11293,7 @@ function bGerar(){
     c1+='/* Cole apenas o codigo 2 no campo CSS Customizado do componente. */';
     $('b-out1').value=c1;
     $('b-out2').value=m.props;
+    bPeso(m.props,m.efeito);
     fccMarcar('bor');
     return;
   }
@@ -11046,6 +11329,7 @@ function bGerar(){
   c1+='</sty'+'le>';
   $('b-out1').value=c1;
   $('b-out2').value=m.props;
+  bPeso(m.props,m.efeito);
   fccMarcar('bor');
 }
 

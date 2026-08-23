@@ -10,6 +10,8 @@ Entregues em 22/08/2026: os três itens que estavam aqui — o bloco sempre carr
 
 Entregue também em 22/08/2026, a pedido do dono: o **contador da barra virou opcional** (`docs/specs/2026-08-22-contador-opcional-design.md`) — a barra pode mostrar só a mensagem, com a contagem correndo por dentro.
 
+Entregue também em 22/08/2026: a **guirlanda de Natal**, sexto efeito da aba Bordas (`docs/specs/2026-08-22-borda-natal-design.md`).
+
 A próxima sai do que o dono encontrar no uso.
 
 ---
@@ -21,7 +23,8 @@ A próxima sai do que o dono encontrar no uso.
 3. **Cobrança de teste de R$ 0,01** para si mesmo, indo até o app do banco. É o único trecho do caminho que não é verificável daqui. Vale fazer uma segunda, **com desconto**, para ver os dois valores no cartão e conferir no extrato qual chegou.
 4. **Levar a configuração para o celular** — *Exportar tudo → Com os dados* no computador, *Importar* no celular. Leva desconto, identidade e endereço de uma vez. Continua valendo, mas **deixou de ser necessário para o campo de desconto aparecer**: ele agora aparece em qualquer aparelho, mesmo sem nada configurado.
 5. **Regerar e recolar** os blocos de **captação de leads** e **slideshow** na landing de Natal: os dois ainda se mexem com "Reduzir movimento" ligado, e a correção já está publicada na ferramenta.
-6. **A `/cobrar` na tela de início do iPhone** — instalar é gesto de aparelho, e o manifesto só foi conferido pelo servidor e pelo navegador. Confirmar que o ícone da coruja aparece e que a página abre em tela cheia.
+6. **Colar a guirlanda de Natal num componente do Prosite e confirmar que o campo aceitou.** É o único ponto do efeito que não é verificável daqui: o código 2 tem entre 2,5 KB (um enfeite) e 22 KB (os sete), e não sabemos o limite do campo **CSS Customizado**. A ferramenta mostra o tamanho na tela. Se recusar, tire enfeites da lista.
+7. **A `/cobrar` na tela de início do iPhone** — instalar é gesto de aparelho, e o manifesto só foi conferido pelo servidor e pelo navegador. Confirmar que o ícone da coruja aparece e que a página abre em tela cheia.
 
 ---
 

@@ -919,6 +919,26 @@ Spec: `docs/specs/2026-08-22-contador-opcional-design.md`. Alcance: aba **Contag
 
 **Verificação.** Com o contador **ligado** (o padrão), as **12 saídas**, os **14 links** e as **12 variações de bloco** saíram byte a byte idênticas à `main` — a mudança não escreveu nada, só passou a poder omitir. O bloco entregue foi **executado numa página servida de verdade** em oito combinações (mensagem única, mensagem com o marcador, urgência, progresso — cada uma com o contador ligado e desligado), conferindo que o literal `{contador}` nunca aparece, que o texto **muda** a cada segundo com o relógio e **não muda** sem ele, e zero erro de JS: **48 de 48**. Na interface, os dois estados foram medidos campo a campo, inclusive a **prévia**, que executa o bloco. 570 IDs, nenhum repetido.
 
+### Guirlanda de Natal: o sexto efeito da aba Bordas (22/08/2026)
+
+Spec: `docs/specs/2026-08-22-borda-natal-design.md`. Plano: `docs/superpowers/plans/2026-08-22-borda-natal.md`. Alcance: aba **Bordas com efeito** — nenhum arquivo compartilhado, nenhuma troca de versão.
+
+**A restrição que define o desenho.** O código 2 desta aba são **propriedades soltas** aplicadas no elemento raiz do componente: sem seletor, portanto sem `::before`, sem `::after` e sem elementos filhos. A única porta para desenhar na moldura é o `background-image` — e é por isso que cada enfeite é um **SVG embutido como data URI**, e não uma tag. É o mesmo mecanismo do "listras em movimento", com desenho no lugar do gradiente.
+
+**Dez camadas, e só quatro andam.** Da frente para trás: o miolo (`padding-box`, que é o que confina os enfeites à faixa), os quatro cantos (`no-repeat`), as quatro tiras (topo e base em `repeat-x`, laterais em `repeat-y`) e a cor de base. `background-position` é uma lista por camada: a animação move as tiras — topo para a direita, direita para baixo, base para a esquerda, esquerda para cima — e repete as outras idênticas nos dois quadros, o que faz a guirlanda dar a volta.
+
+**Dois ladrilhos, não um.** Não há como girar uma camada de fundo, então as laterais precisam do próprio desenho com os motivos empilhados; sem ele os enfeites das laterais sairiam deitados.
+
+**Paleta híbrida.** Cada motivo traz as cores naturais cravadas (o gingerbread marrom, a rena marrom, a bengala vermelha e branca) e deixa dois pontos abertos: `{A}` para o destaque e `{B}` para o secundário, que seguem as cores da aba ou o vermelho-e-dourado de Natal. **`currentColor` não funciona** aqui — um SVG usado como fundo é um documento à parte e não enxerga o `color` do componente —, então as cores entram no texto na hora de gerar.
+
+**O que não é possível, e está dito na interface:** cada enfeite girar no próprio eixo. SVG como `background-image` é renderizado em modo estático, e não há como criar um elemento por enfeite.
+
+**A espessura da borda é o tamanho do enfeite.** Um desenho reconhecível pede 24–48 px e o `b-esp` vai só até 20; em vez de alargar a faixa de um campo que os outros cinco efeitos usam, este traz o próprio (`b-nt-tam`, 16–64) e deixa o `b-esp` **à vista, desabilitado, com aviso âmbar**.
+
+**O tamanho do código 2 virou assunto — e a solução foi estrutural.** Escrito direto, o texto levava **oito cópias** dos desenhos (o ladrilho horizontal duas vezes, o vertical duas, o canto quatro) e a codificação por `encodeURIComponent` inflava mais 4,5 vezes, porque ela escapa a aspa dupla e o espaço. Duas correções: cada desenho passou a morar numa **propriedade customizada** (`--fcn-h`, `--fcn-v`, `--fcn-c`) referenciada por `var()`, e a codificação passou a escapar **só** `%`, `#`, `<` e `>` — sendo o `<` também o que tira o sanitizador do Prosite do caminho. Com os sete enfeites: **de 68 KB para 22 KB**; com três, 5,1 KB. A ferramenta **mostra o tamanho na tela** e avisa acima de 12 KB, porque "o campo do Prosite aceita este tamanho?" é a única pergunta desta rodada que não se responde daqui.
+
+**Verificação.** As 12 saídas dos oito geradores e as 9 cobranças **byte a byte idênticas** à `main`. O CSS aplicado num elemento de verdade em seis cenários, com o número de camadas, a espessura, a animação e o movimento do `background-position` conferidos — mais movimento reduzido (a guirlanda para e as camadas ficam) e a recusa sem enfeite. Na interface: campos, aviso âmbar, prévia e preset. 582 IDs, nenhum repetido, zero erro de console.
+
 ## 5. Decisões de arquitetura registradas
 
 - **O que o gerador consegue provar sozinho, ele prova — e recusa antes de entregar** (22/08/2026). A ferramenta aceitava qualquer texto como chave Pix desde que coubesse e não tivesse caractere estranho; o resultado foi um bloco publicado com `CHAVE_PIX='contato'` e um cliente lendo *"a instituição recebedora não conseguiu processar"* no aplicativo do banco. **Erro que a geração consegue detectar não pode chegar ao cliente.** O critério que separa o que dá para conferir do que não dá é se a resposta está no próprio dado: o formato da chave está (cinco desenhos, dígitos verificadores inclusive); a **existência** dela não está, e continua sendo a cobrança de um centavo que responde. Onde a conferência não decide, ela declara o limite em vez de fingir.
