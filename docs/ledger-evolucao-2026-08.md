@@ -474,3 +474,22 @@ Estimado **45 min – 1h15** depois de ler o código; real dentro da faixa. Spec
 **Falso positivo de substring custa tempo.** A varredura por restos de relógio no bloco desligado acusou `DIG` — que era `CODIGO`. Varredura por identificador usa fronteira de palavra; sem ela, a caça produz suspeita onde não há defeito. Mas ela **também** achou dois defeitos reais: comentários que descreviam maquinaria que o bloco não carrega mais.
 
 **Um pedido pequeno expôs um buraco antigo.** A pílula de `.radios` nunca teve estilo de desabilitado — três casos anteriores estavam com metade do padrão "desabilitado com aviso âmbar" faltando desde que ele nasceu. Só apareceu porque desta vez alguém olhou a tela depois de desabilitar.
+
+
+---
+
+## Décima terceira rodada — a guirlanda de Natal (22/08/2026)
+
+Estimada em **3h – 5h** (passos 1 e 2 juntos, a pedido do dono). Spec: `docs/specs/2026-08-22-borda-natal-design.md`.
+
+### O que a rodada ensinou sobre método
+
+**Dois subagentes em Sonnet, em paralelo, enquanto o principal escrevia a spec e o plano.** Um desenhou os sete motivos em SVG, com contrato fechado (`{id,nome,w,corpo}`, altura 100, `{A}`/`{B}` para a paleta híbrida, ASCII, só aspas duplas) e uma folha de contato a 32 px e 64 px sobre fundo claro e escuro. Esse deu certo: o contrato bateu na primeira, e a conferência visual respondeu a única pergunta que importava — os desenhos são reconhecíveis no tamanho em que vão aparecer.
+
+**O outro subagente não deu.** Ele escreveu o arnês contra uma API *suposta* da `lib.mjs`, porque o scratchpad tinha sido limpo e a biblioteca não existia mais no disco. O script ficou coerente consigo mesmo e incompatível com o real. Lição: **delegar contra um contrato que existe, não contra um que será recriado.** Reescrever o arnês do zero foi mais rápido que remendar 400 linhas escritas sobre suposições.
+
+**O scratchpad é volátil, e isso custou a fotografia de referência duas vezes.** A regressão byte a byte depende de uma captura da `main`; ela sumiu no meio da sessão. Recuperável (`git archive main` mais o arnês reescrito), mas é trabalho repetido. Vale considerar versionar o arnês em `scripts/`.
+
+**O tamanho só apareceu porque foi medido.** O efeito passou em todas as checagens funcionais na primeira execução — e entregava **68 KB** com os sete enfeites, o que provavelmente nenhum campo de CSS de painel aceita. A tabela de bytes no arnês foi o que transformou "funciona" em "funciona e cabe". Duas correções estruturais (propriedade customizada para cada desenho aparecer uma vez em vez de oito; codificação escapando só os quatro caracteres necessários em vez de tudo) levaram a 22 KB. **Checagem funcional que passa não é o fim da medição.**
+
+**A restrição foi lida antes de prometer.** O código 2 são propriedades soltas, sem seletor — foi isso que decidiu que os enfeites seriam `background-image`, e foi isso que permitiu dizer, na análise, que "cada enfeite girando no próprio eixo" não é possível. Dizer o limite na análise é mais barato que descobri-lo no meio.
