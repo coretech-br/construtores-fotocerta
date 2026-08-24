@@ -65,6 +65,10 @@
   .topo svg{width:40px;height:48px;flex-shrink:0}
   .topo h1{font-size:22px;font-weight:600;margin:0;letter-spacing:.3px}
   .topo p{margin:2px 0 0;color:var(--tinta-suave);font-size:13px}
+  /* O carimbo de publicacao. Discreto de proposito: ele e uma etiqueta, nao um aviso --
+     so precisa estar la quando o dono for procurar "que versao eu estou usando". */
+  .topo p.fcv{margin:4px 0 0;font-size:11.5px;letter-spacing:.2px;opacity:.75}
+  .topo p.fcv b{font-weight:600}
 
   /* flex-wrap: os botoes ganharam um selo "fora" (preset geral, fase 3) e a barra passou a
      poder nao caber. Sem quebrar linha ela estouraria a largura da pagina -- o que ja
@@ -545,6 +549,7 @@
   <span id="topo-coruja"></span>
   <div>
     <h1>Construtores Foto Certa</h1>
+    <p class="fcv" id="fc-versao"></p>
     <p>Gere o código dos componentes do Prosite preenchendo os parâmetros. Os valores ficam salvos neste navegador.</p>
   </div>
 </div>
@@ -2037,7 +2042,7 @@
       <div id="c-borda-campo">
       <div class="cor-linha"><input type="color" id="c-cborda" value="#FFC94A"><input type="text" id="c-cborda-t" value="#FFC94A"></div>
       </div>
-      <label for="c-mob">Largura de corte do celular <small>(px, de 320 a 1024 — abaixo disso usa a versão curta e, se você tiver pedido para escondê-la, some com a coruja; fora da faixa o campo se corrige sozinho)</small></label>
+      <label for="c-mob">Largura de corte do celular <small>(px, de 320 a 1024 — abaixo disso usa a versão curta e, se você tiver pedido para esconde-la, some com a coruja; fora da faixa o campo se corrige sozinho)</small></label>
       <input type="number" id="c-mob" value="640" min="320" max="1024" step="10">
       </fieldset>
     </div>
@@ -2831,6 +2836,32 @@
 'use strict';
 (function(){
 /* Escopo isolado: o $ abaixo e privado e nao conflita com o jQuery da Alboom */
+
+/* ============ o carimbo de publicacao ============
+   POR QUE ELE EXISTE. A ferramenta e servida pelo GitHub Pages, e o navegador pode
+   estar executando uma copia guardada. Sem carimbo na tela nao ha como saber QUAL
+   versao esta rodando -- "esta atualizado" viraria fe, e nao medida.
+
+   O QUE ELE DIZ, exatamente: a versao DESTE arquivo, o que o navegador carregou
+   agora. Se a copia for velha, o carimbo vem velho junto -- e e justamente por
+   isso que ele serve: ele DENUNCIA a copia velha em vez de esconde-la. Ele nao
+   consulta o GitHub, entao nao afirma nada sobre o que existe la; afirma sobre o
+   que esta sendo executado aqui, que e a pergunta que o dono faz na pratica.
+
+   QUEM O ESCREVE: scripts/carimbar-publicacao.sh, rodado antes do envio.
+   QUEM IMPEDE QUE ELE MINTA: scripts/conferir-versoes.sh, que recusa index.html
+   alterado sem a versao mudar junto -- a mesma disciplina do fc-compartilhado.js,
+   e pela mesma razao: carimbo que ninguem confere e o defeito de amanha. */
+var FC_VERSAO='2026-08-24b';
+var FC_PUBLICADO='2026-08-24 13:44';   /* America/Sao_Paulo -- escrito pelo carimbador */
+(function(){
+  var el=document.getElementById('fc-versao');
+  if(!el) return;
+  var d=FC_PUBLICADO.split(/[- :]/);
+  el.innerHTML='Versão <b>'+FC_VERSAO+'</b> · publicada em '+d[2]+'/'+d[1]+'/'+d[0]+' às '+d[3]+':'+d[4];
+  el.title='Esta e a versao que o SEU navegador esta executando agora. '+
+    'Se ela estiver atras da que foi publicada, recarregue segurando Shift.';
+})();
 
 /* ============ a fonte compartilhada com a /cobrar ============
    O QUE ELA E: fc-compartilhado.js, carregado logo acima. Ele traz o que as

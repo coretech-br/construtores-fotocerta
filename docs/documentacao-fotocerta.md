@@ -1008,6 +1008,18 @@ Spec: `docs/specs/2026-08-24-popup-fora-do-horario-design.md`. Alcance: aba **Ca
 
 **Verificação.** Primeira aplicação do molde versionado (`scripts/verificar/pagina.mjs`) a um segundo bloco, o que também o validou fora da aba onde nasceu: com relógio falso, o pop-up abre às 14h de segunda, **não** abre às 22h nem no domingo, e o botão continua lá. As outras três combinações (abrir mesmo assim, sem horário, modo clique) medidas do mesmo jeito. Regressão byte a byte intacta — inclusive o `l-out`, porque o padrão de fábrica tem o horário desligado.
 
+### O carimbo de publicação: a ferramenta diz qual versão está rodando (24/08/2026)
+
+Alcance: `index.html` (o topo da página) mais dois scripts. **Nenhum gerador foi tocado** — a regressão byte a byte das 12 saídas e das 9 cobranças saiu idêntica.
+
+**O que apareceu na tela.** Logo abaixo de *Construtores Foto Certa*, uma linha discreta: *Versão 2026-08-24a · publicada em 24/08/2026 às 13:41*.
+
+**O que ela afirma, exatamente — e o que não afirma.** Ela diz a versão **deste arquivo, o que o navegador carregou agora**. Ela não consulta o GitHub e portanto não afirma nada sobre o que existe lá. Isso não é uma limitação contornada por preguiça: é a propriedade útil. Se o navegador estiver servindo uma cópia guardada, o carimbo vem velho junto — ele **denuncia** o cache em vez de escondê-lo. Um carimbo que consultasse o GitHub diria "está tudo certo" enquanto a página em execução fosse de anteontem, que é a pior das duas respostas possíveis.
+
+**Quem escreve e quem impede que minta.** Escreve `scripts/carimbar-publicacao.sh`, rodado uma vez antes do commit que vai ao ar: ele escolhe a versão (`AAAA-MM-DD` mais letra, avançando a letra no mesmo dia), grava `FC_VERSAO` e `FC_PUBLICADO` no fuso de São Paulo, re-registra **só** a linha do `index.html` em `scripts/versoes.txt` e roda a conferência inteira. Impede que minta a mesma `scripts/conferir-versoes.sh`, agora estendida ao `index.html`: conteúdo alterado sem a versão mudar junto **falha**, com a mensagem que diz o comando a rodar. É a disciplina que já valia para o `fc-compartilhado.js`, pela mesma razão — carimbo que ninguém confere é o defeito de amanhã. Medido: acrescentando uma linha ao `index.html` sem recarimbar, a conferência recusou.
+
+**O detalhe que fez o hash funcionar.** O sha256 do `index.html` é calculado **ignorando as duas linhas do próprio carimbo** (`scripts/sha-index.sh`, a regra escrita uma vez e usada pelos dois scripts). Sem essa exclusão o carimbo mudaria o hash sozinho a cada rodada, e a conferência nunca conseguiria responder a única pergunta que lhe cabe: *o conteúdo mudou?*
+
 ## 5. Decisões de arquitetura registradas
 
 - **Toda saída que vai para um campo do Prosite aparece no painel consolidado** (23/08/2026). O painel é o principal recurso de usabilidade do dono, e uma saída que não chega nele é código que ele vai esquecer de colar. A regra alcança Tag Head, Tag Body e o CSS que incide sobre um componente customizado por outra aba. O que **não** vai para campo do Prosite é declarado com o motivo, nunca omitido. E como o mapa é escrito à mão, existe uma rede: o painel compara as saídas com conteúdo contra o plano e **denuncia em vermelho** a que sobrar.
@@ -1163,7 +1175,8 @@ Repositório público servido pelo GitHub Pages. A raiz é o que o Pages publica
 - `CNAME`, `.nojekyll` — configuração do GitHub Pages (domínio próprio e desligamento do Jekyll)
 - `docs/documentacao-fotocerta.md` — este documento (fonte da verdade do contexto)
 - `scripts/verificar/` — o **arnês de verificação**, versionado: `regressao.sh` (a regressão byte a byte, um comando), `geradores.mjs` (a fotografia das saídas), `pagina.mjs` (o **molde** para executar um bloco gerado numa página que imita o Prosite) e `lib.mjs`. Um comando compara o que a árvore de trabalho gera com o que uma referência gera: as 12 saídas dos oito geradores e as 9 cobranças (bloco e link). Existe versionado desde 22/08/2026, porque enquanto morava numa pasta temporária foi perdido duas vezes no meio de uma rodada — e cada perda custou recapturar a referência inteira
-- `scripts/conferir-versoes.sh`, `scripts/versoes.txt` — a conferência **mecânica** das versões dos arquivos servidos com `?v=`: compara o conteúdo com a versão declarada e falha quando um mudou sem o outro. Existe porque a guarda de versão das duas páginas é cega por construção
+- `scripts/conferir-versoes.sh`, `scripts/versoes.txt` — a conferência **mecânica** das versões: `fc-compartilhado.js`, `cobrar/manifest.json` e o `index.html` (pelo carimbo de publicação). Compara o conteúdo com a versão declarada e falha quando um mudou sem o outro. Existe porque a guarda de versão das duas páginas é cega por construção
+- `scripts/carimbar-publicacao.sh`, `scripts/sha-index.sh` — escrevem o **carimbo de versão e hora** que a ferramenta mostra embaixo do título, e a regra de hash que ignora o próprio carimbo. Rodar `carimbar-publicacao.sh` uma vez antes do commit que vai ao ar
 - `docs/specs/` — specs de design das funcionalidades, um arquivo por feature
 - `CLAUDE.md` — instruções do projeto e fluxo de manutenção (carregado automaticamente pelo Claude Code)
 

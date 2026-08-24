@@ -37,6 +37,13 @@
 #                        (o quarto lugar de versao do projeto, que estava fora
 #                         de qualquer disciplina)
 #
+# O index.html entrou na mesma disciplina em 24/08/2026, quando ele passou a
+# CARIMBAR na tela a versao e a hora da publicacao. O hash dele e calculado
+# IGNORANDO as duas linhas do proprio carimbo (scripts/sha-index.sh), senao o
+# carimbo mudaria o hash sozinho e a conferencia nunca saberia se o CONTEUDO
+# mudou. Quem troca a versao dele e scripts/carimbar-publicacao.sh -- aqui so
+# se confere que ela foi trocada.
+#
 # Saida: "OK" e codigo 0, ou a lista do que nao bate e codigo 1.
 # sh puro, sem dependencia -- roda no Mac do dono e em qualquer CI.
 # ============================================================================
@@ -52,6 +59,7 @@ sha() { shasum -a 256 "$1" 2>/dev/null | cut -d' ' -f1 || openssl dgst -sha256 "
 # ---- as versoes declaradas, lidas de onde elas moram ----
 v_arquivo=$(sed -n "s/.*FC_COMPART_VERSAO='\([^']*\)'.*/\1/p" "$raiz/fc-compartilhado.js" | head -1)
 v_manifesto=$(sed -n 's/.*rel="manifest" href="manifest\.json?v=\([^"]*\)".*/\1/p' "$raiz/cobrar/index.html" | head -1)
+v_index=$(sed -n "s/^var FC_VERSAO='\([^']*\)';.*/\1/p" "$raiz/index.html" | head -1)
 
 if [ "$registrar" = "1" ]; then
   {
@@ -59,6 +67,7 @@ if [ "$registrar" = "1" ]; then
     echo "# com ?v=: <arquivo>  <versao declarada>  <sha256 do conteudo>."
     echo "fc-compartilhado.js  $v_arquivo  $(sha "$raiz/fc-compartilhado.js")"
     echo "cobrar/manifest.json  $v_manifesto  $(sha "$raiz/cobrar/manifest.json")"
+    echo "index.html  $v_index  $(sh "$raiz/scripts/sha-index.sh")"
   } > "$reg"
   echo "Registrado em scripts/versoes.txt:"
   grep -v '^#' "$reg"
@@ -75,14 +84,22 @@ if [ ! -f "$reg" ]; then
 else
   while read -r arq ver hash; do
     case "$arq" in ''|'#'*) continue;; esac
-    atual=$(sha "$raiz/$arq")
     case "$arq" in
-      fc-compartilhado.js) decl="$v_arquivo";;
+      index.html) atual=$(sh "$raiz/scripts/sha-index.sh");;
+      *)          atual=$(sha "$raiz/$arq");;
+    esac
+    case "$arq" in
+      fc-compartilhado.js)  decl="$v_arquivo";;
       cobrar/manifest.json) decl="$v_manifesto";;
-      *) decl="$ver";;
+      index.html)           decl="$v_index";;
+      *)                    decl="$ver";;
     esac
     if [ "$atual" != "$hash" ] && [ "$decl" = "$ver" ]; then
-      erro "$arq MUDOU e a versao continua \"$ver\". Troque a versao (e o ?v= de quem o carrega) e rode --registrar. Sem isso o navegador segue servindo a copia velha, sem aviso nenhum."
+      if [ "$arq" = "index.html" ]; then
+        erro "index.html MUDOU e a versao continua \"$ver\". Rode: scripts/carimbar-publicacao.sh. Sem isso a pagina publicada anuncia na tela uma versao e uma hora que nao sao as dela."
+      else
+        erro "$arq MUDOU e a versao continua \"$ver\". Troque a versao (e o ?v= de quem o carrega) e rode --registrar. Sem isso o navegador segue servindo a copia velha, sem aviso nenhum."
+      fi
     fi
     if [ "$atual" = "$hash" ] && [ "$decl" != "$ver" ]; then
       erro "$arq esta com a versao \"$decl\" mas o conteudo e o mesmo da versao \"$ver\". Ou faltou --registrar, ou a versao foi trocada a toa."
@@ -108,4 +125,4 @@ if [ -n "$falhas" ]; then
   echo "CONFERENCIA DE VERSOES: FALHOU$falhas"
   exit 1
 fi
-echo "CONFERENCIA DE VERSOES: OK  (fc-compartilhado.js=$v_arquivo, cobrar/manifest.json=$v_manifesto)"
+echo "CONFERENCIA DE VERSOES: OK  (fc-compartilhado.js=$v_arquivo, cobrar/manifest.json=$v_manifesto, index.html=$v_index)"
