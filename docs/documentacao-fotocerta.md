@@ -1008,6 +1008,20 @@ Spec: `docs/specs/2026-08-24-popup-fora-do-horario-design.md`. Alcance: aba **Ca
 
 **Verificação.** Primeira aplicação do molde versionado (`scripts/verificar/pagina.mjs`) a um segundo bloco, o que também o validou fora da aba onde nasceu: com relógio falso, o pop-up abre às 14h de segunda, **não** abre às 22h nem no domingo, e o botão continua lá. As outras três combinações (abrir mesmo assim, sem horário, modo clique) medidas do mesmo jeito. Regressão byte a byte intacta — inclusive o `l-out`, porque o padrão de fábrica tem o horário desligado.
 
+### A consolidação passa a entregar o CSS do outro componente (24/08/2026)
+
+Spec: `docs/specs/2026-08-24-codigo-2-do-outro-componente-design.md`. Alcance: aba **Bordas com efeito** e **painel consolidado**.
+
+**O buraco.** A consolidação juntava as animações dos dois componentes num código 1 só e parava aí. O CSS do segundo ficava por conta do operador, que teria de reaplicar aquele preset, gerar de novo e copiar antes de voltar atrás. O desfecho provável era levar a animação para a Tag Head **sem** levar o CSS que a usa — e o segundo componente ficaria **parado, sem erro nenhum na tela**. Depois do batismo por assinatura ficou pior: o nome do outro componente é `fc-borda-brilho-c657`, e não há como digitá-lo.
+
+**A saída nova.** Um **código 3**, "CSS Customizado do OUTRO componente", que aparece só quando há preset consolidado e some junto com ele. Ele sai do **mesmo `bMontar`** que escreveu a animação consolidada, então os dois não têm como discordar. E sai **nos dois desfechos**: mesmo quando a animação é a mesma, o outro componente tem cores, fundo e velocidade próprios — medido, código 2 com `4s` e código 3 com `12s`, um `@keyframes` só servindo aos dois.
+
+**Três decisões.** Trocar o preset **limpa a caixa 3 na hora**: deixá-la ali seria oferecer o CSS de um componente com o rótulo de outro, e colar CSS no componente errado não dá erro, só estraga os dois. O painel empurra o item pela **escolha**, não por a caixa ter texto — assim a caixa vazia vira "Ainda não gerado" em vez de o painel montar uma página a que falta justamente aquele CSS. E a escolha é lida do **campo**, não do preset geral, porque `consol` descreve outro componente e está declarada em `fora`.
+
+**O que continua fora:** a caixa aceita **um** preset, logo dois componentes por página. Não há limite técnico para mais — só a caixa de seleção. Uma lista de N exigiria seleção múltipla, N saídas com identificadores estáveis (a varredura de órfãs casa `[a-z]-out[0-9]*`) e N itens no painel.
+
+**Verificação.** Regressão de **13** saídas (o `b-out3` entrou na fotografia, e ali ele tem de sair **vazio** — saída que só aparece às vezes é onde o lixo de uma passagem anterior se esconde) e 9 cobranças, idênticas. Os três casos da aba e os **quatro** estados do painel: sem consolidação não cita nada e não acusa órfã; escolhido e não gerado, cobra a geração; gerado, repassa o CSS idêntico ao da aba com o nome do preset no destino; desmarcado, some sem virar órfã.
+
 ### O nome da animação passa a sair do conteúdo dela (24/08/2026)
 
 Spec: `docs/specs/2026-08-24-nome-da-animacao-por-assinatura-design.md`. Alcance: aba **Bordas com efeito**.

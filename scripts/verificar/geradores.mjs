@@ -22,7 +22,11 @@ if(!ARV || !PORTA || !SAIDA){
   process.exit(2);
 }
 
-const SAIDAS = ['s-out','l-out','t-out1','t-out2','t-out3','u-out','b-out1','b-out2','c-out1','p-out1','m-out'];
+/* b-out3 (o CSS do outro componente, quando ha preset consolidado) entra na lista mesmo
+   sem o cenario exercitar a consolidacao: aqui ele PRECISA sair vazio, e a fotografia passa a
+   cobrar isso. Saida que so aparece as vezes e onde o lixo de uma passagem anterior se
+   esconde. */
+const SAIDAS = ['s-out','l-out','t-out1','t-out2','t-out3','u-out','b-out1','b-out2','b-out3','c-out1','p-out1','m-out'];
 const ABAS = [['aba-slide','s-gerar'],['aba-leads','l-gerar'],['aba-tidy','t-gerar'],
   ['aba-uni','u-gerar'],['aba-bor','b-gerar'],['aba-cnt','c-gerar'],['aba-cob','p-gerar'],['aba-loja','m-gerar']];
 

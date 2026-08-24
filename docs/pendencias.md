@@ -16,6 +16,8 @@ Entregue também em 22/08/2026: a **guirlanda de Natal**, sexto efeito da aba Bo
 
 Entregue em 23/08/2026: a **página de obrigado do TidyCal** (`docs/specs/2026-08-23-pagina-de-obrigado-tidycal-design.md`) — marcadores no texto da página de confirmação, preenchidos com os dados do agendamento.
 
+Entregue em 24/08/2026: a **consolidação passou a entregar o CSS do outro componente** (`docs/specs/2026-08-24-codigo-2-do-outro-componente-design.md`), com o painel consolidado conhecendo a saída nova.
+
 Entregue em 24/08/2026: o **nome da animação passou a sair do conteúdo dela** (`docs/specs/2026-08-24-nome-da-animacao-por-assinatura-design.md`) — dois componentes com o mesmo efeito e parâmetros diferentes convivem agora na mesma página, e dois com a mesma animação passam a colar um bloco só.
 
 Entregue em 24/08/2026: o **selo de destaque na aba Bordas** (`docs/specs/2026-08-24-selo-de-destaque-design.md`) — três formas (faixa, selo circular, fita) mais a ênfase por elevação, para marcar o pacote recomendado. O pulsante ficou de fora por decisão do dono, com a razão registrada.
@@ -23,6 +25,8 @@ Entregue em 24/08/2026: o **selo de destaque na aba Bordas** (`docs/specs/2026-0
 Entregue em 24/08/2026: o **carimbo de publicação** — a ferramenta diz, embaixo do título, qual versão o navegador está executando e quando ela foi publicada, com a conferência mecânica que impede o carimbo de mentir.
 
 Entregue em 23/08/2026: a **consolidação da página de obrigado no painel**, mais a **regra** de que todo construtor que toca Tag Head, Tag Body ou o CSS de um componente customizado precisa consolidar — e a **rede** que denuncia a saída esquecida.
+
+**Possível próximo passo, levantado pelo dono em 24/08/2026:** hoje a consolidação aceita **um** preset, logo dois componentes com efeito de borda por página. Não há limite técnico para mais — nem no CSS nem nos `@keyframes` —, só a caixa de seleção. Passar para N exigiria seleção múltipla, N saídas com identificadores estáveis (a varredura de órfãs casa `[a-z]-out[0-9]*`) e N itens no painel. Estimativa: 3h a 4h.
 
 A próxima sai do que o dono encontrar no uso.
 
