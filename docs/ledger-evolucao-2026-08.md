@@ -607,3 +607,20 @@ O dono pediu a lista das dívidas para avaliar, e mandou fazer todas. No meio di
 **A regra nova não inventou um segundo critério.** "Campo com problema" pergunta à **mesma `pixChaveErro`** que recusa a geração. Se tivesse escrito uma segunda checagem ali, teria criado exatamente a divergência que este projeto passou o mês fechando.
 
 **O molde do arnês nasceu das perdas.** As duas armadilhas registradas dentro dele são as duas que me custaram mais tempo no mês: o `textContent` que inclui o próprio script, e o `<select>` que não reage a evento sintético. Registrá-las no código que as evita vale mais que registrá-las só no ledger.
+
+
+---
+
+## Vigésima rodada — o pop-up e o horário de atendimento (24/08/2026)
+
+Pedido do dono, pequeno e bem delimitado.
+
+### O que a rodada ensinou sobre método
+
+**O comportamento antigo não era defeito, e reconhecer isso mudou o desenho.** O pop-up abrindo à noite com o aviso *"deixe seu recado"* capta lead fora do expediente — é uma escolha defensável, e era a que estava publicada. Trocá-la em silêncio teria removido uma capacidade de quem a quisesse. Virou **escolha visível**, com o padrão no que o dono pediu.
+
+**"Zerado na origem" já é padrão da casa.** O desconto Pix com sinal ligado, o pulsar com alternância deslizante, o contador da barra — e agora esta. O molde é sempre o mesmo: a configuração que não vale naquele contexto fica **à vista, desabilitada, com aviso âmbar**, e o gerador não emite a maquinaria correspondente.
+
+**A conferência tinha de ser na hora de abrir, não na de montar.** Entre a carga e o disparo passam os segundos configurados; quem chega pouco antes de fechar cruzaria o expediente esperando. Uma linha de diferença, e a versão errada só falharia perto do fim do expediente — o tipo de defeito que não aparece em teste feito às 14h.
+
+**O molde versionado se pagou na primeira reutilização.** Esta foi a primeira vez que `scripts/verificar/pagina.mjs` foi usado num bloco que não era o dele, e não precisei escrever servidor, bloqueio de rede nem relógio falso — só dizer o que medir. O relógio, em especial, é o que tornou a medição possível: sem ele, testar "fora do horário" dependeria da hora em que eu rodasse.

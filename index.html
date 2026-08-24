@@ -1118,6 +1118,13 @@
       <input type="time" id="l-horfim" value="18:00">
       <label for="l-horaviso">Aviso mostrado fora do horário</label>
       <input type="text" id="l-horaviso" value="Estamos fora do horário de atendimento. Deixe seu recado: respondemos assim que voltarmos.">
+      <label>Fora do horário, o pop-up que <b>abre sozinho</b> deve abrir?</label>
+      <div class="radios">
+      <label><input type="radio" name="l-hor-auto" value="nao" checked><span>Não abrir <small>(o botão continua lá)</small></span></label>
+      <label><input type="radio" name="l-hor-auto" value="sim"><span>Abrir mesmo assim <small>(com o aviso acima)</small></span></label>
+      </div>
+      <p class="ajuda">Vale <b>só</b> para a abertura automática. O <b>botão flutuante continua na tela</b> nos dois casos, e quem clicar nele abre o pop-up a qualquer hora — com o aviso acima quando estiver fora do horário. Ou seja: escolher “não abrir” não deixa de captar recado à noite; só não interrompe quem está lendo a página.</p>
+      <p class="ajuda alerta" id="l-hor-auto-aviso" style="display:none"><b>Esta escolha não vale no modo atual.</b> Ela só tem efeito quando o modo de exibição é <b>“Pop-up abre sozinho”</b> (seção 1). No modo “abre no clique” não há abertura automática para segurar. O valor fica guardado e volta a valer se você trocar o modo.</p>
       <p class="ajuda l-alerta" id="l-hor-aviso" style="display:none"></p>
       </div>
       </fieldset>
@@ -8261,7 +8268,7 @@ function lColeta(){
       efpulsar:$('l-ef-pulsar').checked,efbrilho:$('l-ef-brilho').checked,efdegrade:$('l-ef-degrade').checked,
       efpiscar:$('l-ef-piscar').checked,eftremor:$('l-ef-tremor').checked,
       hor:radio('l-hor'),hordias:lHorDias(),horini:$('l-horini').value,horfim:$('l-horfim').value,
-      horaviso:$('l-horaviso').value,
+      horaviso:$('l-horaviso').value,horauto:radio('l-hor-auto'),
       qlabel:$('l-qlabel').value,qdica:$('l-qdica').value,qmsg:$('l-qmsg').value,qops:lQops,
       t1:$('l-t1').value,t2:$('l-t2').value,t3:$('l-t3').value,t4:$('l-t4').value,
       t5:$('l-t5').value,t6:$('l-t6').value,t7:$('l-t7').value,
@@ -8307,6 +8314,10 @@ function lRestaura(st){
   if(L.horini!=null)$('l-horini').value=L.horini;
   if(L.horfim!=null)$('l-horfim').value=L.horfim;
   if(L.horaviso!=null)$('l-horaviso').value=L.horaviso;
+  /* Estado gravado antes desta versao nao traz 'horauto'. O ausente vale NAO ABRIR, que e o
+     comportamento pedido -- e nao o antigo: quem tinha horario configurado e pop-up automatico
+     estava sendo interrompido fora do expediente sem ter escolhido isso. */
+  setRadio('l-hor-auto',L.horauto==='sim'?'sim':'nao');
   if(L.qlabel!=null)$('l-qlabel').value=L.qlabel;
   if(L.qdica!=null)$('l-qdica').value=L.qdica;
   if(L.qmsg!=null)$('l-qmsg').value=L.qmsg;
@@ -8367,6 +8378,7 @@ function lPadroes(){
   [0,6].forEach(function(d){$('l-hor-d'+d).checked=false;});
   $('l-horini').value='09:00';$('l-horfim').value='18:00';
   $('l-horaviso').value='Estamos fora do horário de atendimento. Deixe seu recado: respondemos assim que voltarmos.';
+  setRadio('l-hor-auto','nao');
   $('l-qlabel').value='Qual ensaio te interessa?';$('l-qdica').value='Escolha uma opção (opcional)';
   $('l-qmsg').value='Interesse';$('l-qop').value='';
   lQops=[];lQRender();
@@ -8499,6 +8511,13 @@ function lToggles(){
   el=$('l-vel-campo');if(el)el.style.display=(radio('l-mov')!=='estatico')?'block':'none';
   var horLigado=(radio('l-hor')==='sim');
   el=$('l-hor-campos');if(el)el.style.display=horLigado?'block':'none';
+  /* A escolha de segurar a abertura automatica so vale no modo automatico. Fica A VISTA,
+     desabilitada e com aviso ambar -- o mesmo tratamento do desconto Pix com sinal ligado e do
+     pulsar com alternancia deslizante. Esconder faria a escolha sumir sem explicacao. */
+  var soClique=(radio('l-modo')!=='automatico'),ha,qs;
+  qs=document.querySelectorAll('input[name="l-hor-auto"]');
+  for(ha=0;ha<qs.length;ha++)qs[ha].disabled=soClique;
+  el=$('l-hor-auto-aviso');if(el)el.style.display=(horLigado&&soClique)?'block':'none';
   var av=$('l-hor-aviso');
   if(av){
     var falta=[];
@@ -8564,7 +8583,10 @@ function lCfg(){
     mov:mov,vel:lPreso('l-vel'),
     ef:{pulsar:$('l-ef-pulsar').checked,brilho:$('l-ef-brilho').checked,degrade:$('l-ef-degrade').checked,
       piscar:$('l-ef-piscar').checked,tremor:$('l-ef-tremor').checked},
-    hor:{ligado:horLigado,ativo:horAtivo,dias:dias,ini:hini,fim:hfim,aviso:escJs($('l-horaviso').value)},
+    hor:{ligado:horLigado,ativo:horAtivo,dias:dias,ini:hini,fim:hfim,aviso:escJs($('l-horaviso').value),
+      /* So faz sentido com o pop-up automatico: no modo "abre no clique" nao ha abertura
+         automatica para segurar. Zerado na origem, como o desconto Pix com sinal ligado. */
+      segura:(horAtivo&&radio('l-hor-auto')!=='sim'&&radio('l-modo')==='automatico')},
     q:{ativo:ops.length>0,label:escJs($('l-qlabel').value),dica:escJs($('l-qdica').value),
       msg:escJs($('l-qmsg').value),ops:ops},
     t1:escJs($('l-t1').value),t2:escJs($('l-t2').value),t3:escJs($('l-t3').value),t4:escJs($('l-t4').value),
@@ -8999,7 +9021,17 @@ function lJs(v){
   if(v.mov!=='estatico'){
     c+="window.addEventListener('resize',function(){if(overlay.classList.contains('fcw-aberto'))conferirTrilho();});\n\n";
   }
-  c+="if(MODO==='automatico'&&!jaViu()){\ntimerAuto=setTimeout(function(){\ntimerAuto=null;\nabrir(true);\n},SEGUNDOS_AUTO*1000);\n}\n}\n\n";
+  c+="if(MODO==='automatico'&&!jaViu()){\ntimerAuto=setTimeout(function(){\ntimerAuto=null;\n";
+  if(v.hor.segura){
+    /* A CONFERENCIA E NA HORA DE ABRIR, e nao na hora de montar: entre a carga da pagina e o
+       disparo passam SEGUNDOS_AUTO segundos, e quem chega pouco antes de fechar cruzaria o
+       expediente esperando. Conferir aqui e o unico jeito de a decisao valer para o instante
+       em que o pop-up apareceria.
+       Nao chama marcarVisto(): o visitante nao viu nada, entao se ele abrir outra pagina do
+       site dentro do horario o pop-up ainda tem a vez dele. */
+    c+='if(!dentroDoHorario())return;   /* fora do expediente o pop-up nao se abre sozinho */\n';
+  }
+  c+="abrir(true);\n},SEGUNDOS_AUTO*1000);\n}\n}\n\n";
   c+="if(document.body)montar();\nelse document.addEventListener('DOMContentLoaded',montar);\n})();\n</scr"+"ipt>";
   return c;
 }

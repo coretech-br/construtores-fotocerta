@@ -996,6 +996,18 @@ Spec: `docs/specs/2026-08-23-dividas-pequenas-design.md`.
 
 **Verificação.** Regressão com **uma única divergência de um byte**, declarada. 13 medidas na dívida 1 (painel abrindo e foco no campo certo, em quatro chaves ruins e num caso de campo vazio); as duas polaridades da dívida 2; as duas abas da dívida 3. Invariante das duas páginas remedido, porque as recusas mudaram de texto: **5 links byte a byte idênticos** e **4 recusas com as mesmas palavras** nos dois lados.
 
+### O pop-up automático respeita o horário de atendimento (24/08/2026)
+
+Spec: `docs/specs/2026-08-24-popup-fora-do-horario-design.md`. Alcance: aba **Captação de leads**.
+
+**O comportamento antigo não era defeito**, e é por isso que a mudança entrou como escolha. Com horário configurado, o pop-up automático abria à noite mostrando *"Estamos fora do horário de atendimento. Deixe seu recado"* — capta recado fora do expediente com uma frase honesta. O dono preferiu não interromper. As duas opções ficaram: **não abrir** (padrão novo) e **abrir mesmo assim, com o aviso** (o anterior). Estado gravado por versão anterior vale como "não abrir": quem estava sendo interrompido nunca escolheu isso.
+
+**Três decisões.** A conferência é **na hora de abrir**, dentro do `setTimeout`, e não na montagem — entre a carga e o disparo passam os segundos configurados, e quem chega pouco antes de fechar cruzaria o expediente esperando. Quando segura, **não chama `marcarVisto()`**: o visitante não viu nada, então o pop-up ainda tem a vez dele noutra página dentro do horário. E o **botão flutuante continua na tela sempre** — escolher "não abrir" não deixa de captar recado à noite, só não interrompe quem está lendo; isso está dito na ajuda do campo, porque é a diferença que decide a escolha.
+
+**Zerado na origem:** no modo "abre no clique" não há abertura automática para segurar, então a guarda não é emitida e a escolha fica à vista, desabilitada, com aviso âmbar.
+
+**Verificação.** Primeira aplicação do molde versionado (`scripts/verificar/pagina.mjs`) a um segundo bloco, o que também o validou fora da aba onde nasceu: com relógio falso, o pop-up abre às 14h de segunda, **não** abre às 22h nem no domingo, e o botão continua lá. As outras três combinações (abrir mesmo assim, sem horário, modo clique) medidas do mesmo jeito. Regressão byte a byte intacta — inclusive o `l-out`, porque o padrão de fábrica tem o horário desligado.
+
 ## 5. Decisões de arquitetura registradas
 
 - **Toda saída que vai para um campo do Prosite aparece no painel consolidado** (23/08/2026). O painel é o principal recurso de usabilidade do dono, e uma saída que não chega nele é código que ele vai esquecer de colar. A regra alcança Tag Head, Tag Body e o CSS que incide sobre um componente customizado por outra aba. O que **não** vai para campo do Prosite é declarado com o motivo, nunca omitido. E como o mapa é escrito à mão, existe uma rede: o painel compara as saídas com conteúdo contra o plano e **denuncia em vermelho** a que sobrar.
