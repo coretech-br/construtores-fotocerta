@@ -1892,9 +1892,9 @@
     <div>
       <fieldset id="b-consol-campo">
       <legend>Código 1 para dois efeitos no mesmo site</legend>
-      <label for="b-consol">Incluir também a animação de um preset salvo</label>
-      <select id="b-consol"><option value="">Não incluir — só o efeito desta tela</option></select>
-      <p class="ajuda"><b>Para que serve:</b> o código 1 é colado na <b>Tag Head da página</b> onde o efeito aparece — o Prosite não tem cabeçalho global, cada página tem o seu. Quando a <b>mesma página</b> usa dois efeitos diferentes, em vez de colar dois blocos concorrentes nesse campo, escolha aqui o preset do outro componente e o código 1 sai com as <b>duas</b> animações e as duas regras de movimento reduzido, num bloco só.</p>
+      <label>Incluir também a animação de outros componentes desta página <small>(marque um preset por componente)</small></label>
+      <div class="radios" id="b-consol-lista"></div>
+      <p class="ajuda"><b>Para que serve:</b> o código 1 é colado na <b>Tag Head da página</b> onde o efeito aparece — o Prosite não tem cabeçalho global, cada página tem o seu. Uma página pode ter vários componentes com borda: marque aqui o preset de cada um dos <b>outros</b>, e o código 1 sai com <b>todas</b> as animações e todas as regras de movimento reduzido, num bloco só. Junto vem o <b>CSS de cada um</b> deles, numerado, para colar no campo de cada componente.</p>
       <p class="ajuda"><b>O mesmo efeito, duas vezes, agora convive.</b> O nome da animação sai do <b>conteúdo</b> dela, e não do tipo do efeito: <code>fc-borda-brilho-a3f2</code>. Dois componentes com o mesmo efeito e parâmetros diferentes — um com selo e outro sem, duas listras de espessuras diferentes — recebem nomes diferentes e cabem no mesmo campo. E quando os dois produzem a <b>mesma</b> animação, o código 1 sai com um bloco só, dizendo que ele serve aos dois.</p>
       <p class="ajuda alerta"><b>Ao regerar, recole os DOIS códigos deste componente.</b> O nome da animação muda quando você muda o efeito, e o código 2 aponta para um nome que só existe no código 1 correspondente. Colar só um dos dois deixa o componente <b>parado</b>, sem nenhum erro na tela. O que já está publicado continua funcionando enquanto você não regerar.</p>
       </fieldset>
@@ -1913,12 +1913,44 @@
       <textarea id="b-out2" readonly spellcheck="false" style="height:250px" placeholder="O código gerado aparece aqui."></textarea>
       </div>
       <div class="saida" id="b-out3-box" style="display:none">
-      <h3>3) CSS Customizado do <b>outro</b> componente
+      <h3>3) CSS Customizado do <b>1º outro</b> componente
       <button class="botao mini" id="b-copy3" style="margin-left:8px">Copiar</button>
       <span class="aviso-copiado" id="b-cop3">Copiado!</span>
       </h3>
-      <p class="ajuda"><b>Este CSS não é deste componente.</b> Ele é do componente descrito pelo preset que você escolheu na consolidação, e vai no campo <b>CSS Customizado daquele</b> componente. Ele sai daqui porque a animação dele acabou de entrar no código 1 — e o nome que ele usa só existe no código 1 que está acima. Os dois andam em par.</p>
-      <textarea id="b-out3" readonly spellcheck="false" style="height:250px" placeholder="Aparece quando você escolhe um preset na caixa de consolidação e gera o código."></textarea>
+      <p class="ajuda" id="b-out3-quem"></p>
+      <textarea id="b-out3" readonly spellcheck="false" style="height:200px" placeholder="Aparece quando você marca um preset na lista de consolidação e gera o código."></textarea>
+      </div>
+      <div class="saida" id="b-out4-box" style="display:none">
+      <h3>4) CSS Customizado do <b>2º outro</b> componente
+      <button class="botao mini" id="b-copy4" style="margin-left:8px">Copiar</button>
+      <span class="aviso-copiado" id="b-cop4">Copiado!</span>
+      </h3>
+      <p class="ajuda" id="b-out4-quem"></p>
+      <textarea id="b-out4" readonly spellcheck="false" style="height:200px" placeholder="Aparece quando você marca um preset na lista de consolidação e gera o código."></textarea>
+      </div>
+      <div class="saida" id="b-out5-box" style="display:none">
+      <h3>5) CSS Customizado do <b>3º outro</b> componente
+      <button class="botao mini" id="b-copy5" style="margin-left:8px">Copiar</button>
+      <span class="aviso-copiado" id="b-cop5">Copiado!</span>
+      </h3>
+      <p class="ajuda" id="b-out5-quem"></p>
+      <textarea id="b-out5" readonly spellcheck="false" style="height:200px" placeholder="Aparece quando você marca um preset na lista de consolidação e gera o código."></textarea>
+      </div>
+      <div class="saida" id="b-out6-box" style="display:none">
+      <h3>6) CSS Customizado do <b>4º outro</b> componente
+      <button class="botao mini" id="b-copy6" style="margin-left:8px">Copiar</button>
+      <span class="aviso-copiado" id="b-cop6">Copiado!</span>
+      </h3>
+      <p class="ajuda" id="b-out6-quem"></p>
+      <textarea id="b-out6" readonly spellcheck="false" style="height:200px" placeholder="Aparece quando você marca um preset na lista de consolidação e gera o código."></textarea>
+      </div>
+      <div class="saida" id="b-out7-box" style="display:none">
+      <h3>7) CSS Customizado do <b>5º outro</b> componente
+      <button class="botao mini" id="b-copy7" style="margin-left:8px">Copiar</button>
+      <span class="aviso-copiado" id="b-cop7">Copiado!</span>
+      </h3>
+      <p class="ajuda" id="b-out7-quem"></p>
+      <textarea id="b-out7" readonly spellcheck="false" style="height:200px" placeholder="Aparece quando você marca um preset na lista de consolidação e gera o código."></textarea>
       </div>
     </div>
   </div>
@@ -2890,8 +2922,8 @@
    QUEM IMPEDE QUE ELE MINTA: scripts/conferir-versoes.sh, que recusa index.html
    alterado sem a versao mudar junto -- a mesma disciplina do fc-compartilhado.js,
    e pela mesma razao: carimbo que ninguem confere e o defeito de amanha. */
-var FC_VERSAO='2026-08-24e';
-var FC_PUBLICADO='2026-08-24 20:48';   /* America/Sao_Paulo -- escrito pelo carimbador */
+var FC_VERSAO='2026-08-24f';
+var FC_PUBLICADO='2026-08-24 20:58';   /* America/Sao_Paulo -- escrito pelo carimbador */
 (function(){
   var el=document.getElementById('fc-versao');
   if(!el) return;
@@ -11055,7 +11087,7 @@ function bColeta(){
   var o=bCampos();
   /* a biblioteca de presets NAO e lida aqui: quem a acrescenta ao fragmento e o salvarEstado,
      para todas as abas ao mesmo tempo (ver o comentario la) */
-  o.consol=$('b-consol').value;  /* escolha sobre OUTRO componente; nao entra no preset (ver 'fora' em ABAS) */
+  o.consol=bConsolEscolhidos();  /* escolha sobre OUTROS componentes; nao entra no preset (ver 'fora' em ABAS) */
   return {b:o};
 }
 /* Escreve na tela um objeto no formato de bCampos(). Serve ao estado gravado E ao "Aplicar"
@@ -11100,8 +11132,7 @@ function bRestaura(st){
   /* a biblioteca ja foi lida pelo restaurarEstado antes desta chamada; aqui so as OPCOES da
      caixa de consolidacao, que precisam existir antes de o valor gravado ser marcado */
   bConsolRender();
-  var sel=$('b-consol');
-  if(sel)sel.value=st.b.consol||'';
+  bConsolMarcar(st.b.consol);
 }
 
 /* Faixa declarada de cada campo numerico da aba: [id, padrao, min, max, inteiro].
@@ -11525,23 +11556,59 @@ function bPresetDepois(){
 }
 /* A caixa de consolidacao do codigo 1 lista os presets desta aba, entao ela e repovoada
    sempre que a lista muda (ver 'aposPresets' em ABAS) e tambem pelo bRestaura. */
+/* Quantos OUTROS componentes cabem numa pagina. Nao e limite de CSS -- a Tag Head aceita
+   quantas animacoes existirem, e desde o batismo por assinatura elas nao colidem mais. E o
+   numero de caixas de saida que existem na tela, e o cap esta aqui, num lugar so, para a
+   recusa poder dize-lo em vez de a ferramenta parar de escrever sem explicar. */
+var B_CONSOL_MAX=5;
+/* Os presets marcados, SEMPRE na ordem da BIBLIOTECA -- e nao na ordem em que o operador
+   clicou. A ordem decide qual componente e o "1o outro", "2o outro"..., e ela nao pode mudar
+   sozinha entre duas geracoes: o operador estaria colando o CSS num componente diferente do
+   que colou da vez anterior, sem nada na tela mudar. Mesma razao de bNatalMarcados. */
+function bConsolEscolhidos(){
+  /* Percorre os campos e compara em JavaScript, em vez de montar um seletor CSS com o nome:
+     nome de preset e texto livre do operador, e uma aspa dentro dele quebraria o seletor. */
+  var arr=fcPresets.bor||[],r=[],marcados={},cx,i;
+  cx=document.querySelectorAll('#b-consol-lista input');
+  for(i=0;i<cx.length;i++)if(cx[i].checked)marcados[cx[i].getAttribute('data-nome')]=1;
+  for(i=0;i<arr.length;i++)
+    if(Object.prototype.hasOwnProperty.call(marcados,arr[i].nome))r.push(arr[i].nome);
+  return r;
+}
+function bConsolMarcar(lista){
+  var g=fcListaDe(lista),cx=document.querySelectorAll('#b-consol-lista input'),i;
+  for(i=0;i<cx.length;i++)cx[i].checked=(g.indexOf(cx[i].getAttribute('data-nome'))>=0);
+}
+/* Aceita a lista nova (array) e a antiga (um nome so, string): estado gravado antes desta
+   rodada nao pode perder a escolha que ja estava la. */
+function fcListaDe(v){
+  if(Object.prototype.toString.call(v)==='[object Array]')return v.slice();
+  var t=String(v==null?'':v);
+  return t?[t]:[];
+}
 function bConsolRender(){
-  var sel=$('b-consol'),arr=fcPresets.bor||[],antes,o,i;
-  if(!sel)return;
-  antes=sel.value;
-  sel.innerHTML='';
-  o=document.createElement('option');o.value='';o.text='Não incluir — só o efeito desta tela';sel.appendChild(o);
+  var box=$('b-consol-lista'),arr=fcPresets.bor||[],antes,i,lab,inp,sp,n=0;
+  if(!box)return;
+  antes=bConsolEscolhidos();
+  box.innerHTML='';
   for(i=0;i<arr.length;i++){
     /* preset de borda fixa nao tem animacao: nao ha o que consolidar, entao nem aparece */
     if(!arr[i].valores.b||arr[i].valores.b.efeito==='fixa')continue;
-    o=document.createElement('option');
-    /* .text, e nao innerHTML: o nome e texto do operador e aqui ele nao vira marcacao */
-    o.value=arr[i].nome;o.text=arr[i].nome;
-    sel.appendChild(o);
+    lab=document.createElement('label');
+    inp=document.createElement('input');
+    inp.type='checkbox';inp.id='b-consol-'+n;inp.setAttribute('data-nome',arr[i].nome);
+    sp=document.createElement('span');
+    sp.textContent=arr[i].nome;   /* textContent: o nome e texto do operador e nao vira marcacao */
+    lab.appendChild(inp);lab.appendChild(sp);box.appendChild(lab);
+    n++;
   }
-  sel.value=antes;
-  /* preset removido enquanto estava escolhido: a caixa volta para "nao incluir" sozinha */
-  if(sel.value!==antes)sel.value='';
+  if(!n){
+    sp=document.createElement('p');sp.className='ajuda';
+    sp.textContent='Nenhum preset com anima\u00e7\u00e3o salvo nesta aba ainda. Salve um preset do outro componente na se\u00e7\u00e3o 3 e ele aparece aqui.';
+    box.appendChild(sp);
+  }
+  /* preset removido enquanto estava marcado: a marca some sozinha junto com ele */
+  bConsolMarcar(antes);
 }
 
 function bToggles(){
@@ -11900,42 +11967,56 @@ document.addEventListener('change',function(e){
   if(al)bPreview();
 });
 
-/* ===== Consolidacao do codigo 1 (R20) =====
-   Dois efeitos DIFERENTES na mesma pagina tem nomes de animacao diferentes e convivem no
-   mesmo <style>; o MESMO efeito com parametros diferentes colide, porque os dois se chamam
-   igual e vale o ultimo colado. Essa limitacao ja existia com dois blocos colados a mao, e
-   este recurso nao a resolve nem a piora: consolidar um preset do mesmo efeito da tela e
-   RECUSADO com aviso, em vez de emitir dois @keyframes de mesmo nome e deixar a pagina
-   escolher em silencio.
-   Os parametros do segundo efeito vem do preset, e nao da tela: as listras dependem da
-   espessura da listra e o pulso depende do alcance, da intensidade e da cor. Gerar o segundo
-   bloco com os numeros do componente que esta na tela produziria uma animacao que nao e a
-   daquele outro componente -- exatamente o tipo de erro calado que esta fase existe para
-   fechar.
-   Devolve {keys, keysRm, nome, efeito}, ou {erro}, ou null quando nao ha o que consolidar. */
+/* ===== Consolidacao do codigo 1 (R20, ampliada em 24/08/2026) =====
+   Uma pagina pode ter VARIOS componentes com efeito de borda. Os @keyframes de todos moram
+   no mesmo campo -- a Tag Head daquela pagina --, e desde o batismo por assinatura duas
+   animacoes so se chamam igual quando SAO iguais. Entao consolidar deixou de ser "dois
+   efeitos diferentes" e passou a ser "este componente mais os outros que voce marcar".
+
+   Os parametros de cada outro componente vem do PRESET dele, e nao da tela: as listras
+   dependem da espessura da listra, o pulso do alcance e da cor, o selo do tamanho. Gerar o
+   bloco de outro componente com os numeros do que esta na tela produziria uma animacao que
+   nao e a daquele componente -- o erro calado que este recurso existe para fechar.
+
+   Devolve {lista:[...]}, ou {erro}, ou null quando nada esta marcado. Cada item da lista traz
+   {nome, efeito, anim, keys, keysRm, props, mesma}. 'mesma' significa que a animacao dele JA
+   esta no bloco (e a desta tela, ou a de um marcado antes): o @keyframes nao se repete, mas o
+   CSS dele sai do mesmo jeito, porque cores, fundo e velocidade sao dele. */
 function bConsolidar(mAtual){
-  var nome=$('b-consol')?$('b-consol').value:'';
-  if(!nome)return null;
-  var a=fcAba('bor');
-  var i=fcPresetIndice(a,nome);
-  if(i<0)return {erro:'O preset "'+nome+'" nao esta mais salvo neste navegador, entao nao ha de onde tirar a segunda animacao. Escolha outro na caixa de consolidacao do codigo 1.'};
-  var p=fcPresets.bor[i];
-  var m2=bMontar(bCfgPreset(p.valores.b||{}));
-  if(m2.erro)return {erro:'O preset "'+p.nome+'" nao gera codigo com a configuracao que esta guardada nele: '+m2.erro};
-  if(!m2.keys)return {erro:'O preset "'+p.nome+'" usa a borda fixa, que nao tem animacao: nao ha nada para consolidar no codigo 1.'};
-  /* Desde o batismo por assinatura, esta comparacao olha o CORPO, e nao o tipo do efeito.
-     Nome igual e corpo igual nao e conflito: e a mesma animacao, e um bloco so serve aos dois
-     componentes -- o que antes era recusado sem motivo (dois brilhos de velocidades
-     diferentes tem corpos identicos, porque a duracao mora no 'animation' de cada componente
-     e nao nos quadros). Nome igual com corpo diferente so pode ser colisao de assinatura, e
-     ai a recusa e a trava certa. */
-  if(m2.anim===mAtual.anim){
-    if(m2.keys===mAtual.keys&&m2.keysRm===mAtual.keysRm)return {mesma:true,nome:p.nome,anim:m2.anim,props:m2.props};
-    return {erro:'O preset "'+p.nome+'" produziu uma animacao DIFERENTE com a mesma assinatura desta tela ("'+m2.anim+'"). E uma colisao rara do rotulo de quatro digitos, e emitir os dois @keyframes com esse nome faria valer o ultimo para os dois componentes. Mude um parametro de animacao de um dos dois (a espessura da listra, o alcance do halo, o tamanho do selo) e gere de novo: a assinatura muda junto.'};
+  var nomes=bConsolEscolhidos();
+  if(!nomes.length)return null;
+  if(nomes.length>B_CONSOL_MAX){
+    return {erro:'Voce marcou '+nomes.length+' presets, e a ferramenta tem lugar para '+B_CONSOL_MAX+
+      ' outros componentes nesta pagina (o desta tela mais '+B_CONSOL_MAX+' = '+(B_CONSOL_MAX+1)+
+      ' ao todo). Nao e limite do CSS: e o numero de caixas de saida que existem aqui. Desmarque '+
+      (nomes.length-B_CONSOL_MAX)+' e gere; para os que sobrarem, monte a Tag Head numa segunda passagem.'};
   }
-  /* props: o CSS do OUTRO componente, que vira o codigo 3. Ele sai do MESMO bMontar que
-     escreveu a animacao consolidada, entao os dois nao tem como discordar. */
-  return {keys:m2.keys,keysRm:m2.keysRm,nome:p.nome,efeito:m2.efeito,props:m2.props};
+  var a=fcAba('bor'),lista=[],vistos={},k,i,idx,p,m2;
+  /* a animacao DESTA tela ja esta no bloco: e contra ela que o primeiro marcado se compara */
+  vistos[mAtual.anim]={keys:mAtual.keys,keysRm:mAtual.keysRm,dono:'o componente desta tela'};
+  for(i=0;i<nomes.length;i++){
+    idx=fcPresetIndice(a,nomes[i]);
+    if(idx<0)return {erro:'O preset "'+nomes[i]+'" nao esta mais salvo neste navegador, entao nao ha de onde tirar a animacao dele. Desmarque-o na lista de consolidacao do codigo 1.'};
+    p=fcPresets.bor[idx];
+    m2=bMontar(bCfgPreset(p.valores.b||{}));
+    if(m2.erro)return {erro:'O preset "'+p.nome+'" nao gera codigo com a configuracao que esta guardada nele: '+m2.erro};
+    if(!m2.keys)return {erro:'O preset "'+p.nome+'" usa a borda fixa, que nao tem animacao: nao ha nada para consolidar no codigo 1. Gere o CSS dele abrindo o preset na aba, e desmarque-o aqui.'};
+    k=vistos[m2.anim];
+    if(k){
+      /* Nome igual e corpo igual nao e conflito: e a MESMA animacao, e um bloco so serve aos
+         dois -- o que antes era recusado sem motivo (dois brilhos de velocidades diferentes
+         tem corpos identicos, porque a duracao mora no 'animation' de cada componente e nao
+         nos quadros). Nome igual com corpo diferente so pode ser colisao de assinatura. */
+      if(k.keys!==m2.keys||k.keysRm!==m2.keysRm){
+        return {erro:'O preset "'+p.nome+'" produziu uma animacao DIFERENTE com a mesma assinatura de '+k.dono+' ("'+m2.anim+'"). E uma colisao rara do rotulo de quatro digitos, e emitir os dois @keyframes com esse nome faria valer o ultimo para os dois componentes. Mude um parametro de animacao de um dos dois (a espessura da listra, o alcance do halo, o tamanho do selo) e gere de novo: a assinatura muda junto.'};
+      }
+      lista.push({nome:p.nome,efeito:m2.efeito,anim:m2.anim,keys:m2.keys,keysRm:m2.keysRm,props:m2.props,mesma:true});
+      continue;
+    }
+    vistos[m2.anim]={keys:m2.keys,keysRm:m2.keysRm,dono:'o preset "'+p.nome+'"'};
+    lista.push({nome:p.nome,efeito:m2.efeito,anim:m2.anim,keys:m2.keys,keysRm:m2.keysRm,props:m2.props,mesma:false});
+  }
+  return {lista:lista};
 }
 
 /* O TAMANHO A VISTA. So a guirlanda precisa disto: nos outros efeitos o codigo 2 tem menos
@@ -11954,12 +12035,29 @@ function bPeso(props,ef){
     ? 'O codigo 2 ficou com '+kb+' KB. Campos de CSS de painel costumam ter limite de tamanho, e nao sabemos qual e o do Prosite: cole e confira que ele aceitou. Se recusar, tire enfeites da lista.'
     : 'Tamanho do codigo 2: '+kb+' KB.';
 }
-/* A terceira saida existe so quando ha um preset consolidado, e some junto com ele. Um
-   codigo 2 de OUTRO componente parado na tela e pior que caixa vazia: ele parece deste. */
-function bOut3(texto){
-  var t=$('b-out3'),box=$('b-out3-box');
-  if(t)t.value=texto||'';
-  if(box)box.style.display=texto?'block':'none';
+/* As saidas dos OUTROS componentes existem so enquanto o preset de cada um esta marcado, e
+   somem junto com ele. Um CSS de outro componente parado na tela e pior que caixa vazia: ele
+   parece deste. A lista chega na ordem da biblioteca -- ver bConsolEscolhidos. */
+function bOutExtras(lista){
+  var i,it,t,box,quem;
+  for(i=0;i<B_CONSOL_MAX;i++){
+    it=(lista&&lista[i])||null;
+    t=$('b-out'+(i+3));box=$('b-out'+(i+3)+'-box');quem=$('b-out'+(i+3)+'-quem');
+    if(t)t.value=it?it.props:'';
+    if(box)box.style.display=it?'block':'none';
+    if(quem){
+      quem.innerHTML='';
+      if(it){
+        /* o nome do preset e texto do operador: entra por texto, nunca por marcacao */
+        quem.appendChild(document.createTextNode('Este CSS n\u00e3o \u00e9 deste componente. Ele \u00e9 do componente do preset '));
+        var b=document.createElement('b');b.textContent=it.nome;quem.appendChild(b);
+        quem.appendChild(document.createTextNode(
+          it.mesma
+            ? ', e vai no campo CSS Customizado daquele componente. A anima\u00e7\u00e3o dele \u00e9 a mesma que j\u00e1 est\u00e1 no c\u00f3digo 1 \u2014 o que muda aqui s\u00e3o as cores, o fundo e a velocidade, que s\u00e3o dele.'
+            : ', e vai no campo CSS Customizado daquele componente. O nome de anima\u00e7\u00e3o que ele usa s\u00f3 existe no c\u00f3digo 1 acima: os dois andam em par.'));
+      }
+    }
+  }
 }
 function bGerar(){
   if(fcAjustarTodos(B_NUMS))salvarEstado();
@@ -11974,33 +12072,34 @@ function bGerar(){
     c1+='/* Cole apenas o codigo 2 no campo CSS Customizado do componente. */';
     $('b-out1').value=c1;
     $('b-out2').value=m.props;
-    bOut3('');   /* borda fixa nao tem codigo 1, entao nao ha consolidacao nem terceiro codigo */
+    bOutExtras(null);   /* borda fixa nao tem codigo 1, entao nao ha consolidacao nem CSS de outros */
     bPeso(m.props,m.efeito);
     fccMarcar('bor');
     return;
   }
   /* Validacao ANTES de escrever qualquer coisa: recusar no meio deixaria a textarea com o
      bloco anterior enquanto o alerta diz que nao gerou. */
-  var extra=bConsolidar(m);
-  if(extra&&extra.erro){alert(extra.erro);return;}
-  /* Mesma animacao dos dois lados: um bloco so serve aos dois componentes. Isto e DITO, e nao
-     silenciado -- o operador escolheu um preset e precisa saber o que aconteceu com a escolha
-     dele. O nome do preset nao entra no comentario, pela mesma razao de sempre: e texto livre,
-     e a sequencia que fecha comentario CSS digitada ali fecharia este mais cedo. */
-  var mesma=(extra&&extra.mesma)?extra:null;
-  if(mesma)extra=null;
+  var cons=bConsolidar(m);
+  if(cons&&cons.erro){alert(cons.erro);return;}
+  var lista=(cons&&cons.lista)||[],ic,it;
   c1+='<sty'+'le>\n';
   c1+='/* Animacao da borda com efeito - cole na Tag Head DESTA pagina */\n'+m.keys+'\n';
-  if(mesma){
-    c1+='/* O preset escolhido produz EXATAMENTE esta animacao ("'+mesma.anim+'"):\n';
-    c1+='   um bloco so serve aos dois componentes, e nao ha um segundo para colar. */\n';
-  }
-  if(extra){
+  for(ic=0;ic<lista.length;ic++){
+    it=lista[ic];
     /* O nome do preset NAO entra no comentario: e texto livre do operador, e a sequencia que
        fecha comentario CSS (asterisco + barra) digitada ali fecharia este comentario mais
        cedo, e o resto do nome viraria propriedade solta dentro do style. O que identifica o
-       bloco e o efeito, que sai de uma lista fechada nossa e nao tem acento. */
-    c1+='/* Segunda animacao, do outro componente desta pagina - efeito "'+extra.efeito+'" */\n'+extra.keys+'\n';
+       bloco e o efeito, que sai de uma lista fechada nossa e nao tem acento -- e agora
+       tambem o numero da caixa de saida, que e o que liga o comentario ao CSS daquele
+       componente. */
+    if(it.mesma){
+      /* Isto e DITO, e nao silenciado: o operador marcou um preset e precisa saber por que
+         nao apareceu um bloco novo para ele. */
+      c1+='/* O componente do codigo '+(ic+3)+' usa EXATAMENTE a animacao "'+it.anim+'",\n';
+      c1+='   que ja esta neste bloco: ela nao se repete aqui. */\n';
+    }else{
+      c1+='/* Animacao do componente do codigo '+(ic+3)+' - efeito "'+it.efeito+'" */\n'+it.keys+'\n';
+    }
   }
   /* Acessibilidade ESCOPADA. O bloco antigo era "* { animation-duration: 0.01ms !important;
      animation-iteration-count: 1 !important; }": como este codigo vai para a Tag Head da
@@ -12017,15 +12116,17 @@ function bGerar(){
   c1+='/* Acessibilidade: para quem pediu menos movimento no sistema, a MESMA animacao e\n';
   c1+='   redefinida com um unico quadro -- a borda para de se mexer e continua visivel.\n';
   c1+='   Vale so para esta animacao; o resto do site nao e afetado. */\n';
-  c1+=B_MEDIA_RM+'\n'+m.keysRm+(extra?'\n'+extra.keysRm:'')+'\n}\n';
+  c1+=B_MEDIA_RM+'\n'+m.keysRm;
+  for(ic=0;ic<lista.length;ic++)if(!lista[ic].mesma)c1+='\n'+lista[ic].keysRm;
+  c1+='\n}\n';
   c1+='</sty'+'le>';
   $('b-out1').value=c1;
   $('b-out2').value=m.props;
-  /* O CSS do OUTRO componente. Ele sai nos DOIS desfechos em que ha um preset escolhido --
-     inclusive quando a animacao e a mesma, porque o outro componente continua tendo cores,
-     fundo e velocidade proprios. Sem isso o operador levava a animacao dele para o head e
-     nao levava o CSS que a usa: o componente ficaria parado, sem erro na tela. */
-  bOut3((extra&&extra.props)||(mesma&&mesma.props)||'');
+  /* O CSS de cada OUTRO componente. Ele sai inclusive para os que tem a MESMA animacao,
+     porque cores, fundo e velocidade continuam sendo deles. Sem isso o operador levava a
+     animacao para o head e nao levava o CSS que a usa: o componente ficaria parado, sem erro
+     na tela. */
+  bOutExtras(lista);
   bPeso(m.props,m.efeito);
   fccMarcar('bor');
 }
@@ -16148,19 +16249,20 @@ function fccDaAba(a,p,plano,vals){
     plano.head.push(fccItem(a,'b-out1','Bordas com efeito — código 1','Tag Head',
       'O código 1 traz os <code>@keyframes</code> <b>desta página</b> — o Prosite não tem cabeçalho global. Se a página já tiver uma versão anterior deste bloco na Tag Head, <b>substitua</b> em vez de acrescentar: dois <code>@keyframes</code> de mesmo nome no mesmo campo colidem, e vale o último.'));
     plano.comps.push(fccItem(a,'b-out2','Bordas com efeito — código 2','Campo CSS Customizado do componente'));
-    /* O CSS do OUTRO componente entra no painel quando ha um preset consolidado. A escolha e
-       lida do CAMPO, e nao do preset geral: 'consol' descreve outro componente e por isso e
-       declarada em 'fora' -- fcgValoresDaAbaLer a apaga de proposito. Na borda fixa nao ha
-       codigo 1, entao nao ha consolidacao nem terceiro codigo, e a caixa some da tela.
+    /* O CSS de cada OUTRO componente entra no painel enquanto o preset dele estiver marcado.
+       A escolha e lida do CAMPO, e nao do preset geral: 'consol' descreve outros componentes
+       e por isso e declarada em 'fora' -- fcgValoresDaAbaLer a apaga de proposito. Na borda
+       fixa nao ha codigo 1, entao nao ha consolidacao, e as caixas somem da tela.
        Empurrar pela ESCOLHA (e nao por a caixa ter texto) e o que faz o painel cobrar "gerar
-       codigo" quando o operador escolheu o preset e ainda nao gerou -- em vez de montar uma
-       pagina a que falta justamente o CSS do segundo componente. */
+       codigo" quando o operador marcou o preset e ainda nao gerou -- em vez de montar uma
+       pagina a que falta justamente o CSS de um dos componentes. */
     var ef=(v.b&&v.b.efeito)||radio('b-efeito');
-    var cs=$('b-consol');
-    if(ef!=='fixa'&&cs&&cs.value){
-      plano.comps.push(fccItem(a,'b-out3','Bordas com efeito — código 2 do OUTRO componente',
-        'Campo CSS Customizado do outro componente desta página (preset "'+cs.value+'")',
-        'Não cole este CSS no mesmo componente do código 2 — ele é do <b>segundo</b> componente desta página, o que você descreveu no preset. Ele e o código 1 andam <b>em par</b>: o nome de animação que ele usa só existe no código 1 acima.'));
+    var marcados=(ef==='fixa')?[]:bConsolEscolhidos();
+    for(var ib=0;ib<marcados.length&&ib<B_CONSOL_MAX;ib++){
+      plano.comps.push(fccItem(a,'b-out'+(ib+3),
+        'Bordas com efeito — código '+(ib+3)+', de OUTRO componente',
+        'Campo CSS Customizado de outro componente desta página (preset "'+marcados[ib]+'")',
+        'Não cole este CSS no componente do código 2 — ele é de <b>outro</b> componente desta página. Ele e o código 1 andam <b>em par</b>: o nome de animação que ele usa só existe no código 1.'));
     }
   }else if(a.id==='cnt'){
     fixa=(v.c&&v.c.fixa)||radio('c-fixa');
@@ -16625,13 +16727,15 @@ prep('Bordas com efeito','bor',function(){
   liga('b-gerar',bGerar);
   liga('b-copy1',function(){copiar('b-out1','b-cop1');});
   liga('b-copy2',function(){copiar('b-out2','b-cop2');});
-  liga('b-copy3',function(){copiar('b-out3','b-cop3');});
   /* Trocar o preset da consolidacao invalida o terceiro codigo NA HORA. Deixa-lo na tela
      seria oferecer o CSS de um componente com o rotulo de outro -- e colar CSS no componente
      errado nao da erro nenhum, so estraga os dois. Some daqui, e o painel volta a cobrar
      "gerar codigo" enquanto nao for regerado. */
-  var cs=$('b-consol');
-  if(cs)cs.addEventListener('change',function(){bOut3('');fccAgendar();});
+  for(var ic3=3;ic3<=B_CONSOL_MAX+2;ic3++)(function(n){
+    liga('b-copy'+n,function(){copiar('b-out'+n,'b-cop'+n);});
+  })(ic3);
+  var cs=$('b-consol-lista');
+  if(cs)cs.addEventListener('change',function(){bOutExtras(null);fccAgendar();});
   parearCor('b-f1');parearCor('b-f2');parearCor('b-c1');parearCor('b-c2');parearCor('b-c3');parearCor('b-c4');
   /* a cor do fundo da previa e pareada como as outras; quem redesenha e o listener de
      'input' de document que ja atende tudo que comeca com 'b-' */

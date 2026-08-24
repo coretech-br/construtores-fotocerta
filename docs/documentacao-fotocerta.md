@@ -1008,6 +1008,20 @@ Spec: `docs/specs/2026-08-24-popup-fora-do-horario-design.md`. Alcance: aba **Ca
 
 **Verificação.** Primeira aplicação do molde versionado (`scripts/verificar/pagina.mjs`) a um segundo bloco, o que também o validou fora da aba onde nasceu: com relógio falso, o pop-up abre às 14h de segunda, **não** abre às 22h nem no domingo, e o botão continua lá. As outras três combinações (abrir mesmo assim, sem horário, modo clique) medidas do mesmo jeito. Regressão byte a byte intacta — inclusive o `l-out`, porque o padrão de fábrica tem o horário desligado.
 
+### A consolidação passa a aceitar N componentes na mesma página (24/08/2026)
+
+Spec: `docs/specs/2026-08-24-consolidacao-de-n-componentes-design.md`.
+
+**O limite era a caixa, não o CSS.** A consolidação aceitava um preset, logo dois componentes por página. Não havia limite técnico: a Tag Head aceita quantos `@keyframes` existirem, e desde o batismo por assinatura duas animações só se chamam igual quando **são** iguais. Quem limitava era o `<select>`.
+
+**Agora é uma lista de marcação** — um preset por componente, no mesmo desenho que a guirlanda usa para os enfeites — com teto de **cinco outros** componentes mais o desta tela. O teto (`B_CONSOL_MAX`) está num lugar só e a recusa **diz o número**, porque ele não é do CSS: é o número de caixas de saída que existem na tela. Cada componente ganha a sua saída, numerada (códigos 3 a 7), nomeando o preset de origem; e o código 1 traz todas as animações, com um comentário por bloco que aponta **o número da caixa** daquele componente — é o que liga cada `@keyframes` ao CSS que o usa.
+
+**Três decisões.** A ordem é a da **biblioteca**, nunca a dos cliques: se dependesse dos cliques, a mesma seleção produziria códigos em posições diferentes entre duas gerações, e o operador colaria o CSS num componente diferente do da vez anterior sem nada mudar na tela (mesma razão de `bNatalMarcados`). Animação repetida **não** vira bloco repetido, mas vira CSS — cores, fundo e velocidade continuam sendo de cada um, e o código 1 diz por que não apareceu bloco novo. E nome de preset, que é texto do operador, entra por `textContent`/`createTextNode`, nunca em marcação nem em comentário CSS; a busca do marcado percorre os campos e compara em JavaScript, em vez de montar um seletor CSS com o nome — uma aspa dentro dele quebraria o seletor.
+
+**Compatibilidade:** `consol` era uma string e virou lista; `fcListaDe` aceita as duas formas, então o estado gravado antes não perde a escolha.
+
+**Verificação.** Regressão de **17** saídas e 9 cobranças, idênticas. Três marcados (um com a animação da tela) → três `@keyframes`, os CSS na ordem da biblioteca, caixas não usadas vazias e escondidas, e cada CSS apontando para uma animação presente no código 1. O teto recusa nomeando o número e não reescreve o código 1. Cinco cabem. Desmarcar limpa na hora. A escolha sobrevive à recarga, e o formato antigo continua aceito. O painel, nos quatro estados.
+
 ### A consolidação passa a entregar o CSS do outro componente (24/08/2026)
 
 Spec: `docs/specs/2026-08-24-codigo-2-do-outro-componente-design.md`. Alcance: aba **Bordas com efeito** e **painel consolidado**.
