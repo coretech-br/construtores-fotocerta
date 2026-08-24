@@ -1008,6 +1008,30 @@ Spec: `docs/specs/2026-08-24-popup-fora-do-horario-design.md`. Alcance: aba **Ca
 
 **Verificação.** Primeira aplicação do molde versionado (`scripts/verificar/pagina.mjs`) a um segundo bloco, o que também o validou fora da aba onde nasceu: com relógio falso, o pop-up abre às 14h de segunda, **não** abre às 22h nem no domingo, e o botão continua lá. As outras três combinações (abrir mesmo assim, sem horário, modo clique) medidas do mesmo jeito. Regressão byte a byte intacta — inclusive o `l-out`, porque o padrão de fábrica tem o horário desligado.
 
+### Selo de destaque na borda: marcar o pacote do meio (24/08/2026)
+
+Spec: `docs/specs/2026-08-24-selo-de-destaque-design.md`. Alcance: aba **Bordas com efeito**. Nenhum arquivo compartilhado tocado; a regressão byte a byte das 12 saídas e das 9 cobranças saiu **idêntica**, porque com o selo em "não usar" nada novo é emitido.
+
+**O pedido e o que a medição acrescentou a ele.** O dono queria um texto de destaque na área superior da borda, para marcar o pacote do meio numa página de três. Ele pediu junto que alternativas de mercado fossem apresentadas. Foram desenhadas três formas — **faixa no topo**, **selo circular** (sugestão dele) e **fita diagonal** — e um eixo separado de **ênfase** (escala e sombra). As três entraram, à escolha, mais a ênfase como interruptor.
+
+**O pulsante ficou de fora, por razão técnica antes de estética.** O selo é uma camada de fundo; pulsar seria animar `background-position`/`background-size` — e brilho, degradê, listras e guirlanda **já animam essa propriedade**. Um elemento tem uma `animation` só: a segunda apagaria a primeira. O pulso conviveria apenas com borda fixa e halo pulsante.
+
+**Três descobertas do mockup mudaram o desenho.**
+1. **Borda sólida é pintada por cima do fundo.** A primeira faixa punha a cor no `border-color` e desenhava a pílula com `background-origin: border-box` — o SVG simplesmente não aparecia. A faixa passou a vir de uma **camada do próprio fundo**, e o respiro que impede a sobreposição com o texto vem de `padding-top`. O efeito colateral é bom: ela funciona nos **seis** efeitos, inclusive nos que usam a borda para desenhar.
+2. **Texto de SVG estoura o desenho em silêncio.** "ESCOLHIDO" saía do selo e "DESTAQUE" da fita. O desenho passou a **medir o texto** e, quando não cabe, aplicar `textLength`/`lengthAdjust`. Ajusta-se o desenho, nunca o campo do operador.
+3. **Aspas.** Dentro de `url("...")` o SVG usa aspas simples — e o texto do operador é escapado como XML antes de entrar (`bSeloEsc`).
+
+**As três colisões de CSS, que é onde isto poderia falhar calado.**
+- **A lista de camadas.** Nos quatro efeitos de camadas o selo entra **na mesma lista**, na frente — nunca como uma segunda regra de `background`, que apagaria a primeira por inteiro.
+- **Os `@keyframes` que animam `background-position`.** Se a lista de camadas cresce e a do `@keyframes` não, o navegador **cicla os valores** e a animação passa a andar na camada errada, sem erro no console. As posições do selo são prefixadas nos dois quadros, **com o mesmo valor** — é isso que prova que o selo não se move.
+- **`box-shadow`.** Halo e elevação se **acumulam numa declaração só**. No halo pulsante é diferente: ali o `box-shadow` é animado por inteiro, e uma declaração estática seria sobreposta 100 % do tempo — então a sombra da elevação entra **dentro dos quadros**.
+
+**Verificação.** 24 combinações (seis efeitos × quatro formas) medidas na ferramenta: listas de camadas, tamanhos, repetições e posições sempre do mesmo comprimento; posição do selo idêntica em todos os quadros; um `background` só; um `box-shadow` só; nenhum `<` ou `>` sobrando no CSS. As 18 combinações com selo renderizadas numa página, com as animações correndo de verdade. Correção à vista do tamanho (500 → 160, 2 → 18), ida e volta pelo armazenamento, e estado gravado **antes** do selo voltando sem selo nenhum. Zero erro de console; 611 ids na página, nenhum duplicado.
+
+**Duas armadilhas de medição registradas**, porque custaram tempo e quase produziram diagnóstico errado:
+- O extrator de `@keyframes` do arnês recortava pedaços do bloco de movimento reduzido e derrubava a regra seguinte. **Injetar a Tag Head inteira**, como o Prosite faz, é a única leitura fiel — recortar pedaços dela é reimplementar o navegador.
+- `getComputedStyle().backgroundPosition` **não distinguiu** animação correndo de animação parada, e a primeira medição de "o selo está parado?" acusou movimento porque o recorte de pixels incluía a **borda animada em volta do selo**. A prova boa é no **texto emitido**: mesma posição em todos os quadros é uma garantia, não uma amostra.
+
 ### O carimbo de publicação: a ferramenta diz qual versão está rodando (24/08/2026)
 
 Alcance: `index.html` (o topo da página) mais dois scripts. **Nenhum gerador foi tocado** — a regressão byte a byte das 12 saídas e das 9 cobranças saiu idêntica.

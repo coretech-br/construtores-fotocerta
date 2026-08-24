@@ -1832,6 +1832,35 @@
       <label for="b-pad">Espaçamento interno <small>(apenas um valor de padding: de 1 a 4 números com unidade, ex.: <b>40px 32px</b> — vazio = não mexer)</small></label>
       <input type="text" id="b-pad" value="40px 32px" placeholder="40px 32px">
       </fieldset>
+      <fieldset>
+      <legend>Selo de destaque <small>(opcional)</small></legend>
+      <p class="ajuda">Marca este componente como <b>a opção recomendada</b> — o uso clássico é destacar o pacote do meio numa página de três. O selo é desenhado <b>dentro do próprio CSS</b> do componente: não há imagem para subir nem HTML para mexer.</p>
+      <label>Forma do selo</label>
+      <div class="radios">
+      <label><input type="radio" name="b-selo" value="nao" checked><span>Não usar</span></label>
+      <label><input type="radio" name="b-selo" value="faixa"><span>Faixa no topo</span></label>
+      <label><input type="radio" name="b-selo" value="selo"><span>Selo circular</span></label>
+      <label><input type="radio" name="b-selo" value="fita"><span>Fita diagonal</span></label>
+      </div>
+      <div id="b-selo-campos" style="display:none">
+      <label for="b-selo-txt">Texto do selo</label>
+      <input type="text" id="b-selo-txt" value="MAIS ESCOLHIDO" maxlength="40" placeholder="MAIS ESCOLHIDO">
+      <p class="ajuda">No <b>selo circular</b> o texto quebra em duas linhas sozinho, no espaço mais próximo do meio. Texto que não couber <b>encolhe dentro do desenho</b> em vez de vazar — a prévia mostra como fica.</p>
+      <label>Cor de fundo do selo</label>
+      <div class="cor-linha"><input type="color" id="b-selo-f" value="#9C5638"><input type="text" id="b-selo-f-t" value="#9C5638"></div>
+      <label>Cor do texto do selo</label>
+      <div class="cor-linha"><input type="color" id="b-selo-c" value="#FFF6D8"><input type="text" id="b-selo-c-t" value="#FFF6D8"></div>
+      <label for="b-selo-tam">Tamanho <small>(px — na faixa é a <b>altura</b>; no selo, o <b>diâmetro</b>; na fita, o <b>lado</b> do canto)</small></label>
+      <input type="number" id="b-selo-tam" value="28" min="18" max="160" step="2">
+      <p class="ajuda">Referências que funcionaram na medição: faixa <b>28</b>, selo <b>96</b>, fita <b>132</b>.</p>
+      <label>Destacar o cartão inteiro? <small>(escala e sombra — é o que mais chama atenção)</small></label>
+      <div class="radios">
+      <label><input type="radio" name="b-selo-eleva" value="nao" checked><span>Não</span></label>
+      <label><input type="radio" name="b-selo-eleva" value="sim"><span>Destacar</span></label>
+      </div>
+      <p class="ajuda">O cartão cresce 6&nbsp;% e ganha sombra. Ele <b>avança alguns pixels sobre os vizinhos</b> — é isso que cria o efeito. Se a coluna do Prosite cortar o que transborda, o destaque some: só a página publicada responde.</p>
+      </div>
+      </fieldset>
     </div>
   </div>
 
@@ -2852,8 +2881,8 @@
    QUEM IMPEDE QUE ELE MINTA: scripts/conferir-versoes.sh, que recusa index.html
    alterado sem a versao mudar junto -- a mesma disciplina do fc-compartilhado.js,
    e pela mesma razao: carimbo que ninguem confere e o defeito de amanha. */
-var FC_VERSAO='2026-08-24b';
-var FC_PUBLICADO='2026-08-24 13:44';   /* America/Sao_Paulo -- escrito pelo carimbador */
+var FC_VERSAO='2026-08-24c';
+var FC_PUBLICADO='2026-08-24 14:04';   /* America/Sao_Paulo -- escrito pelo carimbador */
 (function(){
   var el=document.getElementById('fc-versao');
   if(!el) return;
@@ -3868,7 +3897,7 @@ var CORES_LIVRES=[['l-corbtn','#25D366'],['l-c1','#075E54'],['l-c2','#ffffff'],[
   ['u-c1','#075E54'],['u-c2','#ffffff'],['u-c3','#333333'],
   ['m-c1','#0F3A30'],['m-c2','#ffffff'],['m-c3','#333333'],
   ['b-f1','#8A4A32'],['b-f2','#B5674A'],['b-c1','#9C5638'],['b-c2','#FFC94A'],['b-c3','#FFF6D8'],
-  ['b-c4','#F7EFDF'],['b-pvcor','#23281F'],
+  ['b-c4','#F7EFDF'],['b-pvcor','#23281F'],['b-selo-f','#9C5638'],['b-selo-c','#FFF6D8'],
   ['c-cfundo','#0F3A30'],['c-ctexto','#FDFBF6'],['c-cdestaque','#FFC94A'],['c-cborda','#FFC94A'],
   ['c-ctafundo','#FFC94A'],['c-ctatexto','#23281F'],['c-cprog','#FFC94A'],
   ['c-corujacorpo','#FDFBF6'],['c-corujadet','#FFC94A'],['c-curg','#8C1D18'],
@@ -10998,7 +11027,9 @@ function bCampos(){
        codigo gerado -- ver bPvFundo. */
     pvfundo:radio('b-pvfundo'),pvcor:$('b-pvcor-t').value,
     ntmotivos:bNatalMarcados().join(','),ntmov:radio('b-nt-mov'),ntpaleta:radio('b-nt-paleta'),
-    ntcantos:radio('b-nt-cantos'),nttam:$('b-nt-tam').value,ntgap:$('b-nt-gap').value};
+    ntcantos:radio('b-nt-cantos'),nttam:$('b-nt-tam').value,ntgap:$('b-nt-gap').value,
+    selo:radio('b-selo'),selotxt:$('b-selo-txt').value,selof:$('b-selo-f-t').value,
+    seloc:$('b-selo-c-t').value,selotam:$('b-selo-tam').value,seloeleva:radio('b-selo-eleva')};
 }
 /* Os motivos marcados, SEMPRE na ordem de B_NATAL_PECAS. A ordem da lista e a ordem em que
    eles se repetem na moldura, e ela nao pode depender da ordem em que o operador clicou --
@@ -11044,6 +11075,12 @@ function bAplicarCampos(B){
   setRadio('b-nt-cantos',B.ntcantos||'sim');
   $('b-nt-tam').value=(B.nttam!=null&&B.nttam!=='')?B.nttam:34;
   $('b-nt-gap').value=(B.ntgap!=null&&B.ntgap!=='')?B.ntgap:18;
+  setRadio('b-selo',B.selo||'nao');
+  $('b-selo-txt').value=(B.selotxt==null)?'MAIS ESCOLHIDO':B.selotxt;
+  var sf=corValida(B.selof)?B.selof:'#9C5638';$('b-selo-f-t').value=sf;$('b-selo-f').value=sf;
+  var sc2=corValida(B.seloc)?B.seloc:'#FFF6D8';$('b-selo-c-t').value=sc2;$('b-selo-c').value=sc2;
+  $('b-selo-tam').value=(B.selotam!=null&&B.selotam!=='')?B.selotam:28;
+  setRadio('b-selo-eleva',B.seloeleva||'nao');
   setRadio('b-pvfundo',B.pvfundo||'papel');
   var pc=corValida(B.pvcor)?B.pvcor:'#23281F';
   $('b-pvcor-t').value=pc;$('b-pvcor').value=pc;
@@ -11162,6 +11199,146 @@ function bNatalCanto(ids,corA,corB){
    as duas), e o url() fica delimitado por aspa dupla. Espaco fica literal, que e valido
    dentro das aspas. As quebras de linha e os espacos repetidos somem.
    Medido: os sete enfeites cairam de 68 KB para menos de um terco disso. */
+/* ===== O SELO DE DESTAQUE (24/08/2026) =====
+   Marca o componente como "a opcao recomendada". Tres formas, desenhadas em SVG dentro do
+   proprio CSS: nao ha imagem para subir nem HTML para mexer.
+
+   POR QUE ELE NAO USA A BORDA. A primeira versao da faixa punha a cor no border-color e
+   desenhava a pilula com background-origin:border-box. O SVG nao aparecia: BORDA SOLIDA E
+   PINTADA POR CIMA DO FUNDO, e o border-color cobria o desenho inteiro. A faixa passou a vir
+   de uma CAMADA DO PROPRIO FUNDO, e o respiro que impede a sobreposicao com o texto vem de
+   padding-top. Como efeito colateral bom, isso a torna compativel com os SEIS efeitos --
+   inclusive os que usam a borda para desenhar.
+
+   POR QUE O TEXTO E MEDIDO. Sem medida, "ESCOLHIDO" saia para fora do selo e "DESTAQUE" para
+   fora da fita, em silencio. Quando a largura estimada nao cabe, o texto ganha textLength e
+   ENCOLHE DENTRO do desenho. Isto ajusta o DESENHO, nao o campo: o que o operador digitou
+   continua la, e a previa mostra o resultado. */
+var B_SELO_FONTE="font-family='Arial,Helvetica,sans-serif'";
+/* Largura estimada de um texto em caixa alta. Nao precisa ser exata: ela so decide SE o
+   texto precisa encolher, e o textLength faz o ajuste fino no proprio navegador. */
+function bSeloLarg(t,fs,esp){return t.length*(fs*0.66+esp);}
+function bSeloAjuste(t,fs,esp,disp){
+  return bSeloLarg(t,fs,esp)>disp ? ' textLength="'+disp.toFixed(1)+'" lengthAdjust="spacingAndGlyphs"' : '';
+}
+function bSeloRed(n){return String(Math.round(n*100)/100);}
+/* Escape de XML para o texto do operador. O & vem primeiro, senao as fugas seguintes seriam
+   re-escapadas. O bDataUri cuida do resto (%, #, < e >) na hora de virar url(). */
+function bSeloEsc(t){
+  return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&apos;');
+}
+/* Quebra o texto em duas linhas no espaco mais proximo do MEIO -- e nao no primeiro espaco,
+   que deixaria "MAIS" sozinho em cima e "ESCOLHIDO DE TODOS" espremido embaixo. */
+function bSeloDuasLinhas(t){
+  var i,meio=t.length/2,melhor=-1;
+  for(i=0;i<t.length;i++){
+    if(t.charAt(i)!==' ')continue;
+    if(melhor<0||Math.abs(i-meio)<Math.abs(melhor-meio))melhor=i;
+  }
+  if(melhor<0)return [t,''];
+  return [t.slice(0,melhor),t.slice(melhor+1)];
+}
+/* 1. FAIXA: a pilula, que anda sobre uma tira lisa emitida a parte. */
+function bSeloFaixa(txt,fundo,cor,alt){
+  var fs=Math.round(alt*0.44),esp=1;
+  /* teto de 320px: pilula mais larga que o componente sairia cortada nas duas pontas */
+  var larg=Math.min(Math.ceil(bSeloLarg(txt,fs,esp)+fs*2.4),320);
+  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+larg+' '+alt+'" width="'+larg+'" height="'+alt+'">'+
+    '<rect x="0" y="2" width="'+larg+'" height="'+(alt-4)+'" rx="'+bSeloRed((alt-4)/2)+'" fill="'+cor+'" opacity="0.16"/>'+
+    '<text x="'+bSeloRed(larg/2)+'" y="'+bSeloRed(alt/2)+'" text-anchor="middle" dy="'+bSeloRed(fs*0.36)+'" '+B_SELO_FONTE+
+    ' font-size="'+fs+'" font-weight="700" letter-spacing="'+esp+'" fill="'+cor+'"'+
+    bSeloAjuste(txt,fs,esp,larg-fs*1.6)+'>'+bSeloEsc(txt)+'</text></svg>';
+}
+/* 2. SELO CIRCULAR: roseta serrilhada de 28 pontas, ate duas linhas de texto. */
+function bSeloCircular(txt,fundo,cor,d){
+  var r=d/2,pontas=28,ri=r*0.90,pts='',i,a,rr;
+  for(i=0;i<pontas*2;i++){
+    a=(Math.PI*i)/pontas-Math.PI/2;rr=(i%2?ri:r);
+    pts+=bSeloRed(r+rr*Math.cos(a))+','+bSeloRed(r+rr*Math.sin(a))+' ';
+  }
+  var L=bSeloDuasLinhas(txt),fs=d*0.135,esp=0.6,disp=d*0.70;
+  var l1=L[0],l2=L[1];
+  var y1=l2?(r-d*0.02):(r+d*0.05);
+  var t='<text x="'+bSeloRed(r)+'" y="'+bSeloRed(y1)+'" text-anchor="middle" '+B_SELO_FONTE+
+    ' font-size="'+bSeloRed(fs)+'" font-weight="700" letter-spacing="'+esp+'" fill="'+cor+'"'+
+    bSeloAjuste(l1,fs,esp,disp)+'>'+bSeloEsc(l1)+'</text>';
+  if(l2){
+    t+='<text x="'+bSeloRed(r)+'" y="'+bSeloRed(r+d*0.155)+'" text-anchor="middle" '+B_SELO_FONTE+
+      ' font-size="'+bSeloRed(fs)+'" font-weight="700" letter-spacing="'+esp+'" fill="'+cor+'"'+
+      bSeloAjuste(l2,fs,esp,disp)+'>'+bSeloEsc(l2)+'</text>';
+  }
+  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+bSeloRed(d)+' '+bSeloRed(d)+'" width="'+bSeloRed(d)+'" height="'+bSeloRed(d)+'">'+
+    '<polygon points="'+pts.replace(/\s+$/,'')+'" fill="'+fundo+'"/>'+
+    '<circle cx="'+bSeloRed(r)+'" cy="'+bSeloRed(r)+'" r="'+bSeloRed(r*0.82)+'" fill="none" stroke="'+cor+'" stroke-width="1.5" opacity="0.55"/>'+
+    t+'</svg>';
+}
+/* 3. FITA DIAGONAL: triangulo no canto, texto girado 45 graus. */
+function bSeloFita(txt,fundo,cor,d){
+  var fs=d*0.115,esp=1,disp=d*0.60;
+  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+bSeloRed(d)+' '+bSeloRed(d)+'" width="'+bSeloRed(d)+'" height="'+bSeloRed(d)+'">'+
+    '<polygon points="'+bSeloRed(d*0.34)+',0 '+bSeloRed(d)+',0 '+bSeloRed(d)+','+bSeloRed(d*0.66)+'" fill="'+fundo+'"/>'+
+    '<text '+B_SELO_FONTE+' font-size="'+bSeloRed(fs)+'" font-weight="700" letter-spacing="'+esp+'" fill="'+cor+'" '+
+    'transform="rotate(45 '+bSeloRed(d*0.70)+' '+bSeloRed(d*0.30)+')" x="'+bSeloRed(d*0.70)+'" y="'+bSeloRed(d*0.32)+'" text-anchor="middle"'+
+    bSeloAjuste(txt,fs,esp,disp)+'>'+bSeloEsc(txt)+'</text></svg>';
+}
+/* A sombra da elevacao. Uma constante porque ela aparece em TRES lugares -- na declaracao
+   estatica, dentro dos quadros do halo pulsante e no quadro do movimento reduzido -- e tres
+   copias de "0 14px 34px rgba(...)" e a duplicacao que este projeto desfaz por regra. */
+var B_SELO_SOMBRA='0 14px 34px rgba(0, 0, 0, 0.20)';
+/* Devolve as camadas do selo, ou null quando ele esta desligado, ou {erro}.
+   camadas/tam/rep/pos sao listas PARALELAS: quem consome prefixa as quatro nas listas que ja
+   existem, e prefixa 'pos' tambem nos dois quadros do @keyframes -- senao a lista de posicoes
+   do keyframes fica mais curta que a de camadas, o navegador cicla os valores e a animacao
+   passa a andar na camada errada. */
+function bSeloCamadas(cfg){
+  var f=cfg.selo;
+  if(!f||f==='nao')return null;
+  var txt=cfg.seloTxt;
+  if(!txt)return {erro:'Escolha um texto para o selo de destaque, ou marque "Nao usar" na forma do selo. Um selo sem texto e so uma mancha colorida no canto do componente.'};
+  var tam=cfg.seloTam,fundo=cfg.seloF,cor=cfg.seloC;
+  if(f==='faixa'){
+    return {camadas:[bDataUri(bSeloFaixa(txt,fundo,cor,tam)),'linear-gradient('+fundo+', '+fundo+')'],
+      tam:['auto '+tam+'px','100% '+tam+'px'],rep:['no-repeat','no-repeat'],
+      pos:['top center','top left'],padTop:tam+16};
+  }
+  if(f==='selo'){
+    var folga=Math.round(tam*0.10);
+    return {camadas:[bDataUri(bSeloCircular(txt,fundo,cor,tam))],
+      tam:[tam+'px '+tam+'px'],rep:['no-repeat'],
+      pos:['top '+folga+'px right '+folga+'px'],padTop:Math.round(tam/2)+12};
+  }
+  return {camadas:[bDataUri(bSeloFita(txt,fundo,cor,tam))],
+    tam:[tam+'px '+tam+'px'],rep:['no-repeat'],pos:['top right'],padTop:0};
+}
+/* As camadas do selo com a caixa explicita, para entrar na LISTA do atalho 'background' dos
+   efeitos de camadas. Uma palavra de caixa no atalho define origem E recorte daquela camada:
+   padding-box mantem o selo dentro da moldura, sem cobrir o efeito que roda na borda. */
+function bSeloComCaixa(sel){
+  var r=[],i;
+  for(i=0;i<sel.camadas.length;i++)r.push(sel.camadas[i]+' padding-box');
+  return r;
+}
+/* Acumula halo e elevacao numa DECLARACAO SO. Duas regras box-shadow no mesmo bloco nao se
+   somam: a segunda apaga a primeira por inteiro. */
+function bSeloSombra(halo,haloraio,c2,haloop,eleva){
+  var s=[];
+  if(halo)s.push('0 0 '+haloraio+'px rgba('+bHexRgb(c2)+', '+haloop+')');
+  if(eleva)s.push(B_SELO_SOMBRA);
+  return s.length?('box-shadow: '+s.join(', ')+';'):'';
+}
+
+/* Nos efeitos SEM lista de camadas (borda fixa e halo pulsante) o selo sai como
+   background-image mais os tres longhands, DEPOIS das declaracoes de fundo. Assim ele
+   convive inclusive com "nao mexer no fundo", que nao emite background nenhum. */
+function bSeloLonghands(props,sel){
+  if(!sel)return;
+  props.push('background-image: '+sel.camadas.join(', ')+';');
+  props.push('background-size: '+sel.tam.join(', ')+';');
+  props.push('background-repeat: '+sel.rep.join(', ')+';');
+  props.push('background-position: '+sel.pos.join(', ')+';');
+}
+
 function bDataUri(svg){
   var t=svg.replace(/"/g,"'").replace(/\s+/g,' ')
     .replace(/%/g,'%25').replace(/#/g,'%23').replace(/</g,'%3C').replace(/>/g,'%3E');
@@ -11175,7 +11352,12 @@ var B_NUMS=[
   /* O tamanho do enfeite E a espessura da borda na guirlanda: um desenho reconhecivel pede
      24-48px, e o 'b-esp' vai so ate 20. Em vez de alargar a faixa de um campo que os outros
      cinco efeitos usam, este efeito traz a propria. */
-  ['b-nt-tam',34,16,64,true],['b-nt-gap',18,0,60,true]
+  ['b-nt-tam',34,16,64,true],['b-nt-gap',18,0,60,true],
+  /* O selo de destaque: um campo de tamanho so, com significado por forma (altura da faixa,
+     diametro do selo, lado da fita). Tres campos para a mesma ideia seria mais superficie
+     para divergir, e trocar o numero do operador ao mudar de forma e o que esta ferramenta
+     ja recusou no limiar de urgencia. */
+  ['b-selo-tam',28,18,160,true]
 ];
 function bPreso(id){return fcPreso(B_NUMS,id);}
 /* O espacamento interno e o unico texto livre desta aba e o destino dele e o CSS do
@@ -11221,6 +11403,9 @@ function bCfgDom(){
     comTexto:(radio('b-txt')==='sim'),corTexto:corSegura('b-c4','#F7EFDF'),
     ntMotivos:bNatalMarcados(),ntMov:radio('b-nt-mov'),ntPaleta:radio('b-nt-paleta'),
     ntCantos:(radio('b-nt-cantos')!=='nao'),ntTam:bPreso('b-nt-tam'),ntGap:bPreso('b-nt-gap'),
+    selo:radio('b-selo'),seloTxt:$('b-selo-txt').value.trim(),
+    seloF:corSegura('b-selo-f','#9C5638'),seloC:corSegura('b-selo-c','#FFF6D8'),
+    seloTam:bPreso('b-selo-tam'),seloEleva:(radio('b-selo-eleva')==='sim'),
     pad:$('b-pad').value.trim()};
 }
 /* A mesma configuracao, vinda de um preset salvo (formato de bCampos). */
@@ -11241,6 +11426,12 @@ function bCfgPreset(C){
     ntMotivos:bNatalDaLista(C.ntmotivos),ntMov:(C.ntmov==='parado')?'parado':'girar',
     ntPaleta:(C.ntpaleta==='natural')?'natural':'campanha',ntCantos:(C.ntcantos!=='nao'),
     ntTam:bPresoDe('b-nt-tam',C.nttam),ntGap:bPresoDe('b-nt-gap',C.ntgap),
+    /* Mesma leitura defensiva: preset gravado antes do selo nao traz nenhum destes campos, e
+       o ausente vale "nao usar" -- um preset antigo nao pode ganhar um selo que ninguem pediu. */
+    selo:(C.selo==='faixa'||C.selo==='selo'||C.selo==='fita')?C.selo:'nao',
+    seloTxt:String(C.selotxt==null?'MAIS ESCOLHIDO':C.selotxt).trim(),
+    seloF:cor(C.selof,'#9C5638'),seloC:cor(C.seloc,'#FFF6D8'),
+    seloTam:bPresoDe('b-selo-tam',C.selotam),seloEleva:(C.seloeleva==='sim'),
     pad:String(C.pad||'').trim()};
 }
 /* Le a lista guardada e devolve so os ids que existem HOJE, na ordem de B_NATAL_PECAS.
@@ -11374,6 +11565,7 @@ function bToggles(){
   el=$('b-halo-aviso');if(el)el.style.display=pulso?'block':'none';
   el=$('b-halo-campos');if(el)el.style.display=(pulso||radio('b-halo')==='sim')?'block':'none';
   el=$('b-txt-campo');if(el)el.style.display=(radio('b-txt')==='sim')?'block':'none';
+  el=$('b-selo-campos');if(el)el.style.display=(radio('b-selo')==='nao')?'none':'block';
   /* a cor livre do fundo da previa so vale na opcao "cor da minha pagina" */
   el=$('b-pvcor-campo');if(el)el.style.display=(radio('b-pvfundo')==='cor')?'block':'none';
   /* Consolidacao do codigo 1: na borda fixa nao existe codigo 1 (nao ha animacao), entao a
@@ -11441,6 +11633,17 @@ function bMontar(cfg){
   if(fu==='solido')interna='linear-gradient('+f1+', '+f1+')';
   else if(fu==='degrade')interna='linear-gradient('+fang+'deg, '+f1+', '+f2+')';
 
+  /* O selo e calculado ANTES dos ramos: ele entra nas listas de camadas de quatro efeitos e
+     nos longhands dos outros dois, e a recusa de texto vazio tem de vir antes de escrever
+     qualquer coisa. Desligado, ele devolve null e NADA muda -- e por isso a regressao byte a
+     byte das saidas antigas e a prova de que esta mudanca e aditiva. */
+  var sel=bSeloCamadas(cfg);
+  if(sel&&sel.erro)return {erro:sel.erro};
+  /* Prefixo das posicoes do selo nos quadros do @keyframes. Se a lista de camadas cresce e a
+     do keyframes nao, o navegador CICLA os valores e a animacao passa a andar na camada
+     errada -- sem erro nenhum no console. */
+  var kpos=sel?(sel.pos.join(', ')+', '):'';
+
   var props=[],anim='',keys='',keysRm='';
 
   if(camadas){
@@ -11449,28 +11652,34 @@ function bMontar(cfg){
       anim='fc-borda-brilho';
       bordaGrad='linear-gradient(120deg,\n    '+bStops(c1,c2,c3,L)+')';
       size='100% 100%, 300% 300%';
-      keys='@keyframes fc-borda-brilho {\n  0%   { background-position: 0 0, 0% 0%; }\n  100% { background-position: 0 0, 100% 100%; }\n}';
-      keysRm='  @keyframes fc-borda-brilho {\n    0%, 100% { background-position: 0 0, 0% 0%; }\n  }';
+      keys='@keyframes fc-borda-brilho {\n  0%   { background-position: '+kpos+'0 0, 0% 0%; }\n  100% { background-position: '+kpos+'0 0, 100% 100%; }\n}';
+      keysRm='  @keyframes fc-borda-brilho {\n    0%, 100% { background-position: '+kpos+'0 0, 0% 0%; }\n  }';
     }else if(ef==='gradiente'){
       anim='fc-borda-gradiente';
       bordaGrad='linear-gradient(90deg, '+c1+', '+c2+', '+c1+')';
       size='100% 100%, 300% 100%';
-      keys='@keyframes fc-borda-gradiente {\n  0%   { background-position: 0 0, 0% 0; }\n  100% { background-position: 0 0, 100% 0; }\n}';
-      keysRm='  @keyframes fc-borda-gradiente {\n    0%, 100% { background-position: 0 0, 0% 0; }\n  }';
+      keys='@keyframes fc-borda-gradiente {\n  0%   { background-position: '+kpos+'0 0, 0% 0; }\n  100% { background-position: '+kpos+'0 0, 100% 0; }\n}';
+      keysRm='  @keyframes fc-borda-gradiente {\n    0%, 100% { background-position: '+kpos+'0 0, 0% 0; }\n  }';
     }else{
       anim='fc-borda-listras';
       bordaGrad='repeating-linear-gradient(45deg, '+c1+' 0 '+listra+'px, '+c2+' '+listra+'px '+(listra*2)+'px)';
       size='100% 100%, 100% 100%';
       var desl=(listra*2*1.41421).toFixed(2);
-      keys='@keyframes fc-borda-listras {\n  0%   { background-position: 0 0, 0 0; }\n  100% { background-position: 0 0, '+desl+'px 0; }\n}';
-      keysRm='  @keyframes fc-borda-listras {\n    0%, 100% { background-position: 0 0, 0 0; }\n  }';
+      keys='@keyframes fc-borda-listras {\n  0%   { background-position: '+kpos+'0 0, 0 0; }\n  100% { background-position: '+kpos+'0 0, '+desl+'px 0; }\n}';
+      keysRm='  @keyframes fc-borda-listras {\n    0%, 100% { background-position: '+kpos+'0 0, 0 0; }\n  }';
     }
     props.push('border: '+esp+'px solid transparent;');
     props.push('border-radius: '+raio+'px;');
-    props.push('background:\n  '+interna+' padding-box,\n  '+bordaGrad+' border-box;');
-    props.push('background-size: '+size+';');
-    props.push('background-position: 0 0, 0 0;');
-    if(halo)props.push('box-shadow: 0 0 '+haloraio+'px rgba('+bHexRgb(c2)+', '+haloop+');');
+    /* O selo entra NA MESMA lista de camadas, na frente. Nunca como uma segunda regra de
+       'background': atalhos nao se fundem entre duas regras de mesmo seletor -- a segunda
+       apagaria a primeira por inteiro, e com ela o efeito. */
+    var camPre=sel?bSeloComCaixa(sel).join(',\n  ')+',\n  ':'';
+    props.push('background:\n  '+camPre+interna+' padding-box,\n  '+bordaGrad+' border-box;');
+    props.push('background-size: '+(sel?sel.tam.join(', ')+', ':'')+size+';');
+    if(sel)props.push('background-repeat: '+sel.rep.join(', ')+', repeat, repeat;');
+    props.push('background-position: '+kpos+'0 0, 0 0;');
+    var sb=bSeloSombra(halo,haloraio,c2,haloop,cfg.seloEleva);
+    if(sb)props.push(sb);
     props.push('animation: '+anim+' '+vel+'s linear infinite;');
   }else if(ef==='natal'){
     /* ===== A GUIRLANDA =====
@@ -11501,6 +11710,15 @@ function bMontar(cfg){
     props.push('--fcn-h: '+bDataUri(th.svg)+';');
     props.push('--fcn-v: '+bDataUri(tv.svg)+';');
     var camadas=[],tamanhos=[],repete=[],pIni=[],pFim=[];
+    /* O selo abre as listas: ele fica na frente de tudo, e PARADO -- mesma posicao nos dois
+       quadros, enquanto as tiras da guirlanda andam. */
+    if(sel){
+      var sc=bSeloComCaixa(sel),is;
+      for(is=0;is<sc.length;is++){
+        camadas.push(sc[is]);tamanhos.push(sel.tam[is]);repete.push(sel.rep[is]);
+        pIni.push(sel.pos[is]);pFim.push(sel.pos[is]);
+      }
+    }
     camadas.push(interna+' padding-box');tamanhos.push('auto auto');repete.push('no-repeat');
     pIni.push('0 0');pFim.push('0 0');
     if(cfg.ntCantos){
@@ -11530,7 +11748,8 @@ function bMontar(cfg){
     props.push('background-size: '+tamanhos.join(', ')+';');
     props.push('background-repeat: '+repete.join(', ')+';');
     props.push('background-position: '+pIni.join(', ')+';');
-    if(halo)props.push('box-shadow: 0 0 '+haloraio+'px rgba('+bHexRgb(c2)+', '+haloop+');');
+    var sbn=bSeloSombra(halo,haloraio,c2,haloop,cfg.seloEleva);
+    if(sbn)props.push(sbn);
     if(cfg.ntMov==='girar'){
       anim='fc-borda-natal';
       keys='@keyframes fc-borda-natal {\n  0%   { background-position: '+pIni.join(', ')+'; }\n'+
@@ -11546,27 +11765,43 @@ function bMontar(cfg){
        sempre neste efeito (ver bMontar/bToggles) e o ternario sumiu. */
     var pr=haloraio;
     var po=haloop;
-    keys='@keyframes fc-borda-pulso {\n  0%   { box-shadow: 0 0 0 0 rgba('+bHexRgb(c2)+', '+po+'); }\n  70%  { box-shadow: 0 0 0 '+pr+'px rgba('+bHexRgb(c2)+', 0); }\n  100% { box-shadow: 0 0 0 0 rgba('+bHexRgb(c2)+', 0); }\n}';
+    /* A sombra da elevacao NAO pode sair como declaracao estatica aqui: neste efeito o
+       box-shadow e animado por inteiro, e a animacao sobrepoe a declaracao 100%% do tempo --
+       o cartao "elevado" ficaria sem sombra e ninguem veria erro nenhum. Ela entra nos
+       quadros, ao lado do halo. */
+    var elevK=cfg.seloEleva?(', '+B_SELO_SOMBRA):'';
+    keys='@keyframes fc-borda-pulso {\n  0%   { box-shadow: 0 0 0 0 rgba('+bHexRgb(c2)+', '+po+')'+elevK+'; }\n  70%  { box-shadow: 0 0 0 '+pr+'px rgba('+bHexRgb(c2)+', 0)'+elevK+'; }\n  100% { box-shadow: 0 0 0 0 rgba('+bHexRgb(c2)+', 0)'+elevK+'; }\n}';
     /* Congelar o pulso no quadro 100% apagaria o halo por inteiro -- ele e "0 0 0 0
        rgba(cor, 0)" --, e o componente perderia todo o destaque justamente para quem pediu
        menos movimento. O quadro estatico e um anel de meio alcance na opacidade de partida:
        parado, mas visivel. */
-    keysRm='  @keyframes fc-borda-pulso {\n    0%, 100% { box-shadow: 0 0 0 '+Math.round(pr/2)+'px rgba('+bHexRgb(c2)+', '+po+'); }\n  }';
+    keysRm='  @keyframes fc-borda-pulso {\n    0%, 100% { box-shadow: 0 0 0 '+Math.round(pr/2)+'px rgba('+bHexRgb(c2)+', '+po+')'+elevK+'; }\n  }';
     if(esp>0)props.push('border: '+esp+'px solid '+c1+';');
     props.push('border-radius: '+raio+'px;');
     if(fu==='solido'){if(fallback)props.push('background: '+f1+';');else props.push('background: '+f1+';');}
     else if(fu==='degrade'){if(fallback)props.push('background: '+f1+';');props.push('background: linear-gradient('+fang+'deg, '+f1+', '+f2+');');}
+    bSeloLonghands(props,sel);
     props.push('animation: '+anim+' '+vel+'s ease-out infinite;');
   }else{
     if(esp>0)props.push('border: '+esp+'px solid '+c1+';');
     props.push('border-radius: '+raio+'px;');
     if(fu==='solido')props.push('background: '+f1+';');
     else if(fu==='degrade'){if(fallback)props.push('background: '+f1+';');props.push('background: linear-gradient('+fang+'deg, '+f1+', '+f2+');');}
-    if(halo)props.push('box-shadow: 0 0 '+haloraio+'px rgba('+bHexRgb(c2)+', '+haloop+');');
+    bSeloLonghands(props,sel);
+    var sbf=bSeloSombra(halo,haloraio,c2,haloop,cfg.seloEleva);
+    if(sbf)props.push(sbf);
   }
 
   if(comTexto)props.push('color: '+corTexto+';');
   if(pad)props.push('padding: '+pad+';');
+  /* O RESPIRO vem DEPOIS do padding, de proposito: 'padding-top' e longhand e sobrepoe so o
+     lado de cima do atalho que o operador escreveu. E ele existe porque o selo e desenhado no
+     FUNDO -- sem empurrar o conteudo, a faixa cairia sobre o titulo do componente. A fita
+     ocupa canto, nao topo, e por isso nao pede respiro. */
+  if(sel&&sel.padTop)props.push('padding-top: '+sel.padTop+'px;');
+  /* A elevacao. A sombra ja foi acumulada junto com o halo (ou posta nos quadros, no pulso);
+     aqui sobra a escala, que e o que faz o olho ir ao cartao antes de ler a palavra. */
+  if(sel&&cfg.seloEleva)props.push('transform: scale(1.06);');
 
   return {anim:anim,keys:keys,keysRm:keysRm,props:props.join('\n'),efeito:ef};
 }
@@ -16294,7 +16529,7 @@ prep('Bordas com efeito','bor',function(){
   parearCor('b-f1');parearCor('b-f2');parearCor('b-c1');parearCor('b-c2');parearCor('b-c3');parearCor('b-c4');
   /* a cor do fundo da previa e pareada como as outras; quem redesenha e o listener de
      'input' de document que ja atende tudo que comeca com 'b-' */
-  parearCor('b-pvcor');
+  parearCor('b-pvcor');parearCor('b-selo-f');parearCor('b-selo-c');
   /* Correcao a vista dos oito campos numericos, no padrao do c-mob. O listener do proprio
      elemento roda antes dos de document, entao o bPreview global ja desenha com o valor
      preso -- por isso o ramo de 'change' nao redesenha. 'blur' nao borbulha e redesenha
