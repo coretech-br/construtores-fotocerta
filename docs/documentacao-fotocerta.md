@@ -1008,6 +1008,24 @@ Spec: `docs/specs/2026-08-24-popup-fora-do-horario-design.md`. Alcance: aba **Ca
 
 **Verificação.** Primeira aplicação do molde versionado (`scripts/verificar/pagina.mjs`) a um segundo bloco, o que também o validou fora da aba onde nasceu: com relógio falso, o pop-up abre às 14h de segunda, **não** abre às 22h nem no domingo, e o botão continua lá. As outras três combinações (abrir mesmo assim, sem horário, modo clique) medidas do mesmo jeito. Regressão byte a byte intacta — inclusive o `l-out`, porque o padrão de fábrica tem o horário desligado.
 
+### O nome da animação passa a sair do conteúdo dela (24/08/2026)
+
+Spec: `docs/specs/2026-08-24-nome-da-animacao-por-assinatura-design.md`. Alcance: aba **Bordas com efeito**.
+
+**O que o dono encontrou.** Ele quis dois componentes com **brilho giratório** na mesma página, um com o selo "MAIS ESCOLHIDO". A ferramenta recusou consolidar. O diagnóstico dele estava certo: o selo muda o **conteúdo** da animação — a lista de `background-position` cresce junto com a de camadas — mas o nome continuava `fc-borda-brilho`.
+
+**A medição mostrou que a doença era mais velha que o selo.** Quatro corpos diferentes de `@keyframes` para brilho (sem selo, faixa, selo, fita), todos com o mesmo nome. E sem selo nenhum: **listras** com espessura 10 × 22 e **halo pulsante** com halos diferentes também produziam corpos diferentes com o mesmo nome. Enquanto isso, dois **brilhos com velocidades diferentes** têm corpo **idêntico** — funcionariam juntos — e eram recusados. A regra antiga errava nas duas direções porque olhava o **tipo do efeito**; o que importa é o **conteúdo da animação**.
+
+**A correção.** O nome vira `fc-borda-brilho-a3f2`: o tipo mais uma assinatura curta (FNV-1a de 32 bits sobre o texto dos dois blocos, quatro dígitos hexadecimais). A propriedade que faz isso funcionar é o nome ser **função pura da configuração** — assim os dois códigos do mesmo componente concordam sempre, mesmo gerados em momentos diferentes. Um esquema que numerasse na hora de consolidar (`-2`) não teria essa propriedade: o código 2 do outro componente já estava colado com o nome antigo. O sufixo por forma do selo, que foi a primeira ideia, deixava dois buracos medidos: `faixa` e `selo` teriam o mesmo sufixo com corpos diferentes, e dois selos de **tamanhos** diferentes também.
+
+**A recusa mudou de papel.** Ela compara os **corpos**, não os tipos: corpos iguais → não há o que consolidar, e o código 1 sai com um bloco só e uma linha dizendo que ele serve aos dois; corpos diferentes com o mesmo nome → só pode ser colisão de assinatura, e aí recusa. Deixou de ser uma limitação e virou uma trava que na prática não dispara.
+
+**O custo, dito na tela.** O nome muda em tudo que for regerado. O que já está publicado continua funcionando, mas ao regerar um componente **os dois códigos dele precisam ser recolados, em par** — colar só um deixa o componente parado, sem erro nenhum. Por isso o aviso está ao lado do código 1, e não só na spec.
+
+**Verificação.** A prova que separa "renomear" de "mudar o gerador": as 12 saídas e as 9 cobranças capturadas **em texto** (não em hash) nas duas árvores, com o sufixo removido dos dois lados — 21 itens comparados, **idênticos**; e sem normalizar, mudaram exatamente `b-out1` e `b-out2`, e mais nada. Depois: quatro formas de selo → quatro nomes; selo 96 × 40 → nomes distintos; listras 10 × 22 e pulso 26/0,35 × 60/0,8 → nomes distintos; brilho velocidade 4 × 12 → **mesmo** nome. Os três desfechos da consolidação, incluindo a trava de colisão exercitada com a assinatura forçada a um valor constante. As 24 combinações do selo e a interface intactas, zero erro de console.
+
+**Uma armadilha de verificação registrada.** A primeira comparação leu uma chave que não existe no JSON da fotografia, comparou **zero itens** e imprimiu "OK". É a mesma armadilha que o cabeçalho de `geradores.mjs` já documentava para outro caso. A correção não foi só o nome da chave: o script passou a **contar e imprimir quantos itens comparou** e a falhar quando o conjunto vem vazio. Comparação que não diz quantos itens comparou não é prova.
+
 ### Selo de destaque na borda: marcar o pacote do meio (24/08/2026)
 
 Spec: `docs/specs/2026-08-24-selo-de-destaque-design.md`. Alcance: aba **Bordas com efeito**. Nenhum arquivo compartilhado tocado; a regressão byte a byte das 12 saídas e das 9 cobranças saiu **idêntica**, porque com o selo em "não usar" nada novo é emitido.

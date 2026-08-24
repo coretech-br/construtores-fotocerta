@@ -1895,7 +1895,8 @@
       <label for="b-consol">Incluir também a animação de um preset salvo</label>
       <select id="b-consol"><option value="">Não incluir — só o efeito desta tela</option></select>
       <p class="ajuda"><b>Para que serve:</b> o código 1 é colado na <b>Tag Head da página</b> onde o efeito aparece — o Prosite não tem cabeçalho global, cada página tem o seu. Quando a <b>mesma página</b> usa dois efeitos diferentes, em vez de colar dois blocos concorrentes nesse campo, escolha aqui o preset do outro componente e o código 1 sai com as <b>duas</b> animações e as duas regras de movimento reduzido, num bloco só.</p>
-      <p class="ajuda"><b>O que ele não resolve:</b> efeitos <b>diferentes</b> têm nomes de animação diferentes e convivem; o <b>mesmo</b> efeito com parâmetros diferentes colide — os dois se chamariam <code>fc-borda-listras</code> e valeria o último. Por isso a ferramenta <b>recusa</b> consolidar um preset do mesmo efeito da tela, em vez de emitir dois <code>@keyframes</code> de mesmo nome. Dois componentes com o mesmo efeito precisam dos <b>mesmos</b> parâmetros de animação.</p>
+      <p class="ajuda"><b>O mesmo efeito, duas vezes, agora convive.</b> O nome da animação sai do <b>conteúdo</b> dela, e não do tipo do efeito: <code>fc-borda-brilho-a3f2</code>. Dois componentes com o mesmo efeito e parâmetros diferentes — um com selo e outro sem, duas listras de espessuras diferentes — recebem nomes diferentes e cabem no mesmo campo. E quando os dois produzem a <b>mesma</b> animação, o código 1 sai com um bloco só, dizendo que ele serve aos dois.</p>
+      <p class="ajuda alerta"><b>Ao regerar, recole os DOIS códigos deste componente.</b> O nome da animação muda quando você muda o efeito, e o código 2 aponta para um nome que só existe no código 1 correspondente. Colar só um dos dois deixa o componente <b>parado</b>, sem nenhum erro na tela. O que já está publicado continua funcionando enquanto você não regerar.</p>
       </fieldset>
       <div class="saida">
       <h3>1) Tag Head <b>desta página</b>
@@ -2881,8 +2882,8 @@
    QUEM IMPEDE QUE ELE MINTA: scripts/conferir-versoes.sh, que recusa index.html
    alterado sem a versao mudar junto -- a mesma disciplina do fc-compartilhado.js,
    e pela mesma razao: carimbo que ninguem confere e o defeito de amanha. */
-var FC_VERSAO='2026-08-24c';
-var FC_PUBLICADO='2026-08-24 14:04';   /* America/Sao_Paulo -- escrito pelo carimbador */
+var FC_VERSAO='2026-08-24d';
+var FC_PUBLICADO='2026-08-24 20:36';   /* America/Sao_Paulo -- escrito pelo carimbador */
 (function(){
   var el=document.getElementById('fc-versao');
   if(!el) return;
@@ -11592,6 +11593,35 @@ function bStops(base,facho,nucleo,L){
   return s.join(', ');
 }
 
+/* ===== A ASSINATURA DO @KEYFRAMES (24/08/2026) =====
+   POR QUE ELA EXISTE. O nome da animacao era o TIPO do efeito -- 'fc-borda-brilho' --, e o
+   tipo nao identifica a animacao. Medido: brilho sem selo, com faixa, com selo circular e com
+   fita produzem QUATRO corpos diferentes de @keyframes, porque a lista de background-position
+   cresce junto com a lista de camadas; e os quatro se chamavam igual. A doenca era mais velha
+   que o selo: listras de espessura 10 e 22, e halo pulsante com halos diferentes, tambem
+   produziam corpos diferentes com o mesmo nome. A regra antiga errava nas DUAS direcoes --
+   recusava consolidar dois brilhos de velocidades diferentes (que tem o MESMO corpo e
+   funcionariam) e nao protegia contra os casos que colidiam de verdade.
+
+   O QUE A ASSINATURA GARANTE. O nome vira 'fc-borda-brilho-a3f2', onde o sufixo sai do texto
+   dos dois blocos. Como ele e FUNCAO PURA DA CONFIGURACAO, os dois codigos do mesmo
+   componente -- a Tag Head e o CSS do componente -- concordam sempre, mesmo tendo sido
+   gerados em momentos diferentes. Um esquema que numerasse na hora de consolidar ("-2") nao
+   teria essa propriedade: o codigo 2 do outro componente ja estava colado com o nome antigo.
+
+   FNV-1a de 32 bits, quatro digitos hexadecimais. Nao e criptografia: e um rotulo estavel.
+   Contra a colisao (uma em ~65 mil por par) existe a trava em bConsolidar, que compara os
+   CORPOS e nao os nomes. */
+function bAssinatura(t){
+  var h=0x811c9dc5,i;
+  for(i=0;i<t.length;i++){
+    h^=t.charCodeAt(i);
+    /* multiplicacao FNV por 16777619 sem estourar o inteiro de 32 bits do JavaScript */
+    h=(h+((h<<1)+(h<<4)+(h<<7)+(h<<8)+(h<<24)))>>>0;
+  }
+  return ('000'+(h>>>16).toString(16)).slice(-4);
+}
+
 /* monta {anim, keyframes, props} a partir de uma configuracao.
    A configuracao vem de bCfgDom (o que esta na tela) ou de bCfgPreset (um preset salvo): o
    gerador e o mesmo para os dois, e por isso a animacao consolidada no codigo 1 sai pelas
@@ -11803,7 +11833,20 @@ function bMontar(cfg){
      aqui sobra a escala, que e o que faz o olho ir ao cartao antes de ler a palavra. */
   if(sel&&cfg.seloEleva)props.push('transform: scale(1.06);');
 
-  return {anim:anim,keys:keys,keysRm:keysRm,props:props.join('\n'),efeito:ef};
+  /* O batismo, no fim: o nome so pode ser calculado quando o corpo esta pronto. A troca e
+     feita nos TRES lugares onde o nome aparece -- os dois blocos e o 'animation:' do codigo
+     2 --, e por isso ela e feita aqui, num lugar so, em vez de em cada ramo. */
+  var textoProps=props.join('\n');
+  if(anim){
+    var nome=anim+'-'+bAssinatura(keys+'|'+keysRm);
+    var re=new RegExp(anim.replace(/[-]/g,'\\-'),'g');
+    keys=keys.replace(re,nome);
+    keysRm=keysRm.replace(re,nome);
+    textoProps=textoProps.replace(re,nome);
+    anim=nome;
+  }
+
+  return {anim:anim,keys:keys,keysRm:keysRm,props:textoProps,efeito:ef};
 }
 
 /* Esta previa NAO foi convertida para o iframe das abas Slideshow, Leads e Contagem, e a
@@ -11872,7 +11915,16 @@ function bConsolidar(mAtual){
   var m2=bMontar(bCfgPreset(p.valores.b||{}));
   if(m2.erro)return {erro:'O preset "'+p.nome+'" nao gera codigo com a configuracao que esta guardada nele: '+m2.erro};
   if(!m2.keys)return {erro:'O preset "'+p.nome+'" usa a borda fixa, que nao tem animacao: nao ha nada para consolidar no codigo 1.'};
-  if(m2.anim===mAtual.anim)return {erro:'O preset "'+p.nome+'" usa o MESMO efeito desta tela ('+(B_EFEITO_NOME[m2.efeito]||m2.efeito)+'). As duas animacoes se chamariam "'+m2.anim+'" e a segunda apagaria a primeira -- valeria a que estivesse por ultimo, para os dois componentes. Consolidar so faz sentido entre efeitos DIFERENTES; dois componentes com o mesmo efeito precisam dos mesmos parametros de animacao.'};
+  /* Desde o batismo por assinatura, esta comparacao olha o CORPO, e nao o tipo do efeito.
+     Nome igual e corpo igual nao e conflito: e a mesma animacao, e um bloco so serve aos dois
+     componentes -- o que antes era recusado sem motivo (dois brilhos de velocidades
+     diferentes tem corpos identicos, porque a duracao mora no 'animation' de cada componente
+     e nao nos quadros). Nome igual com corpo diferente so pode ser colisao de assinatura, e
+     ai a recusa e a trava certa. */
+  if(m2.anim===mAtual.anim){
+    if(m2.keys===mAtual.keys&&m2.keysRm===mAtual.keysRm)return {mesma:true,nome:p.nome,anim:m2.anim};
+    return {erro:'O preset "'+p.nome+'" produziu uma animacao DIFERENTE com a mesma assinatura desta tela ("'+m2.anim+'"). E uma colisao rara do rotulo de quatro digitos, e emitir os dois @keyframes com esse nome faria valer o ultimo para os dois componentes. Mude um parametro de animacao de um dos dois (a espessura da listra, o alcance do halo, o tamanho do selo) e gere de novo: a assinatura muda junto.'};
+  }
   return {keys:m2.keys,keysRm:m2.keysRm,nome:p.nome,efeito:m2.efeito};
 }
 
@@ -11913,8 +11965,18 @@ function bGerar(){
      bloco anterior enquanto o alerta diz que nao gerou. */
   var extra=bConsolidar(m);
   if(extra&&extra.erro){alert(extra.erro);return;}
+  /* Mesma animacao dos dois lados: um bloco so serve aos dois componentes. Isto e DITO, e nao
+     silenciado -- o operador escolheu um preset e precisa saber o que aconteceu com a escolha
+     dele. O nome do preset nao entra no comentario, pela mesma razao de sempre: e texto livre,
+     e a sequencia que fecha comentario CSS digitada ali fecharia este mais cedo. */
+  var mesma=(extra&&extra.mesma)?extra:null;
+  if(mesma)extra=null;
   c1+='<sty'+'le>\n';
   c1+='/* Animacao da borda com efeito - cole na Tag Head DESTA pagina */\n'+m.keys+'\n';
+  if(mesma){
+    c1+='/* O preset escolhido produz EXATAMENTE esta animacao ("'+mesma.anim+'"):\n';
+    c1+='   um bloco so serve aos dois componentes, e nao ha um segundo para colar. */\n';
+  }
   if(extra){
     /* O nome do preset NAO entra no comentario: e texto livre do operador, e a sequencia que
        fecha comentario CSS (asterisco + barra) digitada ali fecharia este comentario mais
