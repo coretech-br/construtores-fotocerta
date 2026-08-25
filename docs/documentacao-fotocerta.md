@@ -1008,6 +1008,18 @@ Spec: `docs/specs/2026-08-24-popup-fora-do-horario-design.md`. Alcance: aba **Ca
 
 **Verificação.** Primeira aplicação do molde versionado (`scripts/verificar/pagina.mjs`) a um segundo bloco, o que também o validou fora da aba onde nasceu: com relógio falso, o pop-up abre às 14h de segunda, **não** abre às 22h nem no domingo, e o botão continua lá. As outras três combinações (abrir mesmo assim, sem horário, modo clique) medidas do mesmo jeito. Regressão byte a byte intacta — inclusive o `l-out`, porque o padrão de fábrica tem o horário desligado.
 
+### O formato da data da página de obrigado (25/08/2026)
+
+Spec: `docs/specs/2026-08-25-formato-da-data-do-tidycal-design.md`. Alcance: aba **Agendamento TidyCal**.
+
+**O que apareceu no uso.** O dono publicou a página de obrigado e a data chegou **em inglês**: `Monday, October 12, 2026`. Medido com o bloco rodando, o TidyCal manda a data em **dois formatos**, conforme a variável: `{{booking.date}}` vem em **inglês por extenso** e `{{booking.starts_at}}` no formato **técnico**. A opção que existia só conhecia o técnico e só valia para o `{{quando}}` — com o dono usando `{{data}}`, ela ficava ligada e **não fazia nada**, sem a ferramenta dizer. Limite conhecido e não contado é defeito.
+
+**O que passou a existir.** Formato **selecionável** (como veio, `12/10/2026`, `12 de outubro de 2026`, `segunda-feira, 12 de outubro de 2026`), valendo para `{{data}}` **e** `{{quando}}`, reconhecendo os **dois** formatos de entrada — mês por nome inteiro ou abreviado. O que não casar sai **exatamente como veio**: a página nunca inventa data. O horário entra só no `{{quando}}`, que é quem o traz. O **dia da semana é calculado**, não lido do inglês, para sair igual venha o valor em qualquer dos dois formatos (conferência cruzada: o TidyCal diz `Monday`, o cálculo diz `segunda-feira`). **Zerado na origem:** em "como o TidyCal mandar" as tabelas e o leitor não são emitidos.
+
+**Uma lacuna do arnês, fechada junto.** As saídas **4** (endereço de redirecionamento) e **5** (Tag Body da página de obrigado) existiam desde 23/08/2026 e **nunca tinham sido fotografadas**. Entraram agora, e com o recurso **ligado** no cenário — acrescentá-las desligado deixaria as duas vazias nas duas árvores e a comparação passaria com folga sobre nada.
+
+**Verificação.** 16 combinações (quatro formatos × quatro entradas) com o bloco executando numa página, todas corretas, e o formato desconhecido saindo intacto nas quatro. Regressão: as **20** outras saídas e as 9 cobranças idênticas; a única divergência é a `t-out5`, intencional. E a **saída 4 não mudou** — provado byte a byte, então o endereço colado no TidyCal não precisa ser refeito por causa do formato.
+
 ### Efeitos de página: proporção no celular e mais três efeitos (24/08/2026)
 
 Spec: `docs/specs/2026-08-24-efeitos-proporcao-e-tres-efeitos-design.md`.

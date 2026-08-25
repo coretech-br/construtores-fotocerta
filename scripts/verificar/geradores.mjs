@@ -26,7 +26,7 @@ if(!ARV || !PORTA || !SAIDA){
    lista mesmo sem o cenario exercitar a consolidacao: aqui os cinco PRECISAM sair vazios, e a
    fotografia passa a cobrar isso. Saida que so aparece as vezes e onde o lixo de uma passagem
    anterior se esconde. */
-const SAIDAS = ['s-out','l-out','t-out1','t-out2','t-out3','u-out','b-out1','b-out2','b-out3','b-out4','b-out5','b-out6','b-out7','c-out1','p-out1','m-out','e-out1','e-out2'];
+const SAIDAS = ['s-out','l-out','t-out1','t-out2','t-out3','t-out4','t-out5','u-out','b-out1','b-out2','b-out3','b-out4','b-out5','b-out6','b-out7','c-out1','p-out1','m-out','e-out1','e-out2'];
 const ABAS = [['aba-slide','s-gerar'],['aba-leads','l-gerar'],['aba-tidy','t-gerar'],
   ['aba-uni','u-gerar'],['aba-bor','b-gerar'],['aba-cnt','c-gerar'],['aba-cob','p-gerar'],['aba-loja','m-gerar'],['aba-efe','e-gerar']];
 
@@ -58,6 +58,19 @@ async function conteudo(pg){
   }
   await clicar(pg,'aba-leads'); await set(pg,'l-cod','NATAL26');
   await clicar(pg,'aba-tidy');  await set(pg,'t-path','fotocerta/natal-2026');
+  /* A PAGINA DE OBRIGADO ENTRA NO CENARIO, e nao so na lista de saidas. As saidas 4 e 5
+     existiam desde 23/08/2026 e nunca foram fotografadas; acrescenta-las sem LIGAR o recurso
+     deixaria as duas vazias nas duas arvores, e a comparacao passaria com folga sobre nada --
+     a mesma armadilha que o cabecalho deste arquivo ja registra para as outras saidas. */
+  await radio(pg,'t-ob-usar','sim');
+  await set(pg,'t-ob-url','https://www.fotocerta.com.br/obrigado');
+  for(const v of ['nome','tipo','data','hora','quando']){
+    await pg.evaluate(v=>{const e=document.getElementById('t-ob-'+v);
+      if(e){e.checked=true;e.dispatchEvent(new Event('change',{bubbles:true}));}},v);
+  }
+  /* O FORMATO fica no padrao ('como o TidyCal mandar'), de proposito: os valores novos nao
+     existem na arvore de referencia, e pedi-los aqui derrubaria a captura inteira. Os quatro
+     formatos sao cobertos pelo roteiro proprio da rodada, nao pela fotografia. */
   await clicar(pg,'aba-uni');
   await set(pg,'u-pnome','Ensaio de Natal'); await set(pg,'u-pdesc','30 minutos, 10 fotos tratadas');
   await set(pg,'u-ppreco','420'); await clicar(pg,'u-prod-salvar');

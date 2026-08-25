@@ -1328,12 +1328,15 @@
       <input type="text" id="t-ob-fb-hora" value="o horário combinado">
       <label for="t-ob-fb-quando" class="ajuda">no lugar de <code>{{quando}}</code></label>
       <input type="text" id="t-ob-fb-quando" value="a data e o horário combinados">
-      <label style="margin-top:10px">Data e horário juntos</label>
+      <label style="margin-top:10px">Formato da data <small>(vale para <code>{{data}}</code> e para <code>{{quando}}</code>)</small></label>
       <div class="radios">
       <label><input type="radio" name="t-ob-fmt" value="comoveio" checked><span>Como o TidyCal mandar</span></label>
-      <label><input type="radio" name="t-ob-fmt" value="bonito"><span>Reescrever em português</span></label>
+      <label><input type="radio" name="t-ob-fmt" value="curto"><span>12/10/2026</span></label>
+      <label><input type="radio" name="t-ob-fmt" value="extenso"><span>12 de outubro de 2026</span></label>
+      <label><input type="radio" name="t-ob-fmt" value="extensodia"><span>segunda-feira, 12 de outubro de 2026</span></label>
       </div>
-      <p class="ajuda">O TidyCal manda esse campo num formato técnico (<code>2026-12-12T15:00:00-03:00</code>). Com <b>Reescrever</b>, ele vira <b>12/12/2026 às 15:00</b> — <b>mas só se chegar exatamente nesse formato</b>. Qualquer outra coisa é exibida como veio: a página não inventa data.</p>
+      <p class="ajuda">O TidyCal manda a data em <b>inglês</b> no <code>{{data}}</code> (<code>Monday, October 12, 2026</code>) e no formato <b>técnico</b> no <code>{{quando}}</code> (<code>2026-10-12T15:00:00-03:00</code>). O bloco reconhece <b>os dois</b> e reescreve no formato escolhido. No <code>{{quando}}</code> o horário entra junto (<b>… às 15:00</b>); no <code>{{data}}</code>, não.</p>
+      <p class="ajuda alerta"><b>Só reescreve o que reconhece.</b> Se o TidyCal mandar num terceiro formato, o valor sai <b>exatamente como veio</b> — a página nunca inventa data. Se isso acontecer, me mostre o endereço gerado que a gente ensina o formato novo.</p>
       </div>
     </div>
   </div>
@@ -3080,8 +3083,8 @@
    QUEM IMPEDE QUE ELE MINTA: scripts/conferir-versoes.sh, que recusa index.html
    alterado sem a versao mudar junto -- a mesma disciplina do fc-compartilhado.js,
    e pela mesma razao: carimbo que ninguem confere e o defeito de amanha. */
-var FC_VERSAO='2026-08-25b';
-var FC_PUBLICADO='2026-08-25 11:38';   /* America/Sao_Paulo -- escrito pelo carimbador */
+var FC_VERSAO='2026-08-25c';
+var FC_PUBLICADO='2026-08-25 14:06';   /* America/Sao_Paulo -- escrito pelo carimbador */
 (function(){
   var el=document.getElementById('fc-versao');
   if(!el) return;
@@ -9601,25 +9604,68 @@ function tObBloco(cfg){
     j+=corpo+'/* '+itens[i].rot+' */\n';
   }
   j+='  ];\n';
-  j+='  var DATA_LEGIVEL = '+(cfg.fmt==='bonito')+';   /* reescreve {{quando}} em portugues, SE ele vier no formato tecnico */\n';
+  j+="  var FORMATO_DATA = '"+cfg.fmt+"';   /* comoveio | curto | extenso | extensodia */\n";
   j+='\n  /* ============================================================\n     Daqui para baixo nao precisa mexer\n     ============================================================ */\n\n';
   j+=tObInd(FC_PARAM_SRC);
-  j+='  /* O TidyCal manda data e hora juntas no formato tecnico (2026-12-12T15:00:00-03:00).\n';
-  j+='     A reescrita so acontece se o valor casar EXATAMENTE com ele; qualquer outra coisa\n';
-  j+='     sai como veio. A pagina nao inventa data. */\n';
-  j+='  function legivel(v){\n';
-  j+='    if(!DATA_LEGIVEL)return v;\n';
-  j+="    var m=/^(\\d{4})-(\\d{2})-(\\d{2})[T ](\\d{2}):(\\d{2})/.exec(v);\n";
-  j+='    if(!m)return v;\n';
+  /* ZERADO NA ORIGEM: em "como o TidyCal mandar" nao ha o que traduzir, entao as tabelas de
+     meses e dias e o leitor de data NAO sao emitidos. Bloco entregue nao carrega maquinaria
+     que nao vai usar -- a mesma regra que tirou o relogio da barra de contagem quando o
+     contador esta oculto. */
+  if(cfg.fmt==='comoveio'){
+    j+='  /* O formato escolhido foi "como o TidyCal mandar": a data sai exatamente como\n';
+    j+='     chegou no endereco, sem nenhuma reescrita. */\n';
+    j+='  function valor(c){ return param(c.marca)||c.reserva; }\n';
+  }else{
+  j+='  /* O TidyCal manda a data em DOIS formatos diferentes, conforme a variavel:\n';
+  j+='       {{data}}   -> ingles por extenso   ("Monday, October 12, 2026")\n';
+  j+='       {{quando}} -> tecnico              ("2026-10-12T15:00:00-03:00")\n';
+  j+='     O bloco reconhece os dois. O que NAO casar com nenhum deles sai EXATAMENTE como\n';
+  j+='     veio -- a pagina nunca inventa data. */\n';
   /* Texto que o CLIENTE le leva acento, como os textos fixos do bloco da /pagar. O Manual
      proibe acento em codigo, nao em conteudo visivel. */
-  j+="    return m[3]+'/'+m[2]+'/'+m[1]+' \u00e0s '+m[4]+':'+m[5];\n";
+  j+="  var MESES_EN = ['january','february','march','april','may','june','july','august','september','october','november','december'];\n";
+  j+="  var MESES_PT = ['janeiro','fevereiro','mar\u00e7o','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];\n";
+  j+="  var DIAS_PT  = ['domingo','segunda-feira','ter\u00e7a-feira','quarta-feira','quinta-feira','sexta-feira','s\u00e1bado'];\n";
+  j+='  function doisDig(n){return (n<10?\'0\':\'\')+n;}\n';
+  j+='  /* Le o valor e devolve {a,m,d,hh,mm} ou null. Aceita o tecnico e o ingles por extenso\n';
+  j+='     (mes por nome inteiro ou abreviado em tres letras). */\n';
+  j+='  function lerData(v){\n';
+  j+="    var t=String(v||'').replace(/^\\s+|\\s+$/g,''),m,i,mes;\n";
+  j+="    m=/^(\\d{4})-(\\d{2})-(\\d{2})(?:[T ](\\d{2}):(\\d{2}))?/.exec(t);\n";
+  j+='    if(m)return {a:+m[1],m:+m[2],d:+m[3],hh:m[4]?+m[4]:null,mm:m[5]?+m[5]:null};\n';
+  j+="    m=/^(?:[A-Za-z]+,\\s*)?([A-Za-z]+)\\s+(\\d{1,2}),?\\s+(\\d{4})(?:[\\s,]+(\\d{1,2}):(\\d{2}))?/.exec(t);\n";
+  j+='    if(!m)return null;\n';
+  j+='    mes=-1;\n';
+  j+='    for(i=0;i<12;i++){\n';
+  j+="      if(MESES_EN[i]===m[1].toLowerCase()||MESES_EN[i].slice(0,3)===m[1].toLowerCase().slice(0,3)){mes=i+1;break;}\n";
+  j+='    }\n';
+  j+='    if(mes<0)return null;\n';
+  j+='    return {a:+m[3],m:mes,d:+m[2],hh:m[4]?+m[4]:null,mm:m[5]?+m[5]:null};\n';
+  j+='  }\n';
+  j+='  /* comHora: so o {{quando}} traz horario. O {{data}} e data seca. */\n';
+  j+='  function legivel(v,comHora){\n';
+  j+="    if(FORMATO_DATA==='comoveio')return v;\n";
+  j+='    var p=lerData(v);\n';
+  j+='    if(!p)return v;\n';
+  j+='    var txt;\n';
+  j+="    if(FORMATO_DATA==='curto')txt=doisDig(p.d)+'/'+doisDig(p.m)+'/'+p.a;\n";
+  j+="    else txt=p.d+' de '+MESES_PT[p.m-1]+' de '+p.a;\n";
+  j+="    if(FORMATO_DATA==='extensodia'){\n";
+  j+='      /* o dia da semana e CALCULADO, e nao lido do texto: assim ele sai igual venha o\n';
+  j+='         valor no formato tecnico ou no ingles por extenso. */\n';
+  j+='      var dt=new Date(p.a,p.m-1,p.d);\n';
+  j+="      if(!isNaN(dt.getTime()))txt=DIAS_PT[dt.getDay()]+', '+txt;\n";
+  j+='    }\n';
+  j+="    if(comHora&&p.hh!==null)txt+=' \u00e0s '+doisDig(p.hh)+':'+doisDig(p.mm);\n";
+  j+='    return txt;\n';
   j+='  }\n';
   j+='  function valor(c){\n';
   j+="    var v=param(c.marca);\n";
-  j+="    if(c.marca==='quando')v=legivel(v);\n";
+  j+="    if(c.marca==='quando')v=legivel(v,true);\n";
+  j+="    else if(c.marca==='data')v=legivel(v,false);\n";
   j+='    return v||c.reserva;\n';
   j+='  }\n';
+  }
   j+='  /* Nos de texto DENTRO destes nao sao conteudo: um marcador ali e codigo, ou o valor\n';
   j+='     digitado num campo de formulario. */\n';
   j+="  var PULAR={SCRIPT:1,STYLE:1,TEXTAREA:1,INPUT:1,SELECT:1,NOSCRIPT:1};\n";
@@ -9688,7 +9734,11 @@ function tRestaura(st){
      continuar vendo a aba exatamente como ela era. */
   setRadio('t-ob-usar',st.t.obusar==='sim'?'sim':'nao');
   $('t-ob-url').value=(typeof st.t.oburl==='string')?st.t.oburl:'';
-  setRadio('t-ob-fmt',st.t.obfmt==='bonito'?'bonito':'comoveio');
+  /* 'bonito' era o nome da unica opcao de reescrita ate 25/08/2026: estado gravado com ele
+     vira 'curto', que e exatamente o que ele produzia (12/10/2026 as 15:00). */
+  var _f=st.t.obfmt;
+  if(_f==='bonito')_f='curto';
+  setRadio('t-ob-fmt',(_f==='curto'||_f==='extenso'||_f==='extensodia')?_f:'comoveio');
   tObMarcar(typeof st.t.obvars==='string'?st.t.obvars:'nome,tipo,data,hora');
   if(typeof st.t.obfb==='string'&&st.t.obfb){
     var fb=st.t.obfb.split('\u0001'),ifb;
