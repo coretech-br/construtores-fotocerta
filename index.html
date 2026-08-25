@@ -3092,8 +3092,8 @@
    QUEM IMPEDE QUE ELE MINTA: scripts/conferir-versoes.sh, que recusa index.html
    alterado sem a versao mudar junto -- a mesma disciplina do fc-compartilhado.js,
    e pela mesma razao: carimbo que ninguem confere e o defeito de amanha. */
-var FC_VERSAO='2026-08-25d';
-var FC_PUBLICADO='2026-08-25 14:47';   /* America/Sao_Paulo -- escrito pelo carimbador */
+var FC_VERSAO='2026-08-25e';
+var FC_PUBLICADO='2026-08-25 15:07';   /* America/Sao_Paulo -- escrito pelo carimbador */
 (function(){
   var el=document.getElementById('fc-versao');
   if(!el) return;
@@ -3936,13 +3936,13 @@ function prep(nome,abaId,fn,fase){
                   que o gerador escreveria como um opcional chamado 'undefined'. Item sem a
                   chave essencial e recusado e SOMADO, como todo o resto. */
 var ABAS=[
-  {id:'slide',nome:'Slideshow',           chaves:['imgs','s'],  coleta:sColeta,restaura:sRestaura,
+  {id:'slide',nome:'Slideshow',           chaves:['imgs','s'],  coleta:sColeta,restaura:sRestaura,gerar:sGerar,
    pref:'s',fora:[],resumo:sPresetResumo,redesenhar:sPresetDepois,antesDeSalvar:sPresetAntes,
    importar:sImportarLimpar,
    listas:[['imgs',{url:'',legenda:''},'url']],
    exemplo:'ex.: Natal 2026 - galeria do hero',
    guarda:'tudo o que está configurado nesta aba — a <b>lista de imagens</b> (links, legendas e a ordem), a transição, o tempo, a largura, a proporção, o corte de celular, a ordem de exibição e os controles do visitante. Não guarda o que está no importador de galeria, que não é configuração e sim uma colagem de trabalho.'},
-  {id:'tidy', nome:'Agendamento TidyCal', chaves:['t'],         coleta:tColeta,restaura:tRestaura,
+  {id:'tidy', nome:'Agendamento TidyCal', chaves:['t'],         coleta:tColeta,restaura:tRestaura,gerar:tGerar,
    pref:'t',fora:[],resumo:tPresetResumo,redesenhar:tPresetDepois,antesDeSalvar:tPresetAntes,
    exemplo:'ex.: Natal 2026 - ensaio tematico',
    guarda:'tudo o que está configurado nesta aba — o caminho do agendamento no TidyCal, as duas alturas, a largura de corte, o modo (direto ou embutido), o endereço da página intermediária e a altura inicial do iframe.'},
@@ -3950,34 +3950,34 @@ var ABAS=[
      geral e no interruptor de cada aba. Por isso vai com acento, como manda a convencao do
      arquivo -- e por isso os prep() desta aba usam exatamente a mesma grafia, senao a barra
      mostraria as duas. */
-  {id:'leads',nome:'Captação de leads',   chaves:['l'],         coleta:lColeta,restaura:lRestaura,
+  {id:'leads',nome:'Captação de leads',   chaves:['l'],         coleta:lColeta,restaura:lRestaura,gerar:lGerar,
    pref:'l',fora:[],resumo:lPresetResumo,redesenhar:lPresetDepois,antesDeSalvar:lPresetAntes,
    listas:[['l.qops',''],['l.hordias',0]],
    exemplo:'ex.: Natal 2026 - hospedeira',
    guarda:'tudo o que está configurado nesta aba — modo de exibição, ícone, formato, cores e posição do botão, os quatro trechos da mensagem, os textos do pop-up, o cabeçalho (coruja, movimento e efeitos), o horário de atendimento, a pergunta de qualificação com as opções cadastradas e a âncora.'},
-  {id:'uni',  nome:'Checkout',            chaves:['u'],         coleta:uColeta,restaura:uRestaura,
+  {id:'uni',  nome:'Checkout',            chaves:['u'],         coleta:uColeta,restaura:uRestaura,gerar:uGerar,
    pref:'u',fora:[],resumo:uPresetResumo,redesenhar:uPresetDepois,antesDeSalvar:uPresetAntes,
    listas:[['u.prods',{nome:'',desc:'',preco:0,opsel:'unico',opnenhum:'nao',qtd:false,ops:[{nome:'',preco:0,qtd:false}]},'nome'],
            ['u.prods.ops',{nome:'',preco:0,qtd:false},'nome'],
            ['u.cps',{codigo:'',tipo:'pct_total',valor:0,validade:''},'codigo']],
    exemplo:'ex.: Natal 2026 - pacotes',
    guarda:'tudo o que está configurado nesta aba — formas de pagamento, moeda, <b>produtos com os opcionais de cada um</b>, cupons, código do pedido, sinal, desconto Pix, textos, largura e cores.'},
-  {id:'bor',  nome:'Bordas com efeito',   chaves:['b'],         coleta:bColeta,restaura:bRestaura,
+  {id:'bor',  nome:'Bordas com efeito',   chaves:['b'],         coleta:bColeta,restaura:bRestaura,gerar:bGerar,
    pref:'b',fora:['consol'],resumo:bPresetResumo,redesenhar:bPresetDepois,antesDeSalvar:bPresetAntes,
    presetOk:bPresetOk,aposPresets:bConsolRender,
    exemplo:'ex.: Natal 2026 - card do plano',
    guarda:'tudo o que está configurado nesta aba — efeito, fundo, cores, espessura, halo, texto, espaçamento e também o <b>fundo da prévia</b>, que é como você confere o resultado. Não guarda a escolha de consolidação do código 1, que é sobre <i>outro</i> componente.'},
-  {id:'cnt',  nome:'Contagem regressiva', chaves:['cmsgs','c'], coleta:cColeta,restaura:cRestaura,
+  {id:'cnt',  nome:'Contagem regressiva', chaves:['cmsgs','c'], coleta:cColeta,restaura:cRestaura,gerar:cGerar,
    pref:'c',fora:[],resumo:cPresetResumo,redesenhar:cPresetDepois,antesDeSalvar:cPresetAntes,
    listas:[['cmsgs',{texto:'',curta:''},'texto']],
    exemplo:'ex.: Natal 2026 - barra do topo',
    guarda:'tudo o que está configurado nesta aba — modo e duração da contagem, o código da campanha, as <b>mensagens cadastradas</b>, aparência, posição, extras, coruja, efeitos, movimento, urgência e entrada.'},
-  {id:'cob',  nome:'Link de cobrança',    chaves:['p'],         coleta:pColeta,restaura:pRestaura,
+  {id:'cob',  nome:'Link de cobrança',    chaves:['p'],         coleta:pColeta,restaura:pRestaura,gerar:pGerar,
    pref:'p',fora:[],resumo:pPresetResumo,redesenhar:pPresetDepois,antesDeSalvar:pPresetAntes,
    naoEmite:['url','desc','valor','txid','validade','descpix','ppmodo','pplink'],
    exemplo:'ex.: Foto Certa - pagina /pagar',
    guarda:'tudo o que está configurado nesta aba — o endereço da página, a aparência, os textos, e também a <b>cobrança que está na tela</b> (descrição, valor, identificador, a data de validade e o desconto no Pix). Aplicar um preset troca também essa cobrança: ele é a fotografia da aba inteira. Os dados de quem recebe <b>não</b> estão aqui: eles saíram desta aba para o painel Identidade, e nenhum preset os toca.'},
-  {id:'loja', nome:'Mini loja',           chaves:['m'],         coleta:mColeta,restaura:mRestaura,
+  {id:'loja', nome:'Mini loja',           chaves:['m'],         coleta:mColeta,restaura:mRestaura,gerar:mGerar,
    pref:'m',fora:[],resumo:mPresetResumo,redesenhar:mPresetDepois,antesDeSalvar:mPresetAntes,
    listas:[['m.prods',{nome:'',desc:'',preco:0,cat:'',img:'',opsel:'unico',opnenhum:'nao',qtd:false,ops:[{nome:'',preco:0,qtd:false}]},'nome'],
            ['m.prods.ops',{nome:'',preco:0,qtd:false},'nome'],
@@ -3985,7 +3985,7 @@ var ABAS=[
    importar:mImportarLimpar,
    exemplo:'ex.: Foto Certa - loja de albuns',
    guarda:'tudo o que está configurado nesta aba — formas de pagamento, moeda, <b>o catálogo inteiro</b> (nome, descrição, preço, categoria, foto e os opcionais de cada produto), cupons, sinal, desconto Pix, a grade da vitrine, o tamanho pedido das fotos, textos e cores. Não guarda o que está no importador de galeria, que não é configuração e sim uma colagem de trabalho.'},
-  {id:'efe',  nome:'Efeitos de página',   chaves:['e'],         coleta:eColeta,restaura:eRestaura,
+  {id:'efe',  nome:'Efeitos de página',   chaves:['e'],         coleta:eColeta,restaura:eRestaura,gerar:eGerar,
    pref:'e',fora:[],resumo:ePresetResumo,redesenhar:ePresetDepois,antesDeSalvar:ePresetAntes,
    presetOk:ePresetOk,
    exemplo:'ex.: Natal 2026 - neve na hospedeira',
@@ -17269,6 +17269,50 @@ function fccListaHTML(titulo,itens,explica,vals){
   h+='</div>';
   return h;
 }
+/* ============ GERAR TODOS OS CODIGOS (25/08/2026) ============
+   Percorre as abas LIGADAS nesta pagina e clica o "Gerar codigo" de cada uma. Quem gera e a
+   propria aba -- este botao nao monta codigo nenhum. Ele so poupa a volta manual por sete
+   abas, que e onde o operador esquecia uma e colava a pagina faltando um bloco.
+
+   O QUE ELE GARANTE SOBRE PARAMETROS ALTERADOS: nada de especial, e de proposito. Cada
+   gerador le os CAMPOS DA TELA na hora (bCfgDom, cCfg, eCfgDom...), entao o que estiver na
+   tela e o que sai -- inclusive o que voce mudou depois de aplicar o preset. Se este botao
+   lesse o preset guardado em vez de chamar o gerador, ele seria uma SEGUNDA implementacao da
+   geracao, e duas implementacoes divergem.
+
+   AS RECUSAS SAO JUNTADAS, NAO EMPILHADAS. Sete abas recusando dariam sete alertas em fila,
+   e o operador fecharia os primeiros sem ler. O alert e trocado por um coletor durante a
+   volta e devolvido no fim (com try/finally, para nao ficar trocado se um gerador lancar), e
+   sai UMA mensagem com o nome de cada aba e o texto exato da recusa dela -- as palavras sao
+   as da aba, nao uma traducao deste botao. */
+function fccGerarTodos(){
+  if(!FCG.pronto||!fcgAtivo())return;
+  var feitas=[],recusas=[],travadas=[],i,a,orig=window.alert,recado;
+  try{
+    window.alert=function(m){recado=String(m);};
+    for(i=0;i<ABAS.length;i++){
+      a=ABAS[i];
+      if(!FCG.ativas[a.id])continue;
+      if(fcSoLeitura[a.id]){travadas.push(a.nome);continue;}
+      if(typeof a.gerar!=='function'){recusas.push([a.nome,'esta aba nao tem gerador declarado no registro.']);continue;}
+      recado=null;
+      try{ a.gerar(); }
+      catch(e){ recado='a aba falhou ao gerar: '+(e&&e.message?e.message:e); }
+      if(recado)recusas.push([a.nome,recado]);
+      else feitas.push(a.nome);
+    }
+  }finally{ window.alert=orig; }
+  /* Redesenha JA: o fccMarcar de cada aba agenda com atraso, e o operador acabou de pedir. */
+  try{ if(fccTimer){clearTimeout(fccTimer);fccTimer=null;} fccRender(); }catch(e){}
+  var t=feitas.length?('Gerado o código de '+fcLista(feitas)+'.'):'Nenhum código foi gerado.';
+  if(travadas.length)t+='\n\nNão gerou (a aba falhou ao restaurar e não grava nada até a página ser recarregada): '+fcLista(travadas)+'.';
+  if(recusas.length){
+    t+='\n\nNão gerou '+(recusas.length===1?'1 aba':recusas.length+' abas')+', com o motivo de cada uma:';
+    for(i=0;i<recusas.length;i++)t+='\n\n• '+recusas[i][0]+': '+recusas[i][1];
+  }
+  alert(t);
+}
+
 function fccRender(){
   var box=$('fcc-corpo'),plano,h='',vals=[],i,assin,bts,el;
   if(!box)return;
@@ -17278,6 +17322,12 @@ function fccRender(){
     h+='<p class="fcc-falta"><b>Falta escolher a página.</b> Este painel entrega o conteúdo inteiro da Tag Head e da Tag Body <i>de uma página</i>. Sem saber qual página é, ele juntaria blocos de páginas diferentes — que é justamente o erro que ele existe para evitar.<br><br>Na barra acima: escolha um preset geral na lista, ou abra <b>Detalhes</b>, preencha campanha e página e clique em <b>Salvar como preset geral</b>. Depois ligue, no topo de cada aba, as que esta página usa.</p>';
   }else{
     h+='<p><b>'+escHtml(plano.nome)+'</b> — '+plano.ligadas+' de '+ABAS.length+' abas nesta página.</p>';
+    if(plano.ligadas){
+      h+='<div class="fcc-atalho"><span><b>Gerar tudo de uma vez.</b> Percorre as '+
+         plano.ligadas+(plano.ligadas===1?' aba ligada':' abas ligadas')+
+         ' nesta página e clica o <b>Gerar código</b> de cada uma, com o que está na tela agora — inclusive o que você mudou depois de aplicar o preset. As abas que recusarem aparecem numa lista só, com o motivo de cada uma.</span>'+
+         '<button class="botao mini" type="button" data-fcc-gerar="1">Gerar todos os códigos</button></div>';
+    }
     if(!plano.ligadas){
       h+='<p class="fcc-falta"><b>Nenhuma aba foi ligada nesta página.</b> Todo preset geral nasce com as '+fcAbasTxt()+' abas fora — ligue, no interruptor no topo de cada aba, as que esta página realmente usa. Aba fora não entra aqui.</p>';
     }
@@ -17312,6 +17362,8 @@ function fccRender(){
   fccAssin=assin;
   box.innerHTML=h;
   for(i=0;i<vals.length;i++){el=$(vals[i][0]);if(el)el.value=vals[i][1];}
+  bts=box.querySelectorAll('[data-fcc-gerar]');
+  for(i=0;i<bts.length;i++)bts[i].addEventListener('click',fccGerarTodos);
   bts=box.querySelectorAll('[data-fcc-copiar]');
   for(i=0;i<bts.length;i++){
     (function(b){b.addEventListener('click',function(){copiar(b.getAttribute('data-fcc-copiar'),b.getAttribute('data-fcc-aviso'));});})(bts[i]);

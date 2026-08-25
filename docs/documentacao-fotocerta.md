@@ -1008,6 +1008,20 @@ Spec: `docs/specs/2026-08-24-popup-fora-do-horario-design.md`. Alcance: aba **Ca
 
 **Verificação.** Primeira aplicação do molde versionado (`scripts/verificar/pagina.mjs`) a um segundo bloco, o que também o validou fora da aba onde nasceu: com relógio falso, o pop-up abre às 14h de segunda, **não** abre às 22h nem no domingo, e o botão continua lá. As outras três combinações (abrir mesmo assim, sem horário, modo clique) medidas do mesmo jeito. Regressão byte a byte intacta — inclusive o `l-out`, porque o padrão de fábrica tem o horário desligado.
 
+### "Gerar todos os códigos" no painel consolidado (25/08/2026)
+
+Spec: `docs/specs/2026-08-25-gerar-todos-os-codigos-design.md`.
+
+Um botão no topo do painel percorre as abas **ligadas naquela página** e clica o *Gerar código* de cada uma. Ele **não monta código nenhum** — quem gera é a própria aba.
+
+**Sobre "parâmetros modificados", que era o centro do pedido:** não foi preciso fazer nada de especial, e essa é a resposta certa. Cada gerador lê os **campos da tela** na hora, então o que está na tela é o que sai — inclusive o que foi mudado depois de aplicar o preset. Se o botão lesse o preset guardado em vez de chamar o gerador, seria uma **segunda implementação da geração**, e duas implementações divergem. Medido: `e-qtd` alterado de 60 para 25 na tela → o código saiu com 25 elementos.
+
+**As recusas são juntadas, não empilhadas.** Sete abas recusando dariam sete alertas em fila, e o operador fecharia os primeiros sem ler. O `alert` é trocado por um coletor durante a volta e devolvido no fim (com `try/finally`), e sai **uma** mensagem com o nome de cada aba e o **texto exato** da recusa dela. Nenhum gerador usa `confirm` — conferido nos nove antes de escolher a técnica. Abas em só-leitura são relatadas à parte, e não como recusa.
+
+**O registro `ABAS` ganhou `gerar`.** Antes, a única lista aba→gerador vivia no arnês de verificação — lista fechada fora do registro é onde a aba seguinte quebra em silêncio, o que este projeto já corrigiu em `trocarAba`.
+
+**Verificação.** Regressão com as 21 saídas e as 9 cobranças idênticas; o botão não aparece sem preset nem sem aba ligada; uma recusa vira um alerta só, com a palavra exata da aba, e a aba que recusou não escreve na caixa; parâmetro alterado depois do preset entra no código; aba desligada não entra; e o `alert` volta ao normal depois da volta.
+
 ### O marcador `{prazo}` na barra de contagem (25/08/2026)
 
 Spec: `docs/specs/2026-08-25-marcador-prazo-design.md`. Alcance: aba **Contagem regressiva**.
