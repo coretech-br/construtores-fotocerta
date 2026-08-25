@@ -30,11 +30,7 @@ Entregue em 24/08/2026: o **carimbo de publicação** — a ferramenta diz, emba
 
 Entregue em 23/08/2026: a **consolidação da página de obrigado no painel**, mais a **regra** de que todo construtor que toca Tag Head, Tag Body ou o CSS de um componente customizado precisa consolidar — e a **rede** que denuncia a saída esquecida.
 
-**Em fila para a aba Efeitos de página**, a pedido do dono ("me apresente mais uns 2 ou 3 efeitos"). Os três candidatos avaliados, todos viáveis com a mesma máquina (`transform`, sem JavaScript):
-
-1. **Confete caindo** — mesma engrenagem da neve, trocando o desenho por retângulos coloridos que giram. É a mais barata das três, porque só muda a peça desenhada. Serve a lançamento, "obrigado pela compra" e campanha. Estimativa: 1h a 1h30.
-2. **Fundo animado (aurora)** — duas ou três manchas de cor desfocadas que se movem devagar atrás do conteúdo. Não é sazonal: serve o ano inteiro. Estimativa: 2h a 2h30.
-3. **Luzes piscando no topo** — um cordão de lâmpadas com brilho alternado. É a mais "de Natal" das três e a mais trabalhosa de deixar bonita em telas estreitas. Estimativa: 2h30 a 3h.
+Entregue em 24/08/2026, na mesma aba: a **prévia de celular**, a **proporção do tamanho no celular** (pedido do dono depois de publicar a neve) e mais **três efeitos** — confete caindo, fundo animado (aurora) e luzes piscando. Spec: `docs/specs/2026-08-24-efeitos-proporcao-e-tres-efeitos-design.md`.
 
 A próxima sai do que o dono encontrar no uso.
 

@@ -1008,6 +1008,22 @@ Spec: `docs/specs/2026-08-24-popup-fora-do-horario-design.md`. Alcance: aba **Ca
 
 **Verificação.** Primeira aplicação do molde versionado (`scripts/verificar/pagina.mjs`) a um segundo bloco, o que também o validou fora da aba onde nasceu: com relógio falso, o pop-up abre às 14h de segunda, **não** abre às 22h nem no domingo, e o botão continua lá. As outras três combinações (abrir mesmo assim, sem horário, modo clique) medidas do mesmo jeito. Regressão byte a byte intacta — inclusive o `l-out`, porque o padrão de fábrica tem o horário desligado.
 
+### Efeitos de página: proporção no celular e mais três efeitos (24/08/2026)
+
+Spec: `docs/specs/2026-08-24-efeitos-proporcao-e-tres-efeitos-design.md`.
+
+**O uso revelou duas coisas.** Faltava a **prévia de celular** — as outras abas têm — e no celular os flocos ficavam **visualmente maiores**. Não era impressão: um floco de 24 px ocupa 2 % da largura num computador de 1200 px e **6 %** num celular de 390 px.
+
+**A correção não foi um `@media`,** que teria degrau (um tablet de 700 px continuaria no tamanho de computador). O tamanho passou a ser proporcional à largura da tela, com piso e teto: `clamp(<piso>px, <k>vw, <teto>px)`, onde o teto é o tamanho pedido, `k = teto/1200*100` e o piso é a porcentagem do campo novo **"Tamanho no celular"** (padrão 45 %). Com 100 % o `clamp` **não é emitido** — o número sai puro. Os três valores são escritos prontos pelo gerador porque **multiplicar px por vw não existe em CSS**: `calc(var(--t) * 100vw / 1200)` é inválido. A mesma escala vale para a deriva, o desfoque da aurora e o tamanho das lâmpadas.
+
+**A prévia de celular** usa 390 px de largura lógica, no padrão da Contagem. O iframe aqui não é convenção: `vw` dentro dele é a largura **do iframe**, e é isso que torna a medida honesta — sem ele o modo Celular mostraria o tamanho de computador com a moldura de celular.
+
+**Três efeitos novos.** **Confete** é a mesma máquina da neve (muda a peça e o giro, que vira `rotate3d` para o papel virar enquanto cai) e por isso compartilha os campos de quantidade, tamanho e deriva. **Aurora** são três manchas desfocadas: elas são **translúcidas e de tamanhos diferentes** porque na primeira versão, opacas e iguais, **uma cobria o bloco inteiro** — fundo chapado, não aurora; o alcance "página inteira" usa `z-index:-1` e vem com aviso, porque se o tema pintar o fundo das seções ela some atrás dele. **Luzes** é um cordão no topo, com o fio desenhado pela própria `border-top` e um **atraso escalonado** por lâmpada, que é o que faz piscar em onda e não em bloco.
+
+**Cada efeito declara os próprios limites na tela**, num quadro ao lado dos campos — é onde fica registrado que o confete não estoura num clique, que a aurora pode sumir atrás do fundo do tema, e que as lâmpadas não têm espaçamento irregular.
+
+**Verificação.** As 17 saídas anteriores e as 9 cobranças idênticas; a única divergência é a Tag Head desta própria aba, intencional. Os quatro efeitos com classe, contagem, animações e marca próprias; os grupos de campos aparecendo e sumindo nas dezesseis combinações; o `clamp` lido de volta com piso de 45 % e `vw` de teto/12; a prévia com 1000 px e 390 px de viewport e o floco caindo de 10 px para 5,4 px; e o bloco entregue numa página com **0,000 s** de estilo+layout em 3 s com CPU 6x.
+
 ### A nona aba: efeitos de página (24/08/2026)
 
 Spec: `docs/specs/2026-08-24-aba-efeitos-de-pagina-design.md`. Primeiro efeito: **neve caindo**.
