@@ -534,6 +534,14 @@
      comeca 3753 px abaixo do topo -- ninguem rola ate la sem saber que existe algo la. Vive
      dentro de .app-esq (e nao do painel) porque o que ele precisa e ficar ONDE o operador ja
      esta olhando. */
+  /* A caixa do "Gerar todos os codigos". Ela NAO reaproveita .fcc-atalho: aquela classe e
+     display:none por padrao e so aparece em tela estreita, entao o botao nascia invisivel no
+     computador -- foi assim que ele saiu na primeira versao. Classe parecida na aparencia nao
+     e classe reaproveitavel. */
+  .fcc-gerar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:10px 0 0;
+    padding:9px 12px;border-radius:8px;border:1px dashed var(--linha);background:#F5F1E6;
+    font-size:12.5px;line-height:1.5;color:var(--tinta-suave)}
+  .fcc-gerar span{flex:1 1 200px;min-width:0}
   .fcc-atalho{display:none}
   @media (max-width:1399px){
     .fcc-atalho{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:18px 0 0;
@@ -3092,8 +3100,8 @@
    QUEM IMPEDE QUE ELE MINTA: scripts/conferir-versoes.sh, que recusa index.html
    alterado sem a versao mudar junto -- a mesma disciplina do fc-compartilhado.js,
    e pela mesma razao: carimbo que ninguem confere e o defeito de amanha. */
-var FC_VERSAO='2026-08-25e';
-var FC_PUBLICADO='2026-08-25 15:07';   /* America/Sao_Paulo -- escrito pelo carimbador */
+var FC_VERSAO='2026-08-25f';
+var FC_PUBLICADO='2026-08-25 15:31';   /* America/Sao_Paulo -- escrito pelo carimbador */
 (function(){
   var el=document.getElementById('fc-versao');
   if(!el) return;
@@ -17323,7 +17331,7 @@ function fccRender(){
   }else{
     h+='<p><b>'+escHtml(plano.nome)+'</b> — '+plano.ligadas+' de '+ABAS.length+' abas nesta página.</p>';
     if(plano.ligadas){
-      h+='<div class="fcc-atalho"><span><b>Gerar tudo de uma vez.</b> Percorre as '+
+      h+='<div class="fcc-gerar"><span><b>Gerar tudo de uma vez.</b> Percorre as '+
          plano.ligadas+(plano.ligadas===1?' aba ligada':' abas ligadas')+
          ' nesta página e clica o <b>Gerar código</b> de cada uma, com o que está na tela agora — inclusive o que você mudou depois de aplicar o preset. As abas que recusarem aparecem numa lista só, com o motivo de cada uma.</span>'+
          '<button class="botao mini" type="button" data-fcc-gerar="1">Gerar todos os códigos</button></div>';

@@ -44,3 +44,14 @@ Cada entrada de `ABAS` passou a declarar a própria função de geração. Antes
 5. **Parâmetro alterado depois do preset**: 25 elementos, como estava na tela.
 6. **Aba desligada não entra** na geração.
 7. **O `alert` volta ao normal** depois da volta — medido injetando um substituto e conferindo que ele é chamado.
+
+## 6. O botão nasceu invisível, e por que o teste não pegou
+
+Publicado, o botão **não apareceu** para o dono. A caixa dele reaproveitava a classe `.fcc-atalho` — que é `display:none` por padrão e só ganha estilo dentro de `@media (max-width:1399px)`. Ela existe para um aviso que só faz sentido em tela estreita. Aparência parecida não é classe reaproveitável.
+
+**E o teste passou assim mesmo, por dois motivos somados:**
+
+1. Ele conferia se o botão **existia no DOM** (`querySelector`), e ele existia — invisível, mas presente. Existir não é aparecer.
+2. Ele rodava na janela padrão do arnês, de **1280 px** — dentro da faixa em que aquela classe fica visível. Medir numa largura só escondeu o defeito justamente na largura em que o dono estava.
+
+As duas coisas foram corrigidas: a caixa tem classe própria (`.fcc-gerar`), e o roteiro passou a exigir **visibilidade** (`offsetParent` e largura maior que zero) em **1280 px e 1600 px**.

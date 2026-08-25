@@ -1020,6 +1020,8 @@ Um botão no topo do painel percorre as abas **ligadas naquela página** e clica
 
 **O registro `ABAS` ganhou `gerar`.** Antes, a única lista aba→gerador vivia no arnês de verificação — lista fechada fora do registro é onde a aba seguinte quebra em silêncio, o que este projeto já corrigiu em `trocarAba`.
 
+**O botão nasceu invisível, e o teste não pegou.** A caixa reaproveitava a classe `.fcc-atalho`, que é `display:none` por padrão e só ganha estilo dentro de `@media (max-width:1399px)` — ela existe para um aviso de tela estreita. **Aparência parecida não é classe reaproveitável.** O teste passou por dois motivos somados: conferia se o botão **existia no DOM** (existir não é aparecer) e rodava na janela padrão do arnês, de **1280 px**, dentro da faixa em que aquela classe fica visível. Corrigidos os dois: classe própria (`.fcc-gerar`) e roteiro exigindo **visibilidade** em 1280 px **e** 1600 px.
+
 **Verificação.** Regressão com as 21 saídas e as 9 cobranças idênticas; o botão não aparece sem preset nem sem aba ligada; uma recusa vira um alerta só, com a palavra exata da aba, e a aba que recusou não escreve na caixa; parâmetro alterado depois do preset entra no código; aba desligada não entra; e o `alert` volta ao normal depois da volta.
 
 ### O marcador `{prazo}` na barra de contagem (25/08/2026)
