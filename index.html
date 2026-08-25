@@ -2044,11 +2044,20 @@
     <div>
       <fieldset>
       <legend>Adicionar mensagem</legend>
-      <label for="c-msg">Texto <small>(use <code>{contador}</code> para marcar onde o relógio entra)</small></label>
+      <label for="c-msg">Texto <small>(use <code>{contador}</code> e <code>{prazo}</code> para marcar onde cada um entra)</small></label>
       <input type="text" id="c-msg" value="" placeholder="Oferta de Natal termina em {contador}">
       <label for="c-msgcurta">Versão curta para o celular <small>(opcional)</small></label>
       <input type="text" id="c-msgcurta" value="" placeholder="Termina em {contador}">
+      <label>Como o <code>{prazo}</code> aparece</label>
+      <div class="radios">
+      <label><input type="radio" name="c-prazofmt" value="curto" checked><span>21/12</span></label>
+      <label><input type="radio" name="c-prazofmt" value="curtoano"><span>21/12/2026</span></label>
+      <label><input type="radio" name="c-prazofmt" value="extenso"><span>21 de dezembro</span></label>
+      <label><input type="radio" name="c-prazofmt" value="extensohora"><span>21 de dezembro às 23:59</span></label>
+      </div>
       <div class="acoes"><button class="botao" id="c-msg-add">Adicionar mensagem</button></div>
+      <p class="ajuda"><b>Dois marcadores.</b> <code>{contador}</code> escreve o <b>tempo que falta</b> ("faltam 3 dias"); <code>{prazo}</code> escreve a <b>data limite</b> ("até 21/12"). Os dois saem com a <b>mesma cor de destaque</b> da seção 3 — é a mesma configuração, não uma cópia. Assim a mesma campanha pode ter, na mesma barra, uma mensagem com a contagem e outra com a data.</p>
+      <p class="ajuda alerta" id="c-prazo-aviso" style="display:none"><b>O <code>{prazo}</code> só vale com data marcada.</b> Esta barra conta a partir da <b>primeira visita de cada pessoa</b>, então não existe uma data limite única para escrever — o marcador é <b>removido</b> do texto. Troque o modo para <b>data marcada</b> na seção 1, ou tire o <code>{prazo}</code> das mensagens.</p>
       <p class="ajuda">Sem o marcador <code>{contador}</code>, o relógio aparece depois do texto. Com <b>duas ou mais</b> mensagens, o que acontece com elas depende do movimento escolhido na seção 4: a <b>alternância</b> mostra uma de cada vez, e a <b>rolagem</b> emenda <b>todas</b> numa faixa contínua, na ordem desta lista. O <b>estático</b> mostra só a primeira — e, quando isso passa a descartar mensagem cadastrada, quem avisa é a própria seção 4, em destaque, ali onde o movimento é escolhido.</p>
       </fieldset>
     </div>
@@ -3083,8 +3092,8 @@
    QUEM IMPEDE QUE ELE MINTA: scripts/conferir-versoes.sh, que recusa index.html
    alterado sem a versao mudar junto -- a mesma disciplina do fc-compartilhado.js,
    e pela mesma razao: carimbo que ninguem confere e o defeito de amanha. */
-var FC_VERSAO='2026-08-25c';
-var FC_PUBLICADO='2026-08-25 14:06';   /* America/Sao_Paulo -- escrito pelo carimbador */
+var FC_VERSAO='2026-08-25d';
+var FC_PUBLICADO='2026-08-25 14:47';   /* America/Sao_Paulo -- escrito pelo carimbador */
 (function(){
   var el=document.getElementById('fc-versao');
   if(!el) return;
@@ -12766,6 +12775,11 @@ function cToggles(){
   el=$('c-data-campos');if(el)el.style.display=(modo==='data')?'block':'none';
   el=$('c-fimtxt-campo');if(el)el.style.display=(fim==='mensagem')?'block':'none';
   el=$('c-reiniciar-aviso');if(el)el.style.display=(modo==='abertura')?'block':'none';
+  /* O aviso do {prazo} so aparece quando ele DE FATO nao vai valer: modo abertura E alguma
+     mensagem pedindo o marcador. Avisar sempre seria ruido; nao avisar nunca deixaria o
+     marcador sumir em silencio -- que e o defeito que este projeto persegue. */
+  el=$('c-prazo-aviso');
+  if(el)el.style.display=(modo==='abertura'&&cUsaPrazo(cMsgs))?'block':'none';
   var rr=document.querySelector('input[name="c-fim"][value="reiniciar"]');
   if(rr){
     rr.disabled=(modo!=='abertura');
@@ -12838,7 +12852,7 @@ function cColeta(){
   return {
     cmsgs:cMsgs,
     c:{modo:radio('c-modo'),dias:$('c-dias').value,horas:$('c-horas').value,mins:$('c-mins').value,
-      alvo:$('c-alvo').value,cod:$('c-cod').value,
+      alvo:$('c-alvo').value,cod:$('c-cod').value,prazofmt:radio('c-prazofmt'),
       contador:radio('c-contador'),
       und:$('c-un-d').checked,unh:$('c-un-h').checked,unm:$('c-un-m').checked,uns:$('c-un-s').checked,
       diaszero:radio('c-diaszero'),fim:radio('c-fim'),fimtxt:$('c-fimtxt').value,
@@ -12868,6 +12882,9 @@ function cRestaura(st){
   setRadio('c-modo',C.modo);setRadio('c-diaszero',C.diaszero);setRadio('c-fim',C.fim);
   $('c-dias').value=C.dias;$('c-horas').value=C.horas;$('c-mins').value=C.mins;
   $('c-alvo').value=C.alvo||'';$('c-cod').value=C.cod||'';$('c-fimtxt').value=C.fimtxt;
+  /* Campo criado em 25/08/2026: estado gravado antes nao o traz, e o ausente vale o padrao. */
+  var _pf=C.prazofmt;
+  setRadio('c-prazofmt',(_pf==='curtoano'||_pf==='extenso'||_pf==='extensohora')?_pf:'curto');
   /* Estado gravado por uma versao anterior nao traz 'contador'. O ausente vale LIGADO, que e
      como a barra sempre se comportou -- restaurar um preset antigo nao pode apagar o relogio. */
   setRadio('c-contador',C.contador==='nao'?'nao':'sim');
@@ -12999,6 +13016,45 @@ function cAlvoIso(){
      segundos. */
   return partes[0]+'T'+partes[1].slice(0,5)+':00-03:00';
 }
+/* ===== O MARCADOR {prazo} (25/08/2026) =====
+   Ao lado de {contador} ("faltam 3 dias"), o {prazo} escreve a DATA LIMITE ("ate 21/12").
+   Assim a mesma campanha pode ter mensagens das duas formas na mesma barra.
+
+   ELE E RESOLVIDO AQUI, NA HORA DE GERAR, e nao no navegador do visitante. A data e fixa:
+   o bloco entregue recebe o texto ja pronto e nao carrega tabela de meses nem leitor de data.
+   E, por sair daqui, a data mostrada e a que o operador digitou -- e nao a mesma data
+   convertida para o fuso de quem esta lendo, que e o que um Date no cliente produziria. Um
+   prazo comercial e do negocio, nao do relogio de quem visita.
+
+   SO NO MODO DATA. No modo "abertura" o prazo e de cada visitante (primeira visita mais a
+   duracao): existe, mas seria um instante diferente para cada pessoa, do tipo "ate as 23:07"
+   -- data que parece arbitraria e nao ajuda ninguem a decidir. Ali o marcador e REMOVIDO do
+   texto, do mesmo jeito que o {contador} some quando o contador esta desligado, e a aba avisa
+   na tela. */
+var C_PRAZO_MESES=['janeiro','fevereiro','mar\u00e7o','abril','maio','junho','julho','agosto',
+  'setembro','outubro','novembro','dezembro'];
+function cPrazoTexto(alvoIso,fmt){
+  var m=/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/.exec(String(alvoIso||''));
+  if(!m)return '';
+  var a=m[1],mes=+m[2],d=+m[3],hh=m[4],mm=m[5];
+  var dd=(d<10?'0':'')+d,MM=(mes<10?'0':'')+mes;
+  if(fmt==='curtoano')return dd+'/'+MM+'/'+a;
+  if(fmt==='extenso')return d+' de '+C_PRAZO_MESES[mes-1];
+  if(fmt==='extensohora')return d+' de '+C_PRAZO_MESES[mes-1]+' \u00e0s '+hh+':'+mm;
+  return dd+'/'+MM;
+}
+/* Alguma mensagem pede o prazo? Sem isso, nada de prazo e emitido -- bloco entregue nao
+   carrega maquinaria que ninguem pediu, e a saida de quem nao usa o marcador nao muda um
+   byte. */
+function cUsaPrazo(msgs){
+  var i;
+  for(i=0;i<msgs.length;i++){
+    if(String(msgs[i].texto||'').indexOf('{prazo}')>=0)return true;
+    if(String(msgs[i].curta||'').indexOf('{prazo}')>=0)return true;
+  }
+  return false;
+}
+
 /* Faixa declarada de TODOS os campos numericos desta aba, no mesmo formato de B_NUMS:
    [id, padrao, min, max, inteiro]. A MESMA linha alimenta o gerador (fcPreso, o numero que sai
    no codigo) e a interface (fcAjustar, o numero que fica na tela), entao nao ha como a saida
@@ -13042,6 +13098,7 @@ function cCfg(){
     modo:radio('c-modo'),
     duracaoMs:((dias*24+horas)*60+mins)*60000,
     alvoIso:cAlvoIso(),
+    prazofmt:radio('c-prazofmt'),
     cod:$('c-cod').value.trim()||'padrao',
     /* O CONTADOR E UMA COISA, A CONTAGEM E OUTRA. Desligar aqui tira o relogio da tela e
        mais nada: o prazo continua correndo, a urgencia entra na hora, a barra de progresso
@@ -13196,11 +13253,20 @@ function cCssBase(cfg){
   s+='.fcb-conteudo{flex:1 1 auto;min-width:0;overflow:hidden;text-align:'+(cfg.alinha==='centro'?'center':'left')+'}\n';
   /* Sem contador nao existe .fcb-num nem .fcb-rel na pagina: emitir a regra seria deixar
      CSS morto dentro do bloco que o operador cola. O bloco entregue carrega so a maquinaria
-     escolhida, aqui como no resto da ferramenta. */
+     escolhida, aqui como no resto da ferramenta.
+     O {prazo} usa AS MESMAS DUAS CLASSES do relogio -- e por isso elas saem tambem quando so
+     ele esta em uso, com o contador desligado. Reaproveitar e o pedido do dono: o prazo tem
+     de aparecer com a mesma cor de destaque e o mesmo peso do contador, sem uma segunda
+     configuracao de aparencia que pudesse divergir dela. */
+  var usaPrazo=(cfg.modo==='data'&&cUsaPrazo(cfg.msgs));
+  /* A ORDEM das tres regras e a mesma de sempre, de proposito: reordena-las nao mudaria nada
+     na tela (sao seletores diferentes, sem conflito) mas mudaria os BYTES da saida de quem ja
+     usa o contador -- e a regressao byte a byte existe justamente para nao deixar passar
+     mudanca sem motivo. */
+  if(cfg.contador||usaPrazo)s+='.fcb-num{font-weight:700;color:'+cfg.cores.destaque+'}\n';
+  if(cfg.contador)s+='.fcb-sep,.fcb-suf{opacity:.65;margin:0 1px}\n';
+  if(cfg.contador||usaPrazo)s+='.fcb-rel{white-space:nowrap}\n';
   if(cfg.contador){
-    s+='.fcb-num{font-weight:700;color:'+cfg.cores.destaque+'}\n';
-    s+='.fcb-sep,.fcb-suf{opacity:.65;margin:0 1px}\n';
-    s+='.fcb-rel{white-space:nowrap}\n';
     if(cfg.formato==='blocos'){
       s+='.fcb-bloco{display:inline-block;text-align:center;margin:0 5px}\n';
       s+='.fcb-bloco .fcb-num{display:block;font-size:1.3em;line-height:1.1}\n';
@@ -13499,10 +13565,34 @@ function cJsBase(cfg){
     j+='  function comMarca(t){\n';
     j+="    return t.split('{contador}').join('');\n  }\n";
   }
+  /* ===== O {prazo} =====
+     Ele so existe no bloco quando alguma mensagem o pede -- quem nao usa o marcador nao
+     carrega uma linha a mais, e a saida dessas configuracoes nao muda um byte.
+     A DATA JA VEM PRONTA daqui: ela e fixa, entao nao ha nada para calcular no navegador do
+     visitante, e o texto mostrado e o que o operador digitou -- nao a mesma data convertida
+     para o fuso de quem le. E ele sai com AS MESMAS CLASSES do relogio (.fcb-rel/.fcb-num),
+     e nao com estilo proprio: a aparencia do prazo e a mesma do contador porque e a MESMA
+     configuracao, e nao uma copia que poderia divergir dela.
+     O span do prazo NAO leva [data-fcb-rel]: esse atributo e o alvo que o tick reescreve a
+     cada segundo, e o prazo seria apagado no primeiro deles. */
+  var _prazoUsa=cUsaPrazo(cfg.msgs);
+  if(_prazoUsa&&cfg.modo==='data'){
+    j+="  var PRAZO='<span class=\"fcb-rel\"><span class=\"fcb-num\">"+esc(escHtml(cPrazoTexto(cfg.alvoIso,cfg.prazofmt)))+"</span></span>';\n";
+    j+='  function comPrazo(t){\n';
+    j+="    return t.split('{prazo}').join(PRAZO);\n  }\n";
+  }else if(_prazoUsa){
+    /* No modo "abertura" o prazo e de cada visitante, e mostra-lo daria um instante diferente
+       para cada pessoa. O marcador e removido, como o {contador} some com o contador
+       desligado -- e a aba avisa isso na tela, no aviso ambar da lista de mensagens. */
+    j+='  /* Esta barra conta a partir da PRIMEIRA VISITA de cada pessoa: nao existe uma data\n';
+    j+='     limite unica para escrever, entao o {prazo} das mensagens e removido do texto. */\n';
+    j+='  function comPrazo(t){\n';
+    j+="    return t.split('{prazo}').join('');\n  }\n";
+  }
   j+='  function textoCom(msg){\n';
-  j+='    var longa=comMarca(msg.texto);\n';
+  j+='    var longa=comMarca('+(_prazoUsa?'comPrazo(msg.texto)':'msg.texto')+');\n';
   j+='    if(!msg.curta)return longa;\n';
-  j+="    return '<span class=\"fcb-longa\">'+longa+'</span><span class=\"fcb-curta\">'+comMarca(msg.curta)+'</span>';\n  }\n\n";
+  j+="    return '<span class=\"fcb-longa\">'+longa+'</span><span class=\"fcb-curta\">'+comMarca("+(_prazoUsa?'comPrazo(msg.curta)':'msg.curta')+")+'</span>';\n  }\n\n";
   j+='  var ROLANDO='+(cfg.mov==='rolaesq'||cfg.mov==='roladir')+';\n';
   var interno='<div class="fcb-interno">';
   /* As corujas sao IRMAS de .fcb-conteudo, nunca filhas: so o miolo tem overflow:hidden e so

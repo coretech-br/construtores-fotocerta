@@ -1008,6 +1008,20 @@ Spec: `docs/specs/2026-08-24-popup-fora-do-horario-design.md`. Alcance: aba **Ca
 
 **Verificação.** Primeira aplicação do molde versionado (`scripts/verificar/pagina.mjs`) a um segundo bloco, o que também o validou fora da aba onde nasceu: com relógio falso, o pop-up abre às 14h de segunda, **não** abre às 22h nem no domingo, e o botão continua lá. As outras três combinações (abrir mesmo assim, sem horário, modo clique) medidas do mesmo jeito. Regressão byte a byte intacta — inclusive o `l-out`, porque o padrão de fábrica tem o horário desligado.
 
+### O marcador `{prazo}` na barra de contagem (25/08/2026)
+
+Spec: `docs/specs/2026-08-25-marcador-prazo-design.md`. Alcance: aba **Contagem regressiva**.
+
+Ao lado de `{contador}` (o **tempo que falta**), as mensagens aceitam `{prazo}` (a **data limite**), em quatro formatos. Na mesma barra, uma mensagem diz *"faltam 3 dias"* e outra *"reserve até 21 de dezembro"*.
+
+**Resolvido na geração, não no navegador.** A data é fixa, então o bloco recebe o texto pronto: não carrega tabela de meses nem leitor de data, e a data mostrada é **a que o operador digitou** — não a mesma data convertida para o fuso de quem lê, que é o que um `Date` no cliente produziria. Prazo comercial é do negócio, não do relógio de quem visita.
+
+**O destaque é o do contador, não uma cópia.** O prazo sai dentro das **mesmas duas classes** do relógio (`.fcb-rel`/`.fcb-num`) e herda a cor e o peso da seção 3 — não existe uma segunda configuração de aparência, logo não existe como divergirem. Duas consequências que pediram cuidado: as regras passaram a sair **também quando só o prazo as usa** (com o contador desligado elas não eram emitidas, e o prazo sairia sem destaque); e o span do prazo **não leva `data-fcb-rel`**, que é o alvo reescrito pelo tick a cada segundo — com ele, o prazo seria apagado no primeiro tique. Medido: depois de 4,5 s a data continua na tela.
+
+**Só no modo "data marcada".** No modo abertura o prazo é de cada visitante e seria um instante diferente para cada pessoa; ali o marcador é removido, e a aba avisa em âmbar **só quando isso de fato vai acontecer** — modo abertura e alguma mensagem pedindo o marcador.
+
+**Aditivo por construção:** a maquinaria só é emitida quando alguma mensagem pede o marcador, e a ordem das regras de CSS foi preservada de propósito. Regressão: as **21** saídas e as 9 cobranças **idênticas**, sem nenhuma divergência.
+
 ### O formato da data da página de obrigado (25/08/2026)
 
 Spec: `docs/specs/2026-08-25-formato-da-data-do-tidycal-design.md`. Alcance: aba **Agendamento TidyCal**.
