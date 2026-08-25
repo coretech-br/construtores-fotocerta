@@ -3080,8 +3080,8 @@
    QUEM IMPEDE QUE ELE MINTA: scripts/conferir-versoes.sh, que recusa index.html
    alterado sem a versao mudar junto -- a mesma disciplina do fc-compartilhado.js,
    e pela mesma razao: carimbo que ninguem confere e o defeito de amanha. */
-var FC_VERSAO='2026-08-24h';
-var FC_PUBLICADO='2026-08-24 22:56';   /* America/Sao_Paulo -- escrito pelo carimbador */
+var FC_VERSAO='2026-08-25a';
+var FC_PUBLICADO='2026-08-25 11:09';   /* America/Sao_Paulo -- escrito pelo carimbador */
 (function(){
   var el=document.getElementById('fc-versao');
   if(!el) return;
@@ -17379,14 +17379,6 @@ prep('Mini loja','loja',function(){
   liga('m-prod-cancelar',mProdLimpar);
   liga('m-prod-limpar',mProdListaLimpar);
   liga('m-cp-add',mCpAdd);
-  liga('e-gerar',eGerar);
-  liga('e-atualizar',function(){ePreview(true);});
-  liga('e-pv-desk',function(){ePvModoSet('desk');});
-  liga('e-pv-cel',function(){ePvModoSet('cel');});
-  liga('e-copy1',function(){copiar('e-out1','e-cop1');});
-  liga('e-copy2',function(){copiar('e-out2','e-cop2');});
-  ['e-cor','e-cf-c1','e-cf-c2','e-cf-c3','e-cf-c4','e-au-c1','e-au-c2','e-au-c3',
-   'e-lz-c1','e-lz-c2','e-lz-c3','e-lz-c4'].forEach(parearCor);
   liga('m-gerar',mGerar);
   liga('m-atualizar',function(){mPreview(true);});
   liga('m-pv-desk',function(){mPvModoSet('desk');});
@@ -17546,6 +17538,19 @@ prep('Link de cobrança','cob',function(){
   pPvBotoes();
 },'desenhar a aba com o estado restaurado');
 prep('Efeitos de página','efe',function(){
+  /* As ligacoes desta aba moram NO PREPARO DESTA ABA. Elas nasceram por engano dentro do
+     prep da Mini loja, e ali um defeito na loja levaria junto os botoes daqui -- inclusive a
+     previa de celular -- e a barra vermelha acusaria a aba ERRADA. E o contrario do que o
+     isolamento por aba existe para garantir: cada aba se prepara por conta propria, e o
+     defeito de uma nao derruba as outras. */
+  liga('e-gerar',eGerar);
+  liga('e-atualizar',function(){ePreview(true);});
+  liga('e-pv-desk',function(){ePvModoSet('desk');});
+  liga('e-pv-cel',function(){ePvModoSet('cel');});
+  liga('e-copy1',function(){copiar('e-out1','e-cop1');});
+  liga('e-copy2',function(){copiar('e-out2','e-cop2');});
+  ['e-cor','e-cf-c1','e-cf-c2','e-cf-c3','e-cf-c4','e-au-c1','e-au-c2','e-au-c3',
+   'e-lz-c1','e-lz-c2','e-lz-c3','e-lz-c4'].forEach(parearCor);
   /* estado gravado antes desta regra pode trazer numero fora da faixa: prende na carga, para o
      campo nunca exibir algo diferente do que eMontar vai usar. */
   if(fcAjustarTodos(E_NUMS))salvarEstado();

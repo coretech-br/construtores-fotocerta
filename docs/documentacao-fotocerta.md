@@ -1022,6 +1022,8 @@ Spec: `docs/specs/2026-08-24-efeitos-proporcao-e-tres-efeitos-design.md`.
 
 **Cada efeito declara os próprios limites na tela**, num quadro ao lado dos campos — é onde fica registrado que o confete não estoura num clique, que a aurora pode sumir atrás do fundo do tema, e que as lâmpadas não têm espaçamento irregular.
 
+**Um defeito de isolamento, achado ao investigar um alarme falso.** O dono relatou que a prévia de celular não funcionava e depois confirmou que funcionava. A investigação não achou o defeito relatado, mas achou **outro**: as ligações dos botões desta aba tinham nascido **dentro do preparo da Mini loja**. Enquanto a loja funciona, nada aparece; no dia em que ela falhar, a aba de Efeitos perde os botões junto e a barra vermelha acusa a **aba errada**. Medido numa árvore com o preparo da loja lançando de propósito: depois da correção, o "Gerar código" e a prévia de celular continuam funcionando, e a barra acusa a Mini loja. Fica a lição: **ligação de aba mora no preparo daquela aba** — e o alarme falso do dono foi o que a trouxe à tona.
+
 **Verificação.** As 17 saídas anteriores e as 9 cobranças idênticas; a única divergência é a Tag Head desta própria aba, intencional. Os quatro efeitos com classe, contagem, animações e marca próprias; os grupos de campos aparecendo e sumindo nas dezesseis combinações; o `clamp` lido de volta com piso de 45 % e `vw` de teto/12; a prévia com 1000 px e 390 px de viewport e o floco caindo de 10 px para 5,4 px; e o bloco entregue numa página com **0,000 s** de estilo+layout em 3 s com CPU 6x.
 
 ### A nona aba: efeitos de página (24/08/2026)

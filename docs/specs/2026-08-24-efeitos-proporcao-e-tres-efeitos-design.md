@@ -64,3 +64,13 @@ Cada um declara os próprios limites, na tela, num quadro ao lado dos campos. N�
 6. **Determinismo**, ida e volta pelo armazenamento, e estado gravado **antes** do campo de proporção caindo no padrão (45), não em vazio.
 7. **O bloco entregue numa página**, com CPU freada em 6x: os dois alcances corretos, 60 flocos animando, **0,000 s** de estilo+layout em 3 s, e o clique atravessando a camada.
 8. 701 ids, nenhum duplicado, zero erro de console.
+
+## 7. Um defeito de isolamento, achado ao investigar um alarme falso
+
+O dono relatou que a prévia de celular não estava funcionando, e depois confirmou que estava. A investigação não achou o defeito relatado — mas achou **outro**, real, introduzido nesta rodada: as ligações dos botões desta aba (gerar, copiar, os dois modos da prévia e os doze campos de cor) tinham nascido **dentro do preparo da Mini loja**.
+
+Enquanto a Mini loja funciona, nada aparece. No dia em que ela falhar, a aba de Efeitos perde os botões **junto** — e a barra vermelha acusa a **Mini loja**, apontando a aba errada. É o oposto do que o isolamento por aba existe para garantir.
+
+Medido, numa árvore com o preparo da Mini loja lançando de propósito: **antes** da correção os botões de Efeitos morriam junto; **depois**, o "Gerar código" produz os 7,5 KB normalmente e a prévia de celular abre com 390 px de viewport, enquanto a barra vermelha acusa corretamente a Mini loja.
+
+A correção não muda um byte de saída nenhuma: as **19** saídas e as 9 cobranças saíram idênticas.
