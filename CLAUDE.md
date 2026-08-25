@@ -12,7 +12,7 @@ Repositório **público**, servido pelo GitHub Pages em **prosite.fotocerta.com.
 
 | Caminho | O que é / onde é usado |
 |---|---|
-| `index.html` | A ferramenta geradora (8 abas: slideshow, captação de leads, agendamento TidyCal, checkout, bordas com efeito, contagem regressiva, link de cobrança, mini loja) mais o **painel consolidado** na faixa à direita, que monta a Tag Head e a Tag Body da página selecionada no preset geral. É a página servida pelo Pages. |
+| `index.html` | A ferramenta geradora (9 abas: slideshow, captação de leads, agendamento TidyCal, checkout, bordas com efeito, contagem regressiva, link de cobrança, mini loja, efeitos de página) mais o **painel consolidado** na faixa à direita, que monta a Tag Head e a Tag Body da página selecionada no preset geral. É a página servida pelo Pages. |
 | `fc-compartilhado.js` | A fonte que as **duas** páginas executam: BR Code (`FC_PIX_SRC`), selo e prazo (`P_SELO_SRC`), PayPal (`P_PP_SRC`), as recusas da cobrança, a montagem do link e a leitura da identidade guardada. Carregado com endereço **versionado** pelas duas. |
 | `cobrar/index.html` | A página `/cobrar`: uso diário, mobile-first, gera o link de uma cobrança. Não reimplementa nada — chama as mesmas funções da aba. |
 | `cobrar/manifest.json` + `cobrar/icone-{180,192,512}.png` | Manifesto e ícones da tela de início. **Sem service worker**, por decisão registrada. |

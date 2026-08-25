@@ -16,6 +16,8 @@ Entregue também em 22/08/2026: a **guirlanda de Natal**, sexto efeito da aba Bo
 
 Entregue em 23/08/2026: a **página de obrigado do TidyCal** (`docs/specs/2026-08-23-pagina-de-obrigado-tidycal-design.md`) — marcadores no texto da página de confirmação, preenchidos com os dados do agendamento.
 
+Entregue em 24/08/2026: a **nona aba, Efeitos de página** (`docs/specs/2026-08-24-aba-efeitos-de-pagina-design.md`), com o primeiro efeito: **neve caindo**, com alcance de página inteira ou preso a um bloco.
+
 Entregue em 24/08/2026: a **consolidação passou a aceitar N componentes** (`docs/specs/2026-08-24-consolidacao-de-n-componentes-design.md`) — lista de marcação, até cinco outros componentes por página, uma saída numerada para cada.
 
 Entregue em 24/08/2026: a **consolidação passou a entregar o CSS do outro componente** (`docs/specs/2026-08-24-codigo-2-do-outro-componente-design.md`), com o painel consolidado conhecendo a saída nova.
@@ -27,6 +29,12 @@ Entregue em 24/08/2026: o **selo de destaque na aba Bordas** (`docs/specs/2026-0
 Entregue em 24/08/2026: o **carimbo de publicação** — a ferramenta diz, embaixo do título, qual versão o navegador está executando e quando ela foi publicada, com a conferência mecânica que impede o carimbo de mentir.
 
 Entregue em 23/08/2026: a **consolidação da página de obrigado no painel**, mais a **regra** de que todo construtor que toca Tag Head, Tag Body ou o CSS de um componente customizado precisa consolidar — e a **rede** que denuncia a saída esquecida.
+
+**Em fila para a aba Efeitos de página**, a pedido do dono ("me apresente mais uns 2 ou 3 efeitos"). Os três candidatos avaliados, todos viáveis com a mesma máquina (`transform`, sem JavaScript):
+
+1. **Confete caindo** — mesma engrenagem da neve, trocando o desenho por retângulos coloridos que giram. É a mais barata das três, porque só muda a peça desenhada. Serve a lançamento, "obrigado pela compra" e campanha. Estimativa: 1h a 1h30.
+2. **Fundo animado (aurora)** — duas ou três manchas de cor desfocadas que se movem devagar atrás do conteúdo. Não é sazonal: serve o ano inteiro. Estimativa: 2h a 2h30.
+3. **Luzes piscando no topo** — um cordão de lâmpadas com brilho alternado. É a mais "de Natal" das três e a mais trabalhosa de deixar bonita em telas estreitas. Estimativa: 2h30 a 3h.
 
 A próxima sai do que o dono encontrar no uso.
 

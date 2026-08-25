@@ -26,9 +26,9 @@ if(!ARV || !PORTA || !SAIDA){
    lista mesmo sem o cenario exercitar a consolidacao: aqui os cinco PRECISAM sair vazios, e a
    fotografia passa a cobrar isso. Saida que so aparece as vezes e onde o lixo de uma passagem
    anterior se esconde. */
-const SAIDAS = ['s-out','l-out','t-out1','t-out2','t-out3','u-out','b-out1','b-out2','b-out3','b-out4','b-out5','b-out6','b-out7','c-out1','p-out1','m-out'];
+const SAIDAS = ['s-out','l-out','t-out1','t-out2','t-out3','u-out','b-out1','b-out2','b-out3','b-out4','b-out5','b-out6','b-out7','c-out1','p-out1','m-out','e-out1','e-out2'];
 const ABAS = [['aba-slide','s-gerar'],['aba-leads','l-gerar'],['aba-tidy','t-gerar'],
-  ['aba-uni','u-gerar'],['aba-bor','b-gerar'],['aba-cnt','c-gerar'],['aba-cob','p-gerar'],['aba-loja','m-gerar']];
+  ['aba-uni','u-gerar'],['aba-bor','b-gerar'],['aba-cnt','c-gerar'],['aba-cob','p-gerar'],['aba-loja','m-gerar'],['aba-efe','e-gerar']];
 
 /* Identidade de teste. NAO sao dados reais: a chave e um e-mail de exemplo e o Client ID
    e inventado -- este arquivo e versionado num repositorio publico. */
@@ -99,7 +99,14 @@ const r = {arvore:ARV, geradores:{}, cobrancas:{}, erros:[]};
 {
   const pg = await abrir(br, base);
   await preparar(pg); await conteudo(pg); await cobranca(pg,{});
-  for(const [aba,bt] of ABAS){ await clicar(pg,aba); await pg.waitForTimeout(60); await clicar(pg,bt); }
+  /* ABA QUE NAO EXISTE NA ARVORE E PULADA, e nao derruba a captura. Sem isto, acrescentar
+     uma aba nova quebrava a regressao INTEIRA -- a referencia (main) nao tem o botao, o
+     clique lanca, e nenhuma das outras onze saidas chegava a ser comparada. A saida da aba
+     ausente fica vazia daquele lado, que e exatamente o que ela e. */
+  for(const [aba,bt] of ABAS){
+    if(!(await pg.$('#'+aba))){ r.pulou = (r.pulou||[]).concat(aba); continue; }
+    await clicar(pg,aba); await pg.waitForTimeout(60); await clicar(pg,bt);
+  }
   await clicar(pg,'p-gerarlink'); await pg.waitForTimeout(200);
   /* t-out2 e t-out3 so existem no modo "pagina intermediaria embutida": sem esta segunda
      passagem, duas das doze saidas ficariam vazias e a regressao nao as cobriria. */

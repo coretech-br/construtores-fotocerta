@@ -718,6 +718,7 @@
   <button class="aba" id="aba-cnt" role="tab" aria-selected="false">Contagem regressiva</button>
   <button class="aba" id="aba-cob" role="tab" aria-selected="false">Link de cobrança</button>
   <button class="aba" id="aba-loja" role="tab" aria-selected="false">Mini loja</button>
+  <button class="aba" id="aba-efe" role="tab" aria-selected="false">Efeitos de página</button>
 </div>
 
 <!-- ==================== CONSTRUTOR: SLIDESHOW ==================== -->
@@ -2877,6 +2878,100 @@
   </div>
 </div>
 
+<div class="painel" id="painel-efe" role="tabpanel">
+  <p class="descricao">Efeitos que valem para a <b>página inteira</b>, e não para um componente: neve caindo, e outros que vierem. O código sai em duas partes — um bloco para a <b>Tag Head</b> da página e um componente HTML com os elementos que o efeito anima. Nada aqui usa JavaScript.</p>
+
+  <div class="secao"><span class="secao-n">1</span> Efeito e alcance</div>
+  <div class="grade">
+    <div>
+      <fieldset>
+      <legend>Qual efeito</legend>
+      <div class="radios">
+      <label><input type="radio" name="e-efeito" value="neve" checked><span>Neve caindo</span></label>
+      </div>
+      <p class="ajuda">Por enquanto só a neve. A aba foi feita para receber outros: cada um entra como uma opção aqui, com os campos próprios dele.</p>
+      <label>Onde o efeito acontece</label>
+      <div class="radios">
+      <label><input type="radio" name="e-alcance" value="pagina" checked><span>Página inteira</span></label>
+      <label><input type="radio" name="e-alcance" value="bloco"><span>Dentro de um bloco</span></label>
+      </div>
+      <p class="ajuda"><b>Página inteira</b> cobre a janela e acompanha a rolagem — é o normal. <b>Dentro de um bloco</b> prende o efeito ao componente, com a altura que você definir.</p>
+      <p class="ajuda alerta"><b>Se a neve não cobrir a tela toda</b>, é porque algum bloco do tema tem <code>transform</code>, e isso quebra a camada fixa — ela passa a se prender àquele bloco. Não dá para saber isso daqui: só a página publicada responde. Nesse caso, troque para <b>dentro de um bloco</b>.</p>
+      <label for="e-altura">Altura do bloco <small>(px — só vale no alcance "dentro de um bloco")</small></label>
+      <input type="number" id="e-altura" value="420" min="120" max="1200" step="10">
+      <p class="ajuda alerta" id="e-altura-aviso"><b>Na página inteira este campo não vale.</b> Ali a camada cobre a janela, e a altura é a da janela do visitante. O número acima fica guardado e volta a valer no alcance "dentro de um bloco".</p>
+      </fieldset>
+    </div>
+    <div>
+      <fieldset>
+      <legend>Aparência da neve</legend>
+      <label for="e-qtd">Quantidade de flocos <small>(20 a 200 — mais flocos, mais código)</small></label>
+      <input type="number" id="e-qtd" value="60" min="20" max="200" step="5">
+      <label>Cor do floco</label>
+      <div class="cor-linha"><input type="color" id="e-cor" value="#FFFFFF"><input type="text" id="e-cor-t" value="#FFFFFF"></div>
+      <p class="ajuda">Os flocos são desenhados com o caractere de neve. Sobre fundo claro, branco <b>some</b> — nesse caso escolha um tom mais escuro.</p>
+      <label for="e-tam">Tamanho do maior floco <small>(px — os outros variam de 40% a 100% disto)</small></label>
+      <input type="number" id="e-tam" value="24" min="8" max="60" step="1">
+      <label for="e-vel">Duração da queda <small>(segundos — maior = mais lento; cada floco varia em torno disto)</small></label>
+      <input type="number" id="e-vel" value="12" min="4" max="40" step="1">
+      <label for="e-deriva">Deriva lateral <small>(px — o quanto o floco desliza para os lados enquanto cai; 0 = cai reto)</small></label>
+      <input type="number" id="e-deriva" value="46" min="0" max="140" step="2">
+      <label for="e-opac">Opacidade <small>(0,1 a 1 — 1 é neve sólida; abaixo de 0,5 vira um véu discreto)</small></label>
+      <input type="number" id="e-opac" value="1" min="0.1" max="1" step="0.05">
+      <p class="ajuda">A opacidade vale para a <b>camada inteira</b>, e não para cada floco: dentro dela, cada floco continua surgindo e sumindo aos poucos, como já fazia.</p>
+      </fieldset>
+    </div>
+  </div>
+
+  <div class="secao"><span class="secao-n">2</span> Biblioteca de presets</div>
+  <div class="grade" id="fcp-e-box"></div>
+
+  <div class="secao"><span class="secao-n">3</span> Prévia e códigos gerados</div>
+  <div class="acoes" style="margin-bottom:14px"><button class="botao" id="e-gerar">Gerar código</button></div>
+  <div class="grade">
+    <div>
+      <fieldset>
+      <legend>Fundo da prévia</legend>
+      <div class="radios">
+      <label><input type="radio" name="e-pvfundo" value="escuro" checked><span>Página escura</span></label>
+      <label><input type="radio" name="e-pvfundo" value="papel"><span>Papel (bege)</span></label>
+      <label><input type="radio" name="e-pvfundo" value="claro"><span>Página clara</span></label>
+      </div>
+      <p class="ajuda"><b>Por que isto existe:</b> o floco é branco por padrão, e branco sobre fundo claro é invisível. Aqui dá para ver isso <b>antes</b> de publicar. Esta escolha é só da prévia: os dois códigos saem exatamente iguais com qualquer fundo aqui.</p>
+      </fieldset>
+      <div class="pv-area" id="e-pv-area">
+      <div id="e-pv-box"></div>
+      </div>
+      <p class="ajuda" id="e-pv-legenda">A prévia executa o mesmo código que sai abaixo, dentro de um quadro isolado. O que ela <b>não</b> mostra: a tipografia e os blocos da sua página, e se o tema quebra a camada fixa.</p>
+    </div>
+    <div>
+      <div class="saida">
+      <h3>1) Tag Head <b>desta página</b>
+      <button class="botao mini" id="e-copy1" style="margin-left:8px">Copiar</button>
+      <span class="aviso-copiado" id="e-cop1">Copiado!</span>
+      </h3>
+      <p class="ajuda" id="e-peso"></p>
+      <textarea id="e-out1" readonly spellcheck="false" style="height:200px" placeholder="O código gerado aparece aqui."></textarea>
+      </div>
+      <div class="saida">
+      <h3>2) Componente HTML <b>desta página</b>
+      <button class="botao mini" id="e-copy2" style="margin-left:8px">Copiar</button>
+      <span class="aviso-copiado" id="e-cop2">Copiado!</span>
+      </h3>
+      <p class="ajuda">Coloque este componente no <b>fim</b> da página. A camada é fixa, então a posição dele no fluxo não muda onde a neve aparece — mas um componente no fim não empurra nada do que já está montado.</p>
+      <textarea id="e-out2" readonly spellcheck="false" style="height:150px" placeholder="O código gerado aparece aqui."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <div class="instrucoes">
+  <h3>Como usar</h3>
+  <p><b>1.</b> Escolha o alcance e ajuste a aparência. <b>2.</b> Clique em <b>Gerar código</b>. <b>3.</b> Cole o <b>código 1</b> na Tag Head <b>daquela página</b> — o Prosite não tem cabeçalho global, cada página tem o seu. <b>4.</b> Crie um componente HTML no fim da página e cole o <b>código 2</b> nele.</p>
+  <p class="ajuda alerta"><b>Confira o número de elementos depois de colar.</b> O código 2 traz exatamente a quantidade de flocos que você pediu. Se o editor comer algum, os últimos ficam sem regra e não aparecem — sem erro nenhum na tela.</p>
+  <p><b>Depois de publicar, confira três coisas:</b> a neve cobre a tela inteira; os botões da página continuam clicáveis (a camada não bloqueia cliques, mas vale testar); e a neve aparece sobre o fundo real da sua página.</p>
+  </div>
+</div>
+
 </div><!-- /app-esq -->
 
 <!-- ==================== PAINEL CONSOLIDADO (fase 5) ====================
@@ -2922,8 +3017,8 @@
    QUEM IMPEDE QUE ELE MINTA: scripts/conferir-versoes.sh, que recusa index.html
    alterado sem a versao mudar junto -- a mesma disciplina do fc-compartilhado.js,
    e pela mesma razao: carimbo que ninguem confere e o defeito de amanha. */
-var FC_VERSAO='2026-08-24f';
-var FC_PUBLICADO='2026-08-24 20:58';   /* America/Sao_Paulo -- escrito pelo carimbador */
+var FC_VERSAO='2026-08-24g';
+var FC_PUBLICADO='2026-08-24 21:28';   /* America/Sao_Paulo -- escrito pelo carimbador */
 (function(){
   var el=document.getElementById('fc-versao');
   if(!el) return;
@@ -3814,7 +3909,12 @@ var ABAS=[
            ['m.cps',{codigo:'',tipo:'pct_total',valor:0,validade:''},'codigo']],
    importar:mImportarLimpar,
    exemplo:'ex.: Foto Certa - loja de albuns',
-   guarda:'tudo o que está configurado nesta aba — formas de pagamento, moeda, <b>o catálogo inteiro</b> (nome, descrição, preço, categoria, foto e os opcionais de cada produto), cupons, sinal, desconto Pix, a grade da vitrine, o tamanho pedido das fotos, textos e cores. Não guarda o que está no importador de galeria, que não é configuração e sim uma colagem de trabalho.'}
+   guarda:'tudo o que está configurado nesta aba — formas de pagamento, moeda, <b>o catálogo inteiro</b> (nome, descrição, preço, categoria, foto e os opcionais de cada produto), cupons, sinal, desconto Pix, a grade da vitrine, o tamanho pedido das fotos, textos e cores. Não guarda o que está no importador de galeria, que não é configuração e sim uma colagem de trabalho.'},
+  {id:'efe',  nome:'Efeitos de página',   chaves:['e'],         coleta:eColeta,restaura:eRestaura,
+   pref:'e',fora:[],resumo:ePresetResumo,redesenhar:ePresetDepois,antesDeSalvar:ePresetAntes,
+   presetOk:ePresetOk,
+   exemplo:'ex.: Natal 2026 - neve na hospedeira',
+   guarda:'tudo o que está configurado nesta aba — o efeito, o alcance (página inteira ou dentro de um bloco) com a altura, a quantidade de flocos, a cor, o tamanho, a duração da queda, a deriva lateral, a opacidade e também o <b>fundo da prévia</b>, que é como você confere se a cor da neve aparece sobre a sua página.'}
 ];
 var fcFrag={};       /* ultimo pedaco bom de cada aba, para nao apagar o que a aba quebrada tinha */
 var fcSoLeitura={};  /* abas que falharam ao restaurar: param de coletar do DOM ate recarregar */
@@ -3939,6 +4039,7 @@ var CORES_LIVRES=[['l-corbtn','#25D366'],['l-c1','#075E54'],['l-c2','#ffffff'],[
   ['m-c1','#0F3A30'],['m-c2','#ffffff'],['m-c3','#333333'],
   ['b-f1','#8A4A32'],['b-f2','#B5674A'],['b-c1','#9C5638'],['b-c2','#FFC94A'],['b-c3','#FFF6D8'],
   ['b-c4','#F7EFDF'],['b-pvcor','#23281F'],['b-selo-f','#9C5638'],['b-selo-c','#FFF6D8'],
+  ['e-cor','#FFFFFF'],
   ['c-cfundo','#0F3A30'],['c-ctexto','#FDFBF6'],['c-cdestaque','#FFC94A'],['c-cborda','#FFC94A'],
   ['c-ctafundo','#FFC94A'],['c-ctatexto','#23281F'],['c-cprog','#FFC94A'],
   ['c-corujacorpo','#FDFBF6'],['c-corujadet','#FFC94A'],['c-curg','#8C1D18'],
@@ -12132,6 +12233,221 @@ function bGerar(){
 }
 
 /* ============================================================
+   EFEITOS DE PAGINA (nona aba, 24/08/2026)
+   ============================================================
+   Efeitos que valem para a PAGINA, e nao para um componente. O primeiro e a neve
+   caindo, trazida pelo dono a partir de um codigo publicado por um desenvolvedor.
+   O codigo original foi medido antes de virar aba, e as cinco correcoes que a
+   medicao pediu estao embutidas aqui para ninguem precisar lembrar delas:
+
+   1. ANIMA 'transform', E NAO 'left/top'. left e top obrigam o navegador a refazer
+      o LAYOUT a cada quadro, para cada floco. Medido com a CPU freada em 6x, numa
+      janela de 3 s:
+          original,  250 flocos (left/top)  : 1,14 s de estilo+layout = 38% da linha principal
+          esta aba,  250 flocos (transform) : 0,00 s                  =  0%
+      Mesmo numero de flocos. O que muda e a propriedade animada.
+   2. 'pointer-events: none' na camada. Sem isso ela cobre a pagina e engole TODOS
+      os cliques embaixo dela -- o original nao tem essa linha.
+   3. Regra de movimento reduzido, que o original tambem nao tem.
+   4. SEIS animacoes compartilhadas, e nao uma por floco: so a deriva lateral varia
+      dentro dos quadros. O original compilado da 103 KB; 60 flocos aqui dao 6 KB.
+   5. O caractere do floco entra como a fuga CSS \2744, entao o bloco inteiro sai
+      100% ASCII e atravessa o sanitizador do Prosite sem risco.
+
+   DETERMINISMO. O sorteio sai de uma semente FIXA, nunca de Math.random: a mesma
+   configuracao precisa produzir os mesmos bytes (e o que a regressao mede), e mudar
+   a quantidade de 60 para 61 muda UMA regra, nao sessenta. E ele toma os bits ALTOS
+   do numero sorteado -- com os bits baixos, que num gerador linear sao fracos, os
+   flocos sairam em faixas horizontais visiveis na tela. Medido, nao deduzido.
+   ============================================================ */
+var E_DERIVAS=6;      /* quantas animacoes compartilhadas (uma por faixa de deriva) */
+var E_SEMENTE=20260824;
+var E_EFEITO_NOME={neve:'neve caindo'};
+
+var E_NUMS=[
+  ['e-altura',420,120,1200,true],['e-qtd',60,20,200,true],['e-tam',24,8,60,true],
+  ['e-vel',12,4,40,true],['e-deriva',46,0,140,true],['e-opac',1,0.1,1,false]
+];
+function ePreso(id){return fcPreso(E_NUMS,id);}
+function ePresoDe(id,v){return fcPrender(fcFaixa(E_NUMS,id),v);}
+
+/* Gerador linear com semente fixa. Devolve 1..n, tomando os bits altos. */
+function eSorteio(){
+  var s=E_SEMENTE;
+  return function(n){s=(s*1103515245+12345)&0x7fffffff;return (Math.floor(s/65536)%n)+1;};
+}
+function eRed(n){return String(Math.round(n*100)/100);}
+
+function eCfgDom(){
+  return {efeito:radio('e-efeito'),alcance:radio('e-alcance'),
+    altura:ePreso('e-altura'),qtd:ePreso('e-qtd'),cor:corSegura('e-cor','#FFFFFF'),
+    tam:ePreso('e-tam'),vel:ePreso('e-vel'),deriva:ePreso('e-deriva'),opac:ePreso('e-opac')};
+}
+function eCfgPreset(C){
+  return {efeito:(C.efeito==='neve')?'neve':'neve',
+    alcance:(C.alcance==='bloco')?'bloco':'pagina',
+    altura:ePresoDe('e-altura',C.altura),qtd:ePresoDe('e-qtd',C.qtd),
+    cor:corValida(C.cor)?C.cor:'#FFFFFF',
+    tam:ePresoDe('e-tam',C.tam),vel:ePresoDe('e-vel',C.vel),
+    deriva:ePresoDe('e-deriva',C.deriva),opac:ePresoDe('e-opac',C.opac)};
+}
+
+/* Monta {css, html} a partir de uma configuracao. Uma entrada pela tela (eCfgDom) e uma
+   por preset (eCfgPreset), um gerador so -- mesmo desenho de bMontar e de cBloco. */
+function eMontar(cfg){
+  if(cfg.efeito!=='neve')return {erro:'Efeito desconhecido: "'+cfg.efeito+'".'};
+  var rnd=eSorteio(),i,k;
+  var fixa=(cfg.alcance!=='bloco');
+  /* A queda em VH na pagina inteira e em PX no bloco. Percentagem nao serve: em
+     translate3d ela se refere ao tamanho do PROPRIO floco, nao ao do container. */
+  var queda=fixa?'112vh':((cfg.altura+40)+'px');
+  var base=fixa
+    ? '.fcef-neve{position:fixed;left:0;top:0;right:0;bottom:0;'
+    : '.fcef-neve{position:relative;height:'+cfg.altura+'px;';
+  base+='overflow:hidden;pointer-events:none;opacity:'+eRed(cfg.opac)+';z-index:9999}\n';
+  base+='.fcef-neve div{position:absolute;top:-8%;left:var(--l);font-size:var(--t);color:'+cfg.cor+';\n'+
+        '  will-change:transform;animation-name:var(--n);animation-duration:var(--d);animation-delay:var(--a);\n'+
+        '  animation-timing-function:linear;animation-iteration-count:infinite}\n';
+  base+='.fcef-neve div:after{content:"\\2744"}\n';
+  var quadros='';
+  for(k=0;k<E_DERIVAS;k++){
+    /* as derivas se espalham simetricamente entre -deriva e +deriva */
+    var dx=(E_DERIVAS===1)?0:Math.round(-cfg.deriva+(2*cfg.deriva*k)/(E_DERIVAS-1));
+    quadros+='@keyframes fcef-'+(k+1)+'{0%{transform:translate3d(0,0,0) rotate(0deg);opacity:0}'+
+      '8%{opacity:1}86%{opacity:1}100%{transform:translate3d('+dx+'px,'+queda+',0) rotate(360deg);opacity:0}}\n';
+  }
+  var regras='';
+  for(i=1;i<=cfg.qtd;i++){
+    var left=rnd(100);
+    var dur=Math.max(3,Math.round(cfg.vel*0.6)+rnd(Math.max(1,Math.round(cfg.vel*0.8))));
+    var tam=Math.max(6,Math.round(cfg.tam*0.4)+rnd(Math.max(1,Math.round(cfg.tam*0.6))));
+    /* ATRASO NEGATIVO: o floco entra ja no meio do percurso, entao a pagina nasce com neve
+       espalhada em vez de todos alinhados no topo esperando a vez. */
+    var atraso=-(rnd(dur*10)/10);
+    regras+='.fcef-neve div:nth-of-type('+i+'){--l:'+left+'%;--t:'+tam+'px;--d:'+dur+'s;--a:'+eRed(atraso)+'s;--n:fcef-'+rnd(E_DERIVAS)+'}\n';
+  }
+  var css=base+quadros+regras+
+    '@media (prefers-reduced-motion: reduce){.fcef-neve div{animation:none;opacity:.7}}\n';
+  var html='<div class="fcef-neve">';
+  for(i=0;i<cfg.qtd;i++)html+='<div></div>';
+  html+='</div>';
+  return {css:css,html:html};
+}
+
+function eGerar(){
+  if(fcAjustarTodos(E_NUMS))salvarEstado();
+  var m=eMontar(eCfgDom());
+  if(m.erro){alert(m.erro);return;}
+  var c1='<sty'+'le>\n';
+  c1+='/* '+(E_EFEITO_NOME[radio('e-efeito')]||'efeito de pagina').toUpperCase()+' - cole na Tag Head DESTA pagina */\n';
+  c1+=m.css;
+  c1+='</sty'+'le>';
+  $('e-out1').value=c1;
+  $('e-out2').value=m.html;
+  ePeso(c1,m.html);
+  fccMarcar('efe');
+}
+/* O TAMANHO A VISTA. O codigo 1 cresce com a quantidade de flocos, e campos de CSS de painel
+   costumam ter limite -- que nao sabemos qual e. Melhor o numero na tela do que a descoberta
+   na hora de colar. */
+function ePeso(c1,html){
+  var el=$('e-peso');if(!el)return;
+  var kb=Math.round(c1.length/102.4)/10;
+  el.textContent='Tamanho do código 1: '+kb+' KB. O código 2 traz '+
+    (html.split('<div></div>').length-1)+' elementos.';
+}
+
+function eToggles(){
+  var fixa=(radio('e-alcance')!=='bloco'),el;
+  /* "Zerado na origem": na pagina inteira a altura nao vale, entao ela fica A VISTA,
+     desabilitada e com aviso ambar -- o mesmo tratamento que 'b-esp' recebe na guirlanda. */
+  el=$('e-altura');if(el)el.disabled=fixa;
+  el=$('e-altura-aviso');if(el)el.style.display=fixa?'block':'none';
+}
+
+/* ===== Previa =====
+   Ela EXECUTA o que o gerador escreve, dentro de um <iframe> de mesma origem. Aqui o iframe
+   nao e convencao: o bloco usa position:fixed, e sem ele a camada cobriria a ferramenta
+   inteira. Junto vem o shim de armazenamento (este bloco nao tem uma linha de JavaScript, mas
+   o shim e do ambiente e custa nada), enchimento para haver o que rolar, e o debounce de
+   400 ms com timer unico. */
+var E_PV_FUNDOS={escuro:'#14202b',papel:'#F5F1E6',claro:'#FFFFFF'};
+var ePvTimer=null;
+function ePvFundo(){return E_PV_FUNDOS[radio('e-pvfundo')]||E_PV_FUNDOS.escuro;}
+function ePreview(){
+  var box=$('e-pv-box');if(!box)return;
+  var m=eMontar(eCfgDom());
+  if(m.erro){box.innerHTML='<p style="font-size:13px;color:#c0392b;text-align:center;margin:0;padding:18px">'+escHtml(m.erro)+'</p>';return;}
+  var fundo=ePvFundo(),tinta=(radio('e-pvfundo')==='escuro')?'#E9E4D8':'#23281F';
+  box.innerHTML='<iframe id="e-pv-frame" style="width:100%;height:340px;border:0;border-radius:8px;display:block"></iframe>';
+  var fr=$('e-pv-frame');
+  var d=fr.contentWindow.document;
+  var enche='';var ie;
+  for(ie=0;ie<10;ie++)enche+='<div style="height:38px;margin:0 0 10px;background:rgba(128,128,128,.18);border-radius:6px"></div>';
+  d.open();
+  d.write('<!doctype html><meta charset="utf-8">'+fcPvShim({})+
+    '<sty'+'le>html,body{margin:0;height:100%}body{background:'+fundo+';color:'+tinta+
+    ';font:14px/1.6 -apple-system,sans-serif}</sty'+'le>'+
+    '<sty'+'le>'+m.css+'</sty'+'le>'+
+    '<div style="padding:16px;position:relative;z-index:1">'+
+    '<div style="font-size:18px;font-weight:700;margin:0 0 10px">Sua p'+String.fromCharCode(225)+'gina de Natal</div>'+enche+'</div>'+
+    m.html);
+  d.close();
+}
+function ePvAgendar(){
+  if(ePvTimer)clearTimeout(ePvTimer);
+  ePvTimer=setTimeout(function(){ePvTimer=null;try{ePreview();}catch(e){}},400);
+}
+document.addEventListener('input',function(e){
+  var al=(e.target.id&&e.target.id.indexOf('e-')===0)||(e.target.name&&e.target.name.indexOf('e-')===0);
+  if(al)ePvAgendar();
+});
+document.addEventListener('change',function(e){
+  var al=(e.target.id&&e.target.id.indexOf('e-')===0)||(e.target.name&&e.target.name.indexOf('e-')===0);
+  if(al){eToggles();ePvAgendar();}
+});
+
+function eCampos(){
+  return {efeito:radio('e-efeito'),alcance:radio('e-alcance'),altura:$('e-altura').value,
+    qtd:$('e-qtd').value,cor:$('e-cor-t').value,tam:$('e-tam').value,vel:$('e-vel').value,
+    deriva:$('e-deriva').value,opac:$('e-opac').value,pvfundo:radio('e-pvfundo')};
+}
+function eColeta(){return {e:eCampos()};}
+function eAplicarCampos(E){
+  setRadio('e-efeito',E.efeito||'neve');
+  setRadio('e-alcance',E.alcance||'pagina');
+  $('e-altura').value=(E.altura!=null&&E.altura!=='')?E.altura:420;
+  $('e-qtd').value=(E.qtd!=null&&E.qtd!=='')?E.qtd:60;
+  var c=corValida(E.cor)?E.cor:'#FFFFFF';$('e-cor-t').value=c;$('e-cor').value=c;
+  $('e-tam').value=(E.tam!=null&&E.tam!=='')?E.tam:24;
+  $('e-vel').value=(E.vel!=null&&E.vel!=='')?E.vel:12;
+  $('e-deriva').value=(E.deriva!=null&&E.deriva!=='')?E.deriva:46;
+  $('e-opac').value=(E.opac!=null&&E.opac!=='')?E.opac:1;
+  setRadio('e-pvfundo',E.pvfundo||'escuro');
+}
+function eRestaura(st){if(!st.e)return;eAplicarCampos(st.e);}
+function ePresetResumo(v){
+  var C=v.e||{};
+  return (E_EFEITO_NOME[C.efeito]||'neve caindo')+' — '+(C.qtd||60)+' flocos, '+
+    ((C.alcance==='bloco')?('bloco de '+(C.altura||420)+'px'):'p'+String.fromCharCode(225)+'gina inteira')+
+    ', queda em '+(C.vel||12)+'s';
+}
+function ePresetOk(valores){return typeof valores.e.efeito==='string';}
+function ePresetAntes(){
+  if(fcAjustarTodos(E_NUMS))salvarEstado();
+  var m=eMontar(eCfgDom());
+  if(m.erro)return 'A configuracao atual nao gera codigo, entao nao ha o que salvar: '+m.erro;
+  return '';
+}
+function ePresetDepois(){
+  var mudou=false;
+  if(fcAjustarTodos(E_NUMS))mudou=true;
+  if(fcCoresAjustar('e-'))mudou=true;
+  if(mudou)salvarEstado();
+  eToggles();ePreview();
+}
+
+/* ============================================================
    CONTAGEM REGRESSIVA
    ============================================================ */
 function cToggles(){
@@ -16264,6 +16580,14 @@ function fccDaAba(a,p,plano,vals){
         'Campo CSS Customizado de outro componente desta página (preset "'+marcados[ib]+'")',
         'Não cole este CSS no componente do código 2 — ele é de <b>outro</b> componente desta página. Ele e o código 1 andam <b>em par</b>: o nome de animação que ele usa só existe no código 1.'));
     }
+  }else if(a.id==='efe'){
+    /* As DUAS saidas desta aba vao para campos do Prosite DESTA pagina: o codigo 1 para a Tag
+       Head e o codigo 2 para um componente. A regra do painel vale inteira -- construtor que
+       toca Tag Head ou Tag Body consolida, sem excecao. */
+    plano.head.push(fccItem(a,'e-out1','Efeitos de página — código 1','Tag Head',
+      'O código 1 traz os <code>@keyframes</code> <b>desta página</b> — o Prosite não tem cabeçalho global. Se a página já tiver uma versão anterior deste bloco na Tag Head, <b>substitua</b> em vez de acrescentar.'));
+    plano.comps.push(fccItem(a,'e-out2','Efeitos de página — código 2','Componente HTML desta página',
+      'Coloque este componente no <b>fim</b> da página. A camada é fixa, então a posição dele no fluxo não muda onde o efeito aparece.'));
   }else if(a.id==='cnt'){
     fixa=(v.c&&v.c.fixa)||radio('c-fixa');
     if(fixa==='fixa')plano.body.push(fccItem(a,'c-out1','Contagem regressiva','Tag Body'));
@@ -16613,6 +16937,10 @@ prep('Barra de abas','',function(){
      a largura real da coluna, senao o iframe nasceria na largura de emergencia. */
   liga('aba-uni',function(){trocarAba('uni');uPreview(true);});
   liga('aba-bor',function(){trocarAba('bor');});
+  /* A previa desta aba e montada AO ABRIR, e nao na carga: o bloco usa position:fixed dentro
+     de um iframe, e montar na carga o executaria em toda abertura da ferramenta, para quem
+     nunca abre esta aba e com o painel ainda sem largura. */
+  liga('aba-efe',function(){trocarAba('efe');ePreview();});
   /* enquanto o painel esta escondido o box mede 0: a previa e remontada ao abrir a aba, ja com
      a largura real da coluna, senao o iframe nasceria na largura de emergencia. */
   liga('aba-cnt',function(){trocarAba('cnt');cPreview(true);});
@@ -16801,6 +17129,10 @@ prep('Mini loja','loja',function(){
   liga('m-prod-cancelar',mProdLimpar);
   liga('m-prod-limpar',mProdListaLimpar);
   liga('m-cp-add',mCpAdd);
+  liga('e-gerar',eGerar);
+  liga('e-copy1',function(){copiar('e-out1','e-cop1');});
+  liga('e-copy2',function(){copiar('e-out2','e-cop2');});
+  parearCor('e-cor');
   liga('m-gerar',mGerar);
   liga('m-atualizar',function(){mPreview(true);});
   liga('m-pv-desk',function(){mPvModoSet('desk');});
@@ -16958,6 +17290,18 @@ prep('Link de cobrança','cob',function(){
      bloco -- inclusive o pedido do script do QR Code -- em toda abertura da ferramenta, mesmo
      para quem nunca abre esta aba, e com o painel escondido (largura de emergencia). */
   pPvBotoes();
+},'desenhar a aba com o estado restaurado');
+prep('Efeitos de página','efe',function(){
+  /* estado gravado antes desta regra pode trazer numero fora da faixa: prende na carga, para o
+     campo nunca exibir algo diferente do que eMontar vai usar. */
+  if(fcAjustarTodos(E_NUMS))salvarEstado();
+  eToggles();
+  /* Correcao a vista dos seis campos numericos, no mesmo padrao das outras abas: o campo se
+     corrige no change/blur, nunca a cada tecla. Sem isto o operador leria 999 na tela
+     enquanto o gerador usava 200 -- trocar defeito visivel por invisivel e o que este projeto
+     recusa por regra. */
+  fcLigarFaixa(E_NUMS,ePvAgendar);
+  /* A previa NAO e montada aqui, pelo mesmo motivo das outras abas -- ver o liga('aba-efe'). */
 },'desenhar a aba com o estado restaurado');
 prep('Mini loja','loja',function(){
   /* estado gravado antes desta regra pode trazer numero fora da faixa: prende na carga, para o

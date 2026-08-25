@@ -1008,6 +1008,24 @@ Spec: `docs/specs/2026-08-24-popup-fora-do-horario-design.md`. Alcance: aba **Ca
 
 **Verificação.** Primeira aplicação do molde versionado (`scripts/verificar/pagina.mjs`) a um segundo bloco, o que também o validou fora da aba onde nasceu: com relógio falso, o pop-up abre às 14h de segunda, **não** abre às 22h nem no domingo, e o botão continua lá. As outras três combinações (abrir mesmo assim, sem horário, modo clique) medidas do mesmo jeito. Regressão byte a byte intacta — inclusive o `l-out`, porque o padrão de fábrica tem o horário desligado.
 
+### A nona aba: efeitos de página (24/08/2026)
+
+Spec: `docs/specs/2026-08-24-aba-efeitos-de-pagina-design.md`. Primeiro efeito: **neve caindo**.
+
+**De onde veio.** O dono trouxe um efeito de neve em CSS publicado por um desenvolvedor. Dava para usar — mas não como estava, e a medição virou o desenho da aba. O original é **SCSS** (precisa ser compilado; compilado dá **103 KB** e 250 `@keyframes`), anima **`left`/`top`** (que refazem o **layout** a cada quadro: medido com CPU 6x, **1,14 s de estilo+layout em 3 s, 38 % da linha principal**, contra **0,00 s** animando `transform` com os mesmos 250 flocos), não tem **`pointer-events: none`** (a camada engole todos os cliques), não tem regra de movimento reduzido, e gasta uma animação por floco quando só a deriva lateral varia. As cinco correções estão embutidas na aba.
+
+**O que ela gera:** um `<style>` para a **Tag Head** e um **componente HTML** de `<div>`s. O caractere do floco entra como a fuga CSS `\2744`, então o bloco sai **100 % ASCII**.
+
+**Dois alcances, e o segundo não é enfeite.** "Página inteira" usa `position: fixed`; "dentro de um bloco" usa `position: relative` com altura. O segundo existe porque **`fixed` quebra** quando qualquer elemento acima na árvore tem `transform`, `filter` ou `perspective` — comum em temas, e impossível de saber daqui. A distância da queda muda junto: `112vh` na página, **pixels** no bloco — percentagem em `translate3d` se refere ao tamanho do próprio floco, não ao do container.
+
+**A opacidade vale para a CAMADA, não para o floco** (pedido do dono). Os quadros já animam `opacity` para o floco surgir e sumir; um segundo controle no mesmo elemento brigaria com a animação. No container, ela multiplica o conjunto e a animação continua intacta.
+
+**Determinismo:** semente fixa, nunca `Math.random` — a mesma configuração precisa dar os mesmos bytes, e mudar a quantidade de 60 para 61 muda **uma** regra. O sorteio toma os **bits altos**: com os baixos, fracos num gerador linear, os flocos saíam em faixas horizontais visíveis. Medido.
+
+**Verificação.** As 17 saídas anteriores e as 9 cobranças **idênticas**; as duas divergências são as saídas novas, e são intencionais. O bloco entregue medido numa página: os dois alcances corretos, 60 flocos animando, **0,000 s** de estilo+layout em 3 s com CPU 6x, e o **clique atravessando** a camada.
+
+**Duas mudanças no arnês.** Ele passou a **pular aba que não existe na árvore** — sem isso, acrescentar uma aba quebrava a regressão inteira, porque o clique na referência lançava e nenhuma outra saída chegava a ser comparada. E a fotografia do alcance "bloco" passou a **rolar até o bloco** antes de medir: a primeira tentativa mostrou uma página sem neve e parecia defeito, quando era só o componente estar abaixo da dobra. Fotografia de tela única não prova ausência.
+
 ### A consolidação passa a aceitar N componentes na mesma página (24/08/2026)
 
 Spec: `docs/specs/2026-08-24-consolidacao-de-n-componentes-design.md`.
