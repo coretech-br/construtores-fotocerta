@@ -74,3 +74,17 @@ Enquanto a Mini loja funciona, nada aparece. No dia em que ela falhar, a aba de 
 Medido, numa árvore com o preparo da Mini loja lançando de propósito: **antes** da correção os botões de Efeitos morriam junto; **depois**, o "Gerar código" produz os 7,5 KB normalmente e a prévia de celular abre com 390 px de viewport, enquanto a barra vermelha acusa corretamente a Mini loja.
 
 A correção não muda um byte de saída nenhuma: as **19** saídas e as 9 cobranças saíram idênticas.
+
+## 8. O `will-change` saiu (25/08/2026)
+
+O dono relatou que a **prévia de celular não desenha no Safari do computador**. Ele mesmo delimitou o alcance, testando quatro cenários: no Chrome as duas prévias funcionam; no Safari a página publicada funciona no computador **e** no celular. Falha **só a prévia, só no modo Celular, só no Safari de computador** — nada que vai ao ar é afetado.
+
+Não foi possível reproduzir: medido em **Chromium e em WebKit** (o motor do Safari), o modo Celular desenha 50 flocos dentro da janela, com opacidade 1 e animando. A investigação foi encerrada a pedido do dono.
+
+O que sobrou foi uma mudança **defensável por mérito próprio**, e não um contorno: o bloco declarava `will-change: transform` em cada partícula. Isso força uma **camada de composição por elemento** — sessenta delas —, e é desnecessário: animação de `transform` já é promovida sozinha. O orçamento de camadas do Safari é mais curto que o do Chrome, e a prévia é a única situação em que o bloco roda num quadro de 390 px; é o formato do sintoma.
+
+**Medido antes de recomendar**, com a CPU freada em 6x, em janelas de 1000 px e de 390 px, com e sem o `will-change`: **0,000 s** de estilo+layout em 3 s nos quatro casos, e o mesmo número de flocos na tela. Tirar não custa nada, e economiza sessenta camadas no aparelho do cliente.
+
+**O limite, dito por inteiro:** isto **não está confirmado** como a correção do Safari do dono — nenhum dos dois motores disponíveis reproduziu o defeito. O que está provado é que não quebra nada. Quem confirma é ele, abrindo a aba no Safari. Se não resolver, a saída combinada é **avisar na tela**: prévia que mente é o que este projeto recusa, mas prévia que avisa que pode falhar não mente.
+
+A regressão apontou **uma** divergência, intencional: o `e-out1` encolheu exatamente **22 bytes** — o comprimento de `will-change:transform;`. As outras 18 saídas e as 9 cobranças, idênticas.

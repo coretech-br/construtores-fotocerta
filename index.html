@@ -3080,8 +3080,8 @@
    QUEM IMPEDE QUE ELE MINTA: scripts/conferir-versoes.sh, que recusa index.html
    alterado sem a versao mudar junto -- a mesma disciplina do fc-compartilhado.js,
    e pela mesma razao: carimbo que ninguem confere e o defeito de amanha. */
-var FC_VERSAO='2026-08-25a';
-var FC_PUBLICADO='2026-08-25 11:09';   /* America/Sao_Paulo -- escrito pelo carimbador */
+var FC_VERSAO='2026-08-25b';
+var FC_PUBLICADO='2026-08-25 11:38';   /* America/Sao_Paulo -- escrito pelo carimbador */
 (function(){
   var el=document.getElementById('fc-versao');
   if(!el) return;
@@ -12427,6 +12427,16 @@ function eCamada(cfg,classe,extra){
    translate3d se refere ao tamanho da PROPRIA particula, nao ao do container. */
 function eQueda(cfg){return (cfg.alcance!=='bloco')?'112vh':((cfg.altura+40)+'px');}
 
+/* SEM 'will-change: transform', DE PROPOSITO. Ele forca uma CAMADA DE COMPOSICAO por
+   elemento -- sessenta delas com sessenta flocos -- e nao e necessario: animacao de
+   'transform' ja e promovida sozinha pelos navegadores. Medido com a CPU freada em 6x, em
+   janelas de 1000px e de 390px: tirar nao muda o custo (0,000 s de estilo+layout em 3 s nos
+   quatro casos) nem o numero de flocos na tela. E ele era a suspeita da previa de celular
+   nao desenhar no Safari do computador, que e a unica situacao em que o bloco roda dentro de
+   um quadro estreito -- o orcamento de camadas do Safari e mais curto que o do Chrome, e e
+   num quadro pequeno que ele desiste de compor. Nao recolocar sem uma medicao que mostre
+   ganho.  --  fica de fora tambem na aurora, pela mesma razao. */
+
 /* ---------- neve e confete: a MESMA maquina ---------- */
 function eParticulas(cfg){
   var E=eEfeito(cfg.efeito),neve=(cfg.efeito==='neve');
@@ -12434,13 +12444,13 @@ function eParticulas(cfg){
   var css=eCamada(cfg,E.classe,'');
   if(neve){
     css+='.'+E.classe+' div{position:absolute;top:-8%;left:var(--l);font-size:var(--t);color:'+cfg.cor+';\n'+
-         '  will-change:transform;animation-name:var(--n);animation-duration:var(--d);animation-delay:var(--a);\n'+
+         '  animation-name:var(--n);animation-duration:var(--d);animation-delay:var(--a);\n'+
          '  animation-timing-function:linear;animation-iteration-count:infinite}\n';
     css+='.'+E.classe+' div:after{content:"\\2744"}\n';
   }else{
     css+='.'+E.classe+' div{position:absolute;top:-8%;left:var(--l);width:var(--t);height:var(--h);\n'+
          '  background:var(--c);border-radius:2px;\n'+
-         '  will-change:transform;animation-name:var(--n);animation-duration:var(--d);animation-delay:var(--a);\n'+
+         '  animation-name:var(--n);animation-duration:var(--d);animation-delay:var(--a);\n'+
          '  animation-timing-function:linear;animation-iteration-count:infinite}\n';
   }
   var queda=eQueda(cfg);
@@ -12479,7 +12489,7 @@ function eAurora(cfg){
   var ESC=[1,1.25,0.85],ONDE=[[-5,-15],[45,10],[15,45]];
   css+='.'+E.classe+' div{position:absolute;border-radius:50%;filter:blur('+eEscala(cfg.auBlur,cfg.cel)+');\n'+
        '  height:0;opacity:.5;\n'+
-       '  will-change:transform;animation-name:var(--n);animation-duration:var(--d);animation-delay:var(--a);\n'+
+       '  animation-name:var(--n);animation-duration:var(--d);animation-delay:var(--a);\n'+
        '  animation-timing-function:ease-in-out;animation-iteration-count:infinite;animation-direction:alternate}\n';
   for(i=0;i<3;i++){
     var ax=rnd(50)-25,ay=rnd(36)-18,lado=Math.round(cfg.auTam*ESC[i]);
