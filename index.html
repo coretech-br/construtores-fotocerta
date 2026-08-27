@@ -3100,8 +3100,8 @@
    QUEM IMPEDE QUE ELE MINTA: scripts/conferir-versoes.sh, que recusa index.html
    alterado sem a versao mudar junto -- a mesma disciplina do fc-compartilhado.js,
    e pela mesma razao: carimbo que ninguem confere e o defeito de amanha. */
-var FC_VERSAO='2026-08-25f';
-var FC_PUBLICADO='2026-08-25 15:31';   /* America/Sao_Paulo -- escrito pelo carimbador */
+var FC_VERSAO='2026-08-27a';
+var FC_PUBLICADO='2026-08-27 13:55';   /* America/Sao_Paulo -- escrito pelo carimbador */
 (function(){
   var el=document.getElementById('fc-versao');
   if(!el) return;
@@ -11176,12 +11176,36 @@ function uBloco(cfg){
     c+='if(total()<0.01){msg(TXT_TOTAL_ZERO,false);return actions.reject();}\n';
     if(usaSinal)c+='var rec=sinalRecusa();\nif(rec){msg(rec,false);return actions.reject();}\n';
     c+='return actions.resolve();\n},\n';
+    /* ===== O PEDIDO QUE CHEGA AO PAINEL DO PAYPAL (27/08/2026) =====
+       Antes daqui saiam valor, descricao e custom_id -- e o painel do PayPal mostrava a linha
+       generica "Pagamento" com a coluna "ID do produto" vazia. Agora vai um ITEM de verdade:
+       'name' preenche "Nome do produto" e 'sku' preenche "ID do produto".
+
+       UM ITEM SO, E NAO O CARRINHO ITEMIZADO. Aqui o valor cobrado NEM SEMPRE e a soma dos
+       produtos: tem sinal (cobra uma parte) e tem cupom (desconta). Itemizar de verdade
+       obrigaria a montar breakdown.discount e a fechar a conta ao centavo -- e a especificacao
+       do PayPal e taxativa: "If you specify amount.breakdown, the amount equals item_total
+       plus tax_total plus shipping...". Um centavo fora e o pedido NAO E CRIADO, e o cliente
+       fica sem meio de pagamento na hora de pagar. Com um item unico igual ao valor cobrado, a
+       conta fecha por construcao. O carrinho detalhado continua no resumo copiavel e no Pix.
+
+       O valor e calculado UMA vez, em v, e usado nos tres lugares: dois toFixed em separado
+       poderiam divergir num centavo e derrubar o pedido.
+
+       O invoice_id ficou de FORA: a especificacao diz que "invoice_id values are required to
+       be unique within each merchant account by default", e numa loja isso viraria recusa na
+       segunda compra com o mesmo codigo de pedido. */
     c+='createOrder:function(data,actions){\n';
+    c+='var v='+(usaSinal?'sinalAgora()':'total()')+'.toFixed(2);\n';
+    if(usaSinal)c+="var nm=(nomesSelecionados().join(' + ')+' (sinal - cod: '+CODIGO_PEDIDO+(cupomAtivo?(' cupom:'+cupomAtivo.codigo):'')+')').substring(0,127);\n";
+    else c+="var nm=(nomesSelecionados().join(' + ')+' (cod: '+CODIGO_PEDIDO+(cupomAtivo?(' cupom:'+cupomAtivo.codigo):'')+')').substring(0,127);\n";
+    c+='if(!nm)nm=CODIGO_PEDIDO;   /* name e obrigatorio no item: nunca pode sair vazio */\n';
+    c+='var it={name:nm,quantity:"1",unit_amount:{value:v,currency_code:MOEDA}};\n';
+    c+='if(CODIGO_PEDIDO)it.sku=CODIGO_PEDIDO;   /* sku vazio nao ajuda ninguem a conciliar */\n';
     c+='return actions.order.create({purchase_units:[{\n';
-    if(usaSinal)c+='amount:{value:sinalAgora().toFixed(2),currency_code:MOEDA},\n';
-    else c+='amount:{value:total().toFixed(2),currency_code:MOEDA},\n';
-    if(usaSinal)c+="description:(nomesSelecionados().join(' + ')+' (sinal - cod: '+CODIGO_PEDIDO+(cupomAtivo?(' cupom:'+cupomAtivo.codigo):'')+')').substring(0,127),\n";
-    else c+="description:(nomesSelecionados().join(' + ')+' (cod: '+CODIGO_PEDIDO+(cupomAtivo?(' cupom:'+cupomAtivo.codigo):'')+')').substring(0,127),\n";
+    c+='amount:{value:v,currency_code:MOEDA,breakdown:{item_total:{value:v,currency_code:MOEDA}}},\n';
+    c+='description:nm,\n';
+    c+='items:[it],\n';
     c+='custom_id:CODIGO_PEDIDO\n}]});\n},\n';
     c+='onApprove:function(data,actions){\n';
     c+='return actions.order.capture().then(function(){msg(TXT_SUCESSO,true);});\n},\n';
@@ -14393,7 +14417,7 @@ function pJs(cfg){
      PayPal, e nao precisa avisar ninguem. No fim da pagina, depois do PayPal, ele parecia o
      ultimo passo de um caminho unico. */
   j+='    pix(c,codigo'+(cfg.zap?',valor,desc,lido.txid':'')+');\n';
-  if(cfg.usapp)j+='    paypal(c,valor,desc);\n';
+  if(cfg.usapp)j+='    paypal(c,valor,desc,lido.txid);\n';
   j+='  }\n';
   /* Sem WhatsApp no bloco a secao do Pix nao precisa dos tres: o bloco entregue continua
      carregando so a maquinaria escolhida, como no resto da ferramenta. */
@@ -14444,7 +14468,7 @@ function pJs(cfg){
   j+='    document.head.appendChild(s);\n';
   j+='  }\n';
   if(cfg.usapp){
-    j+='  function paypal(c,valor,desc){\n';
+    j+='  function paypal(c,valor,desc,txid){\n';
     j+="    var modo=param('pp');\n";
     j+="    if(modo==='nao')return;\n";
     /* O separador entra DEPOIS da recusa acima: numa cobranca sem PayPal nao existe segunda
@@ -14482,11 +14506,48 @@ function pJs(cfg){
     j+='      if(!window.paypal){ppFora();return;}\n';
     j+='      window.paypal.Buttons({\n';
     j+='        style:{color:COR_BOTAO_PAYPAL,layout:"vertical"},\n';
+    /* ===== O PEDIDO QUE CHEGA AO PAINEL DO PAYPAL (27/08/2026) =====
+       Antes daqui saiam so o valor e a descricao, e o painel do PayPal mostrava a linha
+       generica "Pagamento" com o ID do produto vazio -- o dono nao tinha como conciliar um
+       pagamento com a cobranca que o gerou.
+
+       Agora vai um ITEM de verdade. Os campos e o porque de cada um, lidos da especificacao
+       OpenAPI do PayPal (checkout_orders_v2), e nao de memoria:
+         items[].name      obrigatorio, ate 127 -- e a coluna "Nome do produto".
+                           A descricao nunca chega vazia: o link e recusado sem ela.
+         items[].quantity  obrigatorio -- sempre "1"; esta pagina cobra um valor, nao itens.
+         items[].unit_amount  obrigatorio -- o proprio valor.
+         items[].sku       opcional, ate 127 -- e a coluna "ID do produto".
+         custom_id         ate 255 -- "Used to reconcile client transactions with PayPal
+                           transactions. Appears in transaction and settlement reports but is
+                           not visible to the payer." E exatamente o campo de conciliacao.
+
+       A ARMADILHA, e ela recusa o pedido inteiro: com items, o PayPal exige o breakdown, e a
+       especificacao e explicita -- "If you specify amount.breakdown, the amount equals
+       item_total plus tax_total plus shipping...". Sem frete nem imposto aqui, item_total tem
+       de ser IGUAL ao total. Por isso o valor e calculado UMA vez, na variavel v, e usado nos
+       tres lugares: dois numeros formatados em separado poderiam divergir num centavo e o
+       pedido nem seria criado.
+
+       O invoice_id ficou de FORA de proposito. A especificacao diz que ele "Appears in both
+       the payer's transaction history and the emails that the payer receives" -- mas tambem
+       que "invoice_id values are required to be unique within each merchant account by
+       default". Numa pagina de cobranca isso viraria recusa silenciosa na segunda vez que o
+       mesmo identificador fosse cobrado, e essa e uma decisao do dono, nao deste bloco. */
     j+='        createOrder:function(d,actions){\n';
-    j+='          return actions.order.create({purchase_units:[{\n';
-    j+='            amount:{value:valor.toFixed(2),currency_code:"BRL"},\n';
-    j+='            description:String(desc).substring(0,127)\n';
-    j+='          }]});\n';
+    j+='          var v=valor.toFixed(2);\n';
+    j+="          var ref=(txid&&txid!=='***')?String(txid).substring(0,127):'';\n";
+    j+='          var item={name:String(desc).substring(0,127),quantity:"1",\n';
+    j+='            unit_amount:{value:v,currency_code:"BRL"}};\n';
+    j+='          if(ref)item.sku=ref;\n';
+    j+='          var pu={\n';
+    j+='            amount:{value:v,currency_code:"BRL",\n';
+    j+='              breakdown:{item_total:{value:v,currency_code:"BRL"}}},\n';
+    j+='            description:String(desc).substring(0,127),\n';
+    j+='            items:[item]\n';
+    j+='          };\n';
+    j+='          if(ref)pu.custom_id=ref;\n';
+    j+='          return actions.order.create({purchase_units:[pu]});\n';
     j+='        },\n';
     j+='        onApprove:function(d,actions){\n';
     j+='          return actions.order.capture().then(function(){\n';
@@ -16549,12 +16610,36 @@ function mBlocoPagar(cfg,usaPP,usaPix,usaQtd,usaSinal,usaResumo,descpix,zap,usaC
     c+='if(total()<0.01){msg(TXT_TOTAL_ZERO,false);return actions.reject();}\n';
     if(usaSinal)c+='var rec=sinalRecusa();\nif(rec){msg(rec,false);return actions.reject();}\n';
     c+='return actions.resolve();\n},\n';
+    /* ===== O PEDIDO QUE CHEGA AO PAINEL DO PAYPAL (27/08/2026) =====
+       Antes daqui saiam valor, descricao e custom_id -- e o painel do PayPal mostrava a linha
+       generica "Pagamento" com a coluna "ID do produto" vazia. Agora vai um ITEM de verdade:
+       'name' preenche "Nome do produto" e 'sku' preenche "ID do produto".
+
+       UM ITEM SO, E NAO O CARRINHO ITEMIZADO. Aqui o valor cobrado NEM SEMPRE e a soma dos
+       produtos: tem sinal (cobra uma parte) e tem cupom (desconta). Itemizar de verdade
+       obrigaria a montar breakdown.discount e a fechar a conta ao centavo -- e a especificacao
+       do PayPal e taxativa: "If you specify amount.breakdown, the amount equals item_total
+       plus tax_total plus shipping...". Um centavo fora e o pedido NAO E CRIADO, e o cliente
+       fica sem meio de pagamento na hora de pagar. Com um item unico igual ao valor cobrado, a
+       conta fecha por construcao. O carrinho detalhado continua no resumo copiavel e no Pix.
+
+       O valor e calculado UMA vez, em v, e usado nos tres lugares: dois toFixed em separado
+       poderiam divergir num centavo e derrubar o pedido.
+
+       O invoice_id ficou de FORA: a especificacao diz que "invoice_id values are required to
+       be unique within each merchant account by default", e numa loja isso viraria recusa na
+       segunda compra com o mesmo codigo de pedido. */
     c+='createOrder:function(data,actions){\n';
+    c+='var v='+(usaSinal?'sinalAgora()':'total()')+'.toFixed(2);\n';
+    if(usaSinal)c+="var nm=(nomesSelecionados().join(' + ')+' (sinal - cod: '+CODIGO_PEDIDO+(cupomAtivo?(' cupom:'+cupomAtivo.codigo):'')+')').substring(0,127);\n";
+    else c+="var nm=(nomesSelecionados().join(' + ')+' (cod: '+CODIGO_PEDIDO+(cupomAtivo?(' cupom:'+cupomAtivo.codigo):'')+')').substring(0,127);\n";
+    c+='if(!nm)nm=CODIGO_PEDIDO;   /* name e obrigatorio no item: nunca pode sair vazio */\n';
+    c+='var it={name:nm,quantity:"1",unit_amount:{value:v,currency_code:MOEDA}};\n';
+    c+='if(CODIGO_PEDIDO)it.sku=CODIGO_PEDIDO;   /* sku vazio nao ajuda ninguem a conciliar */\n';
     c+='return actions.order.create({purchase_units:[{\n';
-    if(usaSinal)c+='amount:{value:sinalAgora().toFixed(2),currency_code:MOEDA},\n';
-    else c+='amount:{value:total().toFixed(2),currency_code:MOEDA},\n';
-    if(usaSinal)c+="description:(nomesSelecionados().join(' + ')+' (sinal - cod: '+CODIGO_PEDIDO+(cupomAtivo?(' cupom:'+cupomAtivo.codigo):'')+')').substring(0,127),\n";
-    else c+="description:(nomesSelecionados().join(' + ')+' (cod: '+CODIGO_PEDIDO+(cupomAtivo?(' cupom:'+cupomAtivo.codigo):'')+')').substring(0,127),\n";
+    c+='amount:{value:v,currency_code:MOEDA,breakdown:{item_total:{value:v,currency_code:MOEDA}}},\n';
+    c+='description:nm,\n';
+    c+='items:[it],\n';
     c+='custom_id:CODIGO_PEDIDO\n}]});\n},\n';
     /* Concluir o pedido esvazia o carrinho: e o unico momento em que a pagina SABE que a compra
        terminou. Sem isso o cliente voltaria a loja no dia seguinte com o pedido pago ainda na

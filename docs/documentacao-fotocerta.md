@@ -1008,6 +1008,24 @@ Spec: `docs/specs/2026-08-24-popup-fora-do-horario-design.md`. Alcance: aba **Ca
 
 **Verificação.** Primeira aplicação do molde versionado (`scripts/verificar/pagina.mjs`) a um segundo bloco, o que também o validou fora da aba onde nasceu: com relógio falso, o pop-up abre às 14h de segunda, **não** abre às 22h nem no domingo, e o botão continua lá. As outras três combinações (abrir mesmo assim, sem horário, modo clique) medidas do mesmo jeito. Regressão byte a byte intacta — inclusive o `l-out`, porque o padrão de fábrica tem o horário desligado.
 
+### O pedido que chega ao painel do PayPal (27/08/2026)
+
+Spec: `docs/specs/2026-08-27-pedido-do-paypal-com-item-design.md`. Alcance: os **três** geradores que falam com o PayPal — Link de cobrança, Checkout e Mini loja.
+
+**O que o dono viu.** No painel do PayPal, "Detalhes do pedido" mostrava a linha genérica *Pagamento* com o **ID do produto vazio**. Medido: os três blocos mandavam valor e descrição, e nenhum mandava `items`. E o identificador da aba de cobrança ia para **três** lugares — o código Pix, o texto da página e a mensagem do WhatsApp — e para o PayPal, nenhum; a ajuda do campo prometia "ajuda a conciliar no extrato" e para o PayPal não cumpria, sem avisar. *(O `*FC` na fatura do comprador é outra coisa: é o descritor do vendedor, vindo do nome da conta PayPal — o identificador nunca apareceria ali.)*
+
+**O que passou a ir**, com os campos lidos da **especificação OpenAPI** do PayPal e não de memória: `items[].name` (obrigatório, 127) preenche "Nome do produto", `items[].sku` (127) preenche "ID do produto", e `custom_id` (255) é, na letra da especificação, *"used to reconcile client transactions with PayPal transactions… not visible to the payer"*.
+
+**A armadilha, que recusa o pedido inteiro:** *"If you specify `amount.breakdown`, the amount equals `item_total` plus…"*. Com `items`, o `item_total` tem de bater ao **centavo**, senão o pedido **não é criado** e o cliente fica sem meio de pagamento. Por isso o valor é calculado **uma vez** e usado nos três lugares.
+
+**Um item só, e não o carrinho itemizado:** no Checkout e na Mini loja o valor cobrado nem sempre é a soma dos produtos — há **sinal** e **cupom**. Itemizar exigiria montar `breakdown.discount` e fechar a conta em todas as combinações, e o preço do erro é o pedido não nascer. Com um item igual ao valor cobrado, a conta fecha por construção; o detalhamento continua no resumo copiável e no Pix.
+
+**O `invoice_id` ficou de fora:** a especificação diz que ele aparece no histórico e nos e-mails do comprador, mas também que *"invoice_id values are required to be unique within each merchant account by default"* — o que viraria recusa na segunda cobrança com o mesmo identificador. Fica registrado como opção do dono.
+
+**Verificação.** O `createOrder` dos três blocos exercitado **sem tocar no PayPal** (o SDK é interceptado no `appendChild` e um `paypal.Buttons` de mentira chama o `createOrder` com um `create` que devolve o objeto — a técnica que a prévia do Checkout já usava), com carrinho de verdade: 8400,00 / 420,00 / 890,00, cada um com nome e ID preenchidos e a conta fechando. Regressão: 12 divergências, **todas** nos três geradores do PayPal, e **nenhum link mudou** — o selo continua fechando.
+
+**Dois erros registrados, os dois pegos por execução e não por leitura:** uma `var` que foi parar **dentro** do literal do `purchase_unit` (o bloco quebrava com `SyntaxError`), e um roteiro que **pulou** os dois blocos que não conseguiu gerar e imprimiu "OK" sobre nenhuma conferência — bloco ausente passou a ser **falha**.
+
 ### "Gerar todos os códigos" no painel consolidado (25/08/2026)
 
 Spec: `docs/specs/2026-08-25-gerar-todos-os-codigos-design.md`.
