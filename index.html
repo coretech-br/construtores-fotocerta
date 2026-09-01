@@ -3100,8 +3100,8 @@
    QUEM IMPEDE QUE ELE MINTA: scripts/conferir-versoes.sh, que recusa index.html
    alterado sem a versao mudar junto -- a mesma disciplina do fc-compartilhado.js,
    e pela mesma razao: carimbo que ninguem confere e o defeito de amanha. */
-var FC_VERSAO='2026-08-27a';
-var FC_PUBLICADO='2026-08-27 13:55';   /* America/Sao_Paulo -- escrito pelo carimbador */
+var FC_VERSAO='2026-09-01a';
+var FC_PUBLICADO='2026-09-01 20:59';   /* America/Sao_Paulo -- escrito pelo carimbador */
 (function(){
   var el=document.getElementById('fc-versao');
   if(!el) return;
@@ -3384,6 +3384,21 @@ FC_CARRINHO_SRC.cupomVigente=
   'if(!cp.validade)return true;\n'+
   "var lim=new Date(cp.validade+'T23:59:59');\n"+
   'return new Date()<=lim;\n}\n\n';
+
+/* A DATA DE VALIDADE ESCRITA PARA A TELA -- e por que ela NAO usa Date.
+   cupomVigente() acima precisa de Date, porque compara com o agora. Escrever a data nao
+   precisa, e usar Date aqui seria repetir um defeito que este projeto ja mediu: new
+   Date('2026-12-25') e meia-noite UTC, que no fuso de Brasilia ainda e dia 24 -- o cupom
+   apareceria vencendo um dia antes do que o dono cadastrou, todo dia, sem erro nenhum na
+   tela. Recortar por posicao le a data como ela foi escrita (AAAA-MM-DD) e nao tem fuso
+   para errar.
+   A conferencia do formato nao e paranoia: a lista CUPONS fica dentro do bloco publicado e
+   o dono pode edita-la la. Data fora do formato devolve vazio, e a linha simplesmente nao
+   aparece -- em vez de imprimir pedacos de um texto qualquer ao lado do desconto. */
+FC_CARRINHO_SRC.validadeBr=
+  'function validadeBr(v){\n'+
+  "if(typeof v!=='string'||!/^\\d{4}-\\d{2}-\\d{2}$/.test(v))return '';\n"+
+  "return v.slice(8,10)+'/'+v.slice(5,7)+'/'+v.slice(2,4);\n}\n\n";
 /* ARREDONDAMENTO EM CENTAVOS, NUM LUGAR SO -- e por que ele existe.
    O desconto percentual produz centavo quebrado (600,00 com 5% => 570,00; 10,50 com 5% =>
    9,975), e ate esta correcao o total saia com essa terceira casa intacta. Dai para baixo
@@ -10707,6 +10722,8 @@ function uBloco(cfg){
   c+='.fcuni .fcu-cupom-msg.erro{display:block;color:#c0392b}\n';
   c+='.fcuni .fcu-desconto{display:none;justify-content:space-between;gap:10px;padding:6px 0;font-size:14px;color:#1e7e34;font-weight:600}\n';
   c+='.fcuni .fcu-desconto.on{display:flex}\n';
+  c+='.fcuni .fcu-desconto-p{display:none;margin-left:6px;font-size:12px;font-weight:400;white-space:nowrap}\n';
+  c+='.fcuni .fcu-desconto-p.on{display:inline}\n';
   c+='.fcuni .fcu-total{display:flex;justify-content:space-between;padding:12px 0 4px;border-top:2px solid var(--fcu-destaque,#075E54);font-size:17px;font-weight:700;color:var(--fcu-destaque,#075E54);margin-top:10px}\n';
   if(usaSinal){
     c+='.fcuni .fcu-sinal{display:flex;justify-content:space-between;gap:10px;padding:6px 0 0;font-size:16px;font-weight:700;color:var(--fcu-destaque,#075E54)}\n';
@@ -10845,7 +10862,8 @@ function uBloco(cfg){
   c+="var TXT_CUPOM_OK='Cupom aplicado!';\n";
   c+="var TXT_CUPOM_INVALIDO='Cupom invalido.';\n";
   c+="var TXT_CUPOM_EXPIRADO='Cupom expirado.';\n";
-  c+="var TXT_DESCONTO='Desconto';\n\n";
+  c+="var TXT_DESCONTO='Desconto';\n";
+  c+="var TXT_CUPOM_VALIDADE='Valido ate:';   /* precede a data, na propria linha do desconto; so aparece se o cupom tiver validade */\n\n";
 
   c+='/* ============================================================\n   Daqui para baixo nao precisa mexer\n   ============================================================ */\n\n';
   c+=fcMoedaFmtGer(false);
@@ -10875,7 +10893,10 @@ function uBloco(cfg){
   c+="var h='<div class=\"fcu-titulo\"></div>';\n";
   c+="h+='<p class=\"fcu-rotulo fcu-prods-t\"></p><div class=\"fcu-prods-l\"></div>';\n";
   c+="h+='<div class=\"fcu-cupom\"><p class=\"fcu-rotulo fcu-cupom-t\"></p><div class=\"fcu-cupom-l\"><input type=\"text\"><button type=\"button\"></button></div><div class=\"fcu-cupom-msg\"></div></div>';\n";
-  c+="h+='<div class=\"fcu-desconto\"><span class=\"fcu-desconto-t\"></span><span class=\"fcu-desconto-v\"></span></div>';\n";
+  /* A linha do desconto tem DOIS filhos, nao tres: o rotulo e a validade vivem juntos na
+     celula da esquerda. Com tres filhos o justify-content:space-between espalharia a
+     validade para o meio da linha, longe do cupom a que ela se refere. */
+  c+="h+='<div class=\"fcu-desconto\"><span class=\"fcu-desconto-e\"><span class=\"fcu-desconto-t\"></span><span class=\"fcu-desconto-p\"></span></span><span class=\"fcu-desconto-v\"></span></div>';\n";
   c+="h+='<div class=\"fcu-total\"><span class=\"fcu-total-t\"></span><span class=\"fcu-total-v\"></span></div>';\n";
   if(usaSinal){
     c+="h+='<div class=\"fcu-sinal\"><span class=\"fcu-sinal-t\"></span><span class=\"fcu-sinal-v\"></span></div>';\n";
@@ -11044,6 +11065,14 @@ function uBloco(cfg){
   c+="l.className='fcu-desconto on';\n";
   c+="raiz.querySelector('.fcu-desconto-t').textContent=TXT_DESCONTO+' ('+cupomAtivo.codigo+')';\n";
   c+="raiz.querySelector('.fcu-desconto-v').textContent='- '+moedaFmt(descontoAtual());\n";
+  /* A validade sai do cupom ATIVO, nao de uma configuracao do bloco: quem tem prazo mostra,
+     quem nao tem some. Por isso ela e emitida sempre que o bloco tem cupons -- amarra-la a
+     "algum cupom tem data no momento de gerar" repetiria o erro que ja custou uma rodada
+     nesta ferramenta (o desconto do Pix que so entrava no bloco se estivesse ligado na hora
+     de gerar), porque a lista CUPONS e editavel dentro do bloco publicado. */
+  c+="var p=raiz.querySelector('.fcu-desconto-p'),dv=validadeBr(cupomAtivo.validade);\n";
+  c+="p.textContent=dv?TXT_CUPOM_VALIDADE+' '+dv:'';\n";
+  c+="p.className=dv?'fcu-desconto-p on':'fcu-desconto-p';\n";
   c+="}else{l.className='fcu-desconto';}\n}\n\n";
   if(usaPix){
     c+='function esconderPix(){\n';
@@ -11086,6 +11115,7 @@ function uBloco(cfg){
   c+="var m=raiz.querySelector('.fcu-cupom-msg');\n";
   c+="m.textContent=t;m.className='fcu-cupom-msg'+(t?(ok?' ok':' erro'):'');\n}\n\n";
   c+=FC_CARRINHO_SRC.cupomVigente;
+  c+=FC_CARRINHO_SRC.validadeBr;
   c+='function aplicarCupom(){\n';
   c+="var v=raiz.querySelector('.fcu-cupom-l input').value.trim();\n";
   c+="if(!v){cupomAtivo=null;msgCupom('',true);atualizar();return;}\n";
@@ -15809,6 +15839,8 @@ function mBloco(cfg){
     c+='.fcmloja .fcm-cupom-msg.erro{color:#c0392b}\n';
     c+='.fcmloja .fcm-desconto{display:none;justify-content:space-between;font-size:13px;color:#1e7e34;margin-top:8px}\n';
     c+='.fcmloja .fcm-desconto.on{display:flex}\n';
+    c+='.fcmloja .fcm-desconto-p{display:none;margin-left:6px;font-size:11px;white-space:nowrap}\n';
+    c+='.fcmloja .fcm-desconto-p.on{display:inline}\n';
   }
   c+='.fcmloja .fcm-total{display:flex;justify-content:space-between;align-items:baseline;font-size:16px;font-weight:700;color:var(--fcm-destaque,#0F3A30);border-top:2px solid var(--fcm-destaque,#0F3A30);margin-top:10px;padding-top:9px}\n';
   if(usaSinal){
@@ -16034,6 +16066,7 @@ function mBlocoJs(cfg,prods,cps,cats,client,cod){
     c+="var TXT_CUPOM_INVALIDO='Cupom invalido.';\n";
     c+="var TXT_CUPOM_EXPIRADO='Cupom expirado.';\n";
     c+="var TXT_DESCONTO='Desconto';\n";
+    c+="var TXT_CUPOM_VALIDADE='Valido ate:';   /* precede a data, na propria linha do desconto; so aparece se o cupom tiver validade */\n";
   }
   /* Os limites da pagina sao TEXTO DA PAGINA, nao comentario: eles ficam a vista do cliente e
      do dono no rodape do carrinho. Escritos como sao -- prometer menos e o unico jeito de o
@@ -16098,7 +16131,9 @@ function mBlocoRuntime(cfg,usaPP,usaPix,usaQtd,usaSinal,usaResumo,descpix,zap,us
   c+="h+='<div class=\"fcm-itens\"></div><p class=\"fcm-cesta-vazia\"></p>';\n";
   if(usaCupom){
     c+="h+='<div class=\"fcm-cupom\"><p class=\"fcm-rotulo fcm-cupom-t\"></p><div class=\"fcm-cupom-l\"><input type=\"text\"><button type=\"button\"></button></div><div class=\"fcm-cupom-msg\"></div></div>';\n";
-    c+="h+='<div class=\"fcm-desconto\"><span class=\"fcm-desconto-t\"></span><span class=\"fcm-desconto-v\"></span></div>';\n";
+    /* Dois filhos, pelo mesmo motivo do Checkout: a validade pertence ao rotulo do cupom,
+       e um terceiro filho seria espalhado pelo space-between. */
+    c+="h+='<div class=\"fcm-desconto\"><span class=\"fcm-desconto-e\"><span class=\"fcm-desconto-t\"></span><span class=\"fcm-desconto-p\"></span></span><span class=\"fcm-desconto-v\"></span></div>';\n";
   }
   c+="h+='<div class=\"fcm-total\"><span class=\"fcm-total-t\"></span><span class=\"fcm-total-v\"></span></div>';\n";
   if(usaSinal){
@@ -16502,6 +16537,9 @@ function mBlocoPagar(cfg,usaPP,usaPix,usaQtd,usaSinal,usaResumo,descpix,zap,usaC
     c+="l.className='fcm-desconto on';\n";
     c+="raiz.querySelector('.fcm-desconto-t').textContent=TXT_DESCONTO+' ('+cupomAtivo.codigo+')';\n";
     c+="raiz.querySelector('.fcm-desconto-v').textContent='- '+moedaFmt(descontoAtual());\n";
+    c+="var p=raiz.querySelector('.fcm-desconto-p'),dv=validadeBr(cupomAtivo.validade);\n";
+    c+="p.textContent=dv?TXT_CUPOM_VALIDADE+' '+dv:'';\n";
+    c+="p.className=dv?'fcm-desconto-p on':'fcm-desconto-p';\n";
     c+="}else{l.className='fcm-desconto';}\n}\n\n";
   }
   if(usaPix){
@@ -16531,6 +16569,7 @@ function mBlocoPagar(cfg,usaPP,usaPix,usaQtd,usaSinal,usaResumo,descpix,zap,usaC
   c+='}\n\n';
   if(usaCupom){
     c+=FC_CARRINHO_SRC.cupomVigente;
+    c+=FC_CARRINHO_SRC.validadeBr;
     c+='function msgCupom(t,ok){\n';
     c+="var m=raiz.querySelector('.fcm-cupom-msg');\n";
     c+="m.textContent=t;m.className='fcm-cupom-msg'+(t?(ok?' ok':' erro'):'');\n}\n\n";
