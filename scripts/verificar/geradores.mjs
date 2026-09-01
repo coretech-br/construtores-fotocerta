@@ -75,6 +75,7 @@ async function conteudo(pg){
   await set(pg,'u-pnome','Ensaio de Natal'); await set(pg,'u-pdesc','30 minutos, 10 fotos tratadas');
   await set(pg,'u-ppreco','420'); await clicar(pg,'u-prod-salvar');
   await set(pg,'u-pnome','Foto extra'); await set(pg,'u-ppreco','35'); await clicar(pg,'u-prod-salvar');
+  await cupons(pg,'u');
   await clicar(pg,'aba-cnt'); await set(pg,'c-cod','NATAL26');
   await clicar(pg,'aba-loja');
   await set(pg,'m-pnome','Album 30x30'); await set(pg,'m-pdesc','Capa dura, 20 paginas');
@@ -82,6 +83,24 @@ async function conteudo(pg){
   await set(pg,'m-pimg','https://storage.alboom.ninja/album-30x30.jpg'); await clicar(pg,'m-prod-salvar');
   await set(pg,'m-pnome','Moldura'); await set(pg,'m-ppreco','120'); await set(pg,'m-pcat','Molduras');
   await set(pg,'m-pimg','https://storage.alboom.ninja/moldura.jpg'); await clicar(pg,'m-prod-salvar');
+  await cupons(pg,'m');
+}
+
+/* OS CUPONS ENTRAM NO CENARIO, e nao por capricho. Na Mini loja o campo de cupom so existe
+   quando ha cupom cadastrado (usaCupom = cfg.cps.length > 0); sem esta chamada, TODO o
+   caminho do cupom da loja ficava fora da fotografia -- e ficou, ate 01/09/2026, quando uma
+   mudanca na linha do desconto passou pela regressao sem a loja ser exercitada. E a mesma
+   armadilha ja registrada aqui para t-out4/t-out5: saida que so aparece as vezes e onde o
+   defeito se esconde. Dois cupons de proposito: um COM prazo e um SEM, porque a linha do
+   desconto se comporta diferente nos dois casos. */
+async function cupons(pg, pref){
+  for(const [cod, valor, val] of [['NATAL10','10','2027-12-25'],['SEMPRE','5','']]){
+    await set(pg, pref+'-cp-cod', cod);
+    await radio(pg, pref+'-cp-tipo', 'pct_total');
+    await set(pg, pref+'-cp-valor', valor);
+    await set(pg, pref+'-cp-val', val);
+    await clicar(pg, pref+'-cp-add');
+  }
 }
 async function cobranca(pg,c){
   await set(pg,'p-url', c.url ?? 'https://fotocerta.com.br/pagar');
