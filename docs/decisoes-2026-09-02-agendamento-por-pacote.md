@@ -27,6 +27,7 @@ Plano: `docs/superpowers/plans/2026-09-02-agendamento-por-pacote.md`
 9. [A corrida da mensagem atrasada do iframe anterior](#9)
 10. [`previa.html` e o cache: declarado como não-problema, com a razão](#10)
 11. [O caminho B virou interruptor — e o defeito era do meu plano](#11)
+12. [O identificador dizia a hora em UTC — e a data errada em metade das noites](#12)
 
 ---
 
@@ -213,5 +214,27 @@ Isso mantém a rede de segurança que o caminho B queria dar, **e** paga por ela
 **A prova, que agora existe.** Um roteiro forja os sinais do TidyCal (dá para fazer: `MessageEvent` aceita `origin` no construtor) e exercita a máquina de estados inteira — **6 verificações, 6 ok**: altura natural ao abrir; sinal **dentro** da carência de 800 ms ignorado (a defesa da corrida); sinal fora da carência expande para 2.350 px; sinal de fechamento volta ao natural; sinal de outra origem ignorado; e um iframe só, antes e depois de trocar de pacote.
 
 **Custo de desfazer:** baixo.
+
+---
+
+<a id="12"></a>
+## 12. O identificador dizia a hora em UTC — e a data errada em metade das noites
+
+**Como apareceu.** Ao reler o payload Pix com leitor próprio (a prova que reservei para mim), li o identificador gerado: `FCENSAIO2H` + `20261212` + **`1700`**. O agendamento do teste era às **14h** — `hora=14:00`, `quando=2026-12-12T14:00:00-03:00`. O identificador estava usando a hora em **UTC**.
+
+**Por que isso não é detalhe.** O propósito de pôr dia e hora no identificador, decidido pelo dono, é um só: *"no extrato do banco você lê de qual agendamento é o dinheiro sem abrir mais nada"*. Um identificador que diz uma hora que ele nunca viu no TidyCal não serve para isso — serve para confundir.
+
+E o defeito piora à noite: **todo agendamento a partir das 21h de Brasília vira o dia seguinte em UTC**. `12/12 às 22h` sairia como `20261213`. Não é hora errada; é **data errada**, na chave que ele usaria para achar o agendamento.
+
+**As opções.**
+
+- **(a) Converter para o horário de Brasília** a partir de `quando`, aplicando o deslocamento fixo de −3 h sobre o instante — a mesma técnica que `prazoFim` já usa em `fc-compartilhado.js`. Correto, mas depende de `quando` ser legível e reintroduz aritmética de fuso onde ela pode errar.
+- **(b) Usar `data` e `hora` como chegaram**, limpando o que não é letra nem número. São exatamente as strings que o TidyCal mostra — as mesmas que o dono lê no painel dele. **Zero conversão, zero fuso, zero parsing.**
+
+**Decidi (b).** É mais simples e mais correto ao mesmo tempo, o que é raro. O identificador passa a dizer literalmente o que o dono vê. `quando` continua sendo usado para o **limite do prazo** (Tarefa 9), que é onde ele realmente precisa virar instante.
+
+Se `data` e `hora` não vierem, vale o sufixo aleatório — a regra que já estava decidida: **melhor um código que não diz o dia do que um que diz o dia errado.** Era exatamente esse o defeito, e ele estava acontecendo com a data *presente*.
+
+**Custo de desfazer:** baixo, e a correção fica pendente até a Tarefa 9 devolver o arquivo — outro agente está editando `aBlocoObrigado` neste momento.
 
 ---
