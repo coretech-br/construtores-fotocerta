@@ -40,7 +40,7 @@ Entregue em 25/08/2026: o **formato da data da página de obrigado** virou selec
 
 Entregue em 24/08/2026, na mesma aba: a **prévia de celular**, a **proporção do tamanho no celular** (pedido do dono depois de publicar a neve) e mais **três efeitos** — confete caindo, fundo animado (aurora) e luzes piscando. Spec: `docs/specs/2026-08-24-efeitos-proporcao-e-tres-efeitos-design.md`.
 
-Entregue em 01/09/2026: a **validade do cupom na linha do desconto** (`docs/specs/2026-09-01-validade-do-cupom-na-linha-do-desconto-design.md`) — nos dois construtores que têm cupom, Checkout e Mini loja. Cupom com prazo mostra `Valido ate: dd/mm/aa` ao lado do rótulo; cupom sem prazo não mostra nada. Junto veio um buraco fechado no arnês: o cenário da regressão não cadastrava cupom nenhum, então todo o caminho do cupom da Mini loja estava fora da fotografia byte a byte.
+Entregue em 01/09/2026: a **validade do cupom na linha do desconto** (`docs/specs/2026-09-01-validade-do-cupom-na-linha-do-desconto-design.md`) — nos dois construtores que têm cupom, Checkout e Mini loja. Cupom com prazo mostra `Válido até: dd/mm/aa` ao lado do rótulo; cupom sem prazo não mostra nada. Junto veio um buraco fechado no arnês: o cenário da regressão não cadastrava cupom nenhum, então todo o caminho do cupom da Mini loja estava fora da fotografia byte a byte.
 
 **Opção registrada, não implementada:** mandar tambem o `invoice_id` ao PayPal. Ele apareceria no histórico e nos e-mails do comprador, mas é **único por conta** — a segunda cobrança com o mesmo identificador seria recusada. Serve como trava contra pagamento em duplicidade; é decisão do dono.
 
@@ -75,6 +75,8 @@ O sétimo — atualizar o espelho da Tag Body da hospedeira — foi resolvido **
 Em 23/08/2026 o dono pediu que **todas** fossem feitas. Ficou uma, e ela é dele:
 
 1. **A Tag Head da landing de Natal pode ainda ter a regra antiga de movimento reduzido** (`[style], * { animation-duration: 0.01ms !important }`), que mata toda animação **daquela página** para quem pede menos movimento. Quem a substitui é o **código 1 da aba Bordas com efeito**: gerar com o efeito em uso e colar no lugar do bloco antigo. Não é urgente, e o alcance é de uma página só — não do site, porque **o Prosite não tem cabeçalho global**.
+
+2. **Os textos do Checkout e da Mini loja que o cliente lê continuam sem acento.** Em 01/09/2026 `Válido até:` entrou acentuado, a pedido do dono, e virou o único acentuado desses dois blocos. Na mesma tela ainda aparecem `Cupom invalido.`, `Copiar codigo Pix`, `Codigo copiado!`, `Ja paguei - avisar no WhatsApp`, `Esta foto nao carregou…`, `Seu carrinho esta vazio…`, `O sinal deste pedido e maior que o total…`, `Escolha ao menos um item: o pedido esta em zero.` e as mensagens de item que saiu do catálogo. O Manual do Prosite permite acento em texto visível (item 10), e o bloco do Link de cobrança já é o precedente. É uma rodada pequena, com regressão própria — os dois blocos mudam de propósito e nenhum outro pode mudar.
 
 ### Fechadas em 23/08/2026
 

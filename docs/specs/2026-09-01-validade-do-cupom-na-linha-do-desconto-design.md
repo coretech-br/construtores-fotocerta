@@ -18,7 +18,7 @@ O prazo já existia: o cadastro de cupom tem campo de validade desde a criação
 
 **A linha do desconto tem DOIS filhos, e continua tendo.** A linha é `display:flex` com `justify-content:space-between`: rótulo à esquerda, valor à direita. Pendurar a validade como **terceiro** filho a jogaria para o meio da linha, longe do cupom a que se refere e colada no valor. Então o rótulo e a validade passaram a viver juntos numa célula da esquerda (`.fcu-desconto-e` / `.fcm-desconto-e`), e a célula da direita não mudou.
 
-A validade sai menor e mais leve que o rótulo, com `white-space:nowrap` — em tela estreita ela desce inteira para a linha de baixo, em vez de partir "Valido" de "ate 25/12/27".
+A validade sai menor e mais leve que o rótulo, com `white-space:nowrap` — em tela estreita ela desce inteira para a linha de baixo, em vez de partir "Válido" de "até 25/12/27".
 
 **Continua tudo por `textContent`.** O código do cupom e a data nunca passam por `innerHTML`, então não há porta nova para texto hostil.
 
@@ -48,7 +48,7 @@ Em cada um dos dois geradores:
 
 1. **Duas regras de CSS** para o pedaço novo (`-p`), escondido por padrão.
 2. **Um filho a mais no HTML** da linha do desconto — a célula da esquerda (`-e`) embrulhando rótulo e validade.
-3. **`var TXT_CUPOM_VALIDADE='Valido ate:'`**, junto dos outros textos customizáveis do bloco. Sem acento, como todo o resto do bloco entregue (item 10 do manual do Prosite).
+3. **`var TXT_CUPOM_VALIDADE='Válido até:'`**, junto dos outros textos customizáveis do bloco.
 4. **Três linhas em `linhaDesconto()`**: lê a validade do cupom ativo, escreve, e liga ou desliga o pedaço.
 5. **`c+=FC_CARRINHO_SRC.validadeBr;`** ao lado de `cupomVigente`.
 
@@ -70,7 +70,7 @@ Em cada um dos dois geradores:
 | | Checkout | Mini loja |
 |---|---|---|
 | Cupom **com** prazo → rótulo | `Desconto (NATAL10)` | `Desconto (NATAL10)` |
-| Cupom **com** prazo → texto novo | `Valido ate: 25/12/27`, visível | `Valido ate: 25/12/27`, visível |
+| Cupom **com** prazo → texto novo | `Válido até: 25/12/27`, visível | `Válido até: 25/12/27`, visível |
 | Cupom **com** prazo → valor | `- R$ 42,00` (inalterado) | inalterado |
 | Cupom **sem** prazo | texto vazio e escondido | texto vazio e escondido |
 | Cupom **vencido** | `Cupom expirado.`, linha some | `Cupom expirado.`, linha some |
@@ -79,6 +79,16 @@ Em cada um dos dois geradores:
 `validadeBr` também foi executada isolada contra 10 entradas: as três datas válidas, vazio, `undefined`, `null`, `2026-12`, `abcd-ef-gh`, `2026-12-25T00:00` e `26-12-25`. As sete inválidas devolvem vazio.
 
 **Um defeito meu, pego pela regressão.** A primeira versão abria a string com aspas duplas e fechava com aspas simples. A ferramenta inteira parou de carregar, e a regressão o denunciou do jeito mais claro possível: **as 21 saídas em zero byte**, com `Invalid or unexpected token` no console. Vale o registro porque é o argumento a favor da regressão rodar antes de qualquer conferência visual — na tela, uma ferramenta que não carrega e uma ferramenta que carrega errado são parecidas demais.
+
+## 7b. O acento, e a inconsistência que ele deixou à mostra
+
+O texto saiu primeiro como `Valido ate:`, seguindo o estado em que os blocos do Checkout e da Mini loja estavam: **100 % ASCII**, decisão registrada em ago/2026 quando sete textos acentuados da Mini loja foram alinhados ao Checkout.
+
+O dono viu na tela e pediu o acento nas duas palavras. **Ele tem razão, e o Manual do Prosite está do lado dele:** o item 10 proíbe acento em **código**, não em texto que o cliente lê — e existe precedente na própria ferramenta, o bloco do **Link de cobrança**, que carrega texto visível acentuado desde ago/2026 e roda na `/pagar` publicada.
+
+O que isso revela é que o projeto andou nas **duas direções** em rodadas diferentes: o Link de cobrança ganhou acentos, a Mini loja os perdeu. O pedido do dono resolve o empate a favor do português correto no que o cliente lê.
+
+**A dívida que fica, declarada em vez de escondida:** `Válido até:` é agora o **único** texto acentuado que estes dois blocos emitem. Continuam sem acento, na mesma tela do cliente: `Cupom invalido.`, `Copiar codigo Pix`, `Codigo copiado!`, `Ja paguei - avisar no WhatsApp`, `Esta foto nao carregou…`, `Seu carrinho esta vazio…`, `O sinal deste pedido e maior que o total…`, `Escolha ao menos um item: o pedido esta em zero.` e as mensagens de item que saiu do catálogo. Corrigi-los é uma rodada própria, com regressão própria — não um efeito colateral desta.
 
 ## 8. Tempo
 

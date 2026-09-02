@@ -3100,8 +3100,8 @@
    QUEM IMPEDE QUE ELE MINTA: scripts/conferir-versoes.sh, que recusa index.html
    alterado sem a versao mudar junto -- a mesma disciplina do fc-compartilhado.js,
    e pela mesma razao: carimbo que ninguem confere e o defeito de amanha. */
-var FC_VERSAO='2026-09-01a';
-var FC_PUBLICADO='2026-09-01 20:59';   /* America/Sao_Paulo -- escrito pelo carimbador */
+var FC_VERSAO='2026-09-01b';
+var FC_PUBLICADO='2026-09-01 21:10';   /* America/Sao_Paulo -- escrito pelo carimbador */
 (function(){
   var el=document.getElementById('fc-versao');
   if(!el) return;
@@ -10863,7 +10863,12 @@ function uBloco(cfg){
   c+="var TXT_CUPOM_INVALIDO='Cupom invalido.';\n";
   c+="var TXT_CUPOM_EXPIRADO='Cupom expirado.';\n";
   c+="var TXT_DESCONTO='Desconto';\n";
-  c+="var TXT_CUPOM_VALIDADE='Valido ate:';   /* precede a data, na propria linha do desconto; so aparece se o cupom tiver validade */\n\n";
+  /* ACENTO DE PROPOSITO, e o unico texto acentuado que estes dois blocos emitem. O item 10 do
+     Manual do Prosite proibe acento em CODIGO, nao no texto que o cliente le -- o bloco do Link
+     de cobranca ja carrega texto visivel acentuado desde ago/2026. Pedido do dono em 01/09/2026,
+     depois de ver "Valido ate" na tela. Os vizinhos ("Cupom invalido.", "Copiar codigo Pix",
+     "Ja paguei...") continuam sem acento, e essa inconsistencia esta registrada como divida. */
+  c+="var TXT_CUPOM_VALIDADE='Válido até:';   /* precede a data, na propria linha do desconto; so aparece se o cupom tiver validade */\n\n";
 
   c+='/* ============================================================\n   Daqui para baixo nao precisa mexer\n   ============================================================ */\n\n';
   c+=fcMoedaFmtGer(false);
@@ -16066,7 +16071,12 @@ function mBlocoJs(cfg,prods,cps,cats,client,cod){
     c+="var TXT_CUPOM_INVALIDO='Cupom invalido.';\n";
     c+="var TXT_CUPOM_EXPIRADO='Cupom expirado.';\n";
     c+="var TXT_DESCONTO='Desconto';\n";
-    c+="var TXT_CUPOM_VALIDADE='Valido ate:';   /* precede a data, na propria linha do desconto; so aparece se o cupom tiver validade */\n";
+    /* ACENTO DE PROPOSITO, e o unico texto acentuado que estes dois blocos emitem. O item 10 do
+       Manual do Prosite proibe acento em CODIGO, nao no texto que o cliente le -- o bloco do Link
+       de cobranca ja carrega texto visivel acentuado desde ago/2026. Pedido do dono em 01/09/2026,
+       depois de ver "Valido ate" na tela. Os vizinhos ("Cupom invalido.", "Copiar codigo Pix",
+       "Ja paguei...") continuam sem acento, e essa inconsistencia esta registrada como divida. */
+    c+="var TXT_CUPOM_VALIDADE='Válido até:';   /* precede a data, na propria linha do desconto; so aparece se o cupom tiver validade */\n";
   }
   /* Os limites da pagina sao TEXTO DA PAGINA, nao comentario: eles ficam a vista do cliente e
      do dono no rodape do carrinho. Escritos como sao -- prometer menos e o unico jeito de o
