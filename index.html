@@ -3896,8 +3896,8 @@
    QUEM IMPEDE QUE ELE MINTA: scripts/conferir-versoes.sh, que recusa index.html
    alterado sem a versao mudar junto -- a mesma disciplina do fc-compartilhado.js,
    e pela mesma razao: carimbo que ninguem confere e o defeito de amanha. */
-var FC_VERSAO='2026-09-02d';
-var FC_PUBLICADO='2026-09-02 18:03';   /* America/Sao_Paulo -- escrito pelo carimbador */
+var FC_VERSAO='2026-09-02f';
+var FC_PUBLICADO='2026-09-02 18:29';   /* America/Sao_Paulo -- escrito pelo carimbador */
 (function(){
   var el=document.getElementById('fc-versao');
   if(!el) return;
@@ -20319,8 +20319,15 @@ function mBlocoVitrine(cfg,usaPP,usaPix,usaQtd,usaSinal,usaResumo,descpix,zap,us
   c+='var avisos=[];\n';
   c+='if(cestaDeOutra)avisos.push(TXT_OUTRA_LOJA);\n';
   c+='if(cestaEstragada)avisos.push(TXT_CESTA_ESTRAGADA);\n';
-  c+="if(sumidos)avisos.push(sumidos+' '+(sumidos===1?TXT_SUMIU:TXT_SUMIRAM));\n";
-  c+="if(sumidosOp)avisos.push(sumidosOp+' '+(sumidosOp===1?TXT_OP_SUMIU:TXT_OP_SUMIRAM));\n";
+  /* O {n} E SUBSTITUICAO, e nao concatenacao (decisao D-5 de 03/09/2026, e o que a ajuda
+     desta secao promete ao dono: "Onde voce escrever {n}, entra quantos itens sairam ... Sem
+     {n}, o numero nao aparece"). Ate 03/09 os quatro textos ganharam o marcador no padrao de
+     fabrica mas o consumidor continuou concatenando -- o cliente lia "2 {n} itens do seu
+     carrinho sairam...", com o marcador cru na tela. Achado pela passagem CONFIGURADA da
+     regressao (scripts/verificar/geradores.mjs), que e exatamente o buraco que ela existe
+     para tapar: a fotografia de fabrica so via a declaracao da variavel, nunca o uso. */
+  c+="if(sumidos)avisos.push((sumidos===1?TXT_SUMIU:TXT_SUMIRAM).replace(/\\{n\\}/g,sumidos));\n";
+  c+="if(sumidosOp)avisos.push((sumidosOp===1?TXT_OP_SUMIU:TXT_OP_SUMIRAM).replace(/\\{n\\}/g,sumidosOp));\n";
   c+='if(avisos.length){\n';
   c+="av.className='fcm-aviso-cesta on';\n";
   c+="av.textContent=avisos.join(' ');\n";

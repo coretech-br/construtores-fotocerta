@@ -9,8 +9,10 @@ material de apoio, roda no seu computador.
 | Arquivo | O que e | Quando usar |
 |---|---|---|
 | `lib.mjs` | Helpers comuns: achar o Playwright, subir um servidor estatico, abrir a ferramenta com armazenamento limpo, preencher campo/checkbox/radio disparando os mesmos eventos do teclado, ler saida, capturar alerta/erro de console. | Nunca sozinho -- e a base dos outros arquivos. Leia antes de escrever qualquer coisa nova neste diretorio. |
-| `geradores.mjs` | Fotografa o TEXTO que as oito abas produzem (hash de cada saida, link completo de cada cenario de cobranca) e grava num JSON. | Para provar que uma mudanca no gerador nao alterou um byte do que as outras abas produzem. Chamado por `regressao.sh`; raramente direto. |
+| `cenario.mjs` | O CENARIO: o que se preenche em cada uma das dez abas antes de gerar (identidade de teste, produtos, pacotes, familias, cupons, cobranca) e a tabela `TEXTOS`, com os 28 campos de texto da passagem configurada. Nao mede nada e nao abre navegador. | Ao acrescentar aba, campo ou texto que precise entrar na prova. E o unico lugar onde o cenario existe -- `geradores.mjs` e `textos-escape.mjs` leem os dois o mesmo. |
+| `geradores.mjs` | Fotografa o TEXTO que as dez abas produzem, em DUAS passagens (`fabrica` e `configurada`), mais o link completo de cada cenario de cobranca, e grava num JSON. | Para provar que uma mudanca no gerador nao alterou um byte do que as outras abas produzem -- e que o texto configurado pelo dono chega ao bloco. Chamado por `regressao.sh`; raramente direto. |
 | `regressao.sh` | Compara a fotografia da arvore de trabalho com a de uma referencia (`main` por padrao). | Ao fim de toda rodada que mexer em codigo gerado. `scripts/verificar/regressao.sh` ou `scripts/verificar/regressao.sh <ref>`. |
+| `textos-escape.mjs` | Pega os blocos gerados COM os textos de escape (aspas simples e duplas, barra invertida, acento e `</script`) e os EXECUTA numa pagina de verdade, uma por bloco. Checa que nenhum `</script` engoliu o resto do documento, que o bloco desenhou, que nao houve erro de console e que o texto do dono chegou inteiro a tela. | Ao mexer em qualquer escape (`esc`, `escJs`, `escJsD`, `escAttr`, `aTplJs`) ou em qualquer texto configuravel. `node scripts/verificar/textos-escape.mjs`. |
 | `pagina.mjs` | O MOLDE reutilizavel para pegar um bloco gerado e executa-lo de verdade numa pagina que imita uma do Prosite (servidor de uma rota, rede externa bloqueada, relogio falso opcional, `reducedMotion` opcional). Exporta `comBlocoNaPagina`, `gerarNaFerramenta`, `textoSemScripts`, `chk`, `resumo`. | Quando o teste precisa que o bloco RODE num DOM (anima? o botao aparece? o valor calculado bate?), nao so que o texto gerado seja igual a uma referencia. Cada teste concreto e um script pequeno que importa este modulo -- ver exemplo abaixo. |
 
 ## Como rodar
@@ -20,15 +22,44 @@ instalar se faltar (`npx playwright install chromium`, ou apontar um
 Chromium/Playwright ja existente com `FC_CHROME`/`FC_PLAYWRIGHT`).
 
 ```sh
-# regressao byte a byte contra a main
+# regressao byte a byte contra a main -- as DUAS passagens, num comando so
 scripts/verificar/regressao.sh
 
 # regressao contra outro commit/branch
 scripts/verificar/regressao.sh algum-commit
 
-# um teste que use o molde de pagina.mjs (exemplo, nao existe no repo)
+# os blocos com os textos de escape, executando de verdade
+node scripts/verificar/textos-escape.mjs
+
+# um teste novo que use o molde de pagina.mjs (exemplo, nao existe no repo)
 node scripts/verificar/teste-bordas.mjs
 ```
+
+## As duas passagens da fotografia
+
+Desde 03/09/2026 `geradores.mjs` roda o cenario DUAS vezes:
+
+- **fabrica** -- todos os textos no padrao. E a passagem historica, e prova o
+  invariante: mexer numa aba nao muda um byte do que as outras geram.
+- **configurada** -- 28 campos `*-txt-*` preenchidos, escolhidos por criterio:
+  um por aba (as dez, menos Bordas e Efeitos de pagina, que **nao tem nenhum**
+  campo de texto), todos os tipos de marcador (`{pct} {valor} {n} {data}
+  {codigo} {nome} {cod} {desc}`), os quatro caminhos de escape da ferramenta, e
+  o subtitulo da vitrine, que so e emitido quando preenchido.
+
+Ela existe porque a de fabrica **nao dizia nada sobre o caminho configurado**:
+com os textos no padrao, um texto que o gerador deixasse de emitir, ou que
+escapasse errado, passaria sem acusar nada. Na rodada que criou os 162 campos
+de texto, um marcador `{n}` chegou a ficar cru na tela do cliente -- a passagem
+de fabrica via a declaracao da variavel e passava; so a configurada alcanca o
+uso.
+
+**Cada texto configurado leva um selo (`ZxNN`), e o script cobra que ele apareca
+em alguma saida.** Selo que some e campo mal ligado, ou ramo que o cenario nao
+percorre -- e ramo nao percorrido so e aceito quando esta **declarado**, com o
+motivo, na quarta coluna da tabela `TEXTOS` em `cenario.mjs`. A declaracao
+tambem e conferida ao contrario: se o ramo declarado voltar a aparecer, o script
+avisa que a declaracao envelheceu.
 
 ## Exemplo minimo de uso do molde (`pagina.mjs`)
 
@@ -73,6 +104,14 @@ uma "cobranca" -- quem sabe e a funcao `medir` que cada teste escreve.
   para confirmar que o sanitizador nao mordeu nada.
 - **`geradores.mjs`/`regressao.sh` comparam TEXTO, nunca executam o bloco.**
   Para conferir comportamento (anima, calcula, reage a clique) o teste
-  precisa ser escrito com `pagina.mjs`.
+  precisa ser escrito com `pagina.mjs` -- e `textos-escape.mjs` e o exemplo
+  vivo disso para os textos configuraveis.
+- **O cenario nao percorre todo ramo da ferramenta.** Os quatro ramos que a
+  passagem configurada declara hoje como fora dele: o formato de data da pagina
+  de obrigado do TidyCal (o cenario mantem "como o TidyCal mandar"), o modo
+  SINAL do Checkout e da Mini loja, o botao de fechar da Contagem regressiva
+  (o padrao e "Nao ter") e o marcador `{prazo}` nas mensagens dela. Ligar
+  qualquer um deles mudaria a passagem de FABRICA, que e a que prova o
+  invariante -- entao a escolha e consciente, e esta escrita em `cenario.mjs`.
 - **Sem service worker, sem PWA de verdade.** O servidor de `pagina.mjs` e
   de uma rota so, so para hospedar o bloco sob teste.
