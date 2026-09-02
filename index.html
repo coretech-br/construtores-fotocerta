@@ -3100,8 +3100,8 @@
    QUEM IMPEDE QUE ELE MINTA: scripts/conferir-versoes.sh, que recusa index.html
    alterado sem a versao mudar junto -- a mesma disciplina do fc-compartilhado.js,
    e pela mesma razao: carimbo que ninguem confere e o defeito de amanha. */
-var FC_VERSAO='2026-09-01d';
-var FC_PUBLICADO='2026-09-01 23:30';   /* America/Sao_Paulo -- escrito pelo carimbador */
+var FC_VERSAO='2026-09-01e';
+var FC_PUBLICADO='2026-09-01 23:34';   /* America/Sao_Paulo -- escrito pelo carimbador */
 (function(){
   var el=document.getElementById('fc-versao');
   if(!el) return;
@@ -10837,6 +10837,13 @@ function uBloco(cfg){
   if(usaPP){
     c+="var TXT_SUCESSO='"+escJs(cfg.t5)+"';\n";
     c+="var TXT_ERRO='"+escJs(cfg.t6)+"';\n";
+  }
+  /* UMA FRASE SO PARA O PEDIDO ZERADO, e ela e emitida em usaPP OU usaPix. Ate 01/09/2026 o
+     caminho do PayPal recusava com TXT_TOTAL_ZERO (customizavel) e o do Pix com uma segunda
+     frase cravada no bloco -- mesma situacao, duas palavras diferentes, e so uma que o dono
+     conseguia trocar. Emitir so em usaPP faria o Checkout em "somente Pix" referenciar
+     variavel nao declarada, que e o defeito ja medido na Mini loja. */
+  if(usaPP||usaPix){
     c+="var TXT_TOTAL_ZERO='Escolha ao menos um item: o pedido está em zero.';\n";
   }
   if(usaPix){
@@ -11261,10 +11268,10 @@ function uBloco(cfg){
     if(usaSinal){
       /* com sinal, o valor do Pix e o sinal: um sinal fixo continuaria acima de 0.01 com o
          pedido vazio, entao quem manda na recusa e o TOTAL, nao o valor a cobrar. */
-      c+="if(total()<0.01){alert('O valor do pedido precisa ser maior que zero.');return;}\n";
+      c+='if(total()<0.01){alert(TXT_TOTAL_ZERO);return;}\n';
       c+='var rec=sinalRecusa();\nif(rec){alert(rec);return;}\n';
     }else{
-      c+="if(v<0.01){alert('O valor do pedido precisa ser maior que zero.');return;}\n";
+      c+='if(v<0.01){alert(TXT_TOTAL_ZERO);return;}\n';
     }
     c+='payloadAtual=montarPayload(v);\n';
     c+="var qr=raiz.querySelector('.fcu-qr');\n";
