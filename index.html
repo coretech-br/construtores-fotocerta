@@ -3509,6 +3509,66 @@ function fcMoedaFmtGer(soReal){
   return c;
 }
 
+/* ===== o pedido do PayPal no carrinho: fonte unica (Checkout e Mini loja) =====
+   Medido (decisao 8 do diario, revisao 03/09/2026): actions.order.create era escrito a mao em
+   TRES geradores -- Checkout, /pagar e Mini loja -- e nenhuma funcao compartilhada o emitia.
+   Lendo os tres byte a byte: Checkout e Mini loja emitiam o MESMO texto para o bloco inteiro de
+   instalacao do paypal.Buttons (SDK, style dos botoes, guarda de total zero no onClick, forma
+   do purchase_units, onApprove com capture(), onError), exceto em tres pontos -- o seletor de
+   render (.fcu-botoes / .fcm-botoes), um comentario que so o Checkout emitia (explicando a
+   guarda de total zero) e a chamada a cestaLimpar() que so a Mini loja faz depois de capturar
+   (ela tem carrinho persistente para esvaziar; o Checkout, carrinho de uma visita so, nao tem).
+   Esses tres pontos viram parametro; o resto sai identico ao que cada bloco ja emitia.
+
+   A /pagar NAO ENTRA nesta fonte, e a razao e medida, nao suposta: ela nao tem onClick (o valor
+   e fechado, sem cupom nem sinal, entao nao existe guarda de total zero para escrever); o style
+   dos botoes tem DUAS propriedades (color, layout), nao quatro (layout, shape, label, color); o
+   pedido usa nomes de variavel proprios (desc/txid/valor, nao CODIGO_PEDIDO/nm/MOEDA -- a moeda
+   la e literal "BRL", nunca variavel) e o erro do SDK cai numa funcao propria (ppFora) em vez
+   de msg(TXT_ERRO,false). Comparado linha a linha com o bloco abaixo, praticamente toda linha
+   da /pagar diverge em pelo menos um token -- forcar as tres a compartilhar pediria tantos
+   parametros quanto linhas, o que nao e extracao, e template. Mantida como quarta copia,
+   separada, no proprio gerador da /pagar. Precedente: a extracao parcial da Mini loja. */
+function fcPpBotoesSrc(prefixo,ppcor,usaSinal,comentZero,aoAprovarExtra){
+  var c='';
+  c+='/* ===== PayPal ===== */\n';
+  c+="var sdk=document.createElement('script');\n";
+  c+="sdk.src='https://www.paypal.com/sdk/js?client-id='+encodeURIComponent(PAYPAL_CLIENT_ID)+'&currency='+MOEDA+'&intent=capture&locale=pt_BR';\n";
+  c+='sdk.onload=function(){\n';
+  c+='if(!window.paypal){msg(TXT_ERRO,false);return;}\n';
+  c+='window.paypal.Buttons({\n';
+  c+="style:{layout:'vertical',shape:'rect',label:'pay',color:'"+ppcor+"'},  /* color: 'gold' | 'blue' | 'silver' | 'white' | 'black' */\n";
+  if(comentZero){
+    c+='/* Pedido zerado e barrado ANTES de abrir o PayPal, com mensagem propria. O caminho do\n';
+    c+='   Pix ja fazia isso; o do PayPal nao: com total zero a ordem saia com value "0.00", o\n';
+    c+='   PayPal recusava e o cliente via so a mensagem generica de erro do carrinho, sem\n';
+    c+='   nenhuma pista de que bastava marcar um item ou tirar o cupom. */\n';
+  }
+  c+='onClick:function(data,actions){\n';
+  c+='if(total()<0.01){msg(TXT_TOTAL_ZERO,false);return actions.reject();}\n';
+  if(usaSinal)c+='var rec=sinalRecusa();\nif(rec){msg(rec,false);return actions.reject();}\n';
+  c+='return actions.resolve();\n},\n';
+  c+='createOrder:function(data,actions){\n';
+  c+='var v='+(usaSinal?'sinalAgora()':'total()')+'.toFixed(2);\n';
+  if(usaSinal)c+="var nm=(nomesSelecionados().join(' + ')+' (sinal - cod: '+CODIGO_PEDIDO+(cupomAtivo?(' cupom:'+cupomAtivo.codigo):'')+')').substring(0,127);\n";
+  else c+="var nm=(nomesSelecionados().join(' + ')+' (cod: '+CODIGO_PEDIDO+(cupomAtivo?(' cupom:'+cupomAtivo.codigo):'')+')').substring(0,127);\n";
+  c+='if(!nm)nm=CODIGO_PEDIDO;   /* name e obrigatorio no item: nunca pode sair vazio */\n';
+  c+='var it={name:nm,quantity:"1",unit_amount:{value:v,currency_code:MOEDA}};\n';
+  c+='if(CODIGO_PEDIDO)it.sku=CODIGO_PEDIDO;   /* sku vazio nao ajuda ninguem a conciliar */\n';
+  c+='return actions.order.create({purchase_units:[{\n';
+  c+='amount:{value:v,currency_code:MOEDA,breakdown:{item_total:{value:v,currency_code:MOEDA}}},\n';
+  c+='description:nm,\n';
+  c+='items:[it],\n';
+  c+='custom_id:CODIGO_PEDIDO\n}]});\n},\n';
+  c+='onApprove:function(data,actions){\n';
+  c+='return actions.order.capture().then(function(){msg(TXT_SUCESSO,true);'+aoAprovarExtra+'});\n},\n';
+  c+='onError:function(){msg(TXT_ERRO,false);}\n';
+  c+="}).render(raiz.querySelector('."+prefixo+"-botoes'));\n};\n";
+  c+='sdk.onerror=function(){msg(TXT_ERRO,false);};\n';
+  c+='document.head.appendChild(sdk);\n\n';
+  return c;
+}
+
 /* ===== o motor de dinheiro do carrinho: fonte unica =====
    O que este bloco guarda e a CONTA -- cupom, sinal, desconto Pix e o seletor de quantidade --,
    escrita uma vez como TEXTO e emitida identica dentro de cada bloco entregue que precise dela.
@@ -11361,58 +11421,7 @@ function uBloco(cfg){
     c+='function msg(txt,ok){\n';
     c+="var m=raiz.querySelector('.fcu-msg');\n";
     c+="m.textContent=txt;m.className='fcu-msg '+(ok?'ok':'erro');\n}\n\n";
-    c+='/* ===== PayPal ===== */\n';
-    c+="var sdk=document.createElement('script');\n";
-    c+="sdk.src='https://www.paypal.com/sdk/js?client-id='+encodeURIComponent(PAYPAL_CLIENT_ID)+'&currency='+MOEDA+'&intent=capture&locale=pt_BR';\n";
-    c+='sdk.onload=function(){\n';
-    c+='if(!window.paypal){msg(TXT_ERRO,false);return;}\n';
-    c+='window.paypal.Buttons({\n';
-    c+="style:{layout:'vertical',shape:'rect',label:'pay',color:'"+ppcor+"'},  /* color: 'gold' | 'blue' | 'silver' | 'white' | 'black' */\n";
-    c+='/* Pedido zerado e barrado ANTES de abrir o PayPal, com mensagem propria. O caminho do\n';
-    c+='   Pix ja fazia isso; o do PayPal nao: com total zero a ordem saia com value "0.00", o\n';
-    c+='   PayPal recusava e o cliente via so a mensagem generica de erro do carrinho, sem\n';
-    c+='   nenhuma pista de que bastava marcar um item ou tirar o cupom. */\n';
-    c+='onClick:function(data,actions){\n';
-    c+='if(total()<0.01){msg(TXT_TOTAL_ZERO,false);return actions.reject();}\n';
-    if(usaSinal)c+='var rec=sinalRecusa();\nif(rec){msg(rec,false);return actions.reject();}\n';
-    c+='return actions.resolve();\n},\n';
-    /* ===== O PEDIDO QUE CHEGA AO PAINEL DO PAYPAL (27/08/2026) =====
-       Antes daqui saiam valor, descricao e custom_id -- e o painel do PayPal mostrava a linha
-       generica "Pagamento" com a coluna "ID do produto" vazia. Agora vai um ITEM de verdade:
-       'name' preenche "Nome do produto" e 'sku' preenche "ID do produto".
-
-       UM ITEM SO, E NAO O CARRINHO ITEMIZADO. Aqui o valor cobrado NEM SEMPRE e a soma dos
-       produtos: tem sinal (cobra uma parte) e tem cupom (desconta). Itemizar de verdade
-       obrigaria a montar breakdown.discount e a fechar a conta ao centavo -- e a especificacao
-       do PayPal e taxativa: "If you specify amount.breakdown, the amount equals item_total
-       plus tax_total plus shipping...". Um centavo fora e o pedido NAO E CRIADO, e o cliente
-       fica sem meio de pagamento na hora de pagar. Com um item unico igual ao valor cobrado, a
-       conta fecha por construcao. O carrinho detalhado continua no resumo copiavel e no Pix.
-
-       O valor e calculado UMA vez, em v, e usado nos tres lugares: dois toFixed em separado
-       poderiam divergir num centavo e derrubar o pedido.
-
-       O invoice_id ficou de FORA: a especificacao diz que "invoice_id values are required to
-       be unique within each merchant account by default", e numa loja isso viraria recusa na
-       segunda compra com o mesmo codigo de pedido. */
-    c+='createOrder:function(data,actions){\n';
-    c+='var v='+(usaSinal?'sinalAgora()':'total()')+'.toFixed(2);\n';
-    if(usaSinal)c+="var nm=(nomesSelecionados().join(' + ')+' (sinal - cod: '+CODIGO_PEDIDO+(cupomAtivo?(' cupom:'+cupomAtivo.codigo):'')+')').substring(0,127);\n";
-    else c+="var nm=(nomesSelecionados().join(' + ')+' (cod: '+CODIGO_PEDIDO+(cupomAtivo?(' cupom:'+cupomAtivo.codigo):'')+')').substring(0,127);\n";
-    c+='if(!nm)nm=CODIGO_PEDIDO;   /* name e obrigatorio no item: nunca pode sair vazio */\n';
-    c+='var it={name:nm,quantity:"1",unit_amount:{value:v,currency_code:MOEDA}};\n';
-    c+='if(CODIGO_PEDIDO)it.sku=CODIGO_PEDIDO;   /* sku vazio nao ajuda ninguem a conciliar */\n';
-    c+='return actions.order.create({purchase_units:[{\n';
-    c+='amount:{value:v,currency_code:MOEDA,breakdown:{item_total:{value:v,currency_code:MOEDA}}},\n';
-    c+='description:nm,\n';
-    c+='items:[it],\n';
-    c+='custom_id:CODIGO_PEDIDO\n}]});\n},\n';
-    c+='onApprove:function(data,actions){\n';
-    c+='return actions.order.capture().then(function(){msg(TXT_SUCESSO,true);});\n},\n';
-    c+='onError:function(){msg(TXT_ERRO,false);}\n';
-    c+="}).render(raiz.querySelector('.fcu-botoes'));\n};\n";
-    c+='sdk.onerror=function(){msg(TXT_ERRO,false);};\n';
-    c+='document.head.appendChild(sdk);\n\n';
+    c+=fcPpBotoesSrc('fcu',ppcor,usaSinal,true,'');
   }
   if(usaPix){
     c+='/* ===== Pix ===== */\n';
@@ -18028,57 +18037,7 @@ function mBlocoPagar(cfg,usaPP,usaPix,usaQtd,usaSinal,usaResumo,descpix,zap,usaC
     c+='function msg(txt,ok){\n';
     c+="var m=raiz.querySelector('.fcm-msg');\n";
     c+="m.textContent=txt;m.className='fcm-msg '+(ok?'ok':'erro');\n}\n\n";
-    c+='/* ===== PayPal ===== */\n';
-    c+="var sdk=document.createElement('script');\n";
-    c+="sdk.src='https://www.paypal.com/sdk/js?client-id='+encodeURIComponent(PAYPAL_CLIENT_ID)+'&currency='+MOEDA+'&intent=capture&locale=pt_BR';\n";
-    c+='sdk.onload=function(){\n';
-    c+='if(!window.paypal){msg(TXT_ERRO,false);return;}\n';
-    c+='window.paypal.Buttons({\n';
-    c+="style:{layout:'vertical',shape:'rect',label:'pay',color:'"+cfg.ppcor+"'},  /* color: 'gold' | 'blue' | 'silver' | 'white' | 'black' */\n";
-    c+='onClick:function(data,actions){\n';
-    c+='if(total()<0.01){msg(TXT_TOTAL_ZERO,false);return actions.reject();}\n';
-    if(usaSinal)c+='var rec=sinalRecusa();\nif(rec){msg(rec,false);return actions.reject();}\n';
-    c+='return actions.resolve();\n},\n';
-    /* ===== O PEDIDO QUE CHEGA AO PAINEL DO PAYPAL (27/08/2026) =====
-       Antes daqui saiam valor, descricao e custom_id -- e o painel do PayPal mostrava a linha
-       generica "Pagamento" com a coluna "ID do produto" vazia. Agora vai um ITEM de verdade:
-       'name' preenche "Nome do produto" e 'sku' preenche "ID do produto".
-
-       UM ITEM SO, E NAO O CARRINHO ITEMIZADO. Aqui o valor cobrado NEM SEMPRE e a soma dos
-       produtos: tem sinal (cobra uma parte) e tem cupom (desconta). Itemizar de verdade
-       obrigaria a montar breakdown.discount e a fechar a conta ao centavo -- e a especificacao
-       do PayPal e taxativa: "If you specify amount.breakdown, the amount equals item_total
-       plus tax_total plus shipping...". Um centavo fora e o pedido NAO E CRIADO, e o cliente
-       fica sem meio de pagamento na hora de pagar. Com um item unico igual ao valor cobrado, a
-       conta fecha por construcao. O carrinho detalhado continua no resumo copiavel e no Pix.
-
-       O valor e calculado UMA vez, em v, e usado nos tres lugares: dois toFixed em separado
-       poderiam divergir num centavo e derrubar o pedido.
-
-       O invoice_id ficou de FORA: a especificacao diz que "invoice_id values are required to
-       be unique within each merchant account by default", e numa loja isso viraria recusa na
-       segunda compra com o mesmo codigo de pedido. */
-    c+='createOrder:function(data,actions){\n';
-    c+='var v='+(usaSinal?'sinalAgora()':'total()')+'.toFixed(2);\n';
-    if(usaSinal)c+="var nm=(nomesSelecionados().join(' + ')+' (sinal - cod: '+CODIGO_PEDIDO+(cupomAtivo?(' cupom:'+cupomAtivo.codigo):'')+')').substring(0,127);\n";
-    else c+="var nm=(nomesSelecionados().join(' + ')+' (cod: '+CODIGO_PEDIDO+(cupomAtivo?(' cupom:'+cupomAtivo.codigo):'')+')').substring(0,127);\n";
-    c+='if(!nm)nm=CODIGO_PEDIDO;   /* name e obrigatorio no item: nunca pode sair vazio */\n';
-    c+='var it={name:nm,quantity:"1",unit_amount:{value:v,currency_code:MOEDA}};\n';
-    c+='if(CODIGO_PEDIDO)it.sku=CODIGO_PEDIDO;   /* sku vazio nao ajuda ninguem a conciliar */\n';
-    c+='return actions.order.create({purchase_units:[{\n';
-    c+='amount:{value:v,currency_code:MOEDA,breakdown:{item_total:{value:v,currency_code:MOEDA}}},\n';
-    c+='description:nm,\n';
-    c+='items:[it],\n';
-    c+='custom_id:CODIGO_PEDIDO\n}]});\n},\n';
-    /* Concluir o pedido esvazia o carrinho: e o unico momento em que a pagina SABE que a compra
-       terminou. Sem isso o cliente voltaria a loja no dia seguinte com o pedido pago ainda na
-       tela e pagaria duas vezes. */
-    c+='onApprove:function(data,actions){\n';
-    c+='return actions.order.capture().then(function(){msg(TXT_SUCESSO,true);cestaLimpar();});\n},\n';
-    c+='onError:function(){msg(TXT_ERRO,false);}\n';
-    c+="}).render(raiz.querySelector('.fcm-botoes'));\n};\n";
-    c+='sdk.onerror=function(){msg(TXT_ERRO,false);};\n';
-    c+='document.head.appendChild(sdk);\n\n';
+    c+=fcPpBotoesSrc('fcm',cfg.ppcor,usaSinal,false,'cestaLimpar();');
   }
   if(usaPix){
     c+='/* ===== Pix ===== */\n';
