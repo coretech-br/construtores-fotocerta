@@ -98,7 +98,14 @@ async function conteudo(pg){
      Manter a URL aqui, sem editar o valor, exercita esse caminho tolerante.
      O CAMPO E ACHADO EM TEMPO DE EXECUCAO (a-ppath ou, na REFERENCIA anterior a Task 4,
      a-plink): a mesma checagem de '#aba-pac' logo abaixo, so que por campo -- sem ela este
-     script quebra ao rodar contra uma arvore de referencia anterior a esta rodada. */
+     script quebra ao rodar contra uma arvore de referencia anterior a esta rodada.
+     O OPCIONAL COM QUANTIDADE (Task 5c) e O CUPOM (Task 4) entram aqui de proposito, e nao
+     por completude: sem eles os dois caminhos que a v2 criou -- a multiplicacao de
+     QUANTIDADE_MAXIMA no pagamento e a linha de desconto/validade na pagina de obrigado --
+     ficam FORA da fotografia byte a byte, a mesma armadilha que ja pegou o cupom da Mini loja
+     em 01/09 e a propria aba pac na v1. O opcional entra so no COMPLETO (o MINI fica sem
+     opcional nenhum, de proposito: exercita os dois caminhos -- pacote com e sem catalogo de
+     opcionais -- na mesma fotografia). */
   if(await pg.$('#aba-pac')){
     await clicar(pg,'aba-pac');
     await set(pg,'a-urlobrigado','https://www.fotocerta.com.br/obrigado');
@@ -111,8 +118,15 @@ async function conteudo(pg){
     ]){
       await set(pg,'a-pcod',p[0]); await set(pg,'a-pnome',p[1]); await set(pg,'a-pdur',p[2]);
       await set(pg,'a-ppreco',p[3]); await set(pg,'a-pinclui',p[4]); await set(pg,campoLink,p[5]);
+      if(p[0]==='COMPLETO' && await pg.$('#a-op-nome')){
+        await set(pg,'a-op-nome','Álbum extra');
+        await set(pg,'a-op-preco','80');
+        await set(pg,'a-op-qtd',true);
+        await clicar(pg,'a-op-add');
+      }
       await clicar(pg,'a-pac-salvar');
     }
+    if(await pg.$('#a-cp-cod')) await cupons(pg,'a');
   }
 }
 
