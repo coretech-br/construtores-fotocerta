@@ -384,6 +384,8 @@
   .u-pv-moldura iframe{border:0;display:block;background:#fff}
   .m-pv-moldura{overflow:hidden;max-width:100%;margin:0 auto;background:#fff;border:1px solid var(--linha);border-radius:8px}
   .m-pv-moldura iframe{border:0;display:block;background:#fff}
+  .a-pv-moldura{overflow:hidden;max-width:100%;margin:0 auto;background:#fff;border:1px solid var(--linha);border-radius:8px}
+  .a-pv-moldura iframe{border:0;display:block;background:#fff}
   /* aviso ambar de recurso que nao vale agora: nasceu no desconto Pix da aba Checkout e
      passou a servir tambem a Contagem regressiva (pulsar x alternar deslizando). Uma regra so,
      sem prefixo de aba, porque o visual e o mesmo nos dois lugares. */
@@ -3165,7 +3167,10 @@
     <button class="botao claro" id="a-atualizar">Atualizar prévia</button>
   </div>
   <div class="grade">
-    <div><div class="pv-area"><div id="a-pv-box"></div></div></div>
+    <div>
+      <div class="pv-area"><div id="a-pv-box"></div></div>
+      <p class="ajuda">A prévia roda o código gerado de verdade: escolher um pacote acende o passo 2 e troca de preço ao vivo. O que ainda difere da página publicada: o calendário do TidyCal não carrega aqui (é outro domínio, e a prévia não deve depender de rede) — no lugar dele aparece um retângulo cinza avisando "Aqui entra o calendário do TidyCal deste pacote."; e o quadro não carrega o CSS do tema do site.</p>
+    </div>
     <div>
       <div class="saida">
         <h3>1. Componente HTML da vitrine
@@ -4837,6 +4842,7 @@ function fciPreviaDaAberta(imediato){
   if(id==='cnt'){cPreview(!!imediato);return;}
   if(id==='cob'){pPreview(!!imediato);return;}
   if(id==='loja'){mPreview(!!imediato);return;}
+  if(id==='pac'){aPreview(!!imediato);return;}
 }
 /* A linha que torna a copia VISIVEL depois de feita: nao basta copiar, e preciso poder ver que
    as abas ja nao conferem com a paleta. E o mesmo desenho da marca de origem do preset geral --
@@ -13442,9 +13448,126 @@ function aGerar(){
   aPreview(true);
   fccMarcar('pac');
 }
-/* Esqueleto desta tarefa -- as Tarefas 3 e 4 do plano a preenchem (as saidas 1 e 3, e a previa
-   propriamente dita). Fica vazia de proposito, e nao indefinida, para o wiring nao lancar. */
-function aPreview(imediato){}
+/* ===== Tarefa 4: a previa da vitrine =====
+   Modelo literal: mPvShim/mPvDoc/mPvMontar/mPreview (17424+ antes desta tarefa). A previa
+   executa aBlocoVitrine de verdade, dentro de um iframe de mesma origem escrito por
+   document.write -- nao existe segunda implementacao da vitrine para divergir do bloco
+   entregue.
+
+   O QUE E SO DESTA PREVIA, e nao do bloco: o calendario do TidyCal nao pode carregar aqui --
+   outro dominio, e a previa nao deve depender de rede. O bloco cria um <iframe
+   class="fca-tidycal"> de verdade (para 'frame()' continuar achando o MESMO elemento ao trocar
+   de pacote, provando que a previa tambem nao vaza iframe), mas o 'src' dele e interceptado: em
+   vez de navegar para o TidyCal, o quadro mostra um retangulo com a frase combinada. A
+   diferenca fica DECLARADA no <p class="ajuda"> abaixo do quadro (ver o painel), nunca
+   escondida. */
+function aPvShim(cfg){
+  var placeholder='<div style="box-sizing:border-box;min-height:200px;display:flex;align-items:center;justify-content:center;text-align:center;padding:20px;background:#EDEAE1;color:#6b6456;font:600 13px -apple-system,BlinkMacSystemFont,\'Segoe UI\',Roboto,sans-serif">Aqui entra o calendário do TidyCal deste pacote.</div>';
+  var extras='';
+  extras+='  try{\n';
+  extras+="    var DOC_PV_CAL='"+escJs(placeholder)+"';\n";
+  extras+='    Object.defineProperty(HTMLIFrameElement.prototype,"src",{configurable:true,\n';
+  extras+='      set:function(v){this._fcPvSrc=v;this.setAttribute("srcdoc",DOC_PV_CAL);},\n';
+  extras+='      get:function(){return this._fcPvSrc||"";}\n';
+  extras+='    });\n';
+  extras+='  }catch(e){}\n';
+  return fcPvShim({pref:'a',
+    extras:extras,
+    abre:'o ',
+    fecha:' deste quadro. Este bloco nao deveria gravar nada em armazenamento, mas se a troca nao pegou pode estar tocando as chaves reais do navegador. O codigo gerado ao lado nao e afetado.'});
+}
+/* Sem conteudo abaixo nao da para ver onde o passo 2 termina nem rolar ate o calendario depois
+   de escolher um pacote. Blocos cinzentos e mudos, de proposito. */
+function aPvEnchimento(){
+  var s='',i;
+  for(i=0;i<4;i++)s+='<div class="a-pv-falso">conteudo da sua página</div>';
+  return s;
+}
+/* O que a previa mostra quando a configuracao e recusada: o quadro da RECUSA, com o motivo --
+   nunca a vitrine, e nunca o ultimo bloco valido rotulado como desatualizado. A previa executa
+   o codigo gerado; se o gerador se recusaria a produzir esta configuracao, mostrar uma vitrine
+   aqui seria mostrar um codigo que o botao Gerar codigo nao entrega. */
+function aPvRecusaDoc(motivo){
+  var h='';
+  h+='<!DOCTYPE html>\n<html lang="pt-br">\n<head>\n<meta charset="utf-8">\n';
+  h+='<meta name="viewport" content="width=device-width,initial-scale=1">\n';
+  h+='<sty'+'le>\n';
+  h+='html,body{margin:0;padding:0}\n';
+  h+='body{background:#FFFFFF;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Ubuntu,sans-serif;padding:20px}\n';
+  h+='.a-pv-recusa{border:2px solid #8C1D18;border-radius:12px;background:#FDF2F1;color:#5E1310;padding:16px 18px;max-width:560px;margin:0 auto}\n';
+  h+='.a-pv-recusa .t{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin:0 0 8px}\n';
+  h+='.a-pv-recusa .m{font-size:13px;line-height:1.55;margin:0}\n';
+  h+='.a-pv-recusa .r{font-size:12px;line-height:1.5;margin:12px 0 0;color:#7A3B36}\n';
+  h+='</sty'+'le>\n</head>\n<body>\n';
+  h+='<div class="a-pv-recusa"><p class="t">Configuracao recusada &mdash; nao ha vitrine para mostrar</p>';
+  h+='<p class="m">'+escHtml(motivo)+'</p>';
+  h+='<p class="r">A previa executa o codigo gerado, e o gerador se recusa a produzir esta configuracao. Mostrar uma vitrine aqui seria mostrar um codigo que o botao <b>Gerar codigo</b> nao entrega. Corrija o campo acima e a previa volta sozinha.</p>';
+  h+='</div>\n</body>\n</html>';
+  return h;
+}
+function aPvDoc(cfg){
+  var h='';
+  h+='<!DOCTYPE html>\n<html lang="pt-br">\n<head>\n<meta charset="utf-8">\n';
+  h+='<meta name="viewport" content="width=device-width,initial-scale=1">\n';
+  h+='<sty'+'le>\n';
+  h+='html,body{margin:0;padding:0}\n';
+  h+='body{background:#FFFFFF;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Ubuntu,sans-serif;padding:16px 12px}\n';
+  h+='.a-pv-falso{background:#EDEAE1;color:#A9A294;border-radius:6px;margin:10px 0;padding:0 14px;';
+  h+='height:70px;display:flex;align-items:center;font-size:12px;letter-spacing:.04em}\n';
+  h+='</sty'+'le>\n</head>\n<body>\n';
+  h+=aPvShim(cfg);
+  h+=aBlocoVitrine(cfg);
+  h+=aPvEnchimento();
+  h+='\n</body>\n</html>';
+  return h;
+}
+/* A vitrine nao tem corte de largura proprio para alternar desktop/celular na previa (o painel
+   desta aba nao ganhou os botoes de modo -- Tarefa 1 nao os pediu): uma largura logica so, e o
+   quadro escala para caber no espaco disponivel. A media query do bloco (640px) continua sendo
+   avaliada pelo proprio iframe. */
+var aPvTimer=null;
+var A_PV_LARGURA=1040, A_PV_ALTURA=760;
+function aPvMontar(){
+  var box=$('a-pv-box');if(!box)return;
+  var cfg=aCfg();
+  var recusa=aRecusa(cfg);
+  var disp=box.clientWidth||440;
+  var k=Math.min(1,disp/A_PV_LARGURA);
+  box.innerHTML='';
+  var moldura=document.createElement('div');
+  moldura.className='a-pv-moldura';
+  moldura.style.width=Math.round(A_PV_LARGURA*k)+'px';
+  moldura.style.height=A_PV_ALTURA+'px';
+  var ifr=document.createElement('iframe');
+  ifr.id='a-pv-frame';
+  ifr.setAttribute('title','Prévia da vitrine de pacotes');
+  ifr.style.width=A_PV_LARGURA+'px';
+  ifr.style.height=Math.round(A_PV_ALTURA/k)+'px';
+  ifr.style.transform='scale('+k+')';
+  ifr.style.transformOrigin='top left';
+  moldura.appendChild(ifr);
+  box.appendChild(moldura);
+  var doc=ifr.contentDocument||(ifr.contentWindow&&ifr.contentWindow.document);
+  if(!doc)return;
+  /* as MESMAS guardas da geracao: a previa nunca executa o que o gerador se negaria a produzir */
+  doc.open();doc.write(recusa?aPvRecusaDoc(recusa):aPvDoc(cfg));doc.close();
+}
+/* Remontar o iframe a cada tecla digitada custa caro e pisca. O debounce segura as mudancas de
+   campo; "Atualizar previa" e o botao de gerar passam direto. O timer e UNICO e sempre
+   cancelado antes de agendar outro. */
+function aPreview(imediato){
+  if(aPvTimer){clearTimeout(aPvTimer);aPvTimer=null;}
+  if(imediato){aPvMontar();return;}
+  aPvTimer=setTimeout(function(){aPvTimer=null;aPvMontar();},400);
+}
+document.addEventListener('input',function(e){
+  var al=(e.target.id&&e.target.id.indexOf('a-')===0)||(e.target.name&&e.target.name.indexOf('a-')===0);
+  if(al)aPreview();
+});
+document.addEventListener('change',function(e){
+  var al=(e.target.id&&e.target.id.indexOf('a-')===0)||(e.target.name&&e.target.name.indexOf('a-')===0);
+  if(al)aPreview();
+});
 
 /* ============================================================
    CONTAGEM REGRESSIVA
