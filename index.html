@@ -13378,8 +13378,22 @@ function aPacLimpar(){
   $('a-pac-salvar').textContent='Adicionar pacote';
   $('a-pac-cancelar').style.display='none';
 }
+/* Corrige o codigo do pacote A VISTA, no proprio campo -- molde de uCpCodAjustar (10527) e da
+   regra do projeto (CLAUDE.md: campo que alimenta a saida se corrige na TELA, em 'change'/
+   'blur', nunca so por dentro de quem le o campo). Antes a normalizacao (tira o que nao e
+   letra/numero/hifen, maiuscula) acontecia so DENTRO de aPacSalvar, sem devolver o valor
+   corrigido ao campo -- o operador digitava "mini 1h" e so descobria que virou "MINI1H"
+   olhando a lista depois de salvar. */
+function aPcodAjustar(){
+  var el=$('a-pcod');if(!el)return false;
+  var cod=String(el.value).trim().replace(/[^A-Za-z0-9-]/g,'').toUpperCase();
+  if(cod===el.value)return false;
+  el.value=cod;
+  return true;
+}
 function aPacSalvar(){
-  var cod=String($('a-pcod').value).trim().replace(/[^A-Za-z0-9-]/g,'').toUpperCase();
+  aPcodAjustar();
+  var cod=String($('a-pcod').value).trim();
   if(!cod){alert('Informe o código do pacote.');return;}
   var nome=$('a-pnome').value.trim();
   if(!nome){alert('Informe o nome do pacote.');return;}
@@ -19945,6 +19959,9 @@ prep('Agendamento por pacote','pac',function(){
      campo nunca exibir algo diferente do que aCfg vai usar. */
   if(fcAjustarTodos(A_NUMS))salvarEstado();
   aPacRender();aCpRender();aOpRender();
+  /* correcao a vista do codigo, em 'change'/'blur' -- nunca em 'input', que corrigiria a cada
+     tecla e impediria digitar. Mesmo padrao da chave Pix do painel Identidade. */
+  (function(){var el=$('a-pcod');if(el){el.addEventListener('change',aPcodAjustar);el.addEventListener('blur',aPcodAjustar);}})();
   liga('a-pac-salvar',aPacSalvar);
   liga('a-pac-cancelar',aPacLimpar);
   liga('a-ptestar',aPacTestar);
