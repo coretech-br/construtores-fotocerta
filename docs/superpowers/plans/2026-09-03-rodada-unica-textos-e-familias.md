@@ -1,0 +1,60 @@
+# Rodada unica: textos configuraveis + familias de pacotes
+
+Decidida em 03/09/2026 pelo dono. Ele juntou numa entrega so o que eu havia proposto
+partir em duas, e **autorizou a publicacao de antemao**: *"Quando terminar, pode publicar.
+Prefiro testar usando a pagina publicada. Somente eu uso entao nao tem problema subir."*
+
+Autorizacao vale para ESTA rodada. A seguinte volta ao padrao (push so com aprovacao).
+
+## As decisoes do dono, todas de 03/09/2026
+
+| # | Decisao |
+|---|---|
+| 1 | **Rodada unica** -- textos, aviso do Pix, subtitulo, previa de celular e familias juntos |
+| 2 | **Cartoes altos no computador, linhas compactas no celular** -- mantendo em ambos a organizacao de passos numerados e familias |
+| 3 | **A previa de celular sobe junto**, nao antes |
+| 4 | **Texto padrao do aviso do Pix**: "O Pix nao avisa a gente automaticamente. Assim que voce pagar, toque em 'Ja paguei' para eu conferir e confirmar." -- configuravel; ele altera se quiser |
+| 5 | **Familias: opcao A** -- a familia e o passo 1, tres passos numerados, familias definidas por ele |
+| 6 | **Subtitulo opcional com marcador `{pct}`** -- chave simples, coerente com `A_TXT_DEFS` |
+
+## Ordem de execucao, e por que esta
+
+As familias mudam a **forma dos dados** (`aPacotes` deixa de ser lista plana). Toda mudanca
+de texto feita ANTES delas continua valendo depois; o contrario nao e verdade. Entao os
+textos vem primeiro, e as familias por ultimo, com a regressao inteira entre as duas coisas.
+
+1. **Etapa 1 -- textos das abas `a` e `p`.** (em curso, subagente)
+2. **Etapa 2 -- textos do Checkout (`u`) e da Mini loja (`m`).** As duas maiores.
+3. **Etapa 3 -- textos das abas pequenas (`s`, `l`, `t`, `c`).** Quase tudo `aria-label`.
+4. **Aviso do Pix nas quatro abas de pagamento**, configuravel, texto do item 4 acima.
+   Hoje so a Mini loja avisa. Redacao padronizada, nao copiada: a `/pagar` cobra item
+   unico, as outras tres tem carrinho.
+5. **Subtitulo opcional da vitrine**, com `{pct}`. Em branco = bloco identico ao de hoje.
+6. **Previa de celular** -- mesclar `pac-previa-celular` (commit `01ef284`).
+7. **Familias.** A maior peca:
+   - cadastro de familias na aba (nome definido pelo dono);
+   - cada pacote aponta para uma familia;
+   - **migracao** de quem ja gravou sem familia -- mesmo padrao da migracao `link`->`path`
+     da v2: converter na hora, **nunca calado**, aviso uma vez ao fim;
+   - tres passos numerados; uma familia so = volta a dois passos, sem passo vazio;
+   - duas linhas de resumo com "trocar" (familia e pacote), textos configuraveis;
+   - **cartoes altos no computador, linhas compactas no celular** (`@media`, presa a faixa
+     declarada dentro da funcao de configuracao -- ver CLAUDE.md);
+   - titulo do passo novo entra junto de `a-t2`/`a-t3`.
+8. **Painel consolidado e presets** -- campo novo que nao aparece no painel ou nao entra no
+   "Exportar tudo" e campo que o dono perde sem perceber. `fccOrfas` roda a cada desenho.
+9. **Regressao byte a byte** contra `main`. Onde mudou, explicar; onde nao deveria e mudou,
+   e defeito e volta.
+10. **Conferir versoes + carimbo de publicacao.**
+11. **Documentacao** e riscar da `pendencias.md`.
+12. **Publicar** (autorizado de antemao, item acima).
+
+## O que NAO se corta
+
+A regressao byte a byte, o teste do bloco entregue executando de verdade, e a conferencia
+de versoes. O dono vai testar na pagina publicada -- o que torna a prova automatica mais
+importante, nao menos: ele nao vai reler o codigo, vai usar.
+
+## Avisos ao dono
+
+Pedido explicito dele: **avisar a cada etapa concluida.**

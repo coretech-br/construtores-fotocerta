@@ -106,3 +106,70 @@ Spec: `docs/specs/2026-08-23-dividas-pequenas-design.md`.
 - **O arnês que executa os blocos entregues virou molde versionado** (`scripts/verificar/pagina.mjs`), com as duas armadilhas que custaram caro registradas dentro dele.
 
 Junto delas, uma correção que não era dívida e sim **texto falso**: a ferramenta afirmava em onze lugares que existe um cabeçalho global do site, e um deles dava um caminho de menu inexistente. O Prosite só tem Tag Head e Tag Body **por página**.
+
+---
+
+## Combinado em 03/09/2026, ainda nao feito
+
+### 1. O aviso de que o Pix nao confirma sozinho, nas quatro abas
+
+Hoje **so a Mini loja** diz ao cliente que o Pix estatico nao avisa ninguem e que a
+conferencia e manual. O Checkout, a `/pagar` e a aba `pac` ficam calados: o cliente paga,
+a tela nao muda, e ele pode sair achando que o sistema ja sabe -- e cobrar do dono uma
+confirmacao que a pagina nunca prometeu.
+
+Decidido pelo dono em 03/09/2026, depois de a diferenca ser explicada: **as quatro abas
+recebem o mesmo tratamento**, e o texto e **configuravel**, como todos os outros. Entra na
+mesma mecanica de `A_TXT_DEFS` / equivalentes por aba.
+
+O ponto de partida e a frase que a Mini loja ja usa -- padronizada, nao copiada as cegas:
+o texto tem de servir para as quatro (a `/pagar` cobra item unico, as outras tres tem
+carrinho).
+
+### 2. Familias de pacotes na aba `pac` -- desenho escolhido: familia como passo 1
+
+O caso real do dono e **aluguel do estudio para fotografos parceiros**: pacotes por duracao
+(1h, 2h, 4h, diaria), separados em **dias uteis** e **fins de semana/feriados**, estes com
+preco maior. Oito pacotes numa vitrine so, no celular, e rolagem demais.
+
+Mockups apresentados em 03/09/2026 (quatro opcoes, celular, com a troca de pacote em foco):
+https://claude.ai/code/artifact/a83e1f73-53d9-4868-a8c6-243cf591963b
+
+**Escolha do dono: opcao A -- a familia e o passo 1.** O fluxo passa a ser
+`escolher a familia -> escolher o pacote -> agendar`, tres passos numerados. As familias sao
+**definidas pelo dono**, com o nome que ele quiser; quem tiver uma familia so nao ve passo
+a mais (a vitrine volta a ser de dois passos, como hoje).
+
+O que isso implica, e que precisa de rodada propria:
+
+- **Forma dos dados muda**: hoje `aPacotes` e uma lista plana. Passa a existir um cadastro
+  de familias, e cada pacote aponta para uma. Migracao obrigatoria para quem ja gravou
+  configuracao sem familia (mesmo padrao da migracao `link` -> `path` da v2).
+- **Volta do passo 2 para o 1** ("trocar de pacote") e **volta do 1 para a familia**: no
+  mockup sao duas linhas de resumo, cada uma com seu botao. O texto dos botoes tambem
+  configuravel.
+- **Titulo do passo novo** entra junto de `a-t2`/`a-t3`, que ja sao configuraveis.
+- O dono gostou da **estrutura de passos numerados com o titulo ao lado** e quer esses
+  textos configuraveis -- ja sao, e os novos nascem assim.
+- **Painel consolidado, preset da aba e regressao byte a byte** acompanham, como sempre.
+
+### 3. Subtitulo da vitrine (aba `pac`), com marcador -- aprovado em 03/09/2026
+
+O bloco vai hoje do titulo (`a-t1`, ja configuravel) direto para o passo 1. O dono viu um
+subtitulo nos mockups de 03/09 -- que era invencao do mockup, nao existia na ferramenta -- e
+pediu que existisse.
+
+**Campo novo, OPCIONAL**: em branco, nada e desenhado e o bloco fica identico ao de hoje
+(byte a byte, com a configuracao de fabrica). Preenchido, sai uma linha abaixo do titulo.
+
+**Com marcador `{pct}`**, decidido pelo dono depois de a armadilha ser explicada: subtitulo
+com o percentual digitado a mao (`"...5% de desconto"`) passa a MENTIR no dia em que o
+desconto do Pix mudar no campo de configuracao -- sem erro, sem aviso. O marcador e trocado
+na hora de gerar e acompanha sozinho.
+
+**Convencao: chave simples, como o resto da aba** (`{pct}`, `{valor}`, `{n}`, `{data}`, de
+`A_TXT_DEFS` e de `TXT_PRAZO`/`TXT_VENCIDO` na aba Link de cobranca) -- NAO as chaves duplas
+`{{...}}` da pagina de obrigado, que sao outro mecanismo: aquelas viajam ate o navegador e
+sao trocadas em tempo de execucao pelo que o TidyCal manda na URL; esta e trocada na
+ferramenta, na hora de gerar, pelo valor que ja esta na configuracao. Mesma aparencia,
+momentos diferentes -- por isso a chave simples, que e a das trocas em tempo de geracao.
