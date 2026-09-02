@@ -16,6 +16,7 @@ Repositório **público**, servido pelo GitHub Pages em **prosite.fotocerta.com.
 | `fc-compartilhado.js` | A fonte que as **duas** páginas executam: BR Code (`FC_PIX_SRC`), selo e prazo (`P_SELO_SRC`), PayPal (`P_PP_SRC`), as recusas da cobrança, a montagem do link e a leitura da identidade guardada. Carregado com endereço **versionado** pelas duas. |
 | `cobrar/index.html` | A página `/cobrar`: uso diário, mobile-first, gera o link de uma cobrança. Não reimplementa nada — chama as mesmas funções da aba. |
 | `cobrar/manifest.json` + `cobrar/icone-{180,192,512}.png` | Manifesto e ícones da tela de início. **Sem service worker**, por decisão registrada. |
+| `previa.html` | Três linhas, **sem comportamento nenhum**. Existe só para ser um endereço de mesma origem que aceita `?pac=` — a prévia da página de obrigado precisa de consulta na URL, e um iframe escrito por `document.write` herda a URL da ferramenta, sem consulta. Não é versionado com `?v=` de propósito: o arquivo não muda, então cópia velha em cache é idêntica à nova. |
 | `CNAME` | Domínio próprio do Pages: `prosite.fotocerta.com.br`. |
 | `.nojekyll` | Impede o Pages de processar o repositório como Jekyll. |
 | `docs/documentacao-fotocerta.md` | Contexto completo: arquitetura, manual do Prosite, decisões, estado atual. Fonte da verdade. |
