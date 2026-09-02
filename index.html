@@ -3100,6 +3100,14 @@
       <fieldset id="a-pp-campos">
         <legend>Conta PayPal</legend>
         <p class="ajuda"><b>O Client ID saiu desta aba</b> e está no painel <b>Identidade</b>, no topo da página, com a chave Pix, o recebedor e o WhatsApp. É a mesma conta nas quatro abas de pagamento. <span class="acoes"><button type="button" class="botao mini claro fci-ir">Abrir Identidade</button></span></p>
+        <label>Cor dos botões do PayPal</label>
+        <div class="radios">
+          <label><input type="radio" name="a-ppcor" value="gold" checked><span>Dourado</span></label>
+          <label><input type="radio" name="a-ppcor" value="blue"><span>Azul</span></label>
+          <label><input type="radio" name="a-ppcor" value="silver"><span>Prateado</span></label>
+          <label><input type="radio" name="a-ppcor" value="white"><span>Branco</span></label>
+          <label><input type="radio" name="a-ppcor" value="black"><span>Preto</span></label>
+        </div>
       </fieldset>
     </div>
   </div>
@@ -4364,7 +4372,7 @@ var ABAS=[
            ['a.pacotes.ops',{nome:'',preco:0,qtd:false},'nome'],
            ['a.cps',{codigo:'',tipo:'pct_total',valor:0,validade:''},'codigo']],
    exemplo:'ex.: Ensaios 2026 - pacotes',
-   guarda:'tudo o que está configurado nesta aba — a <b>forma de pagamento</b>, os pacotes (código, nome, duração, preço, o que inclui, o caminho do TidyCal e os <b>itens opcionais</b> de cada um), os <b>cupons</b>, o endereço da página de obrigado, o prefixo do identificador, o prazo da reserva, o desconto no Pix, as parcelas, quais <b>marcadores da página de obrigado</b> viajam e o texto reserva de cada um, as alturas do calendário, textos e cores.'}
+   guarda:'tudo o que está configurado nesta aba — a <b>forma de pagamento</b> e a cor dos botões do PayPal, os pacotes (código, nome, duração, preço, o que inclui, o caminho do TidyCal e os <b>itens opcionais</b> de cada um), os <b>cupons</b>, o endereço da página de obrigado, o prefixo do identificador, o prazo da reserva, o desconto no Pix, as parcelas, quais <b>marcadores da página de obrigado</b> viajam e o texto reserva de cada um, as alturas do calendário, textos e cores.'}
 ];
 var fcFrag={};       /* ultimo pedaco bom de cada aba, para nao apagar o que a aba quebrada tinha */
 var fcSoLeitura={};  /* abas que falharam ao restaurar: param de coletar do DOM ate recarregar */
@@ -13590,7 +13598,7 @@ function aCfg(){
     pacotes:aPacotes, cps:aCps,
     urlobrigado:$('a-urlobrigado').value.trim(),
     prefixo:$('a-prefixo').value.trim(),
-    metodo:m, usaPP:usaPP, usaPix:usaPix,
+    metodo:m, usaPP:usaPP, usaPix:usaPix, ppcor:radio('a-ppcor')||'gold',
     prazoh:prazoh, descpix:descpix, parcelas:parcelas,
     altdesk:altdesk, altmob:altmob, largmob:largmob, qtdmax:qtdmax,
     c1:corSegura('a-c1','#0F3A30'), c2:corSegura('a-c2','#ffffff'), c3:corSegura('a-c3','#333333'),
@@ -13610,6 +13618,7 @@ function aColeta(){
     urlobrigado:aElVal('a-urlobrigado',''),
     prefixo:aElVal('a-prefixo',''),
     metodo:radio('a-metodo'),
+    ppcor:radio('a-ppcor'),
     prazoh:aElVal('a-prazoh',24),
     descpix:aElVal('a-descpix',5),
     parcelas:aElVal('a-parcelas',1),
@@ -13652,6 +13661,7 @@ function aRestaura(st){
   el=$('a-urlobrigado');if(el)el.value=A.urlobrigado||'';
   el=$('a-prefixo');if(el)el.value=A.prefixo||'';
   setRadio('a-metodo',A.metodo);
+  setRadio('a-ppcor',A.ppcor);
   el=$('a-prazoh');if(el)el.value=(A.prazoh!=null&&A.prazoh!=='')?A.prazoh:24;
   el=$('a-descpix');if(el)el.value=(A.descpix!=null&&A.descpix!=='')?A.descpix:5;
   el=$('a-parcelas');if(el)el.value=(A.parcelas!=null&&A.parcelas!=='')?A.parcelas:1;
@@ -14626,7 +14636,7 @@ function aBlocoObrigado(cfg){
   c+='  var m=document.createElement("div");m.className="fca-ob-msg";b.appendChild(m);\n';
   c+='  cartao.appendChild(b);\n';
   c+='  function msg(txt,ok){m.textContent=txt;m.className="fca-ob-msg "+(ok?"ok":"erro");}\n';
-  c+=fcPpBotoesSrc('fca-ob','gold',false,true,'');
+  c+=fcPpBotoesSrc('fca-ob',cfg.ppcor,false,true,'');
   c+='}\n\n';
   }
 
@@ -14767,12 +14777,13 @@ function aPvDoc(cfg){
    devolve so as instrucoes, sem as tags de script em volta). raizId e o id do bloco inteiro
    (fca-ob-raiz, 14083); msgSel e caixaId casam com secaoCartao (fca-ob-msg, e o id do
    quadro do desenho, 14507+). */
-/* cfg decide se a sonda entra: sem PayPal no bloco (usaPP false) o SDK nunca e carregado,
-   entao a sonda nunca teria o que interceptar -- mesmo padrao de uPreview/mPreview
-   (10812/18862, 'cfg.usaPP?fcPvSondaPP(...):''). */
+/* cfg decide a cor do botao (cfg.ppcor, Tarefa do seletor de cor) e se a sonda entra: sem
+   PayPal no bloco (usaPP false) o SDK nunca e carregado, entao a sonda nunca teria o que
+   interceptar -- mesmo padrao de uPreview/mPreview (10812/18862, 'cfg.usaPP?fcPvSondaPP(...):
+   ''). */
 function aPvObShim(cfg){
   return fcPvShim({pref:'a',
-    extras:cfg.usaPP?fcPvSondaPP({ppcor:'gold',raizId:'fca-ob-raiz',msgSel:'fca-ob-msg',caixaId:'a-pv-ob-pp'}):'',
+    extras:cfg.usaPP?fcPvSondaPP({ppcor:cfg.ppcor,raizId:'fca-ob-raiz',msgSel:'fca-ob-msg',caixaId:'a-pv-ob-pp'}):'',
     semAbrir:true,
     abre:'',
     fecha:' deste quadro. Este bloco nao deveria gravar nada em armazenamento, mas se a troca nao pegou pode estar tocando as chaves reais do navegador -- ou abrindo o WhatsApp numa aba nova. O codigo gerado ao lado nao e afetado.'});
