@@ -606,7 +606,7 @@
           <legend>Identidade — quem recebe e quem atende</legend>
           <p class="ajuda"><b>Preenchido uma vez, vale para todas as abas.</b> O Checkout, o Link de cobrança e a Mini loja leem a chave Pix, o recebedor e o Client ID daqui; o WhatsApp é lido também pela Captação de leads. <b>Não existe segunda cópia</b> — trocar de chave Pix aqui troca em todas, e não há mais como uma aba ficar com a chave antiga.</p>
           <label for="fci-chave">Chave Pix <small>(máx. 77 caracteres; espaços e caracteres invisíveis das pontas são removidos ao sair do campo — no meio da chave eles impedem a geração, com aviso)</small></label>
-          <input type="text" id="fci-chave" value="" placeholder="e-mail, telefone, CPF/CNPJ ou chave aleatoria">
+          <input type="text" id="fci-chave" value="" placeholder="e-mail, telefone, CPF/CNPJ ou chave aleatória">
           <label for="fci-nomer">Nome do recebedor <small>(máx. 25 caracteres, acentos removidos no código Pix)</small></label>
           <input type="text" id="fci-nomer" value="Foto Certa" maxlength="25" placeholder="nome que aparece no Pix">
           <label for="fci-cidade">Cidade do recebedor <small>(máx. 15 caracteres, acentos removidos no código Pix)</small></label>
@@ -750,7 +750,7 @@
       <label for="s-imp-link">Link da galeria ou da página <small>(o endereço da barra do navegador)</small></label>
       <input type="text" id="s-imp-link" placeholder="https://www.fotocerta.com.br/gallery/121894-estudio-tematico">
       <label for="s-imp-fonte">Código-fonte da página <small>(Cmd ⌥ U, Cmd A, Cmd C — cole aqui)</small></label>
-      <textarea id="s-imp-fonte" spellcheck="false" placeholder="Cole aqui o codigo-fonte inteiro da pagina."></textarea>
+      <textarea id="s-imp-fonte" spellcheck="false" placeholder="Cole aqui o código-fonte inteiro da página."></textarea>
       <div class="acoes"><button class="botao claro" id="s-imp-conferir">Conferir a página</button></div>
       <p class="ajuda">O código-fonte traz <b>mais fotos que a tela</b>: na galeria de exemplo, o navegador tinha 10 fotos carregadas e o código-fonte trazia 46. As fotos entram <b>na mesma ordem em que aparecem na página</b>, inclusive a de capa, que na página não é a primeira. Só entram endereços dos servidores da Alboom: qualquer outro é descartado com a contagem à vista. <b>Numa página comum</b> a mesma foto aparece em vários tamanhos (medido: 51 endereços para 10 fotos em <i>/albuns</i>) — cada foto entra <b>uma vez só, no maior tamanho que a página trouxe</b>, e só as da conta que aparece em mais fotos, que a conferência mostra. Nada do que você cola aqui é salvo — a ferramenta só lê os endereços das fotos e esquece o resto.</p>
       </fieldset>
@@ -1618,7 +1618,7 @@
         <label for="u-t5">Mensagem de sucesso (PayPal)</label>
         <input type="text" id="u-t5" value="Pagamento aprovado! Recebemos seu pedido.">
         <label for="u-t6">Mensagem de erro (PayPal)</label>
-        <input type="text" id="u-t6" value="Nao foi possivel concluir o pagamento. Tente novamente.">
+        <input type="text" id="u-t6" value="Não foi possível concluir o pagamento. Tente novamente.">
       </fieldset>
 
       <fieldset>
@@ -1628,8 +1628,8 @@
           <label><input type="radio" name="u-resumo" value="sim"><span>Incluir resumo copiável</span></label>
         </div>
         <div id="u-resumo-campos">
-          <label for="u-t10">Rótulo do resumo <small>(os padrões da aba são escritos sem acento, como "Nao foi possivel concluir o pagamento"; o campo aceita acento normalmente se você quiser trocar)</small></label>
-          <input type="text" id="u-t10" value="Resumo para conferencia">
+          <label for="u-t10">Rótulo do resumo <small>(o que o cliente lê sai acentuado; o que vai na mensagem do WhatsApp sai sem acento, de propósito)</small></label>
+          <input type="text" id="u-t10" value="Resumo para conferência">
         </div>
         <p class="ajuda">O Pix estático <b>não confirma pagamento</b> — a conferência é pelo extrato. O resumo sai no fim do carrinho, com um botão de copiar, e traz produtos, opcionais (com quantidade quando houver), cupom, subtotal, desconto, total e — com sinal ligado — sinal e saldo, tudo abaixo do <b>código do pedido</b>. O cliente cola no WhatsApp ou no e-mail e você concilia com o extrato sem redigitar nada.</p>
       </fieldset>
@@ -2542,7 +2542,7 @@
       <button class="botao mini" id="p-copy2" style="margin-left:8px">Copiar</button>
       <span class="aviso-copiado" id="p-cop2">Copiado!</span>
       </h3>
-      <textarea id="p-out2" readonly spellcheck="false" style="height:120px" placeholder="O link desta cobranca aparece aqui."></textarea>
+      <textarea id="p-out2" readonly spellcheck="false" style="height:120px" placeholder="O link desta cobrança aparece aqui."></textarea>
       <p class="ajuda"><b>As duas saídas têm vidas diferentes:</b> o <b>código 1</b> vai uma vez só para o componente HTML da página fixa; o <b>código 2</b> é gerado a cada cobrança e vai para o cliente. Mudar a descrição ou o valor <b>não</b> exige colar o código 1 de novo.</p>
       <p class="ajuda"><b>Mexeu na cobrança, a caixa do link esvazia.</b> Trocar a descrição, o valor, o identificador, o desconto no Pix, o endereço da página, o modo de PayPal ou os dados do recebedor apaga o link que estava aqui — para não existir a chance de copiar um link com o valor da cobrança anterior. Clique em <b>Gerar link desta cobrança</b> de novo. Mexer só na aparência ou nos textos do cartão não apaga nada: isso muda o <b>código 1</b>, e aí quem avisa é o painel consolidado.</p>
       </div>
@@ -2689,7 +2689,7 @@
         <label for="m-imp-link">Link da galeria ou da página <small>(o endereço da barra do navegador)</small></label>
         <input type="text" id="m-imp-link" placeholder="https://www.fotocerta.com.br/gallery/121894-estudio-tematico">
         <label for="m-imp-fonte">Código-fonte da página <small>(Cmd ⌥ U, Cmd A, Cmd C — cole aqui)</small></label>
-        <textarea id="m-imp-fonte" spellcheck="false" placeholder="Cole aqui o codigo-fonte inteiro da pagina."></textarea>
+        <textarea id="m-imp-fonte" spellcheck="false" placeholder="Cole aqui o código-fonte inteiro da página."></textarea>
         <div class="acoes"><button class="botao claro" id="m-imp-conferir">Conferir a página</button></div>
         <p class="ajuda s-alerta" id="m-imp-resultado" style="display:none"></p>
         <p class="lista-conta" id="m-imp-conta" style="display:none"></p>
@@ -2818,11 +2818,11 @@
         <label for="m-t9">Rótulo do saldo</label>
         <input type="text" id="m-t9" value="Restante na entrega">
         <label for="m-t12">Rótulo do resumo</label>
-        <input type="text" id="m-t12" value="Resumo para conferencia">
+        <input type="text" id="m-t12" value="Resumo para conferência">
         <label for="m-t5">Mensagem de pagamento aprovado <small>(PayPal)</small></label>
         <input type="text" id="m-t5" value="Pagamento aprovado! Em breve entramos em contato.">
         <label for="m-t6">Mensagem de erro no pagamento</label>
-        <input type="text" id="m-t6" value="Nao foi possivel concluir o pagamento. Tente novamente.">
+        <input type="text" id="m-t6" value="Não foi possível concluir o pagamento. Tente novamente.">
       </fieldset>
     </div>
     <div>
@@ -3100,15 +3100,15 @@
    QUEM IMPEDE QUE ELE MINTA: scripts/conferir-versoes.sh, que recusa index.html
    alterado sem a versao mudar junto -- a mesma disciplina do fc-compartilhado.js,
    e pela mesma razao: carimbo que ninguem confere e o defeito de amanha. */
-var FC_VERSAO='2026-09-01b';
-var FC_PUBLICADO='2026-09-01 21:10';   /* America/Sao_Paulo -- escrito pelo carimbador */
+var FC_VERSAO='2026-09-01c';
+var FC_PUBLICADO='2026-09-01 22:17';   /* America/Sao_Paulo -- escrito pelo carimbador */
 (function(){
   var el=document.getElementById('fc-versao');
   if(!el) return;
   var d=FC_PUBLICADO.split(/[- :]/);
   el.innerHTML='Versão <b>'+FC_VERSAO+'</b> · publicada em '+d[2]+'/'+d[1]+'/'+d[0]+' às '+d[3]+':'+d[4];
-  el.title='Esta e a versao que o SEU navegador esta executando agora. '+
-    'Se ela estiver atras da que foi publicada, recarregue segurando Shift.';
+  el.title='Esta é a versão que o SEU navegador está executando agora. '+
+    'Se ela estiver atrás da que foi publicada, recarregue segurando Shift.';
 })();
 
 /* ============ a fonte compartilhada com a /cobrar ============
@@ -3967,7 +3967,7 @@ var ABAS=[
    guarda:'tudo o que está configurado nesta aba — a <b>lista de imagens</b> (links, legendas e a ordem), a transição, o tempo, a largura, a proporção, o corte de celular, a ordem de exibição e os controles do visitante. Não guarda o que está no importador de galeria, que não é configuração e sim uma colagem de trabalho.'},
   {id:'tidy', nome:'Agendamento TidyCal', chaves:['t'],         coleta:tColeta,restaura:tRestaura,gerar:tGerar,
    pref:'t',fora:[],resumo:tPresetResumo,redesenhar:tPresetDepois,antesDeSalvar:tPresetAntes,
-   exemplo:'ex.: Natal 2026 - ensaio tematico',
+   exemplo:'ex.: Natal 2026 - ensaio temático',
    guarda:'tudo o que está configurado nesta aba — o caminho do agendamento no TidyCal, as duas alturas, a largura de corte, o modo (direto ou embutido), o endereço da página intermediária e a altura inicial do iframe.'},
   /* 'nome' e TEXTO DE INTERFACE: aparece na barra vermelha de falhas, nas perguntas do preset
      geral e no interruptor de cada aba. Por isso vai com acento, como manda a convencao do
@@ -3998,7 +3998,7 @@ var ABAS=[
   {id:'cob',  nome:'Link de cobrança',    chaves:['p'],         coleta:pColeta,restaura:pRestaura,gerar:pGerar,
    pref:'p',fora:[],resumo:pPresetResumo,redesenhar:pPresetDepois,antesDeSalvar:pPresetAntes,
    naoEmite:['url','desc','valor','txid','validade','descpix','ppmodo','pplink'],
-   exemplo:'ex.: Foto Certa - pagina /pagar',
+   exemplo:'ex.: Foto Certa - página /pagar',
    guarda:'tudo o que está configurado nesta aba — o endereço da página, a aparência, os textos, e também a <b>cobrança que está na tela</b> (descrição, valor, identificador, a data de validade e o desconto no Pix). Aplicar um preset troca também essa cobrança: ele é a fotografia da aba inteira. Os dados de quem recebe <b>não</b> estão aqui: eles saíram desta aba para o painel Identidade, e nenhum preset os toca.'},
   {id:'loja', nome:'Mini loja',           chaves:['m'],         coleta:mColeta,restaura:mRestaura,gerar:mGerar,
    pref:'m',fora:[],resumo:mPresetResumo,redesenhar:mPresetDepois,antesDeSalvar:mPresetAntes,
@@ -4006,7 +4006,7 @@ var ABAS=[
            ['m.prods.ops',{nome:'',preco:0,qtd:false},'nome'],
            ['m.cps',{codigo:'',tipo:'pct_total',valor:0,validade:''},'codigo']],
    importar:mImportarLimpar,
-   exemplo:'ex.: Foto Certa - loja de albuns',
+   exemplo:'ex.: Foto Certa - loja de álbuns',
    guarda:'tudo o que está configurado nesta aba — formas de pagamento, moeda, <b>o catálogo inteiro</b> (nome, descrição, preço, categoria, foto e os opcionais de cada produto), cupons, sinal, desconto Pix, a grade da vitrine, o tamanho pedido das fotos, textos e cores. Não guarda o que está no importador de galeria, que não é configuração e sim uma colagem de trabalho.'},
   {id:'efe',  nome:'Efeitos de página',   chaves:['e'],         coleta:eColeta,restaura:eRestaura,gerar:eGerar,
    pref:'e',fora:[],resumo:ePresetResumo,redesenhar:ePresetDepois,antesDeSalvar:ePresetAntes,
@@ -10500,7 +10500,7 @@ function uPvMontar(){
   moldura.style.height=U_PV_ALTURA+'px';
   var ifr=document.createElement('iframe');
   ifr.id='u-pv-frame';
-  ifr.setAttribute('title','Previa do carrinho de checkout');
+  ifr.setAttribute('title','Prévia do carrinho de checkout');
   ifr.style.width=larg+'px';
   ifr.style.height=Math.round(U_PV_ALTURA/k)+'px';
   ifr.style.transform='scale('+k+')';
@@ -10827,14 +10827,14 @@ function uBloco(cfg){
   if(usaSinal){
     c+="var TXT_SINAL='"+escJs(cfg.t8)+"';\n";
     c+="var TXT_SALDO='"+escJs(cfg.t9)+"';\n";
-    c+="var TXT_SINAL_MAIOR='O sinal deste carrinho e maior que o total do pedido. Escolha mais itens, aumente a quantidade ou remova o cupom.';\n";
+    c+="var TXT_SINAL_MAIOR='O sinal deste carrinho é maior que o total do pedido. Escolha mais itens, aumente a quantidade ou remova o cupom.';\n";
     c+="var TXT_SINAL_ZERO='O sinal deste pedido arredonda para zero. Escolha mais itens ou aumente a quantidade.';\n";
     c+="var TXT_SINAL_RECUSADO='pedido recusado';\n";
   }
   if(usaPP){
     c+="var TXT_SUCESSO='"+escJs(cfg.t5)+"';\n";
     c+="var TXT_ERRO='"+escJs(cfg.t6)+"';\n";
-    c+="var TXT_TOTAL_ZERO='Escolha ao menos um item: o pedido esta em zero.';\n";
+    c+="var TXT_TOTAL_ZERO='Escolha ao menos um item: o pedido está em zero.';\n";
   }
   if(usaPix){
     if(usaPP){
@@ -10844,9 +10844,9 @@ function uBloco(cfg){
     c+="var TXT_BOTAO_PIX='"+escJs(cfg.t4)+"';\n";
     c+="var TXT_INSTRUCAO='Abra o app do seu banco e pague pelo QR Code ou Pix Copia e Cola';\n";
     c+="var TXT_PIXVAL='Valor no Pix';\n";
-    c+="var TXT_COPIAR='Copiar codigo Pix';\n";
-    c+="var TXT_COPIADO='Codigo copiado!';\n";
-    if(zap)c+="var TXT_ZAP='Ja paguei - avisar no WhatsApp';\n";
+    c+="var TXT_COPIAR='Copiar código Pix';\n";
+    c+="var TXT_COPIADO='Código copiado!';\n";
+    if(zap)c+="var TXT_ZAP='Já paguei - avisar no WhatsApp';\n";
     c+="var TXT_NOTA='Confira o nome do recebedor antes de confirmar o pagamento';\n";
   }
   if(descpix>0)c+="var TXT_PIX_ROTULO='Pagando via Pix';\n";
@@ -10860,14 +10860,15 @@ function uBloco(cfg){
   c+="var TXT_CUPOM_ROTULO='Cupom de desconto';\n";
   c+="var TXT_CUPOM_BOTAO='Aplicar';\n";
   c+="var TXT_CUPOM_OK='Cupom aplicado!';\n";
-  c+="var TXT_CUPOM_INVALIDO='Cupom invalido.';\n";
+  c+="var TXT_CUPOM_INVALIDO='Cupom inválido.';\n";
   c+="var TXT_CUPOM_EXPIRADO='Cupom expirado.';\n";
   c+="var TXT_DESCONTO='Desconto';\n";
   /* ACENTO DE PROPOSITO, e o unico texto acentuado que estes dois blocos emitem. O item 10 do
      Manual do Prosite proibe acento em CODIGO, nao no texto que o cliente le -- o bloco do Link
      de cobranca ja carrega texto visivel acentuado desde ago/2026. Pedido do dono em 01/09/2026,
-     depois de ver "Valido ate" na tela. Os vizinhos ("Cupom invalido.", "Copiar codigo Pix",
-     "Ja paguei...") continuam sem acento, e essa inconsistencia esta registrada como divida. */
+     depois de ver "Valido ate" na tela. Em 01/09/2026 os vizinhos foram junto: todo texto que
+     o CLIENTE le nestes dois blocos sai acentuado. Continua sem acento, de proposito, o que vai
+     para a mensagem do WhatsApp, e todo comentario e identificador (item 10 do Manual). */
   c+="var TXT_CUPOM_VALIDADE='Válido até:';   /* precede a data, na propria linha do desconto; so aparece se o cupom tiver validade */\n\n";
 
   c+='/* ============================================================\n   Daqui para baixo nao precisa mexer\n   ============================================================ */\n\n';
@@ -12245,7 +12246,7 @@ function bPreview(){
      atende. As duas strings sao as do codigo 1 (m.keys e m.keysRm), e o cabecalho do @media e
      a mesma constante que bGerar emite. */
   st.textContent=(m.keys||'')+(m.keysRm?('\n'+B_MEDIA_RM+'\n'+m.keysRm+'\n}\n'):'');
-  box.innerHTML='<div class="b-alvo"><div style="font-size:15px;font-weight:700;margin-bottom:6px">Presenteie uma familia</div><div style="font-size:13px;opacity:.9">Este e o componente destacado pela borda. O efeito roda ao vivo aqui.</div></div><p class="b-pv-legenda" style="font-size:12px;text-align:center;margin:12px 0 0">Previa do efeito sobre o fundo escolhido (na pagina real, o efeito se aplica ao componente inteiro, e a tipografia e a vizinhanca sao as da pagina). Com "reduzir movimento" ligado no sistema, aqui o efeito congela igual a pagina publicada.</p>';
+  box.innerHTML='<div class="b-alvo"><div style="font-size:15px;font-weight:700;margin-bottom:6px">Presenteie uma família</div><div style="font-size:13px;opacity:.9">Este é o componente destacado pela borda. O efeito roda ao vivo aqui.</div></div><p class="b-pv-legenda" style="font-size:12px;text-align:center;margin:12px 0 0">Prévia do efeito sobre o fundo escolhido (na página real, o efeito se aplica ao componente inteiro, e a tipografia e a vizinhança são as da página). Com "reduzir movimento" ligado no sistema, aqui o efeito congela igual à página publicada.</p>';
   var alvo=box.querySelector('.b-alvo');
   alvo.style.cssText='max-width:340px;margin:0 auto;box-sizing:border-box;text-align:left;'+m.props;
   var leg=box.querySelector('.b-pv-legenda');
@@ -12475,10 +12476,10 @@ function eEfeito(id){
   return E_EFEITOS[0];
 }
 var E_LIMITES={
-  neve:'Os flocos sao o caractere de neve da fonte do visitante — o desenho muda um pouco de aparelho para aparelho. Eles nao interagem com o cursor nem com a rolagem: caem sempre no mesmo ritmo.',
-  confete:'O confete cai sem parar, e nao "estoura" uma vez so: e um efeito de ambiente, nao de comemoracao pontual. Sem JavaScript nao ha como dispara-lo num clique.',
-  aurora:'A aurora e um fundo. No alcance "pagina inteira" ela fica ATRAS do conteudo, e se o tema pintar o fundo das secoes ela some atras dele — por isso o alcance "dentro de um bloco" e o confiavel. O desfoque custa mais que os outros efeitos em aparelhos antigos.',
-  luzes:'O cordao fica no topo e nao acompanha a rolagem no alcance "dentro de um bloco". As lampadas se distribuem por igual: nao ha como espaca-las de forma irregular sem uma regra por lampada.'
+  neve:'Os flocos são o caractere de neve da fonte do visitante — o desenho muda um pouco de aparelho para aparelho. Eles não interagem com o cursor nem com a rolagem: caem sempre no mesmo ritmo.',
+  confete:'O confete cai sem parar, e não "estoura" uma vez só: é um efeito de ambiente, não de comemoração pontual. Sem JavaScript não há como dispará-lo num clique.',
+  aurora:'A aurora é um fundo. No alcance "página inteira" ela fica ATRÁS do conteúdo, e se o tema pintar o fundo das seções ela some atrás dele — por isso o alcance "dentro de um bloco" é o confiável. O desfoque custa mais que os outros efeitos em aparelhos antigos.',
+  luzes:'O cordão fica no topo e não acompanha a rolagem no alcance "dentro de um bloco". As lâmpadas se distribuem por igual: não há como espaçá-las de forma irregular sem uma regra por lâmpada.'
 };
 
 var E_NUMS=[
@@ -13994,7 +13995,7 @@ function cPvMontar(){
   moldura.style.height=C_PV_ALTURA+'px';
   var ifr=document.createElement('iframe');
   ifr.id='c-pv-frame';
-  ifr.setAttribute('title','Previa da barra de contagem regressiva');
+  ifr.setAttribute('title','Prévia da barra de contagem regressiva');
   ifr.style.width=larg+'px';
   ifr.style.height=Math.round(C_PV_ALTURA/k)+'px';
   ifr.style.transform='scale('+k+')';
@@ -14910,7 +14911,7 @@ function pPvMontar(){
   moldura.style.height=P_PV_ALTURA+'px';
   var ifr=document.createElement('iframe');
   ifr.id='p-pv-frame';
-  ifr.setAttribute('title','Previa da pagina de cobranca');
+  ifr.setAttribute('title','Prévia da página de cobrança');
   ifr.style.width=larg+'px';
   ifr.style.height=Math.round(P_PV_ALTURA/k)+'px';
   ifr.style.transform='scale('+k+')';
@@ -16018,29 +16019,29 @@ function mBlocoJs(cfg,prods,cps,cats,client,cod){
   c+="var TXT_ATUALIZAR='Atualizar no carrinho';\n";
   c+="var TXT_VOLTAR='"+escJs(cfg.t11)+"';\n";
   c+="var TXT_CESTA='"+escJs(cfg.t10)+"';\n";
-  c+="var TXT_CESTA_VAZIA='Seu carrinho esta vazio. Escolha um item na vitrine ao lado.';\n";
+  c+="var TXT_CESTA_VAZIA='Seu carrinho está vazio. Escolha um item na vitrine ao lado.';\n";
   c+="var TXT_SEM_OPCIONAL='Sem opcional';\n";
   c+="var TXT_TODOS='Todos';\n";
   /* Nao e texto editavel de proposito: o operador nunca deveria ve-lo na pagina publicada, e
      dar um campo a ele sugeriria o contrario. ASCII, como o resto do bloco. */
-  c+="var TXT_FOTO_ERRO='Esta foto nao carregou. Confira o endereco dela no cadastro.';\n";
-  c+="var TXT_SUMIU='item do seu carrinho saiu do catalogo e foi removido.';\n";
-  c+="var TXT_SUMIRAM='itens do seu carrinho sairam do catalogo e foram removidos.';\n";
-  c+="var TXT_OP_SUMIU='opcional que voce tinha escolhido saiu do catalogo e foi removido.';\n";
-  c+="var TXT_OP_SUMIRAM='opcionais que voce tinha escolhido sairam do catalogo e foram removidos.';\n";
-  c+="var TXT_CESTA_ESTRAGADA='O carrinho guardado neste navegador estava ilegivel e foi descartado. Escolha os itens de novo.';\n";
-  c+="var TXT_OUTRA_LOJA='O carrinho guardado neste navegador era de outra versao desta loja e foi descartado, para voce nao pagar um preco que nao e o que esta na tela. Escolha os itens de novo.';\n";
+  c+="var TXT_FOTO_ERRO='Esta foto não carregou. Confira o endereço dela no cadastro.';\n";
+  c+="var TXT_SUMIU='item do seu carrinho saiu do catálogo e foi removido.';\n";
+  c+="var TXT_SUMIRAM='itens do seu carrinho saíram do catálogo e foram removidos.';\n";
+  c+="var TXT_OP_SUMIU='opcional que você tinha escolhido saiu do catálogo e foi removido.';\n";
+  c+="var TXT_OP_SUMIRAM='opcionais que você tinha escolhido saíram do catálogo e foram removidos.';\n";
+  c+="var TXT_CESTA_ESTRAGADA='O carrinho guardado neste navegador estava ilegível e foi descartado. Escolha os itens de novo.';\n";
+  c+="var TXT_OUTRA_LOJA='O carrinho guardado neste navegador era de outra versão desta loja e foi descartado, para você não pagar um preço que não é o que está na tela. Escolha os itens de novo.';\n";
   if(usaSinal){
     c+="var TXT_SINAL='"+escJs(cfg.t8)+"';\n";
     c+="var TXT_SALDO='"+escJs(cfg.t9)+"';\n";
-    c+="var TXT_SINAL_MAIOR='O sinal deste pedido e maior que o total. Escolha mais itens, aumente a quantidade ou remova o cupom.';\n";
+    c+="var TXT_SINAL_MAIOR='O sinal deste pedido é maior que o total. Escolha mais itens, aumente a quantidade ou remova o cupom.';\n";
     c+="var TXT_SINAL_ZERO='O sinal deste pedido arredonda para zero. Escolha mais itens ou aumente a quantidade.';\n";
     c+="var TXT_SINAL_RECUSADO='pedido recusado';\n";
   }
   if(usaPP){
     c+="var TXT_SUCESSO='"+escJs(cfg.t5)+"';\n";
     c+="var TXT_ERRO='"+escJs(cfg.t6)+"';\n";
-    c+="var TXT_TOTAL_ZERO='Escolha ao menos um item: o pedido esta em zero.';\n";
+    c+="var TXT_TOTAL_ZERO='Escolha ao menos um item: o pedido está em zero.';\n";
   }
   if(usaPix){
     if(usaPP){
@@ -16050,9 +16051,9 @@ function mBlocoJs(cfg,prods,cps,cats,client,cod){
     c+="var TXT_BOTAO_PIX='"+escJs(cfg.t4)+"';\n";
     c+="var TXT_INSTRUCAO='Abra o app do seu banco e pague pelo QR Code ou Pix Copia e Cola';\n";
     c+="var TXT_PIXVAL='Valor no Pix';\n";
-    c+="var TXT_COPIAR='Copiar codigo Pix';\n";
-    c+="var TXT_COPIADO='Codigo copiado!';\n";
-    if(zap)c+="var TXT_ZAP='Ja paguei - avisar no WhatsApp';\n";
+    c+="var TXT_COPIAR='Copiar código Pix';\n";
+    c+="var TXT_COPIADO='Código copiado!';\n";
+    if(zap)c+="var TXT_ZAP='Já paguei - avisar no WhatsApp';\n";
     c+="var TXT_NOTA='Confira o nome do recebedor antes de confirmar o pagamento';\n";
     c+="var TXT_PEDIDO_ENVIADO='Pedido enviado. O carrinho foi esvaziado -- combine o restante pelo WhatsApp.';\n";
   }
@@ -16068,14 +16069,15 @@ function mBlocoJs(cfg,prods,cps,cats,client,cod){
     c+="var TXT_CUPOM_ROTULO='Cupom de desconto';\n";
     c+="var TXT_CUPOM_BOTAO='Aplicar';\n";
     c+="var TXT_CUPOM_OK='Cupom aplicado!';\n";
-    c+="var TXT_CUPOM_INVALIDO='Cupom invalido.';\n";
+    c+="var TXT_CUPOM_INVALIDO='Cupom inválido.';\n";
     c+="var TXT_CUPOM_EXPIRADO='Cupom expirado.';\n";
     c+="var TXT_DESCONTO='Desconto';\n";
     /* ACENTO DE PROPOSITO, e o unico texto acentuado que estes dois blocos emitem. O item 10 do
        Manual do Prosite proibe acento em CODIGO, nao no texto que o cliente le -- o bloco do Link
        de cobranca ja carrega texto visivel acentuado desde ago/2026. Pedido do dono em 01/09/2026,
-       depois de ver "Valido ate" na tela. Os vizinhos ("Cupom invalido.", "Copiar codigo Pix",
-       "Ja paguei...") continuam sem acento, e essa inconsistencia esta registrada como divida. */
+       depois de ver "Valido ate" na tela. Em 01/09/2026 os vizinhos foram junto: todo texto que
+       o CLIENTE le nestes dois blocos sai acentuado. Continua sem acento, de proposito, o que vai
+       para a mensagem do WhatsApp, e todo comentario e identificador (item 10 do Manual). */
     c+="var TXT_CUPOM_VALIDADE='Válido até:';   /* precede a data, na propria linha do desconto; so aparece se o cupom tiver validade */\n";
   }
   /* Os limites da pagina sao TEXTO DA PAGINA, nao comentario: eles ficam a vista do cliente e
@@ -16111,12 +16113,12 @@ function mBlocoJs(cfg,prods,cps,cats,client,cod){
    Cada frase corresponde a um limite real e medido do desenho, e nenhuma promete conserto. */
 function mLimitesTexto(cfg){
   var p=[];
-  p.push('Esta pagina nao guarda pedidos: cada compra existe como a mensagem que voce recebe, a transacao no PayPal e o Pix na conta.');
-  if(cfg.usaPix)p.push('O Pix estatico nao avisa ninguem quando o dinheiro cai -- a confirmacao e por conferencia do extrato.');
-  if(cfg.usaPP)p.push('O PayPal tambem nao tem como avisar esta pagina: a liberacao e manual.');
+  p.push('Esta página não guarda pedidos: cada compra existe como a mensagem que você recebe, a transação no PayPal e o Pix na conta.');
+  if(cfg.usaPix)p.push('O Pix estático não avisa ninguém quando o dinheiro cai -- a confirmação é por conferência do extrato.');
+  if(cfg.usaPP)p.push('O PayPal também não tem como avisar esta página: a liberação é manual.');
   p.push('O carrinho fica guardado neste navegador e neste aparelho: montado no celular, no computador ele aparece vazio.');
-  p.push('Nao ha estoque: todos os itens sao sob encomenda e podem ser pedidos quantas vezes for preciso.');
-  if(cfg.cps.length)p.push('Os cupons ficam dentro do codigo desta pagina e nao sao secretos.');
+  p.push('Não há estoque: todos os itens são sob encomenda e podem ser pedidos quantas vezes for preciso.');
+  if(cfg.cps.length)p.push('Os cupons ficam dentro do código desta página e não são secretos.');
   return p.join(' ');
 }
 
@@ -16706,10 +16708,10 @@ function mBlocoPagar(cfg,usaPP,usaPix,usaQtd,usaSinal,usaResumo,descpix,zap,usaC
     c+='function gerarPix(){\n';
     c+='var v=totalPix();\n';
     if(usaSinal){
-      c+="if(total()<0.01){alert('Escolha ao menos um item: o pedido esta em zero.');return;}\n";
+      c+="if(total()<0.01){alert('Escolha ao menos um item: o pedido está em zero.');return;}\n";
       c+='var rec=sinalRecusa();\nif(rec){alert(rec);return;}\n';
     }else{
-      c+="if(v<0.01){alert('Escolha ao menos um item: o pedido esta em zero.');return;}\n";
+      c+="if(v<0.01){alert('Escolha ao menos um item: o pedido está em zero.');return;}\n";
     }
     c+='if(!CODIGO_PEDIDO)CODIGO_PEDIDO=novoPedido();\n';
     c+='payloadAtual=montarPayload(v);\n';
