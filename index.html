@@ -3271,8 +3271,15 @@
   </div>
   <div class="grade">
     <div>
-      <div class="pv-area"><div id="a-pv-box"></div></div>
-      <p class="ajuda">A prévia roda o código gerado de verdade: escolher um pacote acende o passo 2 e troca de preço ao vivo. O que ainda difere da página publicada: o calendário do TidyCal não carrega aqui (é outro domínio, e a prévia não deve depender de rede) — no lugar dele aparece um retângulo cinza avisando "Aqui entra o calendário do TidyCal deste pacote."; e o quadro não carrega o CSS do tema do site.</p>
+      <div class="pv-area">
+      <div class="c-pv-modos">
+      <span class="rotulo">Ver como:</span>
+      <button type="button" class="botao mini" id="a-pv-desk" aria-pressed="true">Computador</button>
+      <button type="button" class="botao mini claro" id="a-pv-cel" aria-pressed="false">Celular</button>
+      </div>
+      <div id="a-pv-box"></div>
+      </div>
+      <p class="ajuda">A prévia roda o código gerado de verdade: escolher um pacote acende o passo 2 e troca de preço ao vivo. O modo Celular usa uma largura abaixo do corte configurado ao lado (campo "Largura de corte do modo celular"), para os cartões empilharem como no aparelho do cliente. O que ainda difere da página publicada: o calendário do TidyCal não carrega aqui (é outro domínio, e a prévia não deve depender de rede) — no lugar dele aparece um retângulo cinza avisando "Aqui entra o calendário do TidyCal deste pacote."; e o quadro não carrega o CSS do tema do site.</p>
 
       <label for="a-pv-pac" style="display:block;margin-top:16px">Prévia da página de obrigado — prever como</label>
       <select id="a-pv-pac"></select>
@@ -14893,27 +14900,38 @@ function aPvObMontar(){
   });
   ifr.src='previa.html'+(pac?('?pac='+encodeURIComponent(pac)):'');
 }
-/* A vitrine nao tem corte de largura proprio para alternar desktop/celular na previa (o painel
-   desta aba nao ganhou os botoes de modo -- Tarefa 1 nao os pediu): uma largura logica so, e o
-   quadro escala para caber no espaco disponivel. A media query do bloco (640px) continua sendo
-   avaliada pelo proprio iframe. */
-var aPvTimer=null;
-var A_PV_LARGURA=1040, A_PV_ALTURA=760;
+/* Duas coisas mudam com a largura, e as duas tem de virar verdade juntas no modo Celular: a
+   media query do bloco (fixa em 640px) empilha os cartoes, e LARGURA_MOBILE -- cfg.largmob,
+   o campo "Largura de corte do modo celular", configuravel -- decide via window.innerWidth
+   qual altura o calendario usa. min(380,cfg.largmob) fica sempre abaixo das duas retas (380
+   ja e menor que 640, e nunca passa de largmob por ser um minimo), e max(1040,cfg.largmob+240)
+   fica sempre acima das duas. Mesma forma de sPvLargura/cPvLargura, com o segundo corte
+   proprio desta aba. A pagina de obrigado (aPvObMontar, abaixo) NAO ganhou este alternador:
+   o cartao dela e de largura fixa (max-width:480px) e nao tem media query nenhuma alem de
+   prefers-reduced-motion -- o modo Celular so mudaria o espaco em branco ao redor, nao o
+   layout, entao o botao ali seria decorativo e nao provaria nada. */
+function aPvLargura(cfg){
+  if(aPvModo==='cel')return Math.min(380,cfg.largmob);
+  return Math.max(1040,cfg.largmob+240);
+}
+var aPvTimer=null,aPvModo='desk';
+var A_PV_ALTURA=760;
 function aPvMontar(){
   var box=$('a-pv-box');if(!box)return;
   var cfg=aCfg();
   var recusa=aRecusa(cfg);
+  var larg=aPvLargura(cfg);
   var disp=box.clientWidth||440;
-  var k=Math.min(1,disp/A_PV_LARGURA);
+  var k=Math.min(1,disp/larg);
   box.innerHTML='';
   var moldura=document.createElement('div');
   moldura.className='a-pv-moldura';
-  moldura.style.width=Math.round(A_PV_LARGURA*k)+'px';
+  moldura.style.width=Math.round(larg*k)+'px';
   moldura.style.height=A_PV_ALTURA+'px';
   var ifr=document.createElement('iframe');
   ifr.id='a-pv-frame';
   ifr.setAttribute('title','Prévia da vitrine de pacotes');
-  ifr.style.width=A_PV_LARGURA+'px';
+  ifr.style.width=larg+'px';
   ifr.style.height=Math.round(A_PV_ALTURA/k)+'px';
   ifr.style.transform='scale('+k+')';
   ifr.style.transformOrigin='top left';
@@ -14933,6 +14951,12 @@ function aPreview(imediato){
   if(imediato){aPvMontar();aPvObMontar();return;}
   aPvTimer=setTimeout(function(){aPvTimer=null;aPvMontar();aPvObMontar();},400);
 }
+function aPvBotoes(){
+  var d=$('a-pv-desk'),c=$('a-pv-cel');
+  if(d){d.className='botao mini'+(aPvModo==='desk'?'':' claro');d.setAttribute('aria-pressed',aPvModo==='desk'?'true':'false');}
+  if(c){c.className='botao mini'+(aPvModo==='cel'?'':' claro');c.setAttribute('aria-pressed',aPvModo==='cel'?'true':'false');}
+}
+function aPvModoSet(m){aPvModo=m;aPvBotoes();aPreview(true);}
 document.addEventListener('input',function(e){
   var al=(e.target.id&&e.target.id.indexOf('a-')===0)||(e.target.name&&e.target.name.indexOf('a-')===0);
   if(al)aPreview();
@@ -20072,6 +20096,8 @@ prep('Agendamento por pacote','pac',function(){
   liga('a-cp-add',aCpAdd);
   liga('a-gerar',aGerar);
   liga('a-atualizar',function(){aPreview(true);});
+  liga('a-pv-desk',function(){aPvModoSet('desk');});
+  liga('a-pv-cel',function(){aPvModoSet('cel');});
   liga('a-copy1',function(){copiar('a-out1','a-cop1');});
   liga('a-copy2',function(){copiar('a-out2','a-cop2');});
   liga('a-copy3',function(){copiar('a-out3','a-cop3');});
