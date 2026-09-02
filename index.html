@@ -636,7 +636,7 @@
           <div class="cor-linha"><input type="color" id="fci-corujadet" value="#075E54"><input type="text" id="fci-corujadet-t" value="#075E54"></div>
           <div class="acoes"><button class="botao" type="button" id="fci-aplicar">Aplicar a paleta às abas</button></div>
           <p class="ajuda" id="fci-estado"></p>
-          <p class="ajuda"><b>Onde cada cor cai:</b> destaque, fundo e texto vão para <b>Checkout</b>, <b>Link de cobrança</b> e <b>Mini loja</b> — as três abas em que esses três campos significam exatamente isso. As duas cores da coruja vão para <b>Captação de leads</b>, <b>Contagem regressiva</b> e <b>Link de cobrança</b>.</p>
+          <p class="ajuda"><b>Onde cada cor cai:</b> destaque, fundo e texto vão para <b>Checkout</b>, <b>Link de cobrança</b>, <b>Mini loja</b> e <b>Agendamento por pacote</b> — as quatro abas em que esses três campos significam exatamente isso. As duas cores da coruja vão para <b>Captação de leads</b>, <b>Contagem regressiva</b> e <b>Link de cobrança</b>.</p>
           <p class="ajuda"><b>O que o botão não encosta:</b> as cores de <b>Bordas com efeito</b>, as cores próprias da <b>Contagem regressiva</b> (fundo, texto, destaque, borda, botão, progresso, urgência) e as da <b>Captação de leads</b> (cabeçalho, card, botão enviar, texto). Medido: são 35 campos de cor no arquivo e só 9 são a mesma coisa — na Leads, <i>c1</i> é o fundo do cabeçalho e <i>c3</i> é o botão enviar, não destaque e texto. Amarrar por nome quebraria aquela aba.</p>
         </fieldset>
       </div>
@@ -4569,9 +4569,9 @@ function parearCor(idCor){
 /* [chave, padrao, rotulo, campos de aba que significam A MESMA COISA, abas]. A quarta coluna e
    a lista inteira do que o botao alcanca -- nao existe uma segunda lista em lugar nenhum. */
 var FCI_PALETA=[
-  ['destaque',    '#075E54','a cor de destaque',   ['u-c1','p-c1','m-c1'],                            'Checkout, Link de cobrança e Mini loja'],
-  ['fundo',       '#ffffff','o fundo do cartão',   ['u-c2','p-c2','m-c2'],                            'Checkout, Link de cobrança e Mini loja'],
-  ['texto',       '#333333','a cor do texto',      ['u-c3','p-c3','m-c3'],                            'Checkout, Link de cobrança e Mini loja'],
+  ['destaque',    '#075E54','a cor de destaque',   ['u-c1','p-c1','m-c1','a-c1'],                     'Checkout, Link de cobrança, Mini loja e Agendamento por pacote'],
+  ['fundo',       '#ffffff','o fundo do cartão',   ['u-c2','p-c2','m-c2','a-c2'],                     'Checkout, Link de cobrança, Mini loja e Agendamento por pacote'],
+  ['texto',       '#333333','a cor do texto',      ['u-c3','p-c3','m-c3','a-c3'],                     'Checkout, Link de cobrança, Mini loja e Agendamento por pacote'],
   ['corujacorpo', '#ffffff','o corpo da coruja',   ['l-corujacorpo','c-corujacorpo','p-corujacorpo'], 'Captação de leads, Contagem regressiva e Link de cobrança'],
   ['corujadet',   '#075E54','os detalhes da coruja',['l-corujadet','c-corujadet','p-corujadet'],      'Captação de leads, Contagem regressiva e Link de cobrança']
 ];
@@ -5001,7 +5001,7 @@ function fciPaletaAplicar(){
   for(i=0;i<FCI_PALETA.length;i++)nomes.push(FCI_PALETA[i][2]);
   if(!confirm('Aplicar a paleta às abas?\n\n'+
     'Isto substitui '+difs.length+' campo(s) de cor: '+fcLista(nomes)+'.\n\n'+
-    'Alcança só onde a cor significa a mesma coisa — Checkout, Link de cobrança e Mini loja (destaque, fundo, texto) e Captação de leads, Contagem regressiva e Link de cobrança (coruja).\n\n'+
+    'Alcança só onde a cor significa a mesma coisa — Checkout, Link de cobrança, Mini loja e Agendamento por pacote (destaque, fundo, texto) e Captação de leads, Contagem regressiva e Link de cobrança (coruja).\n\n'+
     'NÃO encosta nas cores das Bordas com efeito, nem nas cores próprias da Captação de leads e da Contagem regressiva.\n\n'+
     'As cores que estão hoje nas abas não voltam.'))return;
   for(i=0;i<difs.length;i++){
@@ -9009,8 +9009,8 @@ function lPadroes(){
   setRadio('l-icone','identidade');setRadio('l-formato','circulo');
   $('l-corbtn').value='#25D366';$('l-corbtn-t').value='#25D366';
   setRadio('l-btnlado','dir');$('l-btnbaixo').value=92;
-  $('l-m1').value='Ola Foto Certa';$('l-m2').value='meu nome e';
-  $('l-m3').value='Estava olhando a pagina';$('l-m4').value='Tenho um pedido para voce';
+  $('l-m1').value='Olá Foto Certa';$('l-m2').value='meu nome é';
+  $('l-m3').value='Estava olhando a página';$('l-m4').value='Tenho um pedido para você';
   setRadio('l-corujapos','esq');$('l-emoji').value='';
   setRadio('l-corujacor','auto');
   $('l-corujacorpo').value='#ffffff';$('l-corujacorpo-t').value='#ffffff';
@@ -10607,7 +10607,7 @@ function uProdSalvar(){
   var n=$('u-pnome').value.trim();
   if(!n){alert('Informe o nome do produto.');return;}
   var v=parseFloat(String($('u-ppreco').value).replace(',','.'));
-  if(isNaN(v)||v<0){alert('Informe o preco do produto.');return;}
+  if(isNaN(v)||v<0){alert('Informe o preço do produto.');return;}
   var p={nome:n,desc:$('u-pdesc').value.trim(),preco:v,
     opsel:radio('u-opsel')||'unico',opnenhum:radio('u-opnenhum')||'nao',
     qtd:radio('u-pqtd')==='sim',
@@ -10642,7 +10642,10 @@ function uProdRender(){
     var info=document.createElement('div');info.className='info';
     var txt=document.createElement('div');
     txt.style.fontSize='13px';
-    var qtd=(p.ops&&p.ops.length)?(' \u00b7 '+p.ops.length+' opcional'+(p.ops.length>1?'is':'')):' \u00b7 sem opcionais';
+    /* Plural de 'opcional' e 'opcionais' (troca -al por -ais), nao 'opcional'+'is' -- isso
+       dava "2 opcionalis". Corrigido com a palavra inteira trocada, como aPacRender ja faz
+       (13391+, aba Agendamento por pacote). */
+    var qtd=(p.ops&&p.ops.length)?(' \u00b7 '+p.ops.length+(p.ops.length>1?' opcionais':' opcional')):' \u00b7 sem opcionais';
     var nq=uQtdItens(p);
     txt.textContent=p.nome+' — '+uFmt(parseFloat(p.preco)||0)+qtd+(nq?(' \u00b7 '+nq+' com quantidade'):'');
     info.appendChild(txt);
@@ -10702,7 +10705,9 @@ function uCpRender(){
    com aviso, como a chave Pix e o limiar de urgencia. */
 function uCpPctErro(tipo,v){
   if(tipo!=='pct_produto'&&tipo!=='pct_total')return '';
-  if(v>100)return 'Um cupom em porcentagem nao pode passar de 100%: com '+v+'% o desconto e limitado ao subtotal e o pedido inteiro vai a R$ 0,00 -- o cliente ve "Cupom aplicado!" e um total zerado, e o PayPal recusa a ordem. Se a intencao era 15%, corrija o valor; se era realmente dar o pedido, use um cupom de valor fixo igual ao preco.';
+  /* Acentuado, e sem nomear o provedor -- norma de 01/09/2026 e regra 10 do plano da v2
+     (fcPpBotoesSrc, 3653+): nenhum texto nosso nomeia quem processa o pagamento. */
+  if(v>100)return 'Um cupom em porcentagem não pode passar de 100%: com '+v+'% o desconto é limitado ao subtotal e o pedido inteiro vai a R$ 0,00 — o cliente vê "Cupom aplicado!" e um total zerado, e o pagamento recusa a cobrança zerada. Se a intenção era 15%, corrija o valor; se era realmente dar o pedido, use um cupom de valor fixo igual ao preço.';
   return '';
 }
 /* Recusa de codigo repetido -- decisao 13 de 02/09/2026, uniformizada com a aba pac
@@ -13378,8 +13383,22 @@ function aPacLimpar(){
   $('a-pac-salvar').textContent='Adicionar pacote';
   $('a-pac-cancelar').style.display='none';
 }
+/* Corrige o codigo do pacote A VISTA, no proprio campo -- molde de uCpCodAjustar (10527) e da
+   regra do projeto (CLAUDE.md: campo que alimenta a saida se corrige na TELA, em 'change'/
+   'blur', nunca so por dentro de quem le o campo). Antes a normalizacao (tira o que nao e
+   letra/numero/hifen, maiuscula) acontecia so DENTRO de aPacSalvar, sem devolver o valor
+   corrigido ao campo -- o operador digitava "mini 1h" e so descobria que virou "MINI1H"
+   olhando a lista depois de salvar. */
+function aPcodAjustar(){
+  var el=$('a-pcod');if(!el)return false;
+  var cod=String(el.value).trim().replace(/[^A-Za-z0-9-]/g,'').toUpperCase();
+  if(cod===el.value)return false;
+  el.value=cod;
+  return true;
+}
 function aPacSalvar(){
-  var cod=String($('a-pcod').value).trim().replace(/[^A-Za-z0-9-]/g,'').toUpperCase();
+  aPcodAjustar();
+  var cod=String($('a-pcod').value).trim();
   if(!cod){alert('Informe o código do pacote.');return;}
   var nome=$('a-pnome').value.trim();
   if(!nome){alert('Informe o nome do pacote.');return;}
@@ -13415,10 +13434,24 @@ function aPacDel(i){
   else if(aEditIdx>i)aEditIdx--;
   aPacRender();salvarEstado();aPreview();
 }
+/* O campo so aparece se ALGUM opcional de ALGUM pacote estiver marcado "vende por
+   quantidade" -- molde de uQtdLigada/uQtdItens (10481+/10507): o pacote em si nunca tem
+   quantidade propria aqui, so os opcionais dele (aOpRender, o checkbox 'lq'). Sem isto o
+   Checkout e a Mini loja escondiam o campo quando nao ha o que ele configure, e esta aba o
+   deixava sempre visivel. */
+function aQtdLigada(pacotes){
+  var i,j,ops;
+  for(i=0;i<pacotes.length;i++){
+    ops=pacotes[i].ops||[];
+    for(j=0;j<ops.length;j++)if(ops[j].qtd)return true;
+  }
+  return false;
+}
 function aPacRender(){
   var ul=$('a-pac-lista');if(!ul)return;
   ul.innerHTML='';
   $('a-pac-vazio').style.display=aPacotes.length?'none':'block';
+  var elq=$('a-qtdmax-campo');if(elq)elq.style.display=aQtdLigada(aPacotes)?'block':'none';
   aPacotes.forEach(function(p,i){
     var li=document.createElement('li');
     var info=document.createElement('div');info.className='info';
@@ -13488,6 +13521,13 @@ function aRecusa(cfg){
     if(vistosCp[limpo])return 'Os cupons "'+vistosCp[limpo]+'" e "'+cpc+'" têm o mesmo código ("'+limpo+'"). O cliente digitaria um cupom só, e a página não tem como saber qual dos dois cadastros aplicar — troque um dos dois.';
     vistosCp[limpo]=cpc;
   }
+  /* Mesma guarda de uRecusa/mRecusa (10966/17690): pixChaveErro confere o FORMATO da chave
+     (e-mail, telefone, CPF/CNPJ com digito, aleatoria), nao so se o campo esta vazio. Sem
+     ela, uma chave malformada passava direto: as outras tres abas recusavam gerar e apontavam
+     o campo, e esta gerava o codigo com a chave errada -- o banco do cliente recusa o
+     pagamento sem nenhuma mensagem na tela. */
+  var erroChave=pixChaveErro(pixLimpar(fciBruto('chave')),fciBruto('chave'));
+  if(erroChave)return erroChave;
   if(!fciVal('chave')||!fciVal('nomer')||!fciVal('cidade'))return fciRecusa('Preencha a chave Pix, o nome do recebedor e a cidade.');
   if(!fciVal('client'))return fciRecusa('Informe o Client ID do PayPal.');
   if(!fciVal('zapnum'))return fciRecusa('Informe o WhatsApp de destino.');
@@ -14628,63 +14668,25 @@ function aPvDoc(cfg){
   return h;
 }
 /* ===== Tarefa 10: a previa da pagina de obrigado =====
-   A sonda do PayPal desta previa espelha pPvPayPal (15985+ antes desta tarefa), e NAO
-   fcPvSondaPP: a diferenca e estrutural, nao estetica. fcPvSondaPP EXERCITA um onClick de
-   validacao de carrinho que o Checkout e a Mini loja tem e que este bloco -- item unico, sem
-   carrinho, decisao 1 do diario -- nao tem; chama-la aqui mostraria uma linha falsa ("Ao clicar
-   em pagar: erro --") para um gancho que nunca existiu neste gerador. Mesma familia da divida ja
-   registrada na decisao 8 (o pedido ao SDK NAO E fonte compartilhada entre os quatro geradores
-   que o escrevem): a sonda de previa de cada um segue a forma do gerador que ela espelha, e este
-   espelha a /pagar. */
-function aPvObPayPal(){
-  var s='';
-  s+="  var DESENHO_PP='"+escJs(mockPP())+"';\n";
-  s+='  var inserir=document.head.appendChild;\n';
-  s+='  document.head.appendChild=function(n){\n';
-  s+="    if(n&&n.tagName==='SCRIPT'&&/paypal\\.com/.test(String(n.src||''))){\n";
-  s+='      window.paypal={Buttons:function(bt){return {render:function(sel){\n';
-  s+="        var alvo=(typeof sel==='string')?document.querySelector(sel):sel;\n";
-  s+='        if(!alvo)return;\n';
-  s+="        var caixa=document.createElement('div');\n";
-  s+="        caixa.id='a-pv-ob-pp';\n";
-  s+='        caixa.setAttribute(\'style\',\'border:1px dashed #b9b3a4;border-radius:8px;padding:6px 8px 10px\');\n';
-  s+="        alvo.innerHTML='';alvo.appendChild(caixa);\n";
-  s+="        var valor='',descricao='';\n";
-  s+='        try{\n';
-  s+='          var ped=bt.createOrder(null,{order:{create:function(o){return o;}}});\n';
-  s+='          var am=ped.purchase_units[0].amount;\n';
-  s+="          valor=am.value+' '+am.currency_code;\n";
-  s+='          descricao=ped.purchase_units[0].description;\n';
-  s+="        }catch(e){valor='(erro: '+String(e&&e.message||e)+')';}\n";
-  s+="        var eti=document.createElement('div');\n";
-  s+='        eti.setAttribute(\'style\',\'font:600 10px/1.4 -apple-system,BlinkMacSystemFont,sans-serif;color:#8a8375;text-align:center;text-transform:uppercase;letter-spacing:.06em\');\n';
-  s+="        eti.textContent='desenho: o SDK do PayPal nao roda na previa';\n";
-  s+='        caixa.appendChild(eti);\n';
-  s+="        var des=document.createElement('div');des.innerHTML=DESENHO_PP;caixa.appendChild(des);\n";
-  s+="        var med=document.createElement('div');\n";
-  s+="        med.id='a-pv-ob-pp-valor';\n";
-  s+='        med.setAttribute(\'style\',\'margin-top:8px;border-top:1px dashed #d8d2c4;padding-top:7px;font:12px/1.5 -apple-system,BlinkMacSystemFont,sans-serif;color:#555;text-align:left\');\n';
-  s+="        med.textContent='Medido no proprio bloco -- valor que iria na ordem: '+valor+(descricao?(' | descricao: '+descricao):'');\n";
-  s+='        caixa.appendChild(med);\n';
-  s+='      }};}};\n';
-  s+='      setTimeout(function(){if(n.onload)n.onload();},0);\n';
-  s+='      return n;\n';
-  s+='    }\n';
-  s+='    return inserir.call(document.head,n);\n';
-  s+='  };\n';
-  s+='  document.head.appendChild.fcPvSemPayPal=true;\n';
-  return s;
-}
+   Ate a Tarefa 5 da v2, o pedido ao PayPal deste bloco era a quarta copia manuscrita de
+   actions.order.create (decisao 8 do diario), sem onClick nenhum -- e por isso esta sonda
+   tambem era manuscrita, sem exercitar clique. Isso deixou de ser verdade: o bloco passou a
+   consumir fcPpBotoesSrc (3613+), a mesma fonte do Checkout e da Mini loja, que SEMPRE emite
+   onClick com a guarda de total zero (item 6 da revisao pos-v2). A sonda agora usa
+   fcPvSondaPP, a mesma dos outros dois geradores, e a previa volta a mostrar a linha "Ao
+   clicar em pagar: recusa/aceita" -- que ate aqui faltava so nesta. */
 /* O WHATSAPP NAO E NEUTRALIZADO por window.open (o bloco usa <a target="_blank">, nao
    window.open): o mesmo limite ja aceito na previa da /pagar (16033, zapBotao identico). O
    aviso do shim descreve essa consequencia em vez de prometer o que nao entrega.
-   aPvObPayPal() entra como EXTRAS (nao concatenado a parte): e a mesma engrenagem que a
-   propria fcPvShim ja define para "trocas adicionais do ambiente, emitidas logo depois da
-   troca do storage" -- a sonda do PayPal roda DENTRO do IIFE do shim, nao como um segundo
-   bloco solto (aPvObPayPal devolve so as instrucoes, sem as tags de script em volta). */
+   A sonda entra como EXTRAS (nao concatenada a parte): e a mesma engrenagem que a propria
+   fcPvShim ja define para "trocas adicionais do ambiente, emitidas logo depois da troca do
+   storage" -- ela roda DENTRO do IIFE do shim, nao como um segundo bloco solto (fcPvSondaPP
+   devolve so as instrucoes, sem as tags de script em volta). raizId e o id do bloco inteiro
+   (fca-ob-raiz, 14083); msgSel e caixaId casam com secaoCartao (fca-ob-msg, e o id do
+   quadro do desenho, 14507+). */
 function aPvObShim(){
   return fcPvShim({pref:'a',
-    extras:aPvObPayPal(),
+    extras:fcPvSondaPP({ppcor:'gold',raizId:'fca-ob-raiz',msgSel:'fca-ob-msg',caixaId:'a-pv-ob-pp'}),
     semAbrir:true,
     abre:'',
     fecha:' deste quadro. Este bloco nao deveria gravar nada em armazenamento, mas se a troca nao pegou pode estar tocando as chaves reais do navegador -- ou abrindo o WhatsApp numa aba nova. O codigo gerado ao lado nao e afetado.'});
@@ -19173,7 +19175,18 @@ function fccDaAba(a,p,plano,vals){
       }
     }
   }else if(a.id==='pac'){
-    plano.comps.push(fccItem(a,'a-out1','Agendamento por pacote — vitrine','Componente HTML desta página'));
+    /* a-out1 e a VITRINE, uma pagina diferente da pagina de obrigado (a-out3) -- mesma
+       disciplina do t-out1/t-out5: consolida na pagina certa (plano.comps quando o preset
+       geral selecionado NAO e o tipo Pagina de obrigado), ou entra em "fora do Prosite"
+       nomeando o destino -- para nao ser confundida com o componente da pagina de obrigado,
+       o mesmo erro que a linha de identificacao do plano existe para denunciar. */
+    if(p.pagina!=='obrigado'){
+      plano.comps.push(fccItem(a,'a-out1','Agendamento por pacote — vitrine','Componente HTML desta página'));
+    }else{
+      plano.outra.push(fccItem(a,'a-out1','Agendamento por pacote — vitrine',
+        'Componente HTML da página com a vitrine',
+        'Esta página está marcada como <b>Página de obrigado</b> no preset geral. Para consolidar a vitrine, selecione o preset geral da página onde os pacotes aparecem.'));
+    }
     /* a-out2 e o mesmo caso do t-out4, nao do p-out2 -- por isso mora aqui, e nao em FCC_FORA.
        p-out2 e o link de UMA cobranca, que muda a cada uma e nao e passo de montagem. a-out2 e
        passo de montagem que se faz UMA vez: esquece-lo deixa a pagina de obrigado publicada e
@@ -19951,6 +19964,9 @@ prep('Agendamento por pacote','pac',function(){
      campo nunca exibir algo diferente do que aCfg vai usar. */
   if(fcAjustarTodos(A_NUMS))salvarEstado();
   aPacRender();aCpRender();aOpRender();
+  /* correcao a vista do codigo, em 'change'/'blur' -- nunca em 'input', que corrigiria a cada
+     tecla e impediria digitar. Mesmo padrao da chave Pix do painel Identidade. */
+  (function(){var el=$('a-pcod');if(el){el.addEventListener('change',aPcodAjustar);el.addEventListener('blur',aPcodAjustar);}})();
   liga('a-pac-salvar',aPacSalvar);
   liga('a-pac-cancelar',aPacLimpar);
   liga('a-ptestar',aPacTestar);
