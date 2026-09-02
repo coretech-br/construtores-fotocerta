@@ -2339,7 +2339,7 @@
       <label><input type="radio" name="c-fixa" value="fixa" checked><span>Fixa no topo</span></label>
       <label><input type="radio" name="c-fixa" value="fluxo"><span>Rola com a página</span></label>
       </div>
-      <p class="ajuda">A escolha define <b>onde colar o código</b>: fixa vai na <b>Tag Body</b> da página; rolando com a página vai num <b>componente HTML</b> posicionado no topo pelo editor. O título da saída na seção 5 avisa qual dos dois.</p>
+      <p class="ajuda">A escolha define <b>onde colar o código</b>: fixa vai na <b>Tag Body</b> da página; rolando com a página vai num <b>componente HTML</b> posicionado no topo pelo editor. O título da saída na seção 7 avisa qual dos dois.</p>
       <div id="c-fixa-campos">
       <label>Espaço para a barra</label>
       <div class="radios">
@@ -3626,7 +3626,7 @@
         <input type="text" id="a-t1" value="Agende seu ensaio">
         <label for="a-txt-subtitulo">Subtítulo da vitrine <small>(opcional — vazio, nada aparece)</small></label>
         <input type="text" id="a-txt-subtitulo" value="" placeholder="ex.: Pague no Pix e ganhe {pct}% de desconto">
-        <p class="ajuda">Entra logo abaixo do título, antes do passo 1. Onde você escrever <code>{pct}</code>, entra o <b>desconto do Pix</b> configurado na seção 2 — assim ele acompanha sozinho quando você mudar o desconto. Escrever o número à mão faz o subtítulo mentir no dia em que o desconto mudar, sem erro e sem aviso.</p>
+        <p class="ajuda">Entra logo abaixo do título, antes do passo 1. Onde você escrever <code>{pct}</code>, entra o <b>desconto do Pix</b> configurado na seção 1 — assim ele acompanha sozinho quando você mudar o desconto. Escrever o número à mão faz o subtítulo mentir no dia em que o desconto mudar, sem erro e sem aviso.</p>
         <label for="a-t2">Rótulo do passo 1</label>
         <input type="text" id="a-t2" value="Escolha o pacote">
         <label for="a-t3">Rótulo do passo 2</label>
@@ -15519,8 +15519,10 @@ function aBlocoObrigado(cfg){
   c+='  var av=document.createElement("div");av.className="fca-ob-ajuda";area.appendChild(av);\n';
   c+='  var qr=document.createElement("div");qr.className="fca-ob-qr";area.appendChild(qr);\n';
   c+='  var ins=document.createElement("div");ins.className="fca-ob-ajuda";ins.textContent="'+escJsD(cfg.txtPixInstrucao)+'";area.appendChild(ins);\n';
-  c+='  var man=document.createElement("div");man.className="fca-ob-pixmanual";man.textContent="'+escJsD(cfg.txtPixManual)+'";area.appendChild(man);\n';
   c+='  var nota=document.createElement("div");nota.className="fca-ob-ajuda";nota.textContent=TXT_NOTA;area.appendChild(nota);\n';
+  /* DEPOIS da nota, e nao antes: a nota fala do que conferir ANTES de confirmar o pagamento;
+     este aviso fala do que acontece DEPOIS que ele foi feito. */
+  c+='  var man=document.createElement("div");man.className="fca-ob-pixmanual";man.textContent="'+escJsD(cfg.txtPixManual)+'";area.appendChild(man);\n';
   c+='  b.appendChild(area);\n';
   c+='  cartao.appendChild(b);\n';
   c+='  var payloadAtual="";\n';
@@ -21225,11 +21227,14 @@ prep('Agendamento por pacote','pac',function(){
    fcAjustarTodos de cada aba -- depois dos passos "desenhar a aba com o estado restaurado".
    Lendo antes, a barra compararia uma tela ainda por corrigir com o preset gravado e diria
    "alterado" numa ferramenta recem-aberta em que ninguem mexeu. */
-/* As secoes de texto das abas grandes nascem RECOLHIDAS, e a mesma passada confere se o padrao
-   de fabrica de cada campo bate nos dois lugares onde ele esta escrito (ver fcTxtFabricaDiverge).
+/* As secoes de texto nascem RECOLHIDAS, e a mesma passada confere se o padrao de fabrica de
+   cada campo bate nos dois lugares onde ele esta escrito (ver fcTxtFabricaDiverge).
    Passo proprio, com rotulo proprio: se ele falhar, a barra vermelha precisa dizer que foram os
-   textos -- as abas continuam funcionando, so com as secoes abertas. */
-prep('Textos configuraveis','uni loja',function(){
+   textos -- as abas continuam funcionando, so com as secoes abertas.
+   A lista de abas cresceu com a Etapa 3 (03/09/2026): as OITO tabelas de texto passam por aqui,
+   entao a falha alcanca as oito -- deixar 'uni loja' faria a barra apontar duas abas por um
+   defeito que pode estar em qualquer uma das oito. */
+prep('Textos configuraveis','slide leads tidy uni cnt cob loja pac',function(){
   fcdLigar();
   var d=fcTxtFabricaDiverge();
   if(d.length)throw new Error('o padrao de fabrica destes campos discorda entre o value= do HTML e a tabela da aba: '+d.join(', '));
