@@ -10700,9 +10700,20 @@ function uCpPctErro(tipo,v){
   if(v>100)return 'Um cupom em porcentagem nao pode passar de 100%: com '+v+'% o desconto e limitado ao subtotal e o pedido inteiro vai a R$ 0,00 -- o cliente ve "Cupom aplicado!" e um total zerado, e o PayPal recusa a ordem. Se a intencao era 15%, corrija o valor; se era realmente dar o pedido, use um cupom de valor fixo igual ao preco.';
   return '';
 }
+/* Recusa de codigo repetido -- decisao 13 de 02/09/2026, uniformizada com a aba pac
+   (aCpAchaRepetido, 13268+): sem isto, dois cupons com o mesmo codigo eram aceitos em
+   silencio e o carrinho aplicava sempre o PRIMEIRO que batesse -- o segundo nunca era
+   encontrado. */
+function uCpAchaRepetido(cod,ignorar){
+  var i;
+  for(i=0;i<uCps.length;i++){if(i!==ignorar&&uCps[i].codigo===cod)return uCps[i].codigo;}
+  return '';
+}
 function uCpAdd(){
   var cod=$('u-cp-cod').value.trim().toUpperCase();
   if(!cod){alert('Informe o codigo do cupom.');return;}
+  var repetido=uCpAchaRepetido(cod,-1);
+  if(repetido){alert('Já existe um cupom com o código "'+cod+'". O cliente digitaria um código só, e a página não tem como saber qual dos dois cadastros aplicar — escolha outro código ou edite o cupom já existente na lista.');return;}
   var v=parseFloat(String($('u-cp-valor').value).replace(',','.'));
   if(isNaN(v)||v<=0){alert('Informe o valor do desconto (maior que zero).');return;}
   var ePct=uCpPctErro(radio('u-cp-tipo')||'pct_total',v);
@@ -10943,7 +10954,7 @@ function uCfg(){
    uGerar, que e o gesto deliberado do operador -- a previa roda a cada tecla e nao pode
    reescrever campo nenhum. */
 function uRecusa(cfg){
-  var i,cpv,cpc,cpe;
+  var i,cpv,cpc,cpe,cpvisto,vistosCp={};
   if(!cfg.prods.length)return 'Cadastre ao menos um produto.';
   if(cfg.usaPP&&!cfg.client)return fciRecusa('Informe o Client ID do PayPal.');
   if(cfg.usaPix){
@@ -10966,6 +10977,13 @@ function uRecusa(cfg){
     if(isNaN(cpv)||cpv<=0)return 'O cupom "'+cpc+'" esta com o valor do desconto vazio ou zerado. Ele seria entregue no codigo como desconto de zero: o cliente digitaria o cupom, veria "Cupom aplicado!" e "Desconto - R$ 0,00", e o total nao mudaria. Preencha o valor ou remova o cupom.';
     cpe=uCpPctErro(cfg.cps[i].tipo,cpv);
     if(cpe)return 'Cupom "'+cpc+'": '+cpe;
+    /* Codigo repetido tambem aqui, e nao so no cadastro (uCpAdd) -- decisao 13: a lista se
+       edita por dentro (uCpCodAjustar), e apagar/alterar um codigo la nao passa pelo
+       cadastro. Comparacao ja ignora maiuscula/minuscula e espacos das pontas: cpc chega
+       aqui aparado, e os codigos gravados ja sao maiusculos. */
+    cpvisto=cpc.toUpperCase();
+    if(vistosCp[cpvisto])return 'Os cupons "'+vistosCp[cpvisto]+'" e "'+cpc+'" têm o mesmo código ("'+cpvisto+'"). O cliente digitaria um cupom só, e a página não tem como saber qual dos dois cadastros aplicar — troque um dos dois.';
+    vistosCp[cpvisto]=cpc;
   }
 
   /* Sinal fixo acima do maior pedido possivel: o carrinho nasceria com todo pedido recusado.
@@ -17331,9 +17349,20 @@ function mCpPctErro(tipo,v){
   if((tipo==='pct_total'||tipo==='pct_produto')&&v>100)return 'desconto de '+v+'% zera o pedido (o maximo e 100%).';
   return '';
 }
+/* Recusa de codigo repetido -- decisao 13 de 02/09/2026, uniformizada com a aba pac
+   (aCpAchaRepetido, 13268+): sem isto, dois cupons com o mesmo codigo eram aceitos em
+   silencio e o carrinho aplicava sempre o PRIMEIRO que batesse -- o segundo nunca era
+   encontrado. */
+function mCpAchaRepetido(cod,ignorar){
+  var i;
+  for(i=0;i<mCps.length;i++){if(i!==ignorar&&mCps[i].codigo===cod)return mCps[i].codigo;}
+  return '';
+}
 function mCpAdd(){
   var cod=String($('m-cp-cod').value).trim().toUpperCase();
   if(!cod){alert('Informe o codigo do cupom.');return;}
+  var repetido=mCpAchaRepetido(cod,-1);
+  if(repetido){alert('Já existe um cupom com o código "'+cod+'". O cliente digitaria um código só, e a página não tem como saber qual dos dois cadastros aplicar — escolha outro código ou edite o cupom já existente na lista.');return;}
   var v=parseFloat(String($('m-cp-valor').value).replace(',','.'));
   if(isNaN(v)||v<=0){alert('Informe o valor do desconto do cupom.');return;}
   var tipo=radio('m-cp-tipo')||'pct_total',e=mCpPctErro(tipo,v);
@@ -17615,7 +17644,7 @@ function mCfg(){
    de ser prova do codigo. Nao mexe no DOM de proposito -- a correcao a vista e de mGerar, que e
    o gesto deliberado do operador; a previa roda a cada tecla. */
 function mRecusa(cfg){
-  var i,cpv,cpc,cpe,tmax;
+  var i,cpv,cpc,cpe,tmax,cpvisto,vistosCp={};
   if(!cfg.cod)return 'Informe o codigo da loja. Ele identifica o carrinho no navegador do cliente (e a chave do armazenamento) e vira o comeco do identificador do pedido no extrato -- sem ele, duas lojas no mesmo site dividiriam o mesmo carrinho.';
   if(!/^[A-Za-z0-9_-]+$/.test(cfg.cod))return 'O codigo da loja aceita apenas letras sem acento, numeros, hifen e sublinhado. Ele vira chave de armazenamento e identificador de pedido: espaco e acento ali produzem um identificador diferente do que voce esta lendo.';
   if(!cfg.prods.length)return 'Cadastre ao menos um produto.';
@@ -17636,6 +17665,13 @@ function mRecusa(cfg){
     if(isNaN(cpv)||cpv<=0)return 'O cupom "'+cpc+'" esta com o valor do desconto vazio ou zerado. Ele seria entregue no codigo como desconto de zero: o cliente digitaria o cupom, veria "Cupom aplicado!" e "Desconto - R$ 0,00", e o total nao mudaria. Preencha o valor ou remova o cupom.';
     cpe=mCpPctErro(cfg.cps[i].tipo,cpv);
     if(cpe)return 'Cupom "'+cpc+'": '+cpe;
+    /* Codigo repetido tambem aqui, e nao so no cadastro (mCpAdd) -- decisao 13: a lista se
+       edita por dentro (mCpCodAjustar), e apagar/alterar um codigo la nao passa pelo
+       cadastro. Comparacao ja ignora maiuscula/minuscula e espacos das pontas: cpc chega
+       aqui aparado, e os codigos gravados ja sao maiusculos. */
+    cpvisto=cpc.toUpperCase();
+    if(vistosCp[cpvisto])return 'Os cupons "'+vistosCp[cpvisto]+'" e "'+cpc+'" têm o mesmo código ("'+cpvisto+'"). O cliente digitaria um cupom só, e a página não tem como saber qual dos dois cadastros aplicar — troque um dos dois.';
+    vistosCp[cpvisto]=cpc;
   }
   /* Sinal fixo acima do maior pedido possivel: aqui o "maior pedido" e a loja INTEIRA no
      carrinho, cada item no teto da quantidade. Acima disso nenhum cliente conseguiria pagar. */
