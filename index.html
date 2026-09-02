@@ -13434,9 +13434,192 @@ function aEnderecos(cfg){
   return t;
 }
 
-/* Padrao do gerador, copiado de uGerar (10784+, ver o contrato do plano). A Tarefa 7 poe
-   $('a-out3').value=... antes do aPreview(true) -- ela ainda nao existe, entao a saida 3
-   continua vazia por enquanto. */
+/* ===== Tarefa 7: a pagina de obrigado -- leitura do pacote, recusa cordial e marcadores =====
+   Modelo lido antes de escrever: tObBloco (9764+), para a troca de marcadores -- TreeWalker
+   sobre nos de texto, pulando SCRIPT/STYLE/TEXTAREA/INPUT/SELECT/NOSCRIPT, nodeValue e NUNCA
+   innerHTML, mais o MutationObserver de 5s para conteudo que o tema montar tarde. O que chega
+   pelo endereco e entrada de fora (qualquer pessoa edita a URL): escrito como marcacao, um
+   nome poderia virar script nesta pagina -- a mesma razao que ja levou tObBloco a nunca usar
+   innerHTML.
+
+   O QUE E DIFERENTE de tObBloco, e por isso nao e a mesma fonte: aquela pagina tem um campo de
+   FORMATO_DATA (comoveio/curto/extenso/extensodia, escolhido pelo operador). Esta aba nao
+   ganhou esse campo (fora do contrato da Tarefa 1) -- {{quando}} sai exatamente como chegou na
+   URL, sem reescrita nenhuma. E o mesmo texto reserva (vazio) para os sete marcadores: a aba
+   nao tem campo para configura-lo por marcador, ao contrario de T_OB_VARS/t-ob-fb-*. Registrado
+   aqui porque a spec e o plano mencionam "texto reserva configuravel" sem que a Tarefa 1 tenha
+   aberto os campos correspondentes -- decisao pragmatica desta rodada, nao esquecimento.
+
+   OS DOIS TRABALHOS SAO INDEPENDENTES POR CONSTRUCAO (autorevisao do plano, secao final): a
+   troca de marcadores mexe no texto que o dono ja escreveu na pagina; o pagamento (Tarefa 8)
+   monta o proprio componente do zero, dentro de #fca-ob-raiz. Se o dono nao escrever marcador
+   nenhum na pagina, trocar() nao acha "{{" em nenhum no de texto e nao faz nada -- e o
+   pagamento aparece do mesmo jeito. */
+function aBlocoObrigado(cfg){
+  var pacs=cfg.pacotes.map(function(p){
+    var preco=parseFloat(String(p.preco).replace(',','.'))||0;
+    return "  {cod:'"+escJs(p.cod)+"', nome:'"+escJs(p.nome)+"', dur:'"+escJs(p.dur)+"', preco:"+preco.toFixed(2)+
+      ", inclui:'"+escJs(p.inclui)+"', link:'"+escJs(p.link)+"'}";
+  }).join(',\n');
+
+  var c='';
+  c+='<!-- ============================================================\n';
+  c+='     FOTO CERTA - PAGINA DE OBRIGADO DO AGENDAMENTO POR PACOTE\n';
+  c+='     ONDE COLAR: componente HTML da pagina de obrigado do TidyCal\n';
+  c+='     Escreva os marcadores no texto normal da pagina ({{nome}}, {{data}}, {{hora}},\n';
+  c+='     {{quando}}, {{pacote}}, {{duracao}}, {{valor}}); este script os troca pelos dados\n';
+  c+='     do agendamento e monta o pagamento (Pix ou cartao) do pacote identificado.\n';
+  c+='     Gerado pela ferramenta em prosite.fotocerta.com.br\n';
+  c+='     ============================================================ -->\n\n';
+  c+='<div class="fca-ob-raiz" id="fca-ob-raiz"></div>\n\n';
+
+  /* ===== CSS, dentro do proprio HTML do componente -- nunca no campo CSS Customizado, que so
+     aceita propriedades soltas (Manual do Prosite). Mesma familia fca- da vitrine (decisao 4 do
+     diario: prefixo unico para as duas saidas desta aba), com o sub-prefixo fca-ob- para nao
+     colidir com as classes de fca-raiz -- ainda que nunca apareçam na mesma pagina. */
+  c+='<sty'+'le>\n';
+  c+='.fca-ob-raiz{max-width:480px;margin:0 auto;text-align:left;font-family:inherit;color:var(--fca-ob-texto,#333)}\n';
+  c+='.fca-ob-raiz *{text-align:left;box-sizing:border-box}\n';
+  c+='.fca-ob-cartao{background:var(--fca-ob-fundo,#fff);border:1px solid rgba(0,0,0,.10);border-radius:14px;padding:18px 18px 20px;box-shadow:0 2px 12px rgba(0,0,0,.06)}\n';
+  c+='.fca-ob-titulo{font-size:18px;font-weight:700;color:var(--fca-ob-destaque,#0F3A30);margin:0 0 12px;text-align:left}\n';
+  c+='.fca-ob-resumo-nome{font-size:15px;font-weight:700;margin:0 0 2px;text-align:left}\n';
+  c+='.fca-ob-resumo-dur{font-size:12px;color:#777;margin:0 0 12px;text-align:left}\n';
+  c+='.fca-ob-preco-linha1{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin:0 0 4px;text-align:left}\n';
+  c+='.fca-ob-preco-valor{font-size:26px;font-weight:800;color:var(--fca-ob-destaque,#0F3A30)}\n';
+  c+='.fca-ob-selo{font-size:11px;font-weight:700;color:#1e7e34;background:#e6f4ea;border-radius:999px;padding:2px 8px}\n';
+  c+='.fca-ob-preco-linha2{font-size:13px;color:#777;margin:0 0 14px;text-align:left}\n';
+  c+='.fca-ob-bloco{border-top:1px solid rgba(0,0,0,.10);padding-top:14px;margin-top:14px}\n';
+  c+='.fca-ob-rot{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--fca-ob-destaque,#0F3A30);margin:0 0 8px;text-align:left}\n';
+  c+='.fca-ob-ajuda{font-size:12px;line-height:1.5;opacity:.75;margin:8px 0 0;text-align:left}\n';
+  c+='.fca-ob-cod{width:100%;height:74px;font:11px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace;border:1px solid rgba(0,0,0,.18);border-radius:8px;padding:8px;resize:none;background:#fff;color:#333}\n';
+  c+='.fca-ob-bt{display:inline-block;border:0;border-radius:8px;padding:11px 16px;font-size:14px;font-weight:700;cursor:pointer;background:var(--fca-ob-destaque,#0F3A30);color:var(--fca-ob-fundo,#fff);margin:8px 8px 0 0;text-decoration:none;text-align:center}\n';
+  c+='.fca-ob-bt2{background:transparent;color:var(--fca-ob-destaque,#0F3A30);border:1px solid var(--fca-ob-destaque,#0F3A30)}\n';
+  c+='.fca-ob-qr{margin:12px 0 0;min-height:200px}\n';
+  c+='.fca-ob-qr img,.fca-ob-qr canvas{display:block;max-width:100%;height:auto}\n';
+  c+='.fca-ob-aviso{font-size:12px;margin:8px 0 0;color:#8C1D18;font-weight:700;text-align:left}\n';
+  c+='.fca-ob-recusa-msg{font-size:15px;line-height:1.6;margin:0 0 12px;text-align:left}\n';
+  c+='.fca-ob-sep{display:flex;align-items:center;gap:10px;margin:16px 0 0;font-size:12px;font-weight:700;letter-spacing:.10em;color:var(--fca-ob-destaque,#0F3A30);opacity:.7}\n';
+  c+='.fca-ob-sep:before,.fca-ob-sep:after{content:"";flex:1 1 auto;height:1px;background:rgba(0,0,0,.14)}\n';
+  c+='.fca-ob-semtopo{border-top:0;margin-top:6px;padding-top:0}\n';
+  c+='.fca-ob-pp{margin-top:10px}\n';
+  c+='@media(prefers-reduced-motion: reduce){\n  .fca-ob-cartao *{transition:none}\n}\n';
+  c+='</sty'+'le>\n\n';
+
+  c+='<scr'+'ipt>\n(function(){\n';
+  c+='/* ===== customizacao ===== */\n';
+  c+='var PACOTES=[\n'+pacs+'\n];\n';
+  c+="var PREFIXO='"+escJs(cfg.prefixo)+"';   /* comeca o identificador de conciliacao */\n";
+  c+='var DESCONTO_PIX='+cfg.descpix+';\n';
+  c+='var PARCELAS='+cfg.parcelas+';\n';
+  c+="var CHAVE_PIX='"+escJs(fciVal('chave'))+"';\n";
+  c+="var NOME_RECEBEDOR='"+escJs(fciVal('nomer'))+"';\n";
+  c+="var CIDADE='"+escJs(fciVal('cidade'))+"';\n";
+  c+="var CLIENT_ID='"+escJs(fciVal('client'))+"';\n";
+  c+="var WHATSAPP='"+escJs(fciDigitos('zapnum'))+"';\n";
+  c+="var COR_DESTAQUE='"+cfg.c1+"';\n";
+  c+="var COR_FUNDO='"+cfg.c2+"';\n";
+  c+="var COR_TEXTO='"+cfg.c3+"';\n";
+  c+="var TXT_TITULO='"+escJs(cfg.t5)+"';\n";
+  /* Recado cordial da recusa -- sem pac, ou com codigo desconhecido, nenhum pagamento aparece.
+     Nao ganhou campo proprio na aba (fora do contrato da Tarefa 1): o padrao da spec e o unico
+     texto, hoje. */
+  c+="var TXT_RECUSA='Não encontramos seu agendamento nesta página. Se você acabou de agendar, use o link que aparece no e-mail de confirmação — ou fale com a gente que resolvemos na hora.';\n\n";
+
+  c+='/* ============================================================\n   Daqui para baixo nao precisa mexer\n   ============================================================ */\n\n';
+  c+=fcMoedaFmtGer(true);
+  c+=FC_PARAM_SRC;
+
+  c+='var raiz=document.getElementById("fca-ob-raiz");\n';
+  c+='if(raiz){\n';
+  c+='  raiz.style.setProperty("--fca-ob-destaque",COR_DESTAQUE);\n';
+  c+='  raiz.style.setProperty("--fca-ob-fundo",COR_FUNDO);\n';
+  c+='  raiz.style.setProperty("--fca-ob-texto",COR_TEXTO);\n';
+  c+='}\n\n';
+
+  c+='/* ===== 1. le ?pac= e acha o pacote no catalogo -- SEM diferenciar maiusculas =====\n';
+  c+='   Comparacao por igualdade de string, nunca por regex/eval sobre o parametro: um pac\n';
+  c+='   hostil (<script>, ../, acentos) so pode deixar de casar com nenhum codigo cadastrado,\n';
+  c+='   nunca ser interpretado. */\n';
+  c+='function acharPacote(codigo){\n';
+  c+='  var i,alvo=String(codigo||"").toLowerCase();\n';
+  c+='  if(!alvo)return null;\n';
+  c+='  for(i=0;i<PACOTES.length;i++)if(String(PACOTES[i].cod).toLowerCase()===alvo)return PACOTES[i];\n';
+  c+='  return null;\n';
+  c+='}\n';
+  c+='var QUANDO=param("quando");\n';
+  c+='var PAC=acharPacote(param("pac"));\n';
+  c+="var CODIGO_PEDIDO='';   /* Tarefa 8 preenche com o identificador de conciliacao */\n\n";
+
+  c+='/* ===== 2. troca de marcadores -- copia fiel do mecanismo de tObBloco (9764+) ===== */\n';
+  c+='var CAMPOS=[\n';
+  c+='  {marca:"nome",    valor:param("nome")},\n';
+  c+='  {marca:"data",    valor:param("data")},\n';
+  c+='  {marca:"hora",    valor:param("hora")},\n';
+  c+='  {marca:"quando",  valor:QUANDO},\n';
+  c+='  {marca:"pacote",  valor:PAC?PAC.nome:""},\n';
+  c+='  {marca:"duracao", valor:PAC?PAC.dur:""},\n';
+  c+='  {marca:"valor",   valor:PAC?moedaFmt(PAC.preco):""}\n';
+  c+='];\n';
+  c+='var PULAR={SCRIPT:1,STYLE:1,TEXTAREA:1,INPUT:1,SELECT:1,NOSCRIPT:1};\n';
+  c+='/* A troca mexe SO no texto: nunca innerHTML. O que chega vem do endereco, que qualquer\n';
+  c+='   pessoa edita -- escrito como marcacao, um nome poderia virar script nesta pagina. */\n';
+  c+='function trocarMarcadores(raizTexto){\n';
+  c+='  if(!raizTexto)return;\n';
+  c+='  var and=document.createTreeWalker(raizTexto,NodeFilter.SHOW_TEXT,null,false),n,t,i,ic,novo;\n';
+  c+='  var lista=[];\n';
+  c+='  while((n=and.nextNode()))lista.push(n);\n';
+  c+='  for(i=0;i<lista.length;i++){\n';
+  c+='    n=lista[i];\n';
+  c+='    if(!n.parentNode||PULAR[n.parentNode.nodeName])continue;\n';
+  c+='    t=n.nodeValue;\n';
+  c+='    if(t.indexOf("{{")<0)continue;\n';
+  c+='    novo=t;\n';
+  c+='    for(ic=0;ic<CAMPOS.length;ic++)\n';
+  c+='      novo=novo.split("{{"+CAMPOS[ic].marca+"}}").join(CAMPOS[ic].valor);\n';
+  c+='    if(novo!==t)n.nodeValue=novo;\n';
+  c+='  }\n';
+  c+='}\n';
+  c+='/* O tema pode montar componentes DEPOIS que este script roda. A troca passa uma vez ao\n';
+  c+='   carregar e reobserva por um instante curto -- o observador se desliga sozinho. */\n';
+  c+='function comecarMarcadores(){\n';
+  c+='  trocarMarcadores(document.body);\n';
+  c+='  if(!window.MutationObserver)return;\n';
+  c+='  var ob=new MutationObserver(function(muts){\n';
+  c+='    var k;\n';
+  c+='    for(k=0;k<muts.length;k++)if(muts[k].addedNodes.length){trocarMarcadores(document.body);return;}\n';
+  c+='  });\n';
+  c+='  ob.observe(document.body,{childList:true,subtree:true});\n';
+  c+='  setTimeout(function(){ob.disconnect();},5000);\n';
+  c+='}\n';
+  c+='if(document.body)comecarMarcadores();\n';
+  c+='else document.addEventListener("DOMContentLoaded",comecarMarcadores);\n\n';
+
+  c+='/* ===== 3. o pagamento -- Tarefa 8 preenche montar() ===== */\n';
+  c+='function recusaCordial(){\n';
+  c+='  var cartao=document.createElement("div");cartao.className="fca-ob-cartao";\n';
+  c+='  var msg=document.createElement("div");msg.className="fca-ob-recusa-msg";msg.textContent=TXT_RECUSA;\n';
+  c+='  cartao.appendChild(msg);\n';
+  c+='  if(WHATSAPP){\n';
+  c+='    var zapMsg="Olá! Não encontrei meu agendamento na página de pagamento.";\n';
+  c+='    var zap=document.createElement("a");zap.className="fca-ob-bt fca-ob-bt2";zap.textContent="Falar no WhatsApp";\n';
+  c+='    zap.setAttribute("href","https://wa.me/"+WHATSAPP+"?text="+encodeURIComponent(zapMsg));\n';
+  c+='    zap.setAttribute("target","_blank");zap.setAttribute("rel","noopener noreferrer");\n';
+  c+='    cartao.appendChild(zap);\n';
+  c+='  }\n';
+  c+='  raiz.appendChild(cartao);\n';
+  c+='}\n';
+  c+='function montar(){\n';
+  c+='  if(!raiz)return;\n';
+  c+='  raiz.innerHTML="";\n';
+  c+='  if(!PAC){recusaCordial();return;}\n';
+  c+='  /* Tarefa 8 monta o cartao de pagamento aqui. */\n';
+  c+='}\n';
+  c+='try{montar();}catch(e){try{raiz.innerHTML="";recusaCordial();}catch(e2){}}\n';
+  c+='})();\n</scr'+'ipt>';
+  return c;
+}
+
+/* Padrao do gerador, copiado de uGerar (10784+, ver o contrato do plano). */
 function aGerar(){
   if(fcPixChaveAjustar('fci-chave'))fciGravar();
   if(fcAjustarTodos(A_NUMS))salvarEstado();
@@ -13445,6 +13628,7 @@ function aGerar(){
   if(recusa){alert(recusa);fciApontarSe(recusa);return;}
   $('a-out1').value=aBlocoVitrine(cfg);
   $('a-out2').value=aEnderecos(cfg);
+  $('a-out3').value=aBlocoObrigado(cfg);
   aPreview(true);
   fccMarcar('pac');
 }
@@ -17948,10 +18132,6 @@ function fccDaAba(a,p,plano,vals){
       }
     }
   }else if(a.id==='pac'){
-    /* So a-out1 entra aqui. a-out3 (o bloco da pagina de obrigado) e consolidada na Tarefa 7,
-       junto com o gerador que a produz -- ela nao existe ainda nesta entrega. Consolida-la
-       aqui faria esta tarefa depender de aBlocoObrigado, que so existe na Entrega 2, e o passo
-       de prova desta tarefa (fccOrfas sem acusar orfa, com a-out3 vazia) ficaria inexecutavel. */
     plano.comps.push(fccItem(a,'a-out1','Agendamento por pacote — vitrine','Componente HTML desta página'));
     /* a-out2 e o mesmo caso do t-out4, nao do p-out2 -- por isso mora aqui, e nao em FCC_FORA.
        p-out2 e o link de UMA cobranca, que muda a cada uma e nao e passo de montagem. a-out2 e
@@ -17961,6 +18141,18 @@ function fccDaAba(a,p,plano,vals){
     plano.outra.push(fccItem(a,'a-out2','Agendamento por pacote — saída 2: os endereços de redirecionamento',
       'Configuração do TidyCal — campo “Redirect to custom page after booking”, um em cada tipo de agendamento',
       'Não é campo do Prosite: vai no próprio TidyCal, um endereço por pacote.'));
+    /* a-out3 e a pagina de OBRIGADO -- uma pagina diferente da vitrine (a-out1). Mesma
+       disciplina do t-out5: consolida na pagina certa (plano.comps quando o preset geral
+       selecionado E o tipo Pagina de obrigado), ou entra em "fora do Prosite" nomeando o
+       destino -- para nao ser confundida com o componente de OUTRA pagina, o mesmo erro que a
+       linha de identificacao do plano existe para denunciar. */
+    if(p.pagina==='obrigado'){
+      plano.comps.push(fccItem(a,'a-out3','Agendamento por pacote — página de obrigado','Componente HTML desta página'));
+    }else{
+      plano.outra.push(fccItem(a,'a-out3','Agendamento por pacote — página de obrigado',
+        'Componente HTML da página de obrigado',
+        'É a página para onde o TidyCal redireciona depois do agendamento. Para consolidá-la, selecione o preset geral dessa página — o tipo <b>Página de obrigado</b>.'));
+    }
   }
 }
 /* Esta aba ainda tem ALGUM codigo na tela? Existe por causa da contradicao que o aviso de
