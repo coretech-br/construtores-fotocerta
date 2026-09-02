@@ -3062,10 +3062,71 @@
   <div class="grade"><div><fieldset><legend>Cadastro</legend></fieldset></div></div>
 
   <div class="secao"><span class="secao-n">2</span> Página de obrigado e pagamento</div>
-  <div class="grade"><div><fieldset><legend>Configuração</legend></fieldset></div></div>
+  <div class="grade">
+    <div>
+      <fieldset>
+        <legend>Página de obrigado</legend>
+        <label for="a-urlobrigado">Endereço da página de obrigado</label>
+        <input type="text" id="a-urlobrigado" value="" placeholder="https://www.fotocerta.com.br/obrigado">
+        <p class="ajuda">Se você mudar o preço de um pacote, quem agendou antes e pagar depois verá o preço novo. O preço mora no código da página, não no endereço — foi assim que se evitou que o cliente pudesse editá-lo na barra de endereço.</p>
+        <label for="a-prefixo">Prefixo do identificador de conciliação <small>(aparece no txid do Pix e no extrato)</small></label>
+        <input type="text" id="a-prefixo" value="" placeholder="ex.: FC">
+        <label for="a-prazoh">Prazo da reserva <small>(horas; contadas a partir da primeira visita à página de obrigado)</small></label>
+        <input type="number" id="a-prazoh" value="24" min="1" max="720" step="1">
+      </fieldset>
+    </div>
+    <div>
+      <fieldset>
+        <legend>Pagamento</legend>
+        <label for="a-descpix">Desconto no Pix <small>(percentual; 0 = sem desconto)</small></label>
+        <input type="number" id="a-descpix" value="5" min="0" max="90" step="0.5">
+        <label for="a-parcelas">Parcelas no cartão</label>
+        <input type="number" id="a-parcelas" value="1" min="1" max="12" step="1">
+        <p class="ajuda">Este número é uma promessa sobre o que o cliente vai encontrar no cartão, e quem decide isso é a operadora — a ferramenta não tem como conferir. Deixe em 1 até confirmar no PayPal quantas parcelas a sua conta oferece. O valor da parcela é calculado dividindo o preço, e afirma parcelamento sem juros.</p>
+        <p class="ajuda">Os dois botões de cartão são desenhados pelo PayPal, e o texto e a marca deles são do PayPal — isso não dá para mudar. Em todo o resto da página, o cliente lê apenas "no cartão".</p>
+      </fieldset>
+    </div>
+  </div>
 
   <div class="secao"><span class="secao-n">3</span> Aparência e textos</div>
-  <div class="grade"><div><fieldset><legend>Cores</legend></fieldset></div></div>
+  <div class="grade">
+    <div>
+      <fieldset>
+        <legend>Cores</legend>
+        <label>Cor de destaque</label>
+        <div class="cor-linha"><input type="color" id="a-c1" value="#0F3A30"><input type="text" id="a-c1-t" value="#0F3A30"></div>
+        <label>Fundo do cartão</label>
+        <div class="cor-linha"><input type="color" id="a-c2" value="#ffffff"><input type="text" id="a-c2-t" value="#ffffff"></div>
+        <label>Cor do texto</label>
+        <div class="cor-linha"><input type="color" id="a-c3" value="#333333"><input type="text" id="a-c3-t" value="#333333"></div>
+      </fieldset>
+    </div>
+    <div>
+      <fieldset>
+        <legend>Textos</legend>
+        <label for="a-t1">Título da vitrine</label>
+        <input type="text" id="a-t1" value="Agende seu ensaio">
+        <label for="a-t2">Rótulo do passo 1</label>
+        <input type="text" id="a-t2" value="Escolha o pacote">
+        <label for="a-t3">Rótulo do passo 2</label>
+        <input type="text" id="a-t3" value="Escolha o dia e o horário">
+        <label for="a-t4">Botão de trocar de pacote</label>
+        <input type="text" id="a-t4" value="Trocar pacote">
+        <label for="a-t5">Título da página de obrigado</label>
+        <input type="text" id="a-t5" value="Tudo certo!">
+      </fieldset>
+      <fieldset>
+        <legend>Altura do calendário</legend>
+        <p class="ajuda">Medidas calibradas em produção, com o formulário do TidyCal aberto. São o mesmo par usado na aba Agendamento TidyCal — não precisam mudar a não ser que o seu formulário seja diferente do padrão.</p>
+        <label for="a-altdesk">Altura com o modal aberto — desktop <small>(pixels)</small></label>
+        <input type="number" id="a-altdesk" value="2350" min="800" max="6000" step="50">
+        <label for="a-altmob">Altura com o modal aberto — celular <small>(pixels)</small></label>
+        <input type="number" id="a-altmob" value="2700" min="800" max="6000" step="50">
+        <label for="a-largmob">Largura de corte do modo celular <small>(pixels, de 320 a 1024)</small></label>
+        <input type="number" id="a-largmob" value="700" min="320" max="1024" step="10">
+      </fieldset>
+    </div>
+  </div>
 
   <div class="secao"><span class="secao-n">4</span> Biblioteca de presets</div>
   <div class="grade" id="fcp-a-box"></div>
@@ -4201,6 +4262,7 @@ var CORES_LIVRES=[['l-corbtn','#25D366'],['l-c1','#075E54'],['l-c2','#ffffff'],[
   ['c-corujacorpo','#FDFBF6'],['c-corujadet','#FFC94A'],['c-curg','#8C1D18'],
   ['p-c1','#075E54'],['p-c2','#ffffff'],['p-c3','#333333'],
   ['p-corujacorpo','#ffffff'],['p-corujadet','#075E54'],
+  ['a-c1','#0F3A30'],['a-c2','#ffffff'],['a-c3','#333333'],
   /* As cinco da PALETA global entram na mesma lista, e nao numa segunda lista dentro do bloco
      da identidade: a correcao a vista e a mesma correcao, e duas listas divergiriam no dia em
      que uma cor nova entrasse so numa delas. Elas nao sao alcancadas por fcCoresAjustar (que
@@ -4230,6 +4292,7 @@ function fcCorRedesenhar(idBase){
   if(p==='c-'){cPreview(true);return;}
   if(p==='p-'){pPreview(true);return;}
   if(p==='m-'){mPreview(true);return;}
+  if(p==='a-'){aPreview(true);return;}
 }
 document.addEventListener('input',salvarEstado);
 document.addEventListener('change',salvarEstado);
@@ -12904,17 +12967,15 @@ function ePresetDepois(){
    docs/specs/2026-09-02-agendamento-por-pacote-design.md e o plano em
    docs/superpowers/plans/2026-09-02-agendamento-por-pacote.md.
 
-   Esta tarefa (a primeira do plano) e so o esqueleto: registro em ABAS, botao, painel,
-   wiring, e as duas funcoes de persistencia (aColeta/aRestaura) na forma que as tarefas
-   seguintes vao consumir. O catalogo (secao 1), os campos da pagina de obrigado e pagamento
-   (secao 2) e as cores/textos (secao 3) ainda NAO tem entrada na tela -- entram nas tarefas
-   seguintes do plano. aGerar e aPreview sao esqueletos vazios de proposito (assim manda o
-   passo 6 da Tarefa 1); quem os preenche sao as Tarefas 3 e 4. */
+   Tarefa 1: registro em ABAS, botao, painel, wiring, e as duas funcoes de persistencia
+   (aColeta/aRestaura). Passo 3b (acrescentado depois da revisao do plano): os campos de
+   configuracao das secoes 2 e 3 -- pagina de obrigado, pagamento, cores, textos e altura do
+   calendario -- com os tres avisos de interface que a spec pede por nome. O catalogo (secao 1)
+   ainda NAO tem entrada na tela -- entra na Tarefa 2. aGerar e aPreview seguem esqueletos vazios
+   de proposito (assim manda o passo 6 da Tarefa 1); quem os preenche sao as Tarefas 2 a 4. */
 var aPacotes=[];
 /* Faixa declarada dos campos numericos desta aba, no formato de U_NUMS/E_NUMS: [id, padrao,
-   min, max, inteiro]. Os seis campos ainda nao existem no HTML (ver o paragrafo acima), entao
-   fcAjustarTodos/fcLigarFaixa nao tem o que prender por enquanto -- as duas funcoes ja
-   verificam a existencia do elemento antes de mexer nele, e ficam inertes ate o campo nascer. */
+   min, max, inteiro]. */
 var A_NUMS=[['a-prazoh',24,1,720,true],['a-descpix',5,0,90,false],['a-parcelas',1,1,12,true],
   ['a-altdesk',2350,800,6000,true],['a-altmob',2700,800,6000,true],['a-largmob',700,320,1024,true]];
 function aPreso(id){return fcPreso(A_NUMS,id);}
@@ -17924,7 +17985,7 @@ prep('Mini loja','loja',function(){
    ramo redesenha a previa por conta propria, e por prefixo (fcCorRedesenhar).
    So em 'change'/'blur', nunca em 'input': corrigir a cada tecla impediria digitar '#075E54',
    porque '#0' viraria o padrao antes do resto chegar. */
-prep('Correcao a vista das cores livres','leads uni bor cnt cob loja',function(){
+prep('Correcao a vista das cores livres','leads uni bor cnt cob loja pac',function(){
   CORES_LIVRES.forEach(function(par){
     var t=$(par[0]+'-t');if(!t)return;
     /* Os dois gravadores sao chamados sempre: 'salvarEstado' guarda as cores das abas e
@@ -17964,7 +18025,7 @@ for(var iAba=0;iAba<ABAS.length;iAba++){
    carga, para o campo nunca exibir algo diferente do que o gerador vai usar, e regrava para o
    valor velho nao ressurgir na proxima sessao. Roda ANTES das previas para elas ja desenharem
    o valor corrigido. */
-prep('Correcao das cores livres e da chave Pix na carga','leads uni bor cnt',function(){
+prep('Correcao das cores livres e da chave Pix na carga','leads uni bor cnt pac',function(){
   var mudou=false;
   CORES_LIVRES.forEach(function(par){if(corAjustar(par[0],par[1]))mudou=true;});
   if(fcPixChaveAjustar('fci-chave'))mudou=true;
@@ -18100,12 +18161,16 @@ prep('Mini loja','loja',function(){
 prep('Agendamento por pacote','pac',function(){
   /* As ligacoes desta aba moram NO PREPARO DESTA ABA, no mesmo padrao das demais: cada aba se
      prepara por conta propria, e o defeito de uma nao derruba as outras. */
+  /* estado gravado antes desta regra pode trazer numero fora da faixa: prende na carga, para o
+     campo nunca exibir algo diferente do que aCfg vai usar. */
+  if(fcAjustarTodos(A_NUMS))salvarEstado();
   liga('a-gerar',aGerar);
   liga('a-atualizar',function(){aPreview(true);});
   liga('a-copy1',function(){copiar('a-out1','a-cop1');});
   liga('a-copy2',function(){copiar('a-out2','a-cop2');});
   liga('a-copy3',function(){copiar('a-out3','a-cop3');});
   fcLigarFaixa(A_NUMS,function(){aPreview(true);});
+  parearCor('a-c1');parearCor('a-c2');parearCor('a-c3');
 },'desenhar a aba com o estado restaurado');
 
 /* O preset geral e o ULTIMO passo da partida, e nao por acaso: fcgValoresDaAba le o que esta na
