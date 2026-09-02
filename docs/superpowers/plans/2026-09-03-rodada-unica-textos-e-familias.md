@@ -102,3 +102,23 @@ novo (tres passos, cartao de familia, CSS da familia) fica **fora** da regressao
 exatamente a armadilha do cupom da Mini loja, repetida tres vezes nesta sessao. O cenario
 ganha uma segunda familia, em duas etapas: primeiro fotografa-se com uma familia (provando o
 invariante), depois acrescenta-se a segunda (fotografando o caminho novo).
+
+### Amarracao 4 — cada resumo pertence ao SEU passo (achado pelo dono, 03/09/2026)
+
+No mockup, depois de escolher o pacote as **duas** caixas de resumo (familia e pacote) saiam
+juntas logo abaixo do passo 1, e o passo 2 aparecia **vazio** na tela — como se nada tivesse
+sido escolhido nele. O dono viu e mandou o print.
+
+A regra, que vale para o bloco de verdade e nao so para o mockup:
+
+- **Passo 1** mostra a familia escolhida, com o botao "trocar" dela.
+- **Passo 2** mostra o pacote escolhido, com o botao "trocar" dele.
+- **Passo 3** e o calendario.
+
+Um passo numerado que ja foi resolvido tem de exibir **o que foi resolvido nele**. Passo com
+titulo e nada embaixo le-se como etapa pendente, e o cliente fica procurando o que fazer ali.
+
+**Vale a pena reparar de onde veio o achado:** o mockup executa a mesma logica de passos que
+o bloco vai executar, entao o defeito de arranjo apareceu antes de existir codigo de verdade.
+E o mesmo argumento da regra "previa roda o gerador, nao imita o gerador" — so que um passo
+antes, no desenho.
