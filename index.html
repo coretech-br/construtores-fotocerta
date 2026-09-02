@@ -13662,18 +13662,28 @@ function aBlocoObrigado(cfg){
   c+='}\n';
   c+='/* "dia e hora", so quando quando e legivel -- em UTC, para o mesmo endereco produzir o\n';
   c+='   mesmo identificador nao importa o fuso de quem esta olhando a pagina. */\n';
-  c+='function diaHoraId(quandoCru){\n';
-  c+='  var t=quandoCru?Date.parse(quandoCru):NaN;\n';
-  c+='  if(isNaN(t))return "";\n';
-  c+='  var d=new Date(t);\n';
-  c+='  function d2(n){return (n<10?"0":"")+n;}\n';
-  c+='  return d.getUTCFullYear()+d2(d.getUTCMonth()+1)+d2(d.getUTCDate())+d2(d.getUTCHours())+d2(d.getUTCMinutes());\n';
+  /* O DIA E A HORA SAEM DE "data" E "hora" COMO CHEGARAM, e nao de "quando" convertido.
+     A primeira versao fazia Date.parse(quando) e lia os campos em UTC -- e isso mentia: um
+     ensaio das 14h saia como 1700, e todo agendamento a partir das 21h de Brasilia virava o
+     DIA SEGUINTE. Nao e hora errada, e data errada, justamente na chave que o dono usaria
+     para achar o agendamento no extrato.
+     "data" e "hora" sao as strings que o TidyCal ja mostra ao dono no painel dele. Usar o que
+     ele le e ao mesmo tempo mais simples e mais correto: zero conversao, zero fuso, zero
+     parsing. So digitos, e com teto, para caber nos 25 caracteres que o Pix aceita.
+     Limite declarado: um formato de hora em 12 horas ("2:00 PM") perde o AM/PM, e dois
+     agendamentos assim no mesmo dia compartilhariam o identificador -- o mesmo limite que
+     ja vale quando "data" e "hora" nao vem, e pelo mesmo motivo: melhor um codigo que nao
+     diz o dia do que um que diz o dia errado. */
+  c+='function diaHoraId(dataCru,horaCru){\n';
+  c+='  var d=String(dataCru==null?"":dataCru).replace(/\\D/g,"").substring(0,8);\n';
+  c+='  var h=String(horaCru==null?"":horaCru).replace(/\\D/g,"").substring(0,4);\n';
+  c+='  return d+h;\n';
   c+='}\n';
   c+='/* recebe a RESERVA ja obtida por montar() (uma chamada so de reservaObter por carregamento --\n';
   c+='   ver o comentario acima) em vez de buscar a sua propria: e a mesma que o prazo (3a2) usa,\n';
   c+='   e as duas tem de enxergar o MESMO instante de primeira visita e o MESMO sufixo. */\n';
-  c+='function idConciliacao(pac,quandoCru,reserva){\n';
-  c+='  var dh=diaHoraId(quandoCru);\n';
+  c+='function idConciliacao(pac,dataCru,horaCru,reserva){\n';
+  c+='  var dh=diaHoraId(dataCru,horaCru);\n';
   c+='  return limpaId(PREFIXO+pac.cod+(dh||reserva.suf))||"***";\n';
   c+='}\n\n';
 
@@ -13857,7 +13867,7 @@ function aBlocoObrigado(cfg){
   c+='     e prazo tem de enxergar o MESMO registro, senao um sufixo novo a cada leitura\n';
   c+='     reiniciaria o prazo tambem -- o achado mais caro da rodada (decisao 7 do diario). */\n';
   c+='  var reserva=reservaObter(PAC.cod,QUANDO);\n';
-  c+='  CODIGO_PEDIDO=idConciliacao(PAC,QUANDO,reserva);\n';
+  c+='  CODIGO_PEDIDO=idConciliacao(PAC,param("data"),param("hora"),reserva);\n';
   c+='  var fim=prazoFim(reserva,QUANDO);\n';
   c+='  var cartao=document.createElement("div");cartao.className="fca-ob-cartao";\n';
   c+='  var tit=document.createElement("div");tit.className="fca-ob-titulo";tit.textContent=TXT_TITULO;cartao.appendChild(tit);\n';
