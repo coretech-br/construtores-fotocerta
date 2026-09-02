@@ -22,6 +22,10 @@ Plano: `docs/superpowers/plans/2026-09-02-agendamento-por-pacote.md`
 4. [O prefixo da aba é uma letra só, e não por estética](#4)
 5. [A rodada é partida em duas entregas](#5)
 6. [A `CLAUDE.md` está desatualizada em 3.500 linhas](#6)
+7. [O identificador tem de sobreviver a um F5 — e este é o achado mais caro da noite](#7)
+8. [O pedido do PayPal **não** é fonte compartilhada, e a spec estava errada](#8)
+9. [A corrida da mensagem atrasada do iframe anterior](#9)
+10. [`previa.html` e o cache: declarado como não-problema, com a razão](#10)
 
 ---
 
@@ -115,5 +119,73 @@ Prefixo de duas letras passaria despercebido por essa rede: a aba nova geraria c
 Não é grave, mas é a categoria de texto que este projeto persegue: **documentação que envelhece calada**. Um número errado ali faz quem lê subestimar o arquivo.
 
 **Decidi corrigir** ao fim da rodada, junto com a entrada da décima aba na documentação — e **não agora**, para não misturar com o commit da implementação.
+
+---
+
+<a id="7"></a>
+## 7. O identificador tem de sobreviver a um F5 — e este é o achado mais caro da noite
+
+**Quem achou:** a revisão adversarial do plano, na categoria "verificação que não prova o que diz provar". Eu não tinha visto.
+
+**O defeito, encadeado.** O identificador de conciliação é `prefixo + pacote + dia e hora`. Quando a data do TidyCal **não** é legível, ele cai num sufixo aleatório — regra boa, já decidida. Mas o plano não dizia que esse sufixo é gerado **uma vez**. Escrito do jeito natural, ele seria recalculado a cada carregamento da página, e daí saem **dois** defeitos, os dois silenciosos:
+
+1. **O prazo reiniciaria a cada F5.** A chave que guarda "a primeira visita" inclui o identificador. Identificador novo, chave nova, contagem do zero. O cliente recarrega a página e ganha 24 horas de novo, para sempre.
+2. **Cobranças fantasma no extrato.** O mesmo identificador vai no `txid` do Pix e no `custom_id` do PayPal. Recarregar antes de pagar produziria **um identificador novo por carregamento** — o dono veria várias cobranças diferentes no painel para uma reserva só.
+
+E o pior: o teste que o plano mandava fazer **passaria**. Ele exercitava o relógio falso, não a recarga.
+
+**Decidi:** o registro guardado no navegador passa a ter **as duas coisas** — o instante da primeira visita **e** o sufixo sorteado — e a chave dele **não depende do identificador**. A chave é `fcapac:<pac>:<quando cru>`, usando o valor de `quando` **como ele chegou na URL**, mesmo ilegível: ele é texto estável, e é o que distingue dois agendamentos do mesmo pacote. Sem `quando` nenhum, a chave cai para `fcapac:<pac>` e dois agendamentos do mesmo pacote compartilhariam o registro — **limite declarado**, não escondido.
+
+**Custo de desfazer:** médio. Mexe na chave de armazenamento, e trocá-la depois de publicado faz o prazo reiniciar uma vez para quem já estava com a página aberta. Aceitável.
+
+---
+
+<a id="8"></a>
+## 8. O pedido do PayPal **não** é fonte compartilhada, e a spec estava errada
+
+**O que apareceu.** A spec §9 lista "o pedido do PayPal com item e conciliação" entre as fontes compartilhadas a reusar. A revisão duvidou; eu medi. **`actions.order.create` aparece três vezes no `index.html`**, escrito à mão em cada gerador (Checkout 11303, `/pagar` 14746, Mini loja 16860), e **não existe nenhuma função compartilhada que o escreva**.
+
+A spec estava errada. Erro meu, ao escrevê-la.
+
+**As opções.**
+
+- **(a) Extrair agora** a fonte única e fazer os três geradores consumirem-na. É o que a regra do projeto manda. Custo: mexe em três geradores numa rodada que já é a maior desde a Mini loja, e a prova exigida é que as saídas dos três saiam **byte a byte idênticas** depois da extração. É factível, e é exatamente o tipo de coisa que não se faz às três da manhã no meio de outra rodada.
+- **(b) Escrever a quarta cópia** e registrar a dívida com a medida.
+
+**Decidi (b)**, e registro a dívida em `docs/pendencias.md`. A razão não é preguiça: extrair fonte única é uma refatoração cuja prova é a igualdade byte a byte de três saídas existentes, e misturá-la com a implementação de uma aba nova **destrói a capacidade de dizer o que quebrou** quando a regressão acusar. As duas coisas precisam de rodadas separadas.
+
+A quarta cópia se espelha na da `/pagar` (item único), não na do Checkout — coerente com a decisão 1.
+
+**Correção na spec:** a linha de §9 que afirma isso está errada e vai ser corrigida junto com o resto da documentação, ao fim da rodada.
+
+**Custo de desfazer:** baixo. A extração continua possível depois, com uma cópia a mais para unificar.
+
+---
+
+<a id="9"></a>
+## 9. A corrida da mensagem atrasada do iframe anterior
+
+**Quem achou:** a revisão adversarial, em "risco não declarado". Também não estava na minha spec.
+
+**O risco.** O ouvinte dos sinais do TidyCal fica em `window` — por desenho, para sobreviver à troca de iframe. Ele confere a origem (`https://tidycal.com`), mas **não tem como saber de qual iframe veio a mensagem**. Ao trocar de pacote, uma mensagem atrasada do iframe **anterior** pode chegar depois da troca e ser lida como se fosse do novo: o `min-height` do modal abriria (ou fecharia) no calendário errado, e o cliente veria um salto de 2.350 px sem ter clicado em nada.
+
+**Decidi:** ao trocar de pacote, o bloco zera `modalAberto` e **ignora sinais por 800 ms** — a mesma carência que o código atual já usa entre a abertura do modal e as mutações, e pelo mesmo motivo. Custa três linhas.
+
+**Custo de desfazer:** nenhum.
+
+---
+
+<a id="10"></a>
+## 10. `previa.html` e o cache: declarado como não-problema, com a razão
+
+**O que apareceu.** A revisão notou que o projeto versiona `fc-compartilhado.js` com rigor (três lugares, conferência ao carregar) e que `previa.html` nasceria sem versão nenhuma.
+
+**Por que aqui não é problema, e a razão é o conteúdo.** `previa.html` tem três linhas e **nenhum comportamento**: um doctype, um charset e um título. Ele existe só para ser um endereço de mesma origem que aceita `?pac=` — quem escreve o conteúdo é a ferramenta, por `document.write`, a cada montagem da prévia. Uma cópia velha em cache é **idêntica** à nova, porque o arquivo não muda.
+
+O contraste com `fc-compartilhado.js` é justamente esse: lá o arquivo **carrega comportamento**, e uma cópia velha produz link que a própria `/pagar` recusa.
+
+**Decidi não versionar**, e registrar aqui a razão — para ninguém "consertar" isso depois achando que foi esquecimento.
+
+**Custo de desfazer:** nenhum.
 
 ---
