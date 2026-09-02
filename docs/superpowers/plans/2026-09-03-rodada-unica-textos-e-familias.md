@@ -122,3 +122,34 @@ titulo e nada embaixo le-se como etapa pendente, e o cliente fica procurando o q
 o bloco vai executar, entao o defeito de arranjo apareceu antes de existir codigo de verdade.
 E o mesmo argumento da regra "previa roda o gerador, nao imita o gerador" — so que um passo
 antes, no desenho.
+
+---
+
+## A Etapa 9 cresceu: a prova nao cobria o caminho configurado
+
+Achado pela Etapa 11 (documentacao), medindo em vez de supor: **o cenario da regressao nao
+preenche nenhum campo de texto.** `scripts/verificar/geradores.mjs` nao escreve em nenhum
+`*-txt-*`.
+
+Consequencia: a fotografia byte a byte prova o **caminho de fabrica** e nao diz nada sobre o
+configurado. Um texto que o gerador deixasse de emitir, ou que escapasse errado, passaria sem
+acusar nada. Numa rodada que acabou de criar **157 campos de texto**, isso e o buraco no meio
+da prova principal.
+
+E a mesma armadilha ja registrada tres vezes: **teste que nao alcanca o estado nao prova nada
+sobre aquele estado**. Foi assim com o cupom da Mini loja, com a quantidade dos opcionais e
+com o ramo "somente cartao".
+
+**O que a Etapa 9 passa a incluir**, alem da regressao normal:
+
+1. O cenario preenche **um texto de cada aba**, escolhido entre os que passam por caminho
+   nao-trivial: um com marcador (`{pct}`/`{codigo}`/`{n}`), um com aspas e um com acento
+   (que exercitam o escape), e um do subtitulo (que so e emitido quando preenchido).
+2. A fotografia passa a ter **duas passagens**: fabrica e configurada. A de fabrica prova o
+   invariante; a configurada prova que o texto do dono chega ao bloco.
+3. Isso e feito **depois** da Etapa 7b, porque ela tambem mexe no `geradores.mjs` (a segunda
+   familia) e a arvore de trabalho e uma so.
+
+Enquanto isso nao existe, o que cobre o caminho configurado sao os testes de navegador que
+cada etapa escreveu (bloco gerado rodando de verdade, com campos trocados) — reais, mas
+**nao versionados como regressao**, ou seja, nao rodam de novo sozinhos na proxima rodada.
