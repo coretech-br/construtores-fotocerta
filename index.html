@@ -4569,9 +4569,9 @@ function parearCor(idCor){
 /* [chave, padrao, rotulo, campos de aba que significam A MESMA COISA, abas]. A quarta coluna e
    a lista inteira do que o botao alcanca -- nao existe uma segunda lista em lugar nenhum. */
 var FCI_PALETA=[
-  ['destaque',    '#075E54','a cor de destaque',   ['u-c1','p-c1','m-c1'],                            'Checkout, Link de cobrança e Mini loja'],
-  ['fundo',       '#ffffff','o fundo do cartão',   ['u-c2','p-c2','m-c2'],                            'Checkout, Link de cobrança e Mini loja'],
-  ['texto',       '#333333','a cor do texto',      ['u-c3','p-c3','m-c3'],                            'Checkout, Link de cobrança e Mini loja'],
+  ['destaque',    '#075E54','a cor de destaque',   ['u-c1','p-c1','m-c1','a-c1'],                     'Checkout, Link de cobrança, Mini loja e Agendamento por pacote'],
+  ['fundo',       '#ffffff','o fundo do cartão',   ['u-c2','p-c2','m-c2','a-c2'],                     'Checkout, Link de cobrança, Mini loja e Agendamento por pacote'],
+  ['texto',       '#333333','a cor do texto',      ['u-c3','p-c3','m-c3','a-c3'],                     'Checkout, Link de cobrança, Mini loja e Agendamento por pacote'],
   ['corujacorpo', '#ffffff','o corpo da coruja',   ['l-corujacorpo','c-corujacorpo','p-corujacorpo'], 'Captação de leads, Contagem regressiva e Link de cobrança'],
   ['corujadet',   '#075E54','os detalhes da coruja',['l-corujadet','c-corujadet','p-corujadet'],      'Captação de leads, Contagem regressiva e Link de cobrança']
 ];
@@ -5001,7 +5001,7 @@ function fciPaletaAplicar(){
   for(i=0;i<FCI_PALETA.length;i++)nomes.push(FCI_PALETA[i][2]);
   if(!confirm('Aplicar a paleta às abas?\n\n'+
     'Isto substitui '+difs.length+' campo(s) de cor: '+fcLista(nomes)+'.\n\n'+
-    'Alcança só onde a cor significa a mesma coisa — Checkout, Link de cobrança e Mini loja (destaque, fundo, texto) e Captação de leads, Contagem regressiva e Link de cobrança (coruja).\n\n'+
+    'Alcança só onde a cor significa a mesma coisa — Checkout, Link de cobrança, Mini loja e Agendamento por pacote (destaque, fundo, texto) e Captação de leads, Contagem regressiva e Link de cobrança (coruja).\n\n'+
     'NÃO encosta nas cores das Bordas com efeito, nem nas cores próprias da Captação de leads e da Contagem regressiva.\n\n'+
     'As cores que estão hoje nas abas não voltam.'))return;
   for(i=0;i<difs.length;i++){
