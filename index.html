@@ -889,10 +889,39 @@
     </div>
   </div>
 
-  <div class="secao"><span class="secao-n">3</span> Biblioteca de presets</div>
+  <div class="secao dobra" id="s-txt-cab" role="button" tabindex="0" aria-expanded="false" aria-controls="s-txt-corpo"><span class="secao-n">3</span> Textos que o cliente lê <span class="secao-dobra-seta">mostrar</span></div>
+  <div class="grade fcd-oculto" id="s-txt-corpo">
+    <div class="fcx-largo">
+      <p class="ajuda">Esta galeria quase não tem texto na tela: o que está aqui é o que o <b>leitor de tela</b> anuncia para quem não enxerga as fotos, mais a descrição de reserva de uma foto sem legenda. Todos já vêm com <b>exatamente o texto que a galeria usa hoje</b>. A seção nasce recolhida porque quase nunca se mexe nela.</p>
+    </div>
+    <div>
+      <fieldset>
+        <legend>O que o leitor de tela anuncia</legend>
+        <label for="s-txt-aria-galeria">Nome da galeria</label>
+        <input type="text" id="s-txt-aria-galeria" value="Galeria de fotos">
+        <label for="s-txt-aria-anterior">Seta da esquerda</label>
+        <input type="text" id="s-txt-aria-anterior" value="Foto anterior">
+        <label for="s-txt-aria-proxima">Seta da direita</label>
+        <input type="text" id="s-txt-aria-proxima" value="Próxima foto">
+        <label for="s-txt-aria-dot">Cada bolinha indicadora</label>
+        <input type="text" id="s-txt-aria-dot" value="Ir para a foto {n}">
+        <p class="ajuda">Onde você escrever <code>{n}</code>, entra o número da foto. Sem <code>{n}</code>, todas as bolinhas são anunciadas igual — e quem navega por teclado deixa de saber para onde cada uma leva.</p>
+      </fieldset>
+    </div>
+    <div>
+      <fieldset>
+        <legend>Descrição de cada foto</legend>
+        <label for="s-txt-alt-padrao">Descrição de reserva <small>(só quando a foto não tem legenda)</small></label>
+        <input type="text" id="s-txt-alt-padrao" value="Foto {n}">
+        <p class="ajuda">A <b>legenda</b> cadastrada na seção 1 já é a descrição da foto. Este campo só entra quando a legenda está vazia — e <code>{n}</code> é o número da foto na ordem em que ela aparece.</p>
+      </fieldset>
+    </div>
+  </div>
+
+  <div class="secao"><span class="secao-n">4</span> Biblioteca de presets</div>
   <div class="grade" id="fcp-s-box"></div>
 
-  <div class="secao"><span class="secao-n">4</span> Prévia e código gerado</div>
+  <div class="secao"><span class="secao-n">5</span> Prévia e código gerado</div>
   <div class="acoes" style="margin-bottom:14px">
     <button class="botao" id="s-gerar">Gerar código</button>
     <button class="botao claro" id="s-previewbtn">Atualizar prévia</button>
@@ -1215,10 +1244,39 @@
     </div>
   </div>
 
-  <div class="secao"><span class="secao-n">8</span> Biblioteca de presets</div>
+  <div class="secao dobra" id="l-txt-cab" role="button" tabindex="0" aria-expanded="false" aria-controls="l-txt-corpo"><span class="secao-n">8</span> Textos que o cliente lê <span class="secao-dobra-seta">mostrar</span></div>
+  <div class="grade fcd-oculto" id="l-txt-corpo">
+    <div class="fcx-largo">
+      <p class="ajuda">Os textos que o visitante <b>vê</b> estão nas seções 3 e 5. O que sobra aqui é o que ninguém percebeu que estava cravado: o que o <b>leitor de tela</b> anuncia nos dois botões, e as duas costuras da <b>mensagem que chega no seu WhatsApp</b>. Todos já vêm com <b>exatamente o texto que o bloco usa hoje</b>. A seção nasce recolhida porque quase nunca se mexe nela.</p>
+    </div>
+    <div>
+      <fieldset>
+        <legend>O que o leitor de tela anuncia</legend>
+        <label for="l-txt-aria-botao">Botão flutuante</label>
+        <input type="text" id="l-txt-aria-botao" value="Enviar mensagem">
+        <label for="l-txt-aria-fechar">Botão de fechar o pop-up</label>
+        <input type="text" id="l-txt-aria-fechar" value="Fechar">
+        <p class="ajuda">Os dois botões são só desenho na tela (o ícone e o ×). Sem estes textos, quem usa leitor de tela ouve “botão” e nada mais.</p>
+      </fieldset>
+    </div>
+    <div>
+      <fieldset>
+        <legend>Costuras da mensagem do WhatsApp</legend>
+        <label for="l-txt-sep-saudacao">Emenda entre a saudação e “meu nome é” <small>(vírgula e espaço)</small></label>
+        <input type="text" id="l-txt-sep-saudacao" value=", ">
+        <label for="l-txt-rotulo-codigo">Rótulo do código da página</label>
+        <input type="text" id="l-txt-rotulo-codigo" value=" (cod: *{cod}*)">
+        <label for="l-txt-pag-reserva">Nome de reserva da página <small>(quando a seção 1 e o título da página estão vazios)</small></label>
+        <input type="text" id="l-txt-pag-reserva" value="seu site">
+        <p class="ajuda">Onde você escrever <code>{cod}</code>, entra o código da campanha da seção 1. Estes três campos <b>começam ou terminam com espaço</b> de propósito — é o espaço que separa as palavras na mensagem pronta. Apagar o espaço gruda as palavras.</p>
+      </fieldset>
+    </div>
+  </div>
+
+  <div class="secao"><span class="secao-n">9</span> Biblioteca de presets</div>
   <div class="grade" id="fcp-l-box"></div>
 
-  <div class="secao"><span class="secao-n">9</span> Prévia e código gerado</div>
+  <div class="secao"><span class="secao-n">10</span> Prévia e código gerado</div>
   <div class="acoes">
     <button class="botao" id="l-gerar">Gerar código</button>
     <button class="botao claro" id="l-atualizar">Atualizar prévia</button>
@@ -1360,10 +1418,38 @@
   </div>
   </fieldset>
 
-  <div class="secao"><span class="secao-n">3</span> Biblioteca de presets</div>
+  <div class="secao dobra" id="t-txt-cab" role="button" tabindex="0" aria-expanded="false" aria-controls="t-txt-corpo"><span class="secao-n">3</span> Textos que o cliente lê <span class="secao-dobra-seta">mostrar</span></div>
+  <div class="grade fcd-oculto" id="t-txt-corpo">
+    <div class="fcx-largo">
+      <p class="ajuda">Os quatro textos de reserva da página de obrigado estão na seção 2. O que sobra aqui são as <b>emendas da data por extenso</b> — as palavrinhas entre o dia, o mês e o horário — e o nome que o leitor de tela dá ao calendário. Todos já vêm com <b>exatamente o texto que o bloco usa hoje</b>. A seção nasce recolhida porque quase nunca se mexe nela.</p>
+    </div>
+    <div>
+      <fieldset>
+        <legend>Emendas da data por extenso</legend>
+        <p class="ajuda">Valem nos formatos <b>“12 de outubro de 2026”</b> e <b>“segunda-feira, 12 de outubro de 2026 às 15:00”</b>, escolhidos na seção 2. No formato <b>curto</b> (12/10/2026) e no <b>como o TidyCal mandar</b> não entra nenhuma delas.</p>
+        <label for="t-txt-ob-conector-data">Entre o dia, o mês e o ano <small>(entra duas vezes)</small></label>
+        <input type="text" id="t-txt-ob-conector-data" value=" de ">
+        <label for="t-txt-ob-sep-diasemana">Depois do dia da semana</label>
+        <input type="text" id="t-txt-ob-sep-diasemana" value=", ">
+        <label for="t-txt-ob-conector-hora">Antes do horário</label>
+        <input type="text" id="t-txt-ob-conector-hora" value=" às ">
+        <p class="ajuda">Os três <b>começam e terminam com espaço</b> de propósito — é o espaço que separa as palavras na data pronta. Apagar o espaço gruda “12deoutubro”.</p>
+      </fieldset>
+    </div>
+    <div>
+      <fieldset>
+        <legend>O que o leitor de tela anuncia</legend>
+        <label for="t-txt-iframe-titulo">Nome do calendário embutido <small>(só no código 3)</small></label>
+        <input type="text" id="t-txt-iframe-titulo" value="Agenda">
+        <p class="ajuda">É o <code>title</code> do quadro que carrega a página intermediária. Quem usa leitor de tela ouve este nome ao chegar no calendário; vazio, ouve só “quadro”.</p>
+      </fieldset>
+    </div>
+  </div>
+
+  <div class="secao"><span class="secao-n">4</span> Biblioteca de presets</div>
   <div class="grade" id="fcp-t-box"></div>
 
-  <div class="secao"><span class="secao-n">4</span> Códigos gerados</div>
+  <div class="secao"><span class="secao-n">5</span> Códigos gerados</div>
   <div class="acoes" style="margin-bottom:14px"><button class="botao" id="t-gerar">Gerar código</button></div>
   <div class="grade">
     <div>
@@ -1715,6 +1801,9 @@
         <input type="text" id="u-txt-pix-copiado" value="Código copiado!">
         <label for="u-txt-nota">Aviso para conferir o recebedor</label>
         <input type="text" id="u-txt-nota" value="Confira o nome do recebedor antes de confirmar o pagamento">
+        <label for="u-txt-pix-manual">Aviso de que o Pix não confirma sozinho <small>(só com o botão “Já paguei” ligado)</small></label>
+        <input type="text" id="u-txt-pix-manual" value="O Pix não avisa a gente automaticamente. Assim que você pagar, toque em &quot;Já paguei&quot; para eu conferir e confirmar.">
+        <p class="ajuda">Este aviso aparece <b>dentro da área do Pix</b>, logo acima do botão “Já paguei” — que é onde o cliente está olhando na hora de pagar. O Pix estático não confirma nada sozinho: sem esta frase o cliente paga, a tela não muda, e ele pode sair achando que já está confirmado. Ele <b>não é emitido</b> quando o botão “Já paguei” está desligado, para não mandar tocar num botão que não existe.</p>
         <label for="u-txt-pix-rotulo">Linha “pagando via Pix” <small>(só com desconto no Pix)</small></label>
         <input type="text" id="u-txt-pix-rotulo" value="Pagando via Pix (-{pct}%)">
         <p class="ajuda">Onde você escrever <code>{pct}</code>, entra o percentual de desconto do Pix — nas duas frases acima que o usam. Sem <code>{pct}</code>, o número não aparece.</p>
@@ -2214,10 +2303,10 @@
       <legend>Formato e espaço</legend>
       <label>Formato do contador</label>
       <div class="radios">
-      <label><input type="radio" name="c-formato" value="compacto" checked><span>Compacto <small>(02d 14h 33m 12s)</small></span></label>
+      <label><input type="radio" name="c-formato" value="compacto" checked><span>Compacto <small>(número e rótulo colados: 02dias 14horas…)</small></span></label>
       <label><input type="radio" name="c-formato" value="blocos"><span>Blocos com rótulo</span></label>
       </div>
-      <label for="c-rd">Rótulos das unidades <small>(usados por extenso no formato blocos)</small></label>
+      <label for="c-rd">Rótulos das unidades <small>(valem nos dois formatos)</small></label>
       <input type="text" id="c-rd" value="dias">
       <input type="text" id="c-rh" value="horas">
       <input type="text" id="c-rm" value="min">
@@ -2400,10 +2489,37 @@
     </div>
   </div>
 
-  <div class="secao"><span class="secao-n">5</span> Biblioteca de presets</div>
+  <div class="secao dobra" id="c-txt-cab" role="button" tabindex="0" aria-expanded="false" aria-controls="c-txt-corpo"><span class="secao-n">5</span> Textos que o cliente lê <span class="secao-dobra-seta">mostrar</span></div>
+  <div class="grade fcd-oculto" id="c-txt-corpo">
+    <div class="fcx-largo">
+      <p class="ajuda">As mensagens da barra estão na seção 2 e os rótulos das unidades na seção 3. O que sobra aqui são as costuras: o que separa um número do outro no relógio, as palavrinhas da data do <code>{prazo}</code> e o que o leitor de tela anuncia no botão de fechar. Todos já vêm com <b>exatamente o texto que a barra usa hoje</b>. A seção nasce recolhida porque quase nunca se mexe nela.</p>
+    </div>
+    <div>
+      <fieldset>
+        <legend>Relógio</legend>
+        <label for="c-txt-sep-relogio">Separador entre as unidades <small>(só no formato compacto)</small></label>
+        <input type="text" id="c-txt-sep-relogio" value=":">
+        <p class="ajuda">Os <b>sufixos</b> que aparecem colados em cada número (<code>02dias</code>) saem dos <b>rótulos das unidades</b>, na seção 3 — os mesmos quatro campos que o formato “blocos” usa. Até 03/09/2026 o formato compacto trazia <code>d</code>, <code>h</code>, <code>m</code> e <code>s</code> cravados, e os quatro campos não valiam nada no formato padrão da aba.</p>
+      </fieldset>
+    </div>
+    <div>
+      <fieldset>
+        <legend>Data do marcador {prazo} e leitor de tela</legend>
+        <label for="c-txt-prazo-conector">Entre o dia e o mês <small>(formatos por extenso)</small></label>
+        <input type="text" id="c-txt-prazo-conector" value=" de ">
+        <label for="c-txt-prazo-conector-hora">Antes do horário <small>(formato “21 de dezembro às 23:59”)</small></label>
+        <input type="text" id="c-txt-prazo-conector-hora" value=" às ">
+        <label for="c-txt-aria-fechar">Botão de fechar a barra</label>
+        <input type="text" id="c-txt-aria-fechar" value="Fechar">
+        <p class="ajuda">Os dois conectores <b>começam e terminam com espaço</b> de propósito — é o espaço que separa as palavras na data pronta. O botão de fechar é só um ✕ na tela: sem o texto, quem usa leitor de tela ouve “botão” e nada mais.</p>
+      </fieldset>
+    </div>
+  </div>
+
+  <div class="secao"><span class="secao-n">6</span> Biblioteca de presets</div>
   <div class="grade" id="fcp-c-box"></div>
 
-  <div class="secao"><span class="secao-n">6</span> Prévia e código gerado</div>
+  <div class="secao"><span class="secao-n">7</span> Prévia e código gerado</div>
   <div class="acoes" style="margin-bottom:14px">
     <button class="botao" id="c-gerar">Gerar código</button>
     <button class="botao claro" id="c-atualizar">Atualizar prévia</button>
@@ -2525,13 +2641,16 @@
       <input type="text" id="p-t7" value="Abra o aplicativo do seu banco, escolha Pix e use o Copia e Cola ou o QR Code.">
       <label for="p-txt-nota">Aviso para conferir o recebedor</label>
       <input type="text" id="p-txt-nota" value="Confira o nome do recebedor antes de confirmar o pagamento">
+      <label for="p-txt-pixmanual">Aviso de que o Pix não confirma sozinho <small>(só com o botão “Já paguei” ligado)</small></label>
+      <input type="text" id="p-txt-pixmanual" value="O Pix não avisa a gente automaticamente. Assim que você pagar, toque em &quot;Já paguei&quot; para eu conferir e confirmar.">
+      <p class="ajuda">Aparece <b>dentro do bloco do Pix</b>, logo acima do botão “Já paguei” — que é onde o cliente está olhando na hora de pagar. O Pix estático não confirma nada sozinho: sem esta frase o cliente paga, a página não muda, e ele pode sair achando que já está confirmado. Ele <b>não é emitido</b> quando o botão “Já paguei” está desligado, para não mandar tocar num botão que não existe.</p>
       <label for="p-t8">Aviso do prazo <small>(só aparece quando a cobrança tem “Válido até”)</small></label>
       <input type="text" id="p-t8" value="Este link de pagamento vale até {data}.">
       <p class="ajuda">Onde você escrever <code>{data}</code>, entra a data do prazo (dia/mês/ano) — em <b>todas</b> as vezes que ela aparecer na frase. Sem <code>{data}</code>, a data não aparece.</p>
       <label for="p-txt-ref">Rótulo do identificador da cobrança</label>
       <input type="text" id="p-txt-ref" value="Identificador da cobrança: ">
-      <label for="p-txt-pixrotulo">Rótulo "pagando via Pix" <small>(com desconto no Pix)</small></label>
-      <input type="text" id="p-txt-pixrotulo" value="Pagando via Pix">
+      <label for="p-txt-pixrotulo">Linha do valor com desconto no Pix</label>
+      <input type="text" id="p-txt-pixrotulo" value="Pagando via Pix (-{pct}%)">
       <label for="p-txt-copiado">Código Pix copiado com sucesso</label>
       <input type="text" id="p-txt-copiado" value="Código copiado! Cole no aplicativo do seu banco.">
       <label for="p-txt-naocopiou">Não foi possível copiar o código Pix</label>
@@ -3067,6 +3186,9 @@
         <input type="text" id="m-txt-pix-copiado" value="Código copiado!">
         <label for="m-txt-nota">Aviso para conferir o recebedor</label>
         <input type="text" id="m-txt-nota" value="Confira o nome do recebedor antes de confirmar o pagamento">
+        <label for="m-txt-pix-manual">Aviso de que o Pix não confirma sozinho <small>(só com o botão “Já paguei” ligado)</small></label>
+        <input type="text" id="m-txt-pix-manual" value="O Pix não avisa a gente automaticamente. Assim que você pagar, toque em &quot;Já paguei&quot; para eu conferir e confirmar.">
+        <p class="ajuda">Este aviso aparece <b>dentro da área do Pix</b>, logo acima do botão “Já paguei”. Ele <b>não substitui</b> a linha do rodapé de limites (“O Pix estático não avisa ninguém…”), que continua onde estava: uma é instrução na hora de pagar, a outra é a lista do que esta loja não faz — e a linha do PayPal, logo abaixo dela, começa com “também”.</p>
         <label for="m-txt-pix-rotulo">Linha “pagando via Pix” <small>(só com desconto no Pix)</small></label>
         <input type="text" id="m-txt-pix-rotulo" value="Pagando via Pix (-{pct}%)">
         <p class="ajuda">Onde você escrever <code>{pct}</code>, entra o percentual de desconto do Pix.</p>
@@ -3502,6 +3624,9 @@
         <legend>Textos</legend>
         <label for="a-t1">Título da vitrine</label>
         <input type="text" id="a-t1" value="Agende seu ensaio">
+        <label for="a-txt-subtitulo">Subtítulo da vitrine <small>(opcional — vazio, nada aparece)</small></label>
+        <input type="text" id="a-txt-subtitulo" value="" placeholder="ex.: Pague no Pix e ganhe {pct}% de desconto">
+        <p class="ajuda">Entra logo abaixo do título, antes do passo 1. Onde você escrever <code>{pct}</code>, entra o <b>desconto do Pix</b> configurado na seção 2 — assim ele acompanha sozinho quando você mudar o desconto. Escrever o número à mão faz o subtítulo mentir no dia em que o desconto mudar, sem erro e sem aviso.</p>
         <label for="a-t2">Rótulo do passo 1</label>
         <input type="text" id="a-t2" value="Escolha o pacote">
         <label for="a-t3">Rótulo do passo 2</label>
@@ -3571,10 +3696,11 @@
         <input type="text" id="a-txt-cupom-invalido" value="Cupom inválido.">
         <label for="a-txt-cupom-expirado">Cupom expirado</label>
         <input type="text" id="a-txt-cupom-expirado" value="Cupom expirado.">
-        <label for="a-txt-desconto">Rótulo da linha de desconto</label>
-        <input type="text" id="a-txt-desconto" value="Desconto">
+        <label for="a-txt-desconto">Linha do desconto</label>
+        <input type="text" id="a-txt-desconto" value="Desconto ({codigo})">
         <label for="a-txt-cupom-validade">Validade do cupom, na linha de desconto</label>
         <input type="text" id="a-txt-cupom-validade" value="Válido até:">
+        <p class="ajuda">Onde você escrever <code>{codigo}</code> na linha do desconto, entra o código do cupom aplicado. Sem <code>{codigo}</code>, o código não aparece — a frase sai como você escreveu. Até 03/09/2026 este campo valia só a palavra e o código vinha colado por fora, num parêntese que você não controlava.</p>
       </fieldset>
       <fieldset>
         <legend>Prazo da reserva</legend>
@@ -3610,6 +3736,9 @@
         <input type="text" id="a-txt-pix-instrucao" value="Abra o app do seu banco e pague pelo QR Code ou Pix Copia e Cola">
         <label for="a-txt-nota">Aviso para conferir o recebedor</label>
         <input type="text" id="a-txt-nota" value="Confira o nome do recebedor antes de confirmar o pagamento">
+        <label for="a-txt-pix-manual">Aviso de que o Pix não confirma sozinho</label>
+        <input type="text" id="a-txt-pix-manual" value="O Pix não avisa a gente automaticamente. Assim que você pagar, me avise para eu conferir e confirmar a sua reserva.">
+        <p class="ajuda">Aparece <b>dentro da área do Pix</b>, logo abaixo da instrução de pagamento — que é onde o cliente está olhando na hora de pagar. Sem ele, o cliente paga, a tela não muda, e ele pode sair achando que a reserva já está confirmada. O texto é diferente do das outras abas de propósito: <b>esta página não tem botão “Já paguei”</b>, então ele não manda tocar em nada.</p>
         <label for="a-txt-pix-copiado">Código copiado com sucesso</label>
         <input type="text" id="a-txt-pix-copiado" value="Código copiado! Cole no aplicativo do seu banco.">
         <label for="a-txt-pix-naocopiou">Não foi possível copiar</label>
@@ -3908,8 +4037,12 @@ function escJsD(s){return String(s).replace(/\\/g,'\\\\').replace(/"/g,'\\"').re
    aparece. Marcador repetido tambem funciona: cada ocorrencia vira uma nova expressao.
 
    q: aspas do trecho (' ou "). texto: o valor configurado. pares: lista de [marcador,
-   expressaoJs] -- expressaoJs ja escrita no MESMO q (ex.: 'DESCONTO_PIX', 'moedaFmt(preco)'). */
-function aTplJs(q,texto,pares){
+   expressaoJs] -- expressaoJs ja escrita no MESMO q (ex.: 'DESCONTO_PIX', 'moedaFmt(preco)').
+   sep: o que vai ENTRE os pedacos, quando o trecho original nao usava o '+' colado. O bloco do
+   Slideshow escreve "'Foto ' + (i + 1)" com espacos em volta do mais; devolver "'Foto '+(i + 1)"
+   mudaria a saida em dois bytes com a configuracao de fabrica -- e o invariante desta rodada e
+   saida IDENTICA no padrao. Omitido, continua sendo '+', como as chamadas da Etapa 1 e 2 esperam. */
+function aTplJs(q,texto,pares,sep){
   var re=new RegExp(pares.map(function(p){return p[0].replace(/[{}]/g,'\\$&');}).join('|'),'g');
   var mapa={};pares.forEach(function(p){mapa[p[0]]=p[1];});
   var s=String(texto),last=0,m,toks=[];
@@ -3922,7 +4055,7 @@ function aTplJs(q,texto,pares){
   if(!toks.length)return q+q;
   return toks.map(function(t){
     return t.lit!=null?(q+(q==="'"?esc(t.lit):escJsD(t.lit)).replace(/<\//g,'<\\/').replace(/<!--/g,'<\\!--')+q):t.expr;
-  }).join('+');
+  }).join(sep||'+');
 }
 /* ===== OS TEXTOS DE FABRICA QUE MAIS DE UMA ABA USA =====
    Rodada de textos configuraveis, Etapa 2 (03/09/2026). Sete frases que a Etapa 1 tornou
@@ -3957,6 +4090,13 @@ var FC_TXT_FABRICA={
   pixVal:'Valor no Pix',
   pixCopiado:'Código copiado!',
   zapBotao:'Já paguei - avisar no WhatsApp',
+  /* O AVISO DE QUE O PIX NAO CONFIRMA SOZINHO (decisao do dono, 03/09/2026). Ate esta rodada
+     so a Mini loja dizia isso ao cliente, e no RODAPE de limites -- longe de onde ele esta
+     olhando ao pagar. Agora as quatro abas de pagamento o trazem, dentro da area do Pix, logo
+     acima do "Ja paguei". A frase da Mini loja no rodape CONTINUA: ela e outra coisa -- uma
+     enumeracao do que a pagina nao faz, e a linha seguinte dela ("O PayPal TAMBEM nao tem como
+     avisar...") depende dessa para o "tambem" significar alguma coisa. */
+  pixManual:'O Pix não avisa a gente automaticamente. Assim que você pagar, toque em "Já paguei" para eu conferir e confirmar.',
   /* A FRASE INTEIRA, e nao so "Pagando via Pix" (decisao D-2): metade configuravel e
      armadilha -- o dono trocaria a frase e o sufixo ' (-5%)', que ele nao controla, continuaria
      grudado no fim. */
@@ -4003,7 +4143,9 @@ function fcTxtRestaura(defs,st){
    ATRIBUTO, e nao a propriedade: a propriedade ja foi sobrescrita pela restauracao. */
 function fcTxtFabricaDiverge(){
   var tabelas=[['Checkout',U_TXT_DEFS],['Mini loja',M_TXT_DEFS],
-               ['Agendamento por pacote',A_TXT_DEFS],['Link de cobranca',P_TXT_DEFS]],r=[],i,j,el,attr;
+               ['Agendamento por pacote',A_TXT_DEFS],['Link de cobranca',P_TXT_DEFS],
+               ['Slideshow',S_TXT_DEFS],['Capta\u00e7\u00e3o de leads',L_TXT_DEFS],
+               ['Agendamento TidyCal',T_TXT_DEFS],['Contagem regressiva',C_TXT_DEFS]],r=[],i,j,el,attr;
   for(i=0;i<tabelas.length;i++)for(j=0;j<tabelas[i][1].length;j++){
     el=$(tabelas[i][1][j][1]);
     if(!el)continue;
@@ -4842,11 +4984,11 @@ var ABAS=[
    importar:sImportarLimpar,
    listas:[['imgs',{url:'',legenda:''},'url']],
    exemplo:'ex.: Natal 2026 - galeria do hero',
-   guarda:'tudo o que está configurado nesta aba — a <b>lista de imagens</b> (links, legendas e a ordem), a transição, o tempo, a largura, a proporção, o corte de celular, a ordem de exibição e os controles do visitante. Não guarda o que está no importador de galeria, que não é configuração e sim uma colagem de trabalho.'},
+   guarda:'tudo o que está configurado nesta aba — a <b>lista de imagens</b> (links, legendas e a ordem), a transição, o tempo, a largura, a proporção, o corte de celular, a ordem de exibição, os controles do visitante e os <b>textos que o leitor de tela anuncia</b>. Não guarda o que está no importador de galeria, que não é configuração e sim uma colagem de trabalho.'},
   {id:'tidy', nome:'Agendamento TidyCal', chaves:['t'],         coleta:tColeta,restaura:tRestaura,gerar:tGerar,
    pref:'t',fora:[],resumo:tPresetResumo,redesenhar:tPresetDepois,antesDeSalvar:tPresetAntes,
    exemplo:'ex.: Natal 2026 - ensaio temático',
-   guarda:'tudo o que está configurado nesta aba — o caminho do agendamento no TidyCal, as duas alturas, a largura de corte, o modo (direto ou embutido), o endereço da página intermediária e a altura inicial do iframe.'},
+   guarda:'tudo o que está configurado nesta aba — o caminho do agendamento no TidyCal, as duas alturas, a largura de corte, o modo (direto ou embutido), o endereço da página intermediária, a altura inicial do iframe e os <b>textos</b> da seção 3.'},
   /* 'nome' e TEXTO DE INTERFACE: aparece na barra vermelha de falhas, nas perguntas do preset
      geral e no interruptor de cada aba. Por isso vai com acento, como manda a convencao do
      arquivo -- e por isso os prep() desta aba usam exatamente a mesma grafia, senao a barra
@@ -4855,7 +4997,7 @@ var ABAS=[
    pref:'l',fora:[],resumo:lPresetResumo,redesenhar:lPresetDepois,antesDeSalvar:lPresetAntes,
    listas:[['l.qops',''],['l.hordias',0]],
    exemplo:'ex.: Natal 2026 - hospedeira',
-   guarda:'tudo o que está configurado nesta aba — modo de exibição, ícone, formato, cores e posição do botão, os quatro trechos da mensagem, os textos do pop-up, o cabeçalho (coruja, movimento e efeitos), o horário de atendimento, a pergunta de qualificação com as opções cadastradas e a âncora.'},
+   guarda:'tudo o que está configurado nesta aba — modo de exibição, ícone, formato, cores e posição do botão, os quatro trechos da mensagem, os textos do pop-up, o cabeçalho (coruja, movimento e efeitos), o horário de atendimento, a pergunta de qualificação com as opções cadastradas, a âncora e os <b>textos</b> da seção 8.'},
   {id:'uni',  nome:'Checkout',            chaves:['u'],         coleta:uColeta,restaura:uRestaura,gerar:uGerar,
    pref:'u',fora:[],resumo:uPresetResumo,redesenhar:uPresetDepois,antesDeSalvar:uPresetAntes,
    listas:[['u.prods',{nome:'',desc:'',preco:0,opsel:'unico',opnenhum:'nao',qtd:false,ops:[{nome:'',preco:0,qtd:false}]},'nome'],
@@ -4872,7 +5014,7 @@ var ABAS=[
    pref:'c',fora:[],resumo:cPresetResumo,redesenhar:cPresetDepois,antesDeSalvar:cPresetAntes,
    listas:[['cmsgs',{texto:'',curta:''},'texto']],
    exemplo:'ex.: Natal 2026 - barra do topo',
-   guarda:'tudo o que está configurado nesta aba — modo e duração da contagem, o código da campanha, as <b>mensagens cadastradas</b>, aparência, posição, extras, coruja, efeitos, movimento, urgência e entrada.'},
+   guarda:'tudo o que está configurado nesta aba — modo e duração da contagem, o código da campanha, as <b>mensagens cadastradas</b>, aparência, posição, extras, coruja, efeitos, movimento, urgência, entrada e os <b>textos</b> da seção 5.'},
   {id:'cob',  nome:'Link de cobrança',    chaves:['p'],         coleta:pColeta,restaura:pRestaura,gerar:pGerar,
    pref:'p',fora:[],resumo:pPresetResumo,redesenhar:pPresetDepois,antesDeSalvar:pPresetAntes,
    naoEmite:['url','desc','valor','txid','validade','descpix','ppmodo','pplink'],
@@ -7890,12 +8032,15 @@ function sPreso(id){return fcPreso(S_NUMS,id);}
 /* Salvamento e restauracao desta aba (registradas em ABAS). Ficam junto do bloco da aba
    para que renomear um campo daqui seja uma alteracao de um lugar so. */
 function sColeta(){
-  return {
+  var r={
     imgs:sImgs,
     s:{t:radio('s-t'),p:radio('s-p'),int:$('s-int').value,larg:$('s-larg').value,
        pm:radio('s-pm'),mob:$('s-mob').value,ordem:radio('s-ordem'),
        setas:radio('s-setas'),dots:radio('s-dots'),arrastar:radio('s-arrastar'),pausar:radio('s-pausar')}
   };
+  /* Os cinco textos configuraveis (ver S_TXT_DEFS, logo antes de sCfg). */
+  fcTxtLer(S_TXT_DEFS,r.s);
+  return r;
 }
 function sRestaura(st){
   if(st.imgs){sImgs=st.imgs;sRender();}
@@ -7911,6 +8056,9 @@ function sRestaura(st){
     setRadio('s-dots',st.s.dots||'sim');
     setRadio('s-arrastar',st.s.arrastar||'nao');
     setRadio('s-pausar',st.s.pausar||'nao');
+    /* Os cinco textos configuraveis: estado gravado antes desta rodada nao tem nenhuma destas
+       chaves -- o padrao de cada campo e o terceiro item de S_TXT_DEFS. */
+    fcTxtRestaura(S_TXT_DEFS,st.s);
   }
   sToggles();
 }
@@ -8973,9 +9121,23 @@ function sLimpar(){
    presos a faixa declarada. sGerar e a previa leem daqui -- nao existe segundo lugar onde um
    limite seja aplicado, que e como a versao anterior conseguia rodar a previa a 1500 ms e
    entregar um bloco de 100 ms. */
+/* ===== os cinco textos configuraveis desta aba (Rodada de textos configuraveis, Etapa 3) =====
+   Mesmo molde de A_TXT_DEFS/U_TXT_DEFS: [chave no cfg/estado, id do campo na aba, texto padrao].
+   Quatro deles sao o que o LEITOR DE TELA anuncia -- texto que ninguem percebeu que estava
+   cravado porque ninguem o le olhando. O padrao e exatamente o que saia fixo no bloco, com UMA
+   excecao declarada: 'Proxima foto' saia SEM acento (decisao D-11, 03/09/2026), e o campo nasce
+   com 'Proxima foto' acentuado -- correcao de defeito, nao configuracao, e por isso a saida do
+   Slideshow muda de proposito nesta rodada. */
+var S_TXT_DEFS=[
+  ['txtAriaGaleria','s-txt-aria-galeria','Galeria de fotos'],
+  ['txtAriaAnterior','s-txt-aria-anterior','Foto anterior'],
+  ['txtAriaProxima','s-txt-aria-proxima','Pr\u00f3xima foto'],
+  ['txtAriaDot','s-txt-aria-dot','Ir para a foto {n}'],
+  ['txtAltPadrao','s-txt-alt-padrao','Foto {n}']
+];
 function sCfg(){
   var pm=radio('s-pm');
-  return {
+  var r={
     imgs:sImgs,
     t:radio('s-t'),
     prop:radio('s-p'),
@@ -8991,6 +9153,10 @@ function sCfg(){
     arrastar:radio('s-arrastar')==='sim',
     pausar:radio('s-pausar')==='sim'
   };
+  /* Os cinco textos configuraveis (ver S_TXT_DEFS): lidos direto do DOM pela tabela unica --
+     sCfg() so roda com a aba aberta, entao os campos sempre existem. */
+  fcTxtLer(S_TXT_DEFS,r);
+  return r;
 }
 
 /* ---------- previa fiel: o bloco gerado rodando de verdade ----------
@@ -9183,11 +9349,11 @@ function sBloco(cfg){
      disso dois elementos com o mesmo id sao HTML invalido. Agora cada bloco procura a primeira
      caixa .fc-slideshow ainda nao reivindicada e a marca com data-fc-pronto -- os scripts sao
      executados na ordem em que aparecem na pagina, entao cada um fica com a sua. */
-  c+='<div class="fc-slideshow" aria-label="Galeria de fotos">\n';
+  c+='<div class="fc-slideshow" aria-label="'+escAttr(cfg.txtAriaGaleria)+'">\n';
   c+='  <div class="fc-slides"></div>\n';
   if(cfg.setas){
-    c+='  <button type="button" class="fc-seta fc-seta-esq" aria-label="Foto anterior">&#10094;</button>\n';
-    c+='  <button type="button" class="fc-seta fc-seta-dir" aria-label="Proxima foto">&#10095;</button>\n';
+    c+='  <button type="button" class="fc-seta fc-seta-esq" aria-label="'+escAttr(cfg.txtAriaAnterior)+'">&#10094;</button>\n';
+    c+='  <button type="button" class="fc-seta fc-seta-dir" aria-label="'+escAttr(cfg.txtAriaProxima)+'">&#10095;</button>\n';
   }
   c+='  <div class="fc-legenda"></div>\n';
   if(cfg.dots)c+='  <div class="fc-dots"></div>\n';
@@ -9299,12 +9465,14 @@ function sBloco(cfg){
   c+='    var fundo = document.createElement(\'div\');\n    fundo.className = \'fc-fundo\';\n';
   c+='    fundo.style.backgroundImage = \'url("\' + foto.url.replace(/"/g, \'%22\') + \'")\';\n';
   c+='    var img = document.createElement(\'img\');\n    img.src = foto.url;\n';
-  c+='    img.alt = foto.legenda || (\'Foto \' + (i + 1));\n';
+  /* aTplJs com separador ' + ': o trecho original escrevia o mais com espacos em volta, e a
+     prova desta rodada e saida identica byte a byte com a configuracao de fabrica. */
+  c+='    img.alt = foto.legenda || ('+aTplJs("'",cfg.txtAltPadrao,[['{n}','(i + 1)']],' + ')+');\n';
   c+='    img.loading = (i === 0) ? \'eager\' : \'lazy\';\n';
   c+='    slide.appendChild(fundo);\n    slide.appendChild(img);\n    areaSlides.appendChild(slide);\n';
   if(cfg.dots){
     c+='    var dot = document.createElement(\'button\');\n    dot.type = \'button\';\n';
-    c+='    dot.setAttribute(\'aria-label\', \'Ir para a foto \' + (i + 1));\n';
+    c+='    dot.setAttribute(\'aria-label\', '+aTplJs("'",cfg.txtAriaDot,[['{n}','(i + 1)']],' + ')+');\n';
     c+='    dot.addEventListener(\'click\', function () { irPara(i, true); });\n';
     c+='    areaDots.appendChild(dot);\n';
   }
@@ -9446,7 +9614,7 @@ function lHoraOk(v){return /^\d{1,2}:\d{2}$/.test(String(v||''));}
 
 /* Salvamento e restauracao desta aba (registradas em ABAS). */
 function lColeta(){
-  return {
+  var r={
     /* Sem 'num': o WhatsApp saiu desta aba e e o da ferramenta inteira (ver uColeta). */
     l:{cod:$('l-cod').value,pag:$('l-pag').value,
       modo:radio('l-modo'),segauto:$('l-segauto').value,efeito:radio('l-efeito'),segef:$('l-segef').value,
@@ -9466,6 +9634,9 @@ function lColeta(){
       c1:$('l-c1-t').value,c2:$('l-c2-t').value,c3:$('l-c3-t').value,c4:$('l-c4-t').value,
       anc:radio('l-ancora'),ancv:$('l-anc').value,resp:$('l-resp').value}
   };
+  /* Os cinco textos configuraveis (ver L_TXT_DEFS, logo antes de lCfg). */
+  fcTxtLer(L_TXT_DEFS,r.l);
+  return r;
 }
 function lRestaura(st){
   if(!st.l)return;
@@ -9738,6 +9909,19 @@ function lToggles(){
    ancOk carrega o resultado da validacao do seletor em vez de a previa recusar: lGerar recusa
    antes de montar o bloco, entao quando ha codigo gerado ancOk e sempre true e os dois lados
    leem exatamente o mesmo objeto. */
+/* ===== os cinco textos configuraveis desta aba (Rodada de textos configuraveis, Etapa 3) =====
+   Mesmo molde de A_TXT_DEFS/U_TXT_DEFS: [chave no cfg/estado, id do campo na aba, texto padrao].
+   Os textos que o visitante LE ja eram campo desde antes (l-t1..l-t7, l-m1..l-m4); o que faltava
+   era o que ninguem le olhando -- os dois aria-label -- e as duas costuras da mensagem que chega
+   no WhatsApp. Tres deles comecam ou terminam com ESPACO, e o espaco e parte do texto: sem ele as
+   palavras se grudam na mensagem pronta. */
+var L_TXT_DEFS=[
+  ['txtAriaBotao','l-txt-aria-botao','Enviar mensagem'],
+  ['txtAriaFechar','l-txt-aria-fechar','Fechar'],
+  ['txtSepSaudacao','l-txt-sep-saudacao',', '],
+  ['txtRotuloCodigo','l-txt-rotulo-codigo',' (cod: *{cod}*)'],
+  ['txtPagReserva','l-txt-pag-reserva','seu site']
+];
 function lCfg(){
   var pos=radio('l-corujapos'),mov=radio('l-mov'),i;
   var dias=lHorDias(),hini=$('l-horini').value,hfim=$('l-horfim').value;
@@ -9753,7 +9937,7 @@ function lCfg(){
     ancOk=lAncOk(anc);
     resp=lPreso('l-resp');if(resp==null)resp=24;
   }
-  return {
+  var r={
     /* IDENTIDADE: o WhatsApp de destino e o mesmo da ferramenta inteira -- ver o bloco
        "identidade e paleta". */
     num:fciDigitos('zapnum'),cod:escJs($('l-cod').value),pag:escJs($('l-pag').value),
@@ -9786,6 +9970,11 @@ function lCfg(){
     c3:corSegura('l-c3','#25D366'),c4:corSegura('l-c4','#333333'),
     anc:{ativo:comAnc,v:anc,ok:ancOk,resp:resp}
   };
+  /* Os cinco textos configuraveis (ver L_TXT_DEFS): CRUS, ao contrario dos vizinhos desta
+     funcao -- cada um deles vai para um destino diferente (atributo HTML dentro de uma string
+     JS, literal JS solto), e o escape certo e escolhido no ponto de uso. */
+  fcTxtLer(L_TXT_DEFS,r);
+  return r;
 }
 
 function lGerar(){
@@ -10081,12 +10270,14 @@ function lJs(v){
     c+='}\n}\n';
     c+='return false;\n}\n\n';
   }
-  c+="function montar(){\nvar nomePagina=NOME_PAGINA||document.title||'seu site';\n";
+  c+="function montar(){\nvar nomePagina=NOME_PAGINA||document.title||'"+escJs(v.txtPagReserva)+"';\n";
   c+="var formato=(FORMATO_BOTAO==='quadrado')?'fcw-quadrado':'fcw-circulo';\n";
   c+='var timerAuto=null;\nvar timerEfeito=null;\n\n';
-  c+="var html='<button type=\"button\" class=\"fcw-botao '+formato+'\" aria-label=\"Enviar mensagem\">'+iconeBotao()+'</button>'+\n";
+  /* escAttr por dentro (o destino e um atributo entre aspas duplas) e escJs por fora (o
+     atributo mora dentro de um literal JS entre apostrofos): dois destinos, dois escapes. */
+  c+="var html='<button type=\"button\" class=\"fcw-botao '+formato+'\" aria-label=\""+escJs(escAttr(v.txtAriaBotao))+"\">'+iconeBotao()+'</button>'+\n";
   c+="'<div class=\"fcw-overlay\"><div class=\"fcw-card\">'+\n";
-  c+="'<div class=\"fcw-topo\"><span class=\"fcw-titulo\"></span> <button type=\"button\" class=\"fcw-fechar\" aria-label=\"Fechar\">&times;</button></div>'+\n";
+  c+="'<div class=\"fcw-topo\"><span class=\"fcw-titulo\"></span> <button type=\"button\" class=\"fcw-fechar\" aria-label=\""+escJs(escAttr(v.txtAriaFechar))+"\">&times;</button></div>'+\n";
   c+="'<div class=\"fcw-corpo\">'+\n";
   if(v.hor.ativo)c+="'<div class=\"fcw-aviso\"></div>'+\n";
   c+="'<label for=\"fcw-nome\" class=\"fcw-lbl-nome\"></label><input id=\"fcw-nome\" type=\"text\" maxlength=\"60\">'+\n";
@@ -10193,6 +10384,13 @@ function lJs(v){
   c+='if(timerAuto){clearTimeout(timerAuto);timerAuto=null;}\nabrir(false);\n});\n';
   c+="fechar.addEventListener('click',fecharPopup);\n";
   c+="overlay.addEventListener('click',function(e){if(e.target===overlay)fecharPopup();});\n\n";
+  /* As duas costuras da mensagem viraram campo. O rotulo do codigo carrega o \\n final DENTRO
+     do proprio literal: emitir "'*)'+'\\n'" no lugar de "'*)\\n'" mudaria a saida em tres bytes
+     com a configuracao de fabrica, e o invariante desta rodada e saida IDENTICA no padrao. A
+     sentinela \\u0001 atravessa o escape de aTplJs intacta (esc so mexe em barra e apostrofo) e
+     so depois vira a sequencia de escape do fim de linha. */
+  var lSep=escJs(v.txtSepSaudacao);
+  var lCod=aTplJs("'",v.txtRotuloCodigo+'\u0001',[['{cod}','CODIGO']]).replace(/\u0001/g,'\\n');
   c+="enviar.addEventListener('click',function(){\n";
   c+='var nome=campoNome.value.trim();\nvar recado=campoRecado.value.trim();\n';
   c+="if(!nome||!recado){erro.style.display='block';return;}\n";
@@ -10200,9 +10398,9 @@ function lJs(v){
   if(v.q.ativo){
     c+="var interesse=selInteresse?selInteresse.value:'';\n";
     c+="var linhaInteresse=interesse?(PERGUNTA_MSG+' *'+interesse+'*.\\n'):'';\n";
-    c+="var mensagem=MSG_SAUDACAO+', '+MSG_MEU_NOME+' *'+nome+'*.\\n'+MSG_PAGINA+' *'+nomePagina+'*.\\n'+linhaInteresse+MSG_PEDIDO+' (cod: *'+CODIGO+'*)\\n'+recado;\n";
+    c+="var mensagem=MSG_SAUDACAO+'"+lSep+"'+MSG_MEU_NOME+' *'+nome+'*.\\n'+MSG_PAGINA+' *'+nomePagina+'*.\\n'+linhaInteresse+MSG_PEDIDO+"+lCod+"+recado;\n";
   }else{
-    c+="var mensagem=MSG_SAUDACAO+', '+MSG_MEU_NOME+' *'+nome+'*.\\n'+MSG_PAGINA+' *'+nomePagina+'*.\\n'+MSG_PEDIDO+' (cod: *'+CODIGO+'*)\\n'+recado;\n";
+    c+="var mensagem=MSG_SAUDACAO+'"+lSep+"'+MSG_MEU_NOME+' *'+nome+'*.\\n'+MSG_PAGINA+' *'+nomePagina+'*.\\n'+MSG_PEDIDO+"+lCod+"+recado;\n";
   }
   c+="var url='https://wa.me/'+NUMERO_WHATSAPP+'?text='+encodeURIComponent(mensagem);\n";
   c+="window.open(url,'_blank');\nfecharPopup();\ncampoNome.value='';\ncampoRecado.value='';\n";
@@ -10477,11 +10675,26 @@ function tObMarcar(t){
     if(el)el.checked=(g.indexOf(T_OB_VARS[i].id)>=0);
   }
 }
+/* ===== os quatro textos configuraveis desta aba (Rodada de textos configuraveis, Etapa 3) =====
+   Mesmo molde de A_TXT_DEFS/U_TXT_DEFS: [chave no cfg/estado, id do campo na aba, texto padrao].
+   Tres sao CONECTORES de data -- " de ", ", ", " as " --, que ninguem percebeu que estavam
+   cravados porque sao palavrinhas no meio de um numero. O quarto e o title do iframe do codigo 3.
+   Os tres conectores comecam e terminam com ESPACO, e o espaco e parte do texto. */
+var T_TXT_DEFS=[
+  ['txtObConectorData','t-txt-ob-conector-data',' de '],
+  ['txtObSepDiaSemana','t-txt-ob-sep-diasemana',', '],
+  ['txtObConectorHora','t-txt-ob-conector-hora',' \u00e0s '],
+  ['txtIframeTitulo','t-txt-iframe-titulo','Agenda']
+];
 function tObCfg(){
   var fb={},i;
   for(i=0;i<T_OB_VARS.length;i++)fb[T_OB_VARS[i].id]=$('t-ob-fb-'+T_OB_VARS[i].id).value;
-  return {usar:(radio('t-ob-usar')==='sim'), url:$('t-ob-url').value.trim(),
+  var r={usar:(radio('t-ob-usar')==='sim'), url:$('t-ob-url').value.trim(),
           vars:tObMarcadas(), fmt:radio('t-ob-fmt'), fb:fb};
+  /* Os quatro textos configuraveis (ver T_TXT_DEFS). O title do iframe nao e usado por
+     tObBloco, mas anda junto: uma tabela so por aba e o que impede um campo ficar orfao. */
+  fcTxtLer(T_TXT_DEFS,r);
+  return r;
 }
 /* O endereco para colar no TidyCal. As variaveis dele ficam CRUAS ({{contact.name}}): quem
    substitui e o TidyCal, no momento do redirecionamento -- codificar aqui entregaria a chave
@@ -10569,14 +10782,14 @@ function tObBloco(cfg){
   j+='    if(!p)return v;\n';
   j+='    var txt;\n';
   j+="    if(FORMATO_DATA==='curto')txt=doisDig(p.d)+'/'+doisDig(p.m)+'/'+p.a;\n";
-  j+="    else txt=p.d+' de '+MESES_PT[p.m-1]+' de '+p.a;\n";
+  j+="    else txt=p.d+'"+escJs(cfg.txtObConectorData)+"'+MESES_PT[p.m-1]+'"+escJs(cfg.txtObConectorData)+"'+p.a;\n";
   j+="    if(FORMATO_DATA==='extensodia'){\n";
   j+='      /* o dia da semana e CALCULADO, e nao lido do texto: assim ele sai igual venha o\n';
   j+='         valor no formato tecnico ou no ingles por extenso. */\n';
   j+='      var dt=new Date(p.a,p.m-1,p.d);\n';
-  j+="      if(!isNaN(dt.getTime()))txt=DIAS_PT[dt.getDay()]+', '+txt;\n";
+  j+="      if(!isNaN(dt.getTime()))txt=DIAS_PT[dt.getDay()]+'"+escJs(cfg.txtObSepDiaSemana)+"'+txt;\n";
   j+='    }\n';
-  j+="    if(comHora&&p.hh!==null)txt+=' \u00e0s '+doisDig(p.hh)+':'+doisDig(p.mm);\n";
+  j+="    if(comHora&&p.hh!==null)txt+='"+escJs(cfg.txtObConectorHora)+"'+doisDig(p.hh)+':'+doisDig(p.mm);\n";
   j+='    return txt;\n';
   j+='  }\n';
   j+='  function valor(c){\n';
@@ -10632,13 +10845,16 @@ var T_OB_JANELA=5000;
 function tObInd(t){return String(t).replace(/^(?!$)/gm,'  ');}
 
 function tColeta(){
-  return {
+  var r={
     t:{path:$('t-path').value,desk:$('t-desk').value,mob:$('t-mob').value,larg:$('t-larg').value,
       arq:radio('t-arq'),url:$('t-url').value,alt0:$('t-alt0').value,preset:radio('t-preset'),
       obusar:radio('t-ob-usar'),oburl:$('t-ob-url').value,obfmt:radio('t-ob-fmt'),
       obvars:tObMarcadas().join(','),
       obfb:T_OB_VARS.map(function(v){return $('t-ob-fb-'+v.id).value;}).join('\u0001')}
   };
+  /* Os quatro textos configuraveis (ver T_TXT_DEFS, logo antes de tObCfg). */
+  fcTxtLer(T_TXT_DEFS,r.t);
+  return r;
 }
 function tRestaura(st){
   if(!st.t)return;
@@ -10665,6 +10881,9 @@ function tRestaura(st){
     for(ifb=0;ifb<T_OB_VARS.length;ifb++)
       if(fb[ifb]!==undefined)$('t-ob-fb-'+T_OB_VARS[ifb].id).value=fb[ifb];
   }
+  /* Os quatro textos configuraveis: estado gravado antes desta rodada nao tem nenhuma destas
+     chaves -- o padrao de cada campo e o terceiro item de T_TXT_DEFS. */
+  fcTxtRestaura(T_TXT_DEFS,st.t);
 }
 
 /* ===== O que esta aba poe na biblioteca de presets (ver o bloco compartilhado) =====
@@ -10828,6 +11047,9 @@ function tGerar(){
      caminho do booking type estivesse vazio -- um campo que nada tem a ver com ela. Agora
      cada parte recusa pelo proprio motivo, e a recusa do caminho diz o que ja foi gerado. */
   var ob=tObCfg(),obFeita=false;
+  /* Os quatro textos desta aba vem da mesma tabela; ob ja os traz, mas o codigo 3 e gerado
+     fora do ramo da pagina de obrigado -- por isso a leitura propria, da MESMA tabela. */
+  var tTxt=fcTxtLer(T_TXT_DEFS,{});
   if(ob.usar){
     if(!ob.vars.length){
       alert('Escolha pelo menos um dado para a pagina de obrigado receber (nome, tipo, data, horario). Sem nenhum, nao ha o que preencher na pagina -- ou desligue a pagina de obrigado na secao 2.');
@@ -10915,7 +11137,7 @@ function tGerar(){
     var alt0=tPreso('t-alt0');
     var d='';
     d+='<ifr'+'ame\n  style="border:none; width:100%; display:block;"\n';
-    d+='  src="'+escAttr(u)+'"\n  title="Agenda"\n  width="100%"\n  height="'+alt0+'"\n';
+    d+='  src="'+escAttr(u)+'"\n  title="'+escAttr(tTxt.txtIframeTitulo)+'"\n  width="100%"\n  height="'+alt0+'"\n';
     d+='  scrolling="no"\n  frameborder="0"\n  allow="fullscreen">\n</ifr'+'ame>';
     $('t-out3').value=d;
   }else{
@@ -11483,6 +11705,7 @@ var U_TXT_DEFS=[
   ['txtPixCopiar','u-txt-pix-copiar',FC_TXT_FABRICA.pixCopiar],
   ['txtPixCopiado','u-txt-pix-copiado',FC_TXT_FABRICA.pixCopiado],
   ['txtNota','u-txt-nota',FC_TXT_FABRICA.nota],
+  ['txtPixManual','u-txt-pix-manual',FC_TXT_FABRICA.pixManual],
   ['txtPixRotulo','u-txt-pix-rotulo',FC_TXT_FABRICA.pixRotulo],
   ['txtResumoBotao','u-txt-resumo-botao',FC_TXT_FABRICA.resumoBotao],
   ['txtResumoCopiado','u-txt-resumo-copiado',FC_TXT_FABRICA.resumoCopiado],
@@ -11733,6 +11956,9 @@ function uBloco(cfg){
     if(zap){
       c+='.fcuni .fcu-zap{display:block;width:100%;box-sizing:border-box;margin-top:10px;border:none;border-radius:8px;background:#25D366;color:#fff;font-size:14px;font-weight:600;padding:12px;cursor:pointer;font-family:inherit}\n';
       c+='.fcuni .fcu-zap:hover{filter:brightness(.92)}\n';
+      /* O aviso de que o Pix nao confirma sozinho fica na MESMA condicao do botao: ele manda
+         tocar no "Ja paguei", entao sem o botao nem a regra nem o texto sao emitidos. */
+      c+='.fcuni .fcu-pixmanual{font-size:12px;line-height:1.45;color:#444;background:rgba(0,0,0,.045);border-radius:8px;padding:9px 10px;margin-top:10px;text-align:left}\n';
     }
     c+='.fcuni .fcu-nota{font-size:11px;color:#999;text-align:center;margin-top:8px}\n';
   }
@@ -11826,6 +12052,7 @@ function uBloco(cfg){
     c+="var TXT_COPIAR='"+escJs(cfg.txtPixCopiar)+"';\n";
     c+="var TXT_COPIADO='"+escJs(cfg.txtPixCopiado)+"';\n";
     if(zap)c+="var TXT_ZAP='"+escJs(cfg.txtZapBotao)+"';\n";
+    if(zap)c+="var TXT_PIX_MANUAL='"+escJs(cfg.txtPixManual)+"';\n";
     c+="var TXT_NOTA='"+escJs(cfg.txtNota)+"';\n";
   }
   if(descpix>0)c+="var TXT_PIX_ROTULO='"+escJs(cfg.txtPixRotulo)+"';\n";
@@ -11896,7 +12123,7 @@ function uBloco(cfg){
     c+="h+='<div class=\"fcu-pixarea\"><p class=\"fcu-instrucao\"></p><div class=\"fcu-pixval\"><span class=\"fcu-pixval-t\"></span> <span class=\"fcu-pixval-v\"></span></div><div class=\"fcu-qr\"></div>';\n";
     c+="h+='<textarea class=\"fcu-cola\" readonly></textarea>';\n";
     c+="h+='<button type=\"button\" class=\"fcu-copiar\"></button><div class=\"fcu-copiado\"></div>';\n";
-    if(zap)c+="h+='<button type=\"button\" class=\"fcu-zap\"></button>';\n";
+    if(zap)c+="h+='<div class=\"fcu-pixmanual\"></div><button type=\"button\" class=\"fcu-zap\"></button>';\n";
     c+="h+='<div class=\"fcu-nota\"></div></div>';\n";
   }
   if(usaResumo){
@@ -11926,7 +12153,10 @@ function uBloco(cfg){
     c+="raiz.querySelector('.fcu-copiar').textContent=TXT_COPIAR;\n";
     c+="raiz.querySelector('.fcu-copiado').textContent=TXT_COPIADO;\n";
     c+="raiz.querySelector('.fcu-nota').textContent=TXT_NOTA;\n";
-    if(zap)c+="raiz.querySelector('.fcu-zap').textContent=TXT_ZAP;\n";
+    if(zap){
+      c+="raiz.querySelector('.fcu-pixmanual').textContent=TXT_PIX_MANUAL;\n";
+      c+="raiz.querySelector('.fcu-zap').textContent=TXT_ZAP;\n";
+    }
     /* D-1: as DUAS grafias do marcador. O padrao virou {pct} (minusculo, como o resto da
        ferramenta desde a Etapa 1), e a /i faz configuracao ja gravada com {PCT} continuar
        funcionando -- trocar a convencao nao pode quebrar o bloco de quem ja configurou. */
@@ -13836,6 +14066,13 @@ var A_OB_VARS=[
    {pct}/{valor}/{n}/{data} seguem o padrao que TXT_PRAZO/TXT_VENCIDO ja usam na aba Link de
    cobranca (coerencia pedida pelo dono). */
 var A_TXT_DEFS=[
+  /* SUBTITULO OPCIONAL DA VITRINE (decisao 6 do dono, 03/09/2026). Padrao VAZIO, e vazio nao
+     desenha nada: com a configuracao de fabrica a vitrine sai byte a byte como saia antes --
+     nem a regra de CSS, nem a div, nem a variavel entram no bloco. O {pct} e trocado em tempo
+     de GERACAO pelo desconto do Pix configurado, e nao digitado a mao: subtitulo com o
+     percentual escrito por fora passa a mentir no dia em que o desconto mudar, sem erro e sem
+     aviso -- o mesmo motivo que fez o selo do Pix nascer com marcador. */
+  ['txtSubtitulo','a-txt-subtitulo',''],
   ['txtSeloPix','a-txt-selopix','-{pct}% no Pix'],
   ['txtCartaoLinha','a-txt-cartaolinha','ou {valor} no cartão'],
   ['txtParcela','a-txt-parcela',', em até {n}x de {valor}'],
@@ -13847,7 +14084,9 @@ var A_TXT_DEFS=[
   ['txtCupomOk','a-txt-cupom-ok',FC_TXT_FABRICA.cupomOk],
   ['txtCupomInvalido','a-txt-cupom-invalido',FC_TXT_FABRICA.cupomInvalido],
   ['txtCupomExpirado','a-txt-cupom-expirado',FC_TXT_FABRICA.cupomExpirado],
-  ['txtDesconto','a-txt-desconto','Desconto'],
+  /* D-3 (03/09/2026): a frase INTEIRA, com {codigo}. Antes o campo valia so "Desconto" e o
+     " (CODIGO)" era colado por fora, no bloco -- meia frase configuravel e armadilha. */
+  ['txtDesconto','a-txt-desconto',FC_TXT_FABRICA.desconto],
   ['txtCupomValidade','a-txt-cupom-validade',FC_TXT_FABRICA.cupomValidade],
   ['txtSucesso','a-txt-sucesso','Pagamento aprovado. Obrigado!'],
   ['txtErroComPix','a-txt-erro-compix','Não foi possível carregar o pagamento por cartão agora. Use o Pix acima, ou fale com a gente para receber outra forma de pagar.'],
@@ -13857,6 +14096,11 @@ var A_TXT_DEFS=[
   ['txtPixCopiar','a-txt-pix-copiar',FC_TXT_FABRICA.pixCopiar],
   ['txtPixInstrucao','a-txt-pix-instrucao',FC_TXT_FABRICA.pixInstrucao],
   ['txtNota','a-txt-nota',FC_TXT_FABRICA.nota],
+  /* O aviso de que o Pix nao confirma sozinho (decisao do dono, 03/09/2026) NAO sai de
+     FC_TXT_FABRICA.pixManual: esta pagina nao tem botao "Ja paguei" -- o botao de WhatsApp
+     desta aba so aparece nos dois recados de recusa --, e mandar tocar num botao que nao
+     existe seria texto de fabrica mentindo. Frase parecida nao e frase unica. */
+  ['txtPixManual','a-txt-pix-manual','O Pix não avisa a gente automaticamente. Assim que você pagar, me avise para eu conferir e confirmar a sua reserva.'],
   ['txtPixCopiado','a-txt-pix-copiado','Código copiado! Cole no aplicativo do seu banco.'],
   ['txtPixNaocopiou','a-txt-pix-naocopiou','Não consegui copiar. Selecione o código acima e copie na mão.'],
   ['txtOu','a-txt-ou','OU'],
@@ -14456,6 +14700,11 @@ function fcaTextoCartaoSrc(q,txtCartaoLinha,txtParcela){
 
 function aBlocoVitrine(cfg){
   var c='';
+  /* O SUBTITULO OPCIONAL (decisao 6 do dono, 03/09/2026). O {pct} e trocado AQUI, em tempo de
+     geracao, pelo desconto do Pix configurado -- as duas grafias, como D-1 mandou para o resto
+     da ferramenta. Vazio, aSub e string vazia e nada do subtitulo entra no bloco: nem regra de
+     CSS, nem div, nem variavel. E o que faz a vitrine de fabrica sair byte a byte como antes. */
+  var aSub=String(cfg.txtSubtitulo||'').replace(/\{pct\}/gi,cfg.descpix);
   c+='<div class="fca-raiz" id="fca-raiz"></div>\n\n';
 
   /* ===== CSS, dentro do proprio HTML do componente (nunca no campo CSS Customizado, que so
@@ -14463,6 +14712,10 @@ function aBlocoVitrine(cfg){
   c+='<sty'+'le>\n';
   c+='.fca-raiz{max-width:960px;margin:0 auto;text-align:left;font-family:inherit;color:var(--fca-texto,#333)}\n';
   c+='.fca-titulo{font-size:20px;font-weight:700;color:var(--fca-destaque,#0F3A30);margin:0 0 14px;text-align:left}\n';
+  /* Subtitulo VAZIO nao emite regra nenhuma -- e o que preserva a saida de fabrica byte a byte.
+     Com subtitulo, o titulo perde a margem de baixo (a regra abaixo entra depois dele e vale
+     pelo mesmo seletor mais especifico) para os dois ficarem colados como um par. */
+  if(aSub)c+='.fca-raiz .fca-titulo{margin:0 0 4px}\n.fca-subtitulo{font-size:14px;line-height:1.45;color:var(--fca-texto,#333);opacity:.85;margin:0 0 14px;text-align:left}\n';
   c+='.fca-passo{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:var(--fca-destaque,#0F3A30);margin:0 0 10px;text-align:left}\n';
   c+='.fca-passo-n{width:22px;height:22px;min-width:22px;border-radius:50%;background:var(--fca-destaque,#0F3A30);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px}\n';
   c+='.fca-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:0 0 18px;text-align:left}\n';
@@ -14504,6 +14757,7 @@ function aBlocoVitrine(cfg){
   c+="var COR_FUNDO='"+cfg.c2+"';\n";
   c+="var COR_TEXTO='"+cfg.c3+"';\n";
   c+="var TXT_TITULO='"+escJs(cfg.t1)+"';\n";
+  if(aSub)c+="var TXT_SUBTITULO='"+escJs(aSub)+"';\n";
   c+="var TXT_PASSO1='"+escJs(cfg.t2)+"';\n";
   c+="var TXT_PASSO2='"+escJs(cfg.t3)+"';\n";
   c+="var TXT_TROCAR='"+escJs(cfg.t4)+"';\n\n";
@@ -14557,6 +14811,7 @@ function aBlocoVitrine(cfg){
 
   c+="var h='';\n";
   c+="h+='<div class=\"fca-titulo\"></div>';\n";
+  if(aSub)c+="h+='<div class=\"fca-subtitulo\"></div>';\n";
   c+="h+='<div class=\"fca-passo fca-passo-1\"><span class=\"fca-passo-n\">1</span><span class=\"fca-passo-t\"></span></div>';\n";
   c+="h+='<div class=\"fca-cards\"></div>';\n";
   c+="h+='<div class=\"fca-resumo\"><div><div class=\"fca-resumo-nome\"></div><div class=\"fca-resumo-preco\"></div></div><button type=\"button\" class=\"fca-trocar\"></button></div>';\n";
@@ -14564,6 +14819,7 @@ function aBlocoVitrine(cfg){
   c+='raiz.innerHTML=h;\n\n';
 
   c+="raiz.querySelector('.fca-titulo').textContent=TXT_TITULO;\n";
+  if(aSub)c+="raiz.querySelector('.fca-subtitulo').textContent=TXT_SUBTITULO;\n";
   c+="raiz.querySelector('.fca-passo-1 .fca-passo-t').textContent=TXT_PASSO1;\n";
   c+="raiz.querySelector('.fca-passo-2 .fca-passo-t').textContent=TXT_PASSO2;\n";
   c+="raiz.querySelector('.fca-trocar').textContent=TXT_TROCAR;\n\n";
@@ -14787,6 +15043,9 @@ function aBlocoObrigado(cfg){
   c+='.fca-ob-msg{display:none;text-align:center;font-size:14px;font-weight:600;padding:12px;border-radius:8px;margin-top:10px}\n';
   c+='.fca-ob-msg.ok{display:block;background:#e6f4ea;color:#1e7e34}\n';
   c+='.fca-ob-msg.erro{display:block;background:#fdeaea;color:#c0392b}\n';
+  /* So com Pix na pagina: em "somente cartao" a funcao pix() nem e emitida, e uma regra para
+     uma classe que nunca aparece seria peso e ruido no bloco entregue. */
+  if(cfg.usaPix)c+='.fca-ob-pixmanual{font-size:12px;line-height:1.45;background:rgba(0,0,0,.05);border-radius:8px;padding:9px 10px;margin:10px 0 0;text-align:left}\n';
   c+='.fca-ob-pixarea{display:none;margin-top:10px}\n';
   c+='.fca-ob-pixarea.on{display:block}\n';
   c+='@media(prefers-reduced-motion: reduce){\n  .fca-ob-cartao *{transition:none}\n}\n';
@@ -15210,7 +15469,7 @@ function aBlocoObrigado(cfg){
   c+='  if(!elDescLinha)return;\n';
   c+='  if(cupomAtivo){\n';
   c+='    elDescLinha.className="fca-ob-desconto on";\n';
-  c+='    elDescTxt.textContent=TXT_DESCONTO+" ("+cupomAtivo.codigo+")";\n';
+  c+='    elDescTxt.textContent=TXT_DESCONTO.replace(/\\{codigo\\}/g,cupomAtivo.codigo);\n';
   c+='    elDescVal.textContent="- "+moedaFmt(descontoAtual());\n';
   c+='    var dv=validadeBr(cupomAtivo.validade);\n';
   c+='    elDescP.textContent=dv?TXT_CUPOM_VALIDADE+" "+dv:"";\n';
@@ -15260,6 +15519,7 @@ function aBlocoObrigado(cfg){
   c+='  var av=document.createElement("div");av.className="fca-ob-ajuda";area.appendChild(av);\n';
   c+='  var qr=document.createElement("div");qr.className="fca-ob-qr";area.appendChild(qr);\n';
   c+='  var ins=document.createElement("div");ins.className="fca-ob-ajuda";ins.textContent="'+escJsD(cfg.txtPixInstrucao)+'";area.appendChild(ins);\n';
+  c+='  var man=document.createElement("div");man.className="fca-ob-pixmanual";man.textContent="'+escJsD(cfg.txtPixManual)+'";area.appendChild(man);\n';
   c+='  var nota=document.createElement("div");nota.className="fca-ob-ajuda";nota.textContent=TXT_NOTA;area.appendChild(nota);\n';
   c+='  b.appendChild(area);\n';
   c+='  cartao.appendChild(b);\n';
@@ -15726,7 +15986,7 @@ var cMsgs=[];
 
 /* Salvamento e restauracao desta aba (registradas em ABAS). */
 function cColeta(){
-  return {
+  var r={
     cmsgs:cMsgs,
     c:{modo:radio('c-modo'),dias:$('c-dias').value,horas:$('c-horas').value,mins:$('c-mins').value,
       alvo:$('c-alvo').value,cod:$('c-cod').value,prazofmt:radio('c-prazofmt'),
@@ -15751,6 +16011,9 @@ function cColeta(){
       urg:radio('c-urg'),urglim:$('c-urglim').value,curg:$('c-curg-t').value,urgpulsar:radio('c-urgpulsar'),
       dig:radio('c-dig'),entrada:radio('c-entrada'),entradapx:$('c-entradapx').value}
   };
+  /* Os quatro textos configuraveis (ver C_TXT_DEFS, logo antes de cPrazoTexto). */
+  fcTxtLer(C_TXT_DEFS,r.c);
+  return r;
 }
 function cRestaura(st){
   if(st.cmsgs){cMsgs=st.cmsgs;cMsgRender();}
@@ -15815,6 +16078,9 @@ function cRestaura(st){
    ['c-curg',C.curg,'#8C1D18']].forEach(function(p){
     $(p[0]+'-t').value=p[1];$(p[0]).value=corValida(p[1])?p[1]:p[2];
   });
+  /* Os quatro textos configuraveis: estado gravado antes desta rodada nao tem nenhuma destas
+     chaves -- o padrao de cada campo e o terceiro item de C_TXT_DEFS. */
+  fcTxtRestaura(C_TXT_DEFS,C);
 }
 
 /* ===== O que esta aba poe na biblioteca de presets (ver o bloco compartilhado) ===== */
@@ -15910,14 +16176,30 @@ function cAlvoIso(){
    na tela. */
 var C_PRAZO_MESES=['janeiro','fevereiro','mar\u00e7o','abril','maio','junho','julho','agosto',
   'setembro','outubro','novembro','dezembro'];
-function cPrazoTexto(alvoIso,fmt){
+/* ===== os quatro textos configuraveis desta aba (Rodada de textos configuraveis, Etapa 3) =====
+   Mesmo molde de A_TXT_DEFS/U_TXT_DEFS: [chave no cfg/estado, id do campo na aba, texto padrao].
+   Os SUFIXOS do relogio compacto NAO estao aqui: por decisao D-13 (03/09/2026) eles passaram a
+   sair dos rotulos das unidades (c-rd/c-rh/c-rm/c-rs), que ate entao so valiam no formato
+   "blocos" -- ou seja, na configuracao de fabrica os quatro campos nao apareciam em lugar
+   nenhum da tela do cliente. Dois conectores comecam e terminam com ESPACO, e o espaco e parte
+   do texto. */
+var C_TXT_DEFS=[
+  ['txtSepRelogio','c-txt-sep-relogio',':'],
+  ['txtPrazoConector','c-txt-prazo-conector',' de '],
+  ['txtPrazoConectorHora','c-txt-prazo-conector-hora',' \u00e0s '],
+  ['txtAriaFechar','c-txt-aria-fechar','Fechar']
+];
+/* con e conh sao os dois conectores configuraveis (C_TXT_DEFS). Sem valor padrao aqui de
+   proposito: o padrao mora na tabela, e uma segunda copia dele nesta assinatura seria a
+   fabrica divergindo por acidente -- exatamente o que fcTxtFabricaDiverge existe para acusar. */
+function cPrazoTexto(alvoIso,fmt,con,conh){
   var m=/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/.exec(String(alvoIso||''));
   if(!m)return '';
   var a=m[1],mes=+m[2],d=+m[3],hh=m[4],mm=m[5];
   var dd=(d<10?'0':'')+d,MM=(mes<10?'0':'')+mes;
   if(fmt==='curtoano')return dd+'/'+MM+'/'+a;
-  if(fmt==='extenso')return d+' de '+C_PRAZO_MESES[mes-1];
-  if(fmt==='extensohora')return d+' de '+C_PRAZO_MESES[mes-1]+' \u00e0s '+hh+':'+mm;
+  if(fmt==='extenso')return d+con+C_PRAZO_MESES[mes-1];
+  if(fmt==='extensohora')return d+con+C_PRAZO_MESES[mes-1]+conh+hh+':'+mm;
   return dd+'/'+MM;
 }
 /* Alguma mensagem pede o prazo? Sem isso, nada de prazo e emitido -- bloco entregue nao
@@ -15971,7 +16253,7 @@ function cCfg(){
      pelo mesmo mecanismo que ja zera o desconto Pix quando o sinal esta ligado -- e, como la, o
      campo NAO some da tela: fica desabilitado, com aviso ambar dizendo por que nao vale. */
   var movsel=radio('c-mov'),deslizaAlt=(movsel==='altdesliza');
-  return {
+  var r={
     modo:radio('c-modo'),
     duracaoMs:((dias*24+horas)*60+mins)*60000,
     alvoIso:cAlvoIso(),
@@ -16019,6 +16301,10 @@ function cCfg(){
     dig:radio('c-dig'),entrada:radio('c-entrada'),entradapx:cPreso('c-entradapx',300),
     msgs:cMsgs.length?cMsgs:[{texto:'Oferta por tempo limitado {contador}',curta:''}]
   };
+  /* Os quatro textos configuraveis (ver C_TXT_DEFS): lidos direto do DOM pela tabela unica --
+     cCfg() so roda com a aba aberta, entao os campos sempre existem. */
+  fcTxtLer(C_TXT_DEFS,r);
+  return r;
 }
 /* O motor de contagem da previa foi removido: cFormatarHTML, cPartes, cAlvoMs e cDois eram
    uma segunda implementacao do relogio, mantida so para a previa desenhar alguma coisa.
@@ -16370,7 +16656,7 @@ function cJsBase(cfg){
      uma barra: a mensagem, o botao e a coruja seguem onde estavam. */
   if(cfg.contador){
     j+='  var UNIDADES={d:'+cfg.unidades.d+',h:'+cfg.unidades.h+',m:'+cfg.unidades.m+',s:'+cfg.unidades.s+'};  /* true|false: quais unidades aparecem no relogio */\n';
-    j+="  var ROTULOS={d:'"+esc(escHtml(cfg.rotulos.d))+"',h:'"+esc(escHtml(cfg.rotulos.h))+"',m:'"+esc(escHtml(cfg.rotulos.m))+"',s:'"+esc(escHtml(cfg.rotulos.s))+"'};  /* nomes das unidades, escritos por extenso no formato 'blocos' */\n";
+    j+="  var ROTULOS={d:'"+esc(escHtml(cfg.rotulos.d))+"',h:'"+esc(escHtml(cfg.rotulos.h))+"',m:'"+esc(escHtml(cfg.rotulos.m))+"',s:'"+esc(escHtml(cfg.rotulos.s))+"'};  /* nomes das unidades: embaixo do numero no formato 'blocos', colados nele no 'compacto' */\n";
     j+='  var ESCONDE_DIAS_ZERADOS='+cfg.diaszero+';  /* true = o bloco de dias some quando chega a zero */\n';
     j+="  var FORMATO='"+cfg.formato+"';           /* 'compacto' | 'blocos' */\n";
     j+="  var DIG='"+cfg.dig+"';                    /* 'nenhuma' | 'fade' | 'flip' */\n";
@@ -16395,11 +16681,18 @@ function cJsBase(cfg){
   j+='    if(ms<0)ms=0;\n    var t=Math.floor(ms/1000);\n';
   j+='    return {d:Math.floor(t/86400),h:Math.floor(t%86400/3600),m:Math.floor(t%3600/60),s:t%60};\n  }\n\n';
   j+='  function itensRelogio(p){\n';
+  j+='    /* Cada item e [digitos, rotulo do formato blocos, IDENTIDADE da unidade, sufixo do\n';
+  j+='       formato compacto]. Os dois textos saem hoje do MESMO campo da ferramenta, mas\n';
+  j+='       ocupam posicoes separadas de proposito: a terceira e a identidade que chaveRelogio\n';
+  j+='       usa para saber quando o marcador precisa ser remontado (ao cruzar 24h, quando o\n';
+  j+='       bloco de dias some). Texto do dono nessa posicao faria duas unidades com o mesmo\n';
+  j+='       texto -- ou com texto vazio -- pararem de ser distinguidas, e o relogio deixaria de\n';
+  j+='       se remontar EM SILENCIO. */\n';
   j+='    var itens=[];\n';
-  j+='    if(UNIDADES.d&&!(ESCONDE_DIAS_ZERADOS&&p.d===0))itens.push([dois(p.d),ROTULOS.d,\'d\']);\n';
-  j+='    if(UNIDADES.h)itens.push([dois(p.h),ROTULOS.h,\'h\']);\n';
-  j+='    if(UNIDADES.m)itens.push([dois(p.m),ROTULOS.m,\'m\']);\n';
-  j+='    if(UNIDADES.s)itens.push([dois(p.s),ROTULOS.s,\'s\']);\n';
+  j+='    if(UNIDADES.d&&!(ESCONDE_DIAS_ZERADOS&&p.d===0))itens.push([dois(p.d),ROTULOS.d,\'d\',ROTULOS.d]);\n';
+  j+='    if(UNIDADES.h)itens.push([dois(p.h),ROTULOS.h,\'h\',ROTULOS.h]);\n';
+  j+='    if(UNIDADES.m)itens.push([dois(p.m),ROTULOS.m,\'m\',ROTULOS.m]);\n';
+  j+='    if(UNIDADES.s)itens.push([dois(p.s),ROTULOS.s,\'s\',ROTULOS.s]);\n';
   j+='    return itens;\n  }\n';
   j+='  /* a chave identifica QUAIS unidades estao visiveis (ex: "hms" ou "dhms") -- muda\n';
   j+='     so quando ESCONDE_DIAS_ZERADOS derruba o bloco de dias ao cruzar 24h. So nesse\n';
@@ -16413,8 +16706,8 @@ function cJsBase(cfg){
   j+='      for(i=0;i<itens.length;i++)h+=\'<span class="fcb-bloco"><span class="fcb-num">\'+itens[i][0]+\'</span><span class="fcb-rot">\'+itens[i][1]+\'</span></span>\';\n';
   j+='    }else{\n';
   j+='      for(i=0;i<itens.length;i++){\n';
-  j+='        if(i)h+=\'<span class="fcb-sep">:</span>\';\n';
-  j+='        h+=\'<span class="fcb-num">\'+itens[i][0]+\'</span><span class="fcb-suf">\'+itens[i][2]+\'</span>\';\n';
+  j+='        if(i)h+=\'<span class="fcb-sep">'+esc(escHtml(cfg.txtSepRelogio))+'</span>\';\n';
+  j+='        h+=\'<span class="fcb-num">\'+itens[i][0]+\'</span><span class="fcb-suf">\'+itens[i][3]+\'</span>\';\n';
   j+='      }\n    }\n';
   j+="    return '<span class=\"fcb-rel\">'+h+'</span>';\n  }\n\n";
   }
@@ -16454,7 +16747,7 @@ function cJsBase(cfg){
      cada segundo, e o prazo seria apagado no primeiro deles. */
   var _prazoUsa=cUsaPrazo(cfg.msgs);
   if(_prazoUsa&&cfg.modo==='data'){
-    j+="  var PRAZO='<span class=\"fcb-rel\"><span class=\"fcb-num\">"+esc(escHtml(cPrazoTexto(cfg.alvoIso,cfg.prazofmt)))+"</span></span>';\n";
+    j+="  var PRAZO='<span class=\"fcb-rel\"><span class=\"fcb-num\">"+esc(escHtml(cPrazoTexto(cfg.alvoIso,cfg.prazofmt,cfg.txtPrazoConector,cfg.txtPrazoConectorHora)))+"</span></span>';\n";
     j+='  function comPrazo(t){\n';
     j+="    return t.split('{prazo}').join(PRAZO);\n  }\n";
   }else if(_prazoUsa){
@@ -16479,7 +16772,7 @@ function cJsBase(cfg){
   interno+='<div class="fcb-conteudo"></div>';
   if(cfg.cta.ativo)interno+='<a class="fcb-cta" href="'+escAttr(cfg.cta.url)+'">'+escHtml(cfg.cta.txt)+'</a>';
   if(cfg.coruja.dir)interno+='<div class="fcb-coruja fcb-coruja-d"></div>';
-  if(cfg.fechar!=='nao')interno+='<button type="button" class="fcb-fechar" aria-label="Fechar">\u2715</button>';
+  if(cfg.fechar!=='nao')interno+='<button type="button" class="fcb-fechar" aria-label="'+escAttr(cfg.txtAriaFechar)+'">\u2715</button>';
   interno+='</div>';
   if(cfg.prog)interno+='<div class="fcb-prog"></div>';
   j+="  raiz.innerHTML='"+esc(interno)+"';\n";
@@ -16969,11 +17262,14 @@ var P_TXT_DEFS=[
   ['txtCopiado','p-txt-copiado','Código copiado! Cole no aplicativo do seu banco.'],
   ['txtNaocopiou','p-txt-naocopiou','Não consegui copiar. Selecione o código acima e copie na mão.'],
   ['txtRef','p-txt-ref','Identificador da cobrança: '],
-  ['txtPixRotulo','p-txt-pixrotulo','Pagando via Pix'],
+  /* D-2 (03/09/2026): a frase INTEIRA, com {pct}. Antes o campo valia so "Pagando via Pix" e
+     o " (-N%)" era colado por fora, no bloco. Mesma tabela unica do Checkout e da Mini loja. */
+  ['txtPixRotulo','p-txt-pixrotulo',FC_TXT_FABRICA.pixRotulo],
   ['txtOu','p-txt-ou','OU'],
   ['txtPaypalFora','p-txt-paypalfora','Não foi possível carregar o PayPal agora. Use o Pix acima, ou fale com a gente para receber outro link.'],
   ['txtSucesso','p-txt-sucesso','Pagamento aprovado. Obrigado!'],
   ['txtNota','p-txt-nota',FC_TXT_FABRICA.nota],
+  ['txtPixManual','p-txt-pixmanual',FC_TXT_FABRICA.pixManual],
   ['txtZapMsg','p-txt-zapmsg','Olá! Acabei de pagar: {desc} -- {valor}']
 ];
 function pCfg(){
@@ -17059,6 +17355,8 @@ function pCss(cfg){
   s+='.fcpg-bloco{border-top:1px solid rgba(0,0,0,.10);padding-top:14px;margin-top:14px}\n';
   s+='.fcpg-rot{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:'+cfg.c1+';margin:0 0 8px}\n';
   s+='.fcpg-ajuda{font-size:12px;line-height:1.5;opacity:.75;margin:8px 0 0}\n';
+  /* Mesma condicao do botao "Ja paguei": o aviso manda tocar nele. */
+  if(cfg.zap)s+='.fcpg-pixmanual{font-size:12px;line-height:1.45;background:rgba(0,0,0,.05);border-radius:8px;padding:9px 10px;margin:10px 0 0}\n';
   s+='.fcpg-cod{width:100%;height:74px;font:11px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace;';
   s+='border:1px solid rgba(0,0,0,.18);border-radius:8px;padding:8px;resize:none;background:#fff;color:#333}\n';
   s+='.fcpg-bt{display:inline-block;border:0;border-radius:8px;padding:11px 16px;font-size:14px;font-weight:700;';
@@ -17137,6 +17435,7 @@ function pJs(cfg){
   /* O mesmo rotulo que o carrinho do Checkout escreve, pela mesma razao de sempre: o cliente
      que ja viu a loja le a mesma frase na pagina de cobranca. */
   j+="  var TXT_PIX_ROTULO='"+escJs(cfg.txtPixRotulo)+"';\n";
+  if(cfg.zap)j+="  var TXT_PIX_MANUAL='"+escJs(cfg.txtPixManual)+"';\n";
   if(cfg.usapp)j+="  var TXT_OU='"+escJs(cfg.txtOu)+"';\n";
   if(cfg.usapp)j+="  var TXT_PAYPAL_FORA='"+escJs(cfg.txtPaypalFora)+"';\n";
   /* O aviso do recebedor: ja existe (hardcoded) no Checkout e na Mini loja; aqui ele nasce
@@ -17285,7 +17584,9 @@ function pJs(cfg){
   j+="    if(desc)c.appendChild(novo('div','fcpg-desc',desc));\n";
   j+="    c.appendChild(novo('div','fcpg-valor-rot',TXT_VALOR));\n";
   j+="    c.appendChild(novo('div','fcpg-valor',moedaFmt(valor)));\n";
-  j+="    if(DESCONTO_PIX>0)c.appendChild(novo('div','fcpg-pixlinha',TXT_PIX_ROTULO+' (-'+DESCONTO_PIX+'%): '+moedaFmt(totalPix())));\n";
+  /* D-1: as DUAS grafias do marcador ({pct} e {PCT}), como no Checkout e na Mini loja --
+     trocar a convencao nao pode quebrar o bloco de quem ja configurou. */
+  j+="    if(DESCONTO_PIX>0)c.appendChild(novo('div','fcpg-pixlinha',TXT_PIX_ROTULO.replace(/\\{pct\\}/gi,DESCONTO_PIX)+': '+moedaFmt(totalPix())));\n";
   j+="    if(dia>0)c.appendChild(novo('div','fcpg-prazo',TXT_PRAZO.replace(/\\{data\\}/g,prazoTexto(dia))));\n";
   j+="    if(lido.txid&&lido.txid!=='***')c.appendChild(novo('div','fcpg-ref',TXT_REF+lido.txid));\n";
   /* O "Ja paguei" mora DENTRO da secao do Pix, logo depois da orientacao -- ver pix(). Ele e
@@ -17321,6 +17622,7 @@ function pJs(cfg){
   j+='    b.appendChild(qr);\n';
   j+="    b.appendChild(novo('div','fcpg-ajuda',TXT_INSTRUCAO_PIX));\n";
   j+="    b.appendChild(novo('div','fcpg-ajuda',TXT_NOTA));\n";
+  if(cfg.zap)j+="    b.appendChild(novo('div','fcpg-pixmanual',TXT_PIX_MANUAL));\n";
   if(cfg.zap)j+='    b.appendChild(zapBotao(valor,desc,txid));\n';
   j+='    c.appendChild(b);\n';
   j+='    desenharQr(qr,codigo);\n';
@@ -18509,6 +18811,7 @@ var M_TXT_DEFS=[
   ['txtPixCopiar','m-txt-pix-copiar',FC_TXT_FABRICA.pixCopiar],
   ['txtPixCopiado','m-txt-pix-copiado',FC_TXT_FABRICA.pixCopiado],
   ['txtNota','m-txt-nota',FC_TXT_FABRICA.nota],
+  ['txtPixManual','m-txt-pix-manual',FC_TXT_FABRICA.pixManual],
   ['txtPixRotulo','m-txt-pix-rotulo',FC_TXT_FABRICA.pixRotulo],
   ['txtResumoBotao','m-txt-resumo-botao',FC_TXT_FABRICA.resumoBotao],
   ['txtResumoCopiado','m-txt-resumo-copiado',FC_TXT_FABRICA.resumoCopiado],
@@ -18801,7 +19104,11 @@ function mBloco(cfg){
     c+='.fcmloja .fcm-copiar{width:100%;border:1px solid var(--fcm-destaque,#0F3A30);background:#fff;color:var(--fcm-destaque,#0F3A30);border-radius:8px;padding:9px;font:600 13px/1.2 inherit;cursor:pointer;margin-top:6px}\n';
     c+='.fcmloja .fcm-copiado{display:none;font-size:12px;color:#1e7e34;margin-top:5px;text-align:left}\n';
     c+='.fcmloja .fcm-copiado.on{display:block}\n';
-    if(zap)c+='.fcmloja .fcm-zap{width:100%;border:0;border-radius:8px;background:#25D366;color:#fff;padding:10px;font:700 13px/1.2 inherit;cursor:pointer;margin-top:8px}\n';
+    if(zap){
+      c+='.fcmloja .fcm-zap{width:100%;border:0;border-radius:8px;background:#25D366;color:#fff;padding:10px;font:700 13px/1.2 inherit;cursor:pointer;margin-top:8px}\n';
+      /* Mesma condicao do botao: o aviso manda tocar no "Ja paguei". */
+      c+='.fcmloja .fcm-pixmanual{font-size:12px;line-height:1.45;color:#5a5346;background:rgba(0,0,0,.045);border-radius:8px;padding:9px 10px;margin-top:10px;text-align:left}\n';
+    }
     c+='.fcmloja .fcm-nota{font-size:11px;color:#8a8375;margin-top:8px;text-align:left}\n';
   }
   if(usaResumo){
@@ -18991,6 +19298,7 @@ function mBlocoJs(cfg,prods,cps,cats,client,cod){
     c+="var TXT_COPIAR='"+escJs(cfg.txtPixCopiar)+"';\n";
     c+="var TXT_COPIADO='"+escJs(cfg.txtPixCopiado)+"';\n";
     if(zap)c+="var TXT_ZAP='"+escJs(cfg.txtZapBotao)+"';\n";
+    if(zap)c+="var TXT_PIX_MANUAL='"+escJs(cfg.txtPixManual)+"';\n";
     c+="var TXT_NOTA='"+escJs(cfg.txtNota)+"';\n";
     c+="var TXT_PEDIDO_ENVIADO='"+escJs(cfg.txtPedidoEnviado)+"';\n";
   }
@@ -19100,7 +19408,7 @@ function mBlocoRuntime(cfg,usaPP,usaPix,usaQtd,usaSinal,usaResumo,descpix,zap,us
     c+="h+='<div class=\"fcm-pixarea\"><p class=\"fcm-instrucao\"></p><div class=\"fcm-pixval\"><span class=\"fcm-pixval-t\"></span> <span class=\"fcm-pixval-v\"></span></div><div class=\"fcm-qr\"></div>';\n";
     c+="h+='<textarea class=\"fcm-cola\" readonly></textarea>';\n";
     c+="h+='<button type=\"button\" class=\"fcm-copiar\"></button><div class=\"fcm-copiado\"></div>';\n";
-    if(zap)c+="h+='<button type=\"button\" class=\"fcm-zap\"></button>';\n";
+    if(zap)c+="h+='<div class=\"fcm-pixmanual\"></div><button type=\"button\" class=\"fcm-zap\"></button>';\n";
     c+="h+='<div class=\"fcm-nota\"></div></div>';\n";
   }
   if(usaResumo){
@@ -19131,7 +19439,10 @@ function mBlocoRuntime(cfg,usaPP,usaPix,usaQtd,usaSinal,usaResumo,descpix,zap,us
     c+="raiz.querySelector('.fcm-copiar').textContent=TXT_COPIAR;\n";
     c+="raiz.querySelector('.fcm-copiado').textContent=TXT_COPIADO;\n";
     c+="raiz.querySelector('.fcm-nota').textContent=TXT_NOTA;\n";
-    if(zap)c+="raiz.querySelector('.fcm-zap').textContent=TXT_ZAP;\n";
+    if(zap){
+      c+="raiz.querySelector('.fcm-pixmanual').textContent=TXT_PIX_MANUAL;\n";
+      c+="raiz.querySelector('.fcm-zap').textContent=TXT_ZAP;\n";
+    }
     /* D-1: as DUAS grafias do marcador. O padrao virou {pct} (minusculo, como o resto da
        ferramenta desde a Etapa 1), e a /i faz configuracao ja gravada com {PCT} continuar
        funcionando -- trocar a convencao nao pode quebrar o bloco de quem ja configurou. */
