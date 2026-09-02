@@ -47,7 +47,7 @@ Digitado **uma vez**, na aba. Cada pacote tem seis campos:
 | **O que inclui** | uma linha, opcional ("25 fotos tratadas") |
 | **Link do TidyCal** | o caminho do tipo de agendamento |
 
-Fora do catálogo, a aba tem campos que valem para a página inteira: o **endereço da página de obrigado**, o **prefixo do identificador**, o **prazo da reserva em horas**, o **desconto no Pix**, as **cores** e os **textos**.
+Fora do catálogo, a aba tem campos que valem para a página inteira: o **endereço da página de obrigado**, o **prefixo do identificador**, o **prazo da reserva em horas**, o **desconto no Pix**, o **número de parcelas no cartão**, as **cores** e os **textos**.
 
 O catálogo é emitido **nos dois blocos** — a vitrine precisa dele para os cartões, a página de obrigado para saber o preço. Fonte única na ferramenta; cada bloco continua autossuficiente, como manda a regra do projeto.
 
@@ -71,7 +71,24 @@ O `{{booking_type.title}}` **não entra**: quem identifica o pacote é o código
 
 ## 6. A página de agendamento
 
-**Passo 1 — os cartões.** Nome, duração, o que inclui e **preço**, lado a lado (três por linha no computador, empilhados no celular). Escolher recolhe os cartões para uma linha de resumo com "trocar pacote".
+**Passo 1 — os cartões.** Nome, duração, o que inclui e o preço, lado a lado (três por linha no computador, empilhados no celular). Escolher recolhe os cartões para uma linha de resumo com "trocar pacote".
+
+**O preço no cartão mostra as duas formas de pagar, e o desconto na frente** (pedido do dono, 02/09):
+
+> **R$ 399,00**  `−5% no Pix`
+> ou R$ 420,00 em até 6x no cartão
+
+O desconto deixa de ser surpresa da última tela e vira argumento na primeira. A linha de resumo do passo 1 repete as duas formas, para o cliente não perder o número de vista ao passar para o calendário.
+
+**A palavra "PayPal" não aparece em texto nosso** — nem no cartão, nem no resumo, nem na página de obrigado. O cliente lê "no cartão", que é o que ele vai fazer.
+
+### 6.1 Dois limites desta escolha, declarados
+
+**1. O número de parcelas é uma afirmação que a ferramenta não pode conferir.** "Em até 6x no cartão" é uma promessa sobre o que o cliente vai encontrar na hora de pagar, e quem decide isso é a operadora, não este código. A aba **diz isso ao lado do campo**, e o padrão nasce em 1x — o valor que é verdade sem configuração nenhuma. Prometer parcela que não existe é a mesma família de defeito que este projeto já corrigiu quatro vezes: texto que promete mais do que o sistema entrega.
+
+**2. O valor da parcela fica de fora do padrão, e a razão é a mesma.** "6x de R$ 70,00" converte mais que "em até 6x", e é fácil de calcular — mas afirma **parcelamento sem juros**, que é outra promessa, e mais cara de errar. Fica como **campo opcional, desligado por padrão**: quem ligar está declarando que confirmou com a operadora.
+
+**3. Nos botões de pagamento, "PayPal" aparece — e não há como evitar.** Os dois botões da página de obrigado são desenhados pelo **SDK do PayPal**, não por nós: o texto, a marca e as cores são deles. O que está sob nosso controle é todo o resto da página, e nele a palavra não entra. Isso precisa estar dito na aba, para o pedido não parecer atendido pela metade.
 
 **Passo 2 — o calendário.** Acende ao escolher.
 
@@ -85,7 +102,7 @@ Um componente só, e ele faz três coisas:
 
 1. **Lê `?pac=`** e acha o pacote no catálogo que veio dentro dele.
 2. **Troca os marcadores** no texto que o dono escrever na página — `{{nome}}`, `{{data}}`, `{{hora}}`, `{{quando}}`, e os novos `{{pacote}}`, `{{duracao}}` e `{{valor}}`. Só nós de texto, nunca `innerHTML`, pulando `script`, `style`, `textarea`, `input` e `select` — a mesma disciplina já provada na página de obrigado atual.
-3. **Monta o pagamento**: o que foi agendado, a barra de prazo, o total, a linha do desconto no Pix, os botões do PayPal e o botão do Pix.
+3. **Monta o pagamento**: o que foi agendado, a barra de prazo, o total, a linha do desconto no Pix, os botões do cartão e o botão do Pix, com a linha de parcelas abaixo do botão do cartão.
 
 **Sem `pac`, ou com código desconhecido:** nenhum pagamento na tela. Um recado cordial e o WhatsApp — a mesma família de recusas da `/pagar`.
 
@@ -160,6 +177,8 @@ Regra do projeto: **a prévia executa o gerador, nunca o imita**. Duas prévias,
 - **A página de obrigado com `?pac=` de cada pacote:** valor certo, marcadores trocados, contagem correndo, e o **payload Pix relido por leitor TLV independente** — estrutura fecha, CRC confere, campo 54 igual ao da tela, e o txid dentro do formato.
 - **Sem `pac`, com `pac` inexistente, e com `pac` hostil** (`<script>`, `../`, acentos): recusa cordial, zero pagamento na tela, nada interpretado como marcação.
 - **O identificador**: com data legível, com data ilegível (cai no aleatório), e dois códigos que colidiriam depois da limpeza (recusa no cadastro).
+- **A palavra "PayPal" não aparece em nenhum texto nosso** nas duas saídas — varredura sobre o texto gerado. O que sobrar tem de ser só o que o SDK deles desenha em tempo de execução.
+- **As parcelas**: com 1x (padrão) a linha some; com N>1 ela aparece nos cartões, no resumo e na página de obrigado; com o valor da parcela ligado, ele confere com o preço dividido.
 - **As N URLs**: uma por pacote, com o código certo em cada.
 - **Painel:** as três saídas aparecem; o aviso de colisão dispara com as duas abas ligadas; `fccOrfas` sem órfãs.
 - **Celular** em 360, 390 e 430 px, sem rolagem horizontal.
