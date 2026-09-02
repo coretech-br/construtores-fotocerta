@@ -3170,6 +3170,11 @@
     <div>
       <div class="pv-area"><div id="a-pv-box"></div></div>
       <p class="ajuda">A prévia roda o código gerado de verdade: escolher um pacote acende o passo 2 e troca de preço ao vivo. O que ainda difere da página publicada: o calendário do TidyCal não carrega aqui (é outro domínio, e a prévia não deve depender de rede) — no lugar dele aparece um retângulo cinza avisando "Aqui entra o calendário do TidyCal deste pacote."; e o quadro não carrega o CSS do tema do site.</p>
+
+      <label for="a-pv-pac" style="display:block;margin-top:16px">Prévia da página de obrigado — prever como</label>
+      <select id="a-pv-pac"></select>
+      <div class="pv-area" style="margin-top:8px"><div id="a-pv-ob-box"></div></div>
+      <p class="ajuda">Esta prévia navega de verdade para um endereço próprio da ferramenta com <code>?pac=</code> do pacote escolhido, e executa o componente 3 de verdade ali dentro — inclusive o identificador de conciliação e o prazo da reserva. O que ainda difere da página publicada: o SDK do PayPal não carrega aqui (outro domínio) — no lugar do botão real aparece um desenho, com o valor que iria na ordem medido no próprio bloco; e o botão "Falar no WhatsApp" tem o mesmo endereço do bloco de verdade, então evite clicar nele dentro da prévia.</p>
     </div>
     <div>
       <div class="saida">
@@ -13957,6 +13962,173 @@ function aPvDoc(cfg){
   h+='\n</body>\n</html>';
   return h;
 }
+/* ===== Tarefa 10: a previa da pagina de obrigado =====
+   A sonda do PayPal desta previa espelha pPvPayPal (15985+ antes desta tarefa), e NAO
+   fcPvSondaPP: a diferenca e estrutural, nao estetica. fcPvSondaPP EXERCITA um onClick de
+   validacao de carrinho que o Checkout e a Mini loja tem e que este bloco -- item unico, sem
+   carrinho, decisao 1 do diario -- nao tem; chama-la aqui mostraria uma linha falsa ("Ao clicar
+   em pagar: erro --") para um gancho que nunca existiu neste gerador. Mesma familia da divida ja
+   registrada na decisao 8 (o pedido ao SDK NAO E fonte compartilhada entre os quatro geradores
+   que o escrevem): a sonda de previa de cada um segue a forma do gerador que ela espelha, e este
+   espelha a /pagar. */
+function aPvObPayPal(){
+  var s='';
+  s+="  var DESENHO_PP='"+escJs(mockPP())+"';\n";
+  s+='  var inserir=document.head.appendChild;\n';
+  s+='  document.head.appendChild=function(n){\n';
+  s+="    if(n&&n.tagName==='SCRIPT'&&/paypal\\.com/.test(String(n.src||''))){\n";
+  s+='      window.paypal={Buttons:function(bt){return {render:function(sel){\n';
+  s+="        var alvo=(typeof sel==='string')?document.querySelector(sel):sel;\n";
+  s+='        if(!alvo)return;\n';
+  s+="        var caixa=document.createElement('div');\n";
+  s+="        caixa.id='a-pv-ob-pp';\n";
+  s+='        caixa.setAttribute(\'style\',\'border:1px dashed #b9b3a4;border-radius:8px;padding:6px 8px 10px\');\n';
+  s+="        alvo.innerHTML='';alvo.appendChild(caixa);\n";
+  s+="        var valor='',descricao='';\n";
+  s+='        try{\n';
+  s+='          var ped=bt.createOrder(null,{order:{create:function(o){return o;}}});\n';
+  s+='          var am=ped.purchase_units[0].amount;\n';
+  s+="          valor=am.value+' '+am.currency_code;\n";
+  s+='          descricao=ped.purchase_units[0].description;\n';
+  s+="        }catch(e){valor='(erro: '+String(e&&e.message||e)+')';}\n";
+  s+="        var eti=document.createElement('div');\n";
+  s+='        eti.setAttribute(\'style\',\'font:600 10px/1.4 -apple-system,BlinkMacSystemFont,sans-serif;color:#8a8375;text-align:center;text-transform:uppercase;letter-spacing:.06em\');\n';
+  s+="        eti.textContent='desenho: o SDK do PayPal nao roda na previa';\n";
+  s+='        caixa.appendChild(eti);\n';
+  s+="        var des=document.createElement('div');des.innerHTML=DESENHO_PP;caixa.appendChild(des);\n";
+  s+="        var med=document.createElement('div');\n";
+  s+="        med.id='a-pv-ob-pp-valor';\n";
+  s+='        med.setAttribute(\'style\',\'margin-top:8px;border-top:1px dashed #d8d2c4;padding-top:7px;font:12px/1.5 -apple-system,BlinkMacSystemFont,sans-serif;color:#555;text-align:left\');\n';
+  s+="        med.textContent='Medido no proprio bloco -- valor que iria na ordem: '+valor+(descricao?(' | descricao: '+descricao):'');\n";
+  s+='        caixa.appendChild(med);\n';
+  s+='      }};}};\n';
+  s+='      setTimeout(function(){if(n.onload)n.onload();},0);\n';
+  s+='      return n;\n';
+  s+='    }\n';
+  s+='    return inserir.call(document.head,n);\n';
+  s+='  };\n';
+  s+='  document.head.appendChild.fcPvSemPayPal=true;\n';
+  return s;
+}
+/* O WHATSAPP NAO E NEUTRALIZADO por window.open (o bloco usa <a target="_blank">, nao
+   window.open): o mesmo limite ja aceito na previa da /pagar (16033, zapBotao identico). O
+   aviso do shim descreve essa consequencia em vez de prometer o que nao entrega.
+   aPvObPayPal() entra como EXTRAS (nao concatenado a parte): e a mesma engrenagem que a
+   propria fcPvShim ja define para "trocas adicionais do ambiente, emitidas logo depois da
+   troca do storage" -- a sonda do PayPal roda DENTRO do IIFE do shim, nao como um segundo
+   bloco solto (aPvObPayPal devolve so as instrucoes, sem as tags de script em volta). */
+function aPvObShim(){
+  return fcPvShim({pref:'a',
+    extras:aPvObPayPal(),
+    semAbrir:true,
+    abre:'',
+    fecha:' deste quadro. Este bloco nao deveria gravar nada em armazenamento, mas se a troca nao pegou pode estar tocando as chaves reais do navegador -- ou abrindo o WhatsApp numa aba nova. O codigo gerado ao lado nao e afetado.'});
+}
+/* Fragmento (sem doctype/html/head/body): esta previa nao ESCREVE um documento novo, ela
+   ACRESCENTA a um documento JA NAVEGADO (ver aPvObEscrever, abaixo, e o motivo de existir). */
+function aPvObFragmento(cfg){
+  var h='';
+  h+='<sty'+'le>\n';
+  h+='body{background:#FFFFFF;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Ubuntu,sans-serif;margin:0;padding:16px 12px}\n';
+  h+='.a-pv-falso{background:#EDEAE1;color:#A9A294;border-radius:6px;margin:10px 0;padding:0 14px;';
+  h+='height:70px;display:flex;align-items:center;font-size:12px;letter-spacing:.04em}\n';
+  h+='</sty'+'le>\n';
+  h+=aPvObShim();
+  h+=aBlocoObrigado(cfg);
+  h+=aPvEnchimento();
+  return h;
+}
+/* ===== por que isto existe, e nao document.open()/write() como as outras previas =====
+   MEDIDO nesta tarefa: document.open() chamado a partir do documento da FERRAMENTA reseta a
+   URL do documento ALVO para a URL de quem chamou -- mesmo com o iframe corretamente navegado
+   para previa.html?pac=X antes disso. E o mesmo com contentWindow.eval(). O motivo e que o
+   open()/write() usa "o documento responsavel por quem chamou", nao o documento sendo escrito
+   -- por isso todas as OUTRAS previas desta ferramenta (que nunca navegam o iframe para lugar
+   nenhum, so escrevem por cima de um about:blank) nunca tropecaram nisto: para elas, resetar
+   para a URL da ferramenta nao muda nada que importe.
+   Aqui importa: e location.search que carrega o ?pac=. A saida e nunca chamar open()/write()
+   depois da navegacao -- soletra o HTML com insertAdjacentHTML (inerte para <script>, por
+   desenho do proprio HTML) e cria os <script> de verdade um a um (createElement + appendChild),
+   que executam sem tocar em document.open(). O texto chega com as tags <script> blindadas por
+   concatenacao (Manual do Prosite) para o validador do Prosite, e aqui, em tempo de execucao, a
+   string ja e literal -- so precisa ser separada do HTML em volta. */
+function aPvObEscrever(doc,html){
+  var re=/<script>([\s\S]*?)<\/script>/g,ultimo=0,m,antes,el;
+  while((m=re.exec(html))){
+    antes=html.substring(ultimo,m.index);
+    if(antes)doc.body.insertAdjacentHTML('beforeend',antes);
+    el=doc.createElement('script');
+    el.textContent=m[1];
+    doc.body.appendChild(el);
+    ultimo=re.lastIndex;
+  }
+  var resto=html.substring(ultimo);
+  if(resto)doc.body.insertAdjacentHTML('beforeend',resto);
+}
+/* O seletor "prever como": os pacotes cadastrados, mais "sem pacote (recusa)" -- o estado mais
+   facil de esquecer e o mais visivel para o cliente (Tarefa 10, passo 2). Preserva a escolha
+   entre remontagens quando o codigo escolhido continua existindo; senao cai no primeiro pacote,
+   ou na recusa se a lista estiver vazia. */
+/* aPvObTocado distingue as DUAS razoes de sel.value ser '': o operador nunca abriu este
+   seletor (estado inicial de um <select> vazio -- default util e o primeiro pacote), e o
+   operador ESCOLHEU "sem pacote (recusa)" de proposito (esse valor tem de sobreviver as
+   remontagens tanto quanto o codigo de um pacote real). Sem a distincao, toda remontagem
+   devolvia o operador ao primeiro pacote mesmo depois de ele escolher a recusa -- medido
+   nesta tarefa. */
+var aPvObTocado=false;
+function aPvObOpcoes(){
+  var sel=$('a-pv-pac');if(!sel)return;
+  var atual=sel.value,h='<option value="">— sem pacote (recusa) —</option>',i,existe=(aPvObTocado&&atual==='');
+  for(i=0;i<aPacotes.length;i++){
+    h+='<option value="'+escAttr(aPacotes[i].cod)+'">'+escHtml(aPacotes[i].nome||aPacotes[i].cod)+' ('+escHtml(aPacotes[i].cod)+')</option>';
+    if(aPacotes[i].cod===atual)existe=true;
+  }
+  sel.innerHTML=h;
+  sel.value=existe?atual:(aPacotes.length?aPacotes[0].cod:'');
+}
+var A_PV_OB_LARGURA=420, A_PV_OB_ALTURA=780;
+function aPvObMontar(){
+  var box=$('a-pv-ob-box');if(!box)return;
+  aPvObOpcoes();
+  var cfg=aCfg();
+  var recusa=aRecusa(cfg);
+  var pac=$('a-pv-pac')?$('a-pv-pac').value:'';
+  var disp=box.clientWidth||360;
+  var k=Math.min(1,disp/A_PV_OB_LARGURA);
+  box.innerHTML='';
+  var moldura=document.createElement('div');
+  moldura.className='a-pv-moldura';
+  moldura.style.width=Math.round(A_PV_OB_LARGURA*k)+'px';
+  moldura.style.height=A_PV_OB_ALTURA+'px';
+  var ifr=document.createElement('iframe');
+  ifr.id='a-pv-ob-frame';
+  ifr.setAttribute('title','Prévia da página de obrigado');
+  ifr.style.width=A_PV_OB_LARGURA+'px';
+  ifr.style.height=Math.round(A_PV_OB_ALTURA/k)+'px';
+  ifr.style.transform='scale('+k+')';
+  ifr.style.transformOrigin='top left';
+  moldura.appendChild(ifr);
+  box.appendChild(moldura);
+  if(recusa){
+    /* mesma guarda da vitrine: a previa nunca executa o que o gerador se negaria a produzir --
+       aqui nao ha navegacao nenhuma, so o quadro da recusa de configuracao. */
+    var doc0=ifr.contentDocument||(ifr.contentWindow&&ifr.contentWindow.document);
+    if(doc0){doc0.open();doc0.write(aPvRecusaDoc(recusa));doc0.close();}
+    return;
+  }
+  /* NAVEGACAO DE VERDADE para previa.html?pac=<escolhido>, preservando location.search -- um
+     iframe escrito por document.write direto herdaria a URL da ferramenta, sem ?pac= nenhum, e
+     a pagina mostraria a recusa cordial do BLOCO sempre (Tarefa 10, passo 1; decisao 10 do
+     diario, sobre por que previa.html nao precisa de versao). So DEPOIS de a navegacao terminar
+     e que o bloco de verdade entra -- por aPvObEscrever, NUNCA por document.open()/write(), que
+     desfaria a propria navegacao (ver o comentario dela). */
+  ifr.addEventListener('load',function(){
+    var doc=ifr.contentDocument||(ifr.contentWindow&&ifr.contentWindow.document);
+    if(!doc)return;
+    aPvObEscrever(doc,aPvObFragmento(cfg));
+  });
+  ifr.src='previa.html'+(pac?('?pac='+encodeURIComponent(pac)):'');
+}
 /* A vitrine nao tem corte de largura proprio para alternar desktop/celular na previa (o painel
    desta aba nao ganhou os botoes de modo -- Tarefa 1 nao os pediu): uma largura logica so, e o
    quadro escala para caber no espaco disponivel. A media query do bloco (640px) continua sendo
@@ -13989,12 +14161,13 @@ function aPvMontar(){
   doc.open();doc.write(recusa?aPvRecusaDoc(recusa):aPvDoc(cfg));doc.close();
 }
 /* Remontar o iframe a cada tecla digitada custa caro e pisca. O debounce segura as mudancas de
-   campo; "Atualizar previa" e o botao de gerar passam direto. O timer e UNICO e sempre
-   cancelado antes de agendar outro. */
+   campo; "Atualizar previa" e o botao de gerar passam direto. O timer e UNICO -- as DUAS previas
+   desta aba (vitrine e pagina de obrigado, Tarefa 10) remontam juntas, sob o mesmo temporizador,
+   sempre cancelado antes de agendar outro. */
 function aPreview(imediato){
   if(aPvTimer){clearTimeout(aPvTimer);aPvTimer=null;}
-  if(imediato){aPvMontar();return;}
-  aPvTimer=setTimeout(function(){aPvTimer=null;aPvMontar();},400);
+  if(imediato){aPvMontar();aPvObMontar();return;}
+  aPvTimer=setTimeout(function(){aPvTimer=null;aPvMontar();aPvObMontar();},400);
 }
 document.addEventListener('input',function(e){
   var al=(e.target.id&&e.target.id.indexOf('a-')===0)||(e.target.name&&e.target.name.indexOf('a-')===0);
@@ -19168,6 +19341,10 @@ prep('Agendamento por pacote','pac',function(){
   liga('a-copy1',function(){copiar('a-out1','a-cop1');});
   liga('a-copy2',function(){copiar('a-out2','a-cop2');});
   liga('a-copy3',function(){copiar('a-out3','a-cop3');});
+  /* imediato, como as trocas de modo da previa da /pagar (p-pv-*): escolher o pacote a prever
+     e uma acao de interface, nao digitacao -- nao faz sentido esperar o debounce. liga() so
+     escuta 'click'; um <select> muda por 'change'. */
+  var elPvPac=$('a-pv-pac');if(elPvPac)elPvPac.addEventListener('change',function(){aPvObTocado=true;aPreview(true);});
   fcLigarFaixa(A_NUMS,function(){aPreview(true);});
   parearCor('a-c1');parearCor('a-c2');parearCor('a-c3');
 },'desenhar a aba com o estado restaurado');
