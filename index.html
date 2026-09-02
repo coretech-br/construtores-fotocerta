@@ -13199,17 +13199,241 @@ function aPresetDepois(){
   if(mudou)salvarEstado();
   aPreview(true);
 }
-/* Padrao do gerador, copiado de uGerar (10784+, ver o contrato do plano). Cada tarefa seguinte
-   acrescenta a SUA linha antes do aPreview(true): a Tarefa 3 poe $('a-out1').value=... , a
-   Tarefa 5 poe $('a-out2').value=... e a Tarefa 7 poe $('a-out3').value=... -- nenhuma delas
-   existe ainda, entao o botao "Gerar codigo" ja valida e ja recusa, mas ainda nao escreve
-   textarea nenhuma. */
+/* ===== Tarefa 3: o gerador da vitrine =====
+   Modelos lidos antes de escrever: o embed do TidyCal (frame()/expandir()/recolher(), acima
+   em tArqToggle/tGerar) para a mecanica de altura do modal, e uBloco (10801+) para a forma de
+   um bloco autossuficiente -- variaveis de customizacao no topo, "Daqui para baixo nao precisa
+   mexer", <style> proprio, IIFE unica, montagem via innerHTML(esqueleto vazio) + textContent
+   (conteudo dinamico), nunca innerHTML com texto vindo do catalogo.
+
+   POR QUE ESTE BLOCO CRIA O IFRAME COM AS PROPRIAS MAOS, AO CONTRARIO DA ABA TIDYCAL. A aba
+   atual usa <div class="tidycal-embed" data-path="..."> mais o embed.js do TidyCal, que acha a
+   div e cria o iframe sozinho -- funciona porque o caminho e fixo, decidido uma vez, ao gerar.
+   Aqui o "caminho" (o link do TidyCal) muda em tempo real, toda vez que o cliente escolhe ou
+   troca de pacote, e o embed.js nao foi desenhado para isso. Por isso o bloco cria um <iframe>
+   comum, aponta o src para o link do pacote escolhido, e reaproveita o MESMO elemento ao
+   trocar -- nunca um segundo. O que se herda do embed.js e so a MEDIDA: a origem a conferir
+   (https://tidycal.com), o prefixo dos sinais ([iFrameSizer]) e as duas mensagens (
+   scrollToOffset abre o modal interno de dia/horario, mutationObserver fecha). */
+function aBlocoVitrine(cfg){
+  var pacs=cfg.pacotes.map(function(p){
+    var preco=parseFloat(String(p.preco).replace(',','.'))||0;
+    return "  {cod:'"+escJs(p.cod)+"', nome:'"+escJs(p.nome)+"', dur:'"+escJs(p.dur)+"', preco:"+preco.toFixed(2)+
+      ", inclui:'"+escJs(p.inclui)+"', link:'"+escJs(p.link)+"'}";
+  }).join(',\n');
+
+  var c='';
+  c+='<div class="fca-raiz" id="fca-raiz"></div>\n\n';
+
+  /* ===== CSS, dentro do proprio HTML do componente (nunca no campo CSS Customizado, que so
+     aceita propriedades soltas e nao aceita @media/@keyframes -- Manual do Prosite). ===== */
+  c+='<sty'+'le>\n';
+  c+='.fca-raiz{max-width:960px;margin:0 auto;text-align:left;font-family:inherit;color:var(--fca-texto,#333)}\n';
+  c+='.fca-titulo{font-size:20px;font-weight:700;color:var(--fca-destaque,#0F3A30);margin:0 0 14px;text-align:left}\n';
+  c+='.fca-passo{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:var(--fca-destaque,#0F3A30);margin:0 0 10px;text-align:left}\n';
+  c+='.fca-passo-n{width:22px;height:22px;min-width:22px;border-radius:50%;background:var(--fca-destaque,#0F3A30);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px}\n';
+  c+='.fca-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:0 0 18px;text-align:left}\n';
+  c+='.fca-card{border:1px solid #e5dfd0;border-radius:14px;background:var(--fca-fundo,#fff);padding:16px;cursor:pointer;text-align:left;color:inherit;font:inherit;display:block;width:100%;transition:box-shadow .18s,transform .18s}\n';
+  c+='.fca-card:hover{box-shadow:0 8px 22px rgba(0,0,0,.10);transform:translateY(-2px)}\n';
+  c+='.fca-card-nome{font-size:15px;font-weight:700;margin:0 0 2px;text-align:left}\n';
+  c+='.fca-card-dur{font-size:12px;color:#777;margin:0 0 6px;text-align:left}\n';
+  c+='.fca-card-inclui{font-size:12px;color:#666;margin:0 0 10px;text-align:left}\n';
+  c+='.fca-preco-linha1{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;text-align:left}\n';
+  c+='.fca-preco-valor{font-size:18px;font-weight:700;color:var(--fca-destaque,#0F3A30)}\n';
+  c+='.fca-selo{font-size:11px;font-weight:700;color:#1e7e34;background:#e6f4ea;border-radius:999px;padding:2px 8px}\n';
+  c+='.fca-preco-linha2{font-size:12px;color:#777;margin-top:4px;text-align:left}\n';
+  c+='.fca-resumo{display:none;align-items:center;justify-content:space-between;gap:14px;border:1px solid #e5dfd0;border-radius:14px;background:var(--fca-fundo,#fff);padding:14px 16px;margin:0 0 18px;text-align:left}\n';
+  c+='.fca-resumo.on{display:flex}\n';
+  c+='.fca-resumo-nome{font-size:14px;font-weight:700;margin:0 0 2px;text-align:left}\n';
+  c+='.fca-trocar{border:1px solid #d8d2c4;background:#fff;color:inherit;border-radius:8px;padding:8px 14px;font:600 12px/1.2 inherit;cursor:pointer;white-space:nowrap}\n';
+  /* passo 2 comeca apagado -- so "acende" (opacidade plena + calendario visivel) apos a escolha.
+     O calendario fica ESCONDIDO POR CSS, nunca destruido: assim o iframe unico sobrevive a
+     "Trocar pacote" e a proxima escolha so troca o src, sem criar um segundo elemento. */
+  c+='.fca-passo2{opacity:.45;text-align:left}\n';
+  c+='.fca-passo2 .fca-cal{display:none;border-radius:14px;overflow:hidden}\n';
+  c+='.fca-passo2.on{opacity:1}\n';
+  c+='.fca-passo2.on .fca-cal{display:block}\n';
+  c+='.fca-cal iframe{border:none;width:100%;display:block}\n';
+  c+='@media(max-width:640px){\n  .fca-cards{grid-template-columns:1fr}\n  .fca-resumo{flex-direction:column;align-items:flex-start}\n}\n';
+  c+='@media(prefers-reduced-motion: reduce){\n  .fca-card{transition:none}\n}\n';
+  c+='</sty'+'le>\n\n';
+
+  c+='<scr'+'ipt>\n(function(){\n';
+  c+='/* ===== customizacao ===== */\n';
+  c+='var PACOTES=[\n'+pacs+'\n];\n';
+  c+='var DESCONTO_PIX='+cfg.descpix+';   /* percentual de desconto no Pix; 0 = sem desconto -- some o selo */\n';
+  c+='var PARCELAS='+cfg.parcelas+';   /* numero de parcelas anunciado no cartao; e uma promessa que a operadora decide, nao este codigo */\n';
+  c+="var ALTURA_DESKTOP='"+cfg.altdesk+"px';\n";
+  c+="var ALTURA_MOBILE='"+cfg.altmob+"px';   /* calibrar no aparelho se o modal cortar */\n";
+  c+='var LARGURA_MOBILE='+cfg.largmob+';        /* telas ate este tamanho usam a altura mobile */\n';
+  c+="var COR_DESTAQUE='"+cfg.c1+"';\n";
+  c+="var COR_FUNDO='"+cfg.c2+"';\n";
+  c+="var COR_TEXTO='"+cfg.c3+"';\n";
+  c+="var TXT_TITULO='"+escJs(cfg.t1)+"';\n";
+  c+="var TXT_PASSO1='"+escJs(cfg.t2)+"';\n";
+  c+="var TXT_PASSO2='"+escJs(cfg.t3)+"';\n";
+  c+="var TXT_TROCAR='"+escJs(cfg.t4)+"';\n\n";
+
+  c+='/* ============================================================\n   Daqui para baixo nao precisa mexer\n   ============================================================ */\n\n';
+  c+=fcMoedaFmtGer(true);
+
+  c+='/* precoPix arredonda para o mais proximo (mesma regra do Pix na ferramenta); a PARCELA\n';
+  c+='   arredonda para CIMA de proposito -- 700/6 = 116,6667, e para baixo (116,66) a soma das\n';
+  c+='   seis ficaria 699,96 e uma das parcelas seria MAIOR do que o cliente leu na tela. Para\n';
+  c+='   cima (116,67) o cliente NUNCA paga por mes mais do que estava escrito. Mesma licao do\n';
+  c+='   centavo do Pix, ago/2026. */\n';
+  c+='function precoPix(p){return Math.round(p*(1-DESCONTO_PIX/100)*100)/100;}\n';
+  c+='function parcelaDe(p){return Math.ceil(p/PARCELAS*100)/100;}\n';
+  c+='function textoCartao(preco){\n';
+  c+="  var t='ou '+moedaFmt(preco)+' no cartão';\n";
+  c+="  if(PARCELAS>1)t+=', em até '+PARCELAS+'x de '+moedaFmt(parcelaDe(preco));\n";
+  c+='  return t;\n}\n';
+  /* Uma funcao so desenha o preco do cartao e o do resumo (Tarefa 3, passo 5): nao existe
+     segunda formatacao para o mesmo numero em lugar nenhum deste bloco. */
+  c+='function montarPreco(box,preco){\n';
+  c+="  box.innerHTML='';\n";
+  c+="  var l1=document.createElement('div');l1.className='fca-preco-linha1';\n";
+  c+="  var v=document.createElement('span');v.className='fca-preco-valor';v.textContent=moedaFmt(precoPix(preco));\n";
+  c+='  l1.appendChild(v);\n';
+  c+='  if(DESCONTO_PIX>0){\n';
+  c+="    var selo=document.createElement('span');selo.className='fca-selo';selo.textContent='-'+DESCONTO_PIX+'% no Pix';\n";
+  c+='    l1.appendChild(selo);\n  }\n';
+  c+='  box.appendChild(l1);\n';
+  c+="  var l2=document.createElement('div');l2.className='fca-preco-linha2';l2.textContent=textoCartao(preco);\n";
+  c+='  box.appendChild(l2);\n}\n\n';
+
+  c+="var raiz=document.getElementById('fca-raiz');\n";
+  c+='if(!raiz)return;\n';
+  c+="raiz.style.setProperty('--fca-destaque',COR_DESTAQUE);\n";
+  c+="raiz.style.setProperty('--fca-fundo',COR_FUNDO);\n";
+  c+="raiz.style.setProperty('--fca-texto',COR_TEXTO);\n\n";
+
+  c+="var h='';\n";
+  c+="h+='<div class=\"fca-titulo\"></div>';\n";
+  c+="h+='<div class=\"fca-passo fca-passo-1\"><span class=\"fca-passo-n\">1</span><span class=\"fca-passo-t\"></span></div>';\n";
+  c+="h+='<div class=\"fca-cards\"></div>';\n";
+  c+="h+='<div class=\"fca-resumo\"><div><div class=\"fca-resumo-nome\"></div><div class=\"fca-resumo-preco\"></div></div><button type=\"button\" class=\"fca-trocar\"></button></div>';\n";
+  c+="h+='<div class=\"fca-passo2\"><div class=\"fca-passo fca-passo-2\"><span class=\"fca-passo-n\">2</span><span class=\"fca-passo-t\"></span></div><div class=\"fca-cal\"></div></div>';\n";
+  c+='raiz.innerHTML=h;\n\n';
+
+  c+="raiz.querySelector('.fca-titulo').textContent=TXT_TITULO;\n";
+  c+="raiz.querySelector('.fca-passo-1 .fca-passo-t').textContent=TXT_PASSO1;\n";
+  c+="raiz.querySelector('.fca-passo-2 .fca-passo-t').textContent=TXT_PASSO2;\n";
+  c+="raiz.querySelector('.fca-trocar').textContent=TXT_TROCAR;\n\n";
+
+  c+="var elCards=raiz.querySelector('.fca-cards');\n";
+  c+="var elResumo=raiz.querySelector('.fca-resumo');\n";
+  c+="var elResumoNome=raiz.querySelector('.fca-resumo-nome');\n";
+  c+="var elResumoPreco=raiz.querySelector('.fca-resumo-preco');\n";
+  c+="var elPasso2=raiz.querySelector('.fca-passo2');\n";
+  c+="var elCal=raiz.querySelector('.fca-cal');\n";
+  c+='var atual=-1;\n\n';
+
+  c+='PACOTES.forEach(function(p,i){\n';
+  c+="  var card=document.createElement('button');card.type='button';card.className='fca-card';\n";
+  c+="  var nome=document.createElement('div');nome.className='fca-card-nome';nome.textContent=p.nome;\n";
+  c+='  card.appendChild(nome);\n';
+  c+="  if(p.dur){var dur=document.createElement('div');dur.className='fca-card-dur';dur.textContent=p.dur;card.appendChild(dur);}\n";
+  c+="  if(p.inclui){var inc=document.createElement('div');inc.className='fca-card-inclui';inc.textContent=p.inclui;card.appendChild(inc);}\n";
+  c+='  var precoBox=document.createElement(\'div\');\n';
+  c+='  montarPreco(precoBox,p.preco);\n';
+  c+='  card.appendChild(precoBox);\n';
+  c+="  card.addEventListener('click',function(){escolher(i);});\n";
+  c+='  elCards.appendChild(card);\n});\n\n';
+
+  c+='/* ===== o calendario: UM iframe, criado so quando o pacote e escolhido, reaproveitado ao\n';
+  c+='   trocar de pacote. Nao existem N iframes escondidos -- tres embeds do TidyCal carregando\n';
+  c+='   juntos e exatamente o peso que esta aba existe para evitar. */\n';
+  c+='var modalAberto=false, ignorarMutacoesAte=0, ignorarAte=0;\n\n';
+  c+="function frame(){return elCal.querySelector('iframe.fca-tidycal');}\n";
+  c+='function alturaAlvo(){return (window.innerWidth<=LARGURA_MOBILE)?ALTURA_MOBILE:ALTURA_DESKTOP;}\n';
+  c+="function expandir(){var f=frame();if(f)f.style.setProperty('min-height',alturaAlvo(),'important');}\n";
+  c+="function recolher(){var f=frame();if(f)f.style.removeProperty('min-height');}\n";
+  c+='function abrirCalendario(link){\n';
+  c+='  var f=frame();\n';
+  c+='  if(!f){\n';
+  c+="    f=document.createElement('ifr'+'ame');\n";
+  c+="    f.className='fca-tidycal';\n";
+  c+="    f.setAttribute('title','Agenda');\n";
+  c+="    f.setAttribute('scrolling','no');\n";
+  c+="    f.setAttribute('frameborder','0');\n";
+  c+="    f.setAttribute('allow','fullscreen');\n";
+  c+='    elCal.appendChild(f);\n  }\n';
+  c+='  f.src=link;\n';
+  c+='  /* Caminho B (risco declarado na spec): se os sinais do TidyCal nao chegarem numa pagina\n';
+  c+='     publicada, a altura calibrada ja e o PISO desde a criacao -- o calendario continua\n';
+  c+='     aparecendo inteiro mesmo sem sinal nenhum. Quando o sinal chega de verdade, ele so\n';
+  c+='     melhora (recolhe) a partir daqui. */\n';
+  c+='  expandir();\n}\n\n';
+
+  c+='function escolher(i){\n';
+  c+='  var p=PACOTES[i], trocouLink=(atual!==i);\n';
+  c+='  atual=i;\n';
+  c+='  elResumoNome.textContent=p.nome;\n';
+  c+='  montarPreco(elResumoPreco,p.preco);\n';
+  c+="  elCards.style.display='none';\n";
+  c+="  elResumo.className='fca-resumo on';\n";
+  c+="  elPasso2.className='fca-passo2 on';\n";
+  c+='  if(trocouLink){\n';
+  c+='    /* A corrida da mensagem atrasada do iframe anterior (decisao 9 do diario). O ouvinte\n';
+  c+='       fica em window e nao sabe de qual iframe veio o sinal -- entao, ao trocar, zera o\n';
+  c+='       estado do modal e ignora qualquer sinal por 800ms. Sem isso um sinal atrasado do\n';
+  c+='       iframe QUE ESTAVA SENDO TROCADO pode ser lido como se fosse do novo, e o cliente\n';
+  c+='       veria a pagina crescer 2350px sem ter clicado em nada. */\n';
+  c+='    modalAberto=false;recolher();ignorarAte=Date.now()+800;\n';
+  c+='    abrirCalendario(p.link);\n  }\n}\n\n';
+
+  c+='function trocarPacote(){\n';
+  c+="  elCards.style.display='';\n";
+  c+="  elResumo.className='fca-resumo';\n";
+  c+="  elPasso2.className='fca-passo2';\n}\n";
+  c+="raiz.querySelector('.fca-trocar').addEventListener('click',trocarPacote);\n\n";
+
+  c+='/* Ouvinte UNICO em window, nunca no iframe -- assim ele sobrevive a troca de pacote, que\n';
+  c+='   reaproveita o MESMO elemento (so troca o src). Mesma origem, prefixo e as duas\n';
+  c+='   mensagens que a aba TidyCal ja usa em producao. */\n';
+  c+="window.addEventListener('message',function(e){\n";
+  c+="  if(e.origin!=='https://tidycal.com')return;\n";
+  c+="  if(typeof e.data!=='string')return;\n";
+  c+="  if(e.data.indexOf('[iFrameSizer]')!==0)return;\n";
+  c+='  if(Date.now()<ignorarAte)return;\n\n';
+  c+="  var tipo=e.data.split(':').pop();\n";
+  c+="  if(tipo==='scrollToOffset'){\n    modalAberto=true;ignorarMutacoesAte=Date.now()+800;expandir();return;\n  }\n\n";
+  c+="  if(modalAberto&&tipo==='mutationObserver'&&Date.now()>ignorarMutacoesAte){\n    modalAberto=false;recolher();\n  }\n});\n";
+  c+="window.addEventListener('resize',function(){if(modalAberto)expandir();});\n";
+  c+='})();\n</scr'+'ipt>';
+  return c;
+}
+
+/* ===== Tarefa 5: os N enderecos de redirecionamento =====
+   Um endereco por pacote, para colar no campo de redirecionamento de CADA tipo de agendamento
+   dentro do TidyCal -- fora do Prosite (ver FCC_FORA, Tarefa 6). O {{booking_type.title}} nao
+   entra: quem identifica o pacote e o codigo, e e por isso que renomear um tipo no TidyCal nao
+   quebra nada. O e-mail tambem nao, pela mesma razao ja registrada na pagina de obrigado atual
+   -- menos dado pessoal circulando por menos lugares. */
+function aEnderecos(cfg){
+  var i,p,base=cfg.urlobrigado,sep,t='';
+  for(i=0;i<cfg.pacotes.length;i++){
+    p=cfg.pacotes[i];
+    sep=(base.indexOf('?')<0)?'?':'&';
+    t+=p.nome+' ('+p.cod+'):\n';
+    t+=base+sep+'pac='+encodeURIComponent(p.cod)+
+       '&nome={{contact.name}}&data={{booking.date}}&hora={{booking.time}}&quando={{booking.starts_at}}\n\n';
+  }
+  return t;
+}
+
+/* Padrao do gerador, copiado de uGerar (10784+, ver o contrato do plano). A Tarefa 7 poe
+   $('a-out3').value=... antes do aPreview(true) -- ela ainda nao existe, entao a saida 3
+   continua vazia por enquanto. */
 function aGerar(){
   if(fcPixChaveAjustar('fci-chave'))fciGravar();
   if(fcAjustarTodos(A_NUMS))salvarEstado();
   var cfg=aCfg();
   var recusa=aRecusa(cfg);
   if(recusa){alert(recusa);fciApontarSe(recusa);return;}
+  $('a-out1').value=aBlocoVitrine(cfg);
+  $('a-out2').value=aEnderecos(cfg);
   aPreview(true);
   fccMarcar('pac');
 }
