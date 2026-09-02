@@ -47,6 +47,8 @@ Digitado **uma vez**, na aba. Cada pacote tem seis campos:
 | **O que inclui** | uma linha, opcional ("25 fotos tratadas") |
 | **Link do TidyCal** | o caminho do tipo de agendamento |
 
+Fora do catálogo, a aba tem campos que valem para a página inteira: o **endereço da página de obrigado**, o **prefixo do identificador**, o **prazo da reserva em horas**, o **desconto no Pix**, as **cores** e os **textos**.
+
 O catálogo é emitido **nos dois blocos** — a vitrine precisa dele para os cartões, a página de obrigado para saber o preço. Fonte única na ferramenta; cada bloco continua autossuficiente, como manda a regra do projeto.
 
 ## 5. As três saídas
@@ -91,7 +93,9 @@ Um componente só, e ele faz três coisas:
 
 A página **não sabe quando o agendamento foi feito**. Ela só sabe quando o ensaio é.
 
-A saída: o prazo é **a primeira visita mais N horas**, guardado no navegador daquele aparelho, e **limitado ao início do ensaio** — ninguém paga depois da sessão. Como o cliente cai nesta página imediatamente depois de agendar, "a primeira visita" é o momento do agendamento com erro de segundos.
+A saída: o prazo é **a primeira visita mais um número de horas que o dono configura na aba** (campo próprio, padrão 24), guardado no navegador daquele aparelho, e **limitado ao início do ensaio** — ninguém paga depois da sessão. Como o cliente cai nesta página imediatamente depois de agendar, "a primeira visita" é o momento do agendamento com erro de segundos.
+
+Se a data do ensaio **não** for legível, o limite pelo início do ensaio simplesmente não se aplica e vale só a contagem de horas. O prazo nunca é calculado a partir de uma data que a página não conseguiu ler — mesma disciplina do identificador.
 
 O que acontece se ele abrir noutro aparelho: a contagem recomeça, e ele ganha mais tempo. **A falha é generosa, nunca punitiva** — e essa direção é escolhida, não acidental.
 
@@ -128,7 +132,7 @@ Pedido explícito do dono, e regra do projeto desde 23/08.
 
 - As duas saídas de componente entram no mapa `fccDaAba`, cada uma com **a página a que pertence** — a de agendamento e a de obrigado.
 - **Os N endereços de redirecionamento** entram na lista "fora do Prosite", com o lugar exato: *o campo de redirecionamento de cada tipo, dentro do TidyCal*. Declarados em `FCC_FORA` com o motivo.
-- **O aviso de colisão:** se esta aba e a aba TidyCal estiverem ligadas na mesma campanha, as duas mandam conteúdo para a página de obrigado. O painel avisa **em vermelho**, nomeando as duas — não escolhe por conta própria.
+- **O aviso de colisão — e ele não é o que parecia.** Na conversa que originou esta spec eu descrevi as duas abas disputando o **mesmo campo**. Está errado, e a revisão pegou: a aba TidyCal entrega uma **Tag Body** e esta entrega um **componente**, que são campos diferentes e não se sobrescrevem. A colisão real é de **comportamento**: os dois scripts trocam os mesmos marcadores (`{{nome}}`, `{{data}}`, `{{hora}}`) na mesma página, e quem rodar primeiro vence — inclusive nos **textos reserva**, que são configuráveis em cada aba e podem discordar. O visitante veria o texto reserva de uma aba onde o dono configurou o da outra, sem erro nenhum. O painel avisa **em vermelho**, nomeando as duas abas e dizendo qual marcador está em disputa. Ele não escolhe por conta própria.
 - A aba declara `pref`, `fora`, `resumo`, `redesenhar` e `antesDeSalvar` em `ABAS`, e ganha preset próprio pela mecânica existente. O catálogo entra no preset; a identidade não, como em todas as outras.
 - Rodar a varredura `fccOrfas` antes de fechar a rodada.
 
