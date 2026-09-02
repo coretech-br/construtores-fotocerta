@@ -3569,6 +3569,47 @@ function fcPpBotoesSrc(prefixo,ppcor,usaSinal,comentZero,aoAprovarExtra){
   return c;
 }
 
+/* ===== o desenho do QR Code do Pix: fonte unica =====
+   Medido (03/09/2026, pedido novo do dono): o desenho do QR estava escrito em TRES geradores
+   -- Checkout, Mini loja e /pagar -- e so a /pagar fazia certo. As outras duas tem dois
+   defeitos reais (ver spec 0.1): new QRCode(...) fora de try/catch (uma excecao ali derruba o
+   resto de gerarPix, e o cliente fica sem Pix nenhum na tela) e uma corrida no carregamento
+   (qrPronto so fica verdadeiro no onload do script, entao clicar em "Gerar Pix" antes da
+   biblioteca chegar deixa aquela geracao sem QR, mesmo que ela chegue logo depois). A /pagar
+   carrega a biblioteca sob demanda, no momento de desenhar, com onerror tratado, e envolve o
+   desenho em try/catch.
+   Esta tarefa extrai SO o desenho da /pagar, que e a fonte -- ela e quem prova que o texto
+   nao mudou (p-out1 byte a byte identico). O Checkout e a Mini loja passam a consumir esta
+   mesma fonte numa tarefa separada, que MUDA o que eles emitem de proposito (correcao de
+   comportamento, nao refatoracao) -- por isso o commit desta extracao fica sozinho.
+   Parametros: "ind" e a indentacao da linha da funcao e do fechamento (a /pagar escreve com
+   dois espacos, aninhada dentro de pix()); "tamanho" e o texto que vai no width/height -- na
+   /pagar e o nome de uma variavel do bloco (TAMANHO_QR, configuravel na aba), mas pode ser um
+   numero literal para quem nao tiver essa variavel. */
+function fcDesenharQrSrc(ind,tamanho){
+  var c='',i2=ind+'  ',i3=ind+'    ',ic=ind+'   ';
+  c+=ind+"/* O QR e desenhado a partir do MESMO codigo que esta na caixa de copiar: um segundo\n";
+  c+=ic+"lugar de onde tirar o payload seria um segundo valor possivel.\n";
+  c+=ic+"E se a biblioteca nao chegar (bloqueador, rede ruim) a caixa SOME, como no carrinho.\n";
+  c+=ic+"Deixa-la com a altura reservada e vazia entregava ao cliente um retangulo em branco\n";
+  c+=ic+"de "+tamanho+" pixels sem explicacao nenhuma. Sem QR a cobranca continua inteira: o\n";
+  c+=ic+"copia e cola e a instrucao do Pix ficam onde estavam. */\n";
+  c+=ind+"function desenharQr(alvo,codigo){\n";
+  c+=i2+"function some(){alvo.style.display='none';}\n";
+  c+=i2+"function faz(){\n";
+  c+=i3+"try{new QRCode(alvo,{text:codigo,width:"+tamanho+",height:"+tamanho+",correctLevel:QRCode.CorrectLevel.M});}\n";
+  c+=i3+"catch(e){some();}\n";
+  c+=i2+"}\n";
+  c+=i2+"if(window.QRCode){faz();return;}\n";
+  c+=i2+"var s=document.createElement('script');\n";
+  c+=i2+"s.src='https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';\n";
+  c+=i2+"s.onload=function(){if(!window.QRCode){some();return;}faz();};\n";
+  c+=i2+"s.onerror=some;\n";
+  c+=i2+"document.head.appendChild(s);\n";
+  c+=ind+"}\n";
+  return c;
+}
+
 /* ===== o motor de dinheiro do carrinho: fonte unica =====
    O que este bloco guarda e a CONTA -- cupom, sinal, desconto Pix e o seletor de quantidade --,
    escrita uma vez como TEXTO e emitida identica dentro de cada bloco entregue que precise dela.
@@ -15861,25 +15902,10 @@ function pJs(cfg){
   j+='    c.appendChild(b);\n';
   j+='    desenharQr(qr,codigo);\n';
   j+='  }\n';
-  j+='  /* O QR e desenhado a partir do MESMO codigo que esta na caixa de copiar: um segundo\n';
-  j+='     lugar de onde tirar o payload seria um segundo valor possivel.\n';
-  j+='     E se a biblioteca nao chegar (bloqueador, rede ruim) a caixa SOME, como no carrinho.\n';
-  j+='     Deixa-la com a altura reservada e vazia entregava ao cliente um retangulo em branco\n';
-  j+='     de TAMANHO_QR pixels sem explicacao nenhuma. Sem QR a cobranca continua inteira: o\n';
-  j+='     copia e cola e a instrucao do Pix ficam onde estavam. */\n';
-  j+='  function desenharQr(alvo,codigo){\n';
-  j+="    function some(){alvo.style.display='none';}\n";
-  j+='    function faz(){\n';
-  j+='      try{new QRCode(alvo,{text:codigo,width:TAMANHO_QR,height:TAMANHO_QR,correctLevel:QRCode.CorrectLevel.M});}\n';
-  j+='      catch(e){some();}\n';
-  j+='    }\n';
-  j+="    if(window.QRCode){faz();return;}\n";
-  j+="    var s=document.createElement('script');\n";
-  j+="    s.src='https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';\n";
-  j+='    s.onload=function(){if(!window.QRCode){some();return;}faz();};\n';
-  j+='    s.onerror=some;\n';
-  j+='    document.head.appendChild(s);\n';
-  j+='  }\n';
+  /* Fonte unica com Checkout e Mini loja (fcDesenharQrSrc, ~3577): esta e a fonte de onde o
+     texto delas vai vir numa tarefa separada. Aqui so troca a forma de escrever, o texto
+     emitido continua o mesmo -- ver o comentario da funcao para a medida completa. */
+  j+=fcDesenharQrSrc('  ','TAMANHO_QR');
   if(cfg.usapp){
     j+='  function paypal(c,valor,desc,txid){\n';
     j+="    var modo=param('pp');\n";
