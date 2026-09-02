@@ -1,8 +1,34 @@
 # Agendamento por pacote — design
 
-**Data:** 02/09/2026
-**Estado:** proposta, aguardando revisão do dono
-**Alcance:** aba nova (a décima), mais o painel consolidado, o preset geral e o backup
+**Data:** 02/09/2026 · **revisão 2 em 03/09/2026**
+**Estado:** v1 implementada e publicada; **v2 aprovada pelo dono e em implementação**
+**Alcance:** aba nova (a décima), mais o painel consolidado, o preset geral, o backup — e, na v2, **as abas Checkout, Mini loja e Link de cobrança**, pelas duas unificações que a revisão pediu.
+
+---
+
+## 0. O que a revisão do dono mudou (03/09/2026)
+
+Ele revisou as doze decisões do diário (`docs/decisoes-2026-09-02-agendamento-por-pacote.md`) uma a uma. Oito foram aprovadas como estavam. **Quatro mudam**, e duas delas mudam a arquitetura:
+
+| # | Era | Passa a ser | Consequência |
+|---|---|---|---|
+| **1** | O bloco de pagamento espelha a `/pagar` (item único, valor fechado) | **Espelha o Checkout**, com opcionais, e o link do TidyCal vira **caminho** (`usuario/tipo`), não URL inteira | Muda o catálogo, o bloco de pagamento e a ordem das seções |
+| **2** | `FC_CARRINHO_SRC` fica de fora (sem cupom, sem carrinho) | **Volta**: a página de obrigado tem **cupom** | O bloco passa a ter a conta de dinheiro completa |
+| **3** | O prazo é duração, sem fuso | **Mantida** — mas a solução para o caso de virar data de calendário fica **registrada** | Só documentação |
+| **8** | O pedido do PayPal fica duplicado; dívida registrada | **Extrair a fonte única agora**, e os quatro geradores consomem-na | Toca Checkout, Mini loja e `/pagar` |
+
+E um pedido novo, fora das doze: **corrigir o tratamento do QR Code no Checkout**, como a `/pagar` faz.
+
+### 0.1 Uma afirmação minha que estava errada, e a correção
+
+Ao justificar a decisão 1, eu escrevi que *"o Checkout deixaria um retângulo branco de 220 px"* se a biblioteca do QR não carregasse. **É falso** — medido: ele faz `else{qr.style.display='none';}` e esconde a caixa, como a `/pagar`.
+
+Os problemas reais do Checkout são outros, e **piores** que o que eu descrevi:
+
+1. **`new QRCode(...)` não está dentro de `try/catch`.** Se a biblioteca carregar e lançar, a exceção escapa e **o resto de `gerarPix` nunca roda**: o copia-e-cola não é preenchido, o valor não é escrito, e a área do Pix nem chega a aparecer. O cliente fica sem forma nenhuma de pagar por Pix, sem mensagem.
+2. **Corrida no carregamento.** `qrPronto` só vira verdadeiro no `onload` do script. Quem clicar em "Gerar Pix" antes de a biblioteca chegar fica sem QR **naquela geração**, mesmo que ela chegue logo depois. A `/pagar` carrega sob demanda, no momento de desenhar, e trata `onerror`.
+
+A correção, então, não é "copiar o comportamento da `/pagar`" por gosto: são dois defeitos concretos, um deles capaz de tirar o Pix inteiro da tela.
 
 ---
 
@@ -34,33 +60,48 @@ Todas foram fechadas com o dono antes desta spec, olhando mockups navegáveis da
 
 **O que se herda da aba atual é a MEDIDA, não o código:** os sinais reais do TidyCal (`scrollToOffset` abre o modal, `mutationObserver` fecha), a origem a conferir (`https://tidycal.com`) e as alturas calibradas em produção (2350 px no computador, 2700 px no celular, corte em 700 px).
 
-## 4. O catálogo
+## 4. O catálogo (v2)
 
-Digitado **uma vez**, na aba. Cada pacote tem seis campos:
+Digitado **uma vez**, na aba. Cada pacote é um **produto no molde do Checkout**, com os campos do agendamento por cima:
 
 | Campo | Regra |
 |---|---|
 | **Código** | letras, números e hífen. Vai na URL (`?pac=…`) e alimenta o identificador do Pix. **Nunca muda** — é o que o TidyCal guarda. |
-| **Nome** | o que o cliente lê no cartão |
+| **Nome** | o que o cliente lê no cartão e no pagamento |
+| **Descrição** | uma linha, opcional |
 | **Duração** | texto livre ("2 horas", "1h30") |
 | **Preço** | número, maior que zero |
-| **O que inclui** | uma linha, opcional ("25 fotos tratadas") |
-| **Link do TidyCal** | o caminho do tipo de agendamento |
+| **Caminho do TidyCal** | `usuario/tipo-de-agendamento`, **não a URL inteira** |
+| **Opcionais** | lista própria de cada pacote: nome, preço e se aceita quantidade — o mesmo molde do Checkout |
 
-### 4.1 Os campos da aba, que valem para todos os pacotes
+### 4.1 O caminho, e não a URL — pedido do dono na revisão
 
-Estavam escritos numa frase corrida, e o dono foi procurar o de parcelas e não achou. Se o leitor da spec não acha um campo, o defeito é da spec — viraram tabela:
+A v1 pedia o endereço completo (`https://tidycal.com/fotocerta/ensaio-2h`). **A aba TidyCal não faz assim**: ela pede o caminho (`fotocerta/natal-2026`) e monta o resto. Duas convenções para a mesma coisa, na mesma ferramenta, é a inconsistência que este projeto persegue — e a v1 escolheu a pior das duas, porque obriga a digitar o prefixo a cada pacote.
+
+O campo passa a ser o **caminho**, com a mesma validação e o mesmo botão "abrir para conferir" que a aba TidyCal já tem.
+
+### 4.2 Onde o cliente escolhe os opcionais, e por quê
+
+**Na página de obrigado, não na vitrine.** A razão é do TidyCal, não nossa: quem faz a reserva é ele, e ele não sabe o que é um opcional. Se o cliente escolhesse um álbum na vitrine, a escolha se perderia ao passar pelo calendário.
+
+Consequência que precisa estar dita na vitrine: o cartão mostra o **preço do pacote**, e os opcionais aparecem na hora do pagamento.
+
+### 4.3 Os campos da aba, que valem para todos os pacotes
 
 | Campo | Padrão | O que faz |
 |---|---|---|
-| **Endereço da página de obrigado** | vazio | para onde o TidyCal manda depois de agendar; entra nos N endereços da saída 2 |
-| **Prefixo do identificador** | vazio | começa o código que vai no Pix e no PayPal (ex.: `FC`) |
-| **Prazo da reserva** | 24 horas | quanto tempo o horário fica guardado antes de o dono liberá-lo |
-| **Desconto no Pix** | 5 % | aparece no cartão, no resumo e na página de obrigado |
-| **Parcelas no cartão** | 1 | o número que a página anuncia, e o divisor do valor da parcela |
-| **Cores e textos** | os padrões da paleta | mesma mecânica das outras abas |
+| **Endereço da página de obrigado** | vazio | para onde o TidyCal manda depois de agendar |
+| **Prefixo do identificador** | vazio | começa o código que vai no Pix e no cartão |
+| **Prazo da reserva** | 24 horas | quanto tempo o horário fica guardado |
+| **Desconto no Pix** | 5 % | aparece no cartão, no resumo e no pagamento |
+| **Parcelas no cartão** | 1 | o número anunciado, e o divisor do valor da parcela |
+| **Cupons** | lista | código, tipo (% produtos, % total, fixo), valor e validade — **o mesmo cadastro do Checkout** |
+| **Marcadores da página de obrigado** | todos ligados | quais variáveis do TidyCal viajam, e o **texto reserva** de cada uma |
+| **Cores e textos** | os da paleta | mesma mecânica das outras abas |
 
-O catálogo é emitido **nos dois blocos** — a vitrine precisa dele para os cartões, a página de obrigado para saber o preço. Fonte única na ferramenta; cada bloco continua autossuficiente, como manda a regra do projeto.
+**Os marcadores passam a ser configuráveis** (pedido da revisão). Na v1 os textos reserva ficaram fixos dentro do bloco; agora o operador escolhe quais variáveis passar e o que aparece quando cada uma não vem — a mesma mecânica que a página de obrigado da aba TidyCal já tem.
+
+O catálogo é emitido **nos dois blocos**. Fonte única na ferramenta; cada bloco continua autossuficiente.
 
 ## 5. As três saídas
 
@@ -113,15 +154,33 @@ Continua valendo o que a nota 1 diz: mostrar o valor da parcela afirma **parcela
 
 **A altura do modal** usa os sinais e as medidas herdadas (§3). Quando o iframe é recriado, o ouvinte continua valendo: ele escuta `window`, não o iframe.
 
-## 7. A página de obrigado
+## 7. A página de obrigado (v2)
 
-Um componente só, e ele faz três coisas:
+Um componente só, e ele faz quatro coisas:
 
-1. **Lê `?pac=`** e acha o pacote no catálogo que veio dentro dele.
-2. **Troca os marcadores** no texto que o dono escrever na página — `{{nome}}`, `{{data}}`, `{{hora}}`, `{{quando}}`, e os novos `{{pacote}}`, `{{duracao}}` e `{{valor}}`. Só nós de texto, nunca `innerHTML`, pulando `script`, `style`, `textarea`, `input` e `select` — a mesma disciplina já provada na página de obrigado atual.
-3. **Monta o pagamento**: o que foi agendado, a barra de prazo, o total, a linha do desconto no Pix, os botões do cartão e o botão do Pix, com a linha de parcelas abaixo do botão do cartão.
+1. **Lê `?pac=`** e acha o pacote no catálogo embutido nele.
+2. **Troca os marcadores** no texto que o dono escrever na página, com os textos reserva que ele configurou.
+3. **Monta o pedido**: o pacote agendado como item fixo, os **opcionais** daquele pacote para o cliente marcar, e o campo de **cupom**.
+4. **Cobra**: total, linha do desconto no Pix, botões do cartão e botão do Pix.
 
-**Sem `pac`, ou com código desconhecido:** nenhum pagamento na tela. Um recado cordial e o WhatsApp — a mesma família de recusas da `/pagar`.
+### 7.0 O que a volta do carrinho traz junto
+
+Com opcionais e cupom, o bloco deixa de ser "valor fechado" e passa a ter a **conta de dinheiro completa** — e ela **não é reescrita**: vem de `FC_CARRINHO_SRC`, a mesma fonte que o Checkout e a Mini loja usam, com o contrato por nome que ela exige:
+
+| A fonte chama | O bloco declara |
+|---|---|
+| `subtotal()` | pacote + opcionais marcados |
+| `somaProdutos()` | só o pacote (é o que um cupom `pct_produto` desconta) |
+| `cupomAtivo` | o cupom em vigor, ou `null` |
+| `DESCONTO_PIX` | o desconto configurado |
+
+**O que continua de fora:** `SINAL_TIPO`/`SINAL_VALOR` e as três funções de sinal. Cobrança de sinal não foi pedida aqui, e emiti-las sem interruptor seria carregar código morto no bloco do cliente.
+
+**A decisão 2 do diário está revertida**, e a razão dela deixou de valer: ela dizia que as peças de `FC_CARRINHO_SRC` pressupõem carrinho e cupom, *que este bloco não tem*. Com a revisão, ele tem.
+
+### 7.1 Sem `pac`, ou com código desconhecido
+
+Nenhum pagamento na tela. Um recado cordial e o WhatsApp — mesma família das recusas da `/pagar`.
 
 ### 7.1 O prazo da reserva, e o problema que ele esconde
 
@@ -130,6 +189,8 @@ A página **não sabe quando o agendamento foi feito**. Ela só sabe quando o en
 A saída: o prazo é **a primeira visita mais um número de horas que o dono configura na aba** (campo próprio, padrão 24), guardado no navegador daquele aparelho, e **limitado ao início do ensaio** — ninguém paga depois da sessão. Como o cliente cai nesta página imediatamente depois de agendar, "a primeira visita" é o momento do agendamento com erro de segundos.
 
 Se a data do ensaio **não** for legível, o limite pelo início do ensaio simplesmente não se aplica e vale só a contagem de horas. O prazo nunca é calculado a partir de uma data que a página não conseguiu ler — mesma disciplina do identificador.
+
+**A solução para o dia em que isto virar data de calendário — registrada por pedido do dono (decisão 3 da revisão), para não ser redescoberta.** Hoje o prazo é uma **duração**, e por isso não há fuso para errar. Se um dia ele virar uma data marcada — *"vale até 20/12 às 23h59"*, igual para todo visitante —, a técnica correta já existe neste projeto e é a da aba Contagem regressiva: **resolver o fuso na hora de GERAR** e congelar uma string ISO com o deslocamento explícito (`2026-12-20T23:59:00-03:00`), que o bloco só entrega a `Date.parse`. O bloco nunca recalcula fuso no aparelho do visitante. A alternativa — somar 3 horas em tempo de execução, como `prazoFim` faz na `/pagar` para fechar o dia em Brasília — serve quando o alvo é "o fim do dia", e não um instante marcado.
 
 O que acontece se ele abrir noutro aparelho: a contagem recomeça, e ele ganha mais tempo. **A falha é generosa, nunca punitiva** — e essa direção é escolhida, não acidental.
 
@@ -154,11 +215,37 @@ Seguindo a regra do projeto — recusar em vez de assumir:
 - Endereço da página de obrigado vazio ou inválido.
 - Identidade vazia (chave Pix, nome, cidade, Client ID, WhatsApp) — via `fciRecusa`, que abre o painel e leva o foco ao campo.
 
-## 9. O que é fonte única
+## 9. Fonte única — e as duas unificações que a revisão pediu (v2)
 
-Nada aqui é reescrito. Da fonte compartilhada vêm: a maquinaria do Pix (`FC_PIX_SRC`), a conta do desconto (`fcTotalPixSrc`), o formato de moeda (`fcMoedaFmtGer`), o leitor de parâmetros da URL (`FC_PARAM_SRC`), o pedido do PayPal com item e conciliação, o shim das prévias (`fcPvShim`) e os escapes.
+Da fonte compartilhada vêm, sem uma linha reescrita: a maquinaria do Pix (`FC_PIX_SRC`), **a conta do dinheiro (`FC_CARRINHO_SRC`)**, o desconto (`fcTotalPixSrc`), a moeda (`fcMoedaFmtGer`), o leitor de parâmetros (`FC_PARAM_SRC`), o shim das prévias (`fcPvShim`), os escapes e o embed do TidyCal.
 
-**O que NÃO se reaproveita, com a razão:** o embed do TidyCal da aba atual. Ele carrega dois modos e uma página intermediária que aqui não existem. O que atravessa é a medida (§3), não o texto.
+### 9.1 O pedido do PayPal vira fonte única (decisão 8 → opção a)
+
+**Medido:** `actions.order.create` está escrito **à mão em três geradores** — Checkout, `/pagar` e Mini loja — e nenhuma função compartilhada o escreve. A v1 ia acrescentar a quarta cópia. O dono decidiu extrair agora.
+
+**O que se extrai, e o que provavelmente não se extrai.** Os três não são iguais: o Checkout e a Mini loja montam o nome do item a partir do carrinho e do cupom; a `/pagar` monta de um item único vindo do link. O que é idêntico nos três é o **esqueleto**: carregar o SDK, os `style` dos botões, a guarda de total zero no `onClick`, a forma do `purchase_units` com `amount`/`breakdown`/`items`/`custom_id`, o `onApprove` com `capture()`, e o `onError`.
+
+**A prova manda na extração, e não o contrário:** as saídas `u-out`, `p-out1` e `m-out` têm de sair **byte a byte idênticas** depois. Se um byte mudar, a extração está errada — não o teste. É explicitamente permitido, e preferível, entregar uma **extração parcial com a medida do que ficou de fora**, em vez de forçar a completa e frágil: o projeto já tem esse precedente registrado na Mini loja.
+
+**Por que agora vale a pena, e antes eu disse que não:** eu argumentei que misturar a extração com a aba nova destruiria a capacidade de dizer o que quebrou. O argumento tinha um furo — ele vale para fazer as duas coisas **no mesmo commit**, não na mesma rodada. Como tarefa própria, com a fotografia tirada antes e depois, a extração é isolável e a resposta continua nítida.
+
+### 9.2 O desenho do QR Code vira fonte única, e conserta dois defeitos do Checkout
+
+Pedido novo do dono. Ver o §0.1 para os dois defeitos reais — e para a correção da afirmação errada que eu fiz sobre eles.
+
+O desenho passa a ser **um só**, no molde da `/pagar`:
+
+- **carrega a biblioteca sob demanda**, no momento de desenhar, com `onerror` tratado — em vez de depender de um `qrPronto` que pode ainda ser falso quando o cliente clica;
+- **envolve `new QRCode(...)` em `try/catch`** — hoje, no Checkout, uma exceção ali derruba o resto de `gerarPix`, e o cliente fica sem o copia-e-cola, sem o valor e sem a área do Pix;
+- **esconde a caixa** quando não dá para desenhar, e a cobrança segue inteira pelo copia-e-cola.
+
+Consumidores: Checkout, Mini loja, `/pagar` e a aba nova.
+
+**Esta unificação MUDA `u-out` e `m-out` de propósito** — é uma correção de comportamento, não uma refatoração. O diff tem de ser enumerado linha a linha, e o da `/pagar` (`p-out1`) tem de sair **idêntico**, porque é dela que o desenho vem.
+
+### 9.3 O que NÃO se reaproveita, com a razão
+
+O embed do TidyCal da aba atual carrega dois modos e uma página intermediária que aqui não existem. O que atravessa é a **medida** (os sinais e as alturas calibradas), não o texto.
 
 ## 10. Painel consolidado, preset e backup
 

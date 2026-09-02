@@ -28,6 +28,8 @@ Plano: `docs/superpowers/plans/2026-09-02-agendamento-por-pacote.md`
 10. [`previa.html` e o cache: declarado como não-problema, com a razão](#10)
 11. [O caminho B virou interruptor — e o defeito era do meu plano](#11)
 12. [O identificador dizia a hora em UTC — e a data errada em metade das noites](#12)
+13. [Cupom de código repetido passa a ser recusado nas três abas — decisão do dono](#13)
+14. [O "aceita quantidade" que não fazia nada — decisão do dono](#14)
 
 ---
 
@@ -236,5 +238,43 @@ E o defeito piora à noite: **todo agendamento a partir das 21h de Brasília vir
 Se `data` e `hora` não vierem, vale o sufixo aleatório — a regra que já estava decidida: **melhor um código que não diz o dia do que um que diz o dia errado.** Era exatamente esse o defeito, e ele estava acontecendo com a data *presente*.
 
 **Custo de desfazer:** baixo, e a correção fica pendente até a Tarefa 9 devolver o arquivo — outro agente está editando `aBlocoObrigado` neste momento.
+
+---
+
+<a id="13"></a>
+## 13. Cupom de código repetido passa a ser recusado nas três abas — decisão do dono
+
+**Como apareceu.** No despacho da Task 4 da v2 eu escrevi que a recusa de "código de cupom repetido" era *"a que veio de 01/09"*. O executor foi medir antes de copiar: **ela não existe** — nem no Checkout, nem na Mini loja. Eu confundi com a recusa de **código de PACOTE colidido** (`mini-1h` × `mini1h`), que criei na v1 desta rodada.
+
+Ele implementou como comportamento **novo**, e declarou que era novo em vez de fingir que estava copiando. Foi o certo.
+
+**O que isso revelou.** Se dois cupons com o mesmo código são um problema na aba nova, são um problema nas outras duas — e lá o efeito é pior porque está publicado: o segundo cupom **nunca é encontrado**, em silêncio. O operador cadastra, vê na lista, e ele não funciona nunca.
+
+**Levado ao dono**, porque toca dois construtores que já estão no ar cobrando. Opções apresentadas: uniformizar agora; uniformizar em rodada própria; ou deixar a inconsistência declarada.
+
+**Ele decidiu: uniformizar agora.** Razão que pesou: as saídas `u-out` e `m-out` **já mudam de propósito** nesta rodada por causa da correção do QR, então esta recusa entra no mesmo diff justificado, em vez de exigir uma segunda rodada de regressão sobre os mesmos arquivos.
+
+**O risco, dito a ele antes de decidir:** um preset antigo que tenha código repetido passa a ser recusado ao gerar. É o comportamento certo — mas ele descobre na hora, e não antes.
+
+**Custo de desfazer:** baixo. É uma recusa; tirá-la é apagar três linhas.
+
+---
+
+<a id="14"></a>
+## 14. O "aceita quantidade" que não fazia nada — decisão do dono
+
+**Como apareceu.** O executor da Task 5 declarou, em vez de resolver sozinho: a Task 4 copiou do Checkout o molde do opcional, que inclui a marcação **"aceita quantidade"** — e o bloco de pagamento a **ignora**, tratando todo opcional como caixinha de marcar.
+
+Resultado: o operador liga a marcação na aba e **nada acontece**. É a categoria que este projeto persegue por nome — controle na tela que mente sobre o que faz.
+
+**As três opções levadas ao dono**, com o custo de cada uma: implementar a quantidade (30–45 min, com a peça compartilhada já pronta); tirar a marcação (10 min, a aba fica honesta sobre o que faz); ou deixar com um aviso (o mais barato e, na minha leitura, o pior — *um aviso a menos para ler é melhor que um aviso a mais explicando por que um controle não funciona*).
+
+**Ele decidiu implementar.** O cliente vai poder pedir dois álbuns, três fotos extras.
+
+**O que torna isto barato, e é medido:** a peça já existe e é compartilhada. `fcFazQtdSrc(pref)` escreve o seletor (`index.html:3799`) e `fcQtdCssGer(raiz,pref,destaque)` escreve o CSS dele (`3820`) — o Checkout consome as duas (`11341`, `11068`) e a Mini loja também (`18272`, `17800`). Não se escreve nada do zero: acrescenta-se o campo do teto na aba (no molde de `u-qtdmax`), emite-se `QUANTIDADE_MAXIMA`, e o pagamento multiplica.
+
+**O que precisa ser provado, e é onde isto pode dar errado em silêncio:** a multiplicação tem de chegar **inteira** até o campo 54 do payload Pix. Um opcional de R$ 80 com quantidade 3 são R$ 240 no total da tela — e têm de ser R$ 240 no Pix. É a mesma varredura de combinações que já pegou o defeito de um centavo em ago/2026, agora com uma dimensão a mais.
+
+**Custo de desfazer:** médio. O campo entra no fragmento da aba e nos presets salvos.
 
 ---

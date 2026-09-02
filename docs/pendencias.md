@@ -1,6 +1,6 @@
 # Pendências — o que ficou combinado e ainda não foi feito
 
-Atualizado em 22/08/2026. Este arquivo é a lista viva; o histórico do que já foi entregue está no `docs/ledger-evolucao-2026-08.md` e nas specs.
+Atualizado em 03/09/2026. Este arquivo é a lista viva; o histórico do que já foi entregue está no `docs/ledger-evolucao-2026-08.md` e nas specs.
 
 ---
 
@@ -50,6 +50,8 @@ Entregue em 01/09/2026, fechando a acentuação: a **mensagem do WhatsApp passou
 
 Entregue em 02–03/09/2026: a **décima aba, Agendamento por pacote** (`docs/specs/2026-09-02-agendamento-por-pacote-design.md`, doze decisões em `docs/decisoes-2026-09-02-agendamento-por-pacote.md`) — vitrine de dois passos com iframe único sob demanda, os N endereços de redirecionamento e a página de obrigado com pagamento e prazo de reserva. A rodada foi partida em duas entregas; a verificação final (Tarefa 11) unificou `precoPix`/`parcelaDe`/o texto da linha do cartão/a serialização do catálogo entre os dois geradores (prova byte a byte das três saídas, antes e depois), colocou a aba na fotografia da regressão (`scripts/verificar/geradores.mjs`, com dois pacotes de propósito para exercitar o arredondamento da parcela nas duas direções) e corrigiu, ao rodar as varreduras de sanidade, dois defeitos deixados por rodadas anteriores: um `<script>` cru dentro de um comentário de `aBlocoObrigado` e uma palavra acentuada dentro de outro comentário — nenhum dos dois mexia em lógica, e a regressão das 21 saídas antigas continuou idêntica à `main`. O que ficou de fora está nas duas seções abaixo.
 
+Entregue em 03/09/2026: a **v2 da décima aba**, a revisão do dono sobre a v1 já publicada (`docs/specs/2026-09-02-agendamento-por-pacote-design.md` §0, quatro decisões revisadas + duas novas em `docs/decisoes-2026-09-02-agendamento-por-pacote.md`; plano: `docs/superpowers/plans/2026-09-03-agendamento-por-pacote-v2.md`). O bloco de pagamento passou a espelhar o **Checkout** em vez da `/pagar` (com opcionais, quantidade e cupom, e o link do TidyCal virou **caminho**, não URL inteira); duas fontes únicas foram extraídas **antes** da aba nova, para cada uma ser provada isoladamente — o pedido do PayPal (Checkout e Mini loja, `u-out`/`m-out`/`p-out1` byte a byte idênticos antes e depois) e o desenho do QR Code (molde da `/pagar`, consumido por Checkout, Mini loja, `/pagar` e a aba `pac` — **esta muda `u-out`/`m-out` de propósito**, corrigindo dois defeitos reais do Checkout: `new QRCode(...)` sem `try/catch` e a corrida do `qrPronto`). Cupom repetido passou a ser recusado também no Checkout e na Mini loja, e a quantidade dos opcionais passou a funcionar de verdade no pagamento (antes, a marcação existia e não fazia nada). A prévia não precisou de nenhuma linha nova — ela executa `aBlocoObrigado` diretamente, então herdou opcionais/quantidade/cupom no mesmo commit que os criou. Verificação final (Tarefa 7): o cenário da regressão passou a cadastrar um opcional com quantidade e um cupom com validade na aba `pac` — sem isso, os caminhos novos ficavam fora da fotografia byte a byte; `scripts/verificar/regressao.sh` contra a `main` (que já tem a v1): 4 divergências, todas explicadas (`u-out`, `m-out`, `a-out1`, `a-out3`), as outras 20 saídas e as 9 cobranças idênticas. O que ficou de fora está nas duas seções abaixo.
+
 A próxima sai do que o dono encontrar no uso.
 
 ---
@@ -87,10 +89,12 @@ Em 23/08/2026 o dono pediu que **todas** fossem feitas. Ficou uma, e ela é dele
 
 1. **A Tag Head da landing de Natal pode ainda ter a regra antiga de movimento reduzido** (`[style], * { animation-duration: 0.01ms !important }`), que mata toda animação **daquela página** para quem pede menos movimento. Quem a substitui é o **código 1 da aba Bordas com efeito**: gerar com o efeito em uso e colar no lugar do bloco antigo. Não é urgente, e o alcance é de uma página só — não do site, porque **o Prosite não tem cabeçalho global**.
 
-### Novas em 02–03/09/2026, décima aba
+### Novas em 03/09/2026, décima aba v2
 
-2. **O pedido do PayPal (`actions.order.create`) virou a quarta cópia escrita à mão**, sem fonte compartilhada — já eram três (Checkout, `/pagar`, Mini loja) antes desta rodada, e a spec original dizia, erradamente, que havia uma fonte única a reusar; a medição corrigiu isso. Extrair a fonte única agora exigiria provar a igualdade byte a byte das quatro saídas existentes no meio de outra rodada — trabalho para uma rodada própria, focada só nisso.
-3. **Os textos reserva dos sete marcadores da página de obrigado e a mensagem de erro do cartão ficaram fixos no bloco gerado**, em vez de virar campo da aba (fora do contrato da Tarefa 1 desta rodada). O operador pode editá-los à mão no código já colado no Prosite, mas não pela ferramenta — diferente de `T_OB_VARS`/`t-ob-fb-*`, que a página de obrigado do TidyCal já oferece como campo.
+2. **A `/pagar` continua com a própria cópia do pedido do PayPal (`actions.order.create`)**, e isso é decisão, não esquecimento — medida ao extrair a fonte única (Task 1 do plano v2): o Checkout e a Mini loja montam o item a partir de um carrinho (`subtotal()`/`somaProdutos()`/`cupomAtivo`); a `/pagar` monta de um item único vindo do link, sem carrinho nenhum. O esqueleto comum aos três (SDK, `style` dos botões, guarda de total zero, `purchase_units`, `onApprove`, `onError`) foi extraído e é consumido pelo Checkout e pela Mini loja; puxar a `/pagar` para dentro também exigiria mexer numa saída que já está publicada cobrando, fora do escopo desta rodada — e o ganho seria pequeno, porque a `/pagar` já é a mais simples das quatro. Extração completa fica registrada aqui, não forçada.
+3. **Dois defeitos pré-existentes do Checkout, achados ao ler o código desta rodada e não corrigidos, por estarem fora do escopo** (o arquivo é do Checkout, a tarefa era da aba `pac`):
+   - `uProdRender` (index.html:10636+) escreve o plural de "opcional" como `nome+'is'`, o que produz **"2 opcionalis"** em vez de "2 opcionais" — achado ao escrever o mesmo resumo para a aba `pac`, que usa a troca de palavra inteira (`'opcional'`/`'opcionais'`), correta.
+   - `uProdSalvar` (`alert('Informe o preco do produto.')`) e `uCpPctErro` (index.html:10703, a recusa de cupom acima de 100%) têm mensagens **sem acento**, fora da norma de 01/09/2026 (texto que o cliente lê sai acentuado); a versão da aba `pac` (`aCpPctErro`) já nasceu acentuada e, por sinal, sem citar "PayPal" — a versão do Checkout ainda menciona a marca ("o PayPal recusa a ordem"), o que a v2 também evitaria se o arquivo estivesse no escopo.
 
 ### Fechadas em 23/08/2026
 

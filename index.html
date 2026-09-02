@@ -3058,13 +3058,44 @@
 
 <!-- ==================== CONSTRUTOR: AGENDAMENTO POR PACOTE (decima aba, 02/09/2026) ==================== -->
 <div class="painel" id="painel-pac" role="tabpanel">
-  <p class="descricao"><b>Agendamento por pacote</b> — agrupa vários tipos de agendamento do TidyCal numa página só. O cliente escolhe o pacote pelo preço e vê apenas o calendário daquela duração. Gera também a página de obrigado, que cobra o pacote agendado por Pix ou cartão.</p>
+  <p class="descricao"><b>Agendamento por pacote</b> — agrupa vários tipos de agendamento do TidyCal numa página só. O cliente escolhe o pacote pelo preço e vê apenas o calendário daquela duração. Gera também a página de obrigado, que cobra o pacote agendado — com itens opcionais e cupom de desconto — por Pix ou cartão.</p>
 
-  <div class="secao primeira"><span class="secao-n">1</span> Pacotes</div>
+  <div class="secao primeira"><span class="secao-n">1</span> Formas de pagamento e identificação</div>
+  <div class="grade">
+    <div>
+      <fieldset>
+        <legend>Pagamento</legend>
+        <label for="a-descpix">Desconto no Pix <small>(percentual; 0 = sem desconto)</small></label>
+        <input type="number" id="a-descpix" value="5" min="0" max="90" step="0.5">
+        <label for="a-parcelas">Parcelas no cartão</label>
+        <input type="number" id="a-parcelas" value="1" min="1" max="12" step="1">
+        <p class="ajuda">Este número é uma promessa sobre o que o cliente vai encontrar no cartão, e quem decide isso é a operadora — a ferramenta não tem como conferir. Deixe em 1 até confirmar no PayPal quantas parcelas a sua conta oferece. O valor da parcela é calculado dividindo o preço, e afirma parcelamento sem juros.</p>
+        <p class="ajuda">Os dois botões de cartão são desenhados pelo PayPal, e o texto e a marca deles são do PayPal — isso não dá para mudar. Em todo o resto da página, o cliente lê apenas "no cartão".</p>
+      </fieldset>
+      <fieldset>
+        <legend>Identificação do agendamento</legend>
+        <label for="a-prefixo">Prefixo do identificador de conciliação <small>(aparece no txid do Pix e no extrato)</small></label>
+        <input type="text" id="a-prefixo" value="" placeholder="ex.: FC">
+      </fieldset>
+    </div>
+    <div>
+      <fieldset>
+        <legend>Dados do recebedor (Pix)</legend>
+        <p class="ajuda"><b>A chave Pix, o nome e a cidade do recebedor saíram desta aba.</b> Eles são os mesmos aqui, no Checkout, no Link de cobrança e na Mini loja, e por isso ficam num lugar só: o painel <b>Identidade</b>, no topo da página. <span class="acoes"><button type="button" class="botao mini claro fci-ir">Abrir Identidade</button></span></p>
+      </fieldset>
+      <fieldset>
+        <legend>Conta PayPal</legend>
+        <p class="ajuda"><b>O Client ID saiu desta aba</b> e está no painel <b>Identidade</b>, no topo da página, com a chave Pix, o recebedor e o WhatsApp. É a mesma conta nas quatro abas de pagamento. <span class="acoes"><button type="button" class="botao mini claro fci-ir">Abrir Identidade</button></span></p>
+      </fieldset>
+    </div>
+  </div>
+
+  <div class="secao"><span class="secao-n">2</span> Pacotes e itens opcionais</div>
   <div class="grade">
     <div>
       <fieldset>
         <legend>Cadastrar pacote</legend>
+        <p class="ajuda">Os opcionais deste pacote só aparecem para o cliente na <b>página de obrigado</b> — o TidyCal não sabe o que é um opcional, então a vitrine mostra só o preço do pacote.</p>
         <div class="caixa-editor">
           <label for="a-pcod">Código <small>(identifica o pacote na URL e no Pix — letras, números e hífen)</small></label>
           <input type="text" id="a-pcod" placeholder="MINI-1H">
@@ -3076,9 +3107,27 @@
           <input type="number" id="a-ppreco" placeholder="420" min="0" step="0.01">
           <label for="a-pinclui">O que inclui</label>
           <input type="text" id="a-pinclui" placeholder="10 fotos tratadas">
-          <label for="a-plink">Link do TidyCal deste pacote</label>
-          <input type="text" id="a-plink" placeholder="https://tidycal.com/fotocerta/mini-1h">
-          <div class="acoes"><button class="botao" id="a-pac-salvar">Adicionar pacote</button></div>
+          <label for="a-ppath">Caminho do TidyCal deste pacote <small>(o que vem depois de tidycal.com/)</small></label>
+          <input type="text" id="a-ppath" placeholder="fotocerta/mini-1h">
+          <div class="acoes"><button type="button" class="botao mini claro" id="a-ptestar">Abrir a página de teste</button></div>
+          <p class="ajuda"><b>Antes de gerar:</b> o botão abre <b>tidycal.com/</b> + o caminho digitado numa aba nova. É a mesma página que o código embute — se ela não existir aqui, também não vai existir no site publicado. Colar o endereço completo também funciona: o prefixo <code>https://tidycal.com/</code> é removido sozinho ao salvar o pacote.</p>
+
+          <label>Itens opcionais deste pacote</label>
+          <div class="dupla">
+            <input type="text" id="a-op-nome" placeholder="Álbum impresso">
+            <input type="number" id="a-op-preco" placeholder="300" min="0" step="0.01">
+          </div>
+          <div class="radios">
+            <label><input type="checkbox" id="a-op-qtd"><span>Este opcional vende por quantidade</span></label>
+          </div>
+          <div class="acoes"><button class="botao claro" id="a-op-add">Adicionar opcional</button></div>
+          <ul class="lista-imgs" id="a-op-lista"></ul>
+          <p class="vazio" id="a-op-vazio">Nenhum opcional neste pacote.</p>
+
+          <div class="acoes">
+            <button class="botao" id="a-pac-salvar">Adicionar pacote</button>
+            <button class="botao claro" id="a-pac-cancelar" style="display:none">Cancelar edição</button>
+          </div>
         </div>
       </fieldset>
     </div>
@@ -3087,11 +3136,35 @@
         <legend>Pacotes cadastrados</legend>
         <ul class="lista-imgs" id="a-pac-lista"></ul>
         <p class="vazio" id="a-pac-vazio">Nenhum pacote cadastrado ainda. Use o formulário ao lado.</p>
+        <div id="a-qtdmax-campo">
+          <label for="a-qtdmax">Quantidade máxima por opcional <small>(de 2 a 99; fora da faixa o campo se corrige sozinho)</small></label>
+          <input type="number" id="a-qtdmax" value="10" min="2" max="99" step="1">
+          <p class="ajuda">Vale para os opcionais marcados como <b>"vende por quantidade"</b>. O seletor vai de <b>0</b> até esse número, e <b>0 equivale a não marcar o opcional</b>.</p>
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend>Cupons de desconto</legend>
+        <label for="a-cp-cod">Código do cupom</label>
+        <input type="text" id="a-cp-cod" placeholder="NATAL10">
+        <label>Tipo de desconto</label>
+        <div class="radios">
+          <label><input type="radio" name="a-cp-tipo" value="pct_produto"><span>% sobre o pacote <small>(sem os opcionais)</small></span></label>
+          <label><input type="radio" name="a-cp-tipo" value="pct_total" checked><span>% sobre o total</span></label>
+          <label><input type="radio" name="a-cp-tipo" value="fixo"><span>Valor fixo no total</span></label>
+        </div>
+        <div class="dupla">
+          <input type="number" id="a-cp-valor" placeholder="Valor do desconto" min="0" step="0.01">
+          <input type="date" id="a-cp-val">
+        </div>
+        <p class="ajuda">O segundo campo é a validade (opcional — vale até o fim do dia; vazio = sem validade).</p>
+        <div class="acoes"><button class="botao claro" id="a-cp-add">Adicionar cupom</button></div>
+        <ul class="lista-imgs" id="a-cp-lista"></ul>
+        <p class="vazio" id="a-cp-vazio">Nenhum cupom. O campo de cupom não aparecerá na página de obrigado.</p>
       </fieldset>
     </div>
   </div>
 
-  <div class="secao"><span class="secao-n">2</span> Página de obrigado e pagamento</div>
+  <div class="secao"><span class="secao-n">3</span> Página de obrigado e marcadores</div>
   <div class="grade">
     <div>
       <fieldset>
@@ -3099,38 +3172,35 @@
         <label for="a-urlobrigado">Endereço da página de obrigado</label>
         <input type="text" id="a-urlobrigado" value="" placeholder="https://www.fotocerta.com.br/obrigado">
         <p class="ajuda">Se você mudar o preço de um pacote, quem agendou antes e pagar depois verá o preço novo. O preço mora no código da página, não no endereço — foi assim que se evitou que o cliente pudesse editá-lo na barra de endereço.</p>
-        <label for="a-prefixo">Prefixo do identificador de conciliação <small>(aparece no txid do Pix e no extrato)</small></label>
-        <input type="text" id="a-prefixo" value="" placeholder="ex.: FC">
         <label for="a-prazoh">Prazo da reserva <small>(horas; contadas a partir da primeira visita à página de obrigado)</small></label>
         <input type="number" id="a-prazoh" value="24" min="1" max="720" step="1">
       </fieldset>
     </div>
     <div>
       <fieldset>
-        <legend>Pagamento</legend>
-        <label for="a-descpix">Desconto no Pix <small>(percentual; 0 = sem desconto)</small></label>
-        <input type="number" id="a-descpix" value="5" min="0" max="90" step="0.5">
-        <label for="a-parcelas">Parcelas no cartão</label>
-        <input type="number" id="a-parcelas" value="1" min="1" max="12" step="1">
-        <p class="ajuda">Este número é uma promessa sobre o que o cliente vai encontrar no cartão, e quem decide isso é a operadora — a ferramenta não tem como conferir. Deixe em 1 até confirmar no PayPal quantas parcelas a sua conta oferece. O valor da parcela é calculado dividindo o preço, e afirma parcelamento sem juros.</p>
-        <p class="ajuda">Os dois botões de cartão são desenhados pelo PayPal, e o texto e a marca deles são do PayPal — isso não dá para mudar. Em todo o resto da página, o cliente lê apenas "no cartão".</p>
+        <legend>Marcadores da página de obrigado</legend>
+        <p class="ajuda">O TidyCal manda estes dados no endereço de redirecionamento (saída 2, abaixo). Escolha quais viajam e o texto que aparece quando alguém abre a página sem passar pelo agendamento.</p>
+        <div class="radios">
+          <label><input type="checkbox" id="a-ob-nome" checked><span>Nome de quem agendou</span></label>
+          <label><input type="checkbox" id="a-ob-data" checked><span>Data</span></label>
+          <label><input type="checkbox" id="a-ob-hora" checked><span>Horário</span></label>
+          <label><input type="checkbox" id="a-ob-quando" checked><span>Data e horário juntos</span></label>
+        </div>
+        <p class="ajuda">No texto da sua página, escreva <code>{{nome}}</code>, <code>{{data}}</code>, <code>{{hora}}</code> e <code>{{quando}}</code> onde o dado deve entrar — mais <code>{{pacote}}</code>, <code>{{duracao}}</code> e <code>{{valor}}</code>, que vêm do catálogo cadastrado ao lado e viajam sempre, sem interruptor.</p>
+        <label for="a-ob-fb-nome" class="ajuda" style="margin-top:6px">no lugar de <code>{{nome}}</code></label>
+        <input type="text" id="a-ob-fb-nome" value="tudo certo">
+        <label for="a-ob-fb-data" class="ajuda">no lugar de <code>{{data}}</code></label>
+        <input type="text" id="a-ob-fb-data" value="a data combinada">
+        <label for="a-ob-fb-hora" class="ajuda">no lugar de <code>{{hora}}</code></label>
+        <input type="text" id="a-ob-fb-hora" value="o horário combinado">
+        <label for="a-ob-fb-quando" class="ajuda">no lugar de <code>{{quando}}</code></label>
+        <input type="text" id="a-ob-fb-quando" value="a data e o horário combinados">
       </fieldset>
     </div>
   </div>
 
-  <div class="secao"><span class="secao-n">3</span> Aparência e textos</div>
+  <div class="secao"><span class="secao-n">4</span> Textos e aparência</div>
   <div class="grade">
-    <div>
-      <fieldset>
-        <legend>Cores</legend>
-        <label>Cor de destaque</label>
-        <div class="cor-linha"><input type="color" id="a-c1" value="#0F3A30"><input type="text" id="a-c1-t" value="#0F3A30"></div>
-        <label>Fundo do cartão</label>
-        <div class="cor-linha"><input type="color" id="a-c2" value="#ffffff"><input type="text" id="a-c2-t" value="#ffffff"></div>
-        <label>Cor do texto</label>
-        <div class="cor-linha"><input type="color" id="a-c3" value="#333333"><input type="text" id="a-c3-t" value="#333333"></div>
-      </fieldset>
-    </div>
     <div>
       <fieldset>
         <legend>Textos</legend>
@@ -3145,6 +3215,17 @@
         <label for="a-t5">Título da página de obrigado</label>
         <input type="text" id="a-t5" value="Tudo certo!">
       </fieldset>
+    </div>
+    <div>
+      <fieldset>
+        <legend>Cores</legend>
+        <label>Cor de destaque</label>
+        <div class="cor-linha"><input type="color" id="a-c1" value="#0F3A30"><input type="text" id="a-c1-t" value="#0F3A30"></div>
+        <label>Fundo do cartão</label>
+        <div class="cor-linha"><input type="color" id="a-c2" value="#ffffff"><input type="text" id="a-c2-t" value="#ffffff"></div>
+        <label>Cor do texto</label>
+        <div class="cor-linha"><input type="color" id="a-c3" value="#333333"><input type="text" id="a-c3-t" value="#333333"></div>
+      </fieldset>
       <fieldset>
         <legend>Altura do calendário</legend>
         <p class="ajuda">Medidas calibradas em produção, com o formulário do TidyCal aberto. São o mesmo par usado na aba Agendamento TidyCal — não precisam mudar a não ser que o seu formulário seja diferente do padrão.</p>
@@ -3158,10 +3239,10 @@
     </div>
   </div>
 
-  <div class="secao"><span class="secao-n">4</span> Biblioteca de presets</div>
+  <div class="secao"><span class="secao-n">5</span> Biblioteca de presets</div>
   <div class="grade" id="fcp-a-box"></div>
 
-  <div class="secao"><span class="secao-n">5</span> Prévia e códigos gerados</div>
+  <div class="secao"><span class="secao-n">6</span> Prévia e códigos gerados</div>
   <div class="acoes" style="margin-bottom:14px">
     <button class="botao" id="a-gerar">Gerar código</button>
     <button class="botao claro" id="a-atualizar">Atualizar prévia</button>
@@ -3246,8 +3327,8 @@
    QUEM IMPEDE QUE ELE MINTA: scripts/conferir-versoes.sh, que recusa index.html
    alterado sem a versao mudar junto -- a mesma disciplina do fc-compartilhado.js,
    e pela mesma razao: carimbo que ninguem confere e o defeito de amanha. */
-var FC_VERSAO='2026-09-02a';
-var FC_PUBLICADO='2026-09-02 06:47';   /* America/Sao_Paulo -- escrito pelo carimbador */
+var FC_VERSAO='2026-09-02b';
+var FC_PUBLICADO='2026-09-02 11:07';   /* America/Sao_Paulo -- escrito pelo carimbador */
 (function(){
   var el=document.getElementById('fc-versao');
   if(!el) return;
@@ -3506,6 +3587,107 @@ function fcMoedaFmtGer(soReal){
   for(i=0;i<PRECO_MOEDAS.length;i++)
     c+="if(MOEDA==='"+PRECO_MOEDAS[i][0]+"')return '"+precoJsTexto(PRECO_MOEDAS[i][1])+"'+s;\n";
   c+="return '"+PRECO_PADRAO+"'+s.replace('.',',');\n}\n\n";
+  return c;
+}
+
+/* ===== o pedido do PayPal no carrinho: fonte unica (Checkout e Mini loja) =====
+   Medido (decisao 8 do diario, revisao 03/09/2026): actions.order.create era escrito a mao em
+   TRES geradores -- Checkout, /pagar e Mini loja -- e nenhuma funcao compartilhada o emitia.
+   Lendo os tres byte a byte: Checkout e Mini loja emitiam o MESMO texto para o bloco inteiro de
+   instalacao do paypal.Buttons (SDK, style dos botoes, guarda de total zero no onClick, forma
+   do purchase_units, onApprove com capture(), onError), exceto em tres pontos -- o seletor de
+   render (.fcu-botoes / .fcm-botoes), um comentario que so o Checkout emitia (explicando a
+   guarda de total zero) e a chamada a cestaLimpar() que so a Mini loja faz depois de capturar
+   (ela tem carrinho persistente para esvaziar; o Checkout, carrinho de uma visita so, nao tem).
+   Esses tres pontos viram parametro; o resto sai identico ao que cada bloco ja emitia.
+
+   A /pagar NAO ENTRA nesta fonte, e a razao e medida, nao suposta: ela nao tem onClick (o valor
+   e fechado, sem cupom nem sinal, entao nao existe guarda de total zero para escrever); o style
+   dos botoes tem DUAS propriedades (color, layout), nao quatro (layout, shape, label, color); o
+   pedido usa nomes de variavel proprios (desc/txid/valor, nao CODIGO_PEDIDO/nm/MOEDA -- a moeda
+   la e literal "BRL", nunca variavel) e o erro do SDK cai numa funcao propria (ppFora) em vez
+   de msg(TXT_ERRO,false). Comparado linha a linha com o bloco abaixo, praticamente toda linha
+   da /pagar diverge em pelo menos um token -- forcar as tres a compartilhar pediria tantos
+   parametros quanto linhas, o que nao e extracao, e template. Mantida como quarta copia,
+   separada, no proprio gerador da /pagar. Precedente: a extracao parcial da Mini loja. */
+function fcPpBotoesSrc(prefixo,ppcor,usaSinal,comentZero,aoAprovarExtra){
+  var c='';
+  c+='/* ===== PayPal ===== */\n';
+  c+="var sdk=document.createElement('script');\n";
+  c+="sdk.src='https://www.paypal.com/sdk/js?client-id='+encodeURIComponent(PAYPAL_CLIENT_ID)+'&currency='+MOEDA+'&intent=capture&locale=pt_BR';\n";
+  c+='sdk.onload=function(){\n';
+  c+='if(!window.paypal){msg(TXT_ERRO,false);return;}\n';
+  c+='window.paypal.Buttons({\n';
+  c+="style:{layout:'vertical',shape:'rect',label:'pay',color:'"+ppcor+"'},  /* color: 'gold' | 'blue' | 'silver' | 'white' | 'black' */\n";
+  if(comentZero){
+    c+='/* Pedido zerado e barrado ANTES de abrir o PayPal, com mensagem propria. O caminho do\n';
+    c+='   Pix ja fazia isso; o do PayPal nao: com total zero a ordem saia com value "0.00", o\n';
+    c+='   PayPal recusava e o cliente via so a mensagem generica de erro do carrinho, sem\n';
+    c+='   nenhuma pista de que bastava marcar um item ou tirar o cupom. */\n';
+  }
+  c+='onClick:function(data,actions){\n';
+  c+='if(total()<0.01){msg(TXT_TOTAL_ZERO,false);return actions.reject();}\n';
+  if(usaSinal)c+='var rec=sinalRecusa();\nif(rec){msg(rec,false);return actions.reject();}\n';
+  c+='return actions.resolve();\n},\n';
+  c+='createOrder:function(data,actions){\n';
+  c+='var v='+(usaSinal?'sinalAgora()':'total()')+'.toFixed(2);\n';
+  if(usaSinal)c+="var nm=(nomesSelecionados().join(' + ')+' (sinal - cod: '+CODIGO_PEDIDO+(cupomAtivo?(' cupom:'+cupomAtivo.codigo):'')+')').substring(0,127);\n";
+  else c+="var nm=(nomesSelecionados().join(' + ')+' (cod: '+CODIGO_PEDIDO+(cupomAtivo?(' cupom:'+cupomAtivo.codigo):'')+')').substring(0,127);\n";
+  c+='if(!nm)nm=CODIGO_PEDIDO;   /* name e obrigatorio no item: nunca pode sair vazio */\n';
+  c+='var it={name:nm,quantity:"1",unit_amount:{value:v,currency_code:MOEDA}};\n';
+  c+='if(CODIGO_PEDIDO)it.sku=CODIGO_PEDIDO;   /* sku vazio nao ajuda ninguem a conciliar */\n';
+  c+='return actions.order.create({purchase_units:[{\n';
+  c+='amount:{value:v,currency_code:MOEDA,breakdown:{item_total:{value:v,currency_code:MOEDA}}},\n';
+  c+='description:nm,\n';
+  c+='items:[it],\n';
+  c+='custom_id:CODIGO_PEDIDO\n}]});\n},\n';
+  c+='onApprove:function(data,actions){\n';
+  c+='return actions.order.capture().then(function(){msg(TXT_SUCESSO,true);'+aoAprovarExtra+'});\n},\n';
+  c+='onError:function(){msg(TXT_ERRO,false);}\n';
+  c+="}).render(raiz.querySelector('."+prefixo+"-botoes'));\n};\n";
+  c+='sdk.onerror=function(){msg(TXT_ERRO,false);};\n';
+  c+='document.head.appendChild(sdk);\n\n';
+  return c;
+}
+
+/* ===== o desenho do QR Code do Pix: fonte unica =====
+   Medido (03/09/2026, pedido novo do dono): o desenho do QR estava escrito em TRES geradores
+   -- Checkout, Mini loja e /pagar -- e so a /pagar fazia certo. As outras duas tem dois
+   defeitos reais (ver spec 0.1): new QRCode(...) fora de try/catch (uma excecao ali derruba o
+   resto de gerarPix, e o cliente fica sem Pix nenhum na tela) e uma corrida no carregamento
+   (qrPronto so fica verdadeiro no onload do script, entao clicar em "Gerar Pix" antes da
+   biblioteca chegar deixa aquela geracao sem QR, mesmo que ela chegue logo depois). A /pagar
+   carrega a biblioteca sob demanda, no momento de desenhar, com onerror tratado, e envolve o
+   desenho em try/catch.
+   Esta tarefa extrai SO o desenho da /pagar, que e a fonte -- ela e quem prova que o texto
+   nao mudou (p-out1 byte a byte identico). O Checkout e a Mini loja passam a consumir esta
+   mesma fonte numa tarefa separada, que MUDA o que eles emitem de proposito (correcao de
+   comportamento, nao refatoracao) -- por isso o commit desta extracao fica sozinho.
+   Parametros: "ind" e a indentacao da linha da funcao e do fechamento (a /pagar escreve com
+   dois espacos, aninhada dentro de pix()); "tamanho" e o texto que vai no width/height -- na
+   /pagar e o nome de uma variavel do bloco (TAMANHO_QR, configuravel na aba), mas pode ser um
+   numero literal para quem nao tiver essa variavel. */
+function fcDesenharQrSrc(ind,tamanho){
+  var c='',i2=ind+'  ',i3=ind+'    ',ic=ind+'   ';
+  c+=ind+"/* O QR e desenhado a partir do MESMO codigo que esta na caixa de copiar: um segundo\n";
+  c+=ic+"lugar de onde tirar o payload seria um segundo valor possivel.\n";
+  c+=ic+"E se a biblioteca nao chegar (bloqueador, rede ruim) a caixa SOME, como no carrinho.\n";
+  c+=ic+"Deixa-la com a altura reservada e vazia entregava ao cliente um retangulo em branco\n";
+  c+=ic+"de "+tamanho+" pixels sem explicacao nenhuma. Sem QR a cobranca continua inteira: o\n";
+  c+=ic+"copia e cola e a instrucao do Pix ficam onde estavam. */\n";
+  c+=ind+"function desenharQr(alvo,codigo){\n";
+  c+=i2+"function some(){alvo.style.display='none';}\n";
+  c+=i2+"function faz(){\n";
+  c+=i3+"try{new QRCode(alvo,{text:codigo,width:"+tamanho+",height:"+tamanho+",correctLevel:QRCode.CorrectLevel.M});}\n";
+  c+=i3+"catch(e){some();}\n";
+  c+=i2+"}\n";
+  c+=i2+"if(window.QRCode){faz();return;}\n";
+  c+=i2+"var s=document.createElement('script');\n";
+  c+=i2+"s.src='https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';\n";
+  c+=i2+"s.onload=function(){if(!window.QRCode){some();return;}faz();};\n";
+  c+=i2+"s.onerror=some;\n";
+  c+=i2+"document.head.appendChild(s);\n";
+  c+=ind+"}\n";
   return c;
 }
 
@@ -4164,9 +4346,11 @@ var ABAS=[
    guarda:'tudo o que está configurado nesta aba — o efeito escolhido, o alcance (página inteira ou dentro de um bloco) com a altura, e os campos de <b>todos</b> os efeitos: quantidade, tamanho, deriva e cor das partículas, as quatro cores do confete, o tamanho, o desfoque e as três cores da aurora, a quantidade, o tamanho e as quatro cores das luzes, mais a duração do ciclo, a opacidade, a proporção no celular e o <b>fundo da prévia</b>.'},
   {id:'pac', nome:'Agendamento por pacote', chaves:['a'],       coleta:aColeta,restaura:aRestaura,gerar:aGerar,
    pref:'a',fora:[],resumo:aPresetResumo,redesenhar:aPresetDepois,antesDeSalvar:aPresetAntes,
-   listas:[['a.pacotes',{cod:'',nome:'',dur:'',preco:0,inclui:'',link:''},'cod']],
+   listas:[['a.pacotes',{cod:'',nome:'',dur:'',preco:0,inclui:'',path:'',ops:[{nome:'',preco:0,qtd:false}]},'cod'],
+           ['a.pacotes.ops',{nome:'',preco:0,qtd:false},'nome'],
+           ['a.cps',{codigo:'',tipo:'pct_total',valor:0,validade:''},'codigo']],
    exemplo:'ex.: Ensaios 2026 - pacotes',
-   guarda:'tudo o que está configurado nesta aba — os pacotes (código, nome, duração, preço, o que inclui e o link do TidyCal de cada um), o endereço da página de obrigado, o prefixo do identificador, o prazo da reserva, o desconto no Pix, as parcelas, as alturas do calendário, textos e cores.'}
+   guarda:'tudo o que está configurado nesta aba — os pacotes (código, nome, duração, preço, o que inclui, o caminho do TidyCal e os <b>itens opcionais</b> de cada um), os <b>cupons</b>, o endereço da página de obrigado, o prefixo do identificador, o prazo da reserva, o desconto no Pix, as parcelas, quais <b>marcadores da página de obrigado</b> viajam e o texto reserva de cada um, as alturas do calendário, textos e cores.'}
 ];
 var fcFrag={};       /* ultimo pedaco bom de cada aba, para nao apagar o que a aba quebrada tinha */
 var fcSoLeitura={};  /* abas que falharam ao restaurar: param de coletar do DOM ate recarregar */
@@ -10029,8 +10213,16 @@ function tPresetInferir(){
    A validacao vale para o BOTAO, nao para tGerar: o gerador continua exatamente como estava,
    porque este recurso e sobre conferir o endereco antes de publicar, e nao sobre recusar
    caminhos que hoje geram codigo. */
+/* Extraida da aba TidyCal para ser compartilhada com o cadastro de pacotes desta ferramenta
+   (aba Agendamento por pacote, campo por pacote em vez de campo unico) -- unifica-se a fonte
+   que ESCREVE a normalizacao, nunca uma segunda copia da mesma regex (CLAUDE.md). tPathNorm
+   continua devolvendo exatamente o que devolvia antes desta extracao: mesma regex, mesma
+   ordem -- o t-out* desta aba tem de sair byte a byte identico. */
+function fcTidyPathNorm(v){
+  return String(v||'').trim().replace(/^https?:\/\/tidycal\.com\//,'').replace(/^\//,'');
+}
 function tPathNorm(){
-  return $('t-path').value.trim().replace(/^https?:\/\/tidycal\.com\//,'').replace(/^\//,'');
+  return fcTidyPathNorm($('t-path').value);
 }
 function tPathOk(v){
   /* segmento "." ou ".." e navegacao de caminho, nao nome de booking type: com o host preso em
@@ -10513,9 +10705,20 @@ function uCpPctErro(tipo,v){
   if(v>100)return 'Um cupom em porcentagem nao pode passar de 100%: com '+v+'% o desconto e limitado ao subtotal e o pedido inteiro vai a R$ 0,00 -- o cliente ve "Cupom aplicado!" e um total zerado, e o PayPal recusa a ordem. Se a intencao era 15%, corrija o valor; se era realmente dar o pedido, use um cupom de valor fixo igual ao preco.';
   return '';
 }
+/* Recusa de codigo repetido -- decisao 13 de 02/09/2026, uniformizada com a aba pac
+   (aCpAchaRepetido, 13268+): sem isto, dois cupons com o mesmo codigo eram aceitos em
+   silencio e o carrinho aplicava sempre o PRIMEIRO que batesse -- o segundo nunca era
+   encontrado. */
+function uCpAchaRepetido(cod,ignorar){
+  var i;
+  for(i=0;i<uCps.length;i++){if(i!==ignorar&&uCps[i].codigo===cod)return uCps[i].codigo;}
+  return '';
+}
 function uCpAdd(){
   var cod=$('u-cp-cod').value.trim().toUpperCase();
   if(!cod){alert('Informe o codigo do cupom.');return;}
+  var repetido=uCpAchaRepetido(cod,-1);
+  if(repetido){alert('Já existe um cupom com o código "'+cod+'". O cliente digitaria um código só, e a página não tem como saber qual dos dois cadastros aplicar — escolha outro código ou edite o cupom já existente na lista.');return;}
   var v=parseFloat(String($('u-cp-valor').value).replace(',','.'));
   if(isNaN(v)||v<=0){alert('Informe o valor do desconto (maior que zero).');return;}
   var ePct=uCpPctErro(radio('u-cp-tipo')||'pct_total',v);
@@ -10756,7 +10959,7 @@ function uCfg(){
    uGerar, que e o gesto deliberado do operador -- a previa roda a cada tecla e nao pode
    reescrever campo nenhum. */
 function uRecusa(cfg){
-  var i,cpv,cpc,cpe;
+  var i,cpv,cpc,cpe,cpvisto,vistosCp={};
   if(!cfg.prods.length)return 'Cadastre ao menos um produto.';
   if(cfg.usaPP&&!cfg.client)return fciRecusa('Informe o Client ID do PayPal.');
   if(cfg.usaPix){
@@ -10779,6 +10982,13 @@ function uRecusa(cfg){
     if(isNaN(cpv)||cpv<=0)return 'O cupom "'+cpc+'" esta com o valor do desconto vazio ou zerado. Ele seria entregue no codigo como desconto de zero: o cliente digitaria o cupom, veria "Cupom aplicado!" e "Desconto - R$ 0,00", e o total nao mudaria. Preencha o valor ou remova o cupom.';
     cpe=uCpPctErro(cfg.cps[i].tipo,cpv);
     if(cpe)return 'Cupom "'+cpc+'": '+cpe;
+    /* Codigo repetido tambem aqui, e nao so no cadastro (uCpAdd) -- decisao 13: a lista se
+       edita por dentro (uCpCodAjustar), e apagar/alterar um codigo la nao passa pelo
+       cadastro. Comparacao ja ignora maiuscula/minuscula e espacos das pontas: cpc chega
+       aqui aparado, e os codigos gravados ja sao maiusculos. */
+    cpvisto=cpc.toUpperCase();
+    if(vistosCp[cpvisto])return 'Os cupons "'+vistosCp[cpvisto]+'" e "'+cpc+'" têm o mesmo código ("'+cpvisto+'"). O cliente digitaria um cupom só, e a página não tem como saber qual dos dois cadastros aplicar — troque um dos dois.';
+    vistosCp[cpvisto]=cpc;
   }
 
   /* Sinal fixo acima do maior pedido possivel: o carrinho nasceria com todo pedido recusado.
@@ -11047,11 +11257,11 @@ function uBloco(cfg){
     c+=FC_PIX_SRC.tlv;
     c+=FC_PIX_SRC.crc16;
     c+=FC_PIX_SRC.montarPayload;
-    c+='var qrPronto=false;\n';
-    c+="var qrsrc=document.createElement('script');\n";
-    c+="qrsrc.src='https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';\n";
-    c+='qrsrc.onload=function(){qrPronto=true;};\n';
-    c+='document.head.appendChild(qrsrc);\n\n';
+    /* Fonte unica com a /pagar e a Mini loja (fcDesenharQrSrc, ~3577): carrega a biblioteca
+       sob demanda (sem a corrida do onload eager) e desenha dentro de try/catch, escondendo a
+       caixa se a biblioteca nao chegar em vez de deixar a excecao derrubar o resto de
+       gerarPix. Corrige os dois defeitos medidos no Checkout (spec 0.1). */
+    c+=fcDesenharQrSrc('','220');
   }
 
   c+='function montar(){\n';
@@ -11361,58 +11571,7 @@ function uBloco(cfg){
     c+='function msg(txt,ok){\n';
     c+="var m=raiz.querySelector('.fcu-msg');\n";
     c+="m.textContent=txt;m.className='fcu-msg '+(ok?'ok':'erro');\n}\n\n";
-    c+='/* ===== PayPal ===== */\n';
-    c+="var sdk=document.createElement('script');\n";
-    c+="sdk.src='https://www.paypal.com/sdk/js?client-id='+encodeURIComponent(PAYPAL_CLIENT_ID)+'&currency='+MOEDA+'&intent=capture&locale=pt_BR';\n";
-    c+='sdk.onload=function(){\n';
-    c+='if(!window.paypal){msg(TXT_ERRO,false);return;}\n';
-    c+='window.paypal.Buttons({\n';
-    c+="style:{layout:'vertical',shape:'rect',label:'pay',color:'"+ppcor+"'},  /* color: 'gold' | 'blue' | 'silver' | 'white' | 'black' */\n";
-    c+='/* Pedido zerado e barrado ANTES de abrir o PayPal, com mensagem propria. O caminho do\n';
-    c+='   Pix ja fazia isso; o do PayPal nao: com total zero a ordem saia com value "0.00", o\n';
-    c+='   PayPal recusava e o cliente via so a mensagem generica de erro do carrinho, sem\n';
-    c+='   nenhuma pista de que bastava marcar um item ou tirar o cupom. */\n';
-    c+='onClick:function(data,actions){\n';
-    c+='if(total()<0.01){msg(TXT_TOTAL_ZERO,false);return actions.reject();}\n';
-    if(usaSinal)c+='var rec=sinalRecusa();\nif(rec){msg(rec,false);return actions.reject();}\n';
-    c+='return actions.resolve();\n},\n';
-    /* ===== O PEDIDO QUE CHEGA AO PAINEL DO PAYPAL (27/08/2026) =====
-       Antes daqui saiam valor, descricao e custom_id -- e o painel do PayPal mostrava a linha
-       generica "Pagamento" com a coluna "ID do produto" vazia. Agora vai um ITEM de verdade:
-       'name' preenche "Nome do produto" e 'sku' preenche "ID do produto".
-
-       UM ITEM SO, E NAO O CARRINHO ITEMIZADO. Aqui o valor cobrado NEM SEMPRE e a soma dos
-       produtos: tem sinal (cobra uma parte) e tem cupom (desconta). Itemizar de verdade
-       obrigaria a montar breakdown.discount e a fechar a conta ao centavo -- e a especificacao
-       do PayPal e taxativa: "If you specify amount.breakdown, the amount equals item_total
-       plus tax_total plus shipping...". Um centavo fora e o pedido NAO E CRIADO, e o cliente
-       fica sem meio de pagamento na hora de pagar. Com um item unico igual ao valor cobrado, a
-       conta fecha por construcao. O carrinho detalhado continua no resumo copiavel e no Pix.
-
-       O valor e calculado UMA vez, em v, e usado nos tres lugares: dois toFixed em separado
-       poderiam divergir num centavo e derrubar o pedido.
-
-       O invoice_id ficou de FORA: a especificacao diz que "invoice_id values are required to
-       be unique within each merchant account by default", e numa loja isso viraria recusa na
-       segunda compra com o mesmo codigo de pedido. */
-    c+='createOrder:function(data,actions){\n';
-    c+='var v='+(usaSinal?'sinalAgora()':'total()')+'.toFixed(2);\n';
-    if(usaSinal)c+="var nm=(nomesSelecionados().join(' + ')+' (sinal - cod: '+CODIGO_PEDIDO+(cupomAtivo?(' cupom:'+cupomAtivo.codigo):'')+')').substring(0,127);\n";
-    else c+="var nm=(nomesSelecionados().join(' + ')+' (cod: '+CODIGO_PEDIDO+(cupomAtivo?(' cupom:'+cupomAtivo.codigo):'')+')').substring(0,127);\n";
-    c+='if(!nm)nm=CODIGO_PEDIDO;   /* name e obrigatorio no item: nunca pode sair vazio */\n';
-    c+='var it={name:nm,quantity:"1",unit_amount:{value:v,currency_code:MOEDA}};\n';
-    c+='if(CODIGO_PEDIDO)it.sku=CODIGO_PEDIDO;   /* sku vazio nao ajuda ninguem a conciliar */\n';
-    c+='return actions.order.create({purchase_units:[{\n';
-    c+='amount:{value:v,currency_code:MOEDA,breakdown:{item_total:{value:v,currency_code:MOEDA}}},\n';
-    c+='description:nm,\n';
-    c+='items:[it],\n';
-    c+='custom_id:CODIGO_PEDIDO\n}]});\n},\n';
-    c+='onApprove:function(data,actions){\n';
-    c+='return actions.order.capture().then(function(){msg(TXT_SUCESSO,true);});\n},\n';
-    c+='onError:function(){msg(TXT_ERRO,false);}\n';
-    c+="}).render(raiz.querySelector('.fcu-botoes'));\n};\n";
-    c+='sdk.onerror=function(){msg(TXT_ERRO,false);};\n';
-    c+='document.head.appendChild(sdk);\n\n';
+    c+=fcPpBotoesSrc('fcu',ppcor,usaSinal,true,'');
   }
   if(usaPix){
     c+='/* ===== Pix ===== */\n';
@@ -11430,10 +11589,8 @@ function uBloco(cfg){
     c+='payloadAtual=montarPayload(v);\n';
     c+="var qr=raiz.querySelector('.fcu-qr');\n";
     c+="qr.innerHTML='';\n";
-    c+='if(qrPronto&&window.QRCode){\n';
-    c+="qr.style.display='inline-block';\n";
-    c+='new window.QRCode(qr,{text:payloadAtual,width:220,height:220,correctLevel:window.QRCode.CorrectLevel.M});\n';
-    c+="}else{qr.style.display='none';}\n";
+    c+="qr.style.display='';\n";
+    c+='desenharQr(qr,payloadAtual);\n';
     c+="raiz.querySelector('.fcu-pixval-v').textContent=moedaFmt(v);\n";
     c+="raiz.querySelector('.fcu-cola').value=payloadAtual;\n";
     c+="raiz.querySelector('.fcu-pixarea').className='fcu-pixarea on';\n}\n";
@@ -13014,70 +13171,268 @@ function ePresetDepois(){
    quem falta preencher (Tarefas 3 a 9) sao as tres saidas (aBlocoVitrine, aEnderecos,
    aBlocoObrigado) e aPreview, que ainda sao esqueletos vazios de proposito. */
 var aPacotes=[];
+var aCps=[];
+/* Opcionais do pacote em edicao no formulario de cadastro -- mesmo papel de uEditOps/uEditIdx
+   no Checkout (10420+). aEditIdx=-1 quer dizer "cadastrando pacote novo"; >=0 e o indice do
+   pacote sendo editado em aPacotes. */
+var aEditOps=[];
+var aEditIdx=-1;
 /* Faixa declarada dos campos numericos desta aba, no formato de U_NUMS/E_NUMS: [id, padrao,
    min, max, inteiro]. */
 var A_NUMS=[['a-prazoh',24,1,720,true],['a-descpix',5,0,90,false],['a-parcelas',1,1,12,true],
-  ['a-altdesk',2350,800,6000,true],['a-altmob',2700,800,6000,true],['a-largmob',700,320,1024,true]];
+  ['a-altdesk',2350,800,6000,true],['a-altmob',2700,800,6000,true],['a-largmob',700,320,1024,true],
+  ['a-qtdmax',10,2,99,true]];
 function aPreso(id){return fcPreso(A_NUMS,id);}
-/* ===== catalogo de pacotes (Tarefa 2) =====
-   Modelo: uCpAdd/uCpRender/uCpCodAjustar (10366+), a lista editavel em linha de cupons do
-   Checkout. Cada pacote tem seis campos editaveis direto na lista, sem modo de edicao a parte
-   (diferente de uProdRender, que abre o cadastro para editar) -- o mesmo padrao que os cupons
-   ja usam aqui do lado. */
-function aPacAdd(){
+/* ===== marcadores configuraveis da pagina de obrigado (Tarefa 4, passo 5) =====
+   Mesma mecanica de T_OB_VARS/tObMarcadas/tObMarcar (9826+), com quatro diferencas: so os
+   QUATRO marcadores que o TidyCal manda de verdade entram aqui -- 'tipo' fica de fora porque
+   quem identifica o pacote e o codigo (secao 5 da spec: "renomear um tipo no TidyCal nao
+   quebra nada"), e 'pacote'/'duracao'/'valor' NUNCA sao configuraveis porque nao vem do
+   TidyCal, vem do catalogo cadastrado nesta mesma aba -- eles sempre viajam, sem interruptor
+   (ver aBlocoObrigado). O 'padrao' de cada um e o texto reserva de fabrica, usado quando o
+   estado gravado nao tem 'obfb' (versao anterior) ou o campo especifico veio vazio. */
+var A_OB_VARS=[
+  {id:'nome',  tidy:'contact.name',      rot:'nome de quem agendou',  padrao:'tudo certo'},
+  {id:'data',  tidy:'booking.date',      rot:'data',                  padrao:'a data combinada'},
+  {id:'hora',  tidy:'booking.time',      rot:'horario',               padrao:'o horário combinado'},
+  {id:'quando',tidy:'booking.starts_at', rot:'data e horario juntos', padrao:'a data e o horário combinados'}
+];
+function aObMarcadas(){
+  var r=[],i,el;
+  for(i=0;i<A_OB_VARS.length;i++){
+    el=$('a-ob-'+A_OB_VARS[i].id);
+    if(el&&el.checked)r.push(A_OB_VARS[i].id);
+  }
+  return r;
+}
+function aObMarcar(t){
+  var g=String(t||'').split(','),i,el;
+  for(i=0;i<A_OB_VARS.length;i++){
+    el=$('a-ob-'+A_OB_VARS[i].id);
+    if(el)el.checked=(g.indexOf(A_OB_VARS[i].id)>=0);
+  }
+}
+function aObCfg(){
+  var fb={},i;
+  for(i=0;i<A_OB_VARS.length;i++)fb[A_OB_VARS[i].id]=aElVal('a-ob-fb-'+A_OB_VARS[i].id,A_OB_VARS[i].padrao);
+  return {vars:aObMarcadas(),fb:fb};
+}
+/* ===== opcionais do pacote em edicao =====
+   Copia de uOpPrecoAjustar/uOpRender/uOpAdd/uOpMove/uOpDel (10426+ antes desta tarefa), com o
+   prefixo a- e aEditOps/aEditIdx no lugar de uEditOps/uEditIdx. Mesmas duas recusas ja
+   registradas la: nome vazio se CORRIGE A VISTA (nunca fica vazio -- um opcional sem nome
+   apareceria em branco na tela do cliente), preco zero e ACEITO (opcional gratis e
+   configuracao legitima). */
+function aOpPrecoAjustar(inp,i){
+  var v=parseFloat(String(inp.value).replace(',','.'));
+  if(!isNaN(v)&&v>=0){aEditOps[i].preco=v;return false;}
+  aEditOps[i].preco=0;
+  inp.value='0';
+  return true;
+}
+function aOpRender(){
+  var ul=$('a-op-lista');if(!ul)return;
+  ul.innerHTML='';
+  $('a-op-vazio').style.display=aEditOps.length?'none':'block';
+  aEditOps.forEach(function(op,i){
+    var li=document.createElement('li');
+    var info=document.createElement('div');info.className='info';
+    var n=document.createElement('input');n.type='text';n.value=op.nome;n.placeholder='Nome do opcional';
+    var bom=op.nome;
+    n.addEventListener('input',function(){aEditOps[i].nome=n.value;if(n.value.replace(/^\s+|\s+$/g,''))bom=n.value;});
+    (function(){
+      function volta(){
+        if(n.value.replace(/^\s+|\s+$/g,''))return;
+        n.value=bom;aEditOps[i].nome=bom;
+      }
+      n.addEventListener('change',volta);n.addEventListener('blur',volta);
+    })();
+    /* Acentuado ("Preço"), diferente do molde de uOpRender (10553): texto de interface,
+       norma de 01/09/2026. */
+    var pr=document.createElement('input');pr.type='number';pr.step='0.01';pr.min='0';pr.value=op.preco;pr.placeholder='Preço';
+    pr.addEventListener('input',function(){aEditOps[i].preco=pr.value;});
+    pr.addEventListener('change',function(){aOpPrecoAjustar(pr,i);});
+    pr.addEventListener('blur',function(){aOpPrecoAjustar(pr,i);});
+    info.appendChild(n);info.appendChild(pr);
+    var lq=document.createElement('label');
+    lq.style.cssText='display:flex;align-items:center;gap:6px;margin:5px 0 0;font-size:12px;font-weight:400;color:var(--tinta-suave)';
+    var cq=document.createElement('input');cq.type='checkbox';cq.checked=!!op.qtd;
+    cq.addEventListener('change',function(){aEditOps[i].qtd=cq.checked;});
+    lq.appendChild(cq);lq.appendChild(document.createTextNode('vende por quantidade'));
+    info.appendChild(lq);
+    var ctrl=document.createElement('div');ctrl.className='ctrl';
+    [['↑',function(){aOpMove(i,-1);},'Subir'],['↓',function(){aOpMove(i,1);},'Descer'],['✕',function(){aOpDel(i);},'Remover']]
+      .forEach(function(b){var bt=document.createElement('button');bt.textContent=b[0];bt.title=b[2];bt.setAttribute('aria-label',b[2]);bt.addEventListener('click',b[1]);ctrl.appendChild(bt);});
+    li.appendChild(info);li.appendChild(ctrl);
+    ul.appendChild(li);
+  });
+}
+function aOpAdd(){
+  var n=$('a-op-nome').value.trim();
+  if(!n){alert('Informe o nome do opcional.');return;}
+  var v=parseFloat(String($('a-op-preco').value).replace(',','.'));
+  if(isNaN(v)||v<0)v=0;
+  aEditOps.push({nome:n,preco:v,qtd:!!$('a-op-qtd').checked});
+  $('a-op-nome').value='';$('a-op-preco').value='';$('a-op-qtd').checked=false;
+  aOpRender();
+}
+function aOpMove(i,d){var j=i+d;if(j<0||j>=aEditOps.length)return;var t=aEditOps[i];aEditOps[i]=aEditOps[j];aEditOps[j]=t;aOpRender();}
+function aOpDel(i){aEditOps.splice(i,1);aOpRender();}
+
+/* ===== cupons de desconto =====
+   Copia de uCpCodAjustar/uCpRender/uCpPctErro/uCpAdd/uCpDel (10436+ antes desta tarefa), com o
+   prefixo a- e aCps no lugar de uCps. A UNICA diferenca de comportamento e a recusa de codigo
+   REPETIDO (pedido explicito da Task 4, "veio de 01/09"): nem o Checkout nem a Mini loja
+   recusam isso hoje -- medido, os dois aceitam dois cupons com o mesmo codigo sem aviso, e o
+   carrinho aplicaria sempre o PRIMEIRO que bater. Aqui e recusado, no cadastro E na geracao
+   (aRecusa), porque a lista tambem se edita por dentro (o campo de codigo na propria linha). */
+function aCpCodAjustar(inp,i){
+  var alto=String(inp.value).toUpperCase();
+  aCps[i].codigo=alto;
+  if(alto===inp.value)return false;
+  inp.value=alto;
+  salvarEstado();aPreview();
+  return true;
+}
+function aCpPctErro(tipo,v){
+  if(tipo!=='pct_produto'&&tipo!=='pct_total')return '';
+  /* Acentuado, diferente do molde de uCpPctErro (10614): texto de interface, norma de
+     01/09/2026. Nao mexido no original por estar fora do arquivo desta tarefa (aba pac). */
+  if(v>100)return 'Um cupom em porcentagem não pode passar de 100%: com '+v+'% o desconto é limitado ao subtotal e o pedido inteiro vai a R$ 0,00 — o cliente vê "Cupom aplicado!" e um total zerado. Se a intenção era 15%, corrija o valor; se era realmente dar o pedido, use um cupom de valor fixo igual ao preço.';
+  return '';
+}
+function aCpAchaRepetido(cod,ignorar){
+  var i;
+  for(i=0;i<aCps.length;i++){if(i!==ignorar&&aCps[i].codigo===cod)return aCps[i].codigo;}
+  return '';
+}
+function aCpRender(){
+  var ul=$('a-cp-lista');if(!ul)return;
+  ul.innerHTML='';
+  $('a-cp-vazio').style.display=aCps.length?'none':'block';
+  aCps.forEach(function(cp,i){
+    var li=document.createElement('li');
+    var info=document.createElement('div');info.className='info';
+    /* Acentuado ("Código"), diferente do molde de uCpRender (10662): texto de interface,
+       norma de 01/09/2026. */
+    var cod=document.createElement('input');cod.type='text';cod.value=cp.codigo;cod.placeholder='Código';
+    cod.addEventListener('input',function(){aCps[i].codigo=cod.value.toUpperCase();salvarEstado();aPreview();});
+    cod.addEventListener('change',function(){aCpCodAjustar(cod,i);});
+    cod.addEventListener('blur',function(){aCpCodAjustar(cod,i);});
+    var val=document.createElement('input');val.type='number';val.step='0.01';val.min='0';val.value=cp.valor;val.placeholder='Valor';
+    val.addEventListener('input',function(){aCps[i].valor=val.value;salvarEstado();aPreview();});
+    var sel=document.createElement('select');
+    [['pct_produto','% sobre o pacote'],['pct_total','% sobre o total'],['fixo','Valor fixo no total']].forEach(function(o){
+      var op=document.createElement('option');op.value=o[0];op.textContent=o[1];
+      if(cp.tipo===o[0])op.selected=true;
+      sel.appendChild(op);
+    });
+    sel.addEventListener('change',function(){aCps[i].tipo=sel.value;salvarEstado();aPreview();});
+    var dt=document.createElement('input');dt.type='date';dt.value=cp.validade||'';
+    dt.addEventListener('change',function(){aCps[i].validade=dt.value;salvarEstado();aPreview();});
+    info.appendChild(cod);info.appendChild(val);info.appendChild(sel);info.appendChild(dt);
+    var ctrl=document.createElement('div');ctrl.className='ctrl';
+    var bt=document.createElement('button');bt.textContent='✕';bt.title='Remover';bt.setAttribute('aria-label','Remover');
+    bt.addEventListener('click',function(){aCpDel(i);});
+    ctrl.appendChild(bt);
+    li.appendChild(info);li.appendChild(ctrl);
+    ul.appendChild(li);
+  });
+}
+function aCpAdd(){
+  var cod=$('a-cp-cod').value.trim().toUpperCase();
+  if(!cod){alert('Informe o código do cupom.');return;}
+  var repetido=aCpAchaRepetido(cod,-1);
+  if(repetido){alert('Já existe um cupom com o código "'+cod+'". O cliente digitaria um código só, e a página não tem como saber qual dos dois cadastros aplicar — escolha outro código ou edite o cupom já existente na lista.');return;}
+  var v=parseFloat(String($('a-cp-valor').value).replace(',','.'));
+  if(isNaN(v)||v<=0){alert('Informe o valor do desconto (maior que zero).');return;}
+  var ePct=aCpPctErro(radio('a-cp-tipo')||'pct_total',v);
+  if(ePct){alert(ePct);return;}
+  aCps.push({codigo:cod,tipo:radio('a-cp-tipo')||'pct_total',valor:v,validade:$('a-cp-val').value||''});
+  $('a-cp-cod').value='';$('a-cp-valor').value='';$('a-cp-val').value='';
+  aCpRender();salvarEstado();aPreview();
+}
+function aCpDel(i){aCps.splice(i,1);aCpRender();salvarEstado();aPreview();}
+
+/* ===== catalogo de pacotes =====
+   Modelo: uProdSalvar/uProdEditar/uProdLimpar/uProdRender (10505+ antes desta tarefa) -- o
+   cadastro dobra de formulario de ADICIONAR para formulario de EDITAR (aEditIdx>=0), e a
+   lista mostra um resumo por pacote com botao de editar (lapis), em vez de campos soltos
+   direto na linha. A troca em relacao a v1 (que editava cod/nome/dur/preco/inclui/link direto
+   na lista) e o que permite os opcionais terem o proprio editor em linha (aOpRender acima) sem
+   amontoar uma segunda lista dentro de cada <li>. */
+function aPacTestar(){
+  /* Mesma normalizacao e a mesma checagem de caracteres do botao "abrir a pagina de teste" da
+     aba TidyCal (tTestar, fcTidyPathNorm/tPathOk compartilhados) -- reaproveitados aqui, nao
+     reescritos: um caminho colado como URL inteira tambem funciona, o prefixo sai sozinho. */
+  var p=fcTidyPathNorm($('a-ppath').value);
+  if(!p){alert('Informe o caminho do TidyCal deste pacote antes de abrir a página de teste.');return;}
+  if(!tPathOk(p)){alert('O caminho do TidyCal aceita apenas letras, números, ponto, hífen, sublinhado e barra separando os segmentos (ex.: usuario/nome-do-agendamento). O valor digitado ("'+p+'") tem outro caractere: com ele, o endereço montado deixaria de apontar para tidycal.com.');return;}
+  tAbrir('https://tidycal.com/'+p);
+}
+function aPacLimpar(){
+  $('a-pcod').value='';$('a-pnome').value='';$('a-pdur').value='';$('a-ppreco').value='';
+  $('a-pinclui').value='';$('a-ppath').value='';
+  aEditOps=[];aEditIdx=-1;aOpRender();
+  $('a-op-qtd').checked=false;
+  $('a-pac-salvar').textContent='Adicionar pacote';
+  $('a-pac-cancelar').style.display='none';
+}
+function aPacSalvar(){
   var cod=String($('a-pcod').value).trim().replace(/[^A-Za-z0-9-]/g,'').toUpperCase();
   if(!cod){alert('Informe o código do pacote.');return;}
   var nome=$('a-pnome').value.trim();
   if(!nome){alert('Informe o nome do pacote.');return;}
   var preco=parseFloat(String($('a-ppreco').value).replace(',','.'));
   if(isNaN(preco)||preco<=0){alert('Informe o preço do pacote (maior que zero).');return;}
-  aPacotes.push({cod:cod,nome:nome,dur:$('a-pdur').value.trim(),preco:preco,
-    inclui:$('a-pinclui').value.trim(),link:$('a-plink').value.trim()});
-  $('a-pcod').value='';$('a-pnome').value='';$('a-pdur').value='';$('a-ppreco').value='';
-  $('a-pinclui').value='';$('a-plink').value='';
-  aPacRender();salvarEstado();aPreview();
+  var p={cod:cod,nome:nome,dur:$('a-pdur').value.trim(),preco:preco,
+    inclui:$('a-pinclui').value.trim(),path:fcTidyPathNorm($('a-ppath').value),
+    ops:aEditOps.map(function(o){return {nome:o.nome,preco:o.preco,qtd:!!o.qtd};})};
+  if(aEditIdx>=0)aPacotes[aEditIdx]=p;else aPacotes.push(p);
+  aPacLimpar();aPacRender();salvarEstado();aPreview();
 }
-/* Correcao a vista do codigo, no padrao de uCpCodAjustar: so em 'change'/'blur', nunca no
-   'input' -- corrigir a cada tecla mexeria com o cursor. Remove o que nao e [A-Za-z0-9-] e
-   passa a maiusculas, para a tela nunca mostrar um codigo diferente do que o gerador vai usar. */
-function aPacCodAjustar(inp,i){
-  var limpo=String(inp.value).replace(/[^A-Za-z0-9-]/g,'').toUpperCase();
-  aPacotes[i].cod=limpo;
-  if(limpo===inp.value)return false;
-  inp.value=limpo;
-  salvarEstado();aPreview();
-  return true;
+function aPacEditar(i){
+  var p=aPacotes[i];
+  $('a-pcod').value=p.cod;$('a-pnome').value=p.nome;$('a-pdur').value=p.dur||'';
+  $('a-ppreco').value=p.preco;$('a-pinclui').value=p.inclui||'';$('a-ppath').value=p.path||'';
+  aEditOps=(p.ops||[]).map(function(o){return {nome:o.nome,preco:o.preco,qtd:!!o.qtd};});
+  aEditIdx=i;aOpRender();
+  /* Acentuado ("alterações"), diferente do molde de uProdEditar/mProdEditar (10620/17003):
+     e texto de interface, e a norma de 01/09/2026 (CLAUDE.md, "todo texto que uma pessoa le
+     sai acentuado") vale para ele. Nao mexido nos dois originais por estarem fora do arquivo
+     desta tarefa -- ver o mesmo apontamento em aPacRender, acima. */
+  $('a-pac-salvar').textContent='Salvar alterações';
+  $('a-pac-cancelar').style.display='inline-block';
 }
 function aPacMove(i,d){
   var j=i+d;if(j<0||j>=aPacotes.length)return;
   var t=aPacotes[i];aPacotes[i]=aPacotes[j];aPacotes[j]=t;
   aPacRender();salvarEstado();aPreview();
 }
-function aPacDel(i){aPacotes.splice(i,1);aPacRender();salvarEstado();aPreview();}
+function aPacDel(i){
+  aPacotes.splice(i,1);
+  if(aEditIdx===i)aPacLimpar();
+  else if(aEditIdx>i)aEditIdx--;
+  aPacRender();salvarEstado();aPreview();
+}
 function aPacRender(){
   var ul=$('a-pac-lista');if(!ul)return;
   ul.innerHTML='';
-  var vz=$('a-pac-vazio');if(vz)vz.style.display=aPacotes.length?'none':'block';
+  $('a-pac-vazio').style.display=aPacotes.length?'none':'block';
   aPacotes.forEach(function(p,i){
     var li=document.createElement('li');
     var info=document.createElement('div');info.className='info';
-    var cod=document.createElement('input');cod.type='text';cod.value=p.cod;cod.placeholder='Código';
-    cod.addEventListener('input',function(){aPacotes[i].cod=cod.value;salvarEstado();aPreview();});
-    cod.addEventListener('change',function(){aPacCodAjustar(cod,i);});
-    cod.addEventListener('blur',function(){aPacCodAjustar(cod,i);});
-    var nome=document.createElement('input');nome.type='text';nome.value=p.nome;nome.placeholder='Nome';
-    nome.addEventListener('input',function(){aPacotes[i].nome=nome.value;salvarEstado();aPreview();});
-    var dur=document.createElement('input');dur.type='text';dur.value=p.dur;dur.placeholder='Duração';
-    dur.addEventListener('input',function(){aPacotes[i].dur=dur.value;salvarEstado();aPreview();});
-    var preco=document.createElement('input');preco.type='number';preco.step='0.01';preco.min='0';preco.value=p.preco;preco.placeholder='Preço';
-    preco.addEventListener('input',function(){aPacotes[i].preco=preco.value;salvarEstado();aPreview();});
-    var inclui=document.createElement('input');inclui.type='text';inclui.value=p.inclui;inclui.placeholder='O que inclui';
-    inclui.addEventListener('input',function(){aPacotes[i].inclui=inclui.value;salvarEstado();aPreview();});
-    var link=document.createElement('input');link.type='text';link.value=p.link;link.placeholder='Link do TidyCal';
-    link.addEventListener('input',function(){aPacotes[i].link=link.value;salvarEstado();aPreview();});
-    info.appendChild(cod);info.appendChild(nome);info.appendChild(dur);info.appendChild(preco);info.appendChild(inclui);info.appendChild(link);
+    var txt=document.createElement('div');txt.style.fontSize='13px';
+    /* Plural de 'opcional' e 'opcionais' (troca -al por -ais), nao 'opcional'+'is'/'ais' --
+       o molde de uProdRender (10640) escreve '+is' e da "2 opcionalis"; um '+ais' ingenuo
+       daria "2 opcionalais", igualmente errado. Palavra INTEIRA trocada no plural, e nao
+       mexido em uProdRender por estar fora do arquivo desta tarefa (aba pac). */
+    var qtdops=(p.ops&&p.ops.length)?(' · '+p.ops.length+(p.ops.length>1?' opcionais':' opcional')):' · sem opcionais';
+    txt.textContent=p.cod+' — '+p.nome+' — '+precoFmt('BRL',parseFloat(p.preco)||0)+qtdops;
+    info.appendChild(txt);
     var ctrl=document.createElement('div');ctrl.className='ctrl';
-    [['\u2191',function(){aPacMove(i,-1);},'Subir'],['\u2193',function(){aPacMove(i,1);},'Descer'],['\u2715',function(){aPacDel(i);},'Remover']]
+    [['↑',function(){aPacMove(i,-1);},'Subir'],['↓',function(){aPacMove(i,1);},'Descer'],
+     ['✎',function(){aPacEditar(i);},'Editar'],['✕',function(){aPacDel(i);},'Remover']]
       .forEach(function(b){var bt=document.createElement('button');bt.textContent=b[0];bt.title=b[2];bt.setAttribute('aria-label',b[2]);bt.addEventListener('click',b[1]);ctrl.appendChild(bt);});
     li.appendChild(info);li.appendChild(ctrl);
     ul.appendChild(li);
@@ -13100,7 +13455,7 @@ function aUrlOk(v){
    previa. A recusa de codigo colidido e a mais importante das nove: o Pix descarta hifen, e
    dois pacotes "mini-1h" e "mini1h" gerariam o MESMO identificador de conciliacao. */
 function aRecusa(cfg){
-  var i,p,vistos={},limpo;
+  var i,p,vistos={},limpo,cp,cpc,cpv,cpe,vistosCp={};
   if(!cfg.pacotes.length)return 'Cadastre ao menos um pacote.';
   if(!cfg.urlobrigado)return 'Informe o endereço da página de obrigado.';
   if(!aUrlOk(cfg.urlobrigado))return 'O endereço da página de obrigado precisa começar com https:// e ter o domínio.';
@@ -13113,17 +13468,34 @@ function aRecusa(cfg){
     vistos[limpo]=p.cod;
     if(!p.nome)return 'O pacote "'+p.cod+'" está sem nome.';
     if(!(parseFloat(p.preco)>0))return 'O pacote "'+p.cod+'" está com o preço vazio ou zerado. Ele seria entregue como uma cobrança de R$ 0,00.';
-    if(!p.link)return 'O pacote "'+p.cod+'" está sem o link do TidyCal.';
-    if(!aUrlOk(p.link))return 'O link do TidyCal do pacote "'+p.cod+'" não é um endereço válido.';
+    if(!p.path)return 'O pacote "'+p.cod+'" está sem o caminho do TidyCal.';
+    if(!tPathOk(p.path))return 'O caminho do TidyCal do pacote "'+p.cod+'" ("'+p.path+'") tem um caractere que não é permitido. Use apenas letras, números, ponto, hífen, sublinhado e barra separando os segmentos (ex.: usuario/nome-do-agendamento).';
+  }
+  /* Os cupons sao conferidos AQUI, e nao so no cadastro -- mesma razao ja registrada em uRecusa
+     (10870+): o campo de valor DENTRO da lista nao valida nada, entao apagar o numero de um
+     cupom ja cadastrado geraria {valor:0} sem aviso nenhum. O codigo repetido entra na MESMA
+     varredura, porque o editor em linha (aCpRender) tambem deixa reescrever o codigo de um
+     cupom ja cadastrado para bater com outro -- aCpAdd sozinho nao pega esse caminho. */
+  for(i=0;i<cfg.cps.length;i++){
+    cp=cfg.cps[i];
+    cpc=String(cp.codigo||'').trim();
+    if(!cpc)return 'O cupom na posição '+(i+1)+' da lista está sem código. Um cupom sem código nunca pode ser digitado pelo cliente: preencha o código ou remova a linha.';
+    cpv=parseFloat(String(cp.valor).replace(',','.'));
+    if(isNaN(cpv)||cpv<=0)return 'O cupom "'+cpc+'" está com o valor do desconto vazio ou zerado. Ele seria entregue no código como desconto de zero, e o total não mudaria. Preencha o valor ou remova o cupom.';
+    cpe=aCpPctErro(cp.tipo,cpv);
+    if(cpe)return 'Cupom "'+cpc+'": '+cpe;
+    limpo=cpc.toUpperCase();
+    if(vistosCp[limpo])return 'Os cupons "'+vistosCp[limpo]+'" e "'+cpc+'" têm o mesmo código ("'+limpo+'"). O cliente digitaria um cupom só, e a página não tem como saber qual dos dois cadastros aplicar — troque um dos dois.';
+    vistosCp[limpo]=cpc;
   }
   if(!fciVal('chave')||!fciVal('nomer')||!fciVal('cidade'))return fciRecusa('Preencha a chave Pix, o nome do recebedor e a cidade.');
   if(!fciVal('client'))return fciRecusa('Informe o Client ID do PayPal.');
   if(!fciVal('zapnum'))return fciRecusa('Informe o WhatsApp de destino.');
   return '';
 }
-/* ===== configuracao da aba, ja validada (o que aRecusa confere e o que a Tarefa 3 vai
-   consumir) -- diferente de aColeta, que grava o que esta na tela AINDA POR CORRIGIR, para o
-   backup nao reescrever o que o operador digitou. Modelo: uCfg (10690+). */
+/* ===== configuracao da aba, ja validada (o que aRecusa confere e o que os geradores
+   consomem) -- diferente de aColeta, que grava o que esta na tela AINDA POR CORRIGIR, para o
+   backup nao reescrever o que o operador digitou. Modelo: uCfg (10802+). */
 function aCfg(){
   var prazoh=aPreso('a-prazoh');if(prazoh==null)prazoh=24;
   var descpix=aPreso('a-descpix');if(descpix==null)descpix=5;
@@ -13131,14 +13503,16 @@ function aCfg(){
   var altdesk=aPreso('a-altdesk');if(altdesk==null)altdesk=2350;
   var altmob=aPreso('a-altmob');if(altmob==null)altmob=2700;
   var largmob=aPreso('a-largmob');if(largmob==null)largmob=700;
+  var qtdmax=aPreso('a-qtdmax');if(qtdmax==null)qtdmax=10;
   return {
-    pacotes:aPacotes,
+    pacotes:aPacotes, cps:aCps,
     urlobrigado:$('a-urlobrigado').value.trim(),
     prefixo:$('a-prefixo').value.trim(),
     prazoh:prazoh, descpix:descpix, parcelas:parcelas,
-    altdesk:altdesk, altmob:altmob, largmob:largmob,
+    altdesk:altdesk, altmob:altmob, largmob:largmob, qtdmax:qtdmax,
     c1:corSegura('a-c1','#0F3A30'), c2:corSegura('a-c2','#ffffff'), c3:corSegura('a-c3','#333333'),
-    t1:$('a-t1').value, t2:$('a-t2').value, t3:$('a-t3').value, t4:$('a-t4').value, t5:$('a-t5').value
+    t1:$('a-t1').value, t2:$('a-t2').value, t3:$('a-t3').value, t4:$('a-t4').value, t5:$('a-t5').value,
+    ob:aObCfg()
   };
 }
 /* Leitura defensiva de um campo que pode ainda nao existir no DOM (ver o paragrafo do topo
@@ -13149,24 +13523,48 @@ function aElVal(id,def){var el=$(id);return el?el.value:def;}
 function aColeta(){
   return {a:{
     pacotes:aPacotes,
+    cps:aCps,
     urlobrigado:aElVal('a-urlobrigado',''),
     prefixo:aElVal('a-prefixo',''),
     prazoh:aElVal('a-prazoh',24),
     descpix:aElVal('a-descpix',5),
     parcelas:aElVal('a-parcelas',1),
     altdesk:aElVal('a-altdesk',2350),altmob:aElVal('a-altmob',2700),largmob:aElVal('a-largmob',700),
+    qtdmax:aElVal('a-qtdmax',10),
     c1:aElVal('a-c1-t','#0F3A30'),c2:aElVal('a-c2-t','#ffffff'),c3:aElVal('a-c3-t','#333333'),
     t1:aElVal('a-t1','Agende seu ensaio'),
     t2:aElVal('a-t2','Escolha o pacote'),
     t3:aElVal('a-t3','Escolha o dia e o horário'),
     t4:aElVal('a-t4','Trocar pacote'),
-    t5:aElVal('a-t5','Tudo certo!')
+    t5:aElVal('a-t5','Tudo certo!'),
+    /* Marcadores da pagina de obrigado (Tarefa 4, passo 5). obfb junta os quatro textos
+       reserva com um separador que nao aparece em texto digitado por gente (\u0001), no
+       mesmo padrao de tColeta/t.obfb (10004+). */
+    obvars:aObMarcadas().join(','),
+    obfb:A_OB_VARS.map(function(v){return aElVal('a-ob-fb-'+v.id,v.padrao);}).join('\u0001')
   }};
 }
 function aRestaura(st){
   if(!st.a)return;
-  var A=st.a,el,elc;
-  aPacotes=A.pacotes||[];aPacRender();
+  var A=st.a,el,elc,k,migrouPath=false;
+  /* ===== migracao v1 -> v2 do caminho do TidyCal (03/09/2026, revisao do dono) =====
+     O campo guardava a URL INTEIRA em 'link'; agora guarda so o CAMINHO em 'path'. Quem ja
+     tinha gravado a URL (o dono, se testou a v1) nao pode perder o valor -- entao um pacote
+     sem 'path' e migrado na hora, com a MESMA normalizacao do botao "abrir para conferir"
+     (fcTidyPathNorm, compartilhada com a aba TidyCal). Nunca calado: o aviso sai uma vez, no
+     fim desta funcao. */
+  aPacotes=(A.pacotes||[]).map(function(p){
+    var path=p.path;
+    if(path==null){
+      path=fcTidyPathNorm(p.link||'');
+      migrouPath=true;
+    }
+    return {cod:p.cod,nome:p.nome,dur:p.dur,preco:p.preco,inclui:p.inclui,path:path,
+      ops:(p.ops||[]).map(function(o){return {nome:o.nome,preco:o.preco,qtd:!!o.qtd};})};
+  });
+  aPacRender();
+  aCps=(A.cps||[]).map(function(c){return {codigo:c.codigo,tipo:c.tipo,valor:c.valor,validade:c.validade||''};});
+  aCpRender();
   el=$('a-urlobrigado');if(el)el.value=A.urlobrigado||'';
   el=$('a-prefixo');if(el)el.value=A.prefixo||'';
   el=$('a-prazoh');if(el)el.value=(A.prazoh!=null&&A.prazoh!=='')?A.prazoh:24;
@@ -13175,6 +13573,7 @@ function aRestaura(st){
   el=$('a-altdesk');if(el)el.value=(A.altdesk!=null&&A.altdesk!=='')?A.altdesk:2350;
   el=$('a-altmob');if(el)el.value=(A.altmob!=null&&A.altmob!=='')?A.altmob:2700;
   el=$('a-largmob');if(el)el.value=(A.largmob!=null&&A.largmob!=='')?A.largmob:700;
+  el=$('a-qtdmax');if(el)el.value=(A.qtdmax!=null&&A.qtdmax!=='')?A.qtdmax:10;
   el=$('a-c1-t');if(el){el.value=A.c1;elc=$('a-c1');if(elc)elc.value=corValida(A.c1)?A.c1:'#0F3A30';}
   el=$('a-c2-t');if(el){el.value=A.c2;elc=$('a-c2');if(elc)elc.value=corValida(A.c2)?A.c2:'#ffffff';}
   el=$('a-c3-t');if(el){el.value=A.c3;elc=$('a-c3');if(elc)elc.value=corValida(A.c3)?A.c3:'#333333';}
@@ -13183,12 +13582,34 @@ function aRestaura(st){
   el=$('a-t3');if(el)el.value=(A.t3!=null)?A.t3:'Escolha o dia e o horário';
   el=$('a-t4');if(el)el.value=(A.t4!=null)?A.t4:'Trocar pacote';
   el=$('a-t5');if(el)el.value=(A.t5!=null)?A.t5:'Tudo certo!';
+  /* Estado gravado antes desta versao nao tem 'obvars': o padrao e TODOS os quatro ligados
+     (spec, secao 4.3: "todos ligados"), para quem ja publicou a pagina continuar vendo os
+     mesmos marcadores trocados que ja funcionavam. */
+  aObMarcar(A.obvars!=null?A.obvars:'nome,data,hora,quando');
+  var fbParts=String(A.obfb||'').split('\u0001');
+  for(k=0;k<A_OB_VARS.length;k++){
+    el=$('a-ob-fb-'+A_OB_VARS[k].id);
+    if(el)el.value=(fbParts[k]!=null&&fbParts[k]!=='')?fbParts[k]:A_OB_VARS[k].padrao;
+  }
+  /* A migracao NUNCA fica calada (CLAUDE.md, secao "Em duvida entre descartar e preservar").
+     Persistida na hora (salvarEstado()) para o aviso nao repetir na proxima carga: 'pac' e a
+     ULTIMA aba do loop de restaurarEstado() (fim do array ABAS), entao todas as outras ja
+     restauraram o proprio DOM e este salvarEstado() nao apaga nada delas -- fcEstadoAtual()
+     chama coleta() de cada aba, e a delas ja reflete o que acabou de ser restaurado. Se esta
+     funcao for chamada fora daquele loop (aplicar um preset, por exemplo), a ferramenta ja
+     esta com a tela inteira desenhada ha tempo, e a chamada continua segura pelo mesmo
+     motivo -- nunca e a PRIMEIRA coisa que roda. */
+  if(migrouPath){
+    alert('Os pacotes desta aba tinham o endereço COMPLETO do TidyCal gravado (versão anterior desta ferramenta). Ele foi convertido automaticamente para o CAMINHO, que é o que este campo pede agora — confira a lista de pacotes na seção 2. Nada foi perdido.');
+    salvarEstado();
+  }
 }
 /* ===== O que esta aba poe na biblioteca de presets (ver o bloco compartilhado) =====
    O resumo NAO mostra dado operacional (chave Pix, Client ID, WhatsApp): eles moram no painel
-   Identidade, fora do preset desta aba. */
+   Identidade, fora do preset desta aba. Cupons entram no resumo no mesmo padrao de
+   uPresetResumo (10440+): quantidade, so quando ha pelo menos um. */
 function aPresetResumo(v){
-  var A=(v&&v.a)||{},ps=A.pacotes||[],n=ps.length,i,min=null,max=null,pr;
+  var A=(v&&v.a)||{},ps=A.pacotes||[],cps=A.cps||[],n=ps.length,nc=cps.length,i,min=null,max=null,pr;
   for(i=0;i<n;i++){
     pr=parseFloat(String(ps[i].preco).replace(',','.'));
     if(isNaN(pr))continue;
@@ -13197,6 +13618,7 @@ function aPresetResumo(v){
   }
   var t=n+(n===1?' pacote':' pacotes');
   if(min!==null)t+=(min===max)?(' — '+precoFmt('BRL',min)):(' — de '+precoFmt('BRL',min)+' a '+precoFmt('BRL',max));
+  if(nc)t+=', '+nc+(nc===1?' cupom':' cupons');
   return t;
 }
 function aPresetAntes(){
@@ -13208,6 +13630,7 @@ function aPresetDepois(){
   if(fcAjustarTodos(A_NUMS))mudou=true;
   if(fcCoresAjustar('a-'))mudou=true;
   if(mudou)salvarEstado();
+  aPacRender();aCpRender();
   aPreview(true);
 }
 /* ===== Tarefa 3: o gerador da vitrine =====
@@ -13238,12 +13661,25 @@ function aPresetDepois(){
    emitido -- aBlocoVitrine escrevia com aspas simples, aBlocoObrigado com aspas duplas.
    Normalizar as duas para o mesmo estilo mudaria bytes de uma das duas saidas, e a prova
    exigida e nao mudar nenhum. O parametro preserva o estilo de cada chamador sem duplicar
-   o texto: e a mesma fonte, com o detalhe tipografico que ja existia passado por fora. */
+   o texto: e a mesma fonte, com o detalhe tipografico que ja existia passado por fora.
+
+   Tarefa 4 (v2): PACOTES ganha 'ops' -- a mesma forma {nome,preco,qtd} do 'opcionais' que
+   uBloco/mBloco emitem (10928+/17138+), MAS SEM os campos de selecao/permissao (opsel,
+   opnenhum) que um PRODUTO do Checkout tem: o pacote nao e escolhido por um seletor de
+   opcionais, e quem decide o que fazer com essa lista e o carrinho da pagina de obrigado
+   (Tarefa 5, fora desta rodada). 'link' continua sendo a URL COMPLETA dentro do bloco
+   entregue (e o que abrirCalendario() usa em f.src=link, 13470-ish) -- e montada AQUI, uma vez
+   so, a partir do 'path' cadastrado: 'https://tidycal.com/'+path. */
 function aPacotesSrc(pacotes){
   var pacs=pacotes.map(function(p){
     var preco=parseFloat(String(p.preco).replace(',','.'))||0;
-    return "  {cod:'"+escJs(p.cod)+"', nome:'"+escJs(p.nome)+"', dur:'"+escJs(p.dur)+"', preco:"+preco.toFixed(2)+
-      ", inclui:'"+escJs(p.inclui)+"', link:'"+escJs(p.link)+"'}";
+    var ops=(p.ops||[]).map(function(o){
+      var v=parseFloat(String(o.preco).replace(',','.'))||0;
+      return "{nome:'"+escJs(o.nome)+"', preco:"+v.toFixed(2)+(o.qtd?", qtd:true":"")+"}";
+    }).join(', ');
+    return "  {cod:'"+escJs(p.cod)+"', nome:'"+escJs(p.nome)+"', dur:'"+escJs(p.dur)+"', preco:"+preco.toFixed(2)+",\n"+
+      "   inclui:'"+escJs(p.inclui)+"', link:'"+escJs('https://tidycal.com/'+p.path)+"',\n"+
+      "   ops:["+ops+"]}";
   }).join(',\n');
   return 'var PACOTES=[\n'+pacs+'\n];\n';
 }
@@ -13450,13 +13886,21 @@ function aBlocoVitrine(cfg){
    quebra nada. O e-mail tambem nao, pela mesma razao ja registrada na pagina de obrigado atual
    -- menos dado pessoal circulando por menos lugares. */
 function aEnderecos(cfg){
-  var i,p,base=cfg.urlobrigado,sep,t='';
+  var i,j,p,v,base=cfg.urlobrigado,sep,q,t='';
   for(i=0;i<cfg.pacotes.length;i++){
     p=cfg.pacotes[i];
     sep=(base.indexOf('?')<0)?'?':'&';
     t+=p.nome+' ('+p.cod+'):\n';
-    t+=base+sep+'pac='+encodeURIComponent(p.cod)+
-       '&nome={{contact.name}}&data={{booking.date}}&hora={{booking.time}}&quando={{booking.starts_at}}\n\n';
+    /* Tarefa 4, passo 5: so os marcadores LIGADOS em "Marcadores da pagina de obrigado" entram
+       na URL -- antes os quatro eram fixos. 'pac' nunca e opcional: sem ele a pagina nao tem
+       como achar o pacote. */
+    q='pac='+encodeURIComponent(p.cod);
+    for(j=0;j<A_OB_VARS.length;j++){
+      v=A_OB_VARS[j];
+      if(cfg.ob.vars.indexOf(v.id)<0)continue;
+      q+='&'+v.id+'={{'+v.tidy+'}}';
+    }
+    t+=base+sep+q+'\n\n';
   }
   return t;
 }
@@ -13471,11 +13915,17 @@ function aEnderecos(cfg){
 
    O QUE E DIFERENTE de tObBloco, e por isso nao e a mesma fonte: aquela pagina tem um campo de
    FORMATO_DATA (comoveio/curto/extenso/extensodia, escolhido pelo operador). Esta aba nao
-   ganhou esse campo (fora do contrato da Tarefa 1) -- {{quando}} sai exatamente como chegou na
-   URL, sem reescrita nenhuma. E o mesmo texto reserva (vazio) para os sete marcadores: a aba
-   nao tem campo para configura-lo por marcador, ao contrario de T_OB_VARS/t-ob-fb-*. Registrado
-   aqui porque a spec e o plano mencionam "texto reserva configuravel" sem que a Tarefa 1 tenha
-   aberto os campos correspondentes -- decisao pragmatica desta rodada, nao esquecimento.
+   ganhou esse campo -- {{quando}} sai exatamente como chegou na URL, sem reescrita nenhuma.
+   Fora do alcance desta rodada (Tarefa 4 pede so QUAIS marcadores viajam e o TEXTO RESERVA de
+   cada um, nao a reescrita do formato de data); se um dia for pedido, o texto ja escrito em
+   tObBloco (FORMATO_DATA, MESES_EN/PT, lerData, legivel) e o modelo a seguir.
+
+   A DIVIDA REGISTRADA NA V1 ESTA PAGA AQUI (Tarefa 4, passo 5): os QUATRO marcadores que o
+   TidyCal manda (nome/data/hora/quando) agora sao configuraveis -- quais viajam (A_OB_VARS,
+   checkboxes a-ob-*) e o texto reserva de cada um (a-ob-fb-*), na mesma mecanica de
+   T_OB_VARS/tObMarcadas/tObMarcar/t-ob-fb-*. Os outros tres marcadores do CAMPOS abaixo --
+   pacote/duracao/valor -- NAO sao configuraveis de proposito: eles nao vem do TidyCal, vem do
+   catalogo cadastrado nesta mesma aba, e por isso sempre viajam, sem interruptor.
 
    OS DOIS TRABALHOS SAO INDEPENDENTES POR CONSTRUCAO (autorevisao do plano, secao final): a
    troca de marcadores mexe no texto que o dono ja escreveu na pagina; o pagamento (Tarefa 8)
@@ -13484,6 +13934,16 @@ function aEnderecos(cfg){
    pagamento aparece do mesmo jeito. */
 function aBlocoObrigado(cfg){
   var c='';
+  /* usaQtd e do CATALOGO INTEIRO, nao so do pacote que a URL vai identificar em tempo de
+     execucao -- este bloco e gerado UMA vez para todos os pacotes cadastrados, e qualquer um
+     deles pode ser o PAC em tempo real (Tarefa 5c, decisao 14 do diario). Sem isto ligado, o
+     seletor de quantidade carregaria codigo morto para quem nao tem opcional algum marcado
+     "vende por quantidade". */
+  var usaQtd=false,uqI,uqJ,uqOps;
+  for(uqI=0;uqI<cfg.pacotes.length;uqI++){
+    uqOps=cfg.pacotes[uqI].ops||[];
+    for(uqJ=0;uqJ<uqOps.length;uqJ++)if(uqOps[uqJ].qtd)usaQtd=true;
+  }
   c+='<!-- ============================================================\n';
   c+='     FOTO CERTA - PAGINA DE OBRIGADO DO AGENDAMENTO POR PACOTE\n';
   c+='     ONDE COLAR: componente HTML da pagina de obrigado do TidyCal\n';
@@ -13518,26 +13978,64 @@ function aBlocoObrigado(cfg){
   c+='.fca-ob-bt2{background:transparent;color:var(--fca-ob-destaque,#0F3A30);border:1px solid var(--fca-ob-destaque,#0F3A30)}\n';
   c+='.fca-ob-qr{margin:12px 0 0;min-height:200px}\n';
   c+='.fca-ob-qr img,.fca-ob-qr canvas{display:block;max-width:100%;height:auto}\n';
-  c+='.fca-ob-aviso{font-size:12px;margin:8px 0 0;color:#8C1D18;font-weight:700;text-align:left}\n';
   c+='.fca-ob-recusa-msg{font-size:15px;line-height:1.6;margin:0 0 12px;text-align:left}\n';
   c+='.fca-ob-sep{display:flex;align-items:center;gap:10px;margin:16px 0 0;font-size:12px;font-weight:700;letter-spacing:.10em;color:var(--fca-ob-destaque,#0F3A30);opacity:.7}\n';
   c+='.fca-ob-sep:before,.fca-ob-sep:after{content:"";flex:1 1 auto;height:1px;background:rgba(0,0,0,.14)}\n';
   c+='.fca-ob-semtopo{border-top:0;margin-top:6px;padding-top:0}\n';
-  c+='.fca-ob-pp{margin-top:10px}\n';
+  c+='.fca-ob-botoes{margin-top:10px}\n';
+  /* ===== Tarefa 5 (v2): opcionais, cupom e a linha de desconto -- mesma familia visual do
+     Checkout/Mini loja (fcu-op/fcu-mark/fcu-cupom), com o prefixo fca-ob- desta aba. O pacote
+     agendado em si NAO ganha marcador de selecao (spec 7, 7.0: e item FIXO, nao desmarcavel) --
+     so os opcionais dele viram checkbox. */
+  c+='.fca-ob-bloco.fca-ob-ops{padding-top:10px;margin-top:10px}\n';
+  c+='.fca-ob-op{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 0;font-size:13px}\n';
+  c+='.fca-ob-op label{display:flex;align-items:center;gap:8px;cursor:pointer;margin:0;font-weight:400;position:relative;text-align:left}\n';
+  c+='.fca-ob-raiz input[type="checkbox"]{position:absolute;opacity:0;width:1px;height:1px;pointer-events:none}\n';
+  c+='.fca-ob-mark{width:18px;height:18px;min-width:18px;display:inline-block;position:relative;background:#fff;border:2px solid #b9b3a4;box-sizing:border-box;border-radius:5px}\n';
+  c+='.fca-ob-raiz input:checked+.fca-ob-mark{border-color:var(--fca-ob-destaque,#0F3A30);background:var(--fca-ob-destaque,#0F3A30)}\n';
+  c+='.fca-ob-raiz input:checked+.fca-ob-mark:after{content:"";position:absolute;left:4px;top:0;width:5px;height:10px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(40deg)}\n';
+  if(usaQtd){
+    c+=fcQtdCssGer('.fca-ob-raiz','fca-ob','var(--fca-ob-destaque,#0F3A30)');
+  }
+  c+='.fca-ob-cupom .fca-ob-cupom-l{display:flex;gap:8px}\n';
+  c+='.fca-ob-cupom-l input[type="text"]{flex:1;min-width:0;border:1px solid rgba(0,0,0,.18);border-radius:8px;padding:9px 10px;font-size:14px;font-family:inherit;text-transform:uppercase;background:#fff;color:#333}\n';
+  c+='.fca-ob-cupom-l button{border:none;border-radius:8px;background:var(--fca-ob-destaque,#0F3A30);color:var(--fca-ob-fundo,#fff);font-weight:600;padding:0 14px;cursor:pointer;font-family:inherit}\n';
+  c+='.fca-ob-cupom-msg{font-size:12px;margin-top:5px;display:none;text-align:left}\n';
+  c+='.fca-ob-cupom-msg.ok{display:block;color:#1e7e34}\n';
+  c+='.fca-ob-cupom-msg.erro{display:block;color:#c0392b}\n';
+  c+='.fca-ob-desconto{display:none;justify-content:space-between;gap:10px;padding:6px 0 0;font-size:14px;color:#1e7e34;font-weight:600}\n';
+  c+='.fca-ob-desconto.on{display:flex}\n';
+  c+='.fca-ob-desconto-p{display:none;margin-left:6px;font-size:12px;font-weight:400;white-space:nowrap}\n';
+  c+='.fca-ob-desconto-p.on{display:inline}\n';
+  c+='.fca-ob-msg{display:none;text-align:center;font-size:14px;font-weight:600;padding:12px;border-radius:8px;margin-top:10px}\n';
+  c+='.fca-ob-msg.ok{display:block;background:#e6f4ea;color:#1e7e34}\n';
+  c+='.fca-ob-msg.erro{display:block;background:#fdeaea;color:#c0392b}\n';
+  c+='.fca-ob-pixarea{display:none;margin-top:10px}\n';
+  c+='.fca-ob-pixarea.on{display:block}\n';
   c+='@media(prefers-reduced-motion: reduce){\n  .fca-ob-cartao *{transition:none}\n}\n';
   c+='</sty'+'le>\n\n';
 
   c+='<scr'+'ipt>\n(function(){\n';
   c+='/* ===== customizacao ===== */\n';
   c+=aPacotesSrc(cfg.pacotes);
+  /* ===== CUPONS DE DESCONTO (Tarefa 5, v2) =====
+     Mesmo molde de uBloco/mBloco (cps): codigo em maiusculas, valor numerico, validade AAAA-MM-DD
+     ou vazio. cupomVigente/validadeBr/descontoAtual vem da fonte unica logo abaixo -- nada aqui
+     e reescrito, so serializado. */
+  var aObCps=cfg.cps.map(function(cp){
+    var v=parseFloat(String(cp.valor).replace(',','.'))||0;
+    return "  {codigo:'"+escJs(String(cp.codigo).trim().toUpperCase())+"', tipo:'"+cp.tipo+"', valor:"+v+", validade:'"+escJs(cp.validade||'')+"'}";
+  }).join(',\n');
   c+="var PREFIXO='"+escJs(cfg.prefixo)+"';   /* comeca o identificador de conciliacao */\n";
   c+='var DESCONTO_PIX='+cfg.descpix+';\n';
   c+='var PARCELAS='+cfg.parcelas+';\n';
   c+='var PRAZOH='+cfg.prazoh+';   /* horas de reserva, a partir da primeira visita a esta pagina */\n';
+  if(usaQtd)c+='var QUANTIDADE_MAXIMA='+cfg.qtdmax+';   /* teto do seletor de quantidade; o seletor vai de 0 ate ele, e 0 = item nao escolhido */\n';
+  c+="var MOEDA='BRL';                     /* o Pix so existe em BRL, e o cartao segue o mesmo pedido */\n";
   c+="var CHAVE_PIX='"+escJs(fciVal('chave'))+"';\n";
   c+="var NOME_RECEBEDOR='"+escJs(fciVal('nomer'))+"';\n";
   c+="var CIDADE='"+escJs(fciVal('cidade'))+"';\n";
-  c+="var CLIENT_ID='"+escJs(fciVal('client'))+"';\n";
+  c+="var PAYPAL_CLIENT_ID='"+escJs(fciVal('client'))+"';\n";
   c+="var WHATSAPP='"+escJs(fciDigitos('zapnum'))+"';\n";
   c+="var COR_DESTAQUE='"+cfg.c1+"';\n";
   c+="var COR_FUNDO='"+cfg.c2+"';\n";
@@ -13546,11 +14044,34 @@ function aBlocoObrigado(cfg){
   /* Recado cordial da recusa -- sem pac, ou com codigo desconhecido, nenhum pagamento aparece.
      Nao ganhou campo proprio na aba (fora do contrato da Tarefa 1): o padrao da spec e o unico
      texto, hoje. */
-  c+="var TXT_RECUSA='Não encontramos seu agendamento nesta página. Se você acabou de agendar, use o link que aparece no e-mail de confirmação — ou fale com a gente que resolvemos na hora.';\n\n";
+  c+="var TXT_RECUSA='Não encontramos seu agendamento nesta página. Se você acabou de agendar, use o link que aparece no e-mail de confirmação — ou fale com a gente que resolvemos na hora.';\n";
+  /* Textos do carrinho (Tarefa 5, v2) -- hardcoded, no mesmo padrao ja aberto por TXT_RECUSA
+     acima: esta aba nao ganhou campo proprio para eles (fora do contrato da Tarefa 1). Igual ao
+     Checkout/Mini loja, acentuados (norma de 01/09/2026: todo texto que uma pessoa le). */
+  c+="var TXT_OPCIONAIS='Itens opcionais';\n";
+  /* Diferente do texto generico do Checkout ('Escolha ao menos um item...'): aqui o pacote e
+     fixo e nao ha itens para 'escolher mais' -- a UNICA forma do pedido zerar e um cupom de
+     100%, entao o recado precisa dizer isso, nao mandar escolher algo que ja esta escolhido. */
+  c+="var TXT_TOTAL_ZERO='O cupom aplicado zera o valor deste pedido.';\n";
+  c+="var TXT_SUCESSO='Pagamento aprovado. Obrigado!';\n";
+  c+="var TXT_ERRO='Não foi possível carregar o pagamento por cartão agora. Use o Pix acima, ou fale com a gente para receber outra forma de pagar.';\n";
+  c+="var TXT_CUPOM_ROTULO='Cupom de desconto';\n";
+  c+="var TXT_CUPOM_BOTAO='Aplicar';\n";
+  c+="var TXT_CUPOM_OK='Cupom aplicado!';\n";
+  c+="var TXT_CUPOM_INVALIDO='Cupom inválido.';\n";
+  c+="var TXT_CUPOM_EXPIRADO='Cupom expirado.';\n";
+  c+="var TXT_DESCONTO='Desconto';\n";
+  c+="var TXT_CUPOM_VALIDADE='Válido até:';   /* precede a data, na propria linha do desconto -- so aparece se o cupom tiver validade (mesma regra do Checkout/Mini loja desde 01/09) */\n\n";
+  c+='/* ===== CUPONS =====\n';
+  c+="   tipo: 'pct_produto' = % sobre o pacote (SEM os opcionais) | 'pct_total' = % sobre tudo\n";
+  c+="   com opcionais | 'fixo' = valor fixo. validade: 'AAAA-MM-DD' (vale ate o fim do dia) ou\n";
+  c+="   '' = sem validade. */\n";
+  c+='var CUPONS=[\n'+(aObCps||'')+'\n];\n\n';
 
   c+='/* ============================================================\n   Daqui para baixo nao precisa mexer\n   ============================================================ */\n\n';
   c+=fcMoedaFmtGer(true);
   c+=FC_PARAM_SRC;
+  if(usaQtd)c+=fcFazQtdSrc('fca-ob');
 
   c+='var raiz=document.getElementById("fca-ob-raiz");\n';
   c+='if(raiz){\n';
@@ -13573,15 +14094,21 @@ function aBlocoObrigado(cfg){
   c+='var PAC=acharPacote(param("pac"));\n';
   c+="var CODIGO_PEDIDO='';   /* montar() preenche com o identificador de conciliacao (idConciliacao) */\n\n";
 
-  c+='/* ===== 2. troca de marcadores -- copia fiel do mecanismo de tObBloco (9764+) ===== */\n';
+  c+='/* ===== 2. troca de marcadores -- mecanismo de tObBloco (9764+), mas so os QUATRO que\n';
+  c+='   o TidyCal manda (nome/data/hora/quando) sao configuraveis (Tarefa 4, passo 5): quais\n';
+  c+='   viajam e o texto reserva de cada um, escolhidos na aba. pacote/duracao/valor vem do\n';
+  c+='   catalogo, nao do TidyCal, e por isso sempre viajam, sem interruptor. ===== */\n';
   c+='var CAMPOS=[\n';
-  c+='  {marca:"nome",    valor:param("nome")},\n';
-  c+='  {marca:"data",    valor:param("data")},\n';
-  c+='  {marca:"hora",    valor:param("hora")},\n';
-  c+='  {marca:"quando",  valor:QUANDO},\n';
-  c+='  {marca:"pacote",  valor:PAC?PAC.nome:""},\n';
-  c+='  {marca:"duracao", valor:PAC?PAC.dur:""},\n';
-  c+='  {marca:"valor",   valor:PAC?moedaFmt(PAC.preco):""}\n';
+  var itensOb=[],j,vv;
+  for(j=0;j<A_OB_VARS.length;j++){
+    vv=A_OB_VARS[j];
+    if(cfg.ob.vars.indexOf(vv.id)<0)continue;
+    itensOb.push('  {marca:"'+vv.id+'", valor:param("'+vv.id+'")||"'+escJs(cfg.ob.fb[vv.id]||'')+'"}');
+  }
+  itensOb.push('  {marca:"pacote",  valor:PAC?PAC.nome:""}');
+  itensOb.push('  {marca:"duracao", valor:PAC?PAC.dur:""}');
+  itensOb.push('  {marca:"valor",   valor:PAC?moedaFmt(PAC.preco):""}');
+  c+=itensOb.join(',\n')+'\n';
   c+='];\n';
   c+='var PULAR={SCRIPT:1,STYLE:1,TEXTAREA:1,INPUT:1,SELECT:1,NOSCRIPT:1};\n';
   c+='/* A troca mexe SO no texto: nunca innerHTML. O que chega vem do endereco, que qualquer\n';
@@ -13749,126 +14276,235 @@ function aBlocoObrigado(cfg){
   c+='  if(zap)cartao.appendChild(zap);\n';
   c+='}\n\n';
 
-  c+='/* ===== 3b. resumo do que foi agendado, com as duas formas de pagar (mesma conta de\n';
-  c+='   aBlocoVitrine -- ver o comentario la sobre o arredondamento da parcela) ===== */\n';
+  c+='/* ===== 3b. o carrinho -- pacote FIXO (nao desmarcavel) + opcionais + cupom (Tarefa 5, v2)\n';
+  c+='   =====\n';
+  c+='   A CONTA DO DINHEIRO E FONTE UNICA (FC_CARRINHO_SRC, no bloco de utilidades) -- o MESMO\n';
+  c+='   texto que o Checkout e a Mini loja usam, nao reescrito aqui. O contrato e por NOME:\n';
+  c+='   somaProdutos() devolve SO o pacote (e o que um cupom pct_produto desconta); subtotal()\n';
+  c+='   soma o pacote com os opcionais marcados; cupomAtivo e o cupom em vigor, ou null.\n';
+  c+='   SEM SINAL_TIPO/SINAL_VALOR nem as tres funcoes de sinal (sinalAgora/saldoDepois/\n';
+  c+='   sinalRecusa): esta pagina nao cobra sinal (spec 7.0), e emiti-las sem interruptor\n';
+  c+='   seria carregar codigo morto no bloco do cliente.\n';
+  c+='   O IDENTIFICADOR DE CONCILIACAO (3a, acima) NUNCA depende do que se marca aqui -- ele ja\n';
+  c+='   foi calculado a partir so do pacote e do horario, ANTES deste carrinho existir. Um\n';
+  c+='   cliente que marca um opcional depois de ja ter visto o Pix continua com o MESMO\n';
+  c+='   identificador -- e a mesma familia do defeito mais caro desta rodada (extrato cheio de\n';
+  c+='   cobrancas diferentes para uma reserva so). */\n';
   c+=fcaPrecoParcelaSrc();
   c+=fcaTextoCartaoSrc('"');
+  c+='function somaProdutos(){return PAC.preco;}\n';
+  c+='function subtotal(){\n';
+  c+='  var t=somaProdutos();\n';
+  c+='  (PAC.ops||[]).forEach(function(op,j){\n';
+  if(usaQtd)c+='    if(opChecks[j]&&opChecks[j].checked)t+=op.preco*qtdOp(j);\n';
+  else c+='    if(opChecks[j]&&opChecks[j].checked)t+=op.preco;\n';
+  c+='  });\n';
+  c+='  return t;\n';
+  c+='}\n\n';
+  c+='var cupomAtivo=null;\n';
+  c+='var opChecks=[];\n';
+  if(usaQtd){
+    c+='var qtdsOp=[];\n';
+    c+='function qtdOp(j){var q=qtdsOp[j];return (q==null)?1:q;}\n';
+  }
+  c+='var elValor,elLinha2,elParcela,elDescLinha,elDescTxt,elDescVal,elDescP;\n';
+  c+='var pixEsconder=null;\n\n';
+  c+=FC_CARRINHO_SRC.descontoAtual;
+  c+=FC_CARRINHO_SRC.total;
+  c+=FC_CARRINHO_SRC.cupomVigente;
+  c+=FC_CARRINHO_SRC.validadeBr;
+  c+='/* Nomes do que foi escolhido -- o pacote sempre, os opcionais marcados por cima. Usado so\n';
+  c+='   pelo nome do item que o cartao mostra ao cliente (secao 3d); NUNCA pelo identificador. */\n';
+  c+='function nomesSelecionados(){\n';
+  c+='  var ns=[PAC.nome];\n';
+  c+='  (PAC.ops||[]).forEach(function(op,j){\n';
+  c+='    if(opChecks[j]&&opChecks[j].checked)ns.push(op.nome);\n';
+  c+='  });\n';
+  c+='  return ns;\n';
+  c+='}\n\n';
+
   c+='function montarResumo(cartao){\n';
   c+='  var nome=document.createElement("div");nome.className="fca-ob-resumo-nome";nome.textContent=PAC.nome;\n';
   c+='  cartao.appendChild(nome);\n';
   c+='  if(PAC.dur){var d=document.createElement("div");d.className="fca-ob-resumo-dur";d.textContent=PAC.dur;cartao.appendChild(d);}\n';
+  c+='}\n\n';
+
+  c+='/* Os opcionais DAQUELE pacote, para o cliente marcar (spec 4.2, 7): checkbox simples, cada\n';
+  c+='   um independente dos outros -- o pacote em si NAO ganha marcador, porque e item fixo. */\n';
+  c+='function montarOpcionais(cartao){\n';
+  c+='  var ops=PAC.ops||[];\n';
+  c+='  if(!ops.length)return;\n';
+  c+='  var b=document.createElement("div");b.className="fca-ob-bloco fca-ob-ops";\n';
+  c+='  var r=document.createElement("div");r.className="fca-ob-rot";r.textContent=TXT_OPCIONAIS;b.appendChild(r);\n';
+  c+='  ops.forEach(function(op,j){\n';
+  c+='    var row=document.createElement("div");row.className="fca-ob-op";\n';
+  c+='    var lab=document.createElement("label");\n';
+  c+='    var inp=document.createElement("input");inp.type="checkbox";\n';
+  c+='    inp.addEventListener("change",atualizar);\n';
+  c+='    var mk=document.createElement("span");mk.className="fca-ob-mark";\n';
+  c+='    var sp=document.createElement("span");sp.textContent=op.nome;\n';
+  c+='    lab.appendChild(inp);lab.appendChild(mk);lab.appendChild(sp);\n';
+  c+='    row.appendChild(lab);\n';
+  if(usaQtd){
+    c+='    qtdsOp[j]=1;\n';
+    c+='    if(op.qtd)row.appendChild(fazQtd(1,function(n){qtdsOp[j]=n;atualizar();}));\n';
+  }
+  c+='    var pr=document.createElement("span");pr.textContent="+ "+moedaFmt(op.preco);\n';
+  c+='    row.appendChild(pr);\n';
+  c+='    opChecks[j]=inp;\n';
+  c+='    b.appendChild(row);\n';
+  c+='  });\n';
+  c+='  cartao.appendChild(b);\n';
+  c+='}\n\n';
+
+  c+='/* O campo de cupom, com a linha de desconto (e a validade dela) por baixo -- mesmo molde\n';
+  c+='   do Checkout/Mini loja desde 01/09/2026. Sem cupom cadastrado, o bloco inteiro fica\n';
+  c+='   escondido: cupomAtivo nunca sai de null e a linha de desconto nunca liga sozinha. */\n';
+  c+='function montarCupom(cartao){\n';
+  c+='  var b=document.createElement("div");b.className="fca-ob-bloco fca-ob-cupom";\n';
+  c+='  var r=document.createElement("div");r.className="fca-ob-rot";r.textContent=TXT_CUPOM_ROTULO;b.appendChild(r);\n';
+  c+='  var l=document.createElement("div");l.className="fca-ob-cupom-l";\n';
+  c+='  var inp=document.createElement("input");inp.type="text";l.appendChild(inp);\n';
+  c+='  var bt=document.createElement("button");bt.type="button";bt.textContent=TXT_CUPOM_BOTAO;l.appendChild(bt);\n';
+  c+='  b.appendChild(l);\n';
+  c+='  var m=document.createElement("div");m.className="fca-ob-cupom-msg";b.appendChild(m);\n';
+  c+='  var dl=document.createElement("div");dl.className="fca-ob-desconto";\n';
+  c+='  var de=document.createElement("span");\n';
+  c+='  var dt=document.createElement("span");dt.className="fca-ob-desconto-t";de.appendChild(dt);\n';
+  c+='  var dp=document.createElement("span");dp.className="fca-ob-desconto-p";de.appendChild(dp);\n';
+  c+='  dl.appendChild(de);\n';
+  c+='  var dv=document.createElement("span");dv.className="fca-ob-desconto-v";dl.appendChild(dv);\n';
+  c+='  b.appendChild(dl);\n';
+  c+='  cartao.appendChild(b);\n';
+  c+='  elDescLinha=dl;elDescTxt=dt;elDescVal=dv;elDescP=dp;\n';
+  c+='  if(!CUPONS.length){b.style.display="none";return;}\n';
+  c+='  function aplicar(){\n';
+  c+='    var v=inp.value.trim();\n';
+  c+='    if(!v){cupomAtivo=null;m.textContent="";m.className="fca-ob-cupom-msg";atualizar();return;}\n';
+  c+='    var achado=null,i;\n';
+  c+='    for(i=0;i<CUPONS.length;i++){if(CUPONS[i].codigo.toUpperCase()===v.toUpperCase()){achado=CUPONS[i];break;}}\n';
+  c+='    if(!achado){cupomAtivo=null;m.textContent=TXT_CUPOM_INVALIDO;m.className="fca-ob-cupom-msg erro";}\n';
+  c+='    else if(!cupomVigente(achado)){cupomAtivo=null;m.textContent=TXT_CUPOM_EXPIRADO;m.className="fca-ob-cupom-msg erro";}\n';
+  c+='    else{cupomAtivo=achado;m.textContent=TXT_CUPOM_OK;m.className="fca-ob-cupom-msg ok";}\n';
+  c+='    atualizar();\n';
+  c+='  }\n';
+  c+='  bt.addEventListener("click",aplicar);\n';
+  c+='}\n\n';
+
+  c+='/* O preco final, com as duas formas de pagar -- mesma conta de aBlocoVitrine (ver o\n';
+  c+='   comentario la sobre o arredondamento da parcela), so que a partir de total(), que agora\n';
+  c+='   inclui os opcionais marcados e o cupom, em vez do preco fixo do pacote. */\n';
+  c+='function montarPreco(cartao){\n';
   c+='  var l1=document.createElement("div");l1.className="fca-ob-preco-linha1";\n';
-  c+='  var v=document.createElement("span");v.className="fca-ob-preco-valor";v.textContent=moedaFmt(precoPix(PAC.preco));\n';
-  c+='  l1.appendChild(v);\n';
+  c+='  var v=document.createElement("span");v.className="fca-ob-preco-valor";l1.appendChild(v);\n';
   c+='  if(DESCONTO_PIX>0){\n';
   c+='    var selo=document.createElement("span");selo.className="fca-ob-selo";selo.textContent="-"+DESCONTO_PIX+"% no Pix";\n';
-  c+='    l1.appendChild(selo);\n  }\n';
+  c+='    l1.appendChild(selo);\n';
+  c+='  }\n';
   c+='  cartao.appendChild(l1);\n';
-  c+='  var l2=document.createElement("div");l2.className="fca-ob-preco-linha2";l2.textContent=textoCartao(PAC.preco);\n';
-  c+='  cartao.appendChild(l2);\n';
+  c+='  var l2=document.createElement("div");l2.className="fca-ob-preco-linha2";cartao.appendChild(l2);\n';
+  c+='  elValor=v;elLinha2=l2;\n';
+  c+='}\n\n';
+
+  c+='function linhaDesconto(){\n';
+  c+='  if(!elDescLinha)return;\n';
+  c+='  if(cupomAtivo){\n';
+  c+='    elDescLinha.className="fca-ob-desconto on";\n';
+  c+='    elDescTxt.textContent=TXT_DESCONTO+" ("+cupomAtivo.codigo+")";\n';
+  c+='    elDescVal.textContent="- "+moedaFmt(descontoAtual());\n';
+  c+='    var dv=validadeBr(cupomAtivo.validade);\n';
+  c+='    elDescP.textContent=dv?TXT_CUPOM_VALIDADE+" "+dv:"";\n';
+  c+='    elDescP.className=dv?"fca-ob-desconto-p on":"fca-ob-desconto-p";\n';
+  c+='  }else{\n';
+  c+='    elDescLinha.className="fca-ob-desconto";\n';
+  c+='  }\n';
+  c+='}\n\n';
+
+  c+='/* Reescreve tudo o que depende do carrinho: chamada a cada checkbox de opcional e a cada\n';
+  c+='   cupom aplicado/removido. O Pix ja gerado fica DESATUALIZADO se o carrinho muda depois --\n';
+  c+='   por isso ele e escondido aqui, e so reaparece com um novo clique em "Gerar Pix". */\n';
+  c+='function atualizar(){\n';
+  c+='  linhaDesconto();\n';
+  c+='  if(elValor)elValor.textContent=moedaFmt(precoPix(total()));\n';
+  c+='  if(elLinha2)elLinha2.textContent=textoCartao(total());\n';
+  c+='  if(elParcela)elParcela.textContent="Em até "+PARCELAS+"x de "+moedaFmt(parcelaDe(total()));\n';
+  c+='  if(pixEsconder)pixEsconder();\n';
   c+='}\n\n';
 
   c+='/* ===== 3c. o Pix -- a maquinaria vem da fonte unica (FC_PIX_SRC, fc-compartilhado.js).\n';
   c+='   Ela MONTA um payload novo (como o Checkout/Mini loja fazem), e nao LE um payload que\n';
   c+='   chegou pronto (como a /pagar faz): esta pagina conhece o preco do pacote diretamente,\n';
-  c+='   nao precisa de um codigo Pix pronto viajando por fora. */\n';
+  c+='   nao precisa de um codigo Pix pronto viajando por fora.\n';
+  c+='   BOTAO, e nao mais automatico (v1 desenhava o QR assim que a pagina montava): com o\n';
+  c+='   carrinho de volta o total muda depois que a pagina monta, e um QR desenhado cedo demais\n';
+  c+='   ficaria errado assim que o cliente marcasse um opcional. O clique em "Gerar Pix" sempre\n';
+  c+='   le o total NA HORA; atualizar() esconde a area sempre que o carrinho muda. */\n';
   c+=FC_PIX_SRC.semAcento;
   c+=FC_PIX_SRC.tlv;
   c+=FC_PIX_SRC.crc16;
   c+=FC_PIX_SRC.montarPayload;
-  c+='function total(){return PAC.preco;}\n';
   c+=fcTotalPixSrc(cfg.descpix,true,false);
   c+='function pix(cartao){\n';
-  c+='  var payload=montarPayload(totalPix());\n';
   c+='  var b=document.createElement("div");b.className="fca-ob-bloco";\n';
   c+='  var r=document.createElement("div");r.className="fca-ob-rot";r.textContent="Pix";b.appendChild(r);\n';
-  c+='  var ta=document.createElement("textarea");ta.className="fca-ob-cod";ta.setAttribute("readonly","readonly");ta.value=payload;b.appendChild(ta);\n';
-  c+='  var bt=document.createElement("button");bt.className="fca-ob-bt";bt.type="button";bt.textContent="Copiar código Pix";\n';
-  c+='  var av=document.createElement("div");av.className="fca-ob-ajuda";\n';
+  c+='  var gerar=document.createElement("button");gerar.type="button";gerar.className="fca-ob-bt";gerar.textContent="Gerar Pix";b.appendChild(gerar);\n';
+  c+='  var area=document.createElement("div");area.className="fca-ob-pixarea";\n';
+  c+='  var ta=document.createElement("textarea");ta.className="fca-ob-cod";ta.setAttribute("readonly","readonly");area.appendChild(ta);\n';
+  c+='  var bt=document.createElement("button");bt.className="fca-ob-bt fca-ob-bt2";bt.type="button";bt.textContent="Copiar código Pix";area.appendChild(bt);\n';
+  c+='  var av=document.createElement("div");av.className="fca-ob-ajuda";area.appendChild(av);\n';
+  c+='  var qr=document.createElement("div");qr.className="fca-ob-qr";area.appendChild(qr);\n';
+  c+='  var ins=document.createElement("div");ins.className="fca-ob-ajuda";ins.textContent="Abra o app do seu banco e pague pelo QR Code ou Pix Copia e Cola";area.appendChild(ins);\n';
+  c+='  b.appendChild(area);\n';
+  c+='  cartao.appendChild(b);\n';
+  c+='  var payloadAtual="";\n';
+  c+='  function gerarPix(){\n';
+  c+='    if(total()<0.01){alert(TXT_TOTAL_ZERO);return;}\n';
+  c+='    payloadAtual=montarPayload(totalPix());\n';
+  c+='    ta.value=payloadAtual;\n';
+  c+='    qr.innerHTML="";\n';
+  c+='    area.className="fca-ob-pixarea on";\n';
+  c+='    desenharQr(qr,payloadAtual);\n';
+  c+='  }\n';
+  c+='  gerar.addEventListener("click",gerarPix);\n';
   c+='  bt.addEventListener("click",function(){\n';
   c+='    var ok=false;ta.select();\n';
   c+='    try{ta.setSelectionRange(0,99999);}catch(e){}\n';
   c+='    try{ok=document.execCommand("copy");}catch(e2){ok=false;}\n';
   c+='    av.textContent=ok?"Código copiado! Cole no aplicativo do seu banco.":"Não consegui copiar. Selecione o código acima e copie na mão.";\n';
   c+='  });\n';
-  c+='  b.appendChild(bt);b.appendChild(av);\n';
-  c+='  var qr=document.createElement("div");qr.className="fca-ob-qr";b.appendChild(qr);\n';
-  c+='  var ins=document.createElement("div");ins.className="fca-ob-ajuda";ins.textContent="Abra o app do seu banco e pague pelo QR Code ou Pix Copia e Cola";b.appendChild(ins);\n';
-  c+='  cartao.appendChild(b);\n';
-  c+='  desenharQr(qr,payload);\n';
+  c+='  pixEsconder=function(){area.className="fca-ob-pixarea";av.textContent="";};\n';
   c+='}\n';
-  c+='/* O QR vem do MESMO payload que esta na caixa de copiar: um segundo lugar de onde tirar\n';
-  c+='   o codigo seria um segundo valor possivel. Modelo copiado da /pagar (decisao 1 do\n';
-  c+='   diario): se a biblioteca nao chegar (bloqueador, rede ruim) a caixa SOME -- deixa-la\n';
-  c+='   com a altura reservada e vazia entregava um retangulo em branco de 200px sem explicacao\n';
-  c+='   nenhuma na tela de quem esta pagando. Sem QR a cobranca continua inteira: o copia e\n';
-  c+='   cola e a instrucao do Pix ficam onde estavam. */\n';
-  c+='function desenharQr(alvo,codigo){\n';
-  c+='  function some(){alvo.style.display="none";}\n';
-  c+='  function faz(){\n';
-  c+='    try{new QRCode(alvo,{text:codigo,width:200,height:200,correctLevel:QRCode.CorrectLevel.M});}\n';
-  c+='    catch(e){some();}\n';
-  c+='  }\n';
-  c+='  if(window.QRCode){faz();return;}\n';
-  c+='  var s=document.createElement("script");\n';
-  c+='  s.src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js";\n';
-  c+='  s.onload=function(){if(!window.QRCode){some();return;}faz();};\n';
-  c+='  s.onerror=some;\n';
-  c+='  document.head.appendChild(s);\n';
-  c+='}\n\n';
+  /* Fonte unica com o Checkout, a Mini loja e a /pagar (fcDesenharQrSrc, ~3577): esta era a
+     terceira copia manuscrita do mesmo desenho -- ja no padrao bom (carregamento sob demanda,
+     try/catch) mas escrita a mao, com aspas duplas em vez de simples nas strings internas.
+     Agora consome a mesma fonte que as outras tres; o comentario que explicava o desenho
+     tambem veio junto, de dentro da funcao compartilhada. */
+  c+=fcDesenharQrSrc('','200');
 
-  c+='/* ===== 3d. o cartao -- o pedido ao SDK de pagamento NAO E FONTE COMPARTILHADA (decisao 8\n';
-  c+='   do diario: a spec errava nisso). actions.order.create ja e escrito a mao em tres\n';
-  c+='   geradores (Checkout, /pagar, Mini loja) e nenhuma funcao compartilhada o emite; esta e a\n';
-  c+='   quarta copia, espelhada na da /pagar (item unico, decisao 1). SEM invoice_id: ele e\n';
-  c+='   unico por conta no provedor, e a segunda cobranca com o mesmo seria recusada.\n';
-  c+='   NENHUM TEXTO NOSSO NOMEIA O PROVEDOR (regra 10 do plano): o rotulo da secao e o aviso de\n';
-  c+='   falha dizem so "cartao" -- quem desenha os botoes com a marca deles e o proprio SDK, e\n';
-  c+='   isso nao da para mudar. */\n';
+  c+='/* ===== 3d. o cartao -- o pedido ao SDK de pagamento (Tarefa 5, v2): passa a vir da fonte\n';
+  c+='   unica fcPpBotoesSrc (~3608), a mesma que o Checkout e a Mini loja usam desde a Tarefa 1\n';
+  c+='   desta rodada. Antes era a quarta copia manuscrita do mesmo actions.order.create; com o\n';
+  c+='   carrinho de volta (pacote + opcionais + cupom) este bloco passou a ter a forma que a\n';
+  c+='   fonte compartilhada espera -- total(), nomesSelecionados(), cupomAtivo, CODIGO_PEDIDO,\n';
+  c+='   MOEDA, PAYPAL_CLIENT_ID, TXT_TOTAL_ZERO/TXT_SUCESSO/TXT_ERRO, e msg() abaixo. SEM sinal\n';
+  c+='   (o parametro usaSinal e false) e SEM invoice_id: ele e unico por conta no provedor, e a\n';
+  c+='   segunda cobranca com o mesmo seria recusada.\n';
+  c+='   NENHUM TEXTO NOSSO NOMEIA O PROVEDOR (regra 10 do plano): o rotulo da secao e as\n';
+  c+='   mensagens dizem so "cartao" -- quem desenha os botoes com a marca deles e o proprio SDK,\n';
+  c+='   e isso nao da para mudar. */\n';
   c+='function secaoCartao(cartao){\n';
   c+='  var sep=document.createElement("div");sep.className="fca-ob-sep";sep.textContent="OU";cartao.appendChild(sep);\n';
   c+='  var b=document.createElement("div");b.className="fca-ob-bloco fca-ob-semtopo";\n';
   c+='  var r=document.createElement("div");r.className="fca-ob-rot";r.textContent="Cartão de crédito ou débito";b.appendChild(r);\n';
-  c+='  var alvo=document.createElement("div");alvo.className="fca-ob-pp";alvo.id="fca-ob-pp";b.appendChild(alvo);\n';
+  c+='  var alvo=document.createElement("div");alvo.className="fca-ob-botoes";b.appendChild(alvo);\n';
   c+='  if(PARCELAS>1){\n';
-  c+='    var pl=document.createElement("div");pl.className="fca-ob-ajuda";\n';
-  c+='    pl.textContent="Em até "+PARCELAS+"x de "+moedaFmt(parcelaDe(PAC.preco));\n';
-  c+='    b.appendChild(pl);\n';
+  c+='    var pl=document.createElement("div");pl.className="fca-ob-ajuda";b.appendChild(pl);\n';
+  c+='    elParcela=pl;\n';
   c+='  }\n';
+  c+='  var m=document.createElement("div");m.className="fca-ob-msg";b.appendChild(m);\n';
   c+='  cartao.appendChild(b);\n';
-  c+='  function ppFora(){\n';
-  c+='    var m=document.createElement("div");m.className="fca-ob-aviso";\n';
-  c+='    m.textContent="Não foi possível carregar o pagamento por cartão agora. Use o Pix acima, ou fale com a gente para receber outra forma de pagar.";\n';
-  c+='    alvo.innerHTML="";alvo.appendChild(m);\n';
-  c+='  }\n';
-  c+='  var s=document.createElement("script");\n';
-  c+='  s.src="https://www.paypal.com/sdk/js?client-id="+encodeURIComponent(CLIENT_ID)+"&currency=BRL&intent=capture&locale=pt_BR";\n';
-  c+='  s.onerror=ppFora;\n';
-  c+='  s.onload=function(){\n';
-  c+='    if(!window.paypal){ppFora();return;}\n';
-  c+='    window.paypal.Buttons({\n';
-  c+='      style:{layout:"vertical"},\n';
-  c+='      createOrder:function(d,actions){\n';
-  c+='        var v=PAC.preco.toFixed(2);\n';
-  c+='        var ref=CODIGO_PEDIDO?String(CODIGO_PEDIDO).substring(0,127):"";\n';
-  c+='        var nome=(PAC.nome+(ref?(" - "+ref):"")).substring(0,127);\n';
-  c+='        var item={name:nome,quantity:"1",unit_amount:{value:v,currency_code:"BRL"}};\n';
-  c+='        if(ref)item.sku=ref;\n';
-  c+='        var pu={amount:{value:v,currency_code:"BRL",breakdown:{item_total:{value:v,currency_code:"BRL"}}},\n';
-  c+='          description:nome,items:[item]};\n';
-  c+='        if(ref)pu.custom_id=ref;\n';
-  c+='        return actions.order.create({purchase_units:[pu]});\n';
-  c+='      },\n';
-  c+='      onApprove:function(d,actions){\n';
-  c+='        return actions.order.capture().then(function(){\n';
-  c+='          alvo.innerHTML="";\n';
-  c+='          var ok=document.createElement("div");ok.className="fca-ob-recusa-msg";ok.textContent="Pagamento aprovado. Obrigado!";\n';
-  c+='          alvo.appendChild(ok);\n';
-  c+='        });\n';
-  c+='      }\n';
-  c+='    }).render("#fca-ob-pp");\n';
-  c+='  };\n';
-  c+='  document.head.appendChild(s);\n';
+  c+='  function msg(txt,ok){m.textContent=txt;m.className="fca-ob-msg "+(ok?"ok":"erro");}\n';
+  c+=fcPpBotoesSrc('fca-ob','gold',false,true,'');
   c+='}\n\n';
 
   c+='function montar(){\n';
@@ -13877,7 +14513,9 @@ function aBlocoObrigado(cfg){
   c+='  if(!PAC){recusaCordial();return;}\n';
   c+='  /* UMA SO chamada de reservaObter por carregamento (ver o comentario dela): identificador\n';
   c+='     e prazo tem de enxergar o MESMO registro, senao um sufixo novo a cada leitura\n';
-  c+='     reiniciaria o prazo tambem -- o achado mais caro da rodada (decisao 7 do diario). */\n';
+  c+='     reiniciaria o prazo tambem -- o achado mais caro da rodada (decisao 7 do diario). Este\n';
+  c+='     calculo NAO depende do carrinho montado abaixo -- e por isso que marcar um opcional ou\n';
+  c+='     aplicar um cupom nunca muda o identificador. */\n';
   c+='  var reserva=reservaObter(PAC.cod,QUANDO);\n';
   c+='  CODIGO_PEDIDO=idConciliacao(PAC,param("data"),param("hora"),reserva);\n';
   c+='  var fim=prazoFim(reserva,QUANDO);\n';
@@ -13885,13 +14523,18 @@ function aBlocoObrigado(cfg){
   c+='  var tit=document.createElement("div");tit.className="fca-ob-titulo";tit.textContent=TXT_TITULO;cartao.appendChild(tit);\n';
   c+='  montarResumo(cartao);\n';
   c+='  if(Date.now()>fim){\n';
+  c+='    montarPreco(cartao);\n';
   c+='    prazoVencido(cartao);\n';
   c+='  }else{\n';
+  c+='    montarOpcionais(cartao);\n';
+  c+='    montarCupom(cartao);\n';
+  c+='    montarPreco(cartao);\n';
   c+='    prazoBarra(cartao,fim);\n';
   c+='    pix(cartao);\n';
   c+='    secaoCartao(cartao);\n';
   c+='  }\n';
   c+='  raiz.appendChild(cartao);\n';
+  c+='  atualizar();\n';
   c+='}\n';
   c+='try{montar();}catch(e){try{raiz.innerHTML="";recusaCordial();}catch(e2){}}\n';
   c+='})();\n</scr'+'ipt>';
@@ -15852,25 +16495,10 @@ function pJs(cfg){
   j+='    c.appendChild(b);\n';
   j+='    desenharQr(qr,codigo);\n';
   j+='  }\n';
-  j+='  /* O QR e desenhado a partir do MESMO codigo que esta na caixa de copiar: um segundo\n';
-  j+='     lugar de onde tirar o payload seria um segundo valor possivel.\n';
-  j+='     E se a biblioteca nao chegar (bloqueador, rede ruim) a caixa SOME, como no carrinho.\n';
-  j+='     Deixa-la com a altura reservada e vazia entregava ao cliente um retangulo em branco\n';
-  j+='     de TAMANHO_QR pixels sem explicacao nenhuma. Sem QR a cobranca continua inteira: o\n';
-  j+='     copia e cola e a instrucao do Pix ficam onde estavam. */\n';
-  j+='  function desenharQr(alvo,codigo){\n';
-  j+="    function some(){alvo.style.display='none';}\n";
-  j+='    function faz(){\n';
-  j+='      try{new QRCode(alvo,{text:codigo,width:TAMANHO_QR,height:TAMANHO_QR,correctLevel:QRCode.CorrectLevel.M});}\n';
-  j+='      catch(e){some();}\n';
-  j+='    }\n';
-  j+="    if(window.QRCode){faz();return;}\n";
-  j+="    var s=document.createElement('script');\n";
-  j+="    s.src='https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';\n";
-  j+='    s.onload=function(){if(!window.QRCode){some();return;}faz();};\n';
-  j+='    s.onerror=some;\n';
-  j+='    document.head.appendChild(s);\n';
-  j+='  }\n';
+  /* Fonte unica com Checkout e Mini loja (fcDesenharQrSrc, ~3577): esta e a fonte de onde o
+     texto delas vai vir numa tarefa separada. Aqui so troca a forma de escrever, o texto
+     emitido continua o mesmo -- ver o comentario da funcao para a medida completa. */
+  j+=fcDesenharQrSrc('  ','TAMANHO_QR');
   if(cfg.usapp){
     j+='  function paypal(c,valor,desc,txid){\n';
     j+="    var modo=param('pp');\n";
@@ -16755,9 +17383,20 @@ function mCpPctErro(tipo,v){
   if((tipo==='pct_total'||tipo==='pct_produto')&&v>100)return 'desconto de '+v+'% zera o pedido (o maximo e 100%).';
   return '';
 }
+/* Recusa de codigo repetido -- decisao 13 de 02/09/2026, uniformizada com a aba pac
+   (aCpAchaRepetido, 13268+): sem isto, dois cupons com o mesmo codigo eram aceitos em
+   silencio e o carrinho aplicava sempre o PRIMEIRO que batesse -- o segundo nunca era
+   encontrado. */
+function mCpAchaRepetido(cod,ignorar){
+  var i;
+  for(i=0;i<mCps.length;i++){if(i!==ignorar&&mCps[i].codigo===cod)return mCps[i].codigo;}
+  return '';
+}
 function mCpAdd(){
   var cod=String($('m-cp-cod').value).trim().toUpperCase();
   if(!cod){alert('Informe o codigo do cupom.');return;}
+  var repetido=mCpAchaRepetido(cod,-1);
+  if(repetido){alert('Já existe um cupom com o código "'+cod+'". O cliente digitaria um código só, e a página não tem como saber qual dos dois cadastros aplicar — escolha outro código ou edite o cupom já existente na lista.');return;}
   var v=parseFloat(String($('m-cp-valor').value).replace(',','.'));
   if(isNaN(v)||v<=0){alert('Informe o valor do desconto do cupom.');return;}
   var tipo=radio('m-cp-tipo')||'pct_total',e=mCpPctErro(tipo,v);
@@ -17039,7 +17678,7 @@ function mCfg(){
    de ser prova do codigo. Nao mexe no DOM de proposito -- a correcao a vista e de mGerar, que e
    o gesto deliberado do operador; a previa roda a cada tecla. */
 function mRecusa(cfg){
-  var i,cpv,cpc,cpe,tmax;
+  var i,cpv,cpc,cpe,tmax,cpvisto,vistosCp={};
   if(!cfg.cod)return 'Informe o codigo da loja. Ele identifica o carrinho no navegador do cliente (e a chave do armazenamento) e vira o comeco do identificador do pedido no extrato -- sem ele, duas lojas no mesmo site dividiriam o mesmo carrinho.';
   if(!/^[A-Za-z0-9_-]+$/.test(cfg.cod))return 'O codigo da loja aceita apenas letras sem acento, numeros, hifen e sublinhado. Ele vira chave de armazenamento e identificador de pedido: espaco e acento ali produzem um identificador diferente do que voce esta lendo.';
   if(!cfg.prods.length)return 'Cadastre ao menos um produto.';
@@ -17060,6 +17699,13 @@ function mRecusa(cfg){
     if(isNaN(cpv)||cpv<=0)return 'O cupom "'+cpc+'" esta com o valor do desconto vazio ou zerado. Ele seria entregue no codigo como desconto de zero: o cliente digitaria o cupom, veria "Cupom aplicado!" e "Desconto - R$ 0,00", e o total nao mudaria. Preencha o valor ou remova o cupom.';
     cpe=mCpPctErro(cfg.cps[i].tipo,cpv);
     if(cpe)return 'Cupom "'+cpc+'": '+cpe;
+    /* Codigo repetido tambem aqui, e nao so no cadastro (mCpAdd) -- decisao 13: a lista se
+       edita por dentro (mCpCodAjustar), e apagar/alterar um codigo la nao passa pelo
+       cadastro. Comparacao ja ignora maiuscula/minuscula e espacos das pontas: cpc chega
+       aqui aparado, e os codigos gravados ja sao maiusculos. */
+    cpvisto=cpc.toUpperCase();
+    if(vistosCp[cpvisto])return 'Os cupons "'+vistosCp[cpvisto]+'" e "'+cpc+'" têm o mesmo código ("'+cpvisto+'"). O cliente digitaria um cupom só, e a página não tem como saber qual dos dois cadastros aplicar — troque um dos dois.';
+    vistosCp[cpvisto]=cpc;
   }
   /* Sinal fixo acima do maior pedido possivel: aqui o "maior pedido" e a loja INTEIRA no
      carrinho, cada item no teto da quantidade. Acima disso nenhum cliente conseguiria pagar. */
@@ -17479,11 +18125,11 @@ function mBlocoJs(cfg,prods,cps,cats,client,cod){
     c+=FC_PIX_SRC.tlv;
     c+=FC_PIX_SRC.crc16;
     c+=FC_PIX_SRC.montarPayload;
-    c+='var qrPronto=false;\n';
-    c+="var qrsrc=document.createElement('script');\n";
-    c+="qrsrc.src='https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';\n";
-    c+='qrsrc.onload=function(){qrPronto=true;};\n';
-    c+='document.head.appendChild(qrsrc);\n\n';
+    /* Fonte unica com a /pagar e o Checkout (fcDesenharQrSrc, ~3577): carrega a biblioteca
+       sob demanda (sem a corrida do onload eager) e desenha dentro de try/catch, escondendo a
+       caixa se a biblioteca nao chegar em vez de deixar a excecao derrubar o resto de
+       gerarPix. Corrige os dois defeitos medidos na Mini loja (spec 0.1). */
+    c+=fcDesenharQrSrc('','200');
   }
   return c+mBlocoRuntime(cfg,usaPP,usaPix,usaQtd,usaSinal,usaResumo,descpix,zap,usaCupom,usaFiltro);
 }
@@ -18028,57 +18674,7 @@ function mBlocoPagar(cfg,usaPP,usaPix,usaQtd,usaSinal,usaResumo,descpix,zap,usaC
     c+='function msg(txt,ok){\n';
     c+="var m=raiz.querySelector('.fcm-msg');\n";
     c+="m.textContent=txt;m.className='fcm-msg '+(ok?'ok':'erro');\n}\n\n";
-    c+='/* ===== PayPal ===== */\n';
-    c+="var sdk=document.createElement('script');\n";
-    c+="sdk.src='https://www.paypal.com/sdk/js?client-id='+encodeURIComponent(PAYPAL_CLIENT_ID)+'&currency='+MOEDA+'&intent=capture&locale=pt_BR';\n";
-    c+='sdk.onload=function(){\n';
-    c+='if(!window.paypal){msg(TXT_ERRO,false);return;}\n';
-    c+='window.paypal.Buttons({\n';
-    c+="style:{layout:'vertical',shape:'rect',label:'pay',color:'"+cfg.ppcor+"'},  /* color: 'gold' | 'blue' | 'silver' | 'white' | 'black' */\n";
-    c+='onClick:function(data,actions){\n';
-    c+='if(total()<0.01){msg(TXT_TOTAL_ZERO,false);return actions.reject();}\n';
-    if(usaSinal)c+='var rec=sinalRecusa();\nif(rec){msg(rec,false);return actions.reject();}\n';
-    c+='return actions.resolve();\n},\n';
-    /* ===== O PEDIDO QUE CHEGA AO PAINEL DO PAYPAL (27/08/2026) =====
-       Antes daqui saiam valor, descricao e custom_id -- e o painel do PayPal mostrava a linha
-       generica "Pagamento" com a coluna "ID do produto" vazia. Agora vai um ITEM de verdade:
-       'name' preenche "Nome do produto" e 'sku' preenche "ID do produto".
-
-       UM ITEM SO, E NAO O CARRINHO ITEMIZADO. Aqui o valor cobrado NEM SEMPRE e a soma dos
-       produtos: tem sinal (cobra uma parte) e tem cupom (desconta). Itemizar de verdade
-       obrigaria a montar breakdown.discount e a fechar a conta ao centavo -- e a especificacao
-       do PayPal e taxativa: "If you specify amount.breakdown, the amount equals item_total
-       plus tax_total plus shipping...". Um centavo fora e o pedido NAO E CRIADO, e o cliente
-       fica sem meio de pagamento na hora de pagar. Com um item unico igual ao valor cobrado, a
-       conta fecha por construcao. O carrinho detalhado continua no resumo copiavel e no Pix.
-
-       O valor e calculado UMA vez, em v, e usado nos tres lugares: dois toFixed em separado
-       poderiam divergir num centavo e derrubar o pedido.
-
-       O invoice_id ficou de FORA: a especificacao diz que "invoice_id values are required to
-       be unique within each merchant account by default", e numa loja isso viraria recusa na
-       segunda compra com o mesmo codigo de pedido. */
-    c+='createOrder:function(data,actions){\n';
-    c+='var v='+(usaSinal?'sinalAgora()':'total()')+'.toFixed(2);\n';
-    if(usaSinal)c+="var nm=(nomesSelecionados().join(' + ')+' (sinal - cod: '+CODIGO_PEDIDO+(cupomAtivo?(' cupom:'+cupomAtivo.codigo):'')+')').substring(0,127);\n";
-    else c+="var nm=(nomesSelecionados().join(' + ')+' (cod: '+CODIGO_PEDIDO+(cupomAtivo?(' cupom:'+cupomAtivo.codigo):'')+')').substring(0,127);\n";
-    c+='if(!nm)nm=CODIGO_PEDIDO;   /* name e obrigatorio no item: nunca pode sair vazio */\n';
-    c+='var it={name:nm,quantity:"1",unit_amount:{value:v,currency_code:MOEDA}};\n';
-    c+='if(CODIGO_PEDIDO)it.sku=CODIGO_PEDIDO;   /* sku vazio nao ajuda ninguem a conciliar */\n';
-    c+='return actions.order.create({purchase_units:[{\n';
-    c+='amount:{value:v,currency_code:MOEDA,breakdown:{item_total:{value:v,currency_code:MOEDA}}},\n';
-    c+='description:nm,\n';
-    c+='items:[it],\n';
-    c+='custom_id:CODIGO_PEDIDO\n}]});\n},\n';
-    /* Concluir o pedido esvazia o carrinho: e o unico momento em que a pagina SABE que a compra
-       terminou. Sem isso o cliente voltaria a loja no dia seguinte com o pedido pago ainda na
-       tela e pagaria duas vezes. */
-    c+='onApprove:function(data,actions){\n';
-    c+='return actions.order.capture().then(function(){msg(TXT_SUCESSO,true);cestaLimpar();});\n},\n';
-    c+='onError:function(){msg(TXT_ERRO,false);}\n';
-    c+="}).render(raiz.querySelector('.fcm-botoes'));\n};\n";
-    c+='sdk.onerror=function(){msg(TXT_ERRO,false);};\n';
-    c+='document.head.appendChild(sdk);\n\n';
+    c+=fcPpBotoesSrc('fcm',cfg.ppcor,usaSinal,false,'cestaLimpar();');
   }
   if(usaPix){
     c+='/* ===== Pix ===== */\n';
@@ -18095,10 +18691,8 @@ function mBlocoPagar(cfg,usaPP,usaPix,usaQtd,usaSinal,usaResumo,descpix,zap,usaC
     c+='payloadAtual=montarPayload(v);\n';
     c+="var qr=raiz.querySelector('.fcm-qr');\n";
     c+="qr.innerHTML='';\n";
-    c+='if(qrPronto&&window.QRCode){\n';
-    c+="qr.style.display='inline-block';\n";
-    c+='new window.QRCode(qr,{text:payloadAtual,width:200,height:200,correctLevel:window.QRCode.CorrectLevel.M});\n';
-    c+="}else{qr.style.display='none';}\n";
+    c+="qr.style.display='';\n";
+    c+='desenharQr(qr,payloadAtual);\n';
     c+="raiz.querySelector('.fcm-pixval-v').textContent=moedaFmt(v);\n";
     c+="raiz.querySelector('.fcm-cola').value=payloadAtual;\n";
     c+="raiz.querySelector('.fcm-pixarea').className='fcm-pixarea on';\n}\n";
@@ -19356,8 +19950,12 @@ prep('Agendamento por pacote','pac',function(){
   /* estado gravado antes desta regra pode trazer numero fora da faixa: prende na carga, para o
      campo nunca exibir algo diferente do que aCfg vai usar. */
   if(fcAjustarTodos(A_NUMS))salvarEstado();
-  aPacRender();
-  liga('a-pac-salvar',aPacAdd);
+  aPacRender();aCpRender();aOpRender();
+  liga('a-pac-salvar',aPacSalvar);
+  liga('a-pac-cancelar',aPacLimpar);
+  liga('a-ptestar',aPacTestar);
+  liga('a-op-add',aOpAdd);
+  liga('a-cp-add',aCpAdd);
   liga('a-gerar',aGerar);
   liga('a-atualizar',function(){aPreview(true);});
   liga('a-copy1',function(){copiar('a-out1','a-cop1');});
