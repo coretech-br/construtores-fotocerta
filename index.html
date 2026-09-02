@@ -11494,8 +11494,8 @@ function uProdRender(){
     var txt=document.createElement('div');
     txt.style.fontSize='13px';
     /* Plural de 'opcional' e 'opcionais' (troca -al por -ais), nao 'opcional'+'is' -- isso
-       dava "2 opcionalis". Corrigido com a palavra inteira trocada, como aPacRender ja faz
-       (13391+, aba Agendamento por pacote). */
+       dava "2 opcionalis". Corrigido em 02/09/2026 (cc5aaae) com a palavra inteira trocada,
+       como aPacRender ja fazia (14622+, aba Agendamento por pacote). */
     var qtd=(p.ops&&p.ops.length)?(' \u00b7 '+p.ops.length+(p.ops.length>1?' opcionais':' opcional')):' \u00b7 sem opcionais';
     var nq=uQtdItens(p);
     txt.textContent=p.nome+' — '+uFmt(parseFloat(p.preco)||0)+qtd+(nq?(' \u00b7 '+nq+' com quantidade'):'');
@@ -14325,8 +14325,10 @@ function aCpCodAjustar(inp,i){
 }
 function aCpPctErro(tipo,v){
   if(tipo!=='pct_produto'&&tipo!=='pct_total')return '';
-  /* Acentuado, diferente do molde de uCpPctErro (10614): texto de interface, norma de
-     01/09/2026. Nao mexido no original por estar fora do arquivo desta tarefa (aba pac). */
+  /* Acentuado e sem nomear o provedor -- norma de 01/09/2026 e regra 10 do plano da v2.
+     Nasceu assim aqui; uCpPctErro (11557+), que era o molde e saiu sem acento e nomeando a
+     marca, foi alinhado a esta redacao em 02/09/2026 (commit cc5aaae). As duas dizem o
+     mesmo, de proposito -- o Checkout so acrescenta a frase sobre a cobranca zerada. */
   if(v>100)return 'Um cupom em porcentagem não pode passar de 100%: com '+v+'% o desconto é limitado ao subtotal e o pedido inteiro vai a R$ 0,00 — o cliente vê "Cupom aplicado!" e um total zerado. Se a intenção era 15%, corrija o valor; se era realmente dar o pedido, use um cupom de valor fixo igual ao preço.';
   return '';
 }
@@ -14620,9 +14622,9 @@ function aPacRender(){
     var info=document.createElement('div');info.className='info';
     var txt=document.createElement('div');txt.style.fontSize='13px';
     /* Plural de 'opcional' e 'opcionais' (troca -al por -ais), nao 'opcional'+'is'/'ais' --
-       o molde de uProdRender (10640) escreve '+is' e da "2 opcionalis"; um '+ais' ingenuo
-       daria "2 opcionalais", igualmente errado. Palavra INTEIRA trocada no plural, e nao
-       mexido em uProdRender por estar fora do arquivo desta tarefa (aba pac). */
+       um '+is' da "2 opcionalis" e um '+ais' ingenuo daria "2 opcionalais", os dois errados.
+       Palavra INTEIRA trocada no plural. uProdRender (11487+) escrevia '+is' quando este
+       comentario foi escrito, e foi corrigido para a mesma forma em 02/09/2026 (cc5aaae). */
     var qtdops=(p.ops&&p.ops.length)?(' · '+p.ops.length+(p.ops.length>1?' opcionais':' opcional')):' · sem opcionais';
     txt.textContent=p.cod+' — '+p.nome+' — '+precoFmt('BRL',parseFloat(p.preco)||0)+qtdops;
     info.appendChild(txt);
