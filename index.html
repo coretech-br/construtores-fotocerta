@@ -3059,7 +3059,35 @@
   <p class="descricao"><b>Agendamento por pacote</b> — agrupa vários tipos de agendamento do TidyCal numa página só. O cliente escolhe o pacote pelo preço e vê apenas o calendário daquela duração. Gera também a página de obrigado, que cobra o pacote agendado por Pix ou cartão.</p>
 
   <div class="secao primeira"><span class="secao-n">1</span> Pacotes</div>
-  <div class="grade"><div><fieldset><legend>Cadastro</legend></fieldset></div></div>
+  <div class="grade">
+    <div>
+      <fieldset>
+        <legend>Cadastrar pacote</legend>
+        <div class="caixa-editor">
+          <label for="a-pcod">Código <small>(identifica o pacote na URL e no Pix — letras, números e hífen)</small></label>
+          <input type="text" id="a-pcod" placeholder="MINI-1H">
+          <label for="a-pnome">Nome</label>
+          <input type="text" id="a-pnome" placeholder="Mini ensaio">
+          <label for="a-pdur">Duração</label>
+          <input type="text" id="a-pdur" placeholder="1 hora">
+          <label for="a-ppreco">Preço</label>
+          <input type="number" id="a-ppreco" placeholder="420" min="0" step="0.01">
+          <label for="a-pinclui">O que inclui</label>
+          <input type="text" id="a-pinclui" placeholder="10 fotos tratadas">
+          <label for="a-plink">Link do TidyCal deste pacote</label>
+          <input type="text" id="a-plink" placeholder="https://tidycal.com/fotocerta/mini-1h">
+          <div class="acoes"><button class="botao" id="a-pac-salvar">Adicionar pacote</button></div>
+        </div>
+      </fieldset>
+    </div>
+    <div>
+      <fieldset>
+        <legend>Pacotes cadastrados</legend>
+        <ul class="lista-imgs" id="a-pac-lista"></ul>
+        <p class="vazio" id="a-pac-vazio">Nenhum pacote cadastrado ainda. Use o formulário ao lado.</p>
+      </fieldset>
+    </div>
+  </div>
 
   <div class="secao"><span class="secao-n">2</span> Página de obrigado e pagamento</div>
   <div class="grade">
@@ -12967,18 +12995,141 @@ function ePresetDepois(){
    docs/specs/2026-09-02-agendamento-por-pacote-design.md e o plano em
    docs/superpowers/plans/2026-09-02-agendamento-por-pacote.md.
 
-   Tarefa 1: registro em ABAS, botao, painel, wiring, e as duas funcoes de persistencia
-   (aColeta/aRestaura). Passo 3b (acrescentado depois da revisao do plano): os campos de
-   configuracao das secoes 2 e 3 -- pagina de obrigado, pagamento, cores, textos e altura do
-   calendario -- com os tres avisos de interface que a spec pede por nome. O catalogo (secao 1)
-   ainda NAO tem entrada na tela -- entra na Tarefa 2. aGerar e aPreview seguem esqueletos vazios
-   de proposito (assim manda o passo 6 da Tarefa 1); quem os preenche sao as Tarefas 2 a 4. */
+   Tarefa 1 (esqueleto): registro em ABAS, botao, painel, wiring, e as duas funcoes de
+   persistencia (aColeta/aRestaura). Passo 3b da Tarefa 1: os campos de configuracao das secoes
+   2 e 3 (pagina de obrigado, pagamento, cores, textos e altura do calendario), com os tres
+   avisos de interface que a spec pede por nome. Tarefa 2: o catalogo de pacotes (secao 1) --
+   formulario, lista editavel, aUrlOk e as seis recusas. aGerar ja monta cfg e chama aRecusa;
+   quem falta preencher (Tarefas 3 a 9) sao as tres saidas (aBlocoVitrine, aEnderecos,
+   aBlocoObrigado) e aPreview, que ainda sao esqueletos vazios de proposito. */
 var aPacotes=[];
 /* Faixa declarada dos campos numericos desta aba, no formato de U_NUMS/E_NUMS: [id, padrao,
    min, max, inteiro]. */
 var A_NUMS=[['a-prazoh',24,1,720,true],['a-descpix',5,0,90,false],['a-parcelas',1,1,12,true],
   ['a-altdesk',2350,800,6000,true],['a-altmob',2700,800,6000,true],['a-largmob',700,320,1024,true]];
 function aPreso(id){return fcPreso(A_NUMS,id);}
+/* ===== catalogo de pacotes (Tarefa 2) =====
+   Modelo: uCpAdd/uCpRender/uCpCodAjustar (10366+), a lista editavel em linha de cupons do
+   Checkout. Cada pacote tem seis campos editaveis direto na lista, sem modo de edicao a parte
+   (diferente de uProdRender, que abre o cadastro para editar) -- o mesmo padrao que os cupons
+   ja usam aqui do lado. */
+function aPacAdd(){
+  var cod=String($('a-pcod').value).trim().replace(/[^A-Za-z0-9-]/g,'').toUpperCase();
+  if(!cod){alert('Informe o código do pacote.');return;}
+  var nome=$('a-pnome').value.trim();
+  if(!nome){alert('Informe o nome do pacote.');return;}
+  var preco=parseFloat(String($('a-ppreco').value).replace(',','.'));
+  if(isNaN(preco)||preco<=0){alert('Informe o preço do pacote (maior que zero).');return;}
+  aPacotes.push({cod:cod,nome:nome,dur:$('a-pdur').value.trim(),preco:preco,
+    inclui:$('a-pinclui').value.trim(),link:$('a-plink').value.trim()});
+  $('a-pcod').value='';$('a-pnome').value='';$('a-pdur').value='';$('a-ppreco').value='';
+  $('a-pinclui').value='';$('a-plink').value='';
+  aPacRender();salvarEstado();aPreview();
+}
+/* Correcao a vista do codigo, no padrao de uCpCodAjustar: so em 'change'/'blur', nunca no
+   'input' -- corrigir a cada tecla mexeria com o cursor. Remove o que nao e [A-Za-z0-9-] e
+   passa a maiusculas, para a tela nunca mostrar um codigo diferente do que o gerador vai usar. */
+function aPacCodAjustar(inp,i){
+  var limpo=String(inp.value).replace(/[^A-Za-z0-9-]/g,'').toUpperCase();
+  aPacotes[i].cod=limpo;
+  if(limpo===inp.value)return false;
+  inp.value=limpo;
+  salvarEstado();aPreview();
+  return true;
+}
+function aPacMove(i,d){
+  var j=i+d;if(j<0||j>=aPacotes.length)return;
+  var t=aPacotes[i];aPacotes[i]=aPacotes[j];aPacotes[j]=t;
+  aPacRender();salvarEstado();aPreview();
+}
+function aPacDel(i){aPacotes.splice(i,1);aPacRender();salvarEstado();aPreview();}
+function aPacRender(){
+  var ul=$('a-pac-lista');if(!ul)return;
+  ul.innerHTML='';
+  var vz=$('a-pac-vazio');if(vz)vz.style.display=aPacotes.length?'none':'block';
+  aPacotes.forEach(function(p,i){
+    var li=document.createElement('li');
+    var info=document.createElement('div');info.className='info';
+    var cod=document.createElement('input');cod.type='text';cod.value=p.cod;cod.placeholder='Código';
+    cod.addEventListener('input',function(){aPacotes[i].cod=cod.value;salvarEstado();aPreview();});
+    cod.addEventListener('change',function(){aPacCodAjustar(cod,i);});
+    cod.addEventListener('blur',function(){aPacCodAjustar(cod,i);});
+    var nome=document.createElement('input');nome.type='text';nome.value=p.nome;nome.placeholder='Nome';
+    nome.addEventListener('input',function(){aPacotes[i].nome=nome.value;salvarEstado();aPreview();});
+    var dur=document.createElement('input');dur.type='text';dur.value=p.dur;dur.placeholder='Duração';
+    dur.addEventListener('input',function(){aPacotes[i].dur=dur.value;salvarEstado();aPreview();});
+    var preco=document.createElement('input');preco.type='number';preco.step='0.01';preco.min='0';preco.value=p.preco;preco.placeholder='Preço';
+    preco.addEventListener('input',function(){aPacotes[i].preco=preco.value;salvarEstado();aPreview();});
+    var inclui=document.createElement('input');inclui.type='text';inclui.value=p.inclui;inclui.placeholder='O que inclui';
+    inclui.addEventListener('input',function(){aPacotes[i].inclui=inclui.value;salvarEstado();aPreview();});
+    var link=document.createElement('input');link.type='text';link.value=p.link;link.placeholder='Link do TidyCal';
+    link.addEventListener('input',function(){aPacotes[i].link=link.value;salvarEstado();aPreview();});
+    info.appendChild(cod);info.appendChild(nome);info.appendChild(dur);info.appendChild(preco);info.appendChild(inclui);info.appendChild(link);
+    var ctrl=document.createElement('div');ctrl.className='ctrl';
+    [['\u2191',function(){aPacMove(i,-1);},'Subir'],['\u2193',function(){aPacMove(i,1);},'Descer'],['\u2715',function(){aPacDel(i);},'Remover']]
+      .forEach(function(b){var bt=document.createElement('button');bt.textContent=b[0];bt.title=b[2];bt.setAttribute('aria-label',b[2]);bt.addEventListener('click',b[1]);ctrl.appendChild(bt);});
+    li.appendChild(info);li.appendChild(ctrl);
+    ul.appendChild(li);
+  });
+}
+/* Copia de tUrlOk (9827+ antes desta tarefa). A recusa do endereco protocol-relative nao e
+   detalhe: sem ela, "//evil.com/x" passa como "caminho do proprio site" e o TidyCal
+   redirecionaria o cliente para outro host. */
+function aUrlOk(v){
+  var limpo=urlLimpa(v);
+  if(!limpo)return false;
+  if(/^https?:\/\//i.test(limpo))return true;
+  /* caminho do proprio site: UMA barra. Com duas o endereco e protocol-relative --
+     "//evil.com/x" resolve para OUTRO host, herdando so o esquema da pagina. */
+  if(limpo.charAt(0)==='/'&&limpo.charAt(1)!=='/')return true;
+  return false;
+}
+/* Devolve a PRIMEIRA recusa (ou '') para uma configuracao ja coletada -- mesmo padrao de
+   uRecusa/mRecusa: sem efeito colateral, e a mesma funcao serve o gerador e (na Tarefa 4) a
+   previa. A recusa de codigo colidido e a mais importante das nove: o Pix descarta hifen, e
+   dois pacotes "mini-1h" e "mini1h" gerariam o MESMO identificador de conciliacao. */
+function aRecusa(cfg){
+  var i,p,vistos={},limpo;
+  if(!cfg.pacotes.length)return 'Cadastre ao menos um pacote.';
+  if(!cfg.urlobrigado)return 'Informe o endereço da página de obrigado.';
+  if(!aUrlOk(cfg.urlobrigado))return 'O endereço da página de obrigado precisa começar com https:// e ter o domínio.';
+  for(i=0;i<cfg.pacotes.length;i++){
+    p=cfg.pacotes[i];
+    if(!p.cod)return 'O pacote "'+(p.nome||('#'+(i+1)))+'" está sem código. O código é o que o TidyCal guarda para identificar o pacote.';
+    if(!/^[A-Za-z0-9-]+$/.test(p.cod))return 'O código "'+p.cod+'" tem caractere que não pode ir na URL. Use apenas letras, números e hífen.';
+    limpo=p.cod.replace(/[^A-Za-z0-9]/g,'').toUpperCase();
+    if(vistos[limpo])return 'Os códigos "'+vistos[limpo]+'" e "'+p.cod+'" viram o mesmo identificador no Pix ('+limpo+'), porque o Pix aceita apenas letras e números. Troque um dos dois.';
+    vistos[limpo]=p.cod;
+    if(!p.nome)return 'O pacote "'+p.cod+'" está sem nome.';
+    if(!(parseFloat(p.preco)>0))return 'O pacote "'+p.cod+'" está com o preço vazio ou zerado. Ele seria entregue como uma cobrança de R$ 0,00.';
+    if(!p.link)return 'O pacote "'+p.cod+'" está sem o link do TidyCal.';
+    if(!aUrlOk(p.link))return 'O link do TidyCal do pacote "'+p.cod+'" não é um endereço válido.';
+  }
+  if(!fciVal('chave')||!fciVal('nomer')||!fciVal('cidade'))return fciRecusa('Preencha a chave Pix, o nome do recebedor e a cidade.');
+  if(!fciVal('client'))return fciRecusa('Informe o Client ID do PayPal.');
+  if(!fciVal('zapnum'))return fciRecusa('Informe o WhatsApp de destino.');
+  return '';
+}
+/* ===== configuracao da aba, ja validada (o que aRecusa confere e o que a Tarefa 3 vai
+   consumir) -- diferente de aColeta, que grava o que esta na tela AINDA POR CORRIGIR, para o
+   backup nao reescrever o que o operador digitou. Modelo: uCfg (10690+). */
+function aCfg(){
+  var prazoh=aPreso('a-prazoh');if(prazoh==null)prazoh=24;
+  var descpix=aPreso('a-descpix');if(descpix==null)descpix=5;
+  var parcelas=aPreso('a-parcelas');if(parcelas==null)parcelas=1;
+  var altdesk=aPreso('a-altdesk');if(altdesk==null)altdesk=2350;
+  var altmob=aPreso('a-altmob');if(altmob==null)altmob=2700;
+  var largmob=aPreso('a-largmob');if(largmob==null)largmob=700;
+  return {
+    pacotes:aPacotes,
+    urlobrigado:$('a-urlobrigado').value.trim(),
+    prefixo:$('a-prefixo').value.trim(),
+    prazoh:prazoh, descpix:descpix, parcelas:parcelas,
+    altdesk:altdesk, altmob:altmob, largmob:largmob,
+    c1:corSegura('a-c1','#0F3A30'), c2:corSegura('a-c2','#ffffff'), c3:corSegura('a-c3','#333333'),
+    t1:$('a-t1').value, t2:$('a-t2').value, t3:$('a-t3').value, t4:$('a-t4').value, t5:$('a-t5').value
+  };
+}
 /* Leitura defensiva de um campo que pode ainda nao existir no DOM (ver o paragrafo do topo
    desta secao): sem a guarda, aColeta lancaria a cada chamada de salvarEstado() -- que roda a
    cada tecla digitada em QUALQUER aba da ferramenta -- e a barra vermelha acenderia nesta aba
@@ -13004,7 +13155,7 @@ function aColeta(){
 function aRestaura(st){
   if(!st.a)return;
   var A=st.a,el,elc;
-  aPacotes=A.pacotes||[];
+  aPacotes=A.pacotes||[];aPacRender();
   el=$('a-urlobrigado');if(el)el.value=A.urlobrigado||'';
   el=$('a-prefixo');if(el)el.value=A.prefixo||'';
   el=$('a-prazoh');if(el)el.value=(A.prazoh!=null&&A.prazoh!=='')?A.prazoh:24;
@@ -13048,9 +13199,22 @@ function aPresetDepois(){
   if(mudou)salvarEstado();
   aPreview(true);
 }
-/* Esqueletos desta tarefa -- as Tarefas 3 e 4 do plano os preenchem. O passo 6 da Tarefa 1
-   pede explicitamente que fiquem vazios em vez de indefinidos, para o wiring nao lancar. */
-function aGerar(){}
+/* Padrao do gerador, copiado de uGerar (10784+, ver o contrato do plano). Cada tarefa seguinte
+   acrescenta a SUA linha antes do aPreview(true): a Tarefa 3 poe $('a-out1').value=... , a
+   Tarefa 5 poe $('a-out2').value=... e a Tarefa 7 poe $('a-out3').value=... -- nenhuma delas
+   existe ainda, entao o botao "Gerar codigo" ja valida e ja recusa, mas ainda nao escreve
+   textarea nenhuma. */
+function aGerar(){
+  if(fcPixChaveAjustar('fci-chave'))fciGravar();
+  if(fcAjustarTodos(A_NUMS))salvarEstado();
+  var cfg=aCfg();
+  var recusa=aRecusa(cfg);
+  if(recusa){alert(recusa);fciApontarSe(recusa);return;}
+  aPreview(true);
+  fccMarcar('pac');
+}
+/* Esqueleto desta tarefa -- as Tarefas 3 e 4 do plano a preenchem (as saidas 1 e 3, e a previa
+   propriamente dita). Fica vazia de proposito, e nao indefinida, para o wiring nao lancar. */
 function aPreview(imediato){}
 
 /* ============================================================
@@ -18164,6 +18328,8 @@ prep('Agendamento por pacote','pac',function(){
   /* estado gravado antes desta regra pode trazer numero fora da faixa: prende na carga, para o
      campo nunca exibir algo diferente do que aCfg vai usar. */
   if(fcAjustarTodos(A_NUMS))salvarEstado();
+  aPacRender();
+  liga('a-pac-salvar',aPacAdd);
   liga('a-gerar',aGerar);
   liga('a-atualizar',function(){aPreview(true);});
   liga('a-copy1',function(){copiar('a-out1','a-cop1');});
