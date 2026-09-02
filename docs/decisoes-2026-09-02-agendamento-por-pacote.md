@@ -26,6 +26,7 @@ Plano: `docs/superpowers/plans/2026-09-02-agendamento-por-pacote.md`
 8. [O pedido do PayPal **não** é fonte compartilhada, e a spec estava errada](#8)
 9. [A corrida da mensagem atrasada do iframe anterior](#9)
 10. [`previa.html` e o cache: declarado como não-problema, com a razão](#10)
+11. [O caminho B virou interruptor — e o defeito era do meu plano](#11)
 
 ---
 
@@ -187,5 +188,30 @@ O contraste com `fc-compartilhado.js` é justamente esse: lá o arquivo **carreg
 **Decidi não versionar**, e registrar aqui a razão — para ninguém "consertar" isso depois achando que foi esquecimento.
 
 **Custo de desfazer:** nenhum.
+
+---
+
+<a id="11"></a>
+## 11. O caminho B virou interruptor — e o defeito era do meu plano
+
+**O que apareceu.** Ao revisar o bloco gerado (não o relatório do executor), rastreei a lógica de altura do calendário e achei um defeito. Ele **não** é do subagente: meu plano dizia, com estas palavras, *"emita a altura fixa como `min-height` inicial do iframe, e trate o sinal como melhoria"*. Ele seguiu à risca. A instrução é que estava errada.
+
+**O efeito, medido no código gerado.** `abrirCalendario` chamava `expandir()` sempre; `recolher()` só roda quando `modalAberto` já era verdadeiro; e na **primeira** abertura ele é falso. Resultado: o calendário ficaria travado em **2.350 px para sempre**, com cerca de 1.500 px de vazio embaixo — exatamente a página poluída que esta aba existe para eliminar. O pedido do dono era estético; a implementação entregaria o problema de volta, maior.
+
+**Por que passou pelas 29 verificações do executor.** Nenhuma delas olhava a **altura**. Elas contavam iframes, conferiam preços e classes. É a lição já registrada duas vezes neste projeto: teste que não alcança o estado não prova nada sobre ele.
+
+**Decidi:** o padrão volta a ser o comportamento **provado em produção** na aba TidyCal — altura natural, e o sinal expande. O caminho B vira uma variável no topo do bloco:
+
+```js
+var ALTURA_SEMPRE=false;   /* true = o calendario fica sempre na altura maxima. Ligue APENAS
+                              se, na sua pagina publicada, o modal do TidyCal aparecer
+                              cortado -- o preco de ligar e um vao vazio embaixo. */
+```
+
+Isso mantém a rede de segurança que o caminho B queria dar, **e** paga por ela só quem precisar. E deixa a escolha com quem tem a informação: só o dono, colando numa página publicada, descobre se os sinais chegam.
+
+**A prova, que agora existe.** Um roteiro forja os sinais do TidyCal (dá para fazer: `MessageEvent` aceita `origin` no construtor) e exercita a máquina de estados inteira — **6 verificações, 6 ok**: altura natural ao abrir; sinal **dentro** da carência de 800 ms ignorado (a defesa da corrida); sinal fora da carência expande para 2.350 px; sinal de fechamento volta ao natural; sinal de outra origem ignorado; e um iframe só, antes e depois de trocar de pacote.
+
+**Custo de desfazer:** baixo.
 
 ---

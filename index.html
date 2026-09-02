@@ -13263,6 +13263,7 @@ function aBlocoVitrine(cfg){
   c+='var PACOTES=[\n'+pacs+'\n];\n';
   c+='var DESCONTO_PIX='+cfg.descpix+';   /* percentual de desconto no Pix; 0 = sem desconto -- some o selo */\n';
   c+='var PARCELAS='+cfg.parcelas+';   /* numero de parcelas anunciado no cartao; e uma promessa que a operadora decide, nao este codigo */\n';
+  c+="var ALTURA_SEMPRE=false;   /* true = o calendario fica sempre na altura maxima. Ligue APENAS se, na sua pagina publicada, o modal de confirmacao do TidyCal aparecer cortado -- o preco de ligar e um vao vazio embaixo do calendario. */\n";
   c+="var ALTURA_DESKTOP='"+cfg.altdesk+"px';\n";
   c+="var ALTURA_MOBILE='"+cfg.altmob+"px';   /* calibrar no aparelho se o modal cortar */\n";
   c+='var LARGURA_MOBILE='+cfg.largmob+';        /* telas ate este tamanho usam a altura mobile */\n';
@@ -13360,11 +13361,15 @@ function aBlocoVitrine(cfg){
   c+="    f.setAttribute('allow','fullscreen');\n";
   c+='    elCal.appendChild(f);\n  }\n';
   c+='  f.src=link;\n';
-  c+='  /* Caminho B (risco declarado na spec): se os sinais do TidyCal nao chegarem numa pagina\n';
-  c+='     publicada, a altura calibrada ja e o PISO desde a criacao -- o calendario continua\n';
-  c+='     aparecendo inteiro mesmo sem sinal nenhum. Quando o sinal chega de verdade, ele so\n';
-  c+='     melhora (recolhe) a partir daqui. */\n';
-  c+='  expandir();\n}\n\n';
+  /* O CAMINHO B E UM INTERRUPTOR, E NAO O PADRAO -- corrigido depois de medir o bloco gerado.
+     A primeira versao chamava expandir() aqui, sempre, com o argumento de que a altura
+     calibrada seria "o piso desde a criacao". A medicao desmente o argumento: recolher() so
+     roda quando modalAberto ja era true, e na PRIMEIRA abertura ele e false -- entao o
+     calendario ficava travado em ALTURA_DESKTOP para sempre, com cerca de 1500px de vazio
+     embaixo. E exatamente a pagina poluida que esta aba existe para evitar.
+     O padrao volta a ser o comportamento provado em producao na aba TidyCal: altura natural,
+     e o sinal expande. Quem nao receber sinal nenhum liga ALTURA_SEMPRE no topo do bloco. */
+  c+='  if(ALTURA_SEMPRE)expandir();else recolher();\n}\n\n';
 
   c+='function escolher(i){\n';
   c+='  var p=PACOTES[i], trocouLink=(atual!==i);\n';
