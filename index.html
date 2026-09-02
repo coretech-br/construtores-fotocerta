@@ -17947,6 +17947,12 @@ function fccDaAba(a,p,plano,vals){
           'É a página para onde o TidyCal redireciona depois do agendamento. Para consolidá-la, selecione o preset geral dessa página — o tipo <b>Página de obrigado</b>.'));
       }
     }
+  }else if(a.id==='pac'){
+    /* So a-out1 entra aqui. a-out3 (o bloco da pagina de obrigado) e consolidada na Tarefa 7,
+       junto com o gerador que a produz -- ela nao existe ainda nesta entrega. Consolida-la
+       aqui faria esta tarefa depender de aBlocoObrigado, que so existe na Entrega 2, e o passo
+       de prova desta tarefa (fccOrfas sem acusar orfa, com a-out3 vazia) ficaria inexecutavel. */
+    plano.comps.push(fccItem(a,'a-out1','Agendamento por pacote — vitrine','Componente HTML desta página'));
   }
 }
 /* Esta aba ainda tem ALGUM codigo na tela? Existe por causa da contradicao que o aviso de
@@ -17964,7 +17970,8 @@ function fccDaAba(a,p,plano,vals){
    e esquecimento, e saida que aquela configuracao nao usa.
    Ela nao conserta o mapa; ela faz o buraco APARECER, que e o que faltava. */
 var FCC_FORA={
-  'p-out2':'o link de cada cobranca vai para o CLIENTE e muda a cada uma: nao e campo do Prosite nem passo de montagem desta pagina'
+  'p-out2':'o link de cada cobranca vai para o CLIENTE e muda a cada uma: nao e campo do Prosite nem passo de montagem desta pagina',
+  'a-out2':'cada endereco vai no campo de redirecionamento de UM tipo de agendamento, dentro do TidyCal: nao e campo do Prosite'
 };
 function fccAbaDoOut(id){
   var pref=id.split('-')[0],i;
@@ -18088,6 +18095,25 @@ function fccBlocosDoCampo(plano,qual){
   if(!fccVazio(manual))r.push({rotulo:'Outros códigos meus',texto:manual});
   for(i=0;i<itens.length;i++)if(!itens[i].vazio)r.push({rotulo:itens[i].rotulo,texto:itens[i].texto});
   return r;
+}
+
+/* ---- aviso de colisao: Agendamento por pacote x pagina de obrigado do TidyCal (Tarefa 6,
+   passo 3) ----
+   As duas entregam saidas DIFERENTES desta pagina -- esta aba um componente, a TidyCal uma Tag
+   Body -- e por isso nao disputam CAMPO nenhum. O que colide e o COMPORTAMENTO: os dois scripts
+   trocam os MESMOS marcadores ({{nome}}, {{data}}, {{hora}}) na mesma pagina publicada, e quem
+   rodar primeiro vence -- inclusive nos textos reserva, que sao configuraveis em cada aba e
+   podem discordar entre si. O visitante veria o texto reserva de UMA aba onde o dono configurou
+   o da OUTRA, sem erro nenhum na tela.
+   Quando avisar: as duas abas ativas na campanha (FCG.ativas, o mesmo que fccOrfas ja consulta)
+   e a pagina de obrigado do TidyCal ligada (campo t-ob-usar, radio, valor 'sim'). O painel so
+   avisa; ele nao escolhe por conta propria qual das duas desligar. */
+function fccColisaoPacTidy(){
+  var pac=fcAba('pac'),tidy=fcAba('tidy'),v;
+  if(!pac||!tidy)return false;
+  if(!FCG.ativas.pac||!FCG.ativas.tidy)return false;
+  v=null;try{v=fcgValoresDaAba(tidy);}catch(e){v=null;}
+  return (((v&&v.t&&v.t.obusar)||radio('t-ob-usar'))==='sim');
 }
 
 /* ---- desenho ---- */
@@ -18236,6 +18262,10 @@ function fccRender(){
       h+='<p class="fcc-falta"><b>Código gerado antes da última mudança.</b> '+
          escHtml(fcLista(plano.velhas))+(plano.velhas.length===1?' mudou':' mudaram')+
          ' depois de o código ter sido gerado. O que está abaixo é o código antigo. Volte à aba e clique em <b>Gerar código</b>.</p>';
+    }
+    if(fccColisaoPacTidy()){
+      h+='<p class="fcc-perigo"><b>Agendamento por pacote e a página de obrigado do TidyCal estão ligadas ao mesmo tempo.</b> '+
+         'Não é disputa de campo — esta aba entrega um <b>componente</b> e a TidyCal entrega uma <b>Tag Body</b>, e um não sobrescreve o outro. O que colide é o <b>comportamento</b>: os dois scripts trocam os mesmos marcadores (<code>{{nome}}</code>, <code>{{data}}</code>, <code>{{hora}}</code>) na mesma página publicada, e quem rodar primeiro vence — inclusive nos textos reserva de cada um, que são configuráveis e podem discordar. O visitante veria o texto reserva de uma aba onde você configurou o da outra, sem erro nenhum na tela. Use só uma das duas como página de obrigado desta campanha.</p>';
     }
     h+=fccCampoHTML(plano,'head',vals);
     h+=fccCampoHTML(plano,'body',vals);
