@@ -10,7 +10,7 @@
 
 **Spec:** `docs/specs/2026-09-02-agendamento-por-pacote-design.md` — **leia antes de qualquer tarefa.**
 
-**Decisões já tomadas:** `docs/decisoes-2026-09-02-agendamento-por-pacote.md` — seis, todas com a razão. Não as reabra sem motivo novo.
+**Decisões já tomadas:** `docs/decisoes-2026-09-02-agendamento-por-pacote.md` — **dez**, todas com a razão. Não as reabra sem motivo novo.
 
 ---
 
@@ -90,7 +90,9 @@ As quatro listas de destino são `plano.head`, `plano.body`, `plano.comps`, `pla
 
 **Identidade** — `fciVal('chave'|'nomer'|'cidade'|'client'|'zapnum')` (4263–4267). Recusa com `fciRecusa(texto)` e, depois do `alert`, `fciApontarSe(recusa)`.
 
-**Padrão do `aGerar`** (copiado de `uGerar`, 10641–10651):
+**Padrão do `aGerar`** (copiado de `uGerar`, 10641–10651). **Ele NÃO nasce pronto: cada tarefa acrescenta a sua linha.** Escrevê-lo completo na Tarefa 1 referenciaria funções que só existem na Entrega 2, e o botão "Gerar código" da aba inteira quebraria — inclusive a vitrine, que a Entrega 1 promete entregar funcionando sozinha.
+
+Forma na **Tarefa 1** (esqueleto que já roda):
 
 ```js
 function aGerar(){
@@ -99,13 +101,21 @@ function aGerar(){
   var cfg=aCfg();
   var recusa=aRecusa(cfg);
   if(recusa){alert(recusa);fciApontarSe(recusa);return;}
-  $('a-out1').value=aBlocoVitrine(cfg);
-  $('a-out2').value=aEnderecos(cfg);
-  $('a-out3').value=aBlocoObrigado(cfg);
   aPreview(true);
   fccMarcar('pac');
 }
 ```
+
+Quem acrescenta o quê, e **em que tarefa**:
+
+| Tarefa | Linha que ela acrescenta, antes do `aPreview(true)` |
+|---|---|
+| 2 | (nenhuma — ela escreve `aRecusa`, que o esqueleto já chama) |
+| 3 | `$('a-out1').value=aBlocoVitrine(cfg);` |
+| 5 | `$('a-out2').value=aEnderecos(cfg);` |
+| 7 | `$('a-out3').value=aBlocoObrigado(cfg);` |
+
+Na Tarefa 1, `aRecusa` ainda não existe — declare-a como `function aRecusa(){return '';}` e deixe a Tarefa 2 substituí-la. **Nenhuma função pode ficar indefinida em nenhum momento**, senão o wiring lança ao carregar a ferramenta.
 
 **Fontes compartilhadas a consumir** (não reescreva nenhuma):
 
@@ -117,6 +127,8 @@ function aGerar(){
 | `FC_PARAM_SRC` | `index.html:11454` | o leitor `param(nome)` da URL |
 | `escHtml` / `escAttr` / `escJs` / `esc` | `index.html:3234–3262` | ver a regra de destino na linha 3244 |
 | `fcPvShim(o)` | `index.html:3534` | shim de armazenamento da prévia |
+
+**O pedido do PayPal NÃO é fonte compartilhada — a spec §9 está errada nesse ponto.** Medido em 02/09: `actions.order.create` aparece **três vezes**, escrito à mão em cada gerador (Checkout 11303, `/pagar` 14746, Mini loja 16860), e **nenhuma função compartilhada o escreve**. A Tarefa 8 escreve a quarta cópia, espelhada na da `/pagar` (item único), e a dívida fica registrada em `docs/pendencias.md`. Ver a decisão 8 do diário: extrair fonte única agora exigiria provar a igualdade byte a byte de três saídas existentes no meio de outra rodada, e isso destrói a capacidade de dizer o que quebrou quando a regressão acusar.
 
 **Modelo do bloco de pagamento: a aba Link de cobrança, não o Checkout** (decisão 1 do diário). O QR com tratamento de falha está em `index.html:14505–14520` — copie **aquele** desenho: se a biblioteca não carregar, a caixa do QR **some** em vez de deixar um retângulo branco.
 
@@ -173,10 +185,11 @@ O fragmento `st.a` tem esta forma exata (as tarefas seguintes dependem destes no
   t2:'Escolha o pacote',       /* rotulo do passo 1 */
   t3:'Escolha o dia e o horário',
   t4:'Trocar pacote',
-  t5:'Tudo certo!',            /* titulo da pagina de obrigado */
-  presets:[]
+  t5:'Tudo certo!'             /* titulo da pagina de obrigado */
 }}
 ```
+
+**Não declare `presets` aqui.** Quem o acrescenta é o próprio arcabouço, em `fcEstadoAtual` (`if(frag&&frag[a.pref])frag[a.pref].presets=fcPresets[a.id]||[];`). `uColeta` não o tem, e esta também não deve ter.
 
 - [ ] **Passo 1: Ler o contrato.** Leia, no arquivo real: `index.html:720–730`, `index.html:2901` (o começo do último painel, como modelo de estrutura), `index.html:3964–4012` (o registro `ABAS` inteiro), `index.html:17548–17570`. Não edite nada ainda.
 
@@ -235,6 +248,21 @@ O fragmento `st.a` tem esta forma exata (as tarefas seguintes dependem destes no
 </div>
 ```
 
+- [ ] **Passo 3b: Os campos de configuração das seções 2 e 3.** *(Este passo foi acrescentado depois da revisão do plano: sem ele, `A_NUMS` referencia `a-prazoh`, `a-descpix` e `a-parcelas`, que não existiriam no DOM, e a tarefa é literalmente inexecutável.)*
+
+**Seção 2 — Página de obrigado e pagamento.** Duas caixas na `.grade`:
+
+- Caixa 1, *Página de obrigado*: `a-urlobrigado` (texto, `placeholder="https://www.fotocerta.com.br/obrigado"`), `a-prefixo` (texto, `placeholder="ex.: FC"`), `a-prazoh` (número).
+- Caixa 2, *Pagamento*: `a-descpix` (número), `a-parcelas` (número).
+
+**Três avisos de interface que a spec pede por nome, e que precisam sair escritos** (§6.1 notas 1, 2 e 3, e §12 risco 3). Cada um é um `<p class="ajuda">` logo abaixo do campo a que se refere:
+
+- Ao lado de `a-parcelas`: *"Este número é uma promessa sobre o que o cliente vai encontrar no cartão, e quem decide isso é a operadora — a ferramenta não tem como conferir. Deixe em 1 até confirmar no PayPal quantas parcelas a sua conta oferece. O valor da parcela é calculado dividindo o preço, e afirma parcelamento sem juros."*
+- Ainda na caixa de pagamento: *"Os dois botões de cartão são desenhados pelo PayPal, e o texto e a marca deles são do PayPal — isso não dá para mudar. Em todo o resto da página, o cliente lê apenas 'no cartão'."*
+- Ao lado de `a-urlobrigado`: *"Se você mudar o preço de um pacote, quem agendou antes e pagar depois verá o preço novo. O preço mora no código da página, não no endereço — foi assim que se evitou que o cliente pudesse editá-lo na barra de endereço."*
+
+**Seção 3 — Aparência e textos.** Caixa 1, *Cores*: `a-c1` (destaque), `a-c2` (fundo do cartão), `a-c3` (texto), no padrão `.cor-linha` das outras abas (`<input type="color">` + `<input type="text">` espelhado). Caixa 2, *Textos*: `a-t1` a `a-t5`, mais `a-altdesk`, `a-altmob`, `a-largmob` num fieldset *Altura do calendário* com a ajuda explicando que são as medidas calibradas em produção.
+
 - [ ] **Passo 4: `A_NUMS`, `aColeta`, `aRestaura`.** Num bloco novo de script, junto dos outros geradores. `A_NUMS` (formato `[id,padrão,min,max,inteiro]`):
 
 ```js
@@ -289,13 +317,31 @@ git commit -m "A decima aba nasce: esqueleto, registro e wiring"
 
 **Interfaces:**
 - Consumes: `aColeta`/`aRestaura` da Tarefa 1
-- Produces: `aPacRender()`, `aPacAdd()`, `aPacRecusa(cfg)`, e `cfg.pacotes` com a forma `{cod,nome,dur,preco,inclui,link}`
+- Produces: `aPacRender()`, `aPacAdd()`, **`aRecusa(cfg)`** (substitui o esqueleto da Tarefa 1), `aUrlOk(v)`, e `cfg.pacotes` com a forma `{cod,nome,dur,preco,inclui,link}`
 
 - [ ] **Passo 1: O formulário e a lista.** A seção 1 ganha duas caixas na `.grade`: à esquerda o cadastro, à direita a lista. Campos do cadastro: `a-pcod`, `a-pnome`, `a-pdur`, `a-ppreco`, `a-pinclui`, `a-plink`, e o botão `a-pac-salvar`. A lista `a-pac-lista` é um `<ul class="lista-imgs">`, com o vazio em `a-pac-vazio`.
 
 Modelo de lista editável em linha: `uCpRender` (10296+) ou `mProdRender`. Cada item tem os seis campos editáveis, botões de subir/descer e remover, e **redesenha a prévia** a cada alteração (`aPreview()`), não só ao gravar.
 
 - [ ] **Passo 2: A correção à vista do código.** O código do pacote aceita `[A-Za-z0-9-]`. No `change`/`blur` (**nunca** no `input`, que mexeria com o cursor), o campo se corrige sozinho: remove o que não é permitido e passa a maiúsculas. Modelo: `uCpCodAjustar` (10309–10311).
+
+- [ ] **Passo 2b: `aUrlOk`, e por que ela não pode ser escrita de memória.** *(Acrescentado depois da revisão: a versão anterior deste plano chamava `aUrlOk` sem nunca defini-la.)*
+
+O padrão do projeto é cada aba ter a sua (`sUrlOk` 7100, `tUrlOk` 9827, `cUrlOk` 13236). **Copie `tUrlOk` (linha 9827)**, que é a mais completa, e leia o comentário dela antes:
+
+```js
+function aUrlOk(v){
+  var limpo=urlLimpa(v);
+  if(!limpo)return false;
+  if(/^https?:\/\//i.test(limpo))return true;
+  /* caminho do proprio site: UMA barra. Com duas o endereco e protocol-relative --
+     "//evil.com/x" resolve para OUTRO host, herdando so o esquema da pagina. */
+  if(limpo.charAt(0)==='/'&&limpo.charAt(1)!=='/')return true;
+  return false;
+}
+```
+
+A recusa do endereço protocol-relative **não é detalhe**: sem ela, `//evil.com/x` passa como "caminho do próprio site" e o TidyCal redirecionaria o cliente para outro host. Está registrado na documentação como correção de uma rodada anterior.
 
 - [ ] **Passo 3: As recusas.** `aRecusa(cfg)` devolve texto ou `''`. Na ordem:
 
@@ -319,13 +365,16 @@ function aRecusa(cfg){
   }
   if(!fciVal('chave')||!fciVal('nomer')||!fciVal('cidade'))return fciRecusa('Preencha a chave Pix, o nome do recebedor e a cidade.');
   if(!fciVal('client'))return fciRecusa('Informe o Client ID do PayPal.');
+  if(!fciVal('zapnum'))return fciRecusa('Informe o WhatsApp de destino.');
   return '';
 }
 ```
 
+A recusa do WhatsApp é **incondicional** aqui, ao contrário das outras abas, e a razão é estrutural: esta aba não tem interruptor "usar WhatsApp?", e a **recusa cordial da página de obrigado** (Tarefa 7) sempre oferece o WhatsApp. Sem número, aquela tela ofereceria um botão que não leva a lugar nenhum — justo na tela de quem não conseguiu ser identificado.
+
 **A recusa de código colidido é a mais importante das seis** — ela existe porque o Pix descarta hífen, e dois pacotes `mini-1h` e `mini1h` gerariam o mesmo identificador de conciliação.
 
-- [ ] **Passo 4: Provar as recusas, uma a uma.** Como operador, na ferramenta servida: cada uma das seis recusas tem de aparecer com a mensagem certa, e a de identidade tem de **abrir o painel Identidade** e levar o foco ao campo. Nenhuma pode passar batido.
+- [ ] **Passo 4: Provar as recusas, uma a uma.** Como operador, na ferramenta servida: cada uma das nove recusas tem de aparecer com a mensagem certa, e a de identidade tem de **abrir o painel Identidade** e levar o foco ao campo. Nenhuma pode passar batido.
 
 - [ ] **Passo 5: Regressão + commit.** `scripts/verificar/regressao.sh` → OK. `git commit -m "O catalogo de pacotes, com as seis recusas"`
 
@@ -352,6 +401,16 @@ onde cada linha de `pacs` é
 ```
   {cod:'MINI-1H', nome:'Mini ensaio', dur:'1 hora', preco:420, inclui:'10 fotos tratadas', link:'https://tidycal.com/fotocerta/mini-1h'},
 ```
+
+- [ ] **Passo 2b: A blindagem das tags, e este é o ponto do plano onde ela mais se esquece.** Esta tarefa é a única que escreve `<style>` e cria um `<iframe>` como texto dentro de strings JS. As três sequências têm de sair concatenadas, **sempre**:
+
+```js
+c+='<sty'+'le>\n';           /* nunca '<style>' inteiro dentro de uma string */
+c+='</sty'+'le>\n';
+c+="var ifr=document.createElement('ifr'+'ame');";
+```
+
+O motivo não é superstição: o validador do Prosite corta o componente ao encontrar a sequência crua, e o corte é **silencioso** — o operador cola, salva, e metade do bloco não está lá.
 
 - [ ] **Passo 3: O CSS.** Num `<style>` dentro do componente (nunca no campo *CSS Customizado*). Classes com prefixo `fca-`. Obrigatórios: `text-align:left` na raiz e nos cartões; `@media` para empilhar os cartões no celular; `prefers-reduced-motion` desligando transições.
 
@@ -389,6 +448,13 @@ Regras do texto: com `DESCONTO_PIX===0` o selo some e o preço grande é o cheio
 Ao escolher um pacote: se o `<div class="fca-cal">` ainda não tem iframe, crie um; senão, só troque o `src`. O ouvinte de `message` é ligado **uma vez**, em `window`, nunca no iframe — assim ele sobrevive à troca.
 
 O tratamento de altura é **cópia fiel** do que está em 9973–10003: origem `https://tidycal.com`, prefixo `[iFrameSizer]`, `scrollToOffset` expande, `mutationObserver` recolhe, 800 ms de carência.
+
+**Mais a corrida que o modelo original não tem, porque lá não se troca de iframe** (decisão 9 do diário). O ouvinte confere a origem, mas não sabe de qual iframe veio a mensagem. Um sinal atrasado do iframe **anterior** pode chegar depois da troca e ser lido como se fosse do novo — o cliente veria a página crescer 2.350 px sem ter clicado em nada. Ao trocar de pacote:
+
+```js
+c+='modalAberto=false;recolher();ignorarAte=Date.now()+800;\n';
+```
+e todo tratamento de sinal começa com `if(Date.now()<ignorarAte)return;`.
 
 **Caminho B declarado:** se numa página publicada os sinais não chegarem, o bloco tem de continuar utilizável. Emita a altura fixa (`altdesk`/`altmob`) como `min-height` **inicial** do iframe, e trate o sinal como melhoria. Assim, sem sinal nenhum, o calendário ainda aparece inteiro.
 
@@ -455,8 +521,9 @@ function aEnderecos(cfg){
 ```js
   }else if(a.id==='pac'){
     plano.comps.push(fccItem(a,'a-out1','Agendamento por pacote — vitrine','Componente HTML desta página'));
-    plano.comps.push(fccItem(a,'a-out3','Agendamento por pacote — página de obrigado','Componente HTML da página de obrigado'));
 ```
+
+**A `a-out3` NÃO entra aqui.** Ela é consolidada na Tarefa 7, junto com o gerador que a produz. *(Correção vinda da revisão do plano: consolidá-la aqui faria a Tarefa 6 — da Entrega 1 — depender de `aBlocoObrigado`, que só existe na Entrega 2. O passo de prova desta tarefa seria inexecutável, e a Entrega 1 deixaria de ser entregável sozinha, contra a decisão 5 do diário.)*
 
 - [ ] **Passo 2: A saída que não é campo do Prosite.** Em `FCC_FORA`:
 
@@ -464,9 +531,15 @@ function aEnderecos(cfg){
   'a-out2':'cada endereco vai no campo de redirecionamento de UM tipo de agendamento, dentro do TidyCal: nao e campo do Prosite'
 ```
 
-- [ ] **Passo 3: O aviso de colisão.** Se a aba `pac` e a aba `tidy` estiverem ambas ativas na campanha, as duas trocam os mesmos marcadores na página de obrigado, e **quem rodar primeiro vence** — inclusive nos textos reserva, que são configuráveis nas duas e podem discordar. O painel avisa em vermelho, nomeando as duas abas. Modelo de aviso: o que `fccOrfas` já desenha.
+- [ ] **Passo 3: O aviso de colisão, com o contrato de como detectá-la.** *(A versão anterior deste passo dizia "avise" sem dizer como — corrigido depois da revisão.)*
 
-- [ ] **Passo 4: Provar.** Gerar as três saídas e conferir no painel: as duas de componente aparecem com a página certa; a `a-out2` aparece na lista de "fora do Prosite" com o motivo; **`fccOrfas` não acusa nenhuma órfã**; o aviso de colisão aparece com as duas abas ligadas e some com uma só. Provar também que o preset salva/aplica e que "Exportar tudo" leva a aba nova.
+**Quando avisar:** as duas abas ativas na campanha **e** a da aba `tidy` com a página de obrigado ligada. O estado de "ativa" é `FCG.ativas[a.id]` — o mesmo que `fccOrfas` já consulta (linha 17260). A aba `tidy` liga a página de obrigado no campo `t-ob-usar` (radio, valor `'sim'`), lido do fragmento `st.t`.
+
+**Por que avisar, e o texto tem de dizer isto:** não é disputa de campo — a `tidy` entrega uma **Tag Body** e esta entrega um **componente**, que não se sobrescrevem. O que colide é o **comportamento**: os dois scripts trocam os mesmos marcadores (`{{nome}}`, `{{data}}`, `{{hora}}`) na mesma página, e quem rodar primeiro vence, **inclusive nos textos reserva**, que são configuráveis em cada aba e podem discordar. O visitante veria o texto reserva de uma aba onde o dono configurou o da outra, sem erro nenhum.
+
+O painel avisa em vermelho, nomeando as duas abas e os marcadores em disputa. Não escolhe por conta própria.
+
+- [ ] **Passo 4: Provar.** Gerar as **duas** saídas que existem nesta entrega e conferir no painel: a `a-out1` aparece como componente da página de agendamento; a `a-out2` aparece na lista de "fora do Prosite" com o motivo; **`fccOrfas` não acusa nenhuma órfã** (a `a-out3` ainda está vazia, e saída vazia não é órfã); o aviso de colisão aparece com as duas abas ligadas e some com uma só. Provar também que o preset salva/aplica e que "Exportar tudo" leva a aba nova.
 
 - [ ] **Passo 5: Regressão + commit.**
 
@@ -512,6 +585,21 @@ Marcadores: `{{nome}}`, `{{data}}`, `{{hora}}`, `{{quando}}` (da URL) e `{{pacot
 ```
 A limpeza é a mesma de `pTxidLimpo`: `String(t).replace(/[^A-Za-z0-9]/g,'').substring(0,25)`.
 
+**O identificador tem de sobreviver a um F5, e este passo é o mais importante da tarefa** (decisão 7 do diário; achado da revisão do plano). Escrito do jeito natural, o sufixo aleatório seria sorteado a cada carregamento — e daí saem dois defeitos, os dois silenciosos:
+
+1. **O prazo reiniciaria a cada recarga**, porque a chave que guarda a primeira visita incluiria o identificador.
+2. **Cobranças fantasma**: o mesmo identificador vai no `txid` do Pix e no `custom_id` do PayPal. Recarregar antes de pagar geraria um identificador novo por carregamento, e o dono veria várias cobranças diferentes para uma reserva só.
+
+**A saída, e ela é compartilhada com a Tarefa 9:** existe **um** registro por reserva no `localStorage`, guardando as duas coisas — o instante da primeira visita e o sufixo sorteado. A chave **não depende do identificador**:
+
+```
+fcapac:<cod do pacote>:<o valor de "quando" COMO CHEGOU na URL, mesmo ilegivel>
+```
+
+`quando` cru é texto estável e é o que distingue dois agendamentos do mesmo pacote. Sem `quando` nenhum, a chave cai para `fcapac:<cod>` e dois agendamentos do mesmo pacote compartilham o registro — **limite declarado**, e o comentário do código tem de dizê-lo.
+
+Ao carregar: lê o registro; se não existir, cria com `Date.now()` e o sufixo sorteado, e grava. O identificador sai sempre do registro, nunca de um sorteio novo.
+
 - [ ] **Passo 2: O Pix.** `total()` devolve o preço do pacote. `fcTotalPixSrc(cfg.descpix,true,false)` emite o `totalPix()`. `FC_PIX_SRC.montarPayload` monta o payload, com `CHAVE_PIX`/`NOME_RECEBEDOR`/`CIDADE`/`CODIGO_PEDIDO` declarados antes. O QR usa **o desenho da `/pagar`** (14505–14520), com a caixa sumindo se a biblioteca não carregar.
 
 - [ ] **Passo 3: O cartão.** SDK do PayPal, `createOrder` com um item (nome = nome do pacote + identificador), `custom_id` = identificador. **Sem `invoice_id`** (é único por conta; a segunda cobrança com o mesmo seria recusada). A linha de parcelas abaixo do botão.
@@ -542,6 +630,10 @@ Guardado em `localStorage`, chave `fcapac:<codigo do pacote>:<identificador>`.
 - [ ] **Passo 3: O texto diz a regra de verdade.** Quem libera o horário é o dono, à mão. O relógio é recado, não tranca.
 
 - [ ] **Passo 4: Provar** com relógio falso (`scripts/verificar/pagina.mjs` aceita `relogio`): dentro do prazo, no limite, vencido, e com `quando` ilegível.
+
+- [ ] **Passo 4b: Provar o que o passo 4 NÃO prova — a recarga.** *(Este passo existe porque a revisão do plano mostrou que o passo 4 passaria com bandeiras verdes sobre um defeito real.)* Com `quando` **ilegível**, carregue a página, leia o identificador e o prazo; **recarregue**; leia de novo. **Os dois têm de ser idênticos.** Se o identificador mudar, o prazo reiniciou e a conciliação quebrou — e nenhum teste de relógio falso teria percebido.
+
+Repita com `quando` legível e com dois agendamentos do mesmo pacote em datas diferentes (identificadores têm de ser **diferentes** entre si e estáveis cada um).
 
 - [ ] **Passo 5: Regressão + commit.**
 
@@ -574,6 +666,13 @@ Ele existe por um motivo só, e o comentário do commit tem de dizê-lo: **a pr�
 - [ ] **Passo 1: A décima aba entra na fotografia.** Em `geradores.mjs`: `ABAS` ganha `['aba-pac','a-gerar']`, `SAIDAS` ganha `'a-out1','a-out2','a-out3'`, e `conteudo(pg)` cadastra **dois** pacotes e preenche os campos da aba.
 
 Sem isso, todo o caminho da aba nova fica fora da regressão — a mesma armadilha que já aconteceu em 01/09 com o cupom da Mini loja, e que está registrada no próprio arquivo.
+
+- [ ] **Passo 1b: Os testes que a spec §13 pede e que nenhuma tarefa tinha assumido.** *(Lacuna achada na revisão do plano.)*
+
+- **A matriz do arredondamento da parcela:** preço que divide exato (R$ 420,00 em 6x = R$ 70,00), preço que não divide (R$ 700,00 em 6x = **R$ 116,67**, e nunca R$ 116,66), preço com centavos (R$ 419,90), e parcelas de 1 a 12. **Invariante em toda combinação: `parcela × N ≥ preco`.**
+- **A varredura da palavra "PayPal"**: ela não pode aparecer em nenhum texto que a ferramenta escreva nas três saídas. O que sobrar tem de ser só o que o SDK desenha em tempo de execução, e o SDK não está no texto gerado.
+- **O identificador**, com data legível e ilegível, e a prova de estabilidade da Tarefa 9 passo 4b.
+- **Celular** em 360, 390 e 430 px de largura, nas duas telas, sem rolagem horizontal.
 
 - [ ] **Passo 2: A bateria completa.** Rode tudo e leia o resultado:
 
