@@ -13488,6 +13488,13 @@ function aRecusa(cfg){
     if(vistosCp[limpo])return 'Os cupons "'+vistosCp[limpo]+'" e "'+cpc+'" têm o mesmo código ("'+limpo+'"). O cliente digitaria um cupom só, e a página não tem como saber qual dos dois cadastros aplicar — troque um dos dois.';
     vistosCp[limpo]=cpc;
   }
+  /* Mesma guarda de uRecusa/mRecusa (10966/17690): pixChaveErro confere o FORMATO da chave
+     (e-mail, telefone, CPF/CNPJ com digito, aleatoria), nao so se o campo esta vazio. Sem
+     ela, uma chave malformada passava direto: as outras tres abas recusavam gerar e apontavam
+     o campo, e esta gerava o codigo com a chave errada -- o banco do cliente recusa o
+     pagamento sem nenhuma mensagem na tela. */
+  var erroChave=pixChaveErro(pixLimpar(fciBruto('chave')),fciBruto('chave'));
+  if(erroChave)return erroChave;
   if(!fciVal('chave')||!fciVal('nomer')||!fciVal('cidade'))return fciRecusa('Preencha a chave Pix, o nome do recebedor e a cidade.');
   if(!fciVal('client'))return fciRecusa('Informe o Client ID do PayPal.');
   if(!fciVal('zapnum'))return fciRecusa('Informe o WhatsApp de destino.');
