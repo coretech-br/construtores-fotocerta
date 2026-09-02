@@ -1,7 +1,7 @@
 /* ============================================================================
    A FOTOGRAFIA DOS GERADORES
    ============================================================================
-   Exercita as oito abas na ARVORE indicada e grava, num JSON, o hash de cada saida
+   Exercita as dez abas na ARVORE indicada e grava, num JSON, o hash de cada saida
    e o link completo de cada cobranca. Duas fotografias comparadas dizem, sem opiniao,
    se uma rodada mexeu no que ela nao devia.
 
@@ -26,9 +26,9 @@ if(!ARV || !PORTA || !SAIDA){
    lista mesmo sem o cenario exercitar a consolidacao: aqui os cinco PRECISAM sair vazios, e a
    fotografia passa a cobrar isso. Saida que so aparece as vezes e onde o lixo de uma passagem
    anterior se esconde. */
-const SAIDAS = ['s-out','l-out','t-out1','t-out2','t-out3','t-out4','t-out5','u-out','b-out1','b-out2','b-out3','b-out4','b-out5','b-out6','b-out7','c-out1','p-out1','m-out','e-out1','e-out2'];
+const SAIDAS = ['s-out','l-out','t-out1','t-out2','t-out3','t-out4','t-out5','u-out','b-out1','b-out2','b-out3','b-out4','b-out5','b-out6','b-out7','c-out1','p-out1','m-out','e-out1','e-out2','a-out1','a-out2','a-out3'];
 const ABAS = [['aba-slide','s-gerar'],['aba-leads','l-gerar'],['aba-tidy','t-gerar'],
-  ['aba-uni','u-gerar'],['aba-bor','b-gerar'],['aba-cnt','c-gerar'],['aba-cob','p-gerar'],['aba-loja','m-gerar'],['aba-efe','e-gerar']];
+  ['aba-uni','u-gerar'],['aba-bor','b-gerar'],['aba-cnt','c-gerar'],['aba-cob','p-gerar'],['aba-loja','m-gerar'],['aba-efe','e-gerar'],['aba-pac','a-gerar']];
 
 /* Identidade de teste. NAO sao dados reais: a chave e um e-mail de exemplo e o Client ID
    e inventado -- este arquivo e versionado num repositorio publico. */
@@ -84,6 +84,28 @@ async function conteudo(pg){
   await set(pg,'m-pnome','Moldura'); await set(pg,'m-ppreco','120'); await set(pg,'m-pcat','Molduras');
   await set(pg,'m-pimg','https://storage.alboom.ninja/moldura.jpg'); await clicar(pg,'m-prod-salvar');
   await cupons(pg,'m');
+  /* AGENDAMENTO POR PACOTE. Dois pacotes de proposito, e os precos nao sao aleatorios: 420 com
+     6 parcelas divide exato (70,00), 700 com 6 parcelas NAO divide (116,6667) -- e a parcela
+     tem de arredondar para CIMA (116,67), nunca para baixo, senao a soma das seis fica menor
+     que o preco escrito na tela (mesma licao do centavo do Pix, ago/2026). Sem os dois casos a
+     fotografia nao exercitaria a direcao do arredondamento, so o caminho feliz.
+     A ABA E NOVA e nao existe na referencia (main) enquanto a rodada nao mescla -- guardado
+     com a MESMA checagem que o loop de ABAS ja usa mais abaixo, para a captura da referencia
+     nao lancar tentando clicar num botao que ainda nao existe la. */
+  if(await pg.$('#aba-pac')){
+    await clicar(pg,'aba-pac');
+    await set(pg,'a-urlobrigado','https://www.fotocerta.com.br/obrigado');
+    await set(pg,'a-prefixo','FC');
+    await set(pg,'a-parcelas','6');
+    for(const p of [
+      ['MINI','Mini ensaio','1 hora','420','10 fotos tratadas','https://tidycal.com/fotocerta/mini'],
+      ['COMPLETO','Ensaio completo','2 horas','700','30 fotos tratadas','https://tidycal.com/fotocerta/completo']
+    ]){
+      await set(pg,'a-pcod',p[0]); await set(pg,'a-pnome',p[1]); await set(pg,'a-pdur',p[2]);
+      await set(pg,'a-ppreco',p[3]); await set(pg,'a-pinclui',p[4]); await set(pg,'a-plink',p[5]);
+      await clicar(pg,'a-pac-salvar');
+    }
+  }
 }
 
 /* OS CUPONS ENTRAM NO CENARIO, e nao por capricho. Na Mini loja o campo de cupom so existe

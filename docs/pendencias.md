@@ -48,15 +48,22 @@ Entregue em 01/09/2026, fechando a acentuação: a **mensagem do WhatsApp passou
 
 **Opção registrada, não implementada:** mandar tambem o `invoice_id` ao PayPal. Ele apareceria no histórico e nos e-mails do comprador, mas é **único por conta** — a segunda cobrança com o mesmo identificador seria recusada. Serve como trava contra pagamento em duplicidade; é decisão do dono.
 
+Entregue em 02–03/09/2026: a **décima aba, Agendamento por pacote** (`docs/specs/2026-09-02-agendamento-por-pacote-design.md`, doze decisões em `docs/decisoes-2026-09-02-agendamento-por-pacote.md`) — vitrine de dois passos com iframe único sob demanda, os N endereços de redirecionamento e a página de obrigado com pagamento e prazo de reserva. A rodada foi partida em duas entregas; a verificação final (Tarefa 11) unificou `precoPix`/`parcelaDe`/o texto da linha do cartão/a serialização do catálogo entre os dois geradores (prova byte a byte das três saídas, antes e depois), colocou a aba na fotografia da regressão (`scripts/verificar/geradores.mjs`, com dois pacotes de propósito para exercitar o arredondamento da parcela nas duas direções) e corrigiu, ao rodar as varreduras de sanidade, dois defeitos deixados por rodadas anteriores: um `<script>` cru dentro de um comentário de `aBlocoObrigado` e uma palavra acentuada dentro de outro comentário — nenhum dos dois mexia em lógica, e a regressão das 21 saídas antigas continuou idêntica à `main`. O que ficou de fora está nas duas seções abaixo.
+
 A próxima sai do que o dono encontrar no uso.
 
 ---
 
 ## O que depende só do dono
 
-Em 23/08/2026 o dono fechou os **sete** itens desta lista. **Nada depende dele no momento.**
+Em 23/08/2026 o dono fechou os **sete** itens desta lista. Dois itens novos entraram em 02–03/09/2026, com a décima aba.
 
-O sétimo — atualizar o espelho da Tag Body da hospedeira — foi resolvido **eliminando a causa**: os espelhos deixaram de existir. Ao classificar o que havia em `prosite/`, tudo era reproduzível pelos construtores, inclusive a âncora inteligente e o plano B. Ver a decisão registrada na `CLAUDE.md` e na documentação.
+O sétimo dos antigos — atualizar o espelho da Tag Body da hospedeira — foi resolvido **eliminando a causa**: os espelhos deixaram de existir. Ao classificar o que havia em `prosite/`, tudo era reproduzível pelos construtores, inclusive a âncora inteligente e o plano B. Ver a decisão registrada na `CLAUDE.md` e na documentação.
+
+### Novo em 02–03/09/2026, décima aba
+
+- **Colar os três códigos gerados e criar os tipos de agendamento no TidyCal**, cada um com o endereço de redirecionamento que a saída 2 (`a-out2`) gera para ele — a aba não sabe fazer isso sozinha, porque o cadastro dos tipos é do lado do TidyCal.
+- **Confirmar como o modal do TidyCal se comporta dentro do bloco novo, numa página já publicada.** É a única incógnita que não se responde daqui: o bloco cria o iframe com as próprias mãos (ao contrário da aba TidyCal, que usa o `embed.js` deles), herdando só a origem e o prefixo dos sinais que eles emitem — mas o comportamento real do modal, num navegador de verdade, só se vê publicado. Se o modal aparecer **cortado**, a saída é ligar `ALTURA_SEMPRE=true` no topo do bloco (comentário explicando o custo: um vão vazio embaixo do calendário) e regerar.
 
 ### Fechado em 23/08/2026, com o que cada um provou
 
@@ -79,6 +86,11 @@ O sétimo — atualizar o espelho da Tag Body da hospedeira — foi resolvido **
 Em 23/08/2026 o dono pediu que **todas** fossem feitas. Ficou uma, e ela é dele:
 
 1. **A Tag Head da landing de Natal pode ainda ter a regra antiga de movimento reduzido** (`[style], * { animation-duration: 0.01ms !important }`), que mata toda animação **daquela página** para quem pede menos movimento. Quem a substitui é o **código 1 da aba Bordas com efeito**: gerar com o efeito em uso e colar no lugar do bloco antigo. Não é urgente, e o alcance é de uma página só — não do site, porque **o Prosite não tem cabeçalho global**.
+
+### Novas em 02–03/09/2026, décima aba
+
+2. **O pedido do PayPal (`actions.order.create`) virou a quarta cópia escrita à mão**, sem fonte compartilhada — já eram três (Checkout, `/pagar`, Mini loja) antes desta rodada, e a spec original dizia, erradamente, que havia uma fonte única a reusar; a medição corrigiu isso. Extrair a fonte única agora exigiria provar a igualdade byte a byte das quatro saídas existentes no meio de outra rodada — trabalho para uma rodada própria, focada só nisso.
+3. **Os textos reserva dos sete marcadores da página de obrigado e a mensagem de erro do cartão ficaram fixos no bloco gerado**, em vez de virar campo da aba (fora do contrato da Tarefa 1 desta rodada). O operador pode editá-los à mão no código já colado no Prosite, mas não pela ferramenta — diferente de `T_OB_VARS`/`t-ob-fb-*`, que a página de obrigado do TidyCal já oferece como campo.
 
 ### Fechadas em 23/08/2026
 

@@ -384,6 +384,8 @@
   .u-pv-moldura iframe{border:0;display:block;background:#fff}
   .m-pv-moldura{overflow:hidden;max-width:100%;margin:0 auto;background:#fff;border:1px solid var(--linha);border-radius:8px}
   .m-pv-moldura iframe{border:0;display:block;background:#fff}
+  .a-pv-moldura{overflow:hidden;max-width:100%;margin:0 auto;background:#fff;border:1px solid var(--linha);border-radius:8px}
+  .a-pv-moldura iframe{border:0;display:block;background:#fff}
   /* aviso ambar de recurso que nao vale agora: nasceu no desconto Pix da aba Checkout e
      passou a servir tambem a Contagem regressiva (pulsar x alternar deslizando). Uma regra so,
      sem prefixo de aba, porque o visual e o mesmo nos dois lugares. */
@@ -727,6 +729,7 @@
   <button class="aba" id="aba-cob" role="tab" aria-selected="false">Link de cobrança</button>
   <button class="aba" id="aba-loja" role="tab" aria-selected="false">Mini loja</button>
   <button class="aba" id="aba-efe" role="tab" aria-selected="false">Efeitos de página</button>
+  <button class="aba" id="aba-pac" role="tab" aria-selected="false">Agendamento por pacote</button>
 </div>
 
 <!-- ==================== CONSTRUTOR: SLIDESHOW ==================== -->
@@ -3053,6 +3056,149 @@
   </div>
 </div>
 
+<!-- ==================== CONSTRUTOR: AGENDAMENTO POR PACOTE (decima aba, 02/09/2026) ==================== -->
+<div class="painel" id="painel-pac" role="tabpanel">
+  <p class="descricao"><b>Agendamento por pacote</b> — agrupa vários tipos de agendamento do TidyCal numa página só. O cliente escolhe o pacote pelo preço e vê apenas o calendário daquela duração. Gera também a página de obrigado, que cobra o pacote agendado por Pix ou cartão.</p>
+
+  <div class="secao primeira"><span class="secao-n">1</span> Pacotes</div>
+  <div class="grade">
+    <div>
+      <fieldset>
+        <legend>Cadastrar pacote</legend>
+        <div class="caixa-editor">
+          <label for="a-pcod">Código <small>(identifica o pacote na URL e no Pix — letras, números e hífen)</small></label>
+          <input type="text" id="a-pcod" placeholder="MINI-1H">
+          <label for="a-pnome">Nome</label>
+          <input type="text" id="a-pnome" placeholder="Mini ensaio">
+          <label for="a-pdur">Duração</label>
+          <input type="text" id="a-pdur" placeholder="1 hora">
+          <label for="a-ppreco">Preço</label>
+          <input type="number" id="a-ppreco" placeholder="420" min="0" step="0.01">
+          <label for="a-pinclui">O que inclui</label>
+          <input type="text" id="a-pinclui" placeholder="10 fotos tratadas">
+          <label for="a-plink">Link do TidyCal deste pacote</label>
+          <input type="text" id="a-plink" placeholder="https://tidycal.com/fotocerta/mini-1h">
+          <div class="acoes"><button class="botao" id="a-pac-salvar">Adicionar pacote</button></div>
+        </div>
+      </fieldset>
+    </div>
+    <div>
+      <fieldset>
+        <legend>Pacotes cadastrados</legend>
+        <ul class="lista-imgs" id="a-pac-lista"></ul>
+        <p class="vazio" id="a-pac-vazio">Nenhum pacote cadastrado ainda. Use o formulário ao lado.</p>
+      </fieldset>
+    </div>
+  </div>
+
+  <div class="secao"><span class="secao-n">2</span> Página de obrigado e pagamento</div>
+  <div class="grade">
+    <div>
+      <fieldset>
+        <legend>Página de obrigado</legend>
+        <label for="a-urlobrigado">Endereço da página de obrigado</label>
+        <input type="text" id="a-urlobrigado" value="" placeholder="https://www.fotocerta.com.br/obrigado">
+        <p class="ajuda">Se você mudar o preço de um pacote, quem agendou antes e pagar depois verá o preço novo. O preço mora no código da página, não no endereço — foi assim que se evitou que o cliente pudesse editá-lo na barra de endereço.</p>
+        <label for="a-prefixo">Prefixo do identificador de conciliação <small>(aparece no txid do Pix e no extrato)</small></label>
+        <input type="text" id="a-prefixo" value="" placeholder="ex.: FC">
+        <label for="a-prazoh">Prazo da reserva <small>(horas; contadas a partir da primeira visita à página de obrigado)</small></label>
+        <input type="number" id="a-prazoh" value="24" min="1" max="720" step="1">
+      </fieldset>
+    </div>
+    <div>
+      <fieldset>
+        <legend>Pagamento</legend>
+        <label for="a-descpix">Desconto no Pix <small>(percentual; 0 = sem desconto)</small></label>
+        <input type="number" id="a-descpix" value="5" min="0" max="90" step="0.5">
+        <label for="a-parcelas">Parcelas no cartão</label>
+        <input type="number" id="a-parcelas" value="1" min="1" max="12" step="1">
+        <p class="ajuda">Este número é uma promessa sobre o que o cliente vai encontrar no cartão, e quem decide isso é a operadora — a ferramenta não tem como conferir. Deixe em 1 até confirmar no PayPal quantas parcelas a sua conta oferece. O valor da parcela é calculado dividindo o preço, e afirma parcelamento sem juros.</p>
+        <p class="ajuda">Os dois botões de cartão são desenhados pelo PayPal, e o texto e a marca deles são do PayPal — isso não dá para mudar. Em todo o resto da página, o cliente lê apenas "no cartão".</p>
+      </fieldset>
+    </div>
+  </div>
+
+  <div class="secao"><span class="secao-n">3</span> Aparência e textos</div>
+  <div class="grade">
+    <div>
+      <fieldset>
+        <legend>Cores</legend>
+        <label>Cor de destaque</label>
+        <div class="cor-linha"><input type="color" id="a-c1" value="#0F3A30"><input type="text" id="a-c1-t" value="#0F3A30"></div>
+        <label>Fundo do cartão</label>
+        <div class="cor-linha"><input type="color" id="a-c2" value="#ffffff"><input type="text" id="a-c2-t" value="#ffffff"></div>
+        <label>Cor do texto</label>
+        <div class="cor-linha"><input type="color" id="a-c3" value="#333333"><input type="text" id="a-c3-t" value="#333333"></div>
+      </fieldset>
+    </div>
+    <div>
+      <fieldset>
+        <legend>Textos</legend>
+        <label for="a-t1">Título da vitrine</label>
+        <input type="text" id="a-t1" value="Agende seu ensaio">
+        <label for="a-t2">Rótulo do passo 1</label>
+        <input type="text" id="a-t2" value="Escolha o pacote">
+        <label for="a-t3">Rótulo do passo 2</label>
+        <input type="text" id="a-t3" value="Escolha o dia e o horário">
+        <label for="a-t4">Botão de trocar de pacote</label>
+        <input type="text" id="a-t4" value="Trocar pacote">
+        <label for="a-t5">Título da página de obrigado</label>
+        <input type="text" id="a-t5" value="Tudo certo!">
+      </fieldset>
+      <fieldset>
+        <legend>Altura do calendário</legend>
+        <p class="ajuda">Medidas calibradas em produção, com o formulário do TidyCal aberto. São o mesmo par usado na aba Agendamento TidyCal — não precisam mudar a não ser que o seu formulário seja diferente do padrão.</p>
+        <label for="a-altdesk">Altura com o modal aberto — desktop <small>(pixels)</small></label>
+        <input type="number" id="a-altdesk" value="2350" min="800" max="6000" step="50">
+        <label for="a-altmob">Altura com o modal aberto — celular <small>(pixels)</small></label>
+        <input type="number" id="a-altmob" value="2700" min="800" max="6000" step="50">
+        <label for="a-largmob">Largura de corte do modo celular <small>(pixels, de 320 a 1024)</small></label>
+        <input type="number" id="a-largmob" value="700" min="320" max="1024" step="10">
+      </fieldset>
+    </div>
+  </div>
+
+  <div class="secao"><span class="secao-n">4</span> Biblioteca de presets</div>
+  <div class="grade" id="fcp-a-box"></div>
+
+  <div class="secao"><span class="secao-n">5</span> Prévia e códigos gerados</div>
+  <div class="acoes" style="margin-bottom:14px">
+    <button class="botao" id="a-gerar">Gerar código</button>
+    <button class="botao claro" id="a-atualizar">Atualizar prévia</button>
+  </div>
+  <div class="grade">
+    <div>
+      <div class="pv-area"><div id="a-pv-box"></div></div>
+      <p class="ajuda">A prévia roda o código gerado de verdade: escolher um pacote acende o passo 2 e troca de preço ao vivo. O que ainda difere da página publicada: o calendário do TidyCal não carrega aqui (é outro domínio, e a prévia não deve depender de rede) — no lugar dele aparece um retângulo cinza avisando "Aqui entra o calendário do TidyCal deste pacote."; e o quadro não carrega o CSS do tema do site.</p>
+
+      <label for="a-pv-pac" style="display:block;margin-top:16px">Prévia da página de obrigado — prever como</label>
+      <select id="a-pv-pac"></select>
+      <div class="pv-area" style="margin-top:8px"><div id="a-pv-ob-box"></div></div>
+      <p class="ajuda">Esta prévia navega de verdade para um endereço próprio da ferramenta com <code>?pac=</code> do pacote escolhido, e executa o componente 3 de verdade ali dentro — inclusive o identificador de conciliação e o prazo da reserva. O que ainda difere da página publicada: o SDK do PayPal não carrega aqui (outro domínio) — no lugar do botão real aparece um desenho, com o valor que iria na ordem medido no próprio bloco; e o botão "Falar no WhatsApp" tem o mesmo endereço do bloco de verdade, então evite clicar nele dentro da prévia.</p>
+    </div>
+    <div>
+      <div class="saida">
+        <h3>1. Componente HTML da vitrine
+          <button class="botao mini" id="a-copy1" style="margin-left:8px">Copiar</button>
+          <span class="aviso-copiado" id="a-cop1">Copiado!</span></h3>
+        <textarea id="a-out1" readonly spellcheck="false" style="height:220px" placeholder="O código gerado aparece aqui."></textarea>
+      </div>
+      <div class="saida">
+        <h3>2. Endereços de redirecionamento (cole no TidyCal)
+          <button class="botao mini" id="a-copy2" style="margin-left:8px">Copiar</button>
+          <span class="aviso-copiado" id="a-cop2">Copiado!</span></h3>
+        <textarea id="a-out2" readonly spellcheck="false" style="height:150px" placeholder="Um endereço por pacote."></textarea>
+      </div>
+      <div class="saida">
+        <h3>3. Componente HTML da página de obrigado
+          <button class="botao mini" id="a-copy3" style="margin-left:8px">Copiar</button>
+          <span class="aviso-copiado" id="a-cop3">Copiado!</span></h3>
+        <textarea id="a-out3" readonly spellcheck="false" style="height:220px" placeholder="O código gerado aparece aqui."></textarea>
+      </div>
+    </div>
+  </div>
+</div>
+
 </div>
 
 </div><!-- /app-esq -->
@@ -3100,8 +3246,8 @@
    QUEM IMPEDE QUE ELE MINTA: scripts/conferir-versoes.sh, que recusa index.html
    alterado sem a versao mudar junto -- a mesma disciplina do fc-compartilhado.js,
    e pela mesma razao: carimbo que ninguem confere e o defeito de amanha. */
-var FC_VERSAO='2026-09-01e';
-var FC_PUBLICADO='2026-09-01 23:34';   /* America/Sao_Paulo -- escrito pelo carimbador */
+var FC_VERSAO='2026-09-02a';
+var FC_PUBLICADO='2026-09-02 06:47';   /* America/Sao_Paulo -- escrito pelo carimbador */
 (function(){
   var el=document.getElementById('fc-versao');
   if(!el) return;
@@ -4015,7 +4161,12 @@ var ABAS=[
    pref:'e',fora:[],resumo:ePresetResumo,redesenhar:ePresetDepois,antesDeSalvar:ePresetAntes,
    presetOk:ePresetOk,
    exemplo:'ex.: Natal 2026 - neve na hospedeira',
-   guarda:'tudo o que está configurado nesta aba — o efeito escolhido, o alcance (página inteira ou dentro de um bloco) com a altura, e os campos de <b>todos</b> os efeitos: quantidade, tamanho, deriva e cor das partículas, as quatro cores do confete, o tamanho, o desfoque e as três cores da aurora, a quantidade, o tamanho e as quatro cores das luzes, mais a duração do ciclo, a opacidade, a proporção no celular e o <b>fundo da prévia</b>.'}
+   guarda:'tudo o que está configurado nesta aba — o efeito escolhido, o alcance (página inteira ou dentro de um bloco) com a altura, e os campos de <b>todos</b> os efeitos: quantidade, tamanho, deriva e cor das partículas, as quatro cores do confete, o tamanho, o desfoque e as três cores da aurora, a quantidade, o tamanho e as quatro cores das luzes, mais a duração do ciclo, a opacidade, a proporção no celular e o <b>fundo da prévia</b>.'},
+  {id:'pac', nome:'Agendamento por pacote', chaves:['a'],       coleta:aColeta,restaura:aRestaura,gerar:aGerar,
+   pref:'a',fora:[],resumo:aPresetResumo,redesenhar:aPresetDepois,antesDeSalvar:aPresetAntes,
+   listas:[['a.pacotes',{cod:'',nome:'',dur:'',preco:0,inclui:'',link:''},'cod']],
+   exemplo:'ex.: Ensaios 2026 - pacotes',
+   guarda:'tudo o que está configurado nesta aba — os pacotes (código, nome, duração, preço, o que inclui e o link do TidyCal de cada um), o endereço da página de obrigado, o prefixo do identificador, o prazo da reserva, o desconto no Pix, as parcelas, as alturas do calendário, textos e cores.'}
 ];
 var fcFrag={};       /* ultimo pedaco bom de cada aba, para nao apagar o que a aba quebrada tinha */
 var fcSoLeitura={};  /* abas que falharam ao restaurar: param de coletar do DOM ate recarregar */
@@ -4149,6 +4300,7 @@ var CORES_LIVRES=[['l-corbtn','#25D366'],['l-c1','#075E54'],['l-c2','#ffffff'],[
   ['c-corujacorpo','#FDFBF6'],['c-corujadet','#FFC94A'],['c-curg','#8C1D18'],
   ['p-c1','#075E54'],['p-c2','#ffffff'],['p-c3','#333333'],
   ['p-corujacorpo','#ffffff'],['p-corujadet','#075E54'],
+  ['a-c1','#0F3A30'],['a-c2','#ffffff'],['a-c3','#333333'],
   /* As cinco da PALETA global entram na mesma lista, e nao numa segunda lista dentro do bloco
      da identidade: a correcao a vista e a mesma correcao, e duas listas divergiriam no dia em
      que uma cor nova entrasse so numa delas. Elas nao sao alcancadas por fcCoresAjustar (que
@@ -4178,6 +4330,7 @@ function fcCorRedesenhar(idBase){
   if(p==='c-'){cPreview(true);return;}
   if(p==='p-'){pPreview(true);return;}
   if(p==='m-'){mPreview(true);return;}
+  if(p==='a-'){aPreview(true);return;}
 }
 document.addEventListener('input',salvarEstado);
 document.addEventListener('change',salvarEstado);
@@ -4694,6 +4847,7 @@ function fciPreviaDaAberta(imediato){
   if(id==='cnt'){cPreview(!!imediato);return;}
   if(id==='cob'){pPreview(!!imediato);return;}
   if(id==='loja'){mPreview(!!imediato);return;}
+  if(id==='pac'){aPreview(!!imediato);return;}
 }
 /* A linha que torna a copia VISIVEL depois de feita: nao basta copiar, e preciso poder ver que
    as abas ja nao conferem com a paleta. E o mesmo desenho da marca de origem do preset geral --
@@ -12845,6 +12999,1208 @@ function ePresetDepois(){
 }
 
 /* ============================================================
+   AGENDAMENTO POR PACOTE (decima aba, 02/09/2026)
+   ============================================================
+   Vitrine com N tipos de agendamento do TidyCal agrupados por preco/duracao, mais a pagina
+   de obrigado que cobra o pacote agendado. Ver a spec em
+   docs/specs/2026-09-02-agendamento-por-pacote-design.md e o plano em
+   docs/superpowers/plans/2026-09-02-agendamento-por-pacote.md.
+
+   Tarefa 1 (esqueleto): registro em ABAS, botao, painel, wiring, e as duas funcoes de
+   persistencia (aColeta/aRestaura). Passo 3b da Tarefa 1: os campos de configuracao das secoes
+   2 e 3 (pagina de obrigado, pagamento, cores, textos e altura do calendario), com os tres
+   avisos de interface que a spec pede por nome. Tarefa 2: o catalogo de pacotes (secao 1) --
+   formulario, lista editavel, aUrlOk e as seis recusas. aGerar ja monta cfg e chama aRecusa;
+   quem falta preencher (Tarefas 3 a 9) sao as tres saidas (aBlocoVitrine, aEnderecos,
+   aBlocoObrigado) e aPreview, que ainda sao esqueletos vazios de proposito. */
+var aPacotes=[];
+/* Faixa declarada dos campos numericos desta aba, no formato de U_NUMS/E_NUMS: [id, padrao,
+   min, max, inteiro]. */
+var A_NUMS=[['a-prazoh',24,1,720,true],['a-descpix',5,0,90,false],['a-parcelas',1,1,12,true],
+  ['a-altdesk',2350,800,6000,true],['a-altmob',2700,800,6000,true],['a-largmob',700,320,1024,true]];
+function aPreso(id){return fcPreso(A_NUMS,id);}
+/* ===== catalogo de pacotes (Tarefa 2) =====
+   Modelo: uCpAdd/uCpRender/uCpCodAjustar (10366+), a lista editavel em linha de cupons do
+   Checkout. Cada pacote tem seis campos editaveis direto na lista, sem modo de edicao a parte
+   (diferente de uProdRender, que abre o cadastro para editar) -- o mesmo padrao que os cupons
+   ja usam aqui do lado. */
+function aPacAdd(){
+  var cod=String($('a-pcod').value).trim().replace(/[^A-Za-z0-9-]/g,'').toUpperCase();
+  if(!cod){alert('Informe o código do pacote.');return;}
+  var nome=$('a-pnome').value.trim();
+  if(!nome){alert('Informe o nome do pacote.');return;}
+  var preco=parseFloat(String($('a-ppreco').value).replace(',','.'));
+  if(isNaN(preco)||preco<=0){alert('Informe o preço do pacote (maior que zero).');return;}
+  aPacotes.push({cod:cod,nome:nome,dur:$('a-pdur').value.trim(),preco:preco,
+    inclui:$('a-pinclui').value.trim(),link:$('a-plink').value.trim()});
+  $('a-pcod').value='';$('a-pnome').value='';$('a-pdur').value='';$('a-ppreco').value='';
+  $('a-pinclui').value='';$('a-plink').value='';
+  aPacRender();salvarEstado();aPreview();
+}
+/* Correcao a vista do codigo, no padrao de uCpCodAjustar: so em 'change'/'blur', nunca no
+   'input' -- corrigir a cada tecla mexeria com o cursor. Remove o que nao e [A-Za-z0-9-] e
+   passa a maiusculas, para a tela nunca mostrar um codigo diferente do que o gerador vai usar. */
+function aPacCodAjustar(inp,i){
+  var limpo=String(inp.value).replace(/[^A-Za-z0-9-]/g,'').toUpperCase();
+  aPacotes[i].cod=limpo;
+  if(limpo===inp.value)return false;
+  inp.value=limpo;
+  salvarEstado();aPreview();
+  return true;
+}
+function aPacMove(i,d){
+  var j=i+d;if(j<0||j>=aPacotes.length)return;
+  var t=aPacotes[i];aPacotes[i]=aPacotes[j];aPacotes[j]=t;
+  aPacRender();salvarEstado();aPreview();
+}
+function aPacDel(i){aPacotes.splice(i,1);aPacRender();salvarEstado();aPreview();}
+function aPacRender(){
+  var ul=$('a-pac-lista');if(!ul)return;
+  ul.innerHTML='';
+  var vz=$('a-pac-vazio');if(vz)vz.style.display=aPacotes.length?'none':'block';
+  aPacotes.forEach(function(p,i){
+    var li=document.createElement('li');
+    var info=document.createElement('div');info.className='info';
+    var cod=document.createElement('input');cod.type='text';cod.value=p.cod;cod.placeholder='Código';
+    cod.addEventListener('input',function(){aPacotes[i].cod=cod.value;salvarEstado();aPreview();});
+    cod.addEventListener('change',function(){aPacCodAjustar(cod,i);});
+    cod.addEventListener('blur',function(){aPacCodAjustar(cod,i);});
+    var nome=document.createElement('input');nome.type='text';nome.value=p.nome;nome.placeholder='Nome';
+    nome.addEventListener('input',function(){aPacotes[i].nome=nome.value;salvarEstado();aPreview();});
+    var dur=document.createElement('input');dur.type='text';dur.value=p.dur;dur.placeholder='Duração';
+    dur.addEventListener('input',function(){aPacotes[i].dur=dur.value;salvarEstado();aPreview();});
+    var preco=document.createElement('input');preco.type='number';preco.step='0.01';preco.min='0';preco.value=p.preco;preco.placeholder='Preço';
+    preco.addEventListener('input',function(){aPacotes[i].preco=preco.value;salvarEstado();aPreview();});
+    var inclui=document.createElement('input');inclui.type='text';inclui.value=p.inclui;inclui.placeholder='O que inclui';
+    inclui.addEventListener('input',function(){aPacotes[i].inclui=inclui.value;salvarEstado();aPreview();});
+    var link=document.createElement('input');link.type='text';link.value=p.link;link.placeholder='Link do TidyCal';
+    link.addEventListener('input',function(){aPacotes[i].link=link.value;salvarEstado();aPreview();});
+    info.appendChild(cod);info.appendChild(nome);info.appendChild(dur);info.appendChild(preco);info.appendChild(inclui);info.appendChild(link);
+    var ctrl=document.createElement('div');ctrl.className='ctrl';
+    [['\u2191',function(){aPacMove(i,-1);},'Subir'],['\u2193',function(){aPacMove(i,1);},'Descer'],['\u2715',function(){aPacDel(i);},'Remover']]
+      .forEach(function(b){var bt=document.createElement('button');bt.textContent=b[0];bt.title=b[2];bt.setAttribute('aria-label',b[2]);bt.addEventListener('click',b[1]);ctrl.appendChild(bt);});
+    li.appendChild(info);li.appendChild(ctrl);
+    ul.appendChild(li);
+  });
+}
+/* Copia de tUrlOk (9827+ antes desta tarefa). A recusa do endereco protocol-relative nao e
+   detalhe: sem ela, "//evil.com/x" passa como "caminho do proprio site" e o TidyCal
+   redirecionaria o cliente para outro host. */
+function aUrlOk(v){
+  var limpo=urlLimpa(v);
+  if(!limpo)return false;
+  if(/^https?:\/\//i.test(limpo))return true;
+  /* caminho do proprio site: UMA barra. Com duas o endereco e protocol-relative --
+     "//evil.com/x" resolve para OUTRO host, herdando so o esquema da pagina. */
+  if(limpo.charAt(0)==='/'&&limpo.charAt(1)!=='/')return true;
+  return false;
+}
+/* Devolve a PRIMEIRA recusa (ou '') para uma configuracao ja coletada -- mesmo padrao de
+   uRecusa/mRecusa: sem efeito colateral, e a mesma funcao serve o gerador e (na Tarefa 4) a
+   previa. A recusa de codigo colidido e a mais importante das nove: o Pix descarta hifen, e
+   dois pacotes "mini-1h" e "mini1h" gerariam o MESMO identificador de conciliacao. */
+function aRecusa(cfg){
+  var i,p,vistos={},limpo;
+  if(!cfg.pacotes.length)return 'Cadastre ao menos um pacote.';
+  if(!cfg.urlobrigado)return 'Informe o endereço da página de obrigado.';
+  if(!aUrlOk(cfg.urlobrigado))return 'O endereço da página de obrigado precisa começar com https:// e ter o domínio.';
+  for(i=0;i<cfg.pacotes.length;i++){
+    p=cfg.pacotes[i];
+    if(!p.cod)return 'O pacote "'+(p.nome||('#'+(i+1)))+'" está sem código. O código é o que o TidyCal guarda para identificar o pacote.';
+    if(!/^[A-Za-z0-9-]+$/.test(p.cod))return 'O código "'+p.cod+'" tem caractere que não pode ir na URL. Use apenas letras, números e hífen.';
+    limpo=p.cod.replace(/[^A-Za-z0-9]/g,'').toUpperCase();
+    if(vistos[limpo])return 'Os códigos "'+vistos[limpo]+'" e "'+p.cod+'" viram o mesmo identificador no Pix ('+limpo+'), porque o Pix aceita apenas letras e números. Troque um dos dois.';
+    vistos[limpo]=p.cod;
+    if(!p.nome)return 'O pacote "'+p.cod+'" está sem nome.';
+    if(!(parseFloat(p.preco)>0))return 'O pacote "'+p.cod+'" está com o preço vazio ou zerado. Ele seria entregue como uma cobrança de R$ 0,00.';
+    if(!p.link)return 'O pacote "'+p.cod+'" está sem o link do TidyCal.';
+    if(!aUrlOk(p.link))return 'O link do TidyCal do pacote "'+p.cod+'" não é um endereço válido.';
+  }
+  if(!fciVal('chave')||!fciVal('nomer')||!fciVal('cidade'))return fciRecusa('Preencha a chave Pix, o nome do recebedor e a cidade.');
+  if(!fciVal('client'))return fciRecusa('Informe o Client ID do PayPal.');
+  if(!fciVal('zapnum'))return fciRecusa('Informe o WhatsApp de destino.');
+  return '';
+}
+/* ===== configuracao da aba, ja validada (o que aRecusa confere e o que a Tarefa 3 vai
+   consumir) -- diferente de aColeta, que grava o que esta na tela AINDA POR CORRIGIR, para o
+   backup nao reescrever o que o operador digitou. Modelo: uCfg (10690+). */
+function aCfg(){
+  var prazoh=aPreso('a-prazoh');if(prazoh==null)prazoh=24;
+  var descpix=aPreso('a-descpix');if(descpix==null)descpix=5;
+  var parcelas=aPreso('a-parcelas');if(parcelas==null)parcelas=1;
+  var altdesk=aPreso('a-altdesk');if(altdesk==null)altdesk=2350;
+  var altmob=aPreso('a-altmob');if(altmob==null)altmob=2700;
+  var largmob=aPreso('a-largmob');if(largmob==null)largmob=700;
+  return {
+    pacotes:aPacotes,
+    urlobrigado:$('a-urlobrigado').value.trim(),
+    prefixo:$('a-prefixo').value.trim(),
+    prazoh:prazoh, descpix:descpix, parcelas:parcelas,
+    altdesk:altdesk, altmob:altmob, largmob:largmob,
+    c1:corSegura('a-c1','#0F3A30'), c2:corSegura('a-c2','#ffffff'), c3:corSegura('a-c3','#333333'),
+    t1:$('a-t1').value, t2:$('a-t2').value, t3:$('a-t3').value, t4:$('a-t4').value, t5:$('a-t5').value
+  };
+}
+/* Leitura defensiva de um campo que pode ainda nao existir no DOM (ver o paragrafo do topo
+   desta secao): sem a guarda, aColeta lancaria a cada chamada de salvarEstado() -- que roda a
+   cada tecla digitada em QUALQUER aba da ferramenta -- e a barra vermelha acenderia nesta aba
+   o tempo todo, mesmo com o operador nunca tendo aberto Agendamento por pacote. */
+function aElVal(id,def){var el=$(id);return el?el.value:def;}
+function aColeta(){
+  return {a:{
+    pacotes:aPacotes,
+    urlobrigado:aElVal('a-urlobrigado',''),
+    prefixo:aElVal('a-prefixo',''),
+    prazoh:aElVal('a-prazoh',24),
+    descpix:aElVal('a-descpix',5),
+    parcelas:aElVal('a-parcelas',1),
+    altdesk:aElVal('a-altdesk',2350),altmob:aElVal('a-altmob',2700),largmob:aElVal('a-largmob',700),
+    c1:aElVal('a-c1-t','#0F3A30'),c2:aElVal('a-c2-t','#ffffff'),c3:aElVal('a-c3-t','#333333'),
+    t1:aElVal('a-t1','Agende seu ensaio'),
+    t2:aElVal('a-t2','Escolha o pacote'),
+    t3:aElVal('a-t3','Escolha o dia e o horário'),
+    t4:aElVal('a-t4','Trocar pacote'),
+    t5:aElVal('a-t5','Tudo certo!')
+  }};
+}
+function aRestaura(st){
+  if(!st.a)return;
+  var A=st.a,el,elc;
+  aPacotes=A.pacotes||[];aPacRender();
+  el=$('a-urlobrigado');if(el)el.value=A.urlobrigado||'';
+  el=$('a-prefixo');if(el)el.value=A.prefixo||'';
+  el=$('a-prazoh');if(el)el.value=(A.prazoh!=null&&A.prazoh!=='')?A.prazoh:24;
+  el=$('a-descpix');if(el)el.value=(A.descpix!=null&&A.descpix!=='')?A.descpix:5;
+  el=$('a-parcelas');if(el)el.value=(A.parcelas!=null&&A.parcelas!=='')?A.parcelas:1;
+  el=$('a-altdesk');if(el)el.value=(A.altdesk!=null&&A.altdesk!=='')?A.altdesk:2350;
+  el=$('a-altmob');if(el)el.value=(A.altmob!=null&&A.altmob!=='')?A.altmob:2700;
+  el=$('a-largmob');if(el)el.value=(A.largmob!=null&&A.largmob!=='')?A.largmob:700;
+  el=$('a-c1-t');if(el){el.value=A.c1;elc=$('a-c1');if(elc)elc.value=corValida(A.c1)?A.c1:'#0F3A30';}
+  el=$('a-c2-t');if(el){el.value=A.c2;elc=$('a-c2');if(elc)elc.value=corValida(A.c2)?A.c2:'#ffffff';}
+  el=$('a-c3-t');if(el){el.value=A.c3;elc=$('a-c3');if(elc)elc.value=corValida(A.c3)?A.c3:'#333333';}
+  el=$('a-t1');if(el)el.value=(A.t1!=null)?A.t1:'Agende seu ensaio';
+  el=$('a-t2');if(el)el.value=(A.t2!=null)?A.t2:'Escolha o pacote';
+  el=$('a-t3');if(el)el.value=(A.t3!=null)?A.t3:'Escolha o dia e o horário';
+  el=$('a-t4');if(el)el.value=(A.t4!=null)?A.t4:'Trocar pacote';
+  el=$('a-t5');if(el)el.value=(A.t5!=null)?A.t5:'Tudo certo!';
+}
+/* ===== O que esta aba poe na biblioteca de presets (ver o bloco compartilhado) =====
+   O resumo NAO mostra dado operacional (chave Pix, Client ID, WhatsApp): eles moram no painel
+   Identidade, fora do preset desta aba. */
+function aPresetResumo(v){
+  var A=(v&&v.a)||{},ps=A.pacotes||[],n=ps.length,i,min=null,max=null,pr;
+  for(i=0;i<n;i++){
+    pr=parseFloat(String(ps[i].preco).replace(',','.'));
+    if(isNaN(pr))continue;
+    if(min===null||pr<min)min=pr;
+    if(max===null||pr>max)max=pr;
+  }
+  var t=n+(n===1?' pacote':' pacotes');
+  if(min!==null)t+=(min===max)?(' — '+precoFmt('BRL',min)):(' — de '+precoFmt('BRL',min)+' a '+precoFmt('BRL',max));
+  return t;
+}
+function aPresetAntes(){
+  if(fcAjustarTodos(A_NUMS))salvarEstado();
+  return '';
+}
+function aPresetDepois(){
+  var mudou=false;
+  if(fcAjustarTodos(A_NUMS))mudou=true;
+  if(fcCoresAjustar('a-'))mudou=true;
+  if(mudou)salvarEstado();
+  aPreview(true);
+}
+/* ===== Tarefa 3: o gerador da vitrine =====
+   Modelos lidos antes de escrever: o embed do TidyCal (frame()/expandir()/recolher(), acima
+   em tArqToggle/tGerar) para a mecanica de altura do modal, e uBloco (10801+) para a forma de
+   um bloco autossuficiente -- variaveis de customizacao no topo, "Daqui para baixo nao precisa
+   mexer", <style> proprio, IIFE unica, montagem via innerHTML(esqueleto vazio) + textContent
+   (conteudo dinamico), nunca innerHTML com texto vindo do catalogo.
+
+   POR QUE ESTE BLOCO CRIA O IFRAME COM AS PROPRIAS MAOS, AO CONTRARIO DA ABA TIDYCAL. A aba
+   atual usa <div class="tidycal-embed" data-path="..."> mais o embed.js do TidyCal, que acha a
+   div e cria o iframe sozinho -- funciona porque o caminho e fixo, decidido uma vez, ao gerar.
+   Aqui o "caminho" (o link do TidyCal) muda em tempo real, toda vez que o cliente escolhe ou
+   troca de pacote, e o embed.js nao foi desenhado para isso. Por isso o bloco cria um <iframe>
+   comum, aponta o src para o link do pacote escolhido, e reaproveita o MESMO elemento ao
+   trocar -- nunca um segundo. O que se herda do embed.js e so a MEDIDA: a origem a conferir
+   (https://tidycal.com), o prefixo dos sinais ([iFrameSizer]) e as duas mensagens (
+   scrollToOffset abre o modal interno de dia/horario, mutationObserver fecha). */
+
+/* ===== fonte unica entre aBlocoVitrine e aBlocoObrigado (Tarefa 11) =====
+   precoPix, parcelaDe, o texto da linha do cartao e a serializacao do catalogo saiam
+   escritos duas vezes -- uma copia por bloco. Regra do projeto: unifica-se a fonte que
+   ESCREVE, nunca a saida (CLAUDE.md, "Nada que dois geradores precisem e escrito duas
+   vezes"). A prova e byte a byte: as tres saidas desta aba tem de sair identicas a como
+   saiam antes desta unificacao.
+
+   fcaTextoCartaoSrc(q) recebe o CARACTERE DE ASPAS que aquele bloco ja usava no texto
+   emitido -- aBlocoVitrine escrevia com aspas simples, aBlocoObrigado com aspas duplas.
+   Normalizar as duas para o mesmo estilo mudaria bytes de uma das duas saidas, e a prova
+   exigida e nao mudar nenhum. O parametro preserva o estilo de cada chamador sem duplicar
+   o texto: e a mesma fonte, com o detalhe tipografico que ja existia passado por fora. */
+function aPacotesSrc(pacotes){
+  var pacs=pacotes.map(function(p){
+    var preco=parseFloat(String(p.preco).replace(',','.'))||0;
+    return "  {cod:'"+escJs(p.cod)+"', nome:'"+escJs(p.nome)+"', dur:'"+escJs(p.dur)+"', preco:"+preco.toFixed(2)+
+      ", inclui:'"+escJs(p.inclui)+"', link:'"+escJs(p.link)+"'}";
+  }).join(',\n');
+  return 'var PACOTES=[\n'+pacs+'\n];\n';
+}
+function fcaPrecoParcelaSrc(){
+  return 'function precoPix(p){return Math.round(p*(1-DESCONTO_PIX/100)*100)/100;}\n'+
+    'function parcelaDe(p){return Math.ceil(p/PARCELAS*100)/100;}\n';
+}
+function fcaTextoCartaoSrc(q){
+  return 'function textoCartao(preco){\n'+
+    '  var t='+q+'ou '+q+'+moedaFmt(preco)+'+q+' no cartão'+q+';\n'+
+    '  if(PARCELAS>1)t+='+q+', em até '+q+'+PARCELAS+'+q+'x de '+q+'+moedaFmt(parcelaDe(preco));\n'+
+    '  return t;\n}\n';
+}
+
+function aBlocoVitrine(cfg){
+  var c='';
+  c+='<div class="fca-raiz" id="fca-raiz"></div>\n\n';
+
+  /* ===== CSS, dentro do proprio HTML do componente (nunca no campo CSS Customizado, que so
+     aceita propriedades soltas e nao aceita @media/@keyframes -- Manual do Prosite). ===== */
+  c+='<sty'+'le>\n';
+  c+='.fca-raiz{max-width:960px;margin:0 auto;text-align:left;font-family:inherit;color:var(--fca-texto,#333)}\n';
+  c+='.fca-titulo{font-size:20px;font-weight:700;color:var(--fca-destaque,#0F3A30);margin:0 0 14px;text-align:left}\n';
+  c+='.fca-passo{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:var(--fca-destaque,#0F3A30);margin:0 0 10px;text-align:left}\n';
+  c+='.fca-passo-n{width:22px;height:22px;min-width:22px;border-radius:50%;background:var(--fca-destaque,#0F3A30);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px}\n';
+  c+='.fca-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:0 0 18px;text-align:left}\n';
+  c+='.fca-card{border:1px solid #e5dfd0;border-radius:14px;background:var(--fca-fundo,#fff);padding:16px;cursor:pointer;text-align:left;color:inherit;font:inherit;display:block;width:100%;transition:box-shadow .18s,transform .18s}\n';
+  c+='.fca-card:hover{box-shadow:0 8px 22px rgba(0,0,0,.10);transform:translateY(-2px)}\n';
+  c+='.fca-card-nome{font-size:15px;font-weight:700;margin:0 0 2px;text-align:left}\n';
+  c+='.fca-card-dur{font-size:12px;color:#777;margin:0 0 6px;text-align:left}\n';
+  c+='.fca-card-inclui{font-size:12px;color:#666;margin:0 0 10px;text-align:left}\n';
+  c+='.fca-preco-linha1{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;text-align:left}\n';
+  c+='.fca-preco-valor{font-size:18px;font-weight:700;color:var(--fca-destaque,#0F3A30)}\n';
+  c+='.fca-selo{font-size:11px;font-weight:700;color:#1e7e34;background:#e6f4ea;border-radius:999px;padding:2px 8px}\n';
+  c+='.fca-preco-linha2{font-size:12px;color:#777;margin-top:4px;text-align:left}\n';
+  c+='.fca-resumo{display:none;align-items:center;justify-content:space-between;gap:14px;border:1px solid #e5dfd0;border-radius:14px;background:var(--fca-fundo,#fff);padding:14px 16px;margin:0 0 18px;text-align:left}\n';
+  c+='.fca-resumo.on{display:flex}\n';
+  c+='.fca-resumo-nome{font-size:14px;font-weight:700;margin:0 0 2px;text-align:left}\n';
+  c+='.fca-trocar{border:1px solid #d8d2c4;background:#fff;color:inherit;border-radius:8px;padding:8px 14px;font:600 12px/1.2 inherit;cursor:pointer;white-space:nowrap}\n';
+  /* passo 2 comeca apagado -- so "acende" (opacidade plena + calendario visivel) apos a escolha.
+     O calendario fica ESCONDIDO POR CSS, nunca destruido: assim o iframe unico sobrevive a
+     "Trocar pacote" e a proxima escolha so troca o src, sem criar um segundo elemento. */
+  c+='.fca-passo2{opacity:.45;text-align:left}\n';
+  c+='.fca-passo2 .fca-cal{display:none;border-radius:14px;overflow:hidden}\n';
+  c+='.fca-passo2.on{opacity:1}\n';
+  c+='.fca-passo2.on .fca-cal{display:block}\n';
+  c+='.fca-cal iframe{border:none;width:100%;display:block}\n';
+  c+='@media(max-width:640px){\n  .fca-cards{grid-template-columns:1fr}\n  .fca-resumo{flex-direction:column;align-items:flex-start}\n}\n';
+  c+='@media(prefers-reduced-motion: reduce){\n  .fca-card{transition:none}\n}\n';
+  c+='</sty'+'le>\n\n';
+
+  c+='<scr'+'ipt>\n(function(){\n';
+  c+='/* ===== customizacao ===== */\n';
+  c+=aPacotesSrc(cfg.pacotes);
+  c+='var DESCONTO_PIX='+cfg.descpix+';   /* percentual de desconto no Pix; 0 = sem desconto -- some o selo */\n';
+  c+='var PARCELAS='+cfg.parcelas+';   /* numero de parcelas anunciado no cartao; e uma promessa que a operadora decide, nao este codigo */\n';
+  c+="var ALTURA_SEMPRE=false;   /* true = o calendario fica sempre na altura maxima. Ligue APENAS se, na sua pagina publicada, o modal de confirmacao do TidyCal aparecer cortado -- o preco de ligar e um vao vazio embaixo do calendario. */\n";
+  c+="var ALTURA_DESKTOP='"+cfg.altdesk+"px';\n";
+  c+="var ALTURA_MOBILE='"+cfg.altmob+"px';   /* calibrar no aparelho se o modal cortar */\n";
+  c+='var LARGURA_MOBILE='+cfg.largmob+';        /* telas ate este tamanho usam a altura mobile */\n';
+  c+="var COR_DESTAQUE='"+cfg.c1+"';\n";
+  c+="var COR_FUNDO='"+cfg.c2+"';\n";
+  c+="var COR_TEXTO='"+cfg.c3+"';\n";
+  c+="var TXT_TITULO='"+escJs(cfg.t1)+"';\n";
+  c+="var TXT_PASSO1='"+escJs(cfg.t2)+"';\n";
+  c+="var TXT_PASSO2='"+escJs(cfg.t3)+"';\n";
+  c+="var TXT_TROCAR='"+escJs(cfg.t4)+"';\n\n";
+
+  c+='/* ============================================================\n   Daqui para baixo nao precisa mexer\n   ============================================================ */\n\n';
+  c+=fcMoedaFmtGer(true);
+
+  c+='/* precoPix arredonda para o mais proximo (mesma regra do Pix na ferramenta); a PARCELA\n';
+  c+='   arredonda para CIMA de proposito -- 700/6 = 116,6667, e para baixo (116,66) a soma das\n';
+  c+='   seis ficaria 699,96 e uma das parcelas seria MAIOR do que o cliente leu na tela. Para\n';
+  c+='   cima (116,67) o cliente NUNCA paga por mes mais do que estava escrito. Mesma licao do\n';
+  c+='   centavo do Pix, ago/2026. */\n';
+  c+=fcaPrecoParcelaSrc();
+  c+=fcaTextoCartaoSrc("'");
+  /* Uma funcao so desenha o preco do cartao e o do resumo (Tarefa 3, passo 5): nao existe
+     segunda formatacao para o mesmo numero em lugar nenhum deste bloco. */
+  c+='function montarPreco(box,preco){\n';
+  c+="  box.innerHTML='';\n";
+  c+="  var l1=document.createElement('div');l1.className='fca-preco-linha1';\n";
+  c+="  var v=document.createElement('span');v.className='fca-preco-valor';v.textContent=moedaFmt(precoPix(preco));\n";
+  c+='  l1.appendChild(v);\n';
+  c+='  if(DESCONTO_PIX>0){\n';
+  c+="    var selo=document.createElement('span');selo.className='fca-selo';selo.textContent='-'+DESCONTO_PIX+'% no Pix';\n";
+  c+='    l1.appendChild(selo);\n  }\n';
+  c+='  box.appendChild(l1);\n';
+  c+="  var l2=document.createElement('div');l2.className='fca-preco-linha2';l2.textContent=textoCartao(preco);\n";
+  c+='  box.appendChild(l2);\n}\n\n';
+
+  c+="var raiz=document.getElementById('fca-raiz');\n";
+  c+='if(!raiz)return;\n';
+  c+="raiz.style.setProperty('--fca-destaque',COR_DESTAQUE);\n";
+  c+="raiz.style.setProperty('--fca-fundo',COR_FUNDO);\n";
+  c+="raiz.style.setProperty('--fca-texto',COR_TEXTO);\n\n";
+
+  c+="var h='';\n";
+  c+="h+='<div class=\"fca-titulo\"></div>';\n";
+  c+="h+='<div class=\"fca-passo fca-passo-1\"><span class=\"fca-passo-n\">1</span><span class=\"fca-passo-t\"></span></div>';\n";
+  c+="h+='<div class=\"fca-cards\"></div>';\n";
+  c+="h+='<div class=\"fca-resumo\"><div><div class=\"fca-resumo-nome\"></div><div class=\"fca-resumo-preco\"></div></div><button type=\"button\" class=\"fca-trocar\"></button></div>';\n";
+  c+="h+='<div class=\"fca-passo2\"><div class=\"fca-passo fca-passo-2\"><span class=\"fca-passo-n\">2</span><span class=\"fca-passo-t\"></span></div><div class=\"fca-cal\"></div></div>';\n";
+  c+='raiz.innerHTML=h;\n\n';
+
+  c+="raiz.querySelector('.fca-titulo').textContent=TXT_TITULO;\n";
+  c+="raiz.querySelector('.fca-passo-1 .fca-passo-t').textContent=TXT_PASSO1;\n";
+  c+="raiz.querySelector('.fca-passo-2 .fca-passo-t').textContent=TXT_PASSO2;\n";
+  c+="raiz.querySelector('.fca-trocar').textContent=TXT_TROCAR;\n\n";
+
+  c+="var elCards=raiz.querySelector('.fca-cards');\n";
+  c+="var elResumo=raiz.querySelector('.fca-resumo');\n";
+  c+="var elResumoNome=raiz.querySelector('.fca-resumo-nome');\n";
+  c+="var elResumoPreco=raiz.querySelector('.fca-resumo-preco');\n";
+  c+="var elPasso2=raiz.querySelector('.fca-passo2');\n";
+  c+="var elCal=raiz.querySelector('.fca-cal');\n";
+  c+='var atual=-1;\n\n';
+
+  c+='PACOTES.forEach(function(p,i){\n';
+  c+="  var card=document.createElement('button');card.type='button';card.className='fca-card';\n";
+  c+="  var nome=document.createElement('div');nome.className='fca-card-nome';nome.textContent=p.nome;\n";
+  c+='  card.appendChild(nome);\n';
+  c+="  if(p.dur){var dur=document.createElement('div');dur.className='fca-card-dur';dur.textContent=p.dur;card.appendChild(dur);}\n";
+  c+="  if(p.inclui){var inc=document.createElement('div');inc.className='fca-card-inclui';inc.textContent=p.inclui;card.appendChild(inc);}\n";
+  c+='  var precoBox=document.createElement(\'div\');\n';
+  c+='  montarPreco(precoBox,p.preco);\n';
+  c+='  card.appendChild(precoBox);\n';
+  c+="  card.addEventListener('click',function(){escolher(i);});\n";
+  c+='  elCards.appendChild(card);\n});\n\n';
+
+  c+='/* ===== o calendario: UM iframe, criado so quando o pacote e escolhido, reaproveitado ao\n';
+  c+='   trocar de pacote. Nao existem N iframes escondidos -- tres embeds do TidyCal carregando\n';
+  c+='   juntos e exatamente o peso que esta aba existe para evitar. */\n';
+  c+='var modalAberto=false, ignorarMutacoesAte=0, ignorarAte=0;\n\n';
+  c+="function frame(){return elCal.querySelector('iframe.fca-tidycal');}\n";
+  c+='function alturaAlvo(){return (window.innerWidth<=LARGURA_MOBILE)?ALTURA_MOBILE:ALTURA_DESKTOP;}\n';
+  c+="function expandir(){var f=frame();if(f)f.style.setProperty('min-height',alturaAlvo(),'important');}\n";
+  c+="function recolher(){var f=frame();if(f)f.style.removeProperty('min-height');}\n";
+  c+='function abrirCalendario(link){\n';
+  c+='  var f=frame();\n';
+  c+='  if(!f){\n';
+  c+="    f=document.createElement('ifr'+'ame');\n";
+  c+="    f.className='fca-tidycal';\n";
+  c+="    f.setAttribute('title','Agenda');\n";
+  c+="    f.setAttribute('scrolling','no');\n";
+  c+="    f.setAttribute('frameborder','0');\n";
+  c+="    f.setAttribute('allow','fullscreen');\n";
+  c+='    elCal.appendChild(f);\n  }\n';
+  c+='  f.src=link;\n';
+  /* O CAMINHO B E UM INTERRUPTOR, E NAO O PADRAO -- corrigido depois de medir o bloco gerado.
+     A primeira versao chamava expandir() aqui, sempre, com o argumento de que a altura
+     calibrada seria "o piso desde a criacao". A medicao desmente o argumento: recolher() so
+     roda quando modalAberto ja era true, e na PRIMEIRA abertura ele e false -- entao o
+     calendario ficava travado em ALTURA_DESKTOP para sempre, com cerca de 1500px de vazio
+     embaixo. E exatamente a pagina poluida que esta aba existe para evitar.
+     O padrao volta a ser o comportamento provado em producao na aba TidyCal: altura natural,
+     e o sinal expande. Quem nao receber sinal nenhum liga ALTURA_SEMPRE no topo do bloco. */
+  c+='  if(ALTURA_SEMPRE)expandir();else recolher();\n}\n\n';
+
+  c+='function escolher(i){\n';
+  c+='  var p=PACOTES[i], trocouLink=(atual!==i);\n';
+  c+='  atual=i;\n';
+  c+='  elResumoNome.textContent=p.nome;\n';
+  c+='  montarPreco(elResumoPreco,p.preco);\n';
+  c+="  elCards.style.display='none';\n";
+  c+="  elResumo.className='fca-resumo on';\n";
+  c+="  elPasso2.className='fca-passo2 on';\n";
+  c+='  if(trocouLink){\n';
+  c+='    /* A corrida da mensagem atrasada do iframe anterior (decisao 9 do diario). O ouvinte\n';
+  c+='       fica em window e nao sabe de qual iframe veio o sinal -- entao, ao trocar, zera o\n';
+  c+='       estado do modal e ignora qualquer sinal por 800ms. Sem isso um sinal atrasado do\n';
+  c+='       iframe QUE ESTAVA SENDO TROCADO pode ser lido como se fosse do novo, e o cliente\n';
+  c+='       veria a pagina crescer 2350px sem ter clicado em nada. */\n';
+  c+='    modalAberto=false;recolher();ignorarAte=Date.now()+800;\n';
+  c+='    abrirCalendario(p.link);\n  }\n}\n\n';
+
+  c+='function trocarPacote(){\n';
+  c+="  elCards.style.display='';\n";
+  c+="  elResumo.className='fca-resumo';\n";
+  c+="  elPasso2.className='fca-passo2';\n}\n";
+  c+="raiz.querySelector('.fca-trocar').addEventListener('click',trocarPacote);\n\n";
+
+  c+='/* Ouvinte UNICO em window, nunca no iframe -- assim ele sobrevive a troca de pacote, que\n';
+  c+='   reaproveita o MESMO elemento (so troca o src). Mesma origem, prefixo e as duas\n';
+  c+='   mensagens que a aba TidyCal ja usa em producao. */\n';
+  c+="window.addEventListener('message',function(e){\n";
+  c+="  if(e.origin!=='https://tidycal.com')return;\n";
+  c+="  if(typeof e.data!=='string')return;\n";
+  c+="  if(e.data.indexOf('[iFrameSizer]')!==0)return;\n";
+  c+='  if(Date.now()<ignorarAte)return;\n\n';
+  c+="  var tipo=e.data.split(':').pop();\n";
+  c+="  if(tipo==='scrollToOffset'){\n    modalAberto=true;ignorarMutacoesAte=Date.now()+800;expandir();return;\n  }\n\n";
+  c+="  if(modalAberto&&tipo==='mutationObserver'&&Date.now()>ignorarMutacoesAte){\n    modalAberto=false;recolher();\n  }\n});\n";
+  c+="window.addEventListener('resize',function(){if(modalAberto)expandir();});\n";
+  c+='})();\n</scr'+'ipt>';
+  return c;
+}
+
+/* ===== Tarefa 5: os N enderecos de redirecionamento =====
+   Um endereco por pacote, para colar no campo de redirecionamento de CADA tipo de agendamento
+   dentro do TidyCal -- fora do Prosite (ver FCC_FORA, Tarefa 6). O {{booking_type.title}} nao
+   entra: quem identifica o pacote e o codigo, e e por isso que renomear um tipo no TidyCal nao
+   quebra nada. O e-mail tambem nao, pela mesma razao ja registrada na pagina de obrigado atual
+   -- menos dado pessoal circulando por menos lugares. */
+function aEnderecos(cfg){
+  var i,p,base=cfg.urlobrigado,sep,t='';
+  for(i=0;i<cfg.pacotes.length;i++){
+    p=cfg.pacotes[i];
+    sep=(base.indexOf('?')<0)?'?':'&';
+    t+=p.nome+' ('+p.cod+'):\n';
+    t+=base+sep+'pac='+encodeURIComponent(p.cod)+
+       '&nome={{contact.name}}&data={{booking.date}}&hora={{booking.time}}&quando={{booking.starts_at}}\n\n';
+  }
+  return t;
+}
+
+/* ===== Tarefa 7: a pagina de obrigado -- leitura do pacote, recusa cordial e marcadores =====
+   Modelo lido antes de escrever: tObBloco (9764+), para a troca de marcadores -- TreeWalker
+   sobre nos de texto, pulando SCRIPT/STYLE/TEXTAREA/INPUT/SELECT/NOSCRIPT, nodeValue e NUNCA
+   innerHTML, mais o MutationObserver de 5s para conteudo que o tema montar tarde. O que chega
+   pelo endereco e entrada de fora (qualquer pessoa edita a URL): escrito como marcacao, um
+   nome poderia virar script nesta pagina -- a mesma razao que ja levou tObBloco a nunca usar
+   innerHTML.
+
+   O QUE E DIFERENTE de tObBloco, e por isso nao e a mesma fonte: aquela pagina tem um campo de
+   FORMATO_DATA (comoveio/curto/extenso/extensodia, escolhido pelo operador). Esta aba nao
+   ganhou esse campo (fora do contrato da Tarefa 1) -- {{quando}} sai exatamente como chegou na
+   URL, sem reescrita nenhuma. E o mesmo texto reserva (vazio) para os sete marcadores: a aba
+   nao tem campo para configura-lo por marcador, ao contrario de T_OB_VARS/t-ob-fb-*. Registrado
+   aqui porque a spec e o plano mencionam "texto reserva configuravel" sem que a Tarefa 1 tenha
+   aberto os campos correspondentes -- decisao pragmatica desta rodada, nao esquecimento.
+
+   OS DOIS TRABALHOS SAO INDEPENDENTES POR CONSTRUCAO (autorevisao do plano, secao final): a
+   troca de marcadores mexe no texto que o dono ja escreveu na pagina; o pagamento (Tarefa 8)
+   monta o proprio componente do zero, dentro de #fca-ob-raiz. Se o dono nao escrever marcador
+   nenhum na pagina, trocar() nao acha "{{" em nenhum no de texto e nao faz nada -- e o
+   pagamento aparece do mesmo jeito. */
+function aBlocoObrigado(cfg){
+  var c='';
+  c+='<!-- ============================================================\n';
+  c+='     FOTO CERTA - PAGINA DE OBRIGADO DO AGENDAMENTO POR PACOTE\n';
+  c+='     ONDE COLAR: componente HTML da pagina de obrigado do TidyCal\n';
+  c+='     Escreva os marcadores no texto normal da pagina ({{nome}}, {{data}}, {{hora}},\n';
+  c+='     {{quando}}, {{pacote}}, {{duracao}}, {{valor}}); este script os troca pelos dados\n';
+  c+='     do agendamento e monta o pagamento (Pix ou cartao) do pacote identificado.\n';
+  c+='     Gerado pela ferramenta em prosite.fotocerta.com.br\n';
+  c+='     ============================================================ -->\n\n';
+  c+='<div class="fca-ob-raiz" id="fca-ob-raiz"></div>\n\n';
+
+  /* ===== CSS, dentro do proprio HTML do componente -- nunca no campo CSS Customizado, que so
+     aceita propriedades soltas (Manual do Prosite). Mesma familia fca- da vitrine (decisao 4 do
+     diario: prefixo unico para as duas saidas desta aba), com o sub-prefixo fca-ob- para nao
+     colidir com as classes de fca-raiz -- ainda que nunca apareçam na mesma pagina. */
+  c+='<sty'+'le>\n';
+  c+='.fca-ob-raiz{max-width:480px;margin:0 auto;text-align:left;font-family:inherit;color:var(--fca-ob-texto,#333)}\n';
+  c+='.fca-ob-raiz *{text-align:left;box-sizing:border-box}\n';
+  c+='.fca-ob-cartao{background:var(--fca-ob-fundo,#fff);border:1px solid rgba(0,0,0,.10);border-radius:14px;padding:18px 18px 20px;box-shadow:0 2px 12px rgba(0,0,0,.06)}\n';
+  c+='.fca-ob-titulo{font-size:18px;font-weight:700;color:var(--fca-ob-destaque,#0F3A30);margin:0 0 12px;text-align:left}\n';
+  c+='.fca-ob-resumo-nome{font-size:15px;font-weight:700;margin:0 0 2px;text-align:left}\n';
+  c+='.fca-ob-resumo-dur{font-size:12px;color:#777;margin:0 0 12px;text-align:left}\n';
+  c+='.fca-ob-preco-linha1{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin:0 0 4px;text-align:left}\n';
+  c+='.fca-ob-preco-valor{font-size:26px;font-weight:800;color:var(--fca-ob-destaque,#0F3A30)}\n';
+  c+='.fca-ob-selo{font-size:11px;font-weight:700;color:#1e7e34;background:#e6f4ea;border-radius:999px;padding:2px 8px}\n';
+  c+='.fca-ob-preco-linha2{font-size:13px;color:#777;margin:0 0 14px;text-align:left}\n';
+  c+='.fca-ob-prazo{font-size:13px;font-weight:700;color:var(--fca-ob-destaque,#0F3A30);margin:0 0 4px;text-align:left}\n';
+  c+='.fca-ob-bloco{border-top:1px solid rgba(0,0,0,.10);padding-top:14px;margin-top:14px}\n';
+  c+='.fca-ob-rot{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--fca-ob-destaque,#0F3A30);margin:0 0 8px;text-align:left}\n';
+  c+='.fca-ob-ajuda{font-size:12px;line-height:1.5;opacity:.75;margin:8px 0 0;text-align:left}\n';
+  c+='.fca-ob-cod{width:100%;height:74px;font:11px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace;border:1px solid rgba(0,0,0,.18);border-radius:8px;padding:8px;resize:none;background:#fff;color:#333}\n';
+  c+='.fca-ob-bt{display:inline-block;border:0;border-radius:8px;padding:11px 16px;font-size:14px;font-weight:700;cursor:pointer;background:var(--fca-ob-destaque,#0F3A30);color:var(--fca-ob-fundo,#fff);margin:8px 8px 0 0;text-decoration:none;text-align:center}\n';
+  c+='.fca-ob-bt2{background:transparent;color:var(--fca-ob-destaque,#0F3A30);border:1px solid var(--fca-ob-destaque,#0F3A30)}\n';
+  c+='.fca-ob-qr{margin:12px 0 0;min-height:200px}\n';
+  c+='.fca-ob-qr img,.fca-ob-qr canvas{display:block;max-width:100%;height:auto}\n';
+  c+='.fca-ob-aviso{font-size:12px;margin:8px 0 0;color:#8C1D18;font-weight:700;text-align:left}\n';
+  c+='.fca-ob-recusa-msg{font-size:15px;line-height:1.6;margin:0 0 12px;text-align:left}\n';
+  c+='.fca-ob-sep{display:flex;align-items:center;gap:10px;margin:16px 0 0;font-size:12px;font-weight:700;letter-spacing:.10em;color:var(--fca-ob-destaque,#0F3A30);opacity:.7}\n';
+  c+='.fca-ob-sep:before,.fca-ob-sep:after{content:"";flex:1 1 auto;height:1px;background:rgba(0,0,0,.14)}\n';
+  c+='.fca-ob-semtopo{border-top:0;margin-top:6px;padding-top:0}\n';
+  c+='.fca-ob-pp{margin-top:10px}\n';
+  c+='@media(prefers-reduced-motion: reduce){\n  .fca-ob-cartao *{transition:none}\n}\n';
+  c+='</sty'+'le>\n\n';
+
+  c+='<scr'+'ipt>\n(function(){\n';
+  c+='/* ===== customizacao ===== */\n';
+  c+=aPacotesSrc(cfg.pacotes);
+  c+="var PREFIXO='"+escJs(cfg.prefixo)+"';   /* comeca o identificador de conciliacao */\n";
+  c+='var DESCONTO_PIX='+cfg.descpix+';\n';
+  c+='var PARCELAS='+cfg.parcelas+';\n';
+  c+='var PRAZOH='+cfg.prazoh+';   /* horas de reserva, a partir da primeira visita a esta pagina */\n';
+  c+="var CHAVE_PIX='"+escJs(fciVal('chave'))+"';\n";
+  c+="var NOME_RECEBEDOR='"+escJs(fciVal('nomer'))+"';\n";
+  c+="var CIDADE='"+escJs(fciVal('cidade'))+"';\n";
+  c+="var CLIENT_ID='"+escJs(fciVal('client'))+"';\n";
+  c+="var WHATSAPP='"+escJs(fciDigitos('zapnum'))+"';\n";
+  c+="var COR_DESTAQUE='"+cfg.c1+"';\n";
+  c+="var COR_FUNDO='"+cfg.c2+"';\n";
+  c+="var COR_TEXTO='"+cfg.c3+"';\n";
+  c+="var TXT_TITULO='"+escJs(cfg.t5)+"';\n";
+  /* Recado cordial da recusa -- sem pac, ou com codigo desconhecido, nenhum pagamento aparece.
+     Nao ganhou campo proprio na aba (fora do contrato da Tarefa 1): o padrao da spec e o unico
+     texto, hoje. */
+  c+="var TXT_RECUSA='Não encontramos seu agendamento nesta página. Se você acabou de agendar, use o link que aparece no e-mail de confirmação — ou fale com a gente que resolvemos na hora.';\n\n";
+
+  c+='/* ============================================================\n   Daqui para baixo nao precisa mexer\n   ============================================================ */\n\n';
+  c+=fcMoedaFmtGer(true);
+  c+=FC_PARAM_SRC;
+
+  c+='var raiz=document.getElementById("fca-ob-raiz");\n';
+  c+='if(raiz){\n';
+  c+='  raiz.style.setProperty("--fca-ob-destaque",COR_DESTAQUE);\n';
+  c+='  raiz.style.setProperty("--fca-ob-fundo",COR_FUNDO);\n';
+  c+='  raiz.style.setProperty("--fca-ob-texto",COR_TEXTO);\n';
+  c+='}\n\n';
+
+  c+='/* ===== 1. le ?pac= e acha o pacote no catalogo -- SEM diferenciar maiusculas =====\n';
+  c+='   Comparacao por igualdade de string, nunca por regex/eval sobre o parametro: um pac\n';
+  c+='   hostil (marcacao de script, ../, acentos) so pode deixar de casar com nenhum codigo cadastrado,\n';
+  c+='   nunca ser interpretado. */\n';
+  c+='function acharPacote(codigo){\n';
+  c+='  var i,alvo=String(codigo||"").toLowerCase();\n';
+  c+='  if(!alvo)return null;\n';
+  c+='  for(i=0;i<PACOTES.length;i++)if(String(PACOTES[i].cod).toLowerCase()===alvo)return PACOTES[i];\n';
+  c+='  return null;\n';
+  c+='}\n';
+  c+='var QUANDO=param("quando");\n';
+  c+='var PAC=acharPacote(param("pac"));\n';
+  c+="var CODIGO_PEDIDO='';   /* montar() preenche com o identificador de conciliacao (idConciliacao) */\n\n";
+
+  c+='/* ===== 2. troca de marcadores -- copia fiel do mecanismo de tObBloco (9764+) ===== */\n';
+  c+='var CAMPOS=[\n';
+  c+='  {marca:"nome",    valor:param("nome")},\n';
+  c+='  {marca:"data",    valor:param("data")},\n';
+  c+='  {marca:"hora",    valor:param("hora")},\n';
+  c+='  {marca:"quando",  valor:QUANDO},\n';
+  c+='  {marca:"pacote",  valor:PAC?PAC.nome:""},\n';
+  c+='  {marca:"duracao", valor:PAC?PAC.dur:""},\n';
+  c+='  {marca:"valor",   valor:PAC?moedaFmt(PAC.preco):""}\n';
+  c+='];\n';
+  c+='var PULAR={SCRIPT:1,STYLE:1,TEXTAREA:1,INPUT:1,SELECT:1,NOSCRIPT:1};\n';
+  c+='/* A troca mexe SO no texto: nunca innerHTML. O que chega vem do endereco, que qualquer\n';
+  c+='   pessoa edita -- escrito como marcacao, um nome poderia virar script nesta pagina. */\n';
+  c+='function trocarMarcadores(raizTexto){\n';
+  c+='  if(!raizTexto)return;\n';
+  c+='  var and=document.createTreeWalker(raizTexto,NodeFilter.SHOW_TEXT,null,false),n,t,i,ic,novo;\n';
+  c+='  var lista=[];\n';
+  c+='  while((n=and.nextNode()))lista.push(n);\n';
+  c+='  for(i=0;i<lista.length;i++){\n';
+  c+='    n=lista[i];\n';
+  c+='    if(!n.parentNode||PULAR[n.parentNode.nodeName])continue;\n';
+  c+='    t=n.nodeValue;\n';
+  c+='    if(t.indexOf("{{")<0)continue;\n';
+  c+='    novo=t;\n';
+  c+='    for(ic=0;ic<CAMPOS.length;ic++)\n';
+  c+='      novo=novo.split("{{"+CAMPOS[ic].marca+"}}").join(CAMPOS[ic].valor);\n';
+  c+='    if(novo!==t)n.nodeValue=novo;\n';
+  c+='  }\n';
+  c+='}\n';
+  c+='/* O tema pode montar componentes DEPOIS que este script roda. A troca passa uma vez ao\n';
+  c+='   carregar e reobserva por um instante curto -- o observador se desliga sozinho. */\n';
+  c+='function comecarMarcadores(){\n';
+  c+='  trocarMarcadores(document.body);\n';
+  c+='  if(!window.MutationObserver)return;\n';
+  c+='  var ob=new MutationObserver(function(muts){\n';
+  c+='    var k;\n';
+  c+='    for(k=0;k<muts.length;k++)if(muts[k].addedNodes.length){trocarMarcadores(document.body);return;}\n';
+  c+='  });\n';
+  c+='  ob.observe(document.body,{childList:true,subtree:true});\n';
+  c+='  setTimeout(function(){ob.disconnect();},5000);\n';
+  c+='}\n';
+  c+='if(document.body)comecarMarcadores();\n';
+  c+='else document.addEventListener("DOMContentLoaded",comecarMarcadores);\n\n';
+
+  c+='/* ===== 3. o pagamento ===== */\n';
+  c+='/* O botao de WhatsApp aparece em DOIS recados -- sem pacote reconhecido e prazo vencido --\n';
+  c+='   e e a mesma fonte que os escreve, nunca uma segunda copia. */\n';
+  c+='function botaoZap(msg){\n';
+  c+='  if(!WHATSAPP)return null;\n';
+  c+='  var zap=document.createElement("a");zap.className="fca-ob-bt fca-ob-bt2";zap.textContent="Falar no WhatsApp";\n';
+  c+='  zap.setAttribute("href","https://wa.me/"+WHATSAPP+"?text="+encodeURIComponent(msg));\n';
+  c+='  zap.setAttribute("target","_blank");zap.setAttribute("rel","noopener noreferrer");\n';
+  c+='  return zap;\n';
+  c+='}\n';
+  c+='function recusaCordial(){\n';
+  c+='  var cartao=document.createElement("div");cartao.className="fca-ob-cartao";\n';
+  c+='  var msg=document.createElement("div");msg.className="fca-ob-recusa-msg";msg.textContent=TXT_RECUSA;\n';
+  c+='  cartao.appendChild(msg);\n';
+  c+='  var zap=botaoZap("Olá! Não encontrei meu agendamento na página de pagamento.");\n';
+  c+='  if(zap)cartao.appendChild(zap);\n';
+  c+='  raiz.appendChild(cartao);\n';
+  c+='}\n';
+
+  c+='/* ===== 3a. o identificador de conciliacao =====\n';
+  c+='   prefixo + codigo do pacote + dia e hora do ensaio, limpo para o que o Pix aceita (so\n';
+  c+='   letras e numeros, 25 no maximo). NAO INVENTA DATA: se quando nao for legivel, cai num\n';
+  c+='   sufixo aleatorio -- melhor um codigo que nao diz o dia do que um que diz o dia errado.\n\n';
+  c+='   O SUFIXO E SORTEADO UMA VEZ SO por reserva, e guardado no MESMO registro que guarda o\n';
+  c+='   instante da primeira visita (decisao 7 do diario -- achado mais caro da rodada). Escrito\n';
+  c+='   do jeito natural, o sufixo seria sorteado de novo a cada F5, e dai saem dois defeitos\n';
+  c+='   silenciosos: o prazo reiniciaria a cada recarga (a chave que guarda a primeira visita\n';
+  c+='   incluiria o identificador), e o mesmo agendamento geraria um identificador por\n';
+  c+='   carregamento -- cobrancas fantasma no extrato, uma por F5 antes de pagar.\n\n';
+  c+='   A CHAVE NAO DEPENDE DO IDENTIFICADOR: fcapac:<codigo do pacote>:<quando CRU, exatamente\n';
+  c+='   como chegou na URL, mesmo ilegivel>. quando cru e texto estavel e distingue dois\n';
+  c+='   agendamentos do mesmo pacote sem precisar entende-lo. SEM quando nenhum, a chave cai\n';
+  c+='   para fcapac:<codigo> e dois agendamentos do mesmo pacote passam a compartilhar o\n';
+  c+='   registro -- limite declarado, nao escondido (mesma regra da spec, secao 7.2).\n\n';
+  c+='   Se o navegador recusar localStorage (privado, cheio, desligado) o registro nao persiste\n';
+  c+='   e um novo sufixo sai a cada carga -- a MESMA degradacao generosa que ja vale para quem\n';
+  c+='   abre a reserva noutro aparelho (secao 7.1 da spec): o cliente ganha mais tempo, nunca\n';
+  c+='   menos, e o identificador continua servindo para conciliar o pagamento daquela visita. */\n';
+  c+='function limpaId(t){return String(t==null?"":t).replace(/[^A-Za-z0-9]/g,"").substring(0,25);}\n';
+  c+='function sufAleatorio(){return Math.random().toString(36).substring(2,10);}\n';
+  c+='function reservaChave(cod,quandoCru){return "fcapac:"+cod+(quandoCru?(":"+quandoCru):"");}\n';
+  c+='function reservaLer(chave){\n';
+  c+='  try{\n';
+  c+='    var raw=localStorage.getItem(chave);\n';
+  c+='    if(!raw)return null;\n';
+  c+='    var o=JSON.parse(raw);\n';
+  c+='    if(!o||typeof o!=="object"||!o.primeira||!o.suf)return null;\n';
+  c+='    return o;\n';
+  c+='  }catch(e){return null;}\n';
+  c+='}\n';
+  c+='/* le o registro desta reserva; se nao existir, cria UMA vez e grava. Chamada so uma vez\n';
+  c+='   por carregamento (em montar()), para o sufixo nao ser sorteado de novo a toa. */\n';
+  c+='function reservaObter(cod,quandoCru){\n';
+  c+='  var chave=reservaChave(cod,quandoCru),r=reservaLer(chave);\n';
+  c+='  if(r)return r;\n';
+  c+='  r={primeira:Date.now(),suf:sufAleatorio()};\n';
+  c+='  try{localStorage.setItem(chave,JSON.stringify(r));}catch(e){}\n';
+  c+='  return r;\n';
+  c+='}\n';
+  c+='/* "dia e hora", so quando quando e legivel -- em UTC, para o mesmo endereco produzir o\n';
+  c+='   mesmo identificador nao importa o fuso de quem esta olhando a pagina. */\n';
+  /* O DIA E A HORA SAEM DE "data" E "hora" COMO CHEGARAM, e nao de "quando" convertido.
+     A primeira versao fazia Date.parse(quando) e lia os campos em UTC -- e isso mentia: um
+     ensaio das 14h saia como 1700, e todo agendamento a partir das 21h de Brasilia virava o
+     DIA SEGUINTE. Nao e hora errada, e data errada, justamente na chave que o dono usaria
+     para achar o agendamento no extrato.
+     "data" e "hora" sao as strings que o TidyCal ja mostra ao dono no painel dele. Usar o que
+     ele le e ao mesmo tempo mais simples e mais correto: zero conversao, zero fuso, zero
+     parsing. So digitos, e com teto, para caber nos 25 caracteres que o Pix aceita.
+     Limite declarado: um formato de hora em 12 horas ("2:00 PM") perde o AM/PM, e dois
+     agendamentos assim no mesmo dia compartilhariam o identificador -- o mesmo limite que
+     ja vale quando "data" e "hora" nao vem, e pelo mesmo motivo: melhor um codigo que nao
+     diz o dia do que um que diz o dia errado. */
+  c+='function diaHoraId(dataCru,horaCru){\n';
+  c+='  var d=String(dataCru==null?"":dataCru).replace(/\\D/g,"").substring(0,8);\n';
+  c+='  var h=String(horaCru==null?"":horaCru).replace(/\\D/g,"").substring(0,4);\n';
+  c+='  return d+h;\n';
+  c+='}\n';
+  c+='/* recebe a RESERVA ja obtida por montar() (uma chamada so de reservaObter por carregamento --\n';
+  c+='   ver o comentario acima) em vez de buscar a sua propria: e a mesma que o prazo (3a2) usa,\n';
+  c+='   e as duas tem de enxergar o MESMO instante de primeira visita e o MESMO sufixo. */\n';
+  c+='function idConciliacao(pac,dataCru,horaCru,reserva){\n';
+  c+='  var dh=diaHoraId(dataCru,horaCru);\n';
+  c+='  return limpaId(PREFIXO+pac.cod+(dh||reserva.suf))||"***";\n';
+  c+='}\n\n';
+
+  c+='/* ===== 3a2. o prazo da reserva =====\n';
+  c+='   E UMA DURACAO, nao uma data de calendario: primeira visita (Date.now(), o MESMO relogio e\n';
+  c+='   o MESMO registro que guarda o identificador acima) mais PRAZOH horas. Milissegundo nao\n';
+  c+='   tem fuso, entao nao ha conversao de fuso para errar aqui (decisao 3 do diario) -- diferente\n';
+  c+='   da Contagem regressiva, que resolve OUTRO problema (uma data marcada, igual para\n';
+  c+='   qualquer visitante, e por isso congelada com um deslocamento fixo ao gerar).\n\n';
+  c+='   LIMITADO AO INICIO DO ENSAIO quando "quando" e legivel: ninguem paga depois da sessao.\n';
+  c+='   Sem "quando" legivel, o limite nao se aplica e vale so a contagem de horas -- o prazo\n';
+  c+='   nunca sai de uma data que a pagina nao conseguiu ler (mesma disciplina do identificador).\n\n';
+  c+='   Abrir noutro aparelho reinicia a contagem: o cliente ganha mais tempo. A falha e generosa,\n';
+  c+='   nunca punitiva -- direcao escolhida, nao acidental (spec 7.1). */\n';
+  c+='function prazoFim(reserva,quandoCru){\n';
+  c+='  var fim=reserva.primeira+PRAZOH*3600000;\n';
+  c+='  var ensaio=quandoCru?Date.parse(quandoCru):NaN;\n';
+  c+='  if(!isNaN(ensaio)&&ensaio<fim)fim=ensaio;\n';
+  c+='  return fim;\n';
+  c+='}\n';
+  c+='/* No relogio do PROPRIO aparelho que gerou "primeira" -- por isso nao ha nada para converter\n';
+  c+='   aqui tambem: e so ler a mesma hora que o visitante ja ve no proprio aparelho. */\n';
+  c+='function prazoTexto(fimMs){\n';
+  c+='  var d=new Date(fimMs);\n';
+  c+='  function d2(n){return (n<10?"0":"")+n;}\n';
+  c+='  return d2(d.getDate())+"/"+d2(d.getMonth()+1)+" às "+d2(d.getHours())+":"+d2(d.getMinutes());\n';
+  c+='}\n';
+  c+='/* O TEXTO DIZ A REGRA DE VERDADE (spec 7.1): quem libera o horario depois do prazo e o dono,\n';
+  c+='   a mao. O relogio e recado, nao tranca -- mesma honestidade ja registrada para a validade\n';
+  c+='   do link de cobranca (/pagar). */\n';
+  c+='function prazoBarra(cartao,fimMs){\n';
+  c+='  var b=document.createElement("div");b.className="fca-ob-prazo";\n';
+  c+='  b.textContent="Reserva garantida até "+prazoTexto(fimMs)+".";\n';
+  c+='  cartao.appendChild(b);\n';
+  c+='  var av=document.createElement("div");av.className="fca-ob-ajuda";\n';
+  c+='  av.textContent="O relógio é um recado, não uma tranca: quem libera o horário depois do prazo é a gente, à mão, ao conferir o pagamento.";\n';
+  c+='  cartao.appendChild(av);\n';
+  c+='}\n';
+  c+='/* O mesmo cartao (titulo + resumo ja montados por montar()), sem secao de pagamento -- o\n';
+  c+='   mesmo tratamento que a /pagar da ao link vencido (decisao 1 do diario). Nao ha botao "Ja\n';
+  c+='   paguei" aqui porque nao ha secao do Pix: o WhatsApp cumpre o mesmo papel. */\n';
+  c+='function prazoVencido(cartao){\n';
+  c+='  var msg=document.createElement("div");msg.className="fca-ob-recusa-msg";\n';
+  c+='  msg.textContent="O prazo para pagar esta reserva já passou. Fale com a gente para confirmar se o horário ainda está disponível.";\n';
+  c+='  cartao.appendChild(msg);\n';
+  c+='  var zap=botaoZap("Olá! Meu prazo para pagar a reserva passou. Ainda está disponível?");\n';
+  c+='  if(zap)cartao.appendChild(zap);\n';
+  c+='}\n\n';
+
+  c+='/* ===== 3b. resumo do que foi agendado, com as duas formas de pagar (mesma conta de\n';
+  c+='   aBlocoVitrine -- ver o comentario la sobre o arredondamento da parcela) ===== */\n';
+  c+=fcaPrecoParcelaSrc();
+  c+=fcaTextoCartaoSrc('"');
+  c+='function montarResumo(cartao){\n';
+  c+='  var nome=document.createElement("div");nome.className="fca-ob-resumo-nome";nome.textContent=PAC.nome;\n';
+  c+='  cartao.appendChild(nome);\n';
+  c+='  if(PAC.dur){var d=document.createElement("div");d.className="fca-ob-resumo-dur";d.textContent=PAC.dur;cartao.appendChild(d);}\n';
+  c+='  var l1=document.createElement("div");l1.className="fca-ob-preco-linha1";\n';
+  c+='  var v=document.createElement("span");v.className="fca-ob-preco-valor";v.textContent=moedaFmt(precoPix(PAC.preco));\n';
+  c+='  l1.appendChild(v);\n';
+  c+='  if(DESCONTO_PIX>0){\n';
+  c+='    var selo=document.createElement("span");selo.className="fca-ob-selo";selo.textContent="-"+DESCONTO_PIX+"% no Pix";\n';
+  c+='    l1.appendChild(selo);\n  }\n';
+  c+='  cartao.appendChild(l1);\n';
+  c+='  var l2=document.createElement("div");l2.className="fca-ob-preco-linha2";l2.textContent=textoCartao(PAC.preco);\n';
+  c+='  cartao.appendChild(l2);\n';
+  c+='}\n\n';
+
+  c+='/* ===== 3c. o Pix -- a maquinaria vem da fonte unica (FC_PIX_SRC, fc-compartilhado.js).\n';
+  c+='   Ela MONTA um payload novo (como o Checkout/Mini loja fazem), e nao LE um payload que\n';
+  c+='   chegou pronto (como a /pagar faz): esta pagina conhece o preco do pacote diretamente,\n';
+  c+='   nao precisa de um codigo Pix pronto viajando por fora. */\n';
+  c+=FC_PIX_SRC.semAcento;
+  c+=FC_PIX_SRC.tlv;
+  c+=FC_PIX_SRC.crc16;
+  c+=FC_PIX_SRC.montarPayload;
+  c+='function total(){return PAC.preco;}\n';
+  c+=fcTotalPixSrc(cfg.descpix,true,false);
+  c+='function pix(cartao){\n';
+  c+='  var payload=montarPayload(totalPix());\n';
+  c+='  var b=document.createElement("div");b.className="fca-ob-bloco";\n';
+  c+='  var r=document.createElement("div");r.className="fca-ob-rot";r.textContent="Pix";b.appendChild(r);\n';
+  c+='  var ta=document.createElement("textarea");ta.className="fca-ob-cod";ta.setAttribute("readonly","readonly");ta.value=payload;b.appendChild(ta);\n';
+  c+='  var bt=document.createElement("button");bt.className="fca-ob-bt";bt.type="button";bt.textContent="Copiar código Pix";\n';
+  c+='  var av=document.createElement("div");av.className="fca-ob-ajuda";\n';
+  c+='  bt.addEventListener("click",function(){\n';
+  c+='    var ok=false;ta.select();\n';
+  c+='    try{ta.setSelectionRange(0,99999);}catch(e){}\n';
+  c+='    try{ok=document.execCommand("copy");}catch(e2){ok=false;}\n';
+  c+='    av.textContent=ok?"Código copiado! Cole no aplicativo do seu banco.":"Não consegui copiar. Selecione o código acima e copie na mão.";\n';
+  c+='  });\n';
+  c+='  b.appendChild(bt);b.appendChild(av);\n';
+  c+='  var qr=document.createElement("div");qr.className="fca-ob-qr";b.appendChild(qr);\n';
+  c+='  var ins=document.createElement("div");ins.className="fca-ob-ajuda";ins.textContent="Abra o app do seu banco e pague pelo QR Code ou Pix Copia e Cola";b.appendChild(ins);\n';
+  c+='  cartao.appendChild(b);\n';
+  c+='  desenharQr(qr,payload);\n';
+  c+='}\n';
+  c+='/* O QR vem do MESMO payload que esta na caixa de copiar: um segundo lugar de onde tirar\n';
+  c+='   o codigo seria um segundo valor possivel. Modelo copiado da /pagar (decisao 1 do\n';
+  c+='   diario): se a biblioteca nao chegar (bloqueador, rede ruim) a caixa SOME -- deixa-la\n';
+  c+='   com a altura reservada e vazia entregava um retangulo em branco de 200px sem explicacao\n';
+  c+='   nenhuma na tela de quem esta pagando. Sem QR a cobranca continua inteira: o copia e\n';
+  c+='   cola e a instrucao do Pix ficam onde estavam. */\n';
+  c+='function desenharQr(alvo,codigo){\n';
+  c+='  function some(){alvo.style.display="none";}\n';
+  c+='  function faz(){\n';
+  c+='    try{new QRCode(alvo,{text:codigo,width:200,height:200,correctLevel:QRCode.CorrectLevel.M});}\n';
+  c+='    catch(e){some();}\n';
+  c+='  }\n';
+  c+='  if(window.QRCode){faz();return;}\n';
+  c+='  var s=document.createElement("script");\n';
+  c+='  s.src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js";\n';
+  c+='  s.onload=function(){if(!window.QRCode){some();return;}faz();};\n';
+  c+='  s.onerror=some;\n';
+  c+='  document.head.appendChild(s);\n';
+  c+='}\n\n';
+
+  c+='/* ===== 3d. o cartao -- o pedido ao SDK de pagamento NAO E FONTE COMPARTILHADA (decisao 8\n';
+  c+='   do diario: a spec errava nisso). actions.order.create ja e escrito a mao em tres\n';
+  c+='   geradores (Checkout, /pagar, Mini loja) e nenhuma funcao compartilhada o emite; esta e a\n';
+  c+='   quarta copia, espelhada na da /pagar (item unico, decisao 1). SEM invoice_id: ele e\n';
+  c+='   unico por conta no provedor, e a segunda cobranca com o mesmo seria recusada.\n';
+  c+='   NENHUM TEXTO NOSSO NOMEIA O PROVEDOR (regra 10 do plano): o rotulo da secao e o aviso de\n';
+  c+='   falha dizem so "cartao" -- quem desenha os botoes com a marca deles e o proprio SDK, e\n';
+  c+='   isso nao da para mudar. */\n';
+  c+='function secaoCartao(cartao){\n';
+  c+='  var sep=document.createElement("div");sep.className="fca-ob-sep";sep.textContent="OU";cartao.appendChild(sep);\n';
+  c+='  var b=document.createElement("div");b.className="fca-ob-bloco fca-ob-semtopo";\n';
+  c+='  var r=document.createElement("div");r.className="fca-ob-rot";r.textContent="Cartão de crédito ou débito";b.appendChild(r);\n';
+  c+='  var alvo=document.createElement("div");alvo.className="fca-ob-pp";alvo.id="fca-ob-pp";b.appendChild(alvo);\n';
+  c+='  if(PARCELAS>1){\n';
+  c+='    var pl=document.createElement("div");pl.className="fca-ob-ajuda";\n';
+  c+='    pl.textContent="Em até "+PARCELAS+"x de "+moedaFmt(parcelaDe(PAC.preco));\n';
+  c+='    b.appendChild(pl);\n';
+  c+='  }\n';
+  c+='  cartao.appendChild(b);\n';
+  c+='  function ppFora(){\n';
+  c+='    var m=document.createElement("div");m.className="fca-ob-aviso";\n';
+  c+='    m.textContent="Não foi possível carregar o pagamento por cartão agora. Use o Pix acima, ou fale com a gente para receber outra forma de pagar.";\n';
+  c+='    alvo.innerHTML="";alvo.appendChild(m);\n';
+  c+='  }\n';
+  c+='  var s=document.createElement("script");\n';
+  c+='  s.src="https://www.paypal.com/sdk/js?client-id="+encodeURIComponent(CLIENT_ID)+"&currency=BRL&intent=capture&locale=pt_BR";\n';
+  c+='  s.onerror=ppFora;\n';
+  c+='  s.onload=function(){\n';
+  c+='    if(!window.paypal){ppFora();return;}\n';
+  c+='    window.paypal.Buttons({\n';
+  c+='      style:{layout:"vertical"},\n';
+  c+='      createOrder:function(d,actions){\n';
+  c+='        var v=PAC.preco.toFixed(2);\n';
+  c+='        var ref=CODIGO_PEDIDO?String(CODIGO_PEDIDO).substring(0,127):"";\n';
+  c+='        var nome=(PAC.nome+(ref?(" - "+ref):"")).substring(0,127);\n';
+  c+='        var item={name:nome,quantity:"1",unit_amount:{value:v,currency_code:"BRL"}};\n';
+  c+='        if(ref)item.sku=ref;\n';
+  c+='        var pu={amount:{value:v,currency_code:"BRL",breakdown:{item_total:{value:v,currency_code:"BRL"}}},\n';
+  c+='          description:nome,items:[item]};\n';
+  c+='        if(ref)pu.custom_id=ref;\n';
+  c+='        return actions.order.create({purchase_units:[pu]});\n';
+  c+='      },\n';
+  c+='      onApprove:function(d,actions){\n';
+  c+='        return actions.order.capture().then(function(){\n';
+  c+='          alvo.innerHTML="";\n';
+  c+='          var ok=document.createElement("div");ok.className="fca-ob-recusa-msg";ok.textContent="Pagamento aprovado. Obrigado!";\n';
+  c+='          alvo.appendChild(ok);\n';
+  c+='        });\n';
+  c+='      }\n';
+  c+='    }).render("#fca-ob-pp");\n';
+  c+='  };\n';
+  c+='  document.head.appendChild(s);\n';
+  c+='}\n\n';
+
+  c+='function montar(){\n';
+  c+='  if(!raiz)return;\n';
+  c+='  raiz.innerHTML="";\n';
+  c+='  if(!PAC){recusaCordial();return;}\n';
+  c+='  /* UMA SO chamada de reservaObter por carregamento (ver o comentario dela): identificador\n';
+  c+='     e prazo tem de enxergar o MESMO registro, senao um sufixo novo a cada leitura\n';
+  c+='     reiniciaria o prazo tambem -- o achado mais caro da rodada (decisao 7 do diario). */\n';
+  c+='  var reserva=reservaObter(PAC.cod,QUANDO);\n';
+  c+='  CODIGO_PEDIDO=idConciliacao(PAC,param("data"),param("hora"),reserva);\n';
+  c+='  var fim=prazoFim(reserva,QUANDO);\n';
+  c+='  var cartao=document.createElement("div");cartao.className="fca-ob-cartao";\n';
+  c+='  var tit=document.createElement("div");tit.className="fca-ob-titulo";tit.textContent=TXT_TITULO;cartao.appendChild(tit);\n';
+  c+='  montarResumo(cartao);\n';
+  c+='  if(Date.now()>fim){\n';
+  c+='    prazoVencido(cartao);\n';
+  c+='  }else{\n';
+  c+='    prazoBarra(cartao,fim);\n';
+  c+='    pix(cartao);\n';
+  c+='    secaoCartao(cartao);\n';
+  c+='  }\n';
+  c+='  raiz.appendChild(cartao);\n';
+  c+='}\n';
+  c+='try{montar();}catch(e){try{raiz.innerHTML="";recusaCordial();}catch(e2){}}\n';
+  c+='})();\n</scr'+'ipt>';
+  return c;
+}
+
+/* Padrao do gerador, copiado de uGerar (10784+, ver o contrato do plano). */
+function aGerar(){
+  if(fcPixChaveAjustar('fci-chave'))fciGravar();
+  if(fcAjustarTodos(A_NUMS))salvarEstado();
+  var cfg=aCfg();
+  var recusa=aRecusa(cfg);
+  if(recusa){alert(recusa);fciApontarSe(recusa);return;}
+  $('a-out1').value=aBlocoVitrine(cfg);
+  $('a-out2').value=aEnderecos(cfg);
+  $('a-out3').value=aBlocoObrigado(cfg);
+  aPreview(true);
+  fccMarcar('pac');
+}
+/* ===== Tarefa 4: a previa da vitrine =====
+   Modelo literal: mPvShim/mPvDoc/mPvMontar/mPreview (17424+ antes desta tarefa). A previa
+   executa aBlocoVitrine de verdade, dentro de um iframe de mesma origem escrito por
+   document.write -- nao existe segunda implementacao da vitrine para divergir do bloco
+   entregue.
+
+   O QUE E SO DESTA PREVIA, e nao do bloco: o calendario do TidyCal nao pode carregar aqui --
+   outro dominio, e a previa nao deve depender de rede. O bloco cria um <iframe
+   class="fca-tidycal"> de verdade (para 'frame()' continuar achando o MESMO elemento ao trocar
+   de pacote, provando que a previa tambem nao vaza iframe), mas o 'src' dele e interceptado: em
+   vez de navegar para o TidyCal, o quadro mostra um retangulo com a frase combinada. A
+   diferenca fica DECLARADA no <p class="ajuda"> abaixo do quadro (ver o painel), nunca
+   escondida. */
+function aPvShim(cfg){
+  var placeholder='<div style="box-sizing:border-box;min-height:200px;display:flex;align-items:center;justify-content:center;text-align:center;padding:20px;background:#EDEAE1;color:#6b6456;font:600 13px -apple-system,BlinkMacSystemFont,\'Segoe UI\',Roboto,sans-serif">Aqui entra o calendário do TidyCal deste pacote.</div>';
+  var extras='';
+  extras+='  try{\n';
+  extras+="    var DOC_PV_CAL='"+escJs(placeholder)+"';\n";
+  extras+='    Object.defineProperty(HTMLIFrameElement.prototype,"src",{configurable:true,\n';
+  extras+='      set:function(v){this._fcPvSrc=v;this.setAttribute("srcdoc",DOC_PV_CAL);},\n';
+  extras+='      get:function(){return this._fcPvSrc||"";}\n';
+  extras+='    });\n';
+  extras+='  }catch(e){}\n';
+  return fcPvShim({pref:'a',
+    extras:extras,
+    abre:'o ',
+    fecha:' deste quadro. Este bloco nao deveria gravar nada em armazenamento, mas se a troca nao pegou pode estar tocando as chaves reais do navegador. O codigo gerado ao lado nao e afetado.'});
+}
+/* Sem conteudo abaixo nao da para ver onde o passo 2 termina nem rolar ate o calendario depois
+   de escolher um pacote. Blocos cinzentos e mudos, de proposito. */
+function aPvEnchimento(){
+  var s='',i;
+  for(i=0;i<4;i++)s+='<div class="a-pv-falso">conteudo da sua página</div>';
+  return s;
+}
+/* O que a previa mostra quando a configuracao e recusada: o quadro da RECUSA, com o motivo --
+   nunca a vitrine, e nunca o ultimo bloco valido rotulado como desatualizado. A previa executa
+   o codigo gerado; se o gerador se recusaria a produzir esta configuracao, mostrar uma vitrine
+   aqui seria mostrar um codigo que o botao Gerar codigo nao entrega. */
+function aPvRecusaDoc(motivo){
+  var h='';
+  h+='<!DOCTYPE html>\n<html lang="pt-br">\n<head>\n<meta charset="utf-8">\n';
+  h+='<meta name="viewport" content="width=device-width,initial-scale=1">\n';
+  h+='<sty'+'le>\n';
+  h+='html,body{margin:0;padding:0}\n';
+  h+='body{background:#FFFFFF;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Ubuntu,sans-serif;padding:20px}\n';
+  h+='.a-pv-recusa{border:2px solid #8C1D18;border-radius:12px;background:#FDF2F1;color:#5E1310;padding:16px 18px;max-width:560px;margin:0 auto}\n';
+  h+='.a-pv-recusa .t{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin:0 0 8px}\n';
+  h+='.a-pv-recusa .m{font-size:13px;line-height:1.55;margin:0}\n';
+  h+='.a-pv-recusa .r{font-size:12px;line-height:1.5;margin:12px 0 0;color:#7A3B36}\n';
+  h+='</sty'+'le>\n</head>\n<body>\n';
+  h+='<div class="a-pv-recusa"><p class="t">Configuracao recusada &mdash; nao ha vitrine para mostrar</p>';
+  h+='<p class="m">'+escHtml(motivo)+'</p>';
+  h+='<p class="r">A previa executa o codigo gerado, e o gerador se recusa a produzir esta configuracao. Mostrar uma vitrine aqui seria mostrar um codigo que o botao <b>Gerar codigo</b> nao entrega. Corrija o campo acima e a previa volta sozinha.</p>';
+  h+='</div>\n</body>\n</html>';
+  return h;
+}
+function aPvDoc(cfg){
+  var h='';
+  h+='<!DOCTYPE html>\n<html lang="pt-br">\n<head>\n<meta charset="utf-8">\n';
+  h+='<meta name="viewport" content="width=device-width,initial-scale=1">\n';
+  h+='<sty'+'le>\n';
+  h+='html,body{margin:0;padding:0}\n';
+  h+='body{background:#FFFFFF;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Ubuntu,sans-serif;padding:16px 12px}\n';
+  h+='.a-pv-falso{background:#EDEAE1;color:#A9A294;border-radius:6px;margin:10px 0;padding:0 14px;';
+  h+='height:70px;display:flex;align-items:center;font-size:12px;letter-spacing:.04em}\n';
+  h+='</sty'+'le>\n</head>\n<body>\n';
+  h+=aPvShim(cfg);
+  h+=aBlocoVitrine(cfg);
+  h+=aPvEnchimento();
+  h+='\n</body>\n</html>';
+  return h;
+}
+/* ===== Tarefa 10: a previa da pagina de obrigado =====
+   A sonda do PayPal desta previa espelha pPvPayPal (15985+ antes desta tarefa), e NAO
+   fcPvSondaPP: a diferenca e estrutural, nao estetica. fcPvSondaPP EXERCITA um onClick de
+   validacao de carrinho que o Checkout e a Mini loja tem e que este bloco -- item unico, sem
+   carrinho, decisao 1 do diario -- nao tem; chama-la aqui mostraria uma linha falsa ("Ao clicar
+   em pagar: erro --") para um gancho que nunca existiu neste gerador. Mesma familia da divida ja
+   registrada na decisao 8 (o pedido ao SDK NAO E fonte compartilhada entre os quatro geradores
+   que o escrevem): a sonda de previa de cada um segue a forma do gerador que ela espelha, e este
+   espelha a /pagar. */
+function aPvObPayPal(){
+  var s='';
+  s+="  var DESENHO_PP='"+escJs(mockPP())+"';\n";
+  s+='  var inserir=document.head.appendChild;\n';
+  s+='  document.head.appendChild=function(n){\n';
+  s+="    if(n&&n.tagName==='SCRIPT'&&/paypal\\.com/.test(String(n.src||''))){\n";
+  s+='      window.paypal={Buttons:function(bt){return {render:function(sel){\n';
+  s+="        var alvo=(typeof sel==='string')?document.querySelector(sel):sel;\n";
+  s+='        if(!alvo)return;\n';
+  s+="        var caixa=document.createElement('div');\n";
+  s+="        caixa.id='a-pv-ob-pp';\n";
+  s+='        caixa.setAttribute(\'style\',\'border:1px dashed #b9b3a4;border-radius:8px;padding:6px 8px 10px\');\n';
+  s+="        alvo.innerHTML='';alvo.appendChild(caixa);\n";
+  s+="        var valor='',descricao='';\n";
+  s+='        try{\n';
+  s+='          var ped=bt.createOrder(null,{order:{create:function(o){return o;}}});\n';
+  s+='          var am=ped.purchase_units[0].amount;\n';
+  s+="          valor=am.value+' '+am.currency_code;\n";
+  s+='          descricao=ped.purchase_units[0].description;\n';
+  s+="        }catch(e){valor='(erro: '+String(e&&e.message||e)+')';}\n";
+  s+="        var eti=document.createElement('div');\n";
+  s+='        eti.setAttribute(\'style\',\'font:600 10px/1.4 -apple-system,BlinkMacSystemFont,sans-serif;color:#8a8375;text-align:center;text-transform:uppercase;letter-spacing:.06em\');\n';
+  s+="        eti.textContent='desenho: o SDK do PayPal nao roda na previa';\n";
+  s+='        caixa.appendChild(eti);\n';
+  s+="        var des=document.createElement('div');des.innerHTML=DESENHO_PP;caixa.appendChild(des);\n";
+  s+="        var med=document.createElement('div');\n";
+  s+="        med.id='a-pv-ob-pp-valor';\n";
+  s+='        med.setAttribute(\'style\',\'margin-top:8px;border-top:1px dashed #d8d2c4;padding-top:7px;font:12px/1.5 -apple-system,BlinkMacSystemFont,sans-serif;color:#555;text-align:left\');\n';
+  s+="        med.textContent='Medido no proprio bloco -- valor que iria na ordem: '+valor+(descricao?(' | descricao: '+descricao):'');\n";
+  s+='        caixa.appendChild(med);\n';
+  s+='      }};}};\n';
+  s+='      setTimeout(function(){if(n.onload)n.onload();},0);\n';
+  s+='      return n;\n';
+  s+='    }\n';
+  s+='    return inserir.call(document.head,n);\n';
+  s+='  };\n';
+  s+='  document.head.appendChild.fcPvSemPayPal=true;\n';
+  return s;
+}
+/* O WHATSAPP NAO E NEUTRALIZADO por window.open (o bloco usa <a target="_blank">, nao
+   window.open): o mesmo limite ja aceito na previa da /pagar (16033, zapBotao identico). O
+   aviso do shim descreve essa consequencia em vez de prometer o que nao entrega.
+   aPvObPayPal() entra como EXTRAS (nao concatenado a parte): e a mesma engrenagem que a
+   propria fcPvShim ja define para "trocas adicionais do ambiente, emitidas logo depois da
+   troca do storage" -- a sonda do PayPal roda DENTRO do IIFE do shim, nao como um segundo
+   bloco solto (aPvObPayPal devolve so as instrucoes, sem as tags de script em volta). */
+function aPvObShim(){
+  return fcPvShim({pref:'a',
+    extras:aPvObPayPal(),
+    semAbrir:true,
+    abre:'',
+    fecha:' deste quadro. Este bloco nao deveria gravar nada em armazenamento, mas se a troca nao pegou pode estar tocando as chaves reais do navegador -- ou abrindo o WhatsApp numa aba nova. O codigo gerado ao lado nao e afetado.'});
+}
+/* Fragmento (sem doctype/html/head/body): esta previa nao ESCREVE um documento novo, ela
+   ACRESCENTA a um documento JA NAVEGADO (ver aPvObEscrever, abaixo, e o motivo de existir). */
+function aPvObFragmento(cfg){
+  var h='';
+  h+='<sty'+'le>\n';
+  h+='body{background:#FFFFFF;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Ubuntu,sans-serif;margin:0;padding:16px 12px}\n';
+  h+='.a-pv-falso{background:#EDEAE1;color:#A9A294;border-radius:6px;margin:10px 0;padding:0 14px;';
+  h+='height:70px;display:flex;align-items:center;font-size:12px;letter-spacing:.04em}\n';
+  h+='</sty'+'le>\n';
+  h+=aPvObShim();
+  h+=aBlocoObrigado(cfg);
+  h+=aPvEnchimento();
+  return h;
+}
+/* ===== por que isto existe, e nao document.open()/write() como as outras previas =====
+   MEDIDO nesta tarefa: document.open() chamado a partir do documento da FERRAMENTA reseta a
+   URL do documento ALVO para a URL de quem chamou -- mesmo com o iframe corretamente navegado
+   para previa.html?pac=X antes disso. E o mesmo com contentWindow.eval(). O motivo e que o
+   open()/write() usa "o documento responsavel por quem chamou", nao o documento sendo escrito
+   -- por isso todas as OUTRAS previas desta ferramenta (que nunca navegam o iframe para lugar
+   nenhum, so escrevem por cima de um about:blank) nunca tropecaram nisto: para elas, resetar
+   para a URL da ferramenta nao muda nada que importe.
+   Aqui importa: e location.search que carrega o ?pac=. A saida e nunca chamar open()/write()
+   depois da navegacao -- soletra o HTML com insertAdjacentHTML (inerte para <script>, por
+   desenho do proprio HTML) e cria os <script> de verdade um a um (createElement + appendChild),
+   que executam sem tocar em document.open(). O texto chega com as tags <script> blindadas por
+   concatenacao (Manual do Prosite) para o validador do Prosite, e aqui, em tempo de execucao, a
+   string ja e literal -- so precisa ser separada do HTML em volta. */
+function aPvObEscrever(doc,html){
+  var re=/<script>([\s\S]*?)<\/script>/g,ultimo=0,m,antes,el;
+  while((m=re.exec(html))){
+    antes=html.substring(ultimo,m.index);
+    if(antes)doc.body.insertAdjacentHTML('beforeend',antes);
+    el=doc.createElement('script');
+    el.textContent=m[1];
+    doc.body.appendChild(el);
+    ultimo=re.lastIndex;
+  }
+  var resto=html.substring(ultimo);
+  if(resto)doc.body.insertAdjacentHTML('beforeend',resto);
+}
+/* O seletor "prever como": os pacotes cadastrados, mais "sem pacote (recusa)" -- o estado mais
+   facil de esquecer e o mais visivel para o cliente (Tarefa 10, passo 2). Preserva a escolha
+   entre remontagens quando o codigo escolhido continua existindo; senao cai no primeiro pacote,
+   ou na recusa se a lista estiver vazia. */
+/* aPvObTocado distingue as DUAS razoes de sel.value ser '': o operador nunca abriu este
+   seletor (estado inicial de um <select> vazio -- default util e o primeiro pacote), e o
+   operador ESCOLHEU "sem pacote (recusa)" de proposito (esse valor tem de sobreviver as
+   remontagens tanto quanto o codigo de um pacote real). Sem a distincao, toda remontagem
+   devolvia o operador ao primeiro pacote mesmo depois de ele escolher a recusa -- medido
+   nesta tarefa. */
+var aPvObTocado=false;
+function aPvObOpcoes(){
+  var sel=$('a-pv-pac');if(!sel)return;
+  var atual=sel.value,h='<option value="">— sem pacote (recusa) —</option>',i,existe=(aPvObTocado&&atual==='');
+  for(i=0;i<aPacotes.length;i++){
+    h+='<option value="'+escAttr(aPacotes[i].cod)+'">'+escHtml(aPacotes[i].nome||aPacotes[i].cod)+' ('+escHtml(aPacotes[i].cod)+')</option>';
+    if(aPacotes[i].cod===atual)existe=true;
+  }
+  sel.innerHTML=h;
+  sel.value=existe?atual:(aPacotes.length?aPacotes[0].cod:'');
+}
+var A_PV_OB_LARGURA=420, A_PV_OB_ALTURA=780;
+function aPvObMontar(){
+  var box=$('a-pv-ob-box');if(!box)return;
+  aPvObOpcoes();
+  var cfg=aCfg();
+  var recusa=aRecusa(cfg);
+  var pac=$('a-pv-pac')?$('a-pv-pac').value:'';
+  var disp=box.clientWidth||360;
+  var k=Math.min(1,disp/A_PV_OB_LARGURA);
+  box.innerHTML='';
+  var moldura=document.createElement('div');
+  moldura.className='a-pv-moldura';
+  moldura.style.width=Math.round(A_PV_OB_LARGURA*k)+'px';
+  moldura.style.height=A_PV_OB_ALTURA+'px';
+  var ifr=document.createElement('iframe');
+  ifr.id='a-pv-ob-frame';
+  ifr.setAttribute('title','Prévia da página de obrigado');
+  ifr.style.width=A_PV_OB_LARGURA+'px';
+  ifr.style.height=Math.round(A_PV_OB_ALTURA/k)+'px';
+  ifr.style.transform='scale('+k+')';
+  ifr.style.transformOrigin='top left';
+  moldura.appendChild(ifr);
+  box.appendChild(moldura);
+  if(recusa){
+    /* mesma guarda da vitrine: a previa nunca executa o que o gerador se negaria a produzir --
+       aqui nao ha navegacao nenhuma, so o quadro da recusa de configuracao. */
+    var doc0=ifr.contentDocument||(ifr.contentWindow&&ifr.contentWindow.document);
+    if(doc0){doc0.open();doc0.write(aPvRecusaDoc(recusa));doc0.close();}
+    return;
+  }
+  /* NAVEGACAO DE VERDADE para previa.html?pac=<escolhido>, preservando location.search -- um
+     iframe escrito por document.write direto herdaria a URL da ferramenta, sem ?pac= nenhum, e
+     a pagina mostraria a recusa cordial do BLOCO sempre (Tarefa 10, passo 1; decisao 10 do
+     diario, sobre por que previa.html nao precisa de versao). So DEPOIS de a navegacao terminar
+     e que o bloco de verdade entra -- por aPvObEscrever, NUNCA por document.open()/write(), que
+     desfaria a propria navegacao (ver o comentario dela). */
+  ifr.addEventListener('load',function(){
+    var doc=ifr.contentDocument||(ifr.contentWindow&&ifr.contentWindow.document);
+    if(!doc)return;
+    aPvObEscrever(doc,aPvObFragmento(cfg));
+  });
+  ifr.src='previa.html'+(pac?('?pac='+encodeURIComponent(pac)):'');
+}
+/* A vitrine nao tem corte de largura proprio para alternar desktop/celular na previa (o painel
+   desta aba nao ganhou os botoes de modo -- Tarefa 1 nao os pediu): uma largura logica so, e o
+   quadro escala para caber no espaco disponivel. A media query do bloco (640px) continua sendo
+   avaliada pelo proprio iframe. */
+var aPvTimer=null;
+var A_PV_LARGURA=1040, A_PV_ALTURA=760;
+function aPvMontar(){
+  var box=$('a-pv-box');if(!box)return;
+  var cfg=aCfg();
+  var recusa=aRecusa(cfg);
+  var disp=box.clientWidth||440;
+  var k=Math.min(1,disp/A_PV_LARGURA);
+  box.innerHTML='';
+  var moldura=document.createElement('div');
+  moldura.className='a-pv-moldura';
+  moldura.style.width=Math.round(A_PV_LARGURA*k)+'px';
+  moldura.style.height=A_PV_ALTURA+'px';
+  var ifr=document.createElement('iframe');
+  ifr.id='a-pv-frame';
+  ifr.setAttribute('title','Prévia da vitrine de pacotes');
+  ifr.style.width=A_PV_LARGURA+'px';
+  ifr.style.height=Math.round(A_PV_ALTURA/k)+'px';
+  ifr.style.transform='scale('+k+')';
+  ifr.style.transformOrigin='top left';
+  moldura.appendChild(ifr);
+  box.appendChild(moldura);
+  var doc=ifr.contentDocument||(ifr.contentWindow&&ifr.contentWindow.document);
+  if(!doc)return;
+  /* as MESMAS guardas da geracao: a previa nunca executa o que o gerador se negaria a produzir */
+  doc.open();doc.write(recusa?aPvRecusaDoc(recusa):aPvDoc(cfg));doc.close();
+}
+/* Remontar o iframe a cada tecla digitada custa caro e pisca. O debounce segura as mudancas de
+   campo; "Atualizar previa" e o botao de gerar passam direto. O timer e UNICO -- as DUAS previas
+   desta aba (vitrine e pagina de obrigado, Tarefa 10) remontam juntas, sob o mesmo temporizador,
+   sempre cancelado antes de agendar outro. */
+function aPreview(imediato){
+  if(aPvTimer){clearTimeout(aPvTimer);aPvTimer=null;}
+  if(imediato){aPvMontar();aPvObMontar();return;}
+  aPvTimer=setTimeout(function(){aPvTimer=null;aPvMontar();aPvObMontar();},400);
+}
+document.addEventListener('input',function(e){
+  var al=(e.target.id&&e.target.id.indexOf('a-')===0)||(e.target.name&&e.target.name.indexOf('a-')===0);
+  if(al)aPreview();
+});
+document.addEventListener('change',function(e){
+  var al=(e.target.id&&e.target.id.indexOf('a-')===0)||(e.target.name&&e.target.name.indexOf('a-')===0);
+  if(al)aPreview();
+});
+
+/* ============================================================
    CONTAGEM REGRESSIVA
    ============================================================ */
 function cToggles(){
@@ -17222,6 +18578,28 @@ function fccDaAba(a,p,plano,vals){
           'É a página para onde o TidyCal redireciona depois do agendamento. Para consolidá-la, selecione o preset geral dessa página — o tipo <b>Página de obrigado</b>.'));
       }
     }
+  }else if(a.id==='pac'){
+    plano.comps.push(fccItem(a,'a-out1','Agendamento por pacote — vitrine','Componente HTML desta página'));
+    /* a-out2 e o mesmo caso do t-out4, nao do p-out2 -- por isso mora aqui, e nao em FCC_FORA.
+       p-out2 e o link de UMA cobranca, que muda a cada uma e nao e passo de montagem. a-out2 e
+       passo de montagem que se faz UMA vez: esquece-lo deixa a pagina de obrigado publicada e
+       nunca visitada, exatamente como o comentario do t-out4 ja registra. Por isso entra na
+       lista "fora do Prosite" em vez de ficar silenciosamente fora do plano. */
+    plano.outra.push(fccItem(a,'a-out2','Agendamento por pacote — saída 2: os endereços de redirecionamento',
+      'Configuração do TidyCal — campo “Redirect to custom page after booking”, um em cada tipo de agendamento',
+      'Não é campo do Prosite: vai no próprio TidyCal, um endereço por pacote.'));
+    /* a-out3 e a pagina de OBRIGADO -- uma pagina diferente da vitrine (a-out1). Mesma
+       disciplina do t-out5: consolida na pagina certa (plano.comps quando o preset geral
+       selecionado E o tipo Pagina de obrigado), ou entra em "fora do Prosite" nomeando o
+       destino -- para nao ser confundida com o componente de OUTRA pagina, o mesmo erro que a
+       linha de identificacao do plano existe para denunciar. */
+    if(p.pagina==='obrigado'){
+      plano.comps.push(fccItem(a,'a-out3','Agendamento por pacote — página de obrigado','Componente HTML desta página'));
+    }else{
+      plano.outra.push(fccItem(a,'a-out3','Agendamento por pacote — página de obrigado',
+        'Componente HTML da página de obrigado',
+        'É a página para onde o TidyCal redireciona depois do agendamento. Para consolidá-la, selecione o preset geral dessa página — o tipo <b>Página de obrigado</b>.'));
+    }
   }
 }
 /* Esta aba ainda tem ALGUM codigo na tela? Existe por causa da contradicao que o aviso de
@@ -17363,6 +18741,25 @@ function fccBlocosDoCampo(plano,qual){
   if(!fccVazio(manual))r.push({rotulo:'Outros códigos meus',texto:manual});
   for(i=0;i<itens.length;i++)if(!itens[i].vazio)r.push({rotulo:itens[i].rotulo,texto:itens[i].texto});
   return r;
+}
+
+/* ---- aviso de colisao: Agendamento por pacote x pagina de obrigado do TidyCal (Tarefa 6,
+   passo 3) ----
+   As duas entregam saidas DIFERENTES desta pagina -- esta aba um componente, a TidyCal uma Tag
+   Body -- e por isso nao disputam CAMPO nenhum. O que colide e o COMPORTAMENTO: os dois scripts
+   trocam os MESMOS marcadores ({{nome}}, {{data}}, {{hora}}) na mesma pagina publicada, e quem
+   rodar primeiro vence -- inclusive nos textos reserva, que sao configuraveis em cada aba e
+   podem discordar entre si. O visitante veria o texto reserva de UMA aba onde o dono configurou
+   o da OUTRA, sem erro nenhum na tela.
+   Quando avisar: as duas abas ativas na campanha (FCG.ativas, o mesmo que fccOrfas ja consulta)
+   e a pagina de obrigado do TidyCal ligada (campo t-ob-usar, radio, valor 'sim'). O painel so
+   avisa; ele nao escolhe por conta propria qual das duas desligar. */
+function fccColisaoPacTidy(){
+  var pac=fcAba('pac'),tidy=fcAba('tidy'),v;
+  if(!pac||!tidy)return false;
+  if(!FCG.ativas.pac||!FCG.ativas.tidy)return false;
+  v=null;try{v=fcgValoresDaAba(tidy);}catch(e){v=null;}
+  return (((v&&v.t&&v.t.obusar)||radio('t-ob-usar'))==='sim');
 }
 
 /* ---- desenho ---- */
@@ -17512,6 +18909,10 @@ function fccRender(){
          escHtml(fcLista(plano.velhas))+(plano.velhas.length===1?' mudou':' mudaram')+
          ' depois de o código ter sido gerado. O que está abaixo é o código antigo. Volte à aba e clique em <b>Gerar código</b>.</p>';
     }
+    if(fccColisaoPacTidy()){
+      h+='<p class="fcc-perigo"><b>Agendamento por pacote e a página de obrigado do TidyCal estão ligadas ao mesmo tempo.</b> '+
+         'Não é disputa de campo — esta aba entrega um <b>componente</b> e a TidyCal entrega uma <b>Tag Body</b>, e um não sobrescreve o outro. O que colide é o <b>comportamento</b>: os dois scripts trocam os mesmos marcadores (<code>{{nome}}</code>, <code>{{data}}</code>, <code>{{hora}}</code>) na mesma página publicada, e quem rodar primeiro vence — inclusive nos textos reserva de cada um, que são configuráveis e podem discordar. O visitante veria o texto reserva de uma aba onde você configurou o da outra, sem erro nenhum na tela. Use só uma das duas como página de obrigado desta campanha.</p>';
+    }
     h+=fccCampoHTML(plano,'head',vals);
     h+=fccCampoHTML(plano,'body',vals);
     h+=fccListaHTML('Saídas por componente',plano.comps,
@@ -17568,6 +18969,9 @@ prep('Barra de abas','',function(){
   /* enquanto o painel esta escondido o box mede 0: a previa e remontada ao abrir a aba, ja com
      a largura real da coluna, senao o iframe nasceria na largura de emergencia. */
   liga('aba-loja',function(){trocarAba('loja');mAbaAbrir();});
+  /* enquanto o painel esta escondido o box mede 0: a previa e remontada ao abrir a aba, ja com
+     a largura real da coluna, senao o iframe nasceria na largura de emergencia. */
+  liga('aba-pac',function(){trocarAba('pac');aPreview(true);});
 });
 /* O logotipo do topo deixou de ser SVG colado no corpo da pagina e passa a ser desenhado a
    partir de CORUJA_PECAS, a mesma fonte que alimenta os blocos gerados. Passo proprio, e nao
@@ -17773,7 +19177,7 @@ prep('Mini loja','loja',function(){
    ramo redesenha a previa por conta propria, e por prefixo (fcCorRedesenhar).
    So em 'change'/'blur', nunca em 'input': corrigir a cada tecla impediria digitar '#075E54',
    porque '#0' viraria o padrao antes do resto chegar. */
-prep('Correcao a vista das cores livres','leads uni bor cnt cob loja',function(){
+prep('Correcao a vista das cores livres','leads uni bor cnt cob loja pac',function(){
   CORES_LIVRES.forEach(function(par){
     var t=$(par[0]+'-t');if(!t)return;
     /* Os dois gravadores sao chamados sempre: 'salvarEstado' guarda as cores das abas e
@@ -17813,7 +19217,7 @@ for(var iAba=0;iAba<ABAS.length;iAba++){
    carga, para o campo nunca exibir algo diferente do que o gerador vai usar, e regrava para o
    valor velho nao ressurgir na proxima sessao. Roda ANTES das previas para elas ja desenharem
    o valor corrigido. */
-prep('Correcao das cores livres e da chave Pix na carga','leads uni bor cnt',function(){
+prep('Correcao das cores livres e da chave Pix na carga','leads uni bor cnt pac',function(){
   var mudou=false;
   CORES_LIVRES.forEach(function(par){if(corAjustar(par[0],par[1]))mudou=true;});
   if(fcPixChaveAjustar('fci-chave'))mudou=true;
@@ -17945,6 +19349,26 @@ prep('Mini loja','loja',function(){
      vitrine -- em toda abertura da ferramenta, mesmo para quem nunca abre esta aba, e com o
      painel escondido (largura de emergencia). */
   mPvBotoes();
+},'desenhar a aba com o estado restaurado');
+prep('Agendamento por pacote','pac',function(){
+  /* As ligacoes desta aba moram NO PREPARO DESTA ABA, no mesmo padrao das demais: cada aba se
+     prepara por conta propria, e o defeito de uma nao derruba as outras. */
+  /* estado gravado antes desta regra pode trazer numero fora da faixa: prende na carga, para o
+     campo nunca exibir algo diferente do que aCfg vai usar. */
+  if(fcAjustarTodos(A_NUMS))salvarEstado();
+  aPacRender();
+  liga('a-pac-salvar',aPacAdd);
+  liga('a-gerar',aGerar);
+  liga('a-atualizar',function(){aPreview(true);});
+  liga('a-copy1',function(){copiar('a-out1','a-cop1');});
+  liga('a-copy2',function(){copiar('a-out2','a-cop2');});
+  liga('a-copy3',function(){copiar('a-out3','a-cop3');});
+  /* imediato, como as trocas de modo da previa da /pagar (p-pv-*): escolher o pacote a prever
+     e uma acao de interface, nao digitacao -- nao faz sentido esperar o debounce. liga() so
+     escuta 'click'; um <select> muda por 'change'. */
+  var elPvPac=$('a-pv-pac');if(elPvPac)elPvPac.addEventListener('change',function(){aPvObTocado=true;aPreview(true);});
+  fcLigarFaixa(A_NUMS,function(){aPreview(true);});
+  parearCor('a-c1');parearCor('a-c2');parearCor('a-c3');
 },'desenhar a aba com o estado restaurado');
 
 /* O preset geral e o ULTIMO passo da partida, e nao por acaso: fcgValoresDaAba le o que esta na
