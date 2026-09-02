@@ -19180,7 +19180,18 @@ function fccDaAba(a,p,plano,vals){
       }
     }
   }else if(a.id==='pac'){
-    plano.comps.push(fccItem(a,'a-out1','Agendamento por pacote — vitrine','Componente HTML desta página'));
+    /* a-out1 e a VITRINE, uma pagina diferente da pagina de obrigado (a-out3) -- mesma
+       disciplina do t-out1/t-out5: consolida na pagina certa (plano.comps quando o preset
+       geral selecionado NAO e o tipo Pagina de obrigado), ou entra em "fora do Prosite"
+       nomeando o destino -- para nao ser confundida com o componente da pagina de obrigado,
+       o mesmo erro que a linha de identificacao do plano existe para denunciar. */
+    if(p.pagina!=='obrigado'){
+      plano.comps.push(fccItem(a,'a-out1','Agendamento por pacote — vitrine','Componente HTML desta página'));
+    }else{
+      plano.outra.push(fccItem(a,'a-out1','Agendamento por pacote — vitrine',
+        'Componente HTML da página com a vitrine',
+        'Esta página está marcada como <b>Página de obrigado</b> no preset geral. Para consolidar a vitrine, selecione o preset geral da página onde os pacotes aparecem.'));
+    }
     /* a-out2 e o mesmo caso do t-out4, nao do p-out2 -- por isso mora aqui, e nao em FCC_FORA.
        p-out2 e o link de UMA cobranca, que muda a cada uma e nao e passo de montagem. a-out2 e
        passo de montagem que se faz UMA vez: esquece-lo deixa a pagina de obrigado publicada e
