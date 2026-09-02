@@ -58,3 +58,47 @@ importante, nao menos: ele nao vai reler o codigo, vai usar.
 ## Avisos ao dono
 
 Pedido explicito dele: **avisar a cada etapa concluida.**
+
+---
+
+## Revisao do desenho das familias (7a), por mim, 03/09/2026
+
+Desenho: `scratchpad/desenho-familias.md` (777 linhas). **Aprovado**, com tres amarracoes.
+
+O que me convenceu, ponto a ponto:
+
+- **O vinculo e o `id`, nao o nome.** Renomear uma familia e a operacao mais provavel do dono
+  ("Dias uteis" vira "Segunda a sexta"), e com o nome como vinculo ela deixaria todos os
+  pacotes orfaos **em silencio**. Id deterministico (`'F'+(maior+1)`), nao aleatorio nem por
+  relogio — os dois inutilizariam a comparacao byte a byte.
+- **A lista continua plana.** Aninhar obrigaria a achatar de volta em quatro consumidores que
+  varrem `cfg.pacotes` linearmente. Medido, nao suposto.
+- **Uma familia so nao emite nada de familia** — nem `FAMILIAS`, nem `fam`, nem CSS. E o que
+  preserva o invariante para quem ja tem a aba configurada.
+- **A migracao nao dispara em estado limpo.** `migrouFam` so vira verdadeiro dentro do laco
+  sobre `aPacotes`. Sem isso, o arnes (que limpa o `localStorage` antes de cada passagem e
+  coleta os alertas) acusaria divergencia — e o dono veria aviso de uma migracao que nao houve.
+
+### Amarracao 1 — a ordem: 6 ANTES de 7b, sem excecao
+
+A previa de celular esta numa branch separada (`pac-previa-celular`, commit `01ef284`) e
+toca as mesmas funcoes que as familias vao tocar. Mesclar depois seria resolver conflito no
+arquivo mais sensivel da rodada. **Etapa 6 entra primeiro; as familias sobem em cima dela.**
+
+Consequencia operacional: a etapa 6 exige `git merge`, que mexe na arvore de trabalho — e a
+arvore e uma so. Ela so pode rodar com **nenhum agente escrevendo no `index.html`**.
+
+### Amarracao 2 — o defeito 9.1 entra na etapa 7b
+
+Importar um backup **v1** descarta `link` (a chave nao esta no molde), a migracao roda com
+`p.link` ausente, `path` vira `''` — e o alerta afirma *"Nada foi perdido"*, que naquele
+caminho e **falso**. Conserto: `link:''` no molde. E barato e a mentira e do tipo que este
+projeto ja recusou antes (trocar defeito visivel por invisivel).
+
+### Amarracao 3 — o ramo de duas familias NAO pode ficar fora da fotografia
+
+O cenario do arnes hoje cadastra pacotes sem familia. Se ele continuar assim, todo o caminho
+novo (tres passos, cartao de familia, CSS da familia) fica **fora** da regressao — que foi
+exatamente a armadilha do cupom da Mini loja, repetida tres vezes nesta sessao. O cenario
+ganha uma segunda familia, em duas etapas: primeiro fotografa-se com uma familia (provando o
+invariante), depois acrescenta-se a segunda (fotografando o caminho novo).
