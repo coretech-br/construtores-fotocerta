@@ -126,6 +126,30 @@ async function conteudo(pg){
       }
       await clicar(pg,'a-pac-salvar');
     }
+    /* A SEGUNDA FAMILIA, e o terceiro pacote dentro dela (03/09/2026). Sem ela TODO o caminho
+       novo -- os tres passos, o cartao de familia, a linha de resumo da familia e as regras de
+       CSS que so existem nesse ramo -- ficaria FORA da fotografia byte a byte, que e exatamente
+       a armadilha ja registrada no cabecalho deste arquivo para t-out4/t-out5 e para o cupom da
+       Mini loja: saida que so aparece as vezes e onde o lixo de uma passagem anterior se
+       esconde.
+       A PRIMEIRA familia nao e criada aqui: ela ja existe ('Pacotes', id F1), criada pela
+       propria ferramenta -- e por isso os dois pacotes acima caem nela sem ninguem escolher
+       nada. A segunda recebe id F2, DETERMINISTICO por construcao ('F' + maior + 1), que e o
+       que torna esta fotografia reproduzivel; se um dia a regra do id mudar, este set falha
+       alto em vez de mentir baixo.
+       A dica entra so na SEGUNDA familia, de proposito: exercita os dois caminhos -- cartao de
+       familia com e sem descricao curta -- na mesma fotografia. */
+    if(await pg.$('#a-fam-nome')){
+      await set(pg,'a-fam-nome','Fins de semana');
+      await set(pg,'a-fam-dica','Sábado, domingo e feriados');
+      await clicar(pg,'a-fam-add');
+      await set(pg,'a-pfam','F2');
+      await set(pg,'a-pcod','FDS'); await set(pg,'a-pnome','Ensaio de fim de semana');
+      await set(pg,'a-pdur','2 horas'); await set(pg,'a-ppreco','980');
+      await set(pg,'a-pinclui','30 fotos tratadas');
+      await set(pg,campoLink,'https://tidycal.com/fotocerta/fds');
+      await clicar(pg,'a-pac-salvar');
+    }
     if(await pg.$('#a-cp-cod')) await cupons(pg,'a');
   }
 }
