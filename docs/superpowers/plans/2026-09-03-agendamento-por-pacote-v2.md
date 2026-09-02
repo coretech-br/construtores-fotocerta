@@ -159,6 +159,28 @@ for f in /tmp/pp-antes/*.txt; do cmp "$f" "/tmp/pp-depois/$(basename $f)" || ech
 
 ---
 
+### Task 5c: A quantidade dos opcionais passa a funcionar
+
+**Decisão do dono, 03/09** — ver a decisão 14 do diário. Hoje a marcação "aceita quantidade" existe no cadastro e o pagamento a ignora: o controle mente.
+
+**Nada se escreve do zero — a peça é compartilhada e está medida:**
+
+| Peça | Onde | Quem já consome |
+|---|---|---|
+| `fcFazQtdSrc(pref)` — o seletor | `index.html:3799` | Checkout `11341`, Mini loja `18272` |
+| `fcQtdCssGer(raiz,pref,destaque)` — o CSS dele | `index.html:3820` | Checkout `11068`, Mini loja `17800` |
+| `QUANTIDADE_MAXIMA` — o teto emitido | `11155` / `17946` | os dois, sob `if(usaQtd)` |
+| O campo do teto na aba | `u-qtdmax` (1579), `m-qtdmax` (2713) | molde a copiar |
+
+- [ ] **Passo 1:** a aba `pac` ganha `a-qtdmax` no molde de `u-qtdmax` (número, 2 a 99, padrão 10), entra em `A_NUMS`, em `aColeta`/`aRestaura` e no preset.
+- [ ] **Passo 2:** `aBlocoObrigado` emite `QUANTIDADE_MAXIMA`, `fcQtdCssGer` e `fcFazQtdSrc`, **só quando algum opcional do catálogo tiver a marcação ligada** — o mesmo `if(usaQtd)` que as outras duas abas usam. Sem isso, o bloco carrega código morto para quem não usa quantidade.
+- [ ] **Passo 3:** `subtotal()` passa a multiplicar o preço do opcional pela quantidade escolhida. `somaProdutos()` **não muda** — ele é só o pacote, e é o que `pct_produto` desconta.
+- [ ] **Passo 4: A prova que importa, e ela tem uma dimensão a mais que a da Task 5.** A multiplicação tem de chegar inteira ao **campo 54 do payload Pix**, lido por leitor TLV independente: opcional de R$ 80 com quantidade 3 são R$ 240 na tela **e** R$ 240 no Pix. Varra combinações de preço × opcional × **quantidade** × cupom × desconto Pix, comparando tela e campo 54. Zero divergências.
+- [ ] **Passo 5:** o identificador continua **estável** ao mudar a quantidade — mesma exigência da Task 5, e pelo mesmo motivo.
+- [ ] **Passo 6:** regressão (só `a-out3` diverge) + commit.
+
+---
+
 ### Task 6: A prévia acompanha
 
 - [ ] **Passo 1:** a prévia da página de obrigado passa a mostrar opcionais e cupom, executando o gerador. O seletor "prever como" continua com os pacotes mais "sem pacote (recusa)".

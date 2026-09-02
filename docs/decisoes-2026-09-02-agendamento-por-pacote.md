@@ -29,6 +29,7 @@ Plano: `docs/superpowers/plans/2026-09-02-agendamento-por-pacote.md`
 11. [O caminho B virou interruptor — e o defeito era do meu plano](#11)
 12. [O identificador dizia a hora em UTC — e a data errada em metade das noites](#12)
 13. [Cupom de código repetido passa a ser recusado nas três abas — decisão do dono](#13)
+14. [O "aceita quantidade" que não fazia nada — decisão do dono](#14)
 
 ---
 
@@ -256,5 +257,24 @@ Ele implementou como comportamento **novo**, e declarou que era novo em vez de f
 **O risco, dito a ele antes de decidir:** um preset antigo que tenha código repetido passa a ser recusado ao gerar. É o comportamento certo — mas ele descobre na hora, e não antes.
 
 **Custo de desfazer:** baixo. É uma recusa; tirá-la é apagar três linhas.
+
+---
+
+<a id="14"></a>
+## 14. O "aceita quantidade" que não fazia nada — decisão do dono
+
+**Como apareceu.** O executor da Task 5 declarou, em vez de resolver sozinho: a Task 4 copiou do Checkout o molde do opcional, que inclui a marcação **"aceita quantidade"** — e o bloco de pagamento a **ignora**, tratando todo opcional como caixinha de marcar.
+
+Resultado: o operador liga a marcação na aba e **nada acontece**. É a categoria que este projeto persegue por nome — controle na tela que mente sobre o que faz.
+
+**As três opções levadas ao dono**, com o custo de cada uma: implementar a quantidade (30–45 min, com a peça compartilhada já pronta); tirar a marcação (10 min, a aba fica honesta sobre o que faz); ou deixar com um aviso (o mais barato e, na minha leitura, o pior — *um aviso a menos para ler é melhor que um aviso a mais explicando por que um controle não funciona*).
+
+**Ele decidiu implementar.** O cliente vai poder pedir dois álbuns, três fotos extras.
+
+**O que torna isto barato, e é medido:** a peça já existe e é compartilhada. `fcFazQtdSrc(pref)` escreve o seletor (`index.html:3799`) e `fcQtdCssGer(raiz,pref,destaque)` escreve o CSS dele (`3820`) — o Checkout consome as duas (`11341`, `11068`) e a Mini loja também (`18272`, `17800`). Não se escreve nada do zero: acrescenta-se o campo do teto na aba (no molde de `u-qtdmax`), emite-se `QUANTIDADE_MAXIMA`, e o pagamento multiplica.
+
+**O que precisa ser provado, e é onde isto pode dar errado em silêncio:** a multiplicação tem de chegar **inteira** até o campo 54 do payload Pix. Um opcional de R$ 80 com quantidade 3 são R$ 240 no total da tela — e têm de ser R$ 240 no Pix. É a mesma varredura de combinações que já pegou o defeito de um centavo em ago/2026, agora com uma dimensão a mais.
+
+**Custo de desfazer:** médio. O campo entra no fragmento da aba e nos presets salvos.
 
 ---
