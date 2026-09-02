@@ -3519,13 +3519,17 @@
     </div>
   </div>
 
-  <div class="secao"><span class="secao-n">2</span> Pacotes e itens opcionais</div>
+  <div class="secao"><span class="secao-n">2</span> Famílias, pacotes e itens opcionais</div>
   <div class="grade">
     <div>
       <fieldset>
         <legend>Cadastrar pacote</legend>
         <p class="ajuda">Os opcionais deste pacote só aparecem para o cliente na <b>página de obrigado</b> — o TidyCal não sabe o que é um opcional, então a vitrine mostra só o preço do pacote.</p>
         <div class="caixa-editor">
+          <div id="a-pfam-campo" style="display:none">
+            <label for="a-pfam">Família <small>(o passo 1 da vitrine)</small></label>
+            <select id="a-pfam"></select>
+          </div>
           <label for="a-pcod">Código <small>(identifica o pacote na URL e no Pix — letras, números e hífen)</small></label>
           <input type="text" id="a-pcod" placeholder="MINI-1H">
           <label for="a-pnome">Nome</label>
@@ -3561,6 +3565,18 @@
       </fieldset>
     </div>
     <div>
+      <fieldset>
+        <legend>Famílias de pacotes</legend>
+        <p class="ajuda">A família é o <b>passo 1</b> da vitrine: o cliente escolhe o tipo de ensaio e só então vê os pacotes daquela família. Com <b>uma família só</b> a vitrine volta a dois passos e a família não aparece para ninguém — nem no código gerado.</p>
+        <div class="dupla">
+          <input type="text" id="a-fam-nome" placeholder="Dias úteis">
+          <input type="text" id="a-fam-dica" placeholder="Segunda a sexta">
+        </div>
+        <p class="ajuda">O segundo campo é a descrição curta (opcional), que aparece embaixo do nome no cartão da família.</p>
+        <div class="acoes"><button class="botao claro" id="a-fam-add">Adicionar família</button></div>
+        <ul class="lista-imgs" id="a-fam-lista"></ul>
+        <p class="vazio" id="a-fam-vazio">Uma família só — a vitrine mostra dois passos, sem perguntar o tipo. Crie a segunda para a vitrine passar a perguntar.</p>
+      </fieldset>
       <fieldset>
         <legend>Pacotes cadastrados</legend>
         <ul class="lista-imgs" id="a-pac-lista"></ul>
@@ -3638,12 +3654,23 @@
         <label for="a-txt-subtitulo">Subtítulo da vitrine <small>(opcional — vazio, nada aparece)</small></label>
         <input type="text" id="a-txt-subtitulo" value="" placeholder="ex.: Pague no Pix e ganhe {pct}% de desconto">
         <p class="ajuda">Entra logo abaixo do título, antes do passo 1. Onde você escrever <code>{pct}</code>, entra o <b>desconto do Pix</b> configurado na seção 1 — assim ele acompanha sozinho quando você mudar o desconto. Escrever o número à mão faz o subtítulo mentir no dia em que o desconto mudar, sem erro e sem aviso.</p>
-        <label for="a-t2">Rótulo do passo 1</label>
+        <label for="a-txt-passo-familia">Rótulo do passo da família <small>(só aparece com duas ou mais famílias)</small></label>
+        <input type="text" id="a-txt-passo-familia" value="Escolha o tipo de ensaio">
+        <label for="a-t2">Rótulo do passo dos pacotes <small>(passo 1 sem famílias; passo 2 com elas)</small></label>
         <input type="text" id="a-t2" value="Escolha o pacote">
-        <label for="a-t3">Rótulo do passo 2</label>
+        <label for="a-t3">Rótulo do passo do calendário <small>(o último passo)</small></label>
         <input type="text" id="a-t3" value="Escolha o dia e o horário">
         <label for="a-t4">Botão de trocar de pacote</label>
         <input type="text" id="a-t4" value="Trocar pacote">
+        <label for="a-txt-trocar-familia">Botão de trocar de família <small>(só com duas ou mais famílias)</small></label>
+        <input type="text" id="a-txt-trocar-familia" value="Trocar">
+        <label for="a-txt-rot-familia">Rótulo da linha de resumo da família</label>
+        <input type="text" id="a-txt-rot-familia" value="Tipo de ensaio">
+        <label for="a-txt-rot-pacote">Rótulo da linha de resumo do pacote</label>
+        <input type="text" id="a-txt-rot-pacote" value="Pacote">
+        <label for="a-txt-familia-apartir">Preço no cartão da família <small>(vazio = não mostrar)</small></label>
+        <input type="text" id="a-txt-familia-apartir" value="a partir de {valor}">
+        <p class="ajuda">O <code>{valor}</code> é o <b>menor preço</b> daquela família, já com o desconto do Pix quando há Pix — calculado pelo próprio bloco, a partir dos pacotes. Os quatro campos acima só entram no código quando existem <b>duas ou mais</b> famílias.</p>
         <label for="a-t5">Título da página de obrigado</label>
         <input type="text" id="a-t5" value="Tudo certo!">
       </fieldset>
@@ -3670,7 +3697,7 @@
         <div class="cor-linha"><input type="color" id="a-c3" value="#333333"><input type="text" id="a-c3-t" value="#333333"></div>
       </fieldset>
       <fieldset>
-        <legend>Altura do calendário</legend>
+        <legend>Medidas: calendário e cartões</legend>
         <p class="ajuda">Medidas calibradas em produção, com o formulário do TidyCal aberto. São o mesmo par usado na aba Agendamento TidyCal — não precisam mudar a não ser que o seu formulário seja diferente do padrão.</p>
         <label for="a-altdesk">Altura com o modal aberto — desktop <small>(pixels)</small></label>
         <input type="number" id="a-altdesk" value="2350" min="800" max="6000" step="50">
@@ -3678,6 +3705,9 @@
         <input type="number" id="a-altmob" value="2700" min="800" max="6000" step="50">
         <label for="a-largmob">Largura de corte do modo celular <small>(pixels, de 320 a 1024)</small></label>
         <input type="number" id="a-largmob" value="700" min="320" max="1024" step="10">
+        <label for="a-largcards">Largura de corte das linhas compactas <small>(pixels, de 320 a 1024)</small></label>
+        <input type="number" id="a-largcards" value="640" min="320" max="1024" step="10">
+        <p class="ajuda">Abaixo desta largura os cartões da vitrine viram <b>linhas compactas</b> (nome e duração à esquerda, preço à direita, sem a linha do que inclui). São <b>duas medidas diferentes</b>: a de cima decide a altura do calendário e é lida em JavaScript; esta decide o formato dos cartões e é lida em CSS. Amarrar as duas ao mesmo número faria uma calibragem de altura reformatar a vitrine inteira, sem aviso.</p>
       </fieldset>
     </div>
   </div>
@@ -3789,7 +3819,7 @@
       </div>
       <div id="a-pv-box"></div>
       </div>
-      <p class="ajuda">A prévia roda o código gerado de verdade: escolher um pacote acende o passo 2 e troca de preço ao vivo. O modo Celular usa uma largura abaixo do corte configurado ao lado (campo "Largura de corte do modo celular"), para os cartões empilharem como no aparelho do cliente. O que ainda difere da página publicada: o calendário do TidyCal não carrega aqui (é outro domínio, e a prévia não deve depender de rede) — no lugar dele aparece um retângulo cinza avisando "Aqui entra o calendário do TidyCal deste pacote."; e o quadro não carrega o CSS do tema do site.</p>
+      <p class="ajuda">A prévia roda o código gerado de verdade: escolher uma família mostra só os pacotes dela, escolher um pacote acende o passo do calendário, e o preço troca ao vivo. O modo Celular usa <b>380 pixels</b> de largura lógica — abaixo dos dois cortes configurados na seção 4 no padrão de fábrica, então os cartões aparecem como <b>linhas compactas</b>. Se você baixar a "Largura de corte das linhas compactas" para menos de 380, a prévia passa a mostrar cartões altos num quadro estreito: é o que a página publicada faria nessa largura, não um defeito da prévia. O que ainda difere da página publicada: o calendário do TidyCal não carrega aqui (é outro domínio, e a prévia não deve depender de rede) — no lugar dele aparece um retângulo cinza avisando "Aqui entra o calendário do TidyCal deste pacote."; e o quadro não carrega o CSS do tema do site.</p>
 
       <label for="a-pv-pac" style="display:block;margin-top:16px">Prévia da página de obrigado — prever como</label>
       <select id="a-pv-pac"></select>
@@ -5051,11 +5081,22 @@ var ABAS=[
    guarda:'tudo o que está configurado nesta aba — o efeito escolhido, o alcance (página inteira ou dentro de um bloco) com a altura, e os campos de <b>todos</b> os efeitos: quantidade, tamanho, deriva e cor das partículas, as quatro cores do confete, o tamanho, o desfoque e as três cores da aurora, a quantidade, o tamanho e as quatro cores das luzes, mais a duração do ciclo, a opacidade, a proporção no celular e o <b>fundo da prévia</b>.'},
   {id:'pac', nome:'Agendamento por pacote', chaves:['a'],       coleta:aColeta,restaura:aRestaura,gerar:aGerar,
    pref:'a',fora:[],resumo:aPresetResumo,redesenhar:aPresetDepois,antesDeSalvar:aPresetAntes,
-   listas:[['a.pacotes',{cod:'',nome:'',dur:'',preco:0,inclui:'',path:'',ops:[{nome:'',preco:0,qtd:false}]},'cod'],
+   /* A chave essencial de 'a.familias' e o 'id', e nao o 'nome': e o id que o 'fam' de cada
+      pacote aponta. Uma familia {"nome":"X"} sem id e casca -- ninguem consegue pertencer a
+      ela --, e fcxPodarListas a descarta e a CONTA; ja um nome em branco e recuperavel
+      digitando, e por isso aRestaura o repara em vez de descartar.
+      'link' voltou ao molde do pacote (03/09/2026) para consertar um defeito medido: um backup
+      ANTERIOR a revisao do caminho do TidyCal traz 'link' e nao traz 'path'; sem a chave no
+      molde, fcxConformar descartava o 'link', a migracao de aRestaura rodava com p.link ja
+      ausente, 'path' virava '' -- e o alerta afirmava "Nada foi perdido", que naquele caminho
+      era FALSO. O dono so descobriria ao tentar gerar, pela recusa "esta sem o caminho do
+      TidyCal", sem ligacao nenhuma com a importacao. */
+   listas:[['a.familias',{id:'',nome:'',dica:''},'id'],
+           ['a.pacotes',{cod:'',nome:'',dur:'',preco:0,inclui:'',path:'',link:'',fam:'',ops:[{nome:'',preco:0,qtd:false}]},'cod'],
            ['a.pacotes.ops',{nome:'',preco:0,qtd:false},'nome'],
            ['a.cps',{codigo:'',tipo:'pct_total',valor:0,validade:''},'codigo']],
    exemplo:'ex.: Ensaios 2026 - pacotes',
-   guarda:'tudo o que está configurado nesta aba — a <b>forma de pagamento</b> e a cor dos botões do PayPal, os pacotes (código, nome, duração, preço, o que inclui, o caminho do TidyCal e os <b>itens opcionais</b> de cada um), os <b>cupons</b>, o endereço da página de obrigado, o prefixo do identificador, o prazo da reserva, o desconto no Pix, as parcelas, quais <b>marcadores da página de obrigado</b> viajam e o texto reserva de cada um, as alturas do calendário, textos e cores.'}
+   guarda:'tudo o que está configurado nesta aba — a <b>forma de pagamento</b> e a cor dos botões do PayPal, as <b>famílias de pacotes</b> e a família de cada pacote, os pacotes (código, nome, duração, preço, o que inclui, o caminho do TidyCal e os <b>itens opcionais</b> de cada um), os <b>cupons</b>, o endereço da página de obrigado, o prefixo do identificador, o prazo da reserva, o desconto no Pix, as parcelas, quais <b>marcadores da página de obrigado</b> viajam e o texto reserva de cada um, as alturas do calendário, a largura das linhas compactas, textos e cores. Aplicar um preset <b>substitui as famílias que estão na tela</b>: ele é a fotografia da aba inteira.'}
 ];
 var fcFrag={};       /* ultimo pedaco bom de cada aba, para nao apagar o que a aba quebrada tinha */
 var fcSoLeitura={};  /* abas que falharam ao restaurar: param de coletar do DOM ate recarregar */
@@ -7204,12 +7245,31 @@ var fcxTpl=null;
    de 'u.prods.ops', e o produto de exemplo ja nasce com um opcional dentro.
    O molde e uma copia (fcPresetCapturar ja clona, e cada semeadura clona de novo): nada disto
    toca as listas vivas da aba. */
+/* O MOLDE DECLARADO COMPLETA O ITEM REAL, e nao so substitui a lista vazia. Medido em
+   03/09/2026: fcxConformar julga cada item pelo PRIMEIRO item do molde, e quando a lista da
+   tela NAO esta vazia esse primeiro item e o registro real do operador -- que nao tem os campos
+   que a aba deixou de gravar. Era o caso do 'link' do pacote: um backup anterior a revisao do
+   caminho do TidyCal traz 'link' e nao traz 'path'; com a lista de pacotes cheia, o 'link' era
+   descartado em silencio, a migracao de aRestaura rodava sem ele, 'path' virava '' -- e o
+   alerta afirmava "Nada foi perdido", que naquele caminho era FALSO.
+   Declarar o campo em ABAS passa a bastar, que e o que o proprio comentario de 'listas' sempre
+   prometeu ("o molde da conferencia da importacao"). A completacao so ACRESCENTA chaves
+   ausentes: nenhuma chave real e trocada, e nenhuma aba perde o que ja aceitava. */
+function fcxCompletarItem(item,molde){
+  var k;
+  if(!fcEhObjeto(item)||!fcEhObjeto(molde))return;
+  for(k in molde){
+    if(!Object.prototype.hasOwnProperty.call(molde,k))continue;
+    if(item[k]===undefined)item[k]=fcClone(molde[k]);
+  }
+}
 function fcxSemearNo(no,partes,i,molde){
   var k,j;
   if(!fcEhObjeto(no))return;
   k=partes[i];
   if(i===partes.length-1){
-    if(!fcEhArray(no[k])||!no[k].length)no[k]=[fcClone(molde)];
+    if(!fcEhArray(no[k])||!no[k].length){no[k]=[fcClone(molde)];return;}
+    for(j=0;j<no[k].length;j++)fcxCompletarItem(no[k][j],molde);
     return;
   }
   if(fcEhArray(no[k])){for(j=0;j<no[k].length;j++)fcxSemearNo(no[k][j],partes,i+1,molde);return;}
@@ -14030,6 +14090,25 @@ function ePresetDepois(){
    quem falta preencher (Tarefas 3 a 9) sao as tres saidas (aBlocoVitrine, aEnderecos,
    aBlocoObrigado) e aPreview, que ainda sao esqueletos vazios de proposito. */
 var aPacotes=[];
+/* ===== familias de pacotes (03/09/2026) =====
+   A familia e o PASSO 1 da vitrine: o cliente escolhe o tipo de ensaio e so depois ve os
+   pacotes daquela familia. Com UMA familia so nada disso e emitido -- a vitrine volta aos dois
+   passos de antes, byte a byte (ver aBlocoVitrine).
+   O VINCULO ENTRE PACOTE E FAMILIA E O 'id', NUNCA O NOME. Renomear uma familia e a operacao
+   mais provavel do operador ("Dias uteis" vira "Durante a semana"); com o nome como vinculo,
+   todos os pacotes dela ficariam orfaos EM SILENCIO no instante em que ele terminasse de
+   digitar. E a mesma familia de defeito que fez o codigo do pacote ser declarado imutavel.
+   A LISTA CONTINUA PLANA. A familia e um agrupamento na LEITURA, nao um aninhamento no
+   armazenamento: aPacotesSrc, aRecusa, aQtdLigada, aEnderecos e o laco de usaQtd de
+   aBlocoObrigado varrem cfg.pacotes linearmente, e aninhar obrigaria a achatar de volta nos
+   cinco.
+   O VALOR INICIAL NAO E A LISTA VAZIA, e isso e medido: restaurarEstado() volta cedo quando
+   nao ha nada gravado (o 'if(!raw)return'), entao aRestaura -- que e quem garante "sempre ao
+   menos uma familia" -- NUNCA roda numa ferramenta aberta pela primeira vez. Com a lista vazia
+   ali, o primeiro pacote cadastrado nasceria com fam:'' e aRecusa se negaria a gerar pedindo
+   uma familia que o operador nao sabe que existe. O nome "Pacotes" e o mesmo que a migracao
+   usa, e pelo mesmo motivo: com uma familia so ele nao aparece em lugar nenhum. */
+var aFamilias=[{id:'F1',nome:'Pacotes',dica:''}];
 var aCps=[];
 /* Opcionais do pacote em edicao no formulario de cadastro -- mesmo papel de uEditOps/uEditIdx
    no Checkout (10420+). aEditIdx=-1 quer dizer "cadastrando pacote novo"; >=0 e o indice do
@@ -14040,7 +14119,15 @@ var aEditIdx=-1;
    min, max, inteiro]. */
 var A_NUMS=[['a-prazoh',24,1,720,true],['a-descpix',5,0,90,false],['a-parcelas',1,1,12,true],
   ['a-altdesk',2350,800,6000,true],['a-altmob',2700,800,6000,true],['a-largmob',700,320,1024,true],
-  ['a-qtdmax',10,2,99,true]];
+  ['a-qtdmax',10,2,99,true],
+  /* A largura de corte das LINHAS COMPACTAS do celular (03/09/2026). Ela e lida em CSS (a
+     @media do bloco), enquanto 'a-largmob' e lida em JavaScript (alturaAlvo(), calibrada
+     contra o formulario do TidyCal): sao duas medidas diferentes, e amarrar as duas ao mesmo
+     campo faria uma calibragem de altura de iframe reformatar a vitrine inteira sem aviso.
+     640 e o valor que a aba ja usava fixo para passar de tres colunas para uma -- a troca de
+     formato acontece no MESMO ponto em que a grade ja mudava, o unico que nao cria um terceiro
+     estado intermediario (uma coluna de cartoes altos). */
+  ['a-largcards',640,320,1024,true]];
 function aPreso(id){return fcPreso(A_NUMS,id);}
 /* ===== mostra/esconde campos conforme a forma de pagamento escolhida =====
    Mesmo molde de uToggles/mToggles (10738+/17609+): 'a-pp-campos' some com 'pix' (nada de
@@ -14126,7 +14213,18 @@ var A_TXT_DEFS=[
   ['txtZapVencido','a-txt-zap-vencido','Olá! Meu prazo para pagar a reserva passou. Ainda está disponível?'],
   ['txtPrazoBarra','a-txt-prazo-barra','Reserva garantida até {data}.'],
   ['txtPrazoAjuda','a-txt-prazo-ajuda','O relógio é um recado, não uma tranca: quem libera o horário depois do prazo é a gente, à mão, ao conferir o pagamento.'],
-  ['txtPrazoVencido','a-txt-prazo-vencido','O prazo para pagar esta reserva já passou. Fale com a gente para confirmar se o horário ainda está disponível.']
+  ['txtPrazoVencido','a-txt-prazo-vencido','O prazo para pagar esta reserva já passou. Fale com a gente para confirmar se o horário ainda está disponível.'],
+  /* ===== os cinco textos das FAMILIAS (03/09/2026) =====
+     Entram aqui, e nao como 'a-t6'...'a-t10', pela razao que o comentario acima ja registra:
+     t1..t5 sao escritos A MAO tres vezes cada (aCfg, aColeta, aRestaura), e uma linha nesta
+     tabela e lida pelos tres lacos que ja existem. O ROTULO do campo na tela fica onde o dono
+     pediu (junto de a-t2/a-t3, secao 4); a tabela em que ele e guardado e decisao interna.
+     NENHUM DOS CINCO ENTRA NO BLOCO quando ha uma familia so -- ver aBlocoVitrine. */
+  ['txtPassoFamilia','a-txt-passo-familia','Escolha o tipo de ensaio'],
+  ['txtTrocarFamilia','a-txt-trocar-familia','Trocar'],
+  ['txtRotFamilia','a-txt-rot-familia','Tipo de ensaio'],
+  ['txtRotPacote','a-txt-rot-pacote','Pacote'],
+  ['txtFamiliaApartir','a-txt-familia-apartir','a partir de {valor}']
 ];
 function aObMarcadas(){
   var r=[],i,el;
@@ -14285,6 +14383,115 @@ function aCpAdd(){
 }
 function aCpDel(i){aCps.splice(i,1);aCpRender();salvarEstado();aPreview();}
 
+/* ===== cadastro de familias =====
+   As funcoes novas desta rodada. Nenhuma delas emite codigo: elas so mantem a lista aFamilias
+   e o vinculo dos pacotes coerentes. Quem decide o que vai para o bloco e aBlocoVitrine. */
+function aFamAchaEm(lista,id){
+  var i;
+  for(i=0;i<lista.length;i++)if(lista[i].id===id)return lista[i];
+  return null;
+}
+function aFamAcha(id){return aFamAchaEm(aFamilias,id);}
+function aFamNome(id){var f=aFamAcha(id);return f?f.nome:'';}
+function aFamPacotes(id){
+  var r=[],i;
+  for(i=0;i<aPacotes.length;i++)if(aPacotes[i].fam===id)r.push(i);
+  return r;
+}
+/* 'F' + (maior numero ja usado + 1), calculado sobre a lista viva. DETERMINISTICO de proposito:
+   Math.random() ou um carimbo de tempo tornariam a saida gerada irreproduzivel e inutilizariam
+   a comparacao byte a byte que prova que uma rodada nao mexeu no que nao devia. Id fora do
+   formato (arquivo editado a mao) simplesmente nao conta -- so faz o proximo numero ser maior,
+   que e o lado seguro do erro. */
+function aFamProxId(){
+  var maior=0,i,m,v;
+  for(i=0;i<aFamilias.length;i++){
+    m=/^F([0-9]+)$/.exec(String(aFamilias[i].id||''));
+    if(m){v=parseFloat(m[1]);if(v>maior)maior=v;}
+  }
+  return 'F'+(maior+1);
+}
+function aFamAdd(){
+  var n=$('a-fam-nome').value.trim();
+  if(!n){alert('Informe o nome da família.');return;}
+  aFamilias.push({id:aFamProxId(),nome:n,dica:$('a-fam-dica').value.trim()});
+  $('a-fam-nome').value='';$('a-fam-dica').value='';
+  aFamRender();aPacRender();salvarEstado();aPreview();
+}
+/* As duas recusas do CADASTRO (alert, e nao recusa de geracao): apagar a ultima familia
+   deixaria os pacotes sem para onde apontar, e apagar uma familia que ainda tem pacotes
+   moveria dado do dono em silencio. Nada de mover pacotes sozinho -- quem decide e ele. */
+function aFamDel(i){
+  if(aFamilias.length<2){alert('Esta é a única família. Todo pacote precisa pertencer a alguma — renomeie esta em vez de apagá-la.');return;}
+  var usados=aFamPacotes(aFamilias[i].id);
+  if(usados.length){alert('A família "'+aFamilias[i].nome+'" ainda tem '+usados.length+(usados.length>1?' pacotes':' pacote')+'. Abra cada um no lápis, escolha outra família e salve; depois apague esta. Mover os pacotes sozinho seria mexer no seu cadastro sem você mandar.');return;}
+  aFamilias.splice(i,1);
+  aFamRender();aPacRender();salvarEstado();aPreview();
+}
+function aFamMove(i,d){
+  var j=i+d;if(j<0||j>=aFamilias.length)return;
+  var t=aFamilias[i];aFamilias[i]=aFamilias[j];aFamilias[j]=t;
+  aFamRender();aPacRender();salvarEstado();aPreview();
+}
+/* O <select> do formulario de pacote. Repopulado a cada mudanca na lista, preservando a escolha
+   quando a familia continua existindo. NUNCA fica em branco: sem familia selecionada aPacSalvar
+   gravaria fam:'' e o pacote nasceria orfao. Com UMA familia so o campo inteiro some -- nao ha o
+   que escolher --, no mesmo padrao de 'a-qtdmax-campo'; o <select> continua no DOM com a familia
+   unica selecionada, e aPacSalvar le o VALOR, nao a visibilidade. */
+function aFamOpcoes(){
+  var sel=$('a-pfam');if(!sel)return;
+  var atual=sel.value,h='',i,existe=false;
+  for(i=0;i<aFamilias.length;i++){
+    h+='<option value="'+escAttr(aFamilias[i].id)+'">'+escHtml(aFamilias[i].nome||aFamilias[i].id)+'</option>';
+    if(aFamilias[i].id===atual)existe=true;
+  }
+  sel.innerHTML=h;
+  sel.value=existe?atual:(aFamilias.length?aFamilias[0].id:'');
+  var campo=$('a-pfam-campo');
+  if(campo)campo.style.display=(aFamilias.length>1)?'block':'none';
+}
+/* Edicao EM LINHA (como os cupons, e nao como os pacotes): a familia tem dois campos e nenhum
+   sub-cadastro, entao um segundo modo "editando" no formulario concorreria com o modo de edicao
+   de pacote que ja existe ao lado (aEditIdx) -- dois modos de edicao simultaneos na mesma secao
+   sao um convite ao erro. O nome vazio se corrige A VISTA, no change/blur, voltando ao ultimo
+   nome bom: copia literal do que aOpRender ja faz com o nome do opcional. */
+function aFamRender(){
+  var ul=$('a-fam-lista');if(!ul)return;
+  ul.innerHTML='';
+  var vz=$('a-fam-vazio');
+  if(vz)vz.style.display=(aFamilias.length>1)?'none':'block';
+  aFamilias.forEach(function(f,i){
+    var li=document.createElement('li');
+    var info=document.createElement('div');info.className='info';
+    var n=document.createElement('input');n.type='text';n.value=f.nome;n.placeholder='Nome da família';
+    var bom=f.nome;
+    n.addEventListener('input',function(){aFamilias[i].nome=n.value;if(n.value.replace(/^\s+|\s+$/g,''))bom=n.value;salvarEstado();aPreview();});
+    (function(){
+      function volta(){
+        if(!n.value.replace(/^\s+|\s+$/g,'')){n.value=bom;aFamilias[i].nome=bom;}
+        aFamOpcoes();aPacRender();salvarEstado();aPreview();
+      }
+      n.addEventListener('change',volta);n.addEventListener('blur',volta);
+    })();
+    var d=document.createElement('input');d.type='text';d.value=f.dica||'';d.placeholder='Descrição curta';
+    d.addEventListener('input',function(){aFamilias[i].dica=d.value;salvarEstado();aPreview();});
+    info.appendChild(n);info.appendChild(d);
+    var qt=document.createElement('div');
+    qt.style.cssText='margin:5px 0 0;font-size:12px;color:var(--tinta-suave)';
+    var np=aFamPacotes(f.id).length;
+    qt.textContent=np?(np+(np>1?' pacotes nesta família':' pacote nesta família')):'nenhum pacote nesta família';
+    info.appendChild(qt);
+    var ctrl=document.createElement('div');ctrl.className='ctrl';
+    [['↑',function(){aFamMove(i,-1);},'Subir',i===0],
+     ['↓',function(){aFamMove(i,1);},'Descer',i===aFamilias.length-1],
+     ['✕',function(){aFamDel(i);},'Remover',false]]
+      .forEach(function(b){var bt=document.createElement('button');bt.textContent=b[0];bt.title=b[2];bt.setAttribute('aria-label',b[2]);bt.disabled=!!b[3];bt.addEventListener('click',b[1]);ctrl.appendChild(bt);});
+    li.appendChild(info);li.appendChild(ctrl);
+    ul.appendChild(li);
+  });
+  aFamOpcoes();
+}
+
 /* ===== catalogo de pacotes =====
    Modelo: uProdSalvar/uProdEditar/uProdLimpar/uProdRender (10505+ antes desta tarefa) -- o
    cadastro dobra de formulario de ADICIONAR para formulario de EDITAR (aEditIdx>=0), e a
@@ -14304,6 +14511,8 @@ function aPacTestar(){
 function aPacLimpar(){
   $('a-pcod').value='';$('a-pnome').value='';$('a-pdur').value='';$('a-ppreco').value='';
   $('a-pinclui').value='';$('a-ppath').value='';
+  /* nunca em branco: sem familia selecionada o pacote nasceria orfao */
+  $('a-pfam').value=aFamilias.length?aFamilias[0].id:'';
   aEditOps=[];aEditIdx=-1;aOpRender();
   $('a-op-qtd').checked=false;
   $('a-pac-salvar').textContent='Adicionar pacote';
@@ -14332,6 +14541,10 @@ function aPacSalvar(){
   if(isNaN(preco)||preco<=0){alert('Informe o preço do pacote (maior que zero).');return;}
   var p={cod:cod,nome:nome,dur:$('a-pdur').value.trim(),preco:preco,
     inclui:$('a-pinclui').value.trim(),path:fcTidyPathNorm($('a-ppath').value),
+    /* Sem recusa nova: o seletor sempre tem uma opcao valida selecionada (aFamOpcoes garante),
+       e a lista de familias nunca fica vazia (aRestaura cria uma, aFamDel recusa apagar a
+       ultima). O '||' e a rede para o caso de o estado chegar quebrado por outro caminho. */
+    fam:$('a-pfam').value||(aFamilias.length?aFamilias[0].id:''),
     ops:aEditOps.map(function(o){return {nome:o.nome,preco:o.preco,qtd:!!o.qtd};})};
   if(aEditIdx>=0)aPacotes[aEditIdx]=p;else aPacotes.push(p);
   aPacLimpar();aPacRender();salvarEstado();aPreview();
@@ -14340,6 +14553,7 @@ function aPacEditar(i){
   var p=aPacotes[i];
   $('a-pcod').value=p.cod;$('a-pnome').value=p.nome;$('a-pdur').value=p.dur||'';
   $('a-ppreco').value=p.preco;$('a-pinclui').value=p.inclui||'';$('a-ppath').value=p.path||'';
+  $('a-pfam').value=(p.fam&&aFamAcha(p.fam))?p.fam:(aFamilias.length?aFamilias[0].id:'');
   aEditOps=(p.ops||[]).map(function(o){return {nome:o.nome,preco:o.preco,qtd:!!o.qtd};});
   aEditIdx=i;aOpRender();
   /* Acentuado ("alterações"), diferente do molde de uProdEditar/mProdEditar (10620/17003):
@@ -14349,8 +14563,19 @@ function aPacEditar(i){
   $('a-pac-salvar').textContent='Salvar alterações';
   $('a-pac-cancelar').style.display='inline-block';
 }
+/* O VIZINHO E DA MESMA FAMILIA, e nao o item seguinte da lista plana. Trocando com o vizinho
+   de outra familia o 'fam' viaja dentro do objeto -- ninguem muda de familia, e a vitrine nao
+   muda NADA de visivel: o botao parece quebrado. Acao sem efeito e defeito invisivel, e por
+   isso o botao tambem nasce desabilitado quando nao ha vizinho (ver aPacRender). Trocar dois
+   itens da mesma familia que nao sao adjacentes na lista plana nao mexe em quem esta entre
+   eles, entao a ordem interna das outras familias fica intacta. */
+function aPacVizinho(i,d){
+  var f=aPacotes[i].fam,j;
+  for(j=i+d;j>=0&&j<aPacotes.length;j+=d)if(aPacotes[j].fam===f)return j;
+  return -1;
+}
 function aPacMove(i,d){
-  var j=i+d;if(j<0||j>=aPacotes.length)return;
+  var j=aPacVizinho(i,d);if(j<0)return;
   var t=aPacotes[i];aPacotes[i]=aPacotes[j];aPacotes[j]=t;
   aPacRender();salvarEstado();aPreview();
 }
@@ -14373,12 +14598,24 @@ function aQtdLigada(pacotes){
   }
   return false;
 }
+/* A lista passa a ser desenhada AGRUPADA POR FAMILIA, com um cabecalho por familia -- mas so
+   quando ha duas ou mais: com uma familia so o cabecalho seria ruido e a lista sai exatamente
+   como saia antes. O 'i' passado aos botoes continua sendo o INDICE PLANO em aPacotes, nunca o
+   indice dentro do grupo: e ele que aPacEditar/aPacDel/aPacMove usam. */
 function aPacRender(){
   var ul=$('a-pac-lista');if(!ul)return;
   ul.innerHTML='';
   $('a-pac-vazio').style.display=aPacotes.length?'none':'block';
   var elq=$('a-qtdmax-campo');if(elq)elq.style.display=aQtdLigada(aPacotes)?'block':'none';
-  aPacotes.forEach(function(p,i){
+  var comCab=aFamilias.length>1,feito={},i,sobra=[];
+  function cabecalho(t){
+    var li=document.createElement('li');
+    li.style.cssText='display:block;background:transparent;border:none;padding:10px 0 0;margin-bottom:4px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--tinta-suave)';
+    li.textContent=t;
+    ul.appendChild(li);
+  }
+  function linha(i){
+    var p=aPacotes[i];
     var li=document.createElement('li');
     var info=document.createElement('div');info.className='info';
     var txt=document.createElement('div');txt.style.fontSize='13px';
@@ -14390,12 +14627,29 @@ function aPacRender(){
     txt.textContent=p.cod+' — '+p.nome+' — '+precoFmt('BRL',parseFloat(p.preco)||0)+qtdops;
     info.appendChild(txt);
     var ctrl=document.createElement('div');ctrl.className='ctrl';
-    [['↑',function(){aPacMove(i,-1);},'Subir'],['↓',function(){aPacMove(i,1);},'Descer'],
-     ['✎',function(){aPacEditar(i);},'Editar'],['✕',function(){aPacDel(i);},'Remover']]
-      .forEach(function(b){var bt=document.createElement('button');bt.textContent=b[0];bt.title=b[2];bt.setAttribute('aria-label',b[2]);bt.addEventListener('click',b[1]);ctrl.appendChild(bt);});
+    [['↑',function(){aPacMove(i,-1);},'Subir',aPacVizinho(i,-1)<0],
+     ['↓',function(){aPacMove(i,1);},'Descer',aPacVizinho(i,1)<0],
+     ['✎',function(){aPacEditar(i);},'Editar',false],
+     ['✕',function(){aPacDel(i);},'Remover',false]]
+      .forEach(function(b){var bt=document.createElement('button');bt.textContent=b[0];bt.title=b[2];bt.setAttribute('aria-label',b[2]);bt.disabled=!!b[3];bt.addEventListener('click',b[1]);ctrl.appendChild(bt);});
     li.appendChild(info);li.appendChild(ctrl);
     ul.appendChild(li);
+  }
+  aFamilias.forEach(function(f){
+    var itens=aFamPacotes(f.id);
+    if(comCab&&itens.length)cabecalho(f.nome);
+    itens.forEach(function(i){feito[i]=1;linha(i);});
   });
+  for(i=0;i<aPacotes.length;i++)if(!feito[i])sobra.push(i);
+  /* NENHUM PACOTE SOME DA LISTA. aRestaura repara os orfaos e aPacSalvar sempre grava uma
+     familia valida, entao esta sobra deveria ser sempre vazia -- mas esconder um pacote da
+     lista por causa de um vinculo quebrado seria exatamente o defeito invisivel que o vinculo
+     por 'id' existe para evitar. Ele aparece com cabecalho proprio, e aRecusa se nega a gerar
+     enquanto ele existir. */
+  if(sobra.length){
+    cabecalho('Sem família — corrija antes de gerar');
+    for(i=0;i<sobra.length;i++)linha(sobra[i]);
+  }
 }
 /* Copia de tUrlOk (9827+ antes desta tarefa). A recusa do endereco protocol-relative nao e
    detalhe: sem ela, "//evil.com/x" passa como "caminho do proprio site" e o TidyCal
@@ -14414,8 +14668,12 @@ function aUrlOk(v){
    previa. A recusa de codigo colidido e a mais importante das nove: o Pix descarta hifen, e
    dois pacotes "mini-1h" e "mini1h" gerariam o MESMO identificador de conciliacao. */
 function aRecusa(cfg){
-  var i,p,vistos={},limpo,cp,cpc,cpv,cpe,vistosCp={};
+  var i,p,vistos={},limpo,cp,cpc,cpv,cpe,vistosCp={},f,vistosFam={},fl,pj;
   if(!cfg.pacotes.length)return 'Cadastre ao menos um pacote.';
+  /* GUARDA DE INTEGRIDADE, e nao caso comum: aRestaura garante ao menos uma familia e aFamDel
+     recusa apagar a ultima, mas um estado importado quebrado nao garante nada -- e aRecusa e o
+     que roda antes de gerar E antes da previa. */
+  if(!cfg.familias.length)return 'Cadastre ao menos uma família de pacotes.';
   if(!cfg.urlobrigado)return 'Informe o endereço da página de obrigado.';
   if(!aUrlOk(cfg.urlobrigado))return 'O endereço da página de obrigado precisa começar com https:// e ter o domínio.';
   for(i=0;i<cfg.pacotes.length;i++){
@@ -14429,6 +14687,25 @@ function aRecusa(cfg){
     if(!(parseFloat(p.preco)>0))return 'O pacote "'+p.cod+'" está com o preço vazio ou zerado. Ele seria entregue como uma cobrança de R$ 0,00.';
     if(!p.path)return 'O pacote "'+p.cod+'" está sem o caminho do TidyCal.';
     if(!tPathOk(p.path))return 'O caminho do TidyCal do pacote "'+p.cod+'" ("'+p.path+'") tem um caractere que não é permitido. Use apenas letras, números, ponto, hífen, sublinhado e barra separando os segmentos (ex.: usuario/nome-do-agendamento).';
+    if(!aFamAchaEm(cfg.familias,p.fam))return 'O pacote "'+p.cod+'" está numa família que não existe mais. Abra o pacote no lápis (seção 2), escolha uma família e salve.';
+  }
+  /* As familias sao conferidas AQUI, e nao so no cadastro, pela mesma razao ja registrada para
+     os cupons: o editor EM LINHA nao valida nada -- apagar o nome de uma familia ja cadastrada
+     deixaria um botao em branco na tela do cliente sem aviso nenhum. */
+  for(i=0;i<cfg.familias.length;i++){
+    f=cfg.familias[i];
+    if(!String(f.nome||'').trim())return 'A família na posição '+(i+1)+' da lista está sem nome. O cliente veria um botão em branco: preencha o nome ou remova a família.';
+    limpo=String(f.nome).trim().toUpperCase();
+    if(vistosFam[limpo])return 'As famílias "'+vistosFam[limpo]+'" e "'+f.nome+'" têm o mesmo nome. O cliente veria duas opções idênticas e não teria como escolher — troque um dos dois.';
+    vistosFam[limpo]=f.nome;
+    /* Com UMA familia so a vitrine nem pergunta o tipo, e a recusa "cadastre ao menos um
+       pacote" la em cima ja cobre o caso. Com duas ou mais, uma familia vazia seria uma opcao
+       que leva a uma lista vazia. */
+    if(cfg.familias.length>1){
+      fl=0;
+      for(pj=0;pj<cfg.pacotes.length;pj++)if(cfg.pacotes[pj].fam===f.id)fl++;
+      if(!fl)return 'A família "'+f.nome+'" não tem nenhum pacote. Ela apareceria na vitrine como uma opção que leva a uma lista vazia — cadastre um pacote nela ou remova a família.';
+    }
   }
   /* Os cupons sao conferidos AQUI, e nao so no cadastro -- mesma razao ja registrada em uRecusa
      (10870+): o campo de valor DENTRO da lista nao valida nada, entao apagar o numero de um
@@ -14484,13 +14761,17 @@ function aCfg(){
   var altmob=aPreso('a-altmob');if(altmob==null)altmob=2700;
   var largmob=aPreso('a-largmob');if(largmob==null)largmob=700;
   var qtdmax=aPreso('a-qtdmax');if(qtdmax==null)qtdmax=10;
+  /* PRESO DENTRO DA PROPRIA FUNCAO DE CONFIGURACAO (regra do CLAUDE.md sobre campo numerico que
+     alimenta uma @media): prender so a largura da previa deixaria o iframe num valor e o CSS
+     gerado em outro, e a previa passaria a mentir. */
+  var largcards=aPreso('a-largcards');if(largcards==null)largcards=640;
   var r={
-    pacotes:aPacotes, cps:aCps,
+    pacotes:aPacotes, familias:aFamilias, cps:aCps,
     urlobrigado:$('a-urlobrigado').value.trim(),
     prefixo:$('a-prefixo').value.trim(),
     metodo:m, usaPP:usaPP, usaPix:usaPix, ppcor:radio('a-ppcor')||'gold',
     prazoh:prazoh, descpix:descpix, parcelas:parcelas,
-    altdesk:altdesk, altmob:altmob, largmob:largmob, qtdmax:qtdmax,
+    altdesk:altdesk, altmob:altmob, largmob:largmob, largcards:largcards, qtdmax:qtdmax,
     c1:corSegura('a-c1','#0F3A30'), c2:corSegura('a-c2','#ffffff'), c3:corSegura('a-c3','#333333'),
     t1:$('a-t1').value, t2:$('a-t2').value, t3:$('a-t3').value, t4:$('a-t4').value, t5:$('a-t5').value,
     ob:aObCfg()
@@ -14509,6 +14790,7 @@ function aElVal(id,def){var el=$(id);return el?el.value:def;}
 function aColeta(){
   var r={
     pacotes:aPacotes,
+    familias:aFamilias,
     cps:aCps,
     urlobrigado:aElVal('a-urlobrigado',''),
     prefixo:aElVal('a-prefixo',''),
@@ -14518,6 +14800,7 @@ function aColeta(){
     descpix:aElVal('a-descpix',5),
     parcelas:aElVal('a-parcelas',1),
     altdesk:aElVal('a-altdesk',2350),altmob:aElVal('a-altmob',2700),largmob:aElVal('a-largmob',700),
+    largcards:aElVal('a-largcards',640),
     qtdmax:aElVal('a-qtdmax',10),
     c1:aElVal('a-c1-t','#0F3A30'),c2:aElVal('a-c2-t','#ffffff'),c3:aElVal('a-c3-t','#333333'),
     t1:aElVal('a-t1','Agende seu ensaio'),
@@ -14539,7 +14822,17 @@ function aColeta(){
 }
 function aRestaura(st){
   if(!st.a)return;
-  var A=st.a,el,elc,k,migrouPath=false;
+  var A=st.a,el,elc,k,i,migrouPath=false,movidos=0,reparouOrfao=0,reparouNome=0,partes;
+  var tinhaFamilias=(A.familias!=null);
+  /* ===== migracao v2 -> v3: as FAMILIAS de pacotes (03/09/2026) =====
+     Mesmo molde da migracao link->path logo abaixo: converter na hora do restaura, com a mesma
+     normalizacao que o cadastro usa, e NUNCA calado -- um aviso, uma vez, no fim desta funcao.
+     Primeiro as familias gravadas, saneadas item a item: sem 'id' nao ha o que apontar para
+     ela, entao a casca e descartada aqui (fcxPodarListas ja conta o descarte no caminho da
+     importacao, e a chave essencial declarada em ABAS e justamente o 'id'). */
+  aFamilias=(A.familias||[]).map(function(f){
+    return {id:String(f.id||''),nome:String(f.nome||''),dica:String(f.dica||'')};
+  }).filter(function(f){return !!f.id;});
   /* ===== migracao v1 -> v2 do caminho do TidyCal (03/09/2026, revisao do dono) =====
      O campo guardava a URL INTEIRA em 'link'; agora guarda so o CAMINHO em 'path'. Quem ja
      tinha gravado a URL (o dono, se testou a v1) nao pode perder o valor -- entao um pacote
@@ -14552,9 +14845,26 @@ function aRestaura(st){
       path=fcTidyPathNorm(p.link||'');
       migrouPath=true;
     }
-    return {cod:p.cod,nome:p.nome,dur:p.dur,preco:p.preco,inclui:p.inclui,path:path,
+    return {cod:p.cod,nome:p.nome,dur:p.dur,preco:p.preco,inclui:p.inclui,path:path,fam:(p.fam||''),
       ops:(p.ops||[]).map(function(o){return {nome:o.nome,preco:o.preco,qtd:!!o.qtd};})};
   });
+  /* SEMPRE existe pelo menos uma familia. O nome "Pacotes" e escolhido para ser obvio e para
+     pedir troca: ele nao aparece em lugar nenhum enquanto houver UMA familia so (a vitrine
+     colapsa para dois passos e nunca desenha o cartao da familia), entao nomea-la e uma decisao
+     que o dono toma quando criar a segunda -- e a mensagem abaixo diz isso. */
+  if(!aFamilias.length)aFamilias=[{id:'F1',nome:'Pacotes',dica:''}];
+  /* ESTE LACO E O QUE DECIDE SE O AVISO SAI, e por isso a condicao e "pelo menos um pacote foi
+     movido", nunca "A.familias estava ausente". Em estado LIMPO nao ha pacote nenhum, o laco
+     nao roda, e nenhum alerta aparece -- o arnes de regressao limpa o localStorage e recarrega
+     antes de cada passagem e coleta os alertas, entao um aviso aqui viraria divergencia na
+     fotografia e, pior, o dono veria o aviso de uma migracao que nao aconteceu. */
+  for(i=0;i<aPacotes.length;i++){
+    if(aPacotes[i].fam&&aFamAcha(aPacotes[i].fam))continue;
+    aPacotes[i].fam=aFamilias[0].id;
+    if(tinhaFamilias)reparouOrfao++;else movidos++;
+  }
+  for(i=0;i<aFamilias.length;i++)if(!aFamilias[i].nome){aFamilias[i].nome='Família '+(i+1);reparouNome++;}
+  aFamRender();
   aPacRender();
   aCps=(A.cps||[]).map(function(c){return {codigo:c.codigo,tipo:c.tipo,valor:c.valor,validade:c.validade||''};});
   aCpRender();
@@ -14602,13 +14912,28 @@ function aRestaura(st){
     alert('Os pacotes desta aba tinham o endereço COMPLETO do TidyCal gravado (versão anterior desta ferramenta). Ele foi convertido automaticamente para o CAMINHO, que é o que este campo pede agora — confira a lista de pacotes na seção 2. Nada foi perdido.');
     salvarEstado();
   }
+  /* Duas mensagens, porque são dois fatos diferentes: "esta aba mudou de forma" e "um pacote
+     apontava para uma família que não existe neste arquivo". Trocar de mensagem sem dizer qual
+     é o caso deixaria o dono sem saber o que aconteceu com o cadastro dele. */
+  if(movidos){
+    alert('Esta aba passou a organizar os pacotes em FAMÍLIAS — por exemplo: dias úteis e fins de semana. '+
+      (movidos>1?('Os '+movidos+' pacotes que já estavam cadastrados foram colocados'):'O pacote que já estava cadastrado foi colocado')+
+      ' numa família única chamada "Pacotes". Nada foi perdido, e a vitrine continua com os mesmos dois passos de antes, porque com uma família só não há o que escolher. Para separar os pacotes, crie a segunda família na seção 2 e renomeie esta.');
+    salvarEstado();
+  }else if(reparouOrfao||reparouNome){
+    partes=[];
+    if(reparouOrfao)partes.push(reparouOrfao+(reparouOrfao>1?' pacotes apontavam':' pacote apontava')+' para uma família que não existe neste arquivo — '+(reparouOrfao>1?'foram colocados':'foi colocado')+' na primeira família da lista ("'+aFamilias[0].nome+'")');
+    if(reparouNome)partes.push(reparouNome+(reparouNome>1?' famílias estavam':' família estava')+' sem nome e ganh'+(reparouNome>1?'aram':'ou')+' um nome provisório');
+    alert('A lista de famílias desta aba precisou de conserto: '+partes.join('; ')+'. Confira a seção 2 antes de gerar — nada foi perdido.');
+    salvarEstado();
+  }
 }
 /* ===== O que esta aba poe na biblioteca de presets (ver o bloco compartilhado) =====
    O resumo NAO mostra dado operacional (chave Pix, Client ID, WhatsApp): eles moram no painel
    Identidade, fora do preset desta aba. Cupons entram no resumo no mesmo padrao de
    uPresetResumo (10440+): quantidade, so quando ha pelo menos um. */
 function aPresetResumo(v){
-  var A=(v&&v.a)||{},ps=A.pacotes||[],cps=A.cps||[],n=ps.length,nc=cps.length,i,min=null,max=null,pr;
+  var A=(v&&v.a)||{},ps=A.pacotes||[],cps=A.cps||[],fs=A.familias||[],n=ps.length,nc=cps.length,i,min=null,max=null,pr;
   for(i=0;i<n;i++){
     pr=parseFloat(String(ps[i].preco).replace(',','.'));
     if(isNaN(pr))continue;
@@ -14618,6 +14943,9 @@ function aPresetResumo(v){
   var t=n+(n===1?' pacote':' pacotes');
   if(min!==null)t+=(min===max)?(' — '+precoFmt('BRL',min)):(' — de '+precoFmt('BRL',min)+' a '+precoFmt('BRL',max));
   if(nc)t+=', '+nc+(nc===1?' cupom':' cupons');
+  /* Uma familia so e o padrao, e padrao nao e informacao: o resumo so cita as familias quando
+     ha DUAS ou mais. */
+  if(fs.length>1)t+=', '+fs.length+' famílias';
   return t;
 }
 function aPresetAntes(){
@@ -14629,7 +14957,9 @@ function aPresetDepois(){
   if(fcAjustarTodos(A_NUMS))mudou=true;
   if(fcCoresAjustar('a-'))mudou=true;
   if(mudou)salvarEstado();
-  aPacRender();aCpRender();
+  /* aFamRender ANTES de aPacRender: ela repovoa o seletor 'a-pfam' e e a lista de familias que
+     decide se a lista de pacotes sai agrupada com cabecalhos. */
+  aFamRender();aPacRender();aCpRender();
   aToggles();
   aPreview(true);
 }
@@ -14676,7 +15006,11 @@ function aPresetDepois(){
    (Tarefa 5, fora desta rodada). 'link' continua sendo a URL COMPLETA dentro do bloco
    entregue (e o que abrirCalendario() usa em f.src=link, 13470-ish) -- e montada AQUI, uma vez
    so, a partir do 'path' cadastrado: 'https://tidycal.com/'+path. */
-function aPacotesSrc(pacotes){
+/* 'comFam' e um PARAMETRO, e nao um campo que sempre viaja: a pagina de obrigado nao sabe o
+   que e familia -- ela acha o pacote pelo ?pac= e cobra --, entao aBlocoObrigado chama esta
+   funcao SEM ele e a saida 3 continua byte a byte a de antes desta rodada. Se a-out3 mudar, a
+   parametrizacao esta errada, nao o teste. */
+function aPacotesSrc(pacotes,comFam){
   var pacs=pacotes.map(function(p){
     var preco=parseFloat(String(p.preco).replace(',','.'))||0;
     var ops=(p.ops||[]).map(function(o){
@@ -14685,9 +15019,18 @@ function aPacotesSrc(pacotes){
     }).join(', ');
     return "  {cod:'"+escJs(p.cod)+"', nome:'"+escJs(p.nome)+"', dur:'"+escJs(p.dur)+"', preco:"+preco.toFixed(2)+",\n"+
       "   inclui:'"+escJs(p.inclui)+"', link:'"+escJs('https://tidycal.com/'+p.path)+"',\n"+
+      (comFam?("   fam:'"+escJs(p.fam)+"',\n"):"")+
       "   ops:["+ops+"]}";
   }).join(',\n');
   return 'var PACOTES=[\n'+pacs+'\n];\n';
+}
+/* Emitida SO no ramo de duas ou mais familias (ver aBlocoVitrine). O 'id' viaja porque e ele
+   que casa com o 'fam' de cada pacote; o nome e a dica sao o que o cliente le. */
+function aFamiliasSrc(familias){
+  var fs=familias.map(function(f){
+    return "  {id:'"+escJs(f.id)+"', nome:'"+escJs(f.nome)+"', dica:'"+escJs(f.dica||'')+"'}";
+  }).join(',\n');
+  return 'var FAMILIAS=[\n'+fs+'\n];\n';
 }
 function fcaPrecoParcelaSrc(){
   return 'function precoPix(p){return Math.round(p*(1-DESCONTO_PIX/100)*100)/100;}\n'+
@@ -14716,6 +15059,27 @@ function fcaTextoCartaoSrc(q,txtCartaoLinha,txtParcela){
 
 function aBlocoVitrine(cfg){
   var c='';
+  /* ===== FAMILIAS: UM ramo, ou o OUTRO -- nunca os dois somados (03/09/2026) =====
+     Com UMA familia so nada de familia e emitido: nem a variavel FAMILIAS, nem o campo 'fam'
+     dentro de PACOTES, nem o passo 1 da familia, nem a linha de resumo dela, nem as regras de
+     CSS correspondentes, nem os cinco textos novos. A saida volta a ser, caractere por
+     caractere, a de antes desta rodada -- com a unica excecao das linhas compactas do celular,
+     que sao incondicionais por decisao do dono.
+     Isso nao e economia de bytes: e o que da sentido literal a decisao "uma familia so = a
+     vitrine volta a dois passos, sem passo vazio nem escolha de uma opcao so", e e o que torna
+     a regressao desta rodada legivel. Um passo com um cartao so e uma pergunta cuja resposta ja
+     esta dada.
+     OS DOIS CONJUNTOS DE REGRAS DE CSS SAO EXCLUDENTES, e por um motivo mecanico: emitir uma
+     SEGUNDA regra para .fca-resumo ou .fca-passo2 apagaria por inteiro o 'display'/'opacity' da
+     primeira (mesma especificidade, a ultima vence) -- a regra do CLAUDE.md sobre CSS gerado
+     programaticamente, que ja custou caro neste projeto com transition/background/animation. */
+  var temFam=!!(cfg.familias&&cfg.familias.length>1);
+  /* No ramo de duas ou mais familias existem DUAS linhas de resumo na pagina, entao o seletor
+     do resumo do PACOTE precisa ser qualificado. No ramo de uma familia so as duas constantes
+     abaixo valem exatamente o texto que estava escrito antes, e por isso a saida nao muda um
+     byte. */
+  var clsResPac=temFam?'fca-resumo fca-resumo-pac':'fca-resumo';
+  var selResPac=temFam?'.fca-resumo-pac':'.fca-resumo';
   /* O SUBTITULO OPCIONAL (decisao 6 do dono, 03/09/2026). O {pct} e trocado AQUI, em tempo de
      geracao, pelo desconto do Pix configurado -- as duas grafias, como D-1 mandou para o resto
      da ferramenta. Vazio, aSub e string vazia e nada do subtitulo entra no bloco: nem regra de
@@ -14748,21 +15112,67 @@ function aBlocoVitrine(cfg){
   c+='.fca-resumo.on{display:flex}\n';
   c+='.fca-resumo-nome{font-size:14px;font-weight:700;margin:0 0 2px;text-align:left}\n';
   c+='.fca-trocar{border:1px solid #d8d2c4;background:#fff;color:inherit;border-radius:8px;padding:8px 14px;font:600 12px/1.2 inherit;cursor:pointer;white-space:nowrap}\n';
-  /* passo 2 comeca apagado -- so "acende" (opacidade plena + calendario visivel) apos a escolha.
-     O calendario fica ESCONDIDO POR CSS, nunca destruido: assim o iframe unico sobrevive a
-     "Trocar pacote" e a proxima escolha so troca o src, sem criar um segundo elemento. */
-  c+='.fca-passo2{opacity:.45;text-align:left}\n';
-  c+='.fca-passo2 .fca-cal{display:none;border-radius:14px;overflow:hidden}\n';
-  c+='.fca-passo2.on{opacity:1}\n';
-  c+='.fca-passo2.on .fca-cal{display:block}\n';
+  if(temFam){
+    c+='.fca-fams{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:0 0 18px;text-align:left}\n';
+    c+='.fca-fam{border:1px solid #e5dfd0;border-radius:14px;background:var(--fca-fundo,#fff);padding:16px;cursor:pointer;text-align:left;color:inherit;font:inherit;display:block;width:100%;transition:box-shadow .18s,transform .18s}\n';
+    c+='.fca-fam:hover{box-shadow:0 8px 22px rgba(0,0,0,.10);transform:translateY(-2px)}\n';
+    c+='.fca-fam-nome{font-size:15px;font-weight:700;margin:0 0 2px;text-align:left}\n';
+    c+='.fca-fam-dica{font-size:12px;color:#777;margin:0;text-align:left}\n';
+    c+='.fca-fam-preco{font-size:12px;font-weight:700;color:var(--fca-destaque,#0F3A30);margin:6px 0 0;text-align:left}\n';
+    c+='.fca-resumo-rot{font-size:11px;color:#777;margin:2px 0 0;text-transform:uppercase;letter-spacing:.06em;text-align:left}\n';
+  }
+  /* O passo que ainda nao chegou comeca apagado -- so "acende" (opacidade plena + conteudo
+     visivel) apos a escolha do passo anterior. O calendario fica ESCONDIDO POR CSS, nunca
+     destruido: assim o iframe unico sobrevive a "Trocar pacote" e a proxima escolha so troca o
+     src, sem criar um segundo elemento.
+     No ramo de tres passos o calendario mora no passo 3 e o passo 2 guarda os cartoes de
+     pacote; no de dois passos, tudo como antes. UMA regra por seletor nos dois ramos. */
+  if(temFam){
+    c+='.fca-passo2{opacity:.45;text-align:left}\n';
+    c+='.fca-passo2.on{opacity:1}\n';
+    c+='.fca-passo3{opacity:.45;text-align:left}\n';
+    c+='.fca-passo3 .fca-cal{display:none;border-radius:14px;overflow:hidden}\n';
+    c+='.fca-passo3.on{opacity:1}\n';
+    c+='.fca-passo3.on .fca-cal{display:block}\n';
+  }else{
+    c+='.fca-passo2{opacity:.45;text-align:left}\n';
+    c+='.fca-passo2 .fca-cal{display:none;border-radius:14px;overflow:hidden}\n';
+    c+='.fca-passo2.on{opacity:1}\n';
+    c+='.fca-passo2.on .fca-cal{display:block}\n';
+  }
   c+='.fca-cal iframe{border:none;width:100%;display:block}\n';
-  c+='@media(max-width:640px){\n  .fca-cards{grid-template-columns:1fr}\n  .fca-resumo{flex-direction:column;align-items:flex-start}\n}\n';
-  c+='@media(prefers-reduced-motion: reduce){\n  .fca-card{transition:none}\n}\n';
+  /* ===== O CELULAR: LINHAS COMPACTAS (decisao do dono, 03/09/2026) =====
+     A troca de formato e feita por CSS, com UMA linha nova de JavaScript (a classe da caixa de
+     preco) -- por isso o desenho do computador nao muda por construcao: nenhum no novo entra
+     no cartao. Optou-se por GRADE e nao por um involucro <div class="fca-card-txt"> justamente
+     porque o involucro alteraria a arvore de nos tambem no computador, e seria preciso provar
+     que a fusao de margens atraves dele nao desloca nada. Fora da @media, .fca-card-preco
+     continua sendo um <div> de bloco como antes.
+     "O que inclui" some no celular de proposito: e a linha mais longa e a que menos decide.
+     O TEXTO DO PRECO NAO E REESCRITO -- e a mesma funcao textoCartao, so que menor. Uma
+     terceira redacao do mesmo dado seria um segundo texto para o mesmo numero, que e o que a
+     regra "fonte unica, mesmo quando as copias concordam" recusa.
+     A largura de corte e o campo 'a-largcards', preso a faixa dentro de aCfg. */
+  c+='@media(max-width:'+cfg.largcards+'px){\n';
+  c+='  .fca-cards{grid-template-columns:1fr;gap:8px}\n';
+  if(temFam)c+='  .fca-fams{grid-template-columns:1fr;gap:8px}\n';
+  c+='  .fca-resumo{flex-direction:column;align-items:flex-start}\n';
+  c+='  .fca-card{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:12px;align-items:center;padding:12px 14px}\n';
+  c+='  .fca-card-nome{grid-column:1;grid-row:1;font-size:14px}\n';
+  c+='  .fca-card-dur{grid-column:1;grid-row:2;margin:0}\n';
+  c+='  .fca-card-inclui{display:none}\n';
+  c+='  .fca-card-preco{grid-column:2;grid-row:1/span 2}\n';
+  c+='  .fca-preco-linha1{justify-content:flex-end}\n';
+  c+='  .fca-preco-valor{font-size:16px}\n';
+  c+='  .fca-preco-linha2{font-size:11px;text-align:right;margin-top:2px}\n';
+  c+='}\n';
+  c+='@media(prefers-reduced-motion: reduce){\n  .fca-card'+(temFam?',.fca-fam':'')+'{transition:none}\n}\n';
   c+='</sty'+'le>\n\n';
 
   c+='<scr'+'ipt>\n(function(){\n';
   c+='/* ===== customizacao ===== */\n';
-  c+=aPacotesSrc(cfg.pacotes);
+  c+=aPacotesSrc(cfg.pacotes,temFam);
+  if(temFam)c+=aFamiliasSrc(cfg.familias);
   c+='var DESCONTO_PIX='+cfg.descpix+';   /* percentual de desconto no Pix; 0 = sem desconto -- some o selo */\n';
   c+='var PARCELAS='+cfg.parcelas+';   /* numero de parcelas anunciado no cartao; e uma promessa que a operadora decide, nao este codigo */\n';
   c+="var ALTURA_SEMPRE=false;   /* true = o calendario fica sempre na altura maxima. Ligue APENAS se, na sua pagina publicada, o modal de confirmacao do TidyCal aparecer cortado -- o preco de ligar e um vao vazio embaixo do calendario. */\n";
@@ -14776,7 +15186,14 @@ function aBlocoVitrine(cfg){
   if(aSub)c+="var TXT_SUBTITULO='"+escJs(aSub)+"';\n";
   c+="var TXT_PASSO1='"+escJs(cfg.t2)+"';\n";
   c+="var TXT_PASSO2='"+escJs(cfg.t3)+"';\n";
-  c+="var TXT_TROCAR='"+escJs(cfg.t4)+"';\n\n";
+  c+="var TXT_TROCAR='"+escJs(cfg.t4)+"';\n";
+  if(temFam){
+    c+="var TXT_PASSO_FAM='"+escJs(cfg.txtPassoFamilia)+"';\n";
+    c+="var TXT_TROCAR_FAM='"+escJs(cfg.txtTrocarFamilia)+"';\n";
+    c+="var TXT_ROT_FAM='"+escJs(cfg.txtRotFamilia)+"';\n";
+    c+="var TXT_ROT_PAC='"+escJs(cfg.txtRotPacote)+"';\n";
+  }
+  c+='\n';
   /* Os tres textos do preco (selo, linha do cartao e trecho da parcela) sao a MESMA
      configuracao usada pelo carrinho da pagina de obrigado (aBlocoObrigado, mais abaixo): um
      campo so na aba, lido pelos dois blocos -- nunca dois campos que poderiam divergir. Sem
@@ -14828,24 +15245,55 @@ function aBlocoVitrine(cfg){
   c+="var h='';\n";
   c+="h+='<div class=\"fca-titulo\"></div>';\n";
   if(aSub)c+="h+='<div class=\"fca-subtitulo\"></div>';\n";
-  c+="h+='<div class=\"fca-passo fca-passo-1\"><span class=\"fca-passo-n\">1</span><span class=\"fca-passo-t\"></span></div>';\n";
-  c+="h+='<div class=\"fca-cards\"></div>';\n";
-  c+="h+='<div class=\"fca-resumo\"><div><div class=\"fca-resumo-nome\"></div><div class=\"fca-resumo-preco\"></div></div><button type=\"button\" class=\"fca-trocar\"></button></div>';\n";
-  c+="h+='<div class=\"fca-passo2\"><div class=\"fca-passo fca-passo-2\"><span class=\"fca-passo-n\">2</span><span class=\"fca-passo-t\"></span></div><div class=\"fca-cal\"></div></div>';\n";
+  if(temFam){
+    /* CADA RESUMO FICA SOB O SEU PASSO (achado do dono, 03/09/2026). O passo 1 mostra a familia
+       escolhida com o "trocar" dela; o passo 2 mostra o pacote escolhido com o "trocar" dele; o
+       passo 3 e o calendario. Passo numerado com titulo e NADA embaixo le-se como etapa
+       pendente, e o cliente fica procurando o que fazer ali. */
+    c+="h+='<div class=\"fca-passo fca-passo-1\"><span class=\"fca-passo-n\">1</span><span class=\"fca-passo-t\"></span></div>';\n";
+    c+="h+='<div class=\"fca-fams\"></div>';\n";
+    c+="h+='<div class=\"fca-resumo fca-resumo-fam\"><div><div class=\"fca-resumo-nome\"></div><div class=\"fca-resumo-rot\"></div></div><button type=\"button\" class=\"fca-trocar fca-trocar-fam\"></button></div>';\n";
+    c+="h+='<div class=\"fca-passo2\"><div class=\"fca-passo fca-passo-2\"><span class=\"fca-passo-n\">2</span><span class=\"fca-passo-t\"></span></div><div class=\"fca-cards\"></div></div>';\n";
+    c+="h+='<div class=\"fca-resumo fca-resumo-pac\"><div><div class=\"fca-resumo-nome\"></div><div class=\"fca-resumo-preco\"></div><div class=\"fca-resumo-rot\"></div></div><button type=\"button\" class=\"fca-trocar\"></button></div>';\n";
+    c+="h+='<div class=\"fca-passo3\"><div class=\"fca-passo fca-passo-3\"><span class=\"fca-passo-n\">3</span><span class=\"fca-passo-t\"></span></div><div class=\"fca-cal\"></div></div>';\n";
+  }else{
+    c+="h+='<div class=\"fca-passo fca-passo-1\"><span class=\"fca-passo-n\">1</span><span class=\"fca-passo-t\"></span></div>';\n";
+    c+="h+='<div class=\"fca-cards\"></div>';\n";
+    c+="h+='<div class=\"fca-resumo\"><div><div class=\"fca-resumo-nome\"></div><div class=\"fca-resumo-preco\"></div></div><button type=\"button\" class=\"fca-trocar\"></button></div>';\n";
+    c+="h+='<div class=\"fca-passo2\"><div class=\"fca-passo fca-passo-2\"><span class=\"fca-passo-n\">2</span><span class=\"fca-passo-t\"></span></div><div class=\"fca-cal\"></div></div>';\n";
+  }
   c+='raiz.innerHTML=h;\n\n';
 
   c+="raiz.querySelector('.fca-titulo').textContent=TXT_TITULO;\n";
   if(aSub)c+="raiz.querySelector('.fca-subtitulo').textContent=TXT_SUBTITULO;\n";
-  c+="raiz.querySelector('.fca-passo-1 .fca-passo-t').textContent=TXT_PASSO1;\n";
-  c+="raiz.querySelector('.fca-passo-2 .fca-passo-t').textContent=TXT_PASSO2;\n";
-  c+="raiz.querySelector('.fca-trocar').textContent=TXT_TROCAR;\n\n";
+  if(temFam){
+    c+="raiz.querySelector('.fca-passo-1 .fca-passo-t').textContent=TXT_PASSO_FAM;\n";
+    c+="raiz.querySelector('.fca-passo-2 .fca-passo-t').textContent=TXT_PASSO1;\n";
+    c+="raiz.querySelector('.fca-passo-3 .fca-passo-t').textContent=TXT_PASSO2;\n";
+    c+="raiz.querySelector('.fca-trocar-fam').textContent=TXT_TROCAR_FAM;\n";
+    c+="raiz.querySelector('.fca-resumo-fam .fca-resumo-rot').textContent=TXT_ROT_FAM;\n";
+    c+="raiz.querySelector('.fca-resumo-pac .fca-resumo-rot').textContent=TXT_ROT_PAC;\n";
+    c+="raiz.querySelector('.fca-resumo-pac .fca-trocar').textContent=TXT_TROCAR;\n";
+  }else{
+    c+="raiz.querySelector('.fca-passo-1 .fca-passo-t').textContent=TXT_PASSO1;\n";
+    c+="raiz.querySelector('.fca-passo-2 .fca-passo-t').textContent=TXT_PASSO2;\n";
+    c+="raiz.querySelector('.fca-trocar').textContent=TXT_TROCAR;\n";
+  }
+  c+='\n';
 
   c+="var elCards=raiz.querySelector('.fca-cards');\n";
-  c+="var elResumo=raiz.querySelector('.fca-resumo');\n";
-  c+="var elResumoNome=raiz.querySelector('.fca-resumo-nome');\n";
-  c+="var elResumoPreco=raiz.querySelector('.fca-resumo-preco');\n";
+  c+="var elResumo=raiz.querySelector('"+selResPac+"');\n";
+  c+="var elResumoNome=raiz.querySelector('"+(temFam?'.fca-resumo-pac ':'')+".fca-resumo-nome');\n";
+  c+="var elResumoPreco=raiz.querySelector('"+(temFam?'.fca-resumo-pac ':'')+".fca-resumo-preco');\n";
   c+="var elPasso2=raiz.querySelector('.fca-passo2');\n";
   c+="var elCal=raiz.querySelector('.fca-cal');\n";
+  if(temFam){
+    c+="var elFams=raiz.querySelector('.fca-fams');\n";
+    c+="var elResumoFam=raiz.querySelector('.fca-resumo-fam');\n";
+    c+="var elResumoFamNome=raiz.querySelector('.fca-resumo-fam .fca-resumo-nome');\n";
+    c+="var elPasso3=raiz.querySelector('.fca-passo3');\n";
+    c+='var cards=[];\n';
+  }
   c+='var atual=-1;\n\n';
 
   c+='PACOTES.forEach(function(p,i){\n';
@@ -14854,11 +15302,67 @@ function aBlocoVitrine(cfg){
   c+='  card.appendChild(nome);\n';
   c+="  if(p.dur){var dur=document.createElement('div');dur.className='fca-card-dur';dur.textContent=p.dur;card.appendChild(dur);}\n";
   c+="  if(p.inclui){var inc=document.createElement('div');inc.className='fca-card-inclui';inc.textContent=p.inclui;card.appendChild(inc);}\n";
-  c+='  var precoBox=document.createElement(\'div\');\n';
+  /* A CLASSE DA CAIXA DE PRECO e a unica linha nova de JavaScript do formato compacto: sem ela
+     nao ha como a @media colocar o preco na segunda coluna da grade. Ela entra nos DOIS ramos,
+     porque as linhas compactas do celular sao incondicionais. */
+  c+="  var precoBox=document.createElement('div');precoBox.className='fca-card-preco';\n";
   c+='  montarPreco(precoBox,p.preco);\n';
   c+='  card.appendChild(precoBox);\n';
   c+="  card.addEventListener('click',function(){escolher(i);});\n";
+  /* Os cartoes nascem escondidos e sao mostrados por familia; o indice 'i' do forEach continua
+     sendo o indice GLOBAL em PACOTES por construcao (§9.6 do desenho) -- filtrar a lista e usar
+     o indice do resultado apontaria para o pacote errado em escolher(). */
+  if(temFam)c+="  card.style.display='none';\n  cards.push(card);\n";
   c+='  elCards.appendChild(card);\n});\n\n';
+  if(temFam){
+    c+='/* ===== passo 1: escolher a familia =====\n';
+    c+='   Os cartoes de PACOTE sao criados uma vez, na carga, e apenas escondidos/mostrados por\n';
+    c+='   familia -- nao se recria DOM ao trocar de familia, e por isso o iframe do calendario\n';
+    c+='   continua sendo um so. */\n';
+    c+='function mostrarFamilia(id){\n';
+    c+='  var i;\n';
+    c+="  for(i=0;i<cards.length;i++)cards[i].style.display=(PACOTES[i].fam===id)?'':'none';\n}\n";
+    if(cfg.txtFamiliaApartir){
+      c+='/* o menor preco da familia, com o MESMO precoPix/moedaFmt que os cartoes ja usam --\n';
+      c+='   nunca uma segunda conta para o mesmo numero */\n';
+      c+='function precoMinimo(id){\n';
+      c+='  var m=null,i;\n';
+      c+='  for(i=0;i<PACOTES.length;i++){\n';
+      c+='    if(PACOTES[i].fam!==id)continue;\n';
+      c+='    if(m===null||PACOTES[i].preco<m)m=PACOTES[i].preco;\n  }\n';
+      c+='  return m;\n}\n';
+    }
+    c+='FAMILIAS.forEach(function(f){\n';
+    c+="  var card=document.createElement('button');card.type='button';card.className='fca-fam';\n";
+    c+="  var nome=document.createElement('div');nome.className='fca-fam-nome';nome.textContent=f.nome;\n";
+    c+='  card.appendChild(nome);\n';
+    c+="  if(f.dica){var dica=document.createElement('div');dica.className='fca-fam-dica';dica.textContent=f.dica;card.appendChild(dica);}\n";
+    if(cfg.txtFamiliaApartir){
+      c+='  var ap=precoMinimo(f.id);\n';
+      c+='  if(ap!==null){\n';
+      c+="    var apv=document.createElement('div');apv.className='fca-fam-preco';apv.textContent="+aTplJs("'",cfg.txtFamiliaApartir,[['{valor}','moedaFmt('+(cfg.usaPix?'precoPix(ap)':'ap')+')']])+";\n";
+      c+='    card.appendChild(apv);\n  }\n';
+    }
+    c+="  card.addEventListener('click',function(){escolherFamilia(f.id);});\n";
+    c+='  elFams.appendChild(card);\n});\n\n';
+    c+='function escolherFamilia(id){\n';
+    c+='  var i;\n';
+    c+='  for(i=0;i<FAMILIAS.length;i++)if(FAMILIAS[i].id===id)elResumoFamNome.textContent=FAMILIAS[i].nome;\n';
+    c+='  mostrarFamilia(id);\n';
+    c+="  elFams.style.display='none';\n";
+    c+="  elResumoFam.className='fca-resumo fca-resumo-fam on';\n";
+    c+="  elPasso2.className='fca-passo2 on';\n";
+    c+="  elCards.style.display='';\n";
+    c+="  elResumo.className='"+clsResPac+"';\n";
+    c+="  elPasso3.className='fca-passo3';\n}\n\n";
+    c+='function trocarFamilia(){\n';
+    c+="  elFams.style.display='';\n";
+    c+="  elResumoFam.className='fca-resumo fca-resumo-fam';\n";
+    c+="  elResumo.className='"+clsResPac+"';\n";
+    c+="  elCards.style.display='';\n";
+    c+="  elPasso2.className='fca-passo2';\n";
+    c+="  elPasso3.className='fca-passo3';\n}\n\n";
+  }
 
   c+='/* ===== o calendario: UM iframe, criado so quando o pacote e escolhido, reaproveitado ao\n';
   c+='   trocar de pacote. Nao existem N iframes escondidos -- tres embeds do TidyCal carregando\n';
@@ -14895,8 +15399,9 @@ function aBlocoVitrine(cfg){
   c+='  elResumoNome.textContent=p.nome;\n';
   c+='  montarPreco(elResumoPreco,p.preco);\n';
   c+="  elCards.style.display='none';\n";
-  c+="  elResumo.className='fca-resumo on';\n";
+  c+="  elResumo.className='"+clsResPac+" on';\n";
   c+="  elPasso2.className='fca-passo2 on';\n";
+  if(temFam)c+="  elPasso3.className='fca-passo3 on';\n";
   c+='  if(trocouLink){\n';
   c+='    /* A corrida da mensagem atrasada do iframe anterior (decisao 9 do diario). O ouvinte\n';
   c+='       fica em window e nao sabe de qual iframe veio o sinal -- entao, ao trocar, zera o\n';
@@ -14908,9 +15413,14 @@ function aBlocoVitrine(cfg){
 
   c+='function trocarPacote(){\n';
   c+="  elCards.style.display='';\n";
-  c+="  elResumo.className='fca-resumo';\n";
-  c+="  elPasso2.className='fca-passo2';\n}\n";
-  c+="raiz.querySelector('.fca-trocar').addEventListener('click',trocarPacote);\n\n";
+  c+="  elResumo.className='"+clsResPac+"';\n";
+  /* No ramo de tres passos quem apaga e o passo 3 (o calendario): o passo 2 e onde o cliente
+     esta agora, escolhendo de novo, e apaga-lo faria a lista de cartoes nascer cinzenta. */
+  if(temFam)c+="  elPasso3.className='fca-passo3';\n}\n";
+  else c+="  elPasso2.className='fca-passo2';\n}\n";
+  c+="raiz.querySelector('"+(temFam?'.fca-resumo-pac .fca-trocar':'.fca-trocar')+"').addEventListener('click',trocarPacote);\n";
+  if(temFam)c+="raiz.querySelector('.fca-trocar-fam').addEventListener('click',trocarFamilia);\n";
+  c+='\n';
 
   c+='/* Ouvinte UNICO em window, nunca no iframe -- assim ele sobrevive a troca de pacote, que\n';
   c+='   reaproveita o MESMO elemento (so troca o src). Mesma origem, prefixo e as duas\n';
@@ -15856,12 +16366,19 @@ function aPvObMontar(){
   ifr.src='previa.html'+(pac?('?pac='+encodeURIComponent(pac)):'');
 }
 /* Duas coisas mudam com a largura, e as duas tem de virar verdade juntas no modo Celular: a
-   media query do bloco (fixa em 640px) empilha os cartoes, e LARGURA_MOBILE -- cfg.largmob,
+   media query do bloco (cfg.largcards, o campo "Largura de corte das linhas compactas",
+   configuravel desde 03/09/2026 -- antes fixa em 640px) empilha os cartoes e os transforma em
+   linhas compactas, e LARGURA_MOBILE -- cfg.largmob,
    o campo "Largura de corte do modo celular", configuravel -- decide via window.innerWidth
    qual altura o calendario usa. min(380,cfg.largmob) fica sempre abaixo das duas retas (380
    ja e menor que 640, e nunca passa de largmob por ser um minimo), e max(1040,cfg.largmob+240)
-   fica sempre acima das duas. Mesma forma de sPvLargura/cPvLargura, com o segundo corte
-   proprio desta aba. A pagina de obrigado (aPvObMontar, abaixo) NAO ganhou este alternador:
+   fica sempre acima das duas -- e tambem acima de largcards, cujo maximo declarado e 1024.
+   O MODO CELULAR NAO E PRESO A largcards de proposito: se o dono baixar largcards para menos
+   que 380, a previa passa a mostrar cartoes ALTOS num quadro estreito, que e exatamente o que
+   a pagina publicada faria naquela largura. E a verdade, nao um defeito -- e o <p class="ajuda">
+   abaixo do quadro declara a relacao, como manda a regra do projeto sobre a previa declarar o
+   que ainda difere da pagina publicada. Mesma forma de sPvLargura/cPvLargura, com o segundo
+   corte proprio desta aba. A pagina de obrigado (aPvObMontar, abaixo) NAO ganhou este alternador:
    o cartao dela e de largura fixa (max-width:480px) e nao tem media query nenhuma alem de
    prefers-reduced-motion -- o modo Celular so mudaria o espaco em branco ao redor, nao o
    layout, entao o botao ali seria decorativo e nao provaria nada. */
@@ -21242,7 +21759,9 @@ prep('Agendamento por pacote','pac',function(){
   /* estado gravado antes desta regra pode trazer numero fora da faixa: prende na carga, para o
      campo nunca exibir algo diferente do que aCfg vai usar. */
   if(fcAjustarTodos(A_NUMS))salvarEstado();
-  aPacRender();aCpRender();aOpRender();
+  /* aFamRender ANTES de aPacRender: e ela quem povoa o seletor 'a-pfam' e quem decide se a
+     lista de pacotes sai agrupada com cabecalhos por familia. */
+  aFamRender();aPacRender();aCpRender();aOpRender();
   aToggles();
   /* correcao a vista do codigo, em 'change'/'blur' -- nunca em 'input', que corrigiria a cada
      tecla e impediria digitar. Mesmo padrao da chave Pix do painel Identidade. */
@@ -21251,6 +21770,7 @@ prep('Agendamento por pacote','pac',function(){
   liga('a-pac-cancelar',aPacLimpar);
   liga('a-ptestar',aPacTestar);
   liga('a-op-add',aOpAdd);
+  liga('a-fam-add',aFamAdd);
   liga('a-cp-add',aCpAdd);
   liga('a-gerar',aGerar);
   liga('a-atualizar',function(){aPreview(true);});
