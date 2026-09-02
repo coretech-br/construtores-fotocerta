@@ -33,6 +33,8 @@ Ele sai do **mesmo `bMontar`** que escreveu a animação consolidada (`m2.props`
 
 A caixa aceita **um** preset, então uma página comporta dois componentes com efeito de borda. Não há limite técnico para mais — nem no CSS, nem nos `@keyframes` — só a caixa de seleção. Passar para uma lista de N exige seleção múltipla, N saídas com identificadores estáveis (a varredura de órfãs casa `[a-z]-out[0-9]*`) e N itens no painel. Fica registrado como o próximo passo possível, não como esquecimento.
 
+> **Dívida paga na mesma sessão, dez minutos depois.** `docs/specs/2026-08-24-consolidacao-de-n-componentes-design.md` trocou a caixa por uma lista de marcação, com teto de cinco outros componentes (`B_CONSOL_MAX`) e uma saída numerada para cada.
+
 ## 5. Verificação
 
 1. **Regressão byte a byte**: 13 saídas (o `b-out3` entrou na fotografia) e 9 cobranças, idênticas. Sem consolidação o `b-out3` **tem de sair vazio**, e agora a fotografia cobra isso — saída que só aparece às vezes é onde o lixo de uma passagem anterior se esconde.

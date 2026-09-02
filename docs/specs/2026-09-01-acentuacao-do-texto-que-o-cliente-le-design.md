@@ -85,6 +85,8 @@ A Mini loja escreve a frase `Escolha ao menos um item: o pedido está em zero.` 
 
 Não foi corrigido nesta rodada de propósito: `TXT_TOTAL_ZERO` só é emitido dentro de `if(usaPP)`, então usá-lo no caminho Pix exige mover a declaração — e loja em "somente Pix" com variável ausente é exatamente o defeito que já matou esta aba uma vez (`MOEDA is not defined`, sem produtos e sem aviso). Trocar comportamento numa rodada de tipografia é como se esconde defeito. Está em `docs/pendencias.md`.
 
+> **Dívida paga no mesmo dia.** Ainda em 01/09/2026, `docs/specs/2026-09-01-whatsapp-acentuado-e-frase-unificada-design.md` moveu a declaração de `TXT_TOTAL_ZERO` para `if(usaPP||usaPix)` e unificou as três ocorrências — com o Checkout ganhando a mesma unificação de quebra, a pedido do dono.
+
 ## 9. Tempo
 
 Estimado: 30–45 min. Real: **~1h10** — o levantamento custou mais que a correção, e valeu: metade dos achados (o rodapé de limites da loja, os quatro parágrafos da aba Efeitos, o carimbo de publicação) não estava no meu palpite inicial.
