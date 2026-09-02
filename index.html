@@ -13415,10 +13415,24 @@ function aPacDel(i){
   else if(aEditIdx>i)aEditIdx--;
   aPacRender();salvarEstado();aPreview();
 }
+/* O campo so aparece se ALGUM opcional de ALGUM pacote estiver marcado "vende por
+   quantidade" -- molde de uQtdLigada/uQtdItens (10481+/10507): o pacote em si nunca tem
+   quantidade propria aqui, so os opcionais dele (aOpRender, o checkbox 'lq'). Sem isto o
+   Checkout e a Mini loja escondiam o campo quando nao ha o que ele configure, e esta aba o
+   deixava sempre visivel. */
+function aQtdLigada(pacotes){
+  var i,j,ops;
+  for(i=0;i<pacotes.length;i++){
+    ops=pacotes[i].ops||[];
+    for(j=0;j<ops.length;j++)if(ops[j].qtd)return true;
+  }
+  return false;
+}
 function aPacRender(){
   var ul=$('a-pac-lista');if(!ul)return;
   ul.innerHTML='';
   $('a-pac-vazio').style.display=aPacotes.length?'none':'block';
+  var elq=$('a-qtdmax-campo');if(elq)elq.style.display=aQtdLigada(aPacotes)?'block':'none';
   aPacotes.forEach(function(p,i){
     var li=document.createElement('li');
     var info=document.createElement('div');info.className='info';
