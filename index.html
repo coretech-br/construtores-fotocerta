@@ -3136,6 +3136,11 @@
         <legend>Pacotes cadastrados</legend>
         <ul class="lista-imgs" id="a-pac-lista"></ul>
         <p class="vazio" id="a-pac-vazio">Nenhum pacote cadastrado ainda. Use o formulário ao lado.</p>
+        <div id="a-qtdmax-campo">
+          <label for="a-qtdmax">Quantidade máxima por opcional <small>(de 2 a 99; fora da faixa o campo se corrige sozinho)</small></label>
+          <input type="number" id="a-qtdmax" value="10" min="2" max="99" step="1">
+          <p class="ajuda">Vale para os opcionais marcados como <b>"vende por quantidade"</b>. O seletor vai de <b>0</b> até esse número, e <b>0 equivale a não marcar o opcional</b>.</p>
+        </div>
       </fieldset>
       <fieldset>
         <legend>Cupons de desconto</legend>
@@ -13175,7 +13180,8 @@ var aEditIdx=-1;
 /* Faixa declarada dos campos numericos desta aba, no formato de U_NUMS/E_NUMS: [id, padrao,
    min, max, inteiro]. */
 var A_NUMS=[['a-prazoh',24,1,720,true],['a-descpix',5,0,90,false],['a-parcelas',1,1,12,true],
-  ['a-altdesk',2350,800,6000,true],['a-altmob',2700,800,6000,true],['a-largmob',700,320,1024,true]];
+  ['a-altdesk',2350,800,6000,true],['a-altmob',2700,800,6000,true],['a-largmob',700,320,1024,true],
+  ['a-qtdmax',10,2,99,true]];
 function aPreso(id){return fcPreso(A_NUMS,id);}
 /* ===== marcadores configuraveis da pagina de obrigado (Tarefa 4, passo 5) =====
    Mesma mecanica de T_OB_VARS/tObMarcadas/tObMarcar (9826+), com quatro diferencas: so os
@@ -13497,12 +13503,13 @@ function aCfg(){
   var altdesk=aPreso('a-altdesk');if(altdesk==null)altdesk=2350;
   var altmob=aPreso('a-altmob');if(altmob==null)altmob=2700;
   var largmob=aPreso('a-largmob');if(largmob==null)largmob=700;
+  var qtdmax=aPreso('a-qtdmax');if(qtdmax==null)qtdmax=10;
   return {
     pacotes:aPacotes, cps:aCps,
     urlobrigado:$('a-urlobrigado').value.trim(),
     prefixo:$('a-prefixo').value.trim(),
     prazoh:prazoh, descpix:descpix, parcelas:parcelas,
-    altdesk:altdesk, altmob:altmob, largmob:largmob,
+    altdesk:altdesk, altmob:altmob, largmob:largmob, qtdmax:qtdmax,
     c1:corSegura('a-c1','#0F3A30'), c2:corSegura('a-c2','#ffffff'), c3:corSegura('a-c3','#333333'),
     t1:$('a-t1').value, t2:$('a-t2').value, t3:$('a-t3').value, t4:$('a-t4').value, t5:$('a-t5').value,
     ob:aObCfg()
@@ -13523,6 +13530,7 @@ function aColeta(){
     descpix:aElVal('a-descpix',5),
     parcelas:aElVal('a-parcelas',1),
     altdesk:aElVal('a-altdesk',2350),altmob:aElVal('a-altmob',2700),largmob:aElVal('a-largmob',700),
+    qtdmax:aElVal('a-qtdmax',10),
     c1:aElVal('a-c1-t','#0F3A30'),c2:aElVal('a-c2-t','#ffffff'),c3:aElVal('a-c3-t','#333333'),
     t1:aElVal('a-t1','Agende seu ensaio'),
     t2:aElVal('a-t2','Escolha o pacote'),
@@ -13565,6 +13573,7 @@ function aRestaura(st){
   el=$('a-altdesk');if(el)el.value=(A.altdesk!=null&&A.altdesk!=='')?A.altdesk:2350;
   el=$('a-altmob');if(el)el.value=(A.altmob!=null&&A.altmob!=='')?A.altmob:2700;
   el=$('a-largmob');if(el)el.value=(A.largmob!=null&&A.largmob!=='')?A.largmob:700;
+  el=$('a-qtdmax');if(el)el.value=(A.qtdmax!=null&&A.qtdmax!=='')?A.qtdmax:10;
   el=$('a-c1-t');if(el){el.value=A.c1;elc=$('a-c1');if(elc)elc.value=corValida(A.c1)?A.c1:'#0F3A30';}
   el=$('a-c2-t');if(el){el.value=A.c2;elc=$('a-c2');if(elc)elc.value=corValida(A.c2)?A.c2:'#ffffff';}
   el=$('a-c3-t');if(el){el.value=A.c3;elc=$('a-c3');if(elc)elc.value=corValida(A.c3)?A.c3:'#333333';}
@@ -13925,6 +13934,16 @@ function aEnderecos(cfg){
    pagamento aparece do mesmo jeito. */
 function aBlocoObrigado(cfg){
   var c='';
+  /* usaQtd e do CATALOGO INTEIRO, nao so do pacote que a URL vai identificar em tempo de
+     execucao -- este bloco e gerado UMA vez para todos os pacotes cadastrados, e qualquer um
+     deles pode ser o PAC em tempo real (Tarefa 5c, decisao 14 do diario). Sem isto ligado, o
+     seletor de quantidade carregaria codigo morto para quem nao tem opcional algum marcado
+     "vende por quantidade". */
+  var usaQtd=false,uqI,uqJ,uqOps;
+  for(uqI=0;uqI<cfg.pacotes.length;uqI++){
+    uqOps=cfg.pacotes[uqI].ops||[];
+    for(uqJ=0;uqJ<uqOps.length;uqJ++)if(uqOps[uqJ].qtd)usaQtd=true;
+  }
   c+='<!-- ============================================================\n';
   c+='     FOTO CERTA - PAGINA DE OBRIGADO DO AGENDAMENTO POR PACOTE\n';
   c+='     ONDE COLAR: componente HTML da pagina de obrigado do TidyCal\n';
@@ -13975,6 +13994,9 @@ function aBlocoObrigado(cfg){
   c+='.fca-ob-mark{width:18px;height:18px;min-width:18px;display:inline-block;position:relative;background:#fff;border:2px solid #b9b3a4;box-sizing:border-box;border-radius:5px}\n';
   c+='.fca-ob-raiz input:checked+.fca-ob-mark{border-color:var(--fca-ob-destaque,#0F3A30);background:var(--fca-ob-destaque,#0F3A30)}\n';
   c+='.fca-ob-raiz input:checked+.fca-ob-mark:after{content:"";position:absolute;left:4px;top:0;width:5px;height:10px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(40deg)}\n';
+  if(usaQtd){
+    c+=fcQtdCssGer('.fca-ob-raiz','fca-ob','var(--fca-ob-destaque,#0F3A30)');
+  }
   c+='.fca-ob-cupom .fca-ob-cupom-l{display:flex;gap:8px}\n';
   c+='.fca-ob-cupom-l input[type="text"]{flex:1;min-width:0;border:1px solid rgba(0,0,0,.18);border-radius:8px;padding:9px 10px;font-size:14px;font-family:inherit;text-transform:uppercase;background:#fff;color:#333}\n';
   c+='.fca-ob-cupom-l button{border:none;border-radius:8px;background:var(--fca-ob-destaque,#0F3A30);color:var(--fca-ob-fundo,#fff);font-weight:600;padding:0 14px;cursor:pointer;font-family:inherit}\n';
@@ -14008,6 +14030,7 @@ function aBlocoObrigado(cfg){
   c+='var DESCONTO_PIX='+cfg.descpix+';\n';
   c+='var PARCELAS='+cfg.parcelas+';\n';
   c+='var PRAZOH='+cfg.prazoh+';   /* horas de reserva, a partir da primeira visita a esta pagina */\n';
+  if(usaQtd)c+='var QUANTIDADE_MAXIMA='+cfg.qtdmax+';   /* teto do seletor de quantidade; o seletor vai de 0 ate ele, e 0 = item nao escolhido */\n';
   c+="var MOEDA='BRL';                     /* o Pix so existe em BRL, e o cartao segue o mesmo pedido */\n";
   c+="var CHAVE_PIX='"+escJs(fciVal('chave'))+"';\n";
   c+="var NOME_RECEBEDOR='"+escJs(fciVal('nomer'))+"';\n";
@@ -14048,6 +14071,7 @@ function aBlocoObrigado(cfg){
   c+='/* ============================================================\n   Daqui para baixo nao precisa mexer\n   ============================================================ */\n\n';
   c+=fcMoedaFmtGer(true);
   c+=FC_PARAM_SRC;
+  if(usaQtd)c+=fcFazQtdSrc('fca-ob');
 
   c+='var raiz=document.getElementById("fca-ob-raiz");\n';
   c+='if(raiz){\n';
@@ -14272,12 +14296,17 @@ function aBlocoObrigado(cfg){
   c+='function subtotal(){\n';
   c+='  var t=somaProdutos();\n';
   c+='  (PAC.ops||[]).forEach(function(op,j){\n';
-  c+='    if(opChecks[j]&&opChecks[j].checked)t+=op.preco;\n';
+  if(usaQtd)c+='    if(opChecks[j]&&opChecks[j].checked)t+=op.preco*qtdOp(j);\n';
+  else c+='    if(opChecks[j]&&opChecks[j].checked)t+=op.preco;\n';
   c+='  });\n';
   c+='  return t;\n';
   c+='}\n\n';
   c+='var cupomAtivo=null;\n';
   c+='var opChecks=[];\n';
+  if(usaQtd){
+    c+='var qtdsOp=[];\n';
+    c+='function qtdOp(j){var q=qtdsOp[j];return (q==null)?1:q;}\n';
+  }
   c+='var elValor,elLinha2,elParcela,elDescLinha,elDescTxt,elDescVal,elDescP;\n';
   c+='var pixEsconder=null;\n\n';
   c+=FC_CARRINHO_SRC.descontoAtual;
@@ -14315,8 +14344,13 @@ function aBlocoObrigado(cfg){
   c+='    var mk=document.createElement("span");mk.className="fca-ob-mark";\n';
   c+='    var sp=document.createElement("span");sp.textContent=op.nome;\n';
   c+='    lab.appendChild(inp);lab.appendChild(mk);lab.appendChild(sp);\n';
+  c+='    row.appendChild(lab);\n';
+  if(usaQtd){
+    c+='    qtdsOp[j]=1;\n';
+    c+='    if(op.qtd)row.appendChild(fazQtd(1,function(n){qtdsOp[j]=n;atualizar();}));\n';
+  }
   c+='    var pr=document.createElement("span");pr.textContent="+ "+moedaFmt(op.preco);\n';
-  c+='    row.appendChild(lab);row.appendChild(pr);\n';
+  c+='    row.appendChild(pr);\n';
   c+='    opChecks[j]=inp;\n';
   c+='    b.appendChild(row);\n';
   c+='  });\n';
