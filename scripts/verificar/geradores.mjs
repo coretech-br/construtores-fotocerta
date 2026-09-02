@@ -7,13 +7,52 @@
 
    Uso:  node scripts/verificar/geradores.mjs <arvore> <porta> <saida.json>
 
-   AS ABAS SAO PREENCHIDAS COM O MINIMO PARA NENHUMA RECUSAR. Sem isso metade das
-   saidas sai VAZIA e a comparacao passa com folga sobre nada -- aconteceu, e por isso
-   esta escrito aqui. Os campos que moldam o bloco da aba de cobranca sao fixados
-   explicitamente pelo mesmo motivo: a aba restaura o que estava guardado, e o que
-   sobrou de uma passagem entra na seguinte.
+   O CENARIO (o que se preenche em cada aba, e os 28 textos da passagem configurada)
+   mora em cenario.mjs, que este arquivo e o textos-escape.mjs compartilham.
+
+   ---------------------------------------------------------------------------
+   DUAS PASSAGENS: "fabrica" e "configurada". POR QUE A SEGUNDA EXISTE.
+   ---------------------------------------------------------------------------
+   Ate 03/09/2026 este arquivo tinha UMA passagem, e ela nao escrevia em NENHUM campo
+   de texto (nenhum '*-txt-*'). Naquele dia a rodada dos textos configuraveis criou 162
+   campos desses -- todo texto que o cliente final le nas dez abas passou a ser
+   editavel --, e a fotografia continuou provando apenas o CAMINHO DE FABRICA: com os
+   textos no padrao, ela dizia que a saida nao mudou, e nao dizia nada sobre o que
+   acontece quando o dono escreve o texto dele.
+
+   O buraco nao e teorico. Medido em 03/09/2026, com esta segunda passagem ja escrita:
+   os quatro avisos de carrinho da Mini loja tinham ganhado o marcador {n} no texto de
+   fabrica, mas o consumidor no bloco continuava CONCATENANDO o numero ("2 "+texto) em
+   vez de substituir -- o cliente leria "2 {n} itens do seu carrinho sairam...", com o
+   marcador cru na tela. A passagem de fabrica via a declaracao da variavel e passava;
+   so a configurada alcanca o uso.
+
+   E a mesma armadilha ja registrada quatro vezes neste projeto -- TESTE QUE NAO ALCANCA
+   O ESTADO NAO PROVA NADA SOBRE AQUELE ESTADO (o cupom da Mini loja, a quantidade dos
+   opcionais, o ramo "somente cartao", e agora os textos).
+
+   O QUE CADA PASSAGEM PROVA:
+     - fabrica     -> o INVARIANTE: mexer numa aba nao muda um byte do que as outras
+                      geram com a configuracao padrao. E a passagem historica, e ela
+                      NAO MUDA -- acrescentar a segunda nao pode alterar a primeira.
+     - configurada -> que o texto do dono CHEGA ao bloco, com o escape certo e com os
+                      marcadores substituidos. Cobre o que a de fabrica nao alcanca:
+                      o subtitulo da vitrine (que so e emitido quando preenchido), o
+                      escape de aspas/barra/'</script', e cada tipo de marcador.
+
+   A PROVA DE QUE A SEGUNDA PASSAGEM ALCANCA O QUE PROMETE. Cada texto configurado leva
+   um selo unico ('ZxNN'). Depois de gerar, o script procura cada selo nas saidas e grava
+   em 'configSemVestigio' os que nao apareceram em nenhuma. Selo que some e campo mal
+   ligado, ou ramo que o cenario nao exercita -- e nos dois casos a passagem seria tao
+   cega quanto a antiga, so que mais cara. Ramo nao exercitado e legitimo, mas SO quando
+   declarado na quarta coluna da tabela em cenario.mjs, com o motivo. Lista vazia e a
+   condicao de aprovacao; 'regressao.sh' falha se ela nao estiver.
+
+   O QUE ESTE ARQUIVO CONTINUA NAO FAZENDO: executar o bloco. Ele compara TEXTO. Quem pega
+   os blocos com os textos de escape e os roda numa pagina de verdade e o textos-escape.mjs,
+   que usa o mesmo cenario e o molde de pagina.mjs.
    ============================================================================ */
-import { navegador, servir, sha, abrir, set, radio, clicar, ler, alertas } from './lib.mjs';
+import { navegador, servir, sha, abrir, radio, clicar, ler, alertas } from './lib.mjs';
 import fs from 'node:fs';
 
 const ARV = process.argv[2], PORTA = Number(process.argv[3]), SAIDA = process.argv[4];
@@ -26,134 +65,19 @@ if(!ARV || !PORTA || !SAIDA){
    lista mesmo sem o cenario exercitar a consolidacao: aqui os cinco PRECISAM sair vazios, e a
    fotografia passa a cobrar isso. Saida que so aparece as vezes e onde o lixo de uma passagem
    anterior se esconde. */
-const SAIDAS = ['s-out','l-out','t-out1','t-out2','t-out3','t-out4','t-out5','u-out','b-out1','b-out2','b-out3','b-out4','b-out5','b-out6','b-out7','c-out1','p-out1','m-out','e-out1','e-out2','a-out1','a-out2','a-out3'];
-const ABAS = [['aba-slide','s-gerar'],['aba-leads','l-gerar'],['aba-tidy','t-gerar'],
-  ['aba-uni','u-gerar'],['aba-bor','b-gerar'],['aba-cnt','c-gerar'],['aba-cob','p-gerar'],['aba-loja','m-gerar'],['aba-efe','e-gerar'],['aba-pac','a-gerar']];
+/* p-out2 (o LINK da cobranca aberta nesta mesma passagem) entra na lista desde 03/09/2026,
+   junto da passagem configurada: e o jeito barato de cobrar que TEXTO NAO ENTRA NO LINK. Se
+   um dia um campo de texto vazar para o payload, o link muda entre as duas passagens e a
+   comparacao acusa -- sem isso, a unica cobertura do link seriam as nove cobrancas abaixo,
+   todas com os textos de fabrica. */
+const SAIDAS = ['s-out','l-out','t-out1','t-out2','t-out3','t-out4','t-out5','u-out','b-out1','b-out2','b-out3','b-out4','b-out5','b-out6','b-out7','c-out1','p-out1','p-out2','m-out','e-out1','e-out2','a-out1','a-out2','a-out3'];
 
-/* Identidade de teste. NAO sao dados reais: a chave e um e-mail de exemplo e o Client ID
-   e inventado -- este arquivo e versionado num repositorio publico. */
-const IDENT = {chave:'ensaio@fotocerta.com.br', nomer:'Foto Certa', cidade:'Vitoria',
-  client:'AbCdEf123456789ClientIdDeTeste', zapnum:'5527999998888'};
-const BLOCO_FIXO = {
-  'p-larg':'420','p-qr':'180','p-c1':'#075E54','p-c2':'#ffffff','p-c3':'#333333',
-  'p-corujaalt':'30','p-corujacorpo':'#ffffff','p-corujadet':'#075E54',
-  't1':'Pagamento — Foto Certa','t2':'Valor a pagar','t3':'Copiar código Pix',
-  't4':'Já paguei','t5':'Não há cobrança aberta neste endereço. Fale com a gente.',
-  't6':'Este link de cobrança não é válido. Peça um novo.',
-  't7':'Abra o aplicativo do seu banco, escolha Pix › Pagar › Copia e Cola e cole o código.',
-  't8':'Válido até {data}.','t9':'Esta cobrança venceu em {data}. Fale com a gente para receber um link novo.'
-};
-async function preparar(pg){
-  for(const [k,v] of Object.entries(IDENT)) await set(pg,'fci-'+k,v);
-  for(const [k,v] of Object.entries(BLOCO_FIXO)) await set(pg, k.startsWith('p-')?k:('p-'+k), v);
-  await radio(pg,'p-coruja','esq'); await radio(pg,'p-usapp','sim');
-  await radio(pg,'p-ppcor','gold'); await radio(pg,'p-zap','sim');
-}
-async function conteudo(pg){
-  await clicar(pg,'aba-slide');
-  for(const [u,l] of [['https://storage.alboom.ninja/exemplo-1.jpg','Ensaio de Natal — familia Silva'],
-                      ['https://storage.alboom.ninja/exemplo-2.jpg','Estudio tematico'],
-                      ['https://storage.alboom.ninja/exemplo-3.jpg','']]){
-    await set(pg,'s-url',u); await set(pg,'s-leg',l); await clicar(pg,'s-add');
-  }
-  await clicar(pg,'aba-leads'); await set(pg,'l-cod','NATAL26');
-  await clicar(pg,'aba-tidy');  await set(pg,'t-path','fotocerta/natal-2026');
-  /* A PAGINA DE OBRIGADO ENTRA NO CENARIO, e nao so na lista de saidas. As saidas 4 e 5
-     existiam desde 23/08/2026 e nunca foram fotografadas; acrescenta-las sem LIGAR o recurso
-     deixaria as duas vazias nas duas arvores, e a comparacao passaria com folga sobre nada --
-     a mesma armadilha que o cabecalho deste arquivo ja registra para as outras saidas. */
-  await radio(pg,'t-ob-usar','sim');
-  await set(pg,'t-ob-url','https://www.fotocerta.com.br/obrigado');
-  for(const v of ['nome','tipo','data','hora','quando']){
-    await pg.evaluate(v=>{const e=document.getElementById('t-ob-'+v);
-      if(e){e.checked=true;e.dispatchEvent(new Event('change',{bubbles:true}));}},v);
-  }
-  /* O FORMATO fica no padrao ('como o TidyCal mandar'), de proposito: os valores novos nao
-     existem na arvore de referencia, e pedi-los aqui derrubaria a captura inteira. Os quatro
-     formatos sao cobertos pelo roteiro proprio da rodada, nao pela fotografia. */
-  await clicar(pg,'aba-uni');
-  await set(pg,'u-pnome','Ensaio de Natal'); await set(pg,'u-pdesc','30 minutos, 10 fotos tratadas');
-  await set(pg,'u-ppreco','420'); await clicar(pg,'u-prod-salvar');
-  await set(pg,'u-pnome','Foto extra'); await set(pg,'u-ppreco','35'); await clicar(pg,'u-prod-salvar');
-  await cupons(pg,'u');
-  await clicar(pg,'aba-cnt'); await set(pg,'c-cod','NATAL26');
-  await clicar(pg,'aba-loja');
-  await set(pg,'m-pnome','Album 30x30'); await set(pg,'m-pdesc','Capa dura, 20 paginas');
-  await set(pg,'m-ppreco','890'); await set(pg,'m-pcat','Albuns');
-  await set(pg,'m-pimg','https://storage.alboom.ninja/album-30x30.jpg'); await clicar(pg,'m-prod-salvar');
-  await set(pg,'m-pnome','Moldura'); await set(pg,'m-ppreco','120'); await set(pg,'m-pcat','Molduras');
-  await set(pg,'m-pimg','https://storage.alboom.ninja/moldura.jpg'); await clicar(pg,'m-prod-salvar');
-  await cupons(pg,'m');
-  /* AGENDAMENTO POR PACOTE. Dois pacotes de proposito, e os precos nao sao aleatorios: 420 com
-     6 parcelas divide exato (70,00), 700 com 6 parcelas NAO divide (116,6667) -- e a parcela
-     tem de arredondar para CIMA (116,67), nunca para baixo, senao a soma das seis fica menor
-     que o preco escrito na tela (mesma licao do centavo do Pix, ago/2026). Sem os dois casos a
-     fotografia nao exercitaria a direcao do arredondamento, so o caminho feliz.
-     A ABA E NOVA e nao existe na referencia (main) enquanto a rodada nao mescla -- guardado
-     com a MESMA checagem que o loop de ABAS ja usa mais abaixo, para a captura da referencia
-     nao lancar tentando clicar num botao que ainda nao existe la.
-     A COLUNA p[5] E A URL INTEIRA de proposito (Task 4 do plano v2, 03/09/2026): o campo
-     'a-plink' virou 'a-ppath' e passou a pedir so o caminho, mas aPacSalvar aceita colar a URL
-     inteira tambem -- o prefixo 'https://tidycal.com/' e removido sozinho (fcTidyPathNorm).
-     Manter a URL aqui, sem editar o valor, exercita esse caminho tolerante.
-     O CAMPO E ACHADO EM TEMPO DE EXECUCAO (a-ppath ou, na REFERENCIA anterior a Task 4,
-     a-plink): a mesma checagem de '#aba-pac' logo abaixo, so que por campo -- sem ela este
-     script quebra ao rodar contra uma arvore de referencia anterior a esta rodada.
-     O OPCIONAL COM QUANTIDADE (Task 5c) e O CUPOM (Task 4) entram aqui de proposito, e nao
-     por completude: sem eles os dois caminhos que a v2 criou -- a multiplicacao de
-     QUANTIDADE_MAXIMA no pagamento e a linha de desconto/validade na pagina de obrigado --
-     ficam FORA da fotografia byte a byte, a mesma armadilha que ja pegou o cupom da Mini loja
-     em 01/09 e a propria aba pac na v1. O opcional entra so no COMPLETO (o MINI fica sem
-     opcional nenhum, de proposito: exercita os dois caminhos -- pacote com e sem catalogo de
-     opcionais -- na mesma fotografia). */
-  if(await pg.$('#aba-pac')){
-    await clicar(pg,'aba-pac');
-    await set(pg,'a-urlobrigado','https://www.fotocerta.com.br/obrigado');
-    await set(pg,'a-prefixo','FC');
-    await set(pg,'a-parcelas','6');
-    const campoLink = await pg.$('#a-ppath') ? 'a-ppath' : 'a-plink';
-    for(const p of [
-      ['MINI','Mini ensaio','1 hora','420','10 fotos tratadas','https://tidycal.com/fotocerta/mini'],
-      ['COMPLETO','Ensaio completo','2 horas','700','30 fotos tratadas','https://tidycal.com/fotocerta/completo']
-    ]){
-      await set(pg,'a-pcod',p[0]); await set(pg,'a-pnome',p[1]); await set(pg,'a-pdur',p[2]);
-      await set(pg,'a-ppreco',p[3]); await set(pg,'a-pinclui',p[4]); await set(pg,campoLink,p[5]);
-      if(p[0]==='COMPLETO' && await pg.$('#a-op-nome')){
-        await set(pg,'a-op-nome','Álbum extra');
-        await set(pg,'a-op-preco','80');
-        await set(pg,'a-op-qtd',true);
-        await clicar(pg,'a-op-add');
-      }
-      await clicar(pg,'a-pac-salvar');
-    }
-    if(await pg.$('#a-cp-cod')) await cupons(pg,'a');
-  }
-}
+/* O CENARIO -- o que se preenche na ferramenta antes de gerar -- mora em cenario.mjs desde
+   03/09/2026, porque o teste que EXECUTA os blocos com os textos de escape
+   (textos-escape.mjs) precisa exatamente do mesmo. Cenario escrito duas vezes e a mesma
+   armadilha do codigo escrito duas vezes: as copias concordam hoje e divergem amanha. */
+import { TEXTOS, preparar, conteudo, configurarTextos, cobranca, gerarTodas } from './cenario.mjs';
 
-/* OS CUPONS ENTRAM NO CENARIO, e nao por capricho. Na Mini loja o campo de cupom so existe
-   quando ha cupom cadastrado (usaCupom = cfg.cps.length > 0); sem esta chamada, TODO o
-   caminho do cupom da loja ficava fora da fotografia -- e ficou, ate 01/09/2026, quando uma
-   mudanca na linha do desconto passou pela regressao sem a loja ser exercitada. E a mesma
-   armadilha ja registrada aqui para t-out4/t-out5: saida que so aparece as vezes e onde o
-   defeito se esconde. Dois cupons de proposito: um COM prazo e um SEM, porque a linha do
-   desconto se comporta diferente nos dois casos. */
-async function cupons(pg, pref){
-  for(const [cod, valor, val] of [['NATAL10','10','2027-12-25'],['SEMPRE','5','']]){
-    await set(pg, pref+'-cp-cod', cod);
-    await radio(pg, pref+'-cp-tipo', 'pct_total');
-    await set(pg, pref+'-cp-valor', valor);
-    await set(pg, pref+'-cp-val', val);
-    await clicar(pg, pref+'-cp-add');
-  }
-}
-async function cobranca(pg,c){
-  await set(pg,'p-url', c.url ?? 'https://fotocerta.com.br/pagar');
-  await set(pg,'p-desc', c.desc ?? 'Ensaio de familia — pacote completo');
-  await set(pg,'p-valor', c.valor ?? '1200,50');
-  await set(pg,'p-txid', c.txid ?? ''); await set(pg,'p-validade', c.validade ?? '');
-  await set(pg,'p-descpix', c.descpix ?? '0');
-  await radio(pg,'p-ppmodo', c.ppmodo ?? 'sdk'); await set(pg,'p-pplink', c.pplink ?? '');
-}
 /* As cobrancas cobrem o que muda o LINK: com e sem desconto, com e sem prazo, os tres
    modos de PayPal, acentos e simbolos, e os extremos do valor. */
 const COBRANCAS = [
@@ -171,40 +95,73 @@ const COBRANCAS = [
 const srv = await servir(ARV, PORTA);
 const br = await navegador();
 const base = 'http://127.0.0.1:'+PORTA;
-const r = {arvore:ARV, geradores:{}, cobrancas:{}, erros:[]};
-{
+const r = {arvore:ARV, geradores:{}, configurado:{}, cobrancas:{}, erros:[]};
+
+/* UMA PASSAGEM: o cenario inteiro numa aba do navegador com armazenamento limpo, terminando
+   com o texto de cada saida. 'comTextos' liga a segunda passagem (ver o cabecalho). O corpo
+   e o MESMO nas duas de proposito: se a passagem configurada seguisse outro roteiro, a
+   diferenca entre as duas fotografias deixaria de ser "o texto do dono" e passaria a ser
+   "o texto do dono mais tudo que os dois roteiros nao tem em comum". */
+async function passagem(comTextos, pasta){
   const pg = await abrir(br, base);
   await preparar(pg); await conteudo(pg); await cobranca(pg,{});
-  /* ABA QUE NAO EXISTE NA ARVORE E PULADA, e nao derruba a captura. Sem isto, acrescentar
-     uma aba nova quebrava a regressao INTEIRA -- a referencia (main) nao tem o botao, o
-     clique lanca, e nenhuma das outras onze saidas chegava a ser comparada. A saida da aba
-     ausente fica vazia daquele lado, que e exatamente o que ela e. */
-  for(const [aba,bt] of ABAS){
-    if(!(await pg.$('#'+aba))){ r.pulou = (r.pulou||[]).concat(aba); continue; }
-    await clicar(pg,aba); await pg.waitForTimeout(60); await clicar(pg,bt);
-  }
-  await clicar(pg,'p-gerarlink'); await pg.waitForTimeout(200);
+  const ausentes = comTextos ? await configurarTextos(pg) : [];
+  const pulou = await gerarTodas(pg);
   /* t-out2 e t-out3 so existem no modo "pagina intermediaria embutida": sem esta segunda
      passagem, duas das doze saidas ficariam vazias e a regressao nao as cobriria. */
   const tDireta = await ler(pg,'t-out1');
   await clicar(pg,'aba-tidy'); await radio(pg,'t-arq','embutida'); await clicar(pg,'t-gerar');
   await pg.waitForTimeout(60);
-  const textos = {};
-  for(const id of SAIDAS) textos[id] = (await ler(pg,id)) ?? '';
-  textos['t-out1-direta'] = tDireta ?? '';
-  for(const [id,t] of Object.entries(textos)) r.geradores[id] = sha(t);
+  const saidas = {};
+  for(const id of SAIDAS) saidas[id] = (await ler(pg,id)) ?? '';
+  saidas['t-out1-direta'] = tDireta ?? '';
   /* FC_DUMP=<pasta> grava o TEXTO de cada saida, e nao so o hash. O hash responde "mudou?";
      o texto responde "mudou o que?", que e a pergunta que toda rodada com divergencia
      intencional precisa responder na spec. Sem isto, enumerar o diff exigia reconstruir a
-     captura a mao dos dois lados -- foi assim ate 01/09/2026. */
+     captura a mao dos dois lados -- foi assim ate 01/09/2026. A passagem configurada grava
+     na subpasta 'config/', para as duas poderem ser lidas lado a lado. */
   if(process.env.FC_DUMP){
-    fs.mkdirSync(process.env.FC_DUMP,{recursive:true});
-    for(const [id,t] of Object.entries(textos)) fs.writeFileSync(process.env.FC_DUMP+'/'+id+'.txt', t);
+    const dir = process.env.FC_DUMP + (pasta ? '/'+pasta : '');
+    fs.mkdirSync(dir,{recursive:true});
+    for(const [id,t] of Object.entries(saidas)) fs.writeFileSync(dir+'/'+id+'.txt', t);
   }
-  r.bytes = Object.entries(textos).map(([id,t])=>id+':'+t.length).join(' ');
-  r.alertas = await alertas(pg);
-  r.erros.push(...pg.erros);
+  const res = {saidas, pulou, ausentes,
+    bytes: Object.entries(saidas).map(([id,t])=>id+':'+t.length).join(' '),
+    alertas: await alertas(pg), erros: pg.erros.slice()};
   await pg.close();
+  return res;
+}
+
+const fab = await passagem(false, '');
+for(const [id,t] of Object.entries(fab.saidas)) r.geradores[id] = sha(t);
+r.bytes = fab.bytes; r.alertas = fab.alertas; r.erros.push(...fab.erros);
+if(fab.pulou.length) r.pulou = fab.pulou;
+
+const cfg = await passagem(true, 'config');
+for(const [id,t] of Object.entries(cfg.saidas)) r.configurado[id] = sha(t);
+r.bytesConfig = cfg.bytes;
+r.alertasConfig = cfg.alertas;
+r.erros.push(...cfg.erros);
+r.configTextosAusentes = cfg.ausentes;
+/* A PROVA DE QUE A PASSAGEM CONFIGURADA ALCANCA O QUE PROMETE. Cada selo tem de aparecer em
+   pelo menos uma saida. Selo que nao aparece em nenhuma e uma de duas coisas -- campo mal
+   ligado (defeito) ou campo que so age num ramo que este cenario nao exercita (e ai o cenario
+   e que esta incompleto). Nas duas, a passagem seria tao cega quanto a antiga. Guarda-se
+   tambem ONDE cada selo caiu: e o que permite dizer, na spec, que texto chega a que saida. */
+r.configOnde = {}; r.configSemVestigio = []; r.configRamoDeclaradoQueApareceu = [];
+if(!cfg.ausentes.length){
+  for(const [id,valor,,ramo] of TEXTOS){
+    const selo = (valor.match(/Zx\d\d/)||[''])[0];
+    const onde = Object.keys(cfg.saidas).filter(k => cfg.saidas[k].indexOf(selo) >= 0);
+    r.configOnde[id] = onde.join(' ') || (ramo ? '(ramo nao exercitado)' : '');
+    /* Um campo pode estar preso a um ramo que este cenario nao percorre. Isso e legitimo, mas
+       so quando esta DECLARADO na quarta coluna da tabela, com o motivo -- do contrario o
+       silencio volta a ser a resposta padrao, que e o defeito que esta passagem existe para
+       acabar. A checagem vale nos DOIS sentidos: ramo declarado que passa a aparecer significa
+       que a declaracao envelheceu (o cenario cresceu, ou o gerador mudou), e tambem e avisado. */
+    if(!onde.length && !ramo) r.configSemVestigio.push(id+' ('+selo+')');
+    if(onde.length && ramo)   r.configRamoDeclaradoQueApareceu.push(id+' ('+selo+')');
+  }
 }
 for(const cen of COBRANCAS){
   const pg = await abrir(br, base);
@@ -217,7 +174,23 @@ for(const cen of COBRANCAS){
 await br.close(); srv.close();
 fs.writeFileSync(SAIDA, JSON.stringify(r,null,1));
 const vazias = Object.entries(r.geradores).length;
-console.log('fotografia gravada em '+SAIDA+'  ('+vazias+' saidas, '+Object.keys(r.cobrancas).length+' cobrancas)');
-console.log('  bytes: '+r.bytes);
-if(r.alertas.length) console.log('  ATENCAO -- alertas durante a captura: '+JSON.stringify(r.alertas));
-if(r.erros.length)   console.log('  ATENCAO -- erros de console: '+r.erros.slice(0,5).join(' | '));
+console.log('fotografia gravada em '+SAIDA+'  ('+vazias+' saidas x 2 passagens, '+Object.keys(r.cobrancas).length+' cobrancas)');
+console.log('  bytes fabrica:     '+r.bytes);
+console.log('  bytes configurada: '+r.bytesConfig);
+if(r.configTextosAusentes.length){
+  console.log('  passagem configurada NAO comparavel nesta arvore: '+r.configTextosAusentes.length+
+              ' dos '+TEXTOS.length+' campos de texto nao existem aqui (ex.: '+r.configTextosAusentes[0]+')');
+}else{
+  const decl = TEXTOS.filter(t=>t[3]).length;
+  if(r.configSemVestigio.length)
+    console.log('  ATENCAO -- texto configurado que NAO apareceu em saida nenhuma: '+r.configSemVestigio.join(', '));
+  if(r.configRamoDeclaradoQueApareceu.length)
+    console.log('  ATENCAO -- ramo declarado como nao exercitado que APARECEU (declaracao envelheceu): '+
+                r.configRamoDeclaradoQueApareceu.join(', '));
+  if(!r.configSemVestigio.length && !r.configRamoDeclaradoQueApareceu.length)
+    console.log('  os '+(TEXTOS.length-decl)+' textos configurados apareceram nas saidas ('+decl+
+                ' presos a ramo declarado, fora do cenario).');
+}
+if(r.alertas.length)      console.log('  ATENCAO -- alertas na passagem de fabrica: '+JSON.stringify(r.alertas));
+if(r.alertasConfig.length)console.log('  ATENCAO -- alertas na passagem configurada: '+JSON.stringify(r.alertasConfig));
+if(r.erros.length)        console.log('  ATENCAO -- erros de console: '+r.erros.slice(0,5).join(' | '));

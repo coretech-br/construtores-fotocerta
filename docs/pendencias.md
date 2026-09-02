@@ -4,7 +4,7 @@ Atualizado em 03/09/2026. Este arquivo é a lista viva; o histórico do que já 
 
 ---
 
-## Nada em fila para a próxima rodada
+## O que já foi entregue
 
 Entregues em 22/08/2026: os três itens que estavam aqui — o bloco sempre carregar a matemática do desconto, o "Já paguei" no lugar certo e o "OU" entre as duas formas (`docs/specs/2026-08-22-bloco-sempre-com-desconto-design.md`) — e mais a **conferência do formato da chave Pix**, que saiu do primeiro pagamento real (`docs/specs/2026-08-22-formato-da-chave-pix-design.md`).
 
@@ -52,7 +52,20 @@ Entregue em 02–03/09/2026: a **décima aba, Agendamento por pacote** (`docs/sp
 
 Entregue em 03/09/2026: a **v2 da décima aba**, a revisão do dono sobre a v1 já publicada (`docs/specs/2026-09-02-agendamento-por-pacote-design.md` §0, quatro decisões revisadas + duas novas em `docs/decisoes-2026-09-02-agendamento-por-pacote.md`; plano: `docs/superpowers/plans/2026-09-03-agendamento-por-pacote-v2.md`). O bloco de pagamento passou a espelhar o **Checkout** em vez da `/pagar` (com opcionais, quantidade e cupom, e o link do TidyCal virou **caminho**, não URL inteira); duas fontes únicas foram extraídas **antes** da aba nova, para cada uma ser provada isoladamente — o pedido do PayPal (Checkout e Mini loja, `u-out`/`m-out`/`p-out1` byte a byte idênticos antes e depois) e o desenho do QR Code (molde da `/pagar`, consumido por Checkout, Mini loja, `/pagar` e a aba `pac` — **esta muda `u-out`/`m-out` de propósito**, corrigindo dois defeitos reais do Checkout: `new QRCode(...)` sem `try/catch` e a corrida do `qrPronto`). Cupom repetido passou a ser recusado também no Checkout e na Mini loja, e a quantidade dos opcionais passou a funcionar de verdade no pagamento (antes, a marcação existia e não fazia nada). A prévia não precisou de nenhuma linha nova — ela executa `aBlocoObrigado` diretamente, então herdou opcionais/quantidade/cupom no mesmo commit que os criou. Verificação final (Tarefa 7): o cenário da regressão passou a cadastrar um opcional com quantidade e um cupom com validade na aba `pac` — sem isso, os caminhos novos ficavam fora da fotografia byte a byte; `scripts/verificar/regressao.sh` contra a `main` (que já tem a v1): 4 divergências, todas explicadas (`u-out`, `m-out`, `a-out1`, `a-out3`), as outras 20 saídas e as 9 cobranças idênticas. O que ficou de fora está nas duas seções abaixo.
 
-A próxima sai do que o dono encontrar no uso.
+Entregue em 03/09/2026: **todo texto que o cliente final lê virou campo**, nas oito abas que têm texto que o cliente lê — Bordas com efeito e Efeitos de página não têm nenhum (documentação: `docs/documentacao-fotocerta.md` §4, "Todo texto que o cliente lê virou campo"; plano: `docs/superpowers/plans/2026-09-03-rodada-unica-textos-e-familias.md`; as decisões sobre os 17 duvidosos: `docs/decisoes-2026-09-03-textos-configuraveis.md`). São **157 campos** em oito tabelas `*_TXT_DEFS`, uma por aba, cada uma servindo ao mesmo tempo o `cfg()`, a persistência e o padrão de preset antigo; o texto de fábrica das frases repetidas entre abas passou a sair de uma tabela só (`FC_TXT_FABRICA`), com um campo por aba para o dono poder divergir de propósito. Junto vieram `aTplJs`/`escJsD` (que reconstroem em tempo de geração a concatenação que o texto fixo já escrevia, para o bloco entregue não engordar na configuração de fábrica), a seção recolhida por padrão (`.secao dobra`/`fcdLigar`) e `fcTxtFabricaDiverge`, a guarda que acende a barra vermelha quando o `value=` do HTML e a tabela da aba discordam sobre o padrão.
+
+O que cada parte provou: **a regressão byte a byte** (`scripts/verificar/regressao.sh`) foi rodada ao fim de cada etapa contra a referência anterior, e toda divergência está nomeada no commit correspondente, ligada à decisão que a autorizou — D-1 (`{PCT}` → `{pct}`, com a leitura aceitando as duas grafias), D-2 e D-3 (a frase inteira no campo, em vez do sufixo colado por fora), D-5 (`{n}` nos avisos de carrinho), D-11 (`Próxima foto` acentuado), o aviso do Pix novo nas quatro abas, o `c-out1` da correção de D-13 e os dois rótulos de seção da `/pagar`. Fora dessas, as demais saídas e as 9 cobranças saíram **byte a byte idênticas**, que é o invariante que a rodada existia para não quebrar. Na Etapa 1, o mesmo invariante foi conferido também **nos cenários que a fotografia não exercita** (a vitrine no modo "somente PayPal"). A **prévia da vitrine ganhou o alternador computador/celular** (Etapa 6, mesclada de `pac-previa-celular`), com as 24 saídas byte a byte idênticas — mexer na prévia não pode mudar um byte do que a ferramenta gera, e não mudou. E um ponto foi provado **com o bloco rodando de verdade**, porque a regressão não alcançaria: depois da separação entre a identidade da unidade e o sufixo visível (D-12), o marcador do relógio continua se remontando ao cruzar 24h **com os sufixos de fábrica, vazios e repetidos** — se o dono tivesse ficado com a identidade, dois sufixos iguais parariam a remontagem em silêncio.
+
+Entregue em 03/09/2026, fechando a mesma rodada: as **famílias de pacotes na aba `pac`** (documentação: `docs/documentacao-fotocerta.md` §4, "Famílias de pacotes na aba `pac`"; desenho: `docs/superpowers/plans/2026-09-03-rodada-unica-textos-e-familias.md`, item 7 e a revisão do desenho; commits `f393dea` e `540ab53`). A família virou o **passo 1** da vitrine — o caso real é o aluguel do estúdio para fotógrafos parceiros, com pacotes por duração separados entre dias úteis e fins de semana/feriados, estes mais caros. `aFamilias` é lista irmã de `aPacotes`, e cada pacote aponta para a família **pelo `id`**, nunca pelo nome; o `id` é determinístico (`'F'+(maior+1)`).
+
+O que cada parte provou:
+
+- **O colapso para dois passos**, na primeira etapa da regressão: com **uma** família, das 24 saídas e das 9 cobranças **só `a-out1` mudou**, e só nos dois trechos previstos (as regras do formato compacto dentro da `@media` e a classe da caixa de preço). Nenhum `var FAMILIAS=`, nenhum `fam:` dentro de `PACOTES`, nenhum terceiro passo — que era exatamente o que a leitura do diff existia para conferir.
+- **A parametrização de `aPacotesSrc`**, na segunda etapa: o cenário de `scripts/verificar/geradores.mjs` ganhou a segunda família (`F2`, "Fins de semana") e um terceiro pacote nela, porque sem isso todo o caminho novo ficava **fora** da fotografia byte a byte. Depois disso, das 24 saídas só as três da aba `pac` diferem; `a-out2` e `a-out3` diferem **pelo terceiro pacote**, e `a-out3` continua **sem** o campo `fam` — a prova de que a página de obrigado não ganhou o que não pediu. As 9 cobranças, bloco e link, idênticas.
+- **A migração**, pelos três caminhos (estado do navegador, preset antigo, arquivo de "Exportar tudo" antigo): um aviso, uma vez, que **não repete na recarga**, com os pacotes na família "Pacotes" e nada perdido — e **nenhum alerta em estado limpo**, que é obrigatório porque o arnês limpa o `localStorage` antes de cada passagem e coleta os alertas: um aviso ali viraria divergência na fotografia, e o dono veria na tela o aviso de uma migração que não aconteceu.
+- **O conserto do "Exportar tudo"** (abaixo, item 8): o mesmo arquivo v1, a referência descarta **9** itens e a árvore nova descarta **7** — a diferença são os dois `link`, que agora sobrevivem e alimentam a migração.
+
+A próxima rodada sai do que o dono encontrar no uso.
 
 ---
 
@@ -96,6 +109,21 @@ Em 23/08/2026 o dono pediu que **todas** fossem feitas. Ficou uma, e ela é dele
    - `uProdRender` (index.html:10636+) escreve o plural de "opcional" como `nome+'is'`, o que produz **"2 opcionalis"** em vez de "2 opcionais" — achado ao escrever o mesmo resumo para a aba `pac`, que usa a troca de palavra inteira (`'opcional'`/`'opcionais'`), correta.
    - `uProdSalvar` (`alert('Informe o preco do produto.')`) e `uCpPctErro` (index.html:10703, a recusa de cupom acima de 100%) têm mensagens **sem acento**, fora da norma de 01/09/2026 (texto que o cliente lê sai acentuado); a versão da aba `pac` (`aCpPctErro`) já nasceu acentuada e, por sinal, sem citar "PayPal" — a versão do Checkout ainda menciona a marca ("o PayPal recusa a ordem"), o que a v2 também evitaria se o arquivo estivesse no escopo.
 
+### Novas em 03/09/2026, rodada dos textos configuráveis
+
+Três textos que o cliente final lê **continuam cravados**, e as três exclusões são decisão registrada, com a razão — não esquecimento. As duas primeiras estão em `docs/decisoes-2026-09-03-textos-configuraveis.md` (D-6 e D-14).
+
+4. **A descrição do pedido que chega ao PayPal** não virou campo. O critério de 03/09 pega (o cliente lê essa descrição no PayPal e no recibo), mas ali não é tela do bloco e sim **payload de pagamento**: edição errada só aparece numa cobrança de verdade, com dinheiro no meio, e a rodada já era grande. **Dívida consciente.**
+5. **Os nomes de mês e de dia da semana** (três tabelas, doze e sete itens) não viraram campo porque são **tradução, não customização** — ninguém troca "janeiro" por flexibilidade. Se um dia o site for para outra língua, é aqui que se mexe, e aí a rodada é essa, com as três tabelas juntas.
+6. **Os dois `aria-label` do seletor de quantidade** — `Diminuir a quantidade` e `Aumentar a quantidade` — moram na fonte única `fcFazQtdSrc`, que serve **três** abas ao mesmo tempo (Checkout, Mini loja e Agendamento por pacote). Torná-los configuráveis por aba exigiria parametrizar a fonte e mexer nos três geradores; um campo só para as três seria a fábrica única sem a liberdade por aba, que é justamente o oposto da regra desta rodada. Fica como está, declarado.
+7. **O cenário da regressão não preenche nenhum campo de texto.** Medido na árvore em 03/09/2026: `scripts/verificar/geradores.mjs` não escreve em nenhum `*-txt-*`, então a fotografia byte a byte prova **o caminho de fábrica** e nada diz sobre o caminho configurado — um texto que o gerador deixasse de emitir, ou emitisse escapado errado, passaria pela regressão sem acusar. É a mesma armadilha já registrada três vezes neste arquivo (o cupom da Mini loja em 01/09, `t-out4`/`t-out5`, a própria aba `pac` na v1): **cenário que não exercita um caminho não prova nada sobre ele.** O conserto é barato — configurar um punhado de textos com marcador no cenário, o suficiente para exercitar `aTplJs` nas duas pontas (com e sem marcador) — e cabe na próxima rodada que tocar o arnês.
+
+### Novas em 03/09/2026, rodada das famílias
+
+8. **Os campos numéricos da aba `pac` são gravados como TEXTO, e a conferência da importação recusa por tipo — achado ao medir o conserto do `link`, e NÃO consertado.** `aColeta()` lê cada numérico por `aElVal(id, padrão)`, que devolve `el.value` — sempre uma **string**, mesmo o `<input type="number">`. São `prazoh`, `descpix`, `parcelas`, `altdesk`, `altmob`, `largmob` e `qtdmax`: **sete** antes desta rodada, **oito** com o `largcards` que ela acrescentou. Como o molde da conferência é uma fotografia do próprio `aColeta()` (`fcxMolde` chama `fcPresetCapturar`), o molde diz "string" para os oito; e `fcxConformar` compara `typeof` e recusa quando não bate (`index.html`, `if(typeof v!==t)return {ok:false}` dentro do ramo `string|number|boolean`). Consequência: um arquivo de "Exportar tudo" **gerado por outra ferramenta, ou editado à mão** com os números crus (`"prazoh": 24` em vez de `"prazoh": "24"`) perde os oito campos **em silêncio** — eles somem do fragmento, a aba volta aos padrões, e a única pista é o contador dizendo *"N item(ns) do arquivo NÃO foram reconhecidos e ficam de fora"*, **sem dizer quais**. O número foi medido nas duas árvores ao escrever o teste da migração: sete descartes que nada têm a ver com famílias.
+
+   **Existe igual antes desta rodada** — é a forma como `aColeta` sempre gravou, e o mesmo padrão vale para os numéricos das outras abas —, e por isso não foi consertado aqui: a rodada era das famílias, e mexer no tipo do que `aColeta` grava muda o **formato do arquivo de backup** de todas as abas de uma vez, com a compatibilidade dos backups já existentes junto. Os dois consertos possíveis, para quando houver rodada: converter no `aColeta` (`parseFloat`), que muda o formato gravado, ou fazer `fcxConformar` aceitar a string que representa o número do molde, que não muda. O terceiro conserto, independente dos dois e mais barato, é a mensagem **dizer quais** chaves ficaram de fora, em vez de só contá-las — o contador existe para o operador confiar no número, e um número sem nome não dá o que conferir.
+
 ### Fechadas em 23/08/2026
 
 Spec: `docs/specs/2026-08-23-dividas-pequenas-design.md`.
@@ -106,3 +134,28 @@ Spec: `docs/specs/2026-08-23-dividas-pequenas-design.md`.
 - **O arnês que executa os blocos entregues virou molde versionado** (`scripts/verificar/pagina.mjs`), com as duas armadilhas que custaram caro registradas dentro dele.
 
 Junto delas, uma correção que não era dívida e sim **texto falso**: a ferramenta afirmava em onze lugares que existe um cabeçalho global do site, e um deles dava um caminho de menu inexistente. O Prosite só tem Tag Head e Tag Body **por página**.
+
+---
+
+## Combinado em 03/09/2026 — os três itens, todos entregues
+
+Os três itens combinados em 03/09/2026 saíram na mesma rodada e estão descritos acima, na lista de entregues:
+
+- **O aviso de que o Pix não confirma sozinho, nas quatro abas de pagamento** (item 1) — configurável, dentro da área do Pix e logo acima do "Já paguei", com o texto próprio da aba `pac` (aquela página não tem esse botão) e sem emissão nenhuma onde o botão do WhatsApp está desligado.
+- **As famílias de pacotes na aba `pac`** (item 2) — opção A dos mockups: a família é o passo 1, e quem tiver uma família só continua vendo dois passos, sem passo vazio. Mockups apresentados em 03/09/2026 (quatro opções, celular, com a troca de pacote em foco): https://claude.ai/code/artifact/a83e1f73-53d9-4868-a8c6-243cf591963b
+- **O subtítulo opcional da vitrine, com `{pct}`** (item 3) — vazio, que é o padrão, não emite regra de CSS, `div` nem variável: a vitrine de fábrica sai byte a byte como antes.
+
+---
+
+## A lição de método desta rodada
+
+**Quando um campo "não faz nada" na configuração padrão, a resposta costuma ser explicar onde ele age — não fundi-lo com outro.**
+
+A decisão D-13 foi minha e estava errada. Ela mandou o formato **compacto** do relógio da Contagem regressiva ler os mesmos quatro campos de rótulo que o formato "blocos" usa, porque do jeito que estava aqueles quatro campos não apareciam em lugar nenhum da tela na configuração de fábrica. O que ela não notou é que os padrões daqueles campos são **por extenso** (`dias`, `horas`, `min`, `seg`), justamente porque é assim que o formato "blocos" os mostra — e o compacto é o formato **padrão** da aba. Resultado: o relógio de fábrica passou de `02d:14h:33m:12s` para `02dias:14horas:33min:12seg`. A rodada mudou a aparência de um bloco já em uso, que era exatamente o que ela existia para não fazer.
+
+A correção certa (commit `455c938`) foi dar ao formato compacto os **seus próprios quatro campos** e pôr, ao lado de cada grupo, uma linha de ajuda dizendo a qual formato ele serve. Custou desfazer trabalho já feito e reescrever os textos de interface que D-13 tinha ajustado no caminho errado (o rótulo do rádio de formato e a ajuda da seção de textos voltaram a descrever o que a barra faz).
+
+Duas coisas ficam para as próximas rodadas:
+
+1. **Campo que parece inútil é sintoma de explicação faltando, não de campo sobrando.** A queixa original ("estes quatro campos não fazem nada no formato padrão") era legítima; a resposta é dizer onde eles agem, e não estender o alcance deles até que façam algo.
+2. **Toda decisão de "unificar dois campos" tem de ser conferida contra o padrão de fábrica dos dois**, não só contra o que eles significam. Aqui os dois significavam "o rótulo da unidade" e mesmo assim os padrões eram incompatíveis — a incompatibilidade estava no valor, não no conceito, e só apareceu quando o relógio foi lido na tela.
