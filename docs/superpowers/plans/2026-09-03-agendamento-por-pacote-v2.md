@@ -147,6 +147,18 @@ for f in /tmp/pp-antes/*.txt; do cmp "$f" "/tmp/pp-depois/$(basename $f)" || ech
 
 ---
 
+### Task 5b: Cupom repetido passa a ser recusado no Checkout e na Mini loja
+
+**Decisão do dono, 03/09** — ver a decisão 13 do diário. Medido: a recusa não existe nas duas abas, e o efeito é silencioso — o segundo cupom de código repetido **nunca é encontrado**, e o operador não descobre.
+
+- [ ] **Passo 1:** a mesma recusa que a aba `pac` ganhou na Task 4, com a mesma mensagem, no Checkout (`uRecusa`) e na Mini loja (`mRecusa`). Comparação **sem diferenciar maiúsculas e sem espaços das pontas**, como o resto do projeto faz.
+- [ ] **Passo 2:** a recusa também no **cadastro**, não só na geração — o operador tem de saber na hora de adicionar, não só ao gerar. Veja como a aba `pac` faz.
+- [ ] **Passo 3: invariante B — `u-out` e `m-out` mudam de propósito**, e o diff é enumerado. Nesta tarefa a mudança é de **recusa**, não de saída: com configuração válida, as duas saídas têm de sair **byte a byte idênticas**. Se mudarem, você mexeu em algo que não devia.
+- [ ] **Passo 4: provar as duas recusas** como operador, nas duas abas, e provar que um preset com código repetido é recusado ao gerar, com a mensagem nomeando o código.
+- [ ] **Passo 5:** regressão + commit.
+
+---
+
 ### Task 6: A prévia acompanha
 
 - [ ] **Passo 1:** a prévia da página de obrigado passa a mostrar opcionais e cupom, executando o gerador. O seletor "prever como" continua com os pacotes mais "sem pacote (recusa)".
