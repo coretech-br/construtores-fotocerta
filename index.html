@@ -2373,6 +2373,12 @@
       <label><input type="radio" name="p-ppcor" value="black"><span>Preto</span></label>
       </div>
       <p class="ajuda alerta"><b>O botão do PayPal no site é adulterável de um jeito que o Pix não é.</b> No Pix, o valor que a tela mostra é lido de dentro do mesmo código que o aplicativo do banco vai ler: os dois não têm como discordar. No botão do PayPal o valor é calculado no navegador do cliente e a tela pode dizer uma coisa enquanto a ordem leva outra. No botão do PayPal o valor é calculado no navegador do cliente: quem souber mexer paga o que quiser. Para valor alto, use o segundo modo — <b>colar um link de cobrança criado no próprio PayPal</b>, na seção 3: ali o valor fica guardado no PayPal e o cliente não alcança. A escolha é por cobrança.</p>
+      <label for="p-txt-ou">Separador entre Pix e PayPal</label>
+      <input type="text" id="p-txt-ou" value="OU">
+      <label for="p-txt-paypalfora">Quando o PayPal não carrega</label>
+      <input type="text" id="p-txt-paypalfora" value="Não foi possível carregar o PayPal agora. Use o Pix acima, ou fale com a gente para receber outro link.">
+      <label for="p-txt-sucesso">Pagamento aprovado pelo PayPal</label>
+      <input type="text" id="p-txt-sucesso" value="Pagamento aprovado. Obrigado!">
       </div>
       </fieldset>
       <fieldset>
@@ -2384,6 +2390,9 @@
       </div>
       <p class="ajuda"><b>O número de destino saiu desta aba</b> — é o WhatsApp do painel <b>Identidade</b>, no topo da página. <span class="acoes"><button type="button" class="botao mini claro fci-ir">Abrir Identidade</button></span></p>
       <p class="ajuda">O botão abre o WhatsApp com a descrição, o valor e o identificador da cobrança já escritos na mensagem — assim você sabe de qual cobrança o cliente está falando. O Pix estático não avisa ninguém quando cai: <b>confira o extrato</b> antes de entregar o trabalho.</p>
+      <label for="p-txt-zapmsg">Mensagem enviada pelo botão</label>
+      <input type="text" id="p-txt-zapmsg" value="Olá! Acabei de pagar: {desc} -- {valor}">
+      <p class="ajuda">Onde você escrever <code>{desc}</code> entra a descrição da cobrança, e <code>{valor}</code> o valor pago. A mensagem ainda soma, se houver, o desconto do Pix e o identificador da cobrança — essas duas partes não são editáveis aqui.</p>
       </fieldset>
     </div>
   </div>
@@ -2411,9 +2420,19 @@
       <input type="text" id="p-t4" value="Já paguei">
       <label for="p-t7">Instrução do Pix</label>
       <input type="text" id="p-t7" value="Abra o aplicativo do seu banco, escolha Pix e use o Copia e Cola ou o QR Code.">
+      <label for="p-txt-nota">Aviso para conferir o recebedor</label>
+      <input type="text" id="p-txt-nota" value="Confira o nome do recebedor antes de confirmar o pagamento">
       <label for="p-t8">Aviso do prazo <small>(só aparece quando a cobrança tem “Válido até”)</small></label>
       <input type="text" id="p-t8" value="Este link de pagamento vale até {data}.">
       <p class="ajuda">Onde você escrever <code>{data}</code>, entra a data do prazo (dia/mês/ano) — em <b>todas</b> as vezes que ela aparecer na frase. Sem <code>{data}</code>, a data não aparece.</p>
+      <label for="p-txt-ref">Rótulo do identificador da cobrança</label>
+      <input type="text" id="p-txt-ref" value="Identificador da cobrança: ">
+      <label for="p-txt-pixrotulo">Rótulo "pagando via Pix" <small>(com desconto no Pix)</small></label>
+      <input type="text" id="p-txt-pixrotulo" value="Pagando via Pix">
+      <label for="p-txt-copiado">Código Pix copiado com sucesso</label>
+      <input type="text" id="p-txt-copiado" value="Código copiado! Cole no aplicativo do seu banco.">
+      <label for="p-txt-naocopiou">Não foi possível copiar o código Pix</label>
+      <input type="text" id="p-txt-naocopiou" value="Não consegui copiar. Selecione o código acima e copie na mão.">
       </fieldset>
     </div>
     <div>
@@ -3237,6 +3256,17 @@
         <label for="a-t5">Título da página de obrigado</label>
         <input type="text" id="a-t5" value="Tudo certo!">
       </fieldset>
+      <fieldset>
+        <legend>Vitrine — preço do pacote</legend>
+        <p class="ajuda">O mesmo texto aparece nos cartões da vitrine e no carrinho da página de obrigado — é um campo só para os dois lugares.</p>
+        <label for="a-txt-selopix">Selo do desconto no Pix</label>
+        <input type="text" id="a-txt-selopix" value="-{pct}% no Pix">
+        <label for="a-txt-cartaolinha">Linha do preço no cartão</label>
+        <input type="text" id="a-txt-cartaolinha" value="ou {valor} no cartão">
+        <label for="a-txt-parcela">Trecho do parcelamento <small>(só aparece com mais de uma parcela)</small></label>
+        <input type="text" id="a-txt-parcela" value=", em até {n}x de {valor}">
+        <p class="ajuda">Onde você escrever <code>{pct}</code> entra o percentual de desconto, <code>{n}</code> o número de parcelas, e <code>{valor}</code> o preço já formatado — no mesmo padrão <code>{data}</code> que a aba Link de cobrança usa para o prazo.</p>
+      </fieldset>
     </div>
     <div>
       <fieldset>
@@ -3261,10 +3291,95 @@
     </div>
   </div>
 
-  <div class="secao"><span class="secao-n">5</span> Biblioteca de presets</div>
+  <div class="secao"><span class="secao-n">5</span> Textos da página de obrigado</div>
+  <div class="grade">
+    <div>
+      <fieldset>
+        <legend>Quando o agendamento não é encontrado</legend>
+        <p class="ajuda">Aparece se alguém abrir a página de obrigado sem <code>?pac=</code> reconhecido — link copiado errado, por exemplo.</p>
+        <label for="a-txt-recusa">Recado na página</label>
+        <input type="text" id="a-txt-recusa" value="Não encontramos seu agendamento nesta página. Se você acabou de agendar, use o link que aparece no e-mail de confirmação — ou fale com a gente que resolvemos na hora.">
+      </fieldset>
+      <fieldset>
+        <legend>Itens opcionais e cupom de desconto</legend>
+        <label for="a-txt-opcionais">Rótulo dos itens opcionais</label>
+        <input type="text" id="a-txt-opcionais" value="Itens opcionais">
+        <label for="a-txt-totalzero">Quando o cupom zera o pedido</label>
+        <input type="text" id="a-txt-totalzero" value="O cupom aplicado zera o valor deste pedido.">
+        <label for="a-txt-cupom-rotulo">Rótulo do campo de cupom</label>
+        <input type="text" id="a-txt-cupom-rotulo" value="Cupom de desconto">
+        <label for="a-txt-cupom-botao">Botão de aplicar o cupom</label>
+        <input type="text" id="a-txt-cupom-botao" value="Aplicar">
+        <label for="a-txt-cupom-ok">Cupom aceito</label>
+        <input type="text" id="a-txt-cupom-ok" value="Cupom aplicado!">
+        <label for="a-txt-cupom-invalido">Cupom inválido</label>
+        <input type="text" id="a-txt-cupom-invalido" value="Cupom inválido.">
+        <label for="a-txt-cupom-expirado">Cupom expirado</label>
+        <input type="text" id="a-txt-cupom-expirado" value="Cupom expirado.">
+        <label for="a-txt-desconto">Rótulo da linha de desconto</label>
+        <input type="text" id="a-txt-desconto" value="Desconto">
+        <label for="a-txt-cupom-validade">Validade do cupom, na linha de desconto</label>
+        <input type="text" id="a-txt-cupom-validade" value="Válido até:">
+      </fieldset>
+      <fieldset>
+        <legend>Prazo da reserva</legend>
+        <p class="ajuda"><b>Estas três frases explicam que a liberação do horário é feita à mão, por você.</b> Se reescrevê-las, mantenha isso claro — prometer confirmação automática é prometer o que o sistema não faz.</p>
+        <label for="a-txt-prazo-barra">Barra do prazo</label>
+        <input type="text" id="a-txt-prazo-barra" value="Reserva garantida até {data}.">
+        <label for="a-txt-prazo-ajuda">Explicação abaixo da barra</label>
+        <input type="text" id="a-txt-prazo-ajuda" value="O relógio é um recado, não uma tranca: quem libera o horário depois do prazo é a gente, à mão, ao conferir o pagamento.">
+        <label for="a-txt-prazo-vencido">Recado quando o prazo já passou</label>
+        <input type="text" id="a-txt-prazo-vencido" value="O prazo para pagar esta reserva já passou. Fale com a gente para confirmar se o horário ainda está disponível.">
+        <p class="ajuda">Onde você escrever <code>{data}</code> na barra do prazo, entra o dia e a hora em que a reserva vence.</p>
+      </fieldset>
+    </div>
+    <div>
+      <fieldset>
+        <legend>Quando o pagamento pelo cartão é aprovado ou falha</legend>
+        <label for="a-txt-sucesso">Pagamento aprovado</label>
+        <input type="text" id="a-txt-sucesso" value="Pagamento aprovado. Obrigado!">
+        <label for="a-txt-erro-compix">Erro no cartão, com Pix disponível na página</label>
+        <input type="text" id="a-txt-erro-compix" value="Não foi possível carregar o pagamento por cartão agora. Use o Pix acima, ou fale com a gente para receber outra forma de pagar.">
+        <label for="a-txt-erro-sempix">Erro no cartão, sem Pix na página <small>("somente cartão")</small></label>
+        <input type="text" id="a-txt-erro-sempix" value="Não foi possível carregar o pagamento por cartão agora. Fale com a gente para receber outra forma de pagar.">
+      </fieldset>
+      <fieldset>
+        <legend>Seção de pagamento — Pix e cartão</legend>
+        <label for="a-txt-pix-rotulo">Rótulo da seção Pix</label>
+        <input type="text" id="a-txt-pix-rotulo" value="Pix">
+        <label for="a-txt-pix-gerar">Botão de gerar o Pix</label>
+        <input type="text" id="a-txt-pix-gerar" value="Gerar Pix">
+        <label for="a-txt-pix-copiar">Botão de copiar o código Pix</label>
+        <input type="text" id="a-txt-pix-copiar" value="Copiar código Pix">
+        <label for="a-txt-pix-instrucao">Instrução de pagamento pelo Pix</label>
+        <input type="text" id="a-txt-pix-instrucao" value="Abra o app do seu banco e pague pelo QR Code ou Pix Copia e Cola">
+        <label for="a-txt-nota">Aviso para conferir o recebedor</label>
+        <input type="text" id="a-txt-nota" value="Confira o nome do recebedor antes de confirmar o pagamento">
+        <label for="a-txt-pix-copiado">Código copiado com sucesso</label>
+        <input type="text" id="a-txt-pix-copiado" value="Código copiado! Cole no aplicativo do seu banco.">
+        <label for="a-txt-pix-naocopiou">Não foi possível copiar</label>
+        <input type="text" id="a-txt-pix-naocopiou" value="Não consegui copiar. Selecione o código acima e copie na mão.">
+        <label for="a-txt-ou">Separador entre Pix e cartão</label>
+        <input type="text" id="a-txt-ou" value="OU">
+        <label for="a-txt-cartao-rotulo">Rótulo da seção do cartão</label>
+        <input type="text" id="a-txt-cartao-rotulo" value="Cartão de crédito ou débito">
+      </fieldset>
+      <fieldset>
+        <legend>Botão e mensagens do WhatsApp</legend>
+        <label for="a-txt-zap-botao">Texto do botão</label>
+        <input type="text" id="a-txt-zap-botao" value="Falar no WhatsApp">
+        <label for="a-txt-zap-recusa">Mensagem quando o agendamento não é encontrado</label>
+        <input type="text" id="a-txt-zap-recusa" value="Olá! Não encontrei meu agendamento na página de pagamento.">
+        <label for="a-txt-zap-vencido">Mensagem quando o prazo da reserva passou</label>
+        <input type="text" id="a-txt-zap-vencido" value="Olá! Meu prazo para pagar a reserva passou. Ainda está disponível?">
+      </fieldset>
+    </div>
+  </div>
+
+  <div class="secao"><span class="secao-n">6</span> Biblioteca de presets</div>
   <div class="grade" id="fcp-a-box"></div>
 
-  <div class="secao"><span class="secao-n">6</span> Prévia e códigos gerados</div>
+  <div class="secao"><span class="secao-n">7</span> Prévia e códigos gerados</div>
   <div class="acoes" style="margin-bottom:14px">
     <button class="botao" id="a-gerar">Gerar código</button>
     <button class="botao claro" id="a-atualizar">Atualizar prévia</button>
@@ -3509,6 +3624,44 @@ function escAttr(s){return escHtml(s).replace(/"/g,'&quot;');}
              elemento, e a barra some junto com tudo que vier depois dela na pagina.
    As duas ganham uma barra invertida que o parser HTML ve e o interpretador JS descarta. */
 function escJs(s){return esc(s).replace(/<\//g,'<\\/').replace(/<!--/g,'<\\!--');}
+/* Como escJs, mas para um literal JS entre aspas DUPLAS -- esc()/escJs so escapam a apostrofa.
+   Usada nos poucos lugares (Rodada de textos configuraveis, 02/09/2026) onde um texto
+   configuravel entra DIRETO numa expressao que ja usava aspas duplas, sem variavel propria --
+   ver aTplJs, logo abaixo, para o porque de nao declarar uma variavel nova ali. */
+function escJsD(s){return String(s).replace(/\\/g,'\\\\').replace(/"/g,'\\"').replace(/<\//g,'<\\/').replace(/<!--/g,'<\\!--');}
+/* ===== texto configuravel com marcador, sem variavel nova no bloco entregue =====
+   Um texto como "Reserva garantida ate {data}." precisa, no bloco, de uma concatenacao com um
+   valor que so existe em tempo de EXECUCAO (a data calculada, o preco do pacote...). A forma
+   obvia -- declarar 'var TXT_X=...' e fazer TXT_X.replace(/\{data\}/g,valor) em tempo de
+   execucao -- funciona, mas ACRESCENTA bytes ao bloco mesmo com o texto no padrao de fabrica:
+   a declaracao da variavel e o .replace() nao existiam antes desta rodada, e a prova exigida
+   (docs/pendencias.md, invariante desta tarefa) e saida IDENTICA com a configuracao padrao.
+
+   aTplJs faz a mesma troca em tempo de GERACAO: separa o texto configurado nos pedacos em
+   volta de cada marcador e devolve PRONTA a mesma concatenacao que o texto fixo ja escrevia --
+   'pedaco'+expressao+'pedaco' --, no MESMO caractere de aspas que aquele trecho do bloco ja
+   usava (q). Com o texto no padrao (marcador presente, uma vez, nenhuma letra a mais), a saida
+   e byte a byte a concatenacao original; sem o marcador, o pedaco fixo aparece sozinho -- a
+   mesma escolha que TXT_PRAZO/TXT_VENCIDO ja fazem: sem o marcador, o valor simplesmente nao
+   aparece. Marcador repetido tambem funciona: cada ocorrencia vira uma nova expressao.
+
+   q: aspas do trecho (' ou "). texto: o valor configurado. pares: lista de [marcador,
+   expressaoJs] -- expressaoJs ja escrita no MESMO q (ex.: 'DESCONTO_PIX', 'moedaFmt(preco)'). */
+function aTplJs(q,texto,pares){
+  var re=new RegExp(pares.map(function(p){return p[0].replace(/[{}]/g,'\\$&');}).join('|'),'g');
+  var mapa={};pares.forEach(function(p){mapa[p[0]]=p[1];});
+  var s=String(texto),last=0,m,toks=[];
+  while((m=re.exec(s))){
+    if(m.index>last)toks.push({lit:s.slice(last,m.index)});
+    toks.push({expr:mapa[m[0]]});
+    last=m.index+m[0].length;
+  }
+  if(last<s.length)toks.push({lit:s.slice(last)});
+  if(!toks.length)return q+q;
+  return toks.map(function(t){
+    return t.lit!=null?(q+(q==="'"?esc(t.lit):escJsD(t.lit)).replace(/<\//g,'<\\/').replace(/<!--/g,'<\\!--')+q):t.expr;
+  }).join('+');
+}
 /* Compartilhada por Bordas e Captacao de leads: hexadecimal -> "r, g, b", para montar rgba()
    dentro de @keyframes (onde nao da para usar a cor com alfa separado). Nasceu na aba Bordas;
    subiu para ca quando a aba Leads passou a precisar dela -- o halo do efeito "pulsar" trazia
@@ -13238,6 +13391,50 @@ var A_OB_VARS=[
   {id:'hora',  tidy:'booking.time',      rot:'horario',               padrao:'o horário combinado'},
   {id:'quando',tidy:'booking.starts_at', rot:'data e horario juntos', padrao:'a data e o horário combinados'}
 ];
+/* ===== os 31 textos configuraveis desta aba (Rodada de textos configuraveis, 02/09/2026) =====
+   Pedido do dono: "quanto mais customizado o que aparece de texto para o cliente, mais
+   flexivel para mim". Cada linha e [chave no cfg/estado, id do campo na aba, texto padrao --
+   exatamente o que saia FIXO no bloco antes desta rodada, para as saidas nao mudarem um byte
+   com a configuracao de fabrica]. Uma tabela SO, usada por aCfg (le do DOM ao gerar), aColeta/
+   aRestaura (persistencia) e aTxtPadrao (presets antigos, sem estas chaves) -- 31 chaves
+   escritas a mao tres vezes cada e um convite ao erro de digitacao; aqui e uma vez so.
+   Os tres primeiros (selo, linha do cartao, trecho da parcela) sao os MESMOS que
+   aBlocoVitrine E aBlocoObrigado leem -- um campo so, os dois blocos usam. Os marcadores
+   {pct}/{valor}/{n}/{data} seguem o padrao que TXT_PRAZO/TXT_VENCIDO ja usam na aba Link de
+   cobranca (coerencia pedida pelo dono). */
+var A_TXT_DEFS=[
+  ['txtSeloPix','a-txt-selopix','-{pct}% no Pix'],
+  ['txtCartaoLinha','a-txt-cartaolinha','ou {valor} no cartão'],
+  ['txtParcela','a-txt-parcela',', em até {n}x de {valor}'],
+  ['txtRecusa','a-txt-recusa','Não encontramos seu agendamento nesta página. Se você acabou de agendar, use o link que aparece no e-mail de confirmação — ou fale com a gente que resolvemos na hora.'],
+  ['txtOpcionais','a-txt-opcionais','Itens opcionais'],
+  ['txtTotalZero','a-txt-totalzero','O cupom aplicado zera o valor deste pedido.'],
+  ['txtCupomRotulo','a-txt-cupom-rotulo','Cupom de desconto'],
+  ['txtCupomBotao','a-txt-cupom-botao','Aplicar'],
+  ['txtCupomOk','a-txt-cupom-ok','Cupom aplicado!'],
+  ['txtCupomInvalido','a-txt-cupom-invalido','Cupom inválido.'],
+  ['txtCupomExpirado','a-txt-cupom-expirado','Cupom expirado.'],
+  ['txtDesconto','a-txt-desconto','Desconto'],
+  ['txtCupomValidade','a-txt-cupom-validade','Válido até:'],
+  ['txtSucesso','a-txt-sucesso','Pagamento aprovado. Obrigado!'],
+  ['txtErroComPix','a-txt-erro-compix','Não foi possível carregar o pagamento por cartão agora. Use o Pix acima, ou fale com a gente para receber outra forma de pagar.'],
+  ['txtErroSemPix','a-txt-erro-sempix','Não foi possível carregar o pagamento por cartão agora. Fale com a gente para receber outra forma de pagar.'],
+  ['txtPixRotulo','a-txt-pix-rotulo','Pix'],
+  ['txtPixGerar','a-txt-pix-gerar','Gerar Pix'],
+  ['txtPixCopiar','a-txt-pix-copiar','Copiar código Pix'],
+  ['txtPixInstrucao','a-txt-pix-instrucao','Abra o app do seu banco e pague pelo QR Code ou Pix Copia e Cola'],
+  ['txtNota','a-txt-nota','Confira o nome do recebedor antes de confirmar o pagamento'],
+  ['txtPixCopiado','a-txt-pix-copiado','Código copiado! Cole no aplicativo do seu banco.'],
+  ['txtPixNaocopiou','a-txt-pix-naocopiou','Não consegui copiar. Selecione o código acima e copie na mão.'],
+  ['txtOu','a-txt-ou','OU'],
+  ['txtCartaoRotulo','a-txt-cartao-rotulo','Cartão de crédito ou débito'],
+  ['txtZapBotao','a-txt-zap-botao','Falar no WhatsApp'],
+  ['txtZapRecusa','a-txt-zap-recusa','Olá! Não encontrei meu agendamento na página de pagamento.'],
+  ['txtZapVencido','a-txt-zap-vencido','Olá! Meu prazo para pagar a reserva passou. Ainda está disponível?'],
+  ['txtPrazoBarra','a-txt-prazo-barra','Reserva garantida até {data}.'],
+  ['txtPrazoAjuda','a-txt-prazo-ajuda','O relógio é um recado, não uma tranca: quem libera o horário depois do prazo é a gente, à mão, ao conferir o pagamento.'],
+  ['txtPrazoVencido','a-txt-prazo-vencido','O prazo para pagar esta reserva já passou. Fale com a gente para confirmar se o horário ainda está disponível.']
+];
 function aObMarcadas(){
   var r=[],i,el;
   for(i=0;i<A_OB_VARS.length;i++){
@@ -13594,7 +13791,7 @@ function aCfg(){
   var altmob=aPreso('a-altmob');if(altmob==null)altmob=2700;
   var largmob=aPreso('a-largmob');if(largmob==null)largmob=700;
   var qtdmax=aPreso('a-qtdmax');if(qtdmax==null)qtdmax=10;
-  return {
+  var r={
     pacotes:aPacotes, cps:aCps,
     urlobrigado:$('a-urlobrigado').value.trim(),
     prefixo:$('a-prefixo').value.trim(),
@@ -13605,6 +13802,11 @@ function aCfg(){
     t1:$('a-t1').value, t2:$('a-t2').value, t3:$('a-t3').value, t4:$('a-t4').value, t5:$('a-t5').value,
     ob:aObCfg()
   };
+  /* ===== os 31 textos configuraveis (Rodada de textos configuraveis, 02/09/2026) =====
+     Lidos direto do DOM pela tabela unica A_TXT_DEFS (ver o comentario dela): aCfg() so roda
+     com a aba aberta, entao os campos sempre existem, igual a t1..t5 acima. */
+  for(var iTxt=0;iTxt<A_TXT_DEFS.length;iTxt++)r[A_TXT_DEFS[iTxt][0]]=$(A_TXT_DEFS[iTxt][1]).value;
+  return r;
 }
 /* Leitura defensiva de um campo que pode ainda nao existir no DOM (ver o paragrafo do topo
    desta secao): sem a guarda, aColeta lancaria a cada chamada de salvarEstado() -- que roda a
@@ -13612,7 +13814,7 @@ function aCfg(){
    o tempo todo, mesmo com o operador nunca tendo aberto Agendamento por pacote. */
 function aElVal(id,def){var el=$(id);return el?el.value:def;}
 function aColeta(){
-  return {a:{
+  var r={
     pacotes:aPacotes,
     cps:aCps,
     urlobrigado:aElVal('a-urlobrigado',''),
@@ -13635,7 +13837,12 @@ function aColeta(){
        mesmo padrao de tColeta/t.obfb (10004+). */
     obvars:aObMarcadas().join(','),
     obfb:A_OB_VARS.map(function(v){return aElVal('a-ob-fb-'+v.id,v.padrao);}).join('\u0001')
-  }};
+  };
+  /* Os 31 textos configuraveis (ver A_TXT_DEFS): mesma leitura defensiva de aElVal, com o
+     padrao de cada um vindo da tabela -- estado gravado por versao anterior desta ferramenta
+     nao tem estas chaves. */
+  for(var iTxt=0;iTxt<A_TXT_DEFS.length;iTxt++)r[A_TXT_DEFS[iTxt][0]]=aElVal(A_TXT_DEFS[iTxt][1],A_TXT_DEFS[iTxt][2]);
+  return {a:r};
 }
 function aRestaura(st){
   if(!st.a)return;
@@ -13685,6 +13892,13 @@ function aRestaura(st){
   for(k=0;k<A_OB_VARS.length;k++){
     el=$('a-ob-fb-'+A_OB_VARS[k].id);
     if(el)el.value=(fbParts[k]!=null&&fbParts[k]!=='')?fbParts[k]:A_OB_VARS[k].padrao;
+  }
+  /* Os 31 textos configuraveis (ver A_TXT_DEFS, logo apos A_OB_VARS): estado gravado antes
+     desta rodada (02/09/2026) nao tem nenhuma destas chaves -- o padrao de cada campo e o
+     terceiro item da propria tabela, o mesmo texto que saia fixo no bloco. */
+  for(k=0;k<A_TXT_DEFS.length;k++){
+    el=$(A_TXT_DEFS[k][1]);
+    if(el)el.value=(A[A_TXT_DEFS[k][0]]!=null)?A[A_TXT_DEFS[k][0]]:A_TXT_DEFS[k][2];
   }
   /* A migracao NUNCA fica calada (CLAUDE.md, secao "Em duvida entre descartar e preservar").
      Persistida na hora (salvarEstado()) para o aviso nao repetir na proxima carga: 'pac' e a
@@ -13753,11 +13967,17 @@ function aPresetDepois(){
    vezes"). A prova e byte a byte: as tres saidas desta aba tem de sair identicas a como
    saiam antes desta unificacao.
 
-   fcaTextoCartaoSrc(q) recebe o CARACTERE DE ASPAS que aquele bloco ja usava no texto
-   emitido -- aBlocoVitrine escrevia com aspas simples, aBlocoObrigado com aspas duplas.
-   Normalizar as duas para o mesmo estilo mudaria bytes de uma das duas saidas, e a prova
-   exigida e nao mudar nenhum. O parametro preserva o estilo de cada chamador sem duplicar
-   o texto: e a mesma fonte, com o detalhe tipografico que ja existia passado por fora.
+   fcaTextoCartaoSrc(q,txtCartaoLinha,txtParcela) continua recebendo o CARACTERE DE ASPAS,
+   como antes (Rodada de textos configuraveis, 02/09/2026 NAO mudou isso -- so o texto que
+   preenche a linha e a parcela deixou de ser fixo). Continua tambem SEM declarar variavel
+   nenhuma no bloco: os dois textos agora vem de cfg.txtCartaoLinha/txtParcela, montados em
+   tempo de GERACAO pelo aTplJs (perto de escJs) na mesma concatenacao que o texto fixo ja
+   escrevia -- 'pedaco'+moedaFmt(preco)+'pedaco' --, e por isso a prova byte a byte desta
+   funcao continua de pe MESMO com os dois textos agora configuraveis: com o padrao de
+   fabrica, a saida nao muda nem um byte. Os marcadores {valor} e {n} seguem o mesmo padrao
+   {data} que TXT_PRAZO/TXT_VENCIDO ja usam na aba Link de cobranca (ver aTplJs para o porque
+   de NAO ser um .replace() em tempo de execucao, como aquelas duas -- essa forma acrescentaria
+   bytes ao bloco padrao, e a rodada exige nao acrescentar).
 
    Tarefa 4 (v2): PACOTES ganha 'ops' -- a mesma forma {nome,preco,qtd} do 'opcionais' que
    uBloco/mBloco emitem (10928+/17138+), MAS SEM os campos de selecao/permissao (opsel,
@@ -13783,10 +14003,10 @@ function fcaPrecoParcelaSrc(){
   return 'function precoPix(p){return Math.round(p*(1-DESCONTO_PIX/100)*100)/100;}\n'+
     'function parcelaDe(p){return Math.ceil(p/PARCELAS*100)/100;}\n';
 }
-function fcaTextoCartaoSrc(q){
+function fcaTextoCartaoSrc(q,txtCartaoLinha,txtParcela){
   return 'function textoCartao(preco){\n'+
-    '  var t='+q+'ou '+q+'+moedaFmt(preco)+'+q+' no cartão'+q+';\n'+
-    '  if(PARCELAS>1)t+='+q+', em até '+q+'+PARCELAS+'+q+'x de '+q+'+moedaFmt(parcelaDe(preco));\n'+
+    '  var t='+aTplJs(q,txtCartaoLinha,[['{valor}','moedaFmt(preco)']])+';\n'+
+    '  if(PARCELAS>1)t+='+aTplJs(q,txtParcela,[['{n}','PARCELAS'],['{valor}','moedaFmt(parcelaDe(preco))']])+';\n'+
     '  return t;\n}\n';
 }
 
@@ -13843,6 +14063,12 @@ function aBlocoVitrine(cfg){
   c+="var TXT_PASSO1='"+escJs(cfg.t2)+"';\n";
   c+="var TXT_PASSO2='"+escJs(cfg.t3)+"';\n";
   c+="var TXT_TROCAR='"+escJs(cfg.t4)+"';\n\n";
+  /* Os tres textos do preco (selo, linha do cartao e trecho da parcela) sao a MESMA
+     configuracao usada pelo carrinho da pagina de obrigado (aBlocoObrigado, mais abaixo): um
+     campo so na aba, lido pelos dois blocos -- nunca dois campos que poderiam divergir. Sem
+     variavel propria no bloco (ver aTplJs, perto de escJs): a linha do cartao e a parcela sao
+     montadas por fcaTextoCartaoSrc, mais abaixo, e o selo entra direto onde o texto fixo
+     entrava antes desta rodada -- ver o proprio selo, em montarPreco(). */
 
   c+='/* ============================================================\n   Daqui para baixo nao precisa mexer\n   ============================================================ */\n\n';
   c+=fcMoedaFmtGer(true);
@@ -13853,7 +14079,7 @@ function aBlocoVitrine(cfg){
   c+='   cima (116,67) o cliente NUNCA paga por mes mais do que estava escrito. Mesma licao do\n';
   c+='   centavo do Pix, ago/2026. */\n';
   c+=fcaPrecoParcelaSrc();
-  c+=fcaTextoCartaoSrc("'");
+  c+=fcaTextoCartaoSrc("'",cfg.txtCartaoLinha,cfg.txtParcela);
   /* Uma funcao so desenha o preco do cartao e o do resumo (Tarefa 3, passo 5): nao existe
      segunda formatacao para o mesmo numero em lugar nenhum deste bloco. A LINHA MOSTRA SO O QUE
      EXISTE (Tarefa do seletor de forma de pagamento): "somente Pix" nao anuncia "ou no cartao";
@@ -13866,7 +14092,7 @@ function aBlocoVitrine(cfg){
   c+='  l1.appendChild(v);\n';
   if(cfg.usaPix){
     c+='  if(DESCONTO_PIX>0){\n';
-    c+="    var selo=document.createElement('span');selo.className='fca-selo';selo.textContent='-'+DESCONTO_PIX+'% no Pix';\n";
+    c+="    var selo=document.createElement('span');selo.className='fca-selo';selo.textContent="+aTplJs("'",cfg.txtSeloPix,[['{pct}','DESCONTO_PIX']])+";\n";
     c+='    l1.appendChild(selo);\n  }\n';
   }
   c+='  box.appendChild(l1);\n';
@@ -14149,28 +14375,41 @@ function aBlocoObrigado(cfg){
   c+="var COR_TEXTO='"+cfg.c3+"';\n";
   c+="var TXT_TITULO='"+escJs(cfg.t5)+"';\n";
   /* Recado cordial da recusa -- sem pac, ou com codigo desconhecido, nenhum pagamento aparece.
-     Nao ganhou campo proprio na aba (fora do contrato da Tarefa 1): o padrao da spec e o unico
-     texto, hoje. */
-  c+="var TXT_RECUSA='Não encontramos seu agendamento nesta página. Se você acabou de agendar, use o link que aparece no e-mail de confirmação — ou fale com a gente que resolvemos na hora.';\n";
-  /* Textos do carrinho (Tarefa 5, v2) -- hardcoded, no mesmo padrao ja aberto por TXT_RECUSA
-     acima: esta aba nao ganhou campo proprio para eles (fora do contrato da Tarefa 1). Igual ao
+     Configuravel desde a Rodada de textos configuraveis (02/09/2026, pedido do dono): antes o
+     padrao da spec era o unico texto: agora e so o PADRAO do campo (ver aColeta/aRestaura). */
+  c+="var TXT_RECUSA='"+escJs(cfg.txtRecusa)+"';\n";
+  /* Textos do carrinho (Tarefa 5, v2) -- configuraveis desde 02/09/2026 (idem acima). Igual ao
      Checkout/Mini loja, acentuados (norma de 01/09/2026: todo texto que uma pessoa le). */
-  c+="var TXT_OPCIONAIS='Itens opcionais';\n";
+  c+="var TXT_OPCIONAIS='"+escJs(cfg.txtOpcionais)+"';\n";
   /* Diferente do texto generico do Checkout ('Escolha ao menos um item...'): aqui o pacote e
      fixo e nao ha itens para 'escolher mais' -- a UNICA forma do pedido zerar e um cupom de
      100%, entao o recado precisa dizer isso, nao mandar escolher algo que ja esta escolhido. */
-  c+="var TXT_TOTAL_ZERO='O cupom aplicado zera o valor deste pedido.';\n";
-  c+="var TXT_SUCESSO='Pagamento aprovado. Obrigado!';\n";
+  c+="var TXT_TOTAL_ZERO='"+escJs(cfg.txtTotalZero)+"';\n";
+  c+="var TXT_SUCESSO='"+escJs(cfg.txtSucesso)+"';\n";
   /* "Use o Pix acima" so faz sentido HAVENDO Pix na pagina (Tarefa do seletor de forma de
-     pagamento): em "somente cartao" nao ha secao de Pix nenhuma acima para apontar. */
-  c+="var TXT_ERRO='"+(cfg.usaPix?"Não foi possível carregar o pagamento por cartão agora. Use o Pix acima, ou fale com a gente para receber outra forma de pagar.":"Não foi possível carregar o pagamento por cartão agora. Fale com a gente para receber outra forma de pagar.")+"';\n";
-  c+="var TXT_CUPOM_ROTULO='Cupom de desconto';\n";
-  c+="var TXT_CUPOM_BOTAO='Aplicar';\n";
-  c+="var TXT_CUPOM_OK='Cupom aplicado!';\n";
-  c+="var TXT_CUPOM_INVALIDO='Cupom inválido.';\n";
-  c+="var TXT_CUPOM_EXPIRADO='Cupom expirado.';\n";
-  c+="var TXT_DESCONTO='Desconto';\n";
-  c+="var TXT_CUPOM_VALIDADE='Válido até:';   /* precede a data, na propria linha do desconto -- so aparece se o cupom tiver validade (mesma regra do Checkout/Mini loja desde 01/09) */\n\n";
+     pagamento): em "somente cartao" nao ha secao de Pix nenhuma acima para apontar -- por isso
+     sao DOIS campos na aba (txtErroComPix/txtErroSemPix), nao um so com texto condicional. */
+  c+="var TXT_ERRO='"+(cfg.usaPix?escJs(cfg.txtErroComPix):escJs(cfg.txtErroSemPix))+"';\n";
+  c+="var TXT_CUPOM_ROTULO='"+escJs(cfg.txtCupomRotulo)+"';\n";
+  c+="var TXT_CUPOM_BOTAO='"+escJs(cfg.txtCupomBotao)+"';\n";
+  c+="var TXT_CUPOM_OK='"+escJs(cfg.txtCupomOk)+"';\n";
+  c+="var TXT_CUPOM_INVALIDO='"+escJs(cfg.txtCupomInvalido)+"';\n";
+  c+="var TXT_CUPOM_EXPIRADO='"+escJs(cfg.txtCupomExpirado)+"';\n";
+  c+="var TXT_DESCONTO='"+escJs(cfg.txtDesconto)+"';\n";
+  c+="var TXT_CUPOM_VALIDADE='"+escJs(cfg.txtCupomValidade)+"';   /* precede a data, na propria linha do desconto -- so aparece se o cupom tiver validade (mesma regra do Checkout/Mini loja desde 01/09) */\n";
+  /* O aviso do recebedor: ja existia (hardcoded) no Checkout e na Mini loja (TXT_NOTA la
+     tambem); aqui ele nasce configuravel, por decisao do dono na mesma rodada que criou os
+     outros 30 campos desta aba (02/09/2026) -- e o UNICO dos 31 que muda a saida padrao desta
+     funcao, porque e o unico que nao existia de forma nenhuma antes. */
+  c+="var TXT_NOTA='"+escJs(cfg.txtNota)+"';\n\n";
+  /* Todo o resto dos 31 textos (selo/linha do cartao/parcela, rotulos da secao de pagamento,
+     WhatsApp e as tres frases do prazo) NAO ganha variavel propria aqui -- ao contrario dos que
+     ja eram var antes desta rodada (TXT_RECUSA e acima), estes eram literais DIRETO na
+     expressao, e uma variavel nova teria acrescentado bytes ao bloco padrao (a prova exigida
+     e nao acrescentar nenhum). Em vez disso, cada um entra pelo mesmo caminho que o literal
+     fixo entrava: selo/cartao/parcela por fcaTextoCartaoSrc (mais abaixo, fonte unica com a
+     vitrine) e o resto direto no ponto de uso, com escJs/escJsD ou aTplJs quando ha marcador
+     em tempo de execucao ({data} na barra do prazo) -- ver cada um no proprio lugar. */
   c+='/* ===== CUPONS =====\n';
   c+="   tipo: 'pct_produto' = % sobre o pacote (SEM os opcionais) | 'pct_total' = % sobre tudo\n";
   c+="   com opcionais | 'fixo' = valor fixo. validade: 'AAAA-MM-DD' (vale ate o fim do dia) ou\n";
@@ -14258,7 +14497,7 @@ function aBlocoObrigado(cfg){
   c+='   e e a mesma fonte que os escreve, nunca uma segunda copia. */\n';
   c+='function botaoZap(msg){\n';
   c+='  if(!WHATSAPP)return null;\n';
-  c+='  var zap=document.createElement("a");zap.className="fca-ob-bt fca-ob-bt2";zap.textContent="Falar no WhatsApp";\n';
+  c+='  var zap=document.createElement("a");zap.className="fca-ob-bt fca-ob-bt2";zap.textContent="'+escJsD(cfg.txtZapBotao)+'";\n';
   c+='  zap.setAttribute("href","https://wa.me/"+WHATSAPP+"?text="+encodeURIComponent(msg));\n';
   c+='  zap.setAttribute("target","_blank");zap.setAttribute("rel","noopener noreferrer");\n';
   c+='  return zap;\n';
@@ -14267,7 +14506,7 @@ function aBlocoObrigado(cfg){
   c+='  var cartao=document.createElement("div");cartao.className="fca-ob-cartao";\n';
   c+='  var msg=document.createElement("div");msg.className="fca-ob-recusa-msg";msg.textContent=TXT_RECUSA;\n';
   c+='  cartao.appendChild(msg);\n';
-  c+='  var zap=botaoZap("Olá! Não encontrei meu agendamento na página de pagamento.");\n';
+  c+='  var zap=botaoZap("'+escJsD(cfg.txtZapRecusa)+'");\n';
   c+='  if(zap)cartao.appendChild(zap);\n';
   c+='  raiz.appendChild(cartao);\n';
   c+='}\n';
@@ -14368,10 +14607,10 @@ function aBlocoObrigado(cfg){
   c+='   do link de cobranca (/pagar). */\n';
   c+='function prazoBarra(cartao,fimMs){\n';
   c+='  var b=document.createElement("div");b.className="fca-ob-prazo";\n';
-  c+='  b.textContent="Reserva garantida até "+prazoTexto(fimMs)+".";\n';
+  c+='  b.textContent='+aTplJs('"',cfg.txtPrazoBarra,[['{data}','prazoTexto(fimMs)']])+';\n';
   c+='  cartao.appendChild(b);\n';
   c+='  var av=document.createElement("div");av.className="fca-ob-ajuda";\n';
-  c+='  av.textContent="O relógio é um recado, não uma tranca: quem libera o horário depois do prazo é a gente, à mão, ao conferir o pagamento.";\n';
+  c+='  av.textContent="'+escJsD(cfg.txtPrazoAjuda)+'";\n';
   c+='  cartao.appendChild(av);\n';
   c+='}\n';
   c+='/* O mesmo cartao (titulo + resumo ja montados por montar()), sem secao de pagamento -- o\n';
@@ -14379,9 +14618,9 @@ function aBlocoObrigado(cfg){
   c+='   paguei" aqui porque nao ha secao do Pix: o WhatsApp cumpre o mesmo papel. */\n';
   c+='function prazoVencido(cartao){\n';
   c+='  var msg=document.createElement("div");msg.className="fca-ob-recusa-msg";\n';
-  c+='  msg.textContent="O prazo para pagar esta reserva já passou. Fale com a gente para confirmar se o horário ainda está disponível.";\n';
+  c+='  msg.textContent="'+escJsD(cfg.txtPrazoVencido)+'";\n';
   c+='  cartao.appendChild(msg);\n';
-  c+='  var zap=botaoZap("Olá! Meu prazo para pagar a reserva passou. Ainda está disponível?");\n';
+  c+='  var zap=botaoZap("'+escJsD(cfg.txtZapVencido)+'");\n';
   c+='  if(zap)cartao.appendChild(zap);\n';
   c+='}\n\n';
 
@@ -14400,7 +14639,7 @@ function aBlocoObrigado(cfg){
   c+='   identificador -- e a mesma familia do defeito mais caro desta rodada (extrato cheio de\n';
   c+='   cobrancas diferentes para uma reserva so). */\n';
   c+=fcaPrecoParcelaSrc();
-  c+=fcaTextoCartaoSrc('"');
+  c+=fcaTextoCartaoSrc('"',cfg.txtCartaoLinha,cfg.txtParcela);
   c+='function somaProdutos(){return PAC.preco;}\n';
   c+='function subtotal(){\n';
   c+='  var t=somaProdutos();\n';
@@ -14510,7 +14749,7 @@ function aBlocoObrigado(cfg){
   c+='  var v=document.createElement("span");v.className="fca-ob-preco-valor";l1.appendChild(v);\n';
   if(cfg.usaPix){
     c+='  if(DESCONTO_PIX>0){\n';
-    c+='    var selo=document.createElement("span");selo.className="fca-ob-selo";selo.textContent="-"+DESCONTO_PIX+"% no Pix";\n';
+    c+='    var selo=document.createElement("span");selo.className="fca-ob-selo";selo.textContent='+aTplJs('"',cfg.txtSeloPix,[['{pct}','DESCONTO_PIX']])+';\n';
     c+='    l1.appendChild(selo);\n';
     c+='  }\n';
   }
@@ -14569,14 +14808,15 @@ function aBlocoObrigado(cfg){
   c+=fcTotalPixSrc(cfg.descpix,true,false);
   c+='function pix(cartao){\n';
   c+='  var b=document.createElement("div");b.className="fca-ob-bloco";\n';
-  c+='  var r=document.createElement("div");r.className="fca-ob-rot";r.textContent="Pix";b.appendChild(r);\n';
-  c+='  var gerar=document.createElement("button");gerar.type="button";gerar.className="fca-ob-bt";gerar.textContent="Gerar Pix";b.appendChild(gerar);\n';
+  c+='  var r=document.createElement("div");r.className="fca-ob-rot";r.textContent="'+escJsD(cfg.txtPixRotulo)+'";b.appendChild(r);\n';
+  c+='  var gerar=document.createElement("button");gerar.type="button";gerar.className="fca-ob-bt";gerar.textContent="'+escJsD(cfg.txtPixGerar)+'";b.appendChild(gerar);\n';
   c+='  var area=document.createElement("div");area.className="fca-ob-pixarea";\n';
   c+='  var ta=document.createElement("textarea");ta.className="fca-ob-cod";ta.setAttribute("readonly","readonly");area.appendChild(ta);\n';
-  c+='  var bt=document.createElement("button");bt.className="fca-ob-bt fca-ob-bt2";bt.type="button";bt.textContent="Copiar código Pix";area.appendChild(bt);\n';
+  c+='  var bt=document.createElement("button");bt.className="fca-ob-bt fca-ob-bt2";bt.type="button";bt.textContent="'+escJsD(cfg.txtPixCopiar)+'";area.appendChild(bt);\n';
   c+='  var av=document.createElement("div");av.className="fca-ob-ajuda";area.appendChild(av);\n';
   c+='  var qr=document.createElement("div");qr.className="fca-ob-qr";area.appendChild(qr);\n';
-  c+='  var ins=document.createElement("div");ins.className="fca-ob-ajuda";ins.textContent="Abra o app do seu banco e pague pelo QR Code ou Pix Copia e Cola";area.appendChild(ins);\n';
+  c+='  var ins=document.createElement("div");ins.className="fca-ob-ajuda";ins.textContent="'+escJsD(cfg.txtPixInstrucao)+'";area.appendChild(ins);\n';
+  c+='  var nota=document.createElement("div");nota.className="fca-ob-ajuda";nota.textContent=TXT_NOTA;area.appendChild(nota);\n';
   c+='  b.appendChild(area);\n';
   c+='  cartao.appendChild(b);\n';
   c+='  var payloadAtual="";\n';
@@ -14593,7 +14833,7 @@ function aBlocoObrigado(cfg){
   c+='    var ok=false;ta.select();\n';
   c+='    try{ta.setSelectionRange(0,99999);}catch(e){}\n';
   c+='    try{ok=document.execCommand("copy");}catch(e2){ok=false;}\n';
-  c+='    av.textContent=ok?"Código copiado! Cole no aplicativo do seu banco.":"Não consegui copiar. Selecione o código acima e copie na mão.";\n';
+  c+='    av.textContent=ok?"'+escJsD(cfg.txtPixCopiado)+'":"'+escJsD(cfg.txtPixNaocopiou)+'";\n';
   c+='  });\n';
   c+='  pixEsconder=function(){area.className="fca-ob-pixarea";av.textContent="";};\n';
   c+='}\n';
@@ -14624,10 +14864,10 @@ function aBlocoObrigado(cfg){
   c+='   e isso nao da para mudar. */\n';
   c+='function secaoCartao(cartao){\n';
   if(cfg.usaPix){
-  c+='  var sep=document.createElement("div");sep.className="fca-ob-sep";sep.textContent="OU";cartao.appendChild(sep);\n';
+  c+='  var sep=document.createElement("div");sep.className="fca-ob-sep";sep.textContent="'+escJsD(cfg.txtOu)+'";cartao.appendChild(sep);\n';
   }
   c+='  var b=document.createElement("div");b.className="fca-ob-bloco'+(cfg.usaPix?' fca-ob-semtopo':'')+'";\n';
-  c+='  var r=document.createElement("div");r.className="fca-ob-rot";r.textContent="Cartão de crédito ou débito";b.appendChild(r);\n';
+  c+='  var r=document.createElement("div");r.className="fca-ob-rot";r.textContent="'+escJsD(cfg.txtCartaoRotulo)+'";b.appendChild(r);\n';
   c+='  var alvo=document.createElement("div");alvo.className="fca-ob-botoes";b.appendChild(alvo);\n';
   c+='  if(PARCELAS>1){\n';
   c+='    var pl=document.createElement("div");pl.className="fca-ob-ajuda";b.appendChild(pl);\n';
@@ -16257,11 +16497,29 @@ function pValDia(){
    Uma leitura so da interface, ja presa nas faixas. E o que pGerar valida, e e o que pBloco
    monta -- e como a previa executa o retorno de pBloco, nao sobra nenhuma segunda
    implementacao da pagina de pagamento para divergir do bloco entregue. */
+/* ===== os 9 textos configuraveis desta aba (Rodada de textos configuraveis, 02/09/2026) =====
+   Mesmo molde de A_TXT_DEFS (aba Agendamento por pacote, logo acima na ferramenta): [chave no
+   cfg/estado, id do campo, texto padrao -- o mesmo que saia fixo no bloco antes desta rodada].
+   txtZapMsg usa o marcador {desc}/{valor} no mesmo padrao {data} que TXT_PRAZO/TXT_VENCIDO ja
+   usam nesta aba; txtNota e o unico que NAO tinha texto fixo equivalente antes (era so o
+   Checkout e a Mini loja que tinham, decisao do dono de leva-lo tambem para ca e para a aba
+   Agendamento por pacote). */
+var P_TXT_DEFS=[
+  ['txtCopiado','p-txt-copiado','Código copiado! Cole no aplicativo do seu banco.'],
+  ['txtNaocopiou','p-txt-naocopiou','Não consegui copiar. Selecione o código acima e copie na mão.'],
+  ['txtRef','p-txt-ref','Identificador da cobrança: '],
+  ['txtPixRotulo','p-txt-pixrotulo','Pagando via Pix'],
+  ['txtOu','p-txt-ou','OU'],
+  ['txtPaypalFora','p-txt-paypalfora','Não foi possível carregar o PayPal agora. Use o Pix acima, ou fale com a gente para receber outro link.'],
+  ['txtSucesso','p-txt-sucesso','Pagamento aprovado. Obrigado!'],
+  ['txtNota','p-txt-nota','Confira o nome do recebedor antes de confirmar o pagamento'],
+  ['txtZapMsg','p-txt-zapmsg','Olá! Acabei de pagar: {desc} -- {valor}']
+];
 function pCfg(){
   var cpos=radio('p-coruja')||'esq';
   var usapp=(radio('p-usapp')!=='nao');
   var ppmodo=radio('p-ppmodo')||'sdk';
-  return {
+  var r={
     /* IDENTIDADE: lida do painel global (ver o bloco "identidade e paleta"). Os cinco campos
        sairam desta aba; aqui existe uma leitura, nao uma copia. */
     chave:pixLimpar(fciBruto('chave')), chaveBruta:fciBruto('chave'),
@@ -16290,6 +16548,10 @@ function pCfg(){
     valdia:pValDia(), valbruto:$('p-validade').value,
     ppmodo:(usapp?ppmodo:'nao'), pplink:$('p-pplink').value.trim()
   };
+  /* Os 9 textos configuraveis (ver P_TXT_DEFS): lidos direto do DOM, como t1..t9 acima -- pCfg()
+     so roda com a aba aberta. */
+  for(var iTxt=0;iTxt<P_TXT_DEFS.length;iTxt++)r[P_TXT_DEFS[iTxt][0]]=$(P_TXT_DEFS[iTxt][1]).value;
+  return r;
 }
 
 /* FONTE COMPARTILHADA com a pagina /cobrar: as guardas da cobranca (pRecusaBloco/pRecusaCobranca) e a montagem do link (pPayload, pConferir, pBusca, pLinkDe) vive em fc-compartilhado.js. */
@@ -16405,14 +16667,21 @@ function pJs(cfg){
      pedido do dono: ela ja carregava a descricao da cobranca, que e texto do operador e sempre
      pode ter acento, entao o caminho ja era exercitado -- medido no href gerado, que sai 100%
      ASCII por encodeURIComponent e volta identico ao decodificar. */
-  j+="  var TXT_COPIADO='Código copiado! Cole no aplicativo do seu banco.';\n";
-  j+="  var TXT_NAO_COPIOU='Não consegui copiar. Selecione o código acima e copie na mão.';\n";
-  j+="  var TXT_REF='Identificador da cobrança: ';\n";
+  /* Os seis a seguir ja eram 'var TXT_X=...' antes da Rodada de textos configuraveis
+     (02/09/2026) -- so o literal fixo virou escJs(cfg.txtX): a saida padrao nao muda um byte,
+     porque a declaracao ja existia. */
+  j+="  var TXT_COPIADO='"+escJs(cfg.txtCopiado)+"';\n";
+  j+="  var TXT_NAO_COPIOU='"+escJs(cfg.txtNaocopiou)+"';\n";
+  j+="  var TXT_REF='"+escJs(cfg.txtRef)+"';\n";
   /* O mesmo rotulo que o carrinho do Checkout escreve, pela mesma razao de sempre: o cliente
      que ja viu a loja le a mesma frase na pagina de cobranca. */
-  j+="  var TXT_PIX_ROTULO='Pagando via Pix';\n";
-  if(cfg.usapp)j+="  var TXT_OU='OU';\n";
-  if(cfg.usapp)j+="  var TXT_PAYPAL_FORA='Não foi possível carregar o PayPal agora. Use o Pix acima, ou fale com a gente para receber outro link.';\n";
+  j+="  var TXT_PIX_ROTULO='"+escJs(cfg.txtPixRotulo)+"';\n";
+  if(cfg.usapp)j+="  var TXT_OU='"+escJs(cfg.txtOu)+"';\n";
+  if(cfg.usapp)j+="  var TXT_PAYPAL_FORA='"+escJs(cfg.txtPaypalFora)+"';\n";
+  /* O aviso do recebedor: ja existe (hardcoded) no Checkout e na Mini loja; aqui ele nasce
+     configuravel, decisao do dono na mesma rodada -- e o UNICO destes textos que acrescenta
+     bytes ao padrao de fabrica, porque e o unico que nao existia de forma nenhuma antes. */
+  j+="  var TXT_NOTA='"+escJs(cfg.txtNota)+"';\n";
   j+='\n  /* ============================================================\n     Daqui para baixo nao precisa mexer\n     ============================================================ */\n\n';
   /* A maquinaria do BR Code vem da FONTE UNICA. Aqui ela e usada ao contrario do Checkout: em
      vez de montar um payload para o carrinho, o bloco LE o payload que chegou no endereco --
@@ -16590,6 +16859,7 @@ function pJs(cfg){
   j+="    var qr=novo('div','fcpg-qr');\n";
   j+='    b.appendChild(qr);\n';
   j+="    b.appendChild(novo('div','fcpg-ajuda',TXT_INSTRUCAO_PIX));\n";
+  j+="    b.appendChild(novo('div','fcpg-ajuda',TXT_NOTA));\n";
   if(cfg.zap)j+='    b.appendChild(zapBotao(valor,desc,txid));\n';
   j+='    c.appendChild(b);\n';
   j+='    desenharQr(qr,codigo);\n';
@@ -16682,7 +16952,7 @@ function pJs(cfg){
     j+='        },\n';
     j+='        onApprove:function(d,actions){\n';
     j+='          return actions.order.capture().then(function(){\n';
-    j+="            texto(alvo,'Pagamento aprovado. Obrigado!');\n";
+    j+="            texto(alvo,'"+escJs(cfg.txtSucesso)+"');\n";
     j+='          });\n';
     j+='        }\n';
     j+="      }).render('#fcpg-pp');\n";
@@ -16696,7 +16966,7 @@ function pJs(cfg){
        ela montasse a secao, o caminho vencido precisaria de uma segunda montagem da mensagem,
        que e justamente o que o dono le no WhatsApp. */
     j+='  function zapBotao(valor,desc,txid){\n';
-    j+="    var msg='Olá! Acabei de pagar: '+desc+' -- '+moedaFmt(valor);\n";
+    j+="    var msg="+aTplJs("'",cfg.txtZapMsg,[['{desc}','desc'],['{valor}','moedaFmt(valor)']])+";\n";
     /* Com desconto o cliente pode ter pago o total (PayPal) ou o valor com desconto (Pix). A
        mensagem cita os dois: um numero so aqui obrigaria o dono a adivinhar qual chegou. */
     j+="    if(DESCONTO_PIX>0)msg+=' (via Pix: '+moedaFmt(totalPix())+')';\n";
@@ -17035,7 +17305,7 @@ function pPvModoSet(m){pPvModo=m;pPvBotoes();pPreview(true);}
 /* ===== estado e biblioteca de presets ===== */
 function pColeta(){
   /* Sem chave, nomer, cidade, client e zapnum: a identidade saiu desta aba (ver uColeta). */
-  return {p:{
+  var r={
     usapp:radio('p-usapp'),ppcor:radio('p-ppcor'),
     zap:radio('p-zap'),url:$('p-url').value,
     larg:$('p-larg').value,qr:$('p-qr').value,
@@ -17047,7 +17317,10 @@ function pColeta(){
     t8:$('p-t8').value,t9:$('p-t9').value,
     desc:$('p-desc').value,valor:$('p-valor').value,txid:$('p-txid').value,
     validade:$('p-validade').value,descpix:$('p-descpix').value,
-    ppmodo:radio('p-ppmodo'),pplink:$('p-pplink').value}};
+    ppmodo:radio('p-ppmodo'),pplink:$('p-pplink').value};
+  /* Os 9 textos configuraveis (ver P_TXT_DEFS, logo antes de pCfg). */
+  for(var iTxt=0;iTxt<P_TXT_DEFS.length;iTxt++)r[P_TXT_DEFS[iTxt][0]]=$(P_TXT_DEFS[iTxt][1]).value;
+  return {p:r};
 }
 function pRestaura(st){
   var P=st.p||{},i;
@@ -17065,6 +17338,12 @@ function pRestaura(st){
   if(P.coruja)setRadio('p-coruja',P.coruja);
   if(P.corujaalt!==undefined)$('p-corujaalt').value=P.corujaalt;
   for(i=1;i<=9;i++)if(P['t'+i]!==undefined)$('p-t'+i).value=P['t'+i];
+  /* Os 9 textos configuraveis: estado gravado antes desta rodada (02/09/2026) nao tem
+     nenhuma destas chaves -- o padrao de cada campo e o terceiro item de P_TXT_DEFS. */
+  for(i=0;i<P_TXT_DEFS.length;i++){
+    var elTxt=$(P_TXT_DEFS[i][1]);
+    if(elTxt)elTxt.value=(P[P_TXT_DEFS[i][0]]!=null)?P[P_TXT_DEFS[i][0]]:P_TXT_DEFS[i][2];
+  }
   if(P.desc!==undefined)$('p-desc').value=P.desc;
   if(P.valor!==undefined)$('p-valor').value=P.valor;
   if(P.txid!==undefined)$('p-txid').value=P.txid;
