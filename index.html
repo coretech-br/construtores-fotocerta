@@ -17953,6 +17953,14 @@ function fccDaAba(a,p,plano,vals){
        aqui faria esta tarefa depender de aBlocoObrigado, que so existe na Entrega 2, e o passo
        de prova desta tarefa (fccOrfas sem acusar orfa, com a-out3 vazia) ficaria inexecutavel. */
     plano.comps.push(fccItem(a,'a-out1','Agendamento por pacote — vitrine','Componente HTML desta página'));
+    /* a-out2 e o mesmo caso do t-out4, nao do p-out2 -- por isso mora aqui, e nao em FCC_FORA.
+       p-out2 e o link de UMA cobranca, que muda a cada uma e nao e passo de montagem. a-out2 e
+       passo de montagem que se faz UMA vez: esquece-lo deixa a pagina de obrigado publicada e
+       nunca visitada, exatamente como o comentario do t-out4 ja registra. Por isso entra na
+       lista "fora do Prosite" em vez de ficar silenciosamente fora do plano. */
+    plano.outra.push(fccItem(a,'a-out2','Agendamento por pacote — saída 2: os endereços de redirecionamento',
+      'Configuração do TidyCal — campo “Redirect to custom page after booking”, um em cada tipo de agendamento',
+      'Não é campo do Prosite: vai no próprio TidyCal, um endereço por pacote.'));
   }
 }
 /* Esta aba ainda tem ALGUM codigo na tela? Existe por causa da contradicao que o aviso de
@@ -17970,8 +17978,7 @@ function fccDaAba(a,p,plano,vals){
    e esquecimento, e saida que aquela configuracao nao usa.
    Ela nao conserta o mapa; ela faz o buraco APARECER, que e o que faltava. */
 var FCC_FORA={
-  'p-out2':'o link de cada cobranca vai para o CLIENTE e muda a cada uma: nao e campo do Prosite nem passo de montagem desta pagina',
-  'a-out2':'cada endereco vai no campo de redirecionamento de UM tipo de agendamento, dentro do TidyCal: nao e campo do Prosite'
+  'p-out2':'o link de cada cobranca vai para o CLIENTE e muda a cada uma: nao e campo do Prosite nem passo de montagem desta pagina'
 };
 function fccAbaDoOut(id){
   var pref=id.split('-')[0],i;
