@@ -11148,11 +11148,11 @@ function uBloco(cfg){
     c+=FC_PIX_SRC.tlv;
     c+=FC_PIX_SRC.crc16;
     c+=FC_PIX_SRC.montarPayload;
-    c+='var qrPronto=false;\n';
-    c+="var qrsrc=document.createElement('script');\n";
-    c+="qrsrc.src='https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';\n";
-    c+='qrsrc.onload=function(){qrPronto=true;};\n';
-    c+='document.head.appendChild(qrsrc);\n\n';
+    /* Fonte unica com a /pagar e a Mini loja (fcDesenharQrSrc, ~3577): carrega a biblioteca
+       sob demanda (sem a corrida do onload eager) e desenha dentro de try/catch, escondendo a
+       caixa se a biblioteca nao chegar em vez de deixar a excecao derrubar o resto de
+       gerarPix. Corrige os dois defeitos medidos no Checkout (spec 0.1). */
+    c+=fcDesenharQrSrc('','220');
   }
 
   c+='function montar(){\n';
@@ -11480,10 +11480,8 @@ function uBloco(cfg){
     c+='payloadAtual=montarPayload(v);\n';
     c+="var qr=raiz.querySelector('.fcu-qr');\n";
     c+="qr.innerHTML='';\n";
-    c+='if(qrPronto&&window.QRCode){\n';
-    c+="qr.style.display='inline-block';\n";
-    c+='new window.QRCode(qr,{text:payloadAtual,width:220,height:220,correctLevel:window.QRCode.CorrectLevel.M});\n';
-    c+="}else{qr.style.display='none';}\n";
+    c+="qr.style.display='';\n";
+    c+='desenharQr(qr,payloadAtual);\n';
     c+="raiz.querySelector('.fcu-pixval-v').textContent=moedaFmt(v);\n";
     c+="raiz.querySelector('.fcu-cola').value=payloadAtual;\n";
     c+="raiz.querySelector('.fcu-pixarea').className='fcu-pixarea on';\n}\n";
@@ -13847,25 +13845,12 @@ function aBlocoObrigado(cfg){
   c+='  cartao.appendChild(b);\n';
   c+='  desenharQr(qr,payload);\n';
   c+='}\n';
-  c+='/* O QR vem do MESMO payload que esta na caixa de copiar: um segundo lugar de onde tirar\n';
-  c+='   o codigo seria um segundo valor possivel. Modelo copiado da /pagar (decisao 1 do\n';
-  c+='   diario): se a biblioteca nao chegar (bloqueador, rede ruim) a caixa SOME -- deixa-la\n';
-  c+='   com a altura reservada e vazia entregava um retangulo em branco de 200px sem explicacao\n';
-  c+='   nenhuma na tela de quem esta pagando. Sem QR a cobranca continua inteira: o copia e\n';
-  c+='   cola e a instrucao do Pix ficam onde estavam. */\n';
-  c+='function desenharQr(alvo,codigo){\n';
-  c+='  function some(){alvo.style.display="none";}\n';
-  c+='  function faz(){\n';
-  c+='    try{new QRCode(alvo,{text:codigo,width:200,height:200,correctLevel:QRCode.CorrectLevel.M});}\n';
-  c+='    catch(e){some();}\n';
-  c+='  }\n';
-  c+='  if(window.QRCode){faz();return;}\n';
-  c+='  var s=document.createElement("script");\n';
-  c+='  s.src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js";\n';
-  c+='  s.onload=function(){if(!window.QRCode){some();return;}faz();};\n';
-  c+='  s.onerror=some;\n';
-  c+='  document.head.appendChild(s);\n';
-  c+='}\n\n';
+  /* Fonte unica com o Checkout, a Mini loja e a /pagar (fcDesenharQrSrc, ~3577): esta era a
+     terceira copia manuscrita do mesmo desenho -- ja no padrao bom (carregamento sob demanda,
+     try/catch) mas escrita a mao, com aspas duplas em vez de simples nas strings internas.
+     Agora consome a mesma fonte que as outras tres; o comentario que explicava o desenho
+     tambem veio junto, de dentro da funcao compartilhada. */
+  c+=fcDesenharQrSrc('','200');
 
   c+='/* ===== 3d. o cartao -- o pedido ao SDK de pagamento NAO E FONTE COMPARTILHADA (decisao 8\n';
   c+='   do diario: a spec errava nisso). actions.order.create ja e escrito a mao em tres\n';
@@ -17514,11 +17499,11 @@ function mBlocoJs(cfg,prods,cps,cats,client,cod){
     c+=FC_PIX_SRC.tlv;
     c+=FC_PIX_SRC.crc16;
     c+=FC_PIX_SRC.montarPayload;
-    c+='var qrPronto=false;\n';
-    c+="var qrsrc=document.createElement('script');\n";
-    c+="qrsrc.src='https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';\n";
-    c+='qrsrc.onload=function(){qrPronto=true;};\n';
-    c+='document.head.appendChild(qrsrc);\n\n';
+    /* Fonte unica com a /pagar e o Checkout (fcDesenharQrSrc, ~3577): carrega a biblioteca
+       sob demanda (sem a corrida do onload eager) e desenha dentro de try/catch, escondendo a
+       caixa se a biblioteca nao chegar em vez de deixar a excecao derrubar o resto de
+       gerarPix. Corrige os dois defeitos medidos na Mini loja (spec 0.1). */
+    c+=fcDesenharQrSrc('','200');
   }
   return c+mBlocoRuntime(cfg,usaPP,usaPix,usaQtd,usaSinal,usaResumo,descpix,zap,usaCupom,usaFiltro);
 }
@@ -18080,10 +18065,8 @@ function mBlocoPagar(cfg,usaPP,usaPix,usaQtd,usaSinal,usaResumo,descpix,zap,usaC
     c+='payloadAtual=montarPayload(v);\n';
     c+="var qr=raiz.querySelector('.fcm-qr');\n";
     c+="qr.innerHTML='';\n";
-    c+='if(qrPronto&&window.QRCode){\n';
-    c+="qr.style.display='inline-block';\n";
-    c+='new window.QRCode(qr,{text:payloadAtual,width:200,height:200,correctLevel:window.QRCode.CorrectLevel.M});\n';
-    c+="}else{qr.style.display='none';}\n";
+    c+="qr.style.display='';\n";
+    c+='desenharQr(qr,payloadAtual);\n';
     c+="raiz.querySelector('.fcm-pixval-v').textContent=moedaFmt(v);\n";
     c+="raiz.querySelector('.fcm-cola').value=payloadAtual;\n";
     c+="raiz.querySelector('.fcm-pixarea').className='fcm-pixarea on';\n}\n";
