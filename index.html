@@ -13226,13 +13226,39 @@ function aPresetDepois(){
    trocar -- nunca um segundo. O que se herda do embed.js e so a MEDIDA: a origem a conferir
    (https://tidycal.com), o prefixo dos sinais ([iFrameSizer]) e as duas mensagens (
    scrollToOffset abre o modal interno de dia/horario, mutationObserver fecha). */
-function aBlocoVitrine(cfg){
-  var pacs=cfg.pacotes.map(function(p){
+
+/* ===== fonte unica entre aBlocoVitrine e aBlocoObrigado (Tarefa 11) =====
+   precoPix, parcelaDe, o texto da linha do cartao e a serializacao do catalogo saiam
+   escritos duas vezes -- uma copia por bloco. Regra do projeto: unifica-se a fonte que
+   ESCREVE, nunca a saida (CLAUDE.md, "Nada que dois geradores precisem e escrito duas
+   vezes"). A prova e byte a byte: as tres saidas desta aba tem de sair identicas a como
+   saiam antes desta unificacao.
+
+   fcaTextoCartaoSrc(q) recebe o CARACTERE DE ASPAS que aquele bloco ja usava no texto
+   emitido -- aBlocoVitrine escrevia com aspas simples, aBlocoObrigado com aspas duplas.
+   Normalizar as duas para o mesmo estilo mudaria bytes de uma das duas saidas, e a prova
+   exigida e nao mudar nenhum. O parametro preserva o estilo de cada chamador sem duplicar
+   o texto: e a mesma fonte, com o detalhe tipografico que ja existia passado por fora. */
+function aPacotesSrc(pacotes){
+  var pacs=pacotes.map(function(p){
     var preco=parseFloat(String(p.preco).replace(',','.'))||0;
     return "  {cod:'"+escJs(p.cod)+"', nome:'"+escJs(p.nome)+"', dur:'"+escJs(p.dur)+"', preco:"+preco.toFixed(2)+
       ", inclui:'"+escJs(p.inclui)+"', link:'"+escJs(p.link)+"'}";
   }).join(',\n');
+  return 'var PACOTES=[\n'+pacs+'\n];\n';
+}
+function fcaPrecoParcelaSrc(){
+  return 'function precoPix(p){return Math.round(p*(1-DESCONTO_PIX/100)*100)/100;}\n'+
+    'function parcelaDe(p){return Math.ceil(p/PARCELAS*100)/100;}\n';
+}
+function fcaTextoCartaoSrc(q){
+  return 'function textoCartao(preco){\n'+
+    '  var t='+q+'ou '+q+'+moedaFmt(preco)+'+q+' no cartão'+q+';\n'+
+    '  if(PARCELAS>1)t+='+q+', em até '+q+'+PARCELAS+'+q+'x de '+q+'+moedaFmt(parcelaDe(preco));\n'+
+    '  return t;\n}\n';
+}
 
+function aBlocoVitrine(cfg){
   var c='';
   c+='<div class="fca-raiz" id="fca-raiz"></div>\n\n';
 
@@ -13271,7 +13297,7 @@ function aBlocoVitrine(cfg){
 
   c+='<scr'+'ipt>\n(function(){\n';
   c+='/* ===== customizacao ===== */\n';
-  c+='var PACOTES=[\n'+pacs+'\n];\n';
+  c+=aPacotesSrc(cfg.pacotes);
   c+='var DESCONTO_PIX='+cfg.descpix+';   /* percentual de desconto no Pix; 0 = sem desconto -- some o selo */\n';
   c+='var PARCELAS='+cfg.parcelas+';   /* numero de parcelas anunciado no cartao; e uma promessa que a operadora decide, nao este codigo */\n';
   c+="var ALTURA_SEMPRE=false;   /* true = o calendario fica sempre na altura maxima. Ligue APENAS se, na sua pagina publicada, o modal de confirmacao do TidyCal aparecer cortado -- o preco de ligar e um vao vazio embaixo do calendario. */\n";
@@ -13294,12 +13320,8 @@ function aBlocoVitrine(cfg){
   c+='   seis ficaria 699,96 e uma das parcelas seria MAIOR do que o cliente leu na tela. Para\n';
   c+='   cima (116,67) o cliente NUNCA paga por mes mais do que estava escrito. Mesma licao do\n';
   c+='   centavo do Pix, ago/2026. */\n';
-  c+='function precoPix(p){return Math.round(p*(1-DESCONTO_PIX/100)*100)/100;}\n';
-  c+='function parcelaDe(p){return Math.ceil(p/PARCELAS*100)/100;}\n';
-  c+='function textoCartao(preco){\n';
-  c+="  var t='ou '+moedaFmt(preco)+' no cartão';\n";
-  c+="  if(PARCELAS>1)t+=', em até '+PARCELAS+'x de '+moedaFmt(parcelaDe(preco));\n";
-  c+='  return t;\n}\n';
+  c+=fcaPrecoParcelaSrc();
+  c+=fcaTextoCartaoSrc("'");
   /* Uma funcao so desenha o preco do cartao e o do resumo (Tarefa 3, passo 5): nao existe
      segunda formatacao para o mesmo numero em lugar nenhum deste bloco. */
   c+='function montarPreco(box,preco){\n';
@@ -13461,12 +13483,6 @@ function aEnderecos(cfg){
    nenhum na pagina, trocar() nao acha "{{" em nenhum no de texto e nao faz nada -- e o
    pagamento aparece do mesmo jeito. */
 function aBlocoObrigado(cfg){
-  var pacs=cfg.pacotes.map(function(p){
-    var preco=parseFloat(String(p.preco).replace(',','.'))||0;
-    return "  {cod:'"+escJs(p.cod)+"', nome:'"+escJs(p.nome)+"', dur:'"+escJs(p.dur)+"', preco:"+preco.toFixed(2)+
-      ", inclui:'"+escJs(p.inclui)+"', link:'"+escJs(p.link)+"'}";
-  }).join(',\n');
-
   var c='';
   c+='<!-- ============================================================\n';
   c+='     FOTO CERTA - PAGINA DE OBRIGADO DO AGENDAMENTO POR PACOTE\n';
@@ -13513,7 +13529,7 @@ function aBlocoObrigado(cfg){
 
   c+='<scr'+'ipt>\n(function(){\n';
   c+='/* ===== customizacao ===== */\n';
-  c+='var PACOTES=[\n'+pacs+'\n];\n';
+  c+=aPacotesSrc(cfg.pacotes);
   c+="var PREFIXO='"+escJs(cfg.prefixo)+"';   /* comeca o identificador de conciliacao */\n";
   c+='var DESCONTO_PIX='+cfg.descpix+';\n';
   c+='var PARCELAS='+cfg.parcelas+';\n';
@@ -13545,7 +13561,7 @@ function aBlocoObrigado(cfg){
 
   c+='/* ===== 1. le ?pac= e acha o pacote no catalogo -- SEM diferenciar maiusculas =====\n';
   c+='   Comparacao por igualdade de string, nunca por regex/eval sobre o parametro: um pac\n';
-  c+='   hostil (<script>, ../, acentos) so pode deixar de casar com nenhum codigo cadastrado,\n';
+  c+='   hostil (marcacao de script, ../, acentos) so pode deixar de casar com nenhum codigo cadastrado,\n';
   c+='   nunca ser interpretado. */\n';
   c+='function acharPacote(codigo){\n';
   c+='  var i,alvo=String(codigo||"").toLowerCase();\n';
@@ -13735,12 +13751,8 @@ function aBlocoObrigado(cfg){
 
   c+='/* ===== 3b. resumo do que foi agendado, com as duas formas de pagar (mesma conta de\n';
   c+='   aBlocoVitrine -- ver o comentario la sobre o arredondamento da parcela) ===== */\n';
-  c+='function precoPix(p){return Math.round(p*(1-DESCONTO_PIX/100)*100)/100;}\n';
-  c+='function parcelaDe(p){return Math.ceil(p/PARCELAS*100)/100;}\n';
-  c+='function textoCartao(preco){\n';
-  c+='  var t="ou "+moedaFmt(preco)+" no cartão";\n';
-  c+='  if(PARCELAS>1)t+=", em até "+PARCELAS+"x de "+moedaFmt(parcelaDe(preco));\n';
-  c+='  return t;\n}\n';
+  c+=fcaPrecoParcelaSrc();
+  c+=fcaTextoCartaoSrc('"');
   c+='function montarResumo(cartao){\n';
   c+='  var nome=document.createElement("div");nome.className="fca-ob-resumo-nome";nome.textContent=PAC.nome;\n';
   c+='  cartao.appendChild(nome);\n';
@@ -13811,7 +13823,7 @@ function aBlocoObrigado(cfg){
   c+='   quarta copia, espelhada na da /pagar (item unico, decisao 1). SEM invoice_id: ele e\n';
   c+='   unico por conta no provedor, e a segunda cobranca com o mesmo seria recusada.\n';
   c+='   NENHUM TEXTO NOSSO NOMEIA O PROVEDOR (regra 10 do plano): o rotulo da secao e o aviso de\n';
-  c+='   falha dizem so "cartão" -- quem desenha os botoes com a marca deles e o proprio SDK, e\n';
+  c+='   falha dizem so "cartao" -- quem desenha os botoes com a marca deles e o proprio SDK, e\n';
   c+='   isso nao da para mudar. */\n';
   c+='function secaoCartao(cartao){\n';
   c+='  var sep=document.createElement("div");sep.className="fca-ob-sep";sep.textContent="OU";cartao.appendChild(sep);\n';
