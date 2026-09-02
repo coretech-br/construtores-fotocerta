@@ -84,3 +84,5 @@ O erro aparecia no **último lugar possível**, que é o pior: a tela de quem es
 ## 5. Dívida registrada
 
 A recusa de formato devolve texto simples, como já faziam as recusas de charset e de tamanho — então ela **não abre o painel Identidade**. As recusas de campo *vazio* abrem (via `FCI_APONTA`), mas a frase daquele sufixo diz "preencha", que não serve para um campo preenchido errado. Mudar o sufixo mexeria em cinco mensagens já cobertas pelo invariante "as recusas dizem as mesmas palavras nos dois lados", e nenhuma medição pediu isso agora. Fica anotado em `docs/pendencias.md`.
+
+> **Dívida paga no dia seguinte.** `docs/specs/2026-08-23-dividas-pequenas-design.md` §1 trocou a frase do ponteiro para "abra o painel Identidade" (que serve aos dois casos) e passou a apontar **o primeiro campo com problema**, via `fciPrimeiroProblema` — cobrindo as três recusas de "chave errada", não só a de campo vazio.

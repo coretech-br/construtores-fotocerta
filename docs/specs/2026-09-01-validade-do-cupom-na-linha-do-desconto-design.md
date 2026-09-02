@@ -90,6 +90,8 @@ O que isso revela é que o projeto andou nas **duas direções** em rodadas dife
 
 **A dívida que fica, declarada em vez de escondida:** `Válido até:` é agora o **único** texto acentuado que estes dois blocos emitem. Continuam sem acento, na mesma tela do cliente: `Cupom invalido.`, `Copiar codigo Pix`, `Codigo copiado!`, `Ja paguei - avisar no WhatsApp`, `Esta foto nao carregou…`, `Seu carrinho esta vazio…`, `O sinal deste pedido e maior que o total…`, `Escolha ao menos um item: o pedido esta em zero.` e as mensagens de item que saiu do catálogo. Corrigi-los é uma rodada própria, com regressão própria — não um efeito colateral desta.
 
+> **Dívida paga no mesmo dia.** Todos os textos listados acima foram acentuados ainda em 01/09/2026, na rodada seguinte: `docs/specs/2026-09-01-acentuacao-do-texto-que-o-cliente-le-design.md` §4. O `index.html` confirma — `TXT_CUPOM_INVALIDO='Cupom inválido.'`, `TXT_COPIAR='Copiar código Pix'`, `TXT_ZAP='Já paguei - avisar no WhatsApp'`, entre outros.
+
 ## 8. Tempo
 
 Estimado no início: 45min – 1h15. Real: **~50 min**, incluindo a correção da aspa, o buraco do cenário da loja e esta spec.
