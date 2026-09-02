@@ -2303,14 +2303,21 @@
       <legend>Formato e espaço</legend>
       <label>Formato do contador</label>
       <div class="radios">
-      <label><input type="radio" name="c-formato" value="compacto" checked><span>Compacto <small>(número e rótulo colados: 02dias 14horas…)</small></span></label>
+      <label><input type="radio" name="c-formato" value="compacto" checked><span>Compacto <small>(02d 14h 33m 12s)</small></span></label>
       <label><input type="radio" name="c-formato" value="blocos"><span>Blocos com rótulo</span></label>
       </div>
-      <label for="c-rd">Rótulos das unidades <small>(valem nos dois formatos)</small></label>
+      <label for="c-txt-suf-d">Sufixos do formato <b>compacto</b> <small>(colados no número)</small></label>
+      <input type="text" id="c-txt-suf-d" value="d">
+      <input type="text" id="c-txt-suf-h" value="h">
+      <input type="text" id="c-txt-suf-m" value="m">
+      <input type="text" id="c-txt-suf-s" value="s">
+      <p class="ajuda">Estes quatro valem <b>só no formato Compacto</b> — que é o escolhido aqui em cima por padrão. São as letrinhas coladas em cada número: <code>02d:14h:33m:12s</code>. Por serem coladas, quase sempre uma letra só.</p>
+      <label for="c-rd">Rótulos das unidades, no formato <b>blocos</b> <small>(embaixo do número)</small></label>
       <input type="text" id="c-rd" value="dias">
       <input type="text" id="c-rh" value="horas">
       <input type="text" id="c-rm" value="min">
       <input type="text" id="c-rs" value="seg">
+      <p class="ajuda">Estes quatro valem <b>só no formato Blocos com rótulo</b>. São as palavras escritas embaixo de cada número, e por isso vêm por extenso. Mexer aqui <b>não muda</b> o relógio compacto — quem manda nele são os quatro campos acima.</p>
       <label for="c-pad">Espaçamento interno vertical <small>(px)</small></label>
       <input type="number" id="c-pad" value="10" min="0" max="40" step="1">
       <label for="c-largmax">Largura máxima do conteúdo <small>(px)</small></label>
@@ -2492,14 +2499,14 @@
   <div class="secao dobra" id="c-txt-cab" role="button" tabindex="0" aria-expanded="false" aria-controls="c-txt-corpo"><span class="secao-n">5</span> Textos que o cliente lê <span class="secao-dobra-seta">mostrar</span></div>
   <div class="grade fcd-oculto" id="c-txt-corpo">
     <div class="fcx-largo">
-      <p class="ajuda">As mensagens da barra estão na seção 2 e os rótulos das unidades na seção 3. O que sobra aqui são as costuras: o que separa um número do outro no relógio, as palavrinhas da data do <code>{prazo}</code> e o que o leitor de tela anuncia no botão de fechar. Todos já vêm com <b>exatamente o texto que a barra usa hoje</b>. A seção nasce recolhida porque quase nunca se mexe nela.</p>
+      <p class="ajuda">As mensagens da barra estão na seção 2, e os sufixos do relógio compacto e os rótulos dos blocos na seção 3. O que sobra aqui são as costuras: o que separa um número do outro no relógio, as palavrinhas da data do <code>{prazo}</code> e o que o leitor de tela anuncia no botão de fechar. Todos já vêm com <b>exatamente o texto que a barra usa hoje</b>. A seção nasce recolhida porque quase nunca se mexe nela.</p>
     </div>
     <div>
       <fieldset>
         <legend>Relógio</legend>
         <label for="c-txt-sep-relogio">Separador entre as unidades <small>(só no formato compacto)</small></label>
         <input type="text" id="c-txt-sep-relogio" value=":">
-        <p class="ajuda">Os <b>sufixos</b> que aparecem colados em cada número (<code>02dias</code>) saem dos <b>rótulos das unidades</b>, na seção 3 — os mesmos quatro campos que o formato “blocos” usa. Até 03/09/2026 o formato compacto trazia <code>d</code>, <code>h</code>, <code>m</code> e <code>s</code> cravados, e os quatro campos não valiam nada no formato padrão da aba.</p>
+        <p class="ajuda">É o que fica <b>entre</b> as unidades: <code>02d<b>:</b>14h<b>:</b>33m<b>:</b>12s</code>. As letrinhas <b>coladas</b> em cada número (o <code>d</code>, o <code>h</code>…) são outra coisa e ficam na <b>seção 3</b>, num grupo só delas — logo acima dos rótulos do formato “blocos”, que são um grupo à parte.</p>
       </fieldset>
     </div>
     <div>
@@ -2594,6 +2601,8 @@
       <p class="ajuda alerta"><b>O botão do PayPal no site é adulterável de um jeito que o Pix não é.</b> No Pix, o valor que a tela mostra é lido de dentro do mesmo código que o aplicativo do banco vai ler: os dois não têm como discordar. No botão do PayPal o valor é calculado no navegador do cliente e a tela pode dizer uma coisa enquanto a ordem leva outra. No botão do PayPal o valor é calculado no navegador do cliente: quem souber mexer paga o que quiser. Para valor alto, use o segundo modo — <b>colar um link de cobrança criado no próprio PayPal</b>, na seção 3: ali o valor fica guardado no PayPal e o cliente não alcança. A escolha é por cobrança.</p>
       <label for="p-txt-ou">Separador entre Pix e PayPal</label>
       <input type="text" id="p-txt-ou" value="OU">
+      <label for="p-txt-secao-paypal">Rótulo da seção do PayPal</label>
+      <input type="text" id="p-txt-secao-paypal" value="PayPal, cartão de crédito ou débito">
       <label for="p-txt-paypalfora">Quando o PayPal não carrega</label>
       <input type="text" id="p-txt-paypalfora" value="Não foi possível carregar o PayPal agora. Use o Pix acima, ou fale com a gente para receber outro link.">
       <label for="p-txt-sucesso">Pagamento aprovado pelo PayPal</label>
@@ -2633,6 +2642,8 @@
       <input type="text" id="p-t1" value="Pagamento do seu ensaio">
       <label for="p-t2">Rótulo do valor</label>
       <input type="text" id="p-t2" value="Total a pagar">
+      <label for="p-txt-secao-pix">Rótulo da seção do Pix</label>
+      <input type="text" id="p-txt-secao-pix" value="Pix">
       <label for="p-t3">Botão de copiar o Pix</label>
       <input type="text" id="p-t3" value="Copiar código Pix">
       <label for="p-t4">Botão do comprovante</label>
@@ -4097,6 +4108,11 @@ var FC_TXT_FABRICA={
      enumeracao do que a pagina nao faz, e a linha seguinte dela ("O PayPal TAMBEM nao tem como
      avisar...") depende dessa para o "tambem" significar alguma coisa. */
   pixManual:'O Pix não avisa a gente automaticamente. Assim que você pagar, toque em "Já paguei" para eu conferir e confirmar.',
+  /* O TITULO DA SECAO do Pix, e nao a linha do valor com desconto (que e o pixRotulo logo
+     abaixo). Sobe para ca em 03/09/2026, quando o Link de cobranca tornou o seu configuravel:
+     a aba Agendamento por pacote ja tinha o mesmo texto, escrito a mao na propria tabela dela.
+     Duas fabricas com a mesma frase e a fabrica divergindo amanha. */
+  secaoPix:'Pix',
   /* A FRASE INTEIRA, e nao so "Pagando via Pix" (decisao D-2): metade configuravel e
      armadilha -- o dono trocaria a frase e o sufixo ' (-5%)', que ele nao controla, continuaria
      grudado no fim. */
@@ -14091,7 +14107,7 @@ var A_TXT_DEFS=[
   ['txtSucesso','a-txt-sucesso','Pagamento aprovado. Obrigado!'],
   ['txtErroComPix','a-txt-erro-compix','Não foi possível carregar o pagamento por cartão agora. Use o Pix acima, ou fale com a gente para receber outra forma de pagar.'],
   ['txtErroSemPix','a-txt-erro-sempix','Não foi possível carregar o pagamento por cartão agora. Fale com a gente para receber outra forma de pagar.'],
-  ['txtPixRotulo','a-txt-pix-rotulo','Pix'],
+  ['txtPixRotulo','a-txt-pix-rotulo',FC_TXT_FABRICA.secaoPix],
   ['txtPixGerar','a-txt-pix-gerar','Gerar Pix'],
   ['txtPixCopiar','a-txt-pix-copiar',FC_TXT_FABRICA.pixCopiar],
   ['txtPixInstrucao','a-txt-pix-instrucao',FC_TXT_FABRICA.pixInstrucao],
@@ -15934,7 +15950,8 @@ function cToggles(){
      explicacao, e trocar defeito visivel por invisivel e o que este projeto recusa. */
   var semRel=(radio('c-contador')==='nao'),iq,qs;
   el=$('c-contador-aviso');if(el)el.style.display=semRel?'block':'none';
-  ['c-un-d','c-un-h','c-un-m','c-un-s','c-rd','c-rh','c-rm','c-rs','c-ef-piscar'].forEach(function(id){
+  ['c-un-d','c-un-h','c-un-m','c-un-s','c-rd','c-rh','c-rm','c-rs',
+   'c-txt-suf-d','c-txt-suf-h','c-txt-suf-m','c-txt-suf-s','c-ef-piscar'].forEach(function(id){
     var e=$(id);if(e)e.disabled=semRel;
   });
   ['c-diaszero','c-formato','c-dig'].forEach(function(nome){
@@ -16013,7 +16030,7 @@ function cColeta(){
       urg:radio('c-urg'),urglim:$('c-urglim').value,curg:$('c-curg-t').value,urgpulsar:radio('c-urgpulsar'),
       dig:radio('c-dig'),entrada:radio('c-entrada'),entradapx:$('c-entradapx').value}
   };
-  /* Os quatro textos configuraveis (ver C_TXT_DEFS, logo antes de cPrazoTexto). */
+  /* Os oito textos configuraveis (ver C_TXT_DEFS, logo antes de cPrazoTexto). */
   fcTxtLer(C_TXT_DEFS,r.c);
   return r;
 }
@@ -16080,7 +16097,7 @@ function cRestaura(st){
    ['c-curg',C.curg,'#8C1D18']].forEach(function(p){
     $(p[0]+'-t').value=p[1];$(p[0]).value=corValida(p[1])?p[1]:p[2];
   });
-  /* Os quatro textos configuraveis: estado gravado antes desta rodada nao tem nenhuma destas
+  /* Os oito textos configuraveis: estado gravado antes desta rodada nao tem nenhuma destas
      chaves -- o padrao de cada campo e o terceiro item de C_TXT_DEFS. */
   fcTxtRestaura(C_TXT_DEFS,C);
 }
@@ -16178,14 +16195,24 @@ function cAlvoIso(){
    na tela. */
 var C_PRAZO_MESES=['janeiro','fevereiro','mar\u00e7o','abril','maio','junho','julho','agosto',
   'setembro','outubro','novembro','dezembro'];
-/* ===== os quatro textos configuraveis desta aba (Rodada de textos configuraveis, Etapa 3) =====
+/* ===== os oito textos configuraveis desta aba (Rodada de textos configuraveis, Etapa 3) =====
    Mesmo molde de A_TXT_DEFS/U_TXT_DEFS: [chave no cfg/estado, id do campo na aba, texto padrao].
-   Os SUFIXOS do relogio compacto NAO estao aqui: por decisao D-13 (03/09/2026) eles passaram a
-   sair dos rotulos das unidades (c-rd/c-rh/c-rm/c-rs), que ate entao so valiam no formato
-   "blocos" -- ou seja, na configuracao de fabrica os quatro campos nao apareciam em lugar
-   nenhum da tela do cliente. Dois conectores comecam e terminam com ESPACO, e o espaco e parte
-   do texto. */
+   OS SUFIXOS DO RELOGIO COMPACTO SAO CAMPOS PROPRIOS, e nao os rotulos das unidades. A decisao
+   D-13 (03/09/2026) mandou o compacto ler c-rd/c-rh/c-rm/c-rs, e foi DESFEITA no mesmo dia: os
+   padroes de fabrica daqueles quatro sao 'dias'/'horas'/'min'/'seg' -- por extenso, porque e
+   assim que o formato "blocos" os mostra --, entao o relogio compacto de fabrica passou a ler
+   "02dias:14horas:33min:12seg" no lugar do "02d:14h:33m:12s" que sempre leu. E o compacto e o
+   formato PADRAO da aba: a mudanca trocou a aparencia de um bloco ja publicado, que era
+   exatamente o que esta rodada nao podia fazer -- o objetivo era tornar configuravel SEM mudar
+   nada. A queixa que gerou D-13 (quatro campos que nao faziam efeito nenhum no formato padrao)
+   continua atendida, mas pela resposta certa: cada grupo tem o seu <p class="ajuda"> dizendo a
+   qual formato serve. Dois conectores comecam e terminam com ESPACO, e o espaco e parte do
+   texto. */
 var C_TXT_DEFS=[
+  ['txtSufD','c-txt-suf-d','d'],
+  ['txtSufH','c-txt-suf-h','h'],
+  ['txtSufM','c-txt-suf-m','m'],
+  ['txtSufS','c-txt-suf-s','s'],
   ['txtSepRelogio','c-txt-sep-relogio',':'],
   ['txtPrazoConector','c-txt-prazo-conector',' de '],
   ['txtPrazoConectorHora','c-txt-prazo-conector-hora',' \u00e0s '],
@@ -16303,7 +16330,7 @@ function cCfg(){
     dig:radio('c-dig'),entrada:radio('c-entrada'),entradapx:cPreso('c-entradapx',300),
     msgs:cMsgs.length?cMsgs:[{texto:'Oferta por tempo limitado {contador}',curta:''}]
   };
-  /* Os quatro textos configuraveis (ver C_TXT_DEFS): lidos direto do DOM pela tabela unica --
+  /* Os oito textos configuraveis (ver C_TXT_DEFS): lidos direto do DOM pela tabela unica --
      cCfg() so roda com a aba aberta, entao os campos sempre existem. */
   fcTxtLer(C_TXT_DEFS,r);
   return r;
@@ -16658,7 +16685,8 @@ function cJsBase(cfg){
      uma barra: a mensagem, o botao e a coruja seguem onde estavam. */
   if(cfg.contador){
     j+='  var UNIDADES={d:'+cfg.unidades.d+',h:'+cfg.unidades.h+',m:'+cfg.unidades.m+',s:'+cfg.unidades.s+'};  /* true|false: quais unidades aparecem no relogio */\n';
-    j+="  var ROTULOS={d:'"+esc(escHtml(cfg.rotulos.d))+"',h:'"+esc(escHtml(cfg.rotulos.h))+"',m:'"+esc(escHtml(cfg.rotulos.m))+"',s:'"+esc(escHtml(cfg.rotulos.s))+"'};  /* nomes das unidades: embaixo do numero no formato 'blocos', colados nele no 'compacto' */\n";
+    j+="  var ROTULOS={d:'"+esc(escHtml(cfg.rotulos.d))+"',h:'"+esc(escHtml(cfg.rotulos.h))+"',m:'"+esc(escHtml(cfg.rotulos.m))+"',s:'"+esc(escHtml(cfg.rotulos.s))+"'};  /* nomes das unidades, embaixo do numero -- so no formato 'blocos' */\n";
+    j+="  var SUFIXOS={d:'"+esc(escHtml(cfg.txtSufD))+"',h:'"+esc(escHtml(cfg.txtSufH))+"',m:'"+esc(escHtml(cfg.txtSufM))+"',s:'"+esc(escHtml(cfg.txtSufS))+"'};  /* letrinhas coladas no numero -- so no formato 'compacto' */\n";
     j+='  var ESCONDE_DIAS_ZERADOS='+cfg.diaszero+';  /* true = o bloco de dias some quando chega a zero */\n';
     j+="  var FORMATO='"+cfg.formato+"';           /* 'compacto' | 'blocos' */\n";
     j+="  var DIG='"+cfg.dig+"';                    /* 'nenhuma' | 'fade' | 'flip' */\n";
@@ -16684,17 +16712,17 @@ function cJsBase(cfg){
   j+='    return {d:Math.floor(t/86400),h:Math.floor(t%86400/3600),m:Math.floor(t%3600/60),s:t%60};\n  }\n\n';
   j+='  function itensRelogio(p){\n';
   j+='    /* Cada item e [digitos, rotulo do formato blocos, IDENTIDADE da unidade, sufixo do\n';
-  j+='       formato compacto]. Os dois textos saem hoje do MESMO campo da ferramenta, mas\n';
-  j+='       ocupam posicoes separadas de proposito: a terceira e a identidade que chaveRelogio\n';
-  j+='       usa para saber quando o marcador precisa ser remontado (ao cruzar 24h, quando o\n';
-  j+='       bloco de dias some). Texto do dono nessa posicao faria duas unidades com o mesmo\n';
-  j+='       texto -- ou com texto vazio -- pararem de ser distinguidas, e o relogio deixaria de\n';
-  j+='       se remontar EM SILENCIO. */\n';
+  j+='       formato compacto]. Os dois TEXTOS saem de campos diferentes da ferramenta -- um\n';
+  j+='       grupo por formato --, e a terceira posicao nao sai de campo nenhum: ela e a\n';
+  j+='       identidade que chaveRelogio usa para saber quando o marcador precisa ser remontado\n';
+  j+='       (ao cruzar 24h, quando o bloco de dias some). Texto do dono nessa posicao faria\n';
+  j+='       duas unidades com o mesmo texto -- ou com texto vazio -- pararem de ser\n';
+  j+='       distinguidas, e o relogio deixaria de se remontar EM SILENCIO. */\n';
   j+='    var itens=[];\n';
-  j+='    if(UNIDADES.d&&!(ESCONDE_DIAS_ZERADOS&&p.d===0))itens.push([dois(p.d),ROTULOS.d,\'d\',ROTULOS.d]);\n';
-  j+='    if(UNIDADES.h)itens.push([dois(p.h),ROTULOS.h,\'h\',ROTULOS.h]);\n';
-  j+='    if(UNIDADES.m)itens.push([dois(p.m),ROTULOS.m,\'m\',ROTULOS.m]);\n';
-  j+='    if(UNIDADES.s)itens.push([dois(p.s),ROTULOS.s,\'s\',ROTULOS.s]);\n';
+  j+='    if(UNIDADES.d&&!(ESCONDE_DIAS_ZERADOS&&p.d===0))itens.push([dois(p.d),ROTULOS.d,\'d\',SUFIXOS.d]);\n';
+  j+='    if(UNIDADES.h)itens.push([dois(p.h),ROTULOS.h,\'h\',SUFIXOS.h]);\n';
+  j+='    if(UNIDADES.m)itens.push([dois(p.m),ROTULOS.m,\'m\',SUFIXOS.m]);\n';
+  j+='    if(UNIDADES.s)itens.push([dois(p.s),ROTULOS.s,\'s\',SUFIXOS.s]);\n';
   j+='    return itens;\n  }\n';
   j+='  /* a chave identifica QUAIS unidades estao visiveis (ex: "hms" ou "dhms") -- muda\n';
   j+='     so quando ESCONDE_DIAS_ZERADOS derruba o bloco de dias ao cruzar 24h. So nesse\n';
@@ -17013,7 +17041,11 @@ function cLimpar(){
   setRadio('c-dig','nenhuma');setRadio('c-entrada','imediata');
   [['c-dias','0'],['c-horas','48'],['c-mins','0'],['c-alvo',''],['c-cod',''],
    ['c-fimtxt','Promoção encerrada'],['c-tam','15'],['c-rd','dias'],['c-rh','horas'],
-   ['c-rm','min'],['c-rs','seg'],['c-pad','10'],['c-largmax','1100'],['c-mob','640'],
+   ['c-rm','min'],['c-rs','seg'],
+   /* Os sufixos do compacto andam com os rotulos dos blocos: sao dois grupos irmaos, lado a
+      lado na mesma tela, e "Limpar" devolver um e deixar o outro seria assimetria visivel. */
+   ['c-txt-suf-d','d'],['c-txt-suf-h','h'],['c-txt-suf-m','m'],['c-txt-suf-s','s'],
+   ['c-pad','10'],['c-largmax','1100'],['c-mob','640'],
    ['c-z','99980'],['c-ctatxt','Quero garantir'],['c-ctaurl','#reserva'],['c-gap','16'],
    ['c-corujaalt','26'],['c-vel','18'],['c-alt','5'],['c-urglim','60'],['c-entradapx','300']]
     .forEach(function(p){var el=$(p[0]);if(el)el.value=p[1];});
@@ -17253,7 +17285,7 @@ function pValDia(){
    Uma leitura so da interface, ja presa nas faixas. E o que pGerar valida, e e o que pBloco
    monta -- e como a previa executa o retorno de pBloco, nao sobra nenhuma segunda
    implementacao da pagina de pagamento para divergir do bloco entregue. */
-/* ===== os 9 textos configuraveis desta aba (Rodada de textos configuraveis, 02/09/2026) =====
+/* ===== os 11 textos configuraveis desta aba (Rodada de textos configuraveis, 02/09/2026) =====
    Mesmo molde de A_TXT_DEFS (aba Agendamento por pacote, logo acima na ferramenta): [chave no
    cfg/estado, id do campo, texto padrao -- o mesmo que saia fixo no bloco antes desta rodada].
    txtZapMsg usa o marcador {desc}/{valor} no mesmo padrao {data} que TXT_PRAZO/TXT_VENCIDO ja
@@ -17268,6 +17300,17 @@ var P_TXT_DEFS=[
      o " (-N%)" era colado por fora, no bloco. Mesma tabela unica do Checkout e da Mini loja. */
   ['txtPixRotulo','p-txt-pixrotulo',FC_TXT_FABRICA.pixRotulo],
   ['txtOu','p-txt-ou','OU'],
+  /* O TITULO DE CADA UMA DAS DUAS SECOES DE PAGAMENTO. Ficaram fixos na Etapa 1 e sao os
+     unicos textos que sobraram cravados nesta pagina.
+     O do Pix sai de FC_TXT_FABRICA: a aba Agendamento por pacote ja tem o mesmo texto ('Pix'),
+     no mesmo lugar da tela -- o titulo da secao --, entao a fabrica e uma so.
+     O do PayPal NAO sai de la, e a razao e a mesma do pixManual da aba pac: o texto equivalente
+     que existe nas outras abas e 'Cartao de credito ou debito' (a-txt-cartao-rotulo), que NAO
+     nomeia o PayPal porque naquela pagina o cliente ve campos de cartao. Aqui ele ve o botao
+     amarelo do PayPal, e o rotulo o anuncia. Frase parecida nao e frase unica -- e juntar as
+     duas numa fabrica so mudaria o texto de uma das duas paginas. */
+  ['txtSecaoPix','p-txt-secao-pix',FC_TXT_FABRICA.secaoPix],
+  ['txtSecaoPaypal','p-txt-secao-paypal','PayPal, cartão de crédito ou débito'],
   ['txtPaypalFora','p-txt-paypalfora','Não foi possível carregar o PayPal agora. Use o Pix acima, ou fale com a gente para receber outro link.'],
   ['txtSucesso','p-txt-sucesso','Pagamento aprovado. Obrigado!'],
   ['txtNota','p-txt-nota',FC_TXT_FABRICA.nota],
@@ -17307,7 +17350,7 @@ function pCfg(){
     valdia:pValDia(), valbruto:$('p-validade').value,
     ppmodo:(usapp?ppmodo:'nao'), pplink:$('p-pplink').value.trim()
   };
-  /* Os 9 textos configuraveis (ver P_TXT_DEFS): lidos direto do DOM, como t1..t9 acima -- pCfg()
+  /* Os 11 textos configuraveis (ver P_TXT_DEFS): lidos direto do DOM, como t1..t9 acima -- pCfg()
      so roda com a aba aberta. */
   fcTxtLer(P_TXT_DEFS,r);
   return r;
@@ -17437,8 +17480,10 @@ function pJs(cfg){
   /* O mesmo rotulo que o carrinho do Checkout escreve, pela mesma razao de sempre: o cliente
      que ja viu a loja le a mesma frase na pagina de cobranca. */
   j+="  var TXT_PIX_ROTULO='"+escJs(cfg.txtPixRotulo)+"';\n";
+  j+="  var TXT_SECAO_PIX='"+escJs(cfg.txtSecaoPix)+"';\n";
   if(cfg.zap)j+="  var TXT_PIX_MANUAL='"+escJs(cfg.txtPixManual)+"';\n";
   if(cfg.usapp)j+="  var TXT_OU='"+escJs(cfg.txtOu)+"';\n";
+  if(cfg.usapp)j+="  var TXT_SECAO_PAYPAL='"+escJs(cfg.txtSecaoPaypal)+"';\n";
   if(cfg.usapp)j+="  var TXT_PAYPAL_FORA='"+escJs(cfg.txtPaypalFora)+"';\n";
   /* O aviso do recebedor: ja existe (hardcoded) no Checkout e na Mini loja; aqui ele nasce
      configuravel, decisao do dono na mesma rodada -- e o UNICO destes textos que acrescenta
@@ -17602,7 +17647,7 @@ function pJs(cfg){
      carregando so a maquinaria escolhida, como no resto da ferramenta. */
   j+='  function pix(c,codigo'+(cfg.zap?',valor,desc,txid':'')+'){\n';
   j+="    var b=novo('div','fcpg-bloco');\n";
-  j+="    b.appendChild(novo('div','fcpg-rot','Pix'));\n";
+  j+="    b.appendChild(novo('div','fcpg-rot',TXT_SECAO_PIX));\n";
   j+="    var ta=document.createElement('textarea');\n";
   j+="    ta.className='fcpg-cod';\n";
   j+="    ta.setAttribute('readonly','readonly');\n";
@@ -17641,7 +17686,7 @@ function pJs(cfg){
        forma de pagamento, e um "OU" solto embaixo do Pix prometeria uma que nao vem. */
     j+="    c.appendChild(novo('div','fcpg-sep',TXT_OU));\n";
     j+="    var b=novo('div','fcpg-bloco fcpg-semtopo');\n";
-    j+="    b.appendChild(novo('div','fcpg-rot','PayPal, cartão de crédito ou débito'));\n";
+    j+="    b.appendChild(novo('div','fcpg-rot',TXT_SECAO_PAYPAL));\n";
     j+='    if(modo){\n';
     j+='      if(!paypalLinkOk(modo)){c.appendChild(b);return;}\n';
     j+="      var a=novo('a','fcpg-bt','Pagar no PayPal');\n";
@@ -18083,7 +18128,7 @@ function pColeta(){
     desc:$('p-desc').value,valor:$('p-valor').value,txid:$('p-txid').value,
     validade:$('p-validade').value,descpix:$('p-descpix').value,
     ppmodo:radio('p-ppmodo'),pplink:$('p-pplink').value};
-  /* Os 9 textos configuraveis (ver P_TXT_DEFS, logo antes de pCfg). */
+  /* Os 11 textos configuraveis (ver P_TXT_DEFS, logo antes de pCfg). */
   fcTxtLer(P_TXT_DEFS,r);
   return {p:r};
 }
@@ -18103,7 +18148,7 @@ function pRestaura(st){
   if(P.coruja)setRadio('p-coruja',P.coruja);
   if(P.corujaalt!==undefined)$('p-corujaalt').value=P.corujaalt;
   for(i=1;i<=9;i++)if(P['t'+i]!==undefined)$('p-t'+i).value=P['t'+i];
-  /* Os 9 textos configuraveis: estado gravado antes desta rodada (02/09/2026) nao tem
+  /* Os 11 textos configuraveis: estado gravado antes desta rodada (02/09/2026) nao tem
      nenhuma destas chaves -- o padrao de cada campo e o terceiro item de P_TXT_DEFS. */
   fcTxtRestaura(P_TXT_DEFS,P);
   if(P.desc!==undefined)$('p-desc').value=P.desc;
