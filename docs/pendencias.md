@@ -56,7 +56,16 @@ Entregue em 03/09/2026: **todo texto que o cliente final lê virou campo**, nas 
 
 O que cada parte provou: **a regressão byte a byte** (`scripts/verificar/regressao.sh`) foi rodada ao fim de cada etapa contra a referência anterior, e toda divergência está nomeada no commit correspondente, ligada à decisão que a autorizou — D-1 (`{PCT}` → `{pct}`, com a leitura aceitando as duas grafias), D-2 e D-3 (a frase inteira no campo, em vez do sufixo colado por fora), D-5 (`{n}` nos avisos de carrinho), D-11 (`Próxima foto` acentuado), o aviso do Pix novo nas quatro abas, o `c-out1` da correção de D-13 e os dois rótulos de seção da `/pagar`. Fora dessas, as demais saídas e as 9 cobranças saíram **byte a byte idênticas**, que é o invariante que a rodada existia para não quebrar. Na Etapa 1, o mesmo invariante foi conferido também **nos cenários que a fotografia não exercita** (a vitrine no modo "somente PayPal"). A **prévia da vitrine ganhou o alternador computador/celular** (Etapa 6, mesclada de `pac-previa-celular`), com as 24 saídas byte a byte idênticas — mexer na prévia não pode mudar um byte do que a ferramenta gera, e não mudou. E um ponto foi provado **com o bloco rodando de verdade**, porque a regressão não alcançaria: depois da separação entre a identidade da unidade e o sufixo visível (D-12), o marcador do relógio continua se remontando ao cruzar 24h **com os sufixos de fábrica, vazios e repetidos** — se o dono tivesse ficado com a identidade, dois sufixos iguais parariam a remontagem em silêncio.
 
-Em fila, agora, só as **famílias de pacotes** (última seção deste arquivo), que estavam combinadas na mesma rodada. Depois delas, a próxima sai do que o dono encontrar no uso.
+Entregue em 03/09/2026, fechando a mesma rodada: as **famílias de pacotes na aba `pac`** (documentação: `docs/documentacao-fotocerta.md` §4, "Famílias de pacotes na aba `pac`"; desenho: `docs/superpowers/plans/2026-09-03-rodada-unica-textos-e-familias.md`, item 7 e a revisão do desenho; commits `f393dea` e `540ab53`). A família virou o **passo 1** da vitrine — o caso real é o aluguel do estúdio para fotógrafos parceiros, com pacotes por duração separados entre dias úteis e fins de semana/feriados, estes mais caros. `aFamilias` é lista irmã de `aPacotes`, e cada pacote aponta para a família **pelo `id`**, nunca pelo nome; o `id` é determinístico (`'F'+(maior+1)`).
+
+O que cada parte provou:
+
+- **O colapso para dois passos**, na primeira etapa da regressão: com **uma** família, das 24 saídas e das 9 cobranças **só `a-out1` mudou**, e só nos dois trechos previstos (as regras do formato compacto dentro da `@media` e a classe da caixa de preço). Nenhum `var FAMILIAS=`, nenhum `fam:` dentro de `PACOTES`, nenhum terceiro passo — que era exatamente o que a leitura do diff existia para conferir.
+- **A parametrização de `aPacotesSrc`**, na segunda etapa: o cenário de `scripts/verificar/geradores.mjs` ganhou a segunda família (`F2`, "Fins de semana") e um terceiro pacote nela, porque sem isso todo o caminho novo ficava **fora** da fotografia byte a byte. Depois disso, das 24 saídas só as três da aba `pac` diferem; `a-out2` e `a-out3` diferem **pelo terceiro pacote**, e `a-out3` continua **sem** o campo `fam` — a prova de que a página de obrigado não ganhou o que não pediu. As 9 cobranças, bloco e link, idênticas.
+- **A migração**, pelos três caminhos (estado do navegador, preset antigo, arquivo de "Exportar tudo" antigo): um aviso, uma vez, que **não repete na recarga**, com os pacotes na família "Pacotes" e nada perdido — e **nenhum alerta em estado limpo**, que é obrigatório porque o arnês limpa o `localStorage` antes de cada passagem e coleta os alertas: um aviso ali viraria divergência na fotografia, e o dono veria na tela o aviso de uma migração que não aconteceu.
+- **O conserto do "Exportar tudo"** (abaixo, item 8): o mesmo arquivo v1, a referência descarta **9** itens e a árvore nova descarta **7** — a diferença são os dois `link`, que agora sobrevivem e alimentam a migração.
+
+A próxima rodada sai do que o dono encontrar no uso.
 
 ---
 
@@ -109,6 +118,12 @@ Três textos que o cliente final lê **continuam cravados**, e as três exclusõ
 6. **Os dois `aria-label` do seletor de quantidade** — `Diminuir a quantidade` e `Aumentar a quantidade` — moram na fonte única `fcFazQtdSrc`, que serve **três** abas ao mesmo tempo (Checkout, Mini loja e Agendamento por pacote). Torná-los configuráveis por aba exigiria parametrizar a fonte e mexer nos três geradores; um campo só para as três seria a fábrica única sem a liberdade por aba, que é justamente o oposto da regra desta rodada. Fica como está, declarado.
 7. **O cenário da regressão não preenche nenhum campo de texto.** Medido na árvore em 03/09/2026: `scripts/verificar/geradores.mjs` não escreve em nenhum `*-txt-*`, então a fotografia byte a byte prova **o caminho de fábrica** e nada diz sobre o caminho configurado — um texto que o gerador deixasse de emitir, ou emitisse escapado errado, passaria pela regressão sem acusar. É a mesma armadilha já registrada três vezes neste arquivo (o cupom da Mini loja em 01/09, `t-out4`/`t-out5`, a própria aba `pac` na v1): **cenário que não exercita um caminho não prova nada sobre ele.** O conserto é barato — configurar um punhado de textos com marcador no cenário, o suficiente para exercitar `aTplJs` nas duas pontas (com e sem marcador) — e cabe na próxima rodada que tocar o arnês.
 
+### Novas em 03/09/2026, rodada das famílias
+
+8. **Os campos numéricos da aba `pac` são gravados como TEXTO, e a conferência da importação recusa por tipo — achado ao medir o conserto do `link`, e NÃO consertado.** `aColeta()` lê cada numérico por `aElVal(id, padrão)`, que devolve `el.value` — sempre uma **string**, mesmo o `<input type="number">`. São `prazoh`, `descpix`, `parcelas`, `altdesk`, `altmob`, `largmob` e `qtdmax`: **sete** antes desta rodada, **oito** com o `largcards` que ela acrescentou. Como o molde da conferência é uma fotografia do próprio `aColeta()` (`fcxMolde` chama `fcPresetCapturar`), o molde diz "string" para os oito; e `fcxConformar` compara `typeof` e recusa quando não bate (`index.html`, `if(typeof v!==t)return {ok:false}` dentro do ramo `string|number|boolean`). Consequência: um arquivo de "Exportar tudo" **gerado por outra ferramenta, ou editado à mão** com os números crus (`"prazoh": 24` em vez de `"prazoh": "24"`) perde os oito campos **em silêncio** — eles somem do fragmento, a aba volta aos padrões, e a única pista é o contador dizendo *"N item(ns) do arquivo NÃO foram reconhecidos e ficam de fora"*, **sem dizer quais**. O número foi medido nas duas árvores ao escrever o teste da migração: sete descartes que nada têm a ver com famílias.
+
+   **Existe igual antes desta rodada** — é a forma como `aColeta` sempre gravou, e o mesmo padrão vale para os numéricos das outras abas —, e por isso não foi consertado aqui: a rodada era das famílias, e mexer no tipo do que `aColeta` grava muda o **formato do arquivo de backup** de todas as abas de uma vez, com a compatibilidade dos backups já existentes junto. Os dois consertos possíveis, para quando houver rodada: converter no `aColeta` (`parseFloat`), que muda o formato gravado, ou fazer `fcxConformar` aceitar a string que representa o número do molde, que não muda. O terceiro conserto, independente dos dois e mais barato, é a mensagem **dizer quais** chaves ficaram de fora, em vez de só contá-las — o contador existe para o operador confiar no número, e um número sem nome não dá o que conferir.
+
 ### Fechadas em 23/08/2026
 
 Spec: `docs/specs/2026-08-23-dividas-pequenas-design.md`.
@@ -122,30 +137,13 @@ Junto delas, uma correção que não era dívida e sim **texto falso**: a ferram
 
 ---
 
-## Combinado em 03/09/2026 — o que sobrou
+## Combinado em 03/09/2026 — os três itens, todos entregues
 
-Dos três itens combinados em 03/09/2026, **dois foram entregues** na mesma rodada e estão descritos acima, na lista de entregues:
+Os três itens combinados em 03/09/2026 saíram na mesma rodada e estão descritos acima, na lista de entregues:
 
-- **O aviso de que o Pix não confirma sozinho, nas quatro abas de pagamento** (item 1) — entregue, configurável, dentro da área do Pix e logo acima do "Já paguei", com o texto próprio da aba `pac` (aquela página não tem esse botão) e sem emissão nenhuma onde o botão do WhatsApp está desligado.
-- **O subtítulo opcional da vitrine, com `{pct}`** (item 3) — entregue. Vazio, que é o padrão, não emite regra de CSS, `div` nem variável: a vitrine de fábrica sai byte a byte como antes.
-
-Sobra o item 2.
-
-### Famílias de pacotes na aba `pac` — implementação em curso
-
-**Escolha do dono: opção A — a família é o passo 1.** O fluxo passa a ser `escolher a família → escolher o pacote → agendar`, três passos numerados; quem tiver uma família só continua vendo dois passos, sem passo vazio. O caso real é o **aluguel do estúdio para fotógrafos parceiros**: pacotes por duração (1h, 2h, 4h, diária), separados em dias úteis e fins de semana/feriados, estes com preço maior — oito cartões numa vitrine só, no celular, é rolagem demais.
-
-Mockups apresentados em 03/09/2026 (quatro opções, celular, com a troca de pacote em foco): https://claude.ai/code/artifact/a83e1f73-53d9-4868-a8c6-243cf591963b
-
-**A implementação está em curso enquanto esta linha é escrita**, e o desenho aprovado — com as quatro amarrações da revisão — vive em `docs/superpowers/plans/2026-09-03-rodada-unica-textos-e-familias.md` (item 7 e a seção "Revisão do desenho das famílias"). Em resumo, o que ainda tem de ficar de pé quando ela fechar:
-
-- **A forma dos dados muda**: `aPacotes` deixa de ser lista plana solta e cada pacote passa a apontar para uma família, **pelo `id`** e nunca pelo nome — renomear uma família é a operação mais provável do dono, e com o nome como vínculo ela deixaria todos os pacotes órfãos em silêncio. O `id` é determinístico (`'F'+(maior+1)`): aleatório ou por relógio inutilizaria a comparação byte a byte.
-- **Migração de quem já gravou configuração sem família**, no mesmo padrão da migração `link` → `path` da v2: converter na hora, **nunca calado**, com aviso uma vez ao fim — e sem disparar em estado limpo, senão o arnês acusaria divergência e o dono veria aviso de uma migração que não houve.
-- **Uma família só não emite nada de família** — nem catálogo de famílias, nem campo por pacote, nem CSS. É o que preserva o invariante byte a byte para quem já tem a aba configurada.
-- **Cada passo numerado exibe o que foi resolvido nele** (achado pelo dono no mockup): o passo 1 mostra a família escolhida com o "trocar" dela, o passo 2 mostra o pacote com o "trocar" dele, o passo 3 é o calendário. Passo com título e nada embaixo lê-se como etapa pendente, e o cliente fica procurando o que fazer ali.
-- **Cartões altos no computador, linhas compactas no celular**, por `@media` presa à faixa declarada dentro da própria função de configuração.
-- **O cenário da regressão precisa ganhar uma segunda família**, em duas etapas — primeiro com uma família (provando o invariante), depois com a segunda (fotografando o caminho novo). Sem isso, todo o caminho novo fica **fora** da fotografia byte a byte, que é a armadilha repetida deste projeto.
-- **Painel consolidado, preset da aba e regressão byte a byte** acompanham, como sempre.
+- **O aviso de que o Pix não confirma sozinho, nas quatro abas de pagamento** (item 1) — configurável, dentro da área do Pix e logo acima do "Já paguei", com o texto próprio da aba `pac` (aquela página não tem esse botão) e sem emissão nenhuma onde o botão do WhatsApp está desligado.
+- **As famílias de pacotes na aba `pac`** (item 2) — opção A dos mockups: a família é o passo 1, e quem tiver uma família só continua vendo dois passos, sem passo vazio. Mockups apresentados em 03/09/2026 (quatro opções, celular, com a troca de pacote em foco): https://claude.ai/code/artifact/a83e1f73-53d9-4868-a8c6-243cf591963b
+- **O subtítulo opcional da vitrine, com `{pct}`** (item 3) — vazio, que é o padrão, não emite regra de CSS, `div` nem variável: a vitrine de fábrica sai byte a byte como antes.
 
 ---
 
