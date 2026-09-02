@@ -282,12 +282,24 @@ export async function configurarTextos(pg){
    armadilha ja registrada aqui para t-out4/t-out5: saida que so aparece as vezes e onde o
    defeito se esconde. Dois cupons de proposito: um COM prazo e um SEM, porque a linha do
    desconto se comporta diferente nos dois casos. */
+/* O TERCEIRO cupom, o do VALOR MINIMO DO PEDIDO (03/09/2026), entra pela MESMA razao dos
+   outros dois: sem ele, toda a maquinaria do minimo -- cupomMinimoOk, os dois textos, a
+   conferencia dentro do recalculo e a chave 'minimo' na lista CUPONS -- fica FORA da
+   fotografia byte a byte, e a regressao passaria com folga sobre codigo que ela nunca viu.
+   O CODIGO E O VALOR SAO CADASTRADOS NOS DOIS LADOS, e so o MINIMO e condicional: numa
+   arvore de referencia anterior a esta rodada o campo '*-cp-min' nao existe, mas o cupom
+   existe do mesmo jeito -- e assim a divergencia que a regressao mostra e exatamente "este
+   cupom ganhou um minimo", e nao "apareceu um cupom a mais", que misturaria duas coisas.
+   Tres cupons de proposito: um com prazo, um sem nada, e um com minimo. */
 export async function cupons(pg, pref){
-  for(const [cod, valor, val] of [['NATAL10','10','2027-12-25'],['SEMPRE','5','']]){
+  for(const [cod, valor, val, min] of [['NATAL10','10','2027-12-25',''],
+                                       ['SEMPRE','5','',''],
+                                       ['MIN300','10','','300']]){
     await set(pg, pref+'-cp-cod', cod);
     await radio(pg, pref+'-cp-tipo', 'pct_total');
     await set(pg, pref+'-cp-valor', valor);
     await set(pg, pref+'-cp-val', val);
+    if(min && await pg.$('#'+pref+'-cp-min')) await set(pg, pref+'-cp-min', min);
     await clicar(pg, pref+'-cp-add');
   }
 }

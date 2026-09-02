@@ -13,6 +13,7 @@ material de apoio, roda no seu computador.
 | `geradores.mjs` | Fotografa o TEXTO que as dez abas produzem, em DUAS passagens (`fabrica` e `configurada`), mais o link completo de cada cenario de cobranca, e grava num JSON. | Para provar que uma mudanca no gerador nao alterou um byte do que as outras abas produzem -- e que o texto configurado pelo dono chega ao bloco. Chamado por `regressao.sh`; raramente direto. |
 | `regressao.sh` | Compara a fotografia da arvore de trabalho com a de uma referencia (`main` por padrao). | Ao fim de toda rodada que mexer em codigo gerado. `scripts/verificar/regressao.sh` ou `scripts/verificar/regressao.sh <ref>`. |
 | `textos-escape.mjs` | Pega os blocos gerados COM os textos de escape (aspas simples e duplas, barra invertida, acento e `</script`) e os EXECUTA numa pagina de verdade, uma por bloco. Checa que nenhum `</script` engoliu o resto do documento, que o bloco desenhou, que nao houve erro de console e que o texto do dono chegou inteiro a tela. | Ao mexer em qualquer escape (`esc`, `escJs`, `escJsD`, `escAttr`, `aTplJs`) ou em qualquer texto configuravel. `node scripts/verificar/textos-escape.mjs`. |
+| `cupom-minimo.mjs` | O VALOR MINIMO DO PEDIDO PARA O CUPOM VALER, com os blocos RODANDO: gera as tres abas que tem cupom (Checkout, Mini loja e Agendamento por pacote) com um cupom de minimo e um sem, executa cada bloco numa pagina e percorre os cinco casos -- aplicado acima, recusado abaixo, a QUEDA AUTOMATICA ao tirar um item, o voltar a subir que nao reaplica, e o cupom sem minimo intacto. Le o total NA TELA, nunca a variavel. Fecha com a compatibilidade: estado de versao anterior, "Exportar tudo"/importar e preset de aba. | Ao mexer em qualquer coisa do cupom nas tres abas -- a regra do minimo, `FC_CARRINHO_SRC`, `fcCpSerial` ou os dois textos novos. `node scripts/verificar/cupom-minimo.mjs`. |
 | `pagina.mjs` | O MOLDE reutilizavel para pegar um bloco gerado e executa-lo de verdade numa pagina que imita uma do Prosite (servidor de uma rota, rede externa bloqueada, relogio falso opcional, `reducedMotion` opcional). Exporta `comBlocoNaPagina`, `gerarNaFerramenta`, `textoSemScripts`, `chk`, `resumo`. | Quando o teste precisa que o bloco RODE num DOM (anima? o botao aparece? o valor calculado bate?), nao so que o texto gerado seja igual a uma referencia. Cada teste concreto e um script pequeno que importa este modulo -- ver exemplo abaixo. |
 
 ## Como rodar
@@ -30,6 +31,9 @@ scripts/verificar/regressao.sh algum-commit
 
 # os blocos com os textos de escape, executando de verdade
 node scripts/verificar/textos-escape.mjs
+
+# o valor minimo do cupom, com os tres blocos rodando de verdade
+node scripts/verificar/cupom-minimo.mjs
 
 # um teste novo que use o molde de pagina.mjs (exemplo, nao existe no repo)
 node scripts/verificar/teste-bordas.mjs

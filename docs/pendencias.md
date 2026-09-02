@@ -105,9 +105,27 @@ Em 23/08/2026 o dono pediu que **todas** fossem feitas. Ficou uma, e ela é dele
 ### Novas em 03/09/2026, décima aba v2
 
 2. **A `/pagar` continua com a própria cópia do pedido do PayPal (`actions.order.create`)**, e isso é decisão, não esquecimento — medida ao extrair a fonte única (Task 1 do plano v2): o Checkout e a Mini loja montam o item a partir de um carrinho (`subtotal()`/`somaProdutos()`/`cupomAtivo`); a `/pagar` monta de um item único vindo do link, sem carrinho nenhum. O esqueleto comum aos três (SDK, `style` dos botões, guarda de total zero, `purchase_units`, `onApprove`, `onError`) foi extraído e é consumido pelo Checkout e pela Mini loja; puxar a `/pagar` para dentro também exigiria mexer numa saída que já está publicada cobrando, fora do escopo desta rodada — e o ganho seria pequeno, porque a `/pagar` já é a mais simples das quatro. Extração completa fica registrada aqui, não forçada.
-3. **Dois defeitos pré-existentes do Checkout, achados ao ler o código desta rodada e não corrigidos, por estarem fora do escopo** (o arquivo é do Checkout, a tarefa era da aba `pac`):
-   - `uProdRender` (index.html:10636+) escreve o plural de "opcional" como `nome+'is'`, o que produz **"2 opcionalis"** em vez de "2 opcionais" — achado ao escrever o mesmo resumo para a aba `pac`, que usa a troca de palavra inteira (`'opcional'`/`'opcionais'`), correta.
-   - `uProdSalvar` (`alert('Informe o preco do produto.')`) e `uCpPctErro` (index.html:10703, a recusa de cupom acima de 100%) têm mensagens **sem acento**, fora da norma de 01/09/2026 (texto que o cliente lê sai acentuado); a versão da aba `pac` (`aCpPctErro`) já nasceu acentuada e, por sinal, sem citar "PayPal" — a versão do Checkout ainda menciona a marca ("o PayPal recusa a ordem"), o que a v2 também evitaria se o arquivo estivesse no escopo.
+3. ~~**Dois defeitos pré-existentes do Checkout**~~ — **FECHADOS, e a dívida era do registro, não do código.**
+   Ao ir consertá-los em 03/09/2026, a medição mostrou que os dois já tinham sido corrigidos no
+   dia anterior, pelo commit `cc5aaae`: `uProdRender` já troca a palavra inteira
+   (`ops.length>1?' opcionais':' opcional'`), `uProdSalvar` já diz `'Informe o preço do
+   produto.'` e `uCpPctErro` já é a versão acentuada e **sem a marca** ("o pagamento recusa a
+   cobrança zerada").
+
+   O que sobrava eram **três comentários dentro do `index.html`** ainda afirmando que o defeito
+   existia — um deles dizendo, textualmente, *"Nao mexido no original por estar fora do arquivo
+   desta tarefa"*. Foram corrigidos para dizer o que é verdade hoje, com o commit que fechou
+   cada um.
+
+   **A lição, e ela é a mesma da dívida 7:** registro que descreve como pendente o que já foi
+   feito é pior que registro ausente — ele **manda procurar no lugar errado**, e quem o lê
+   confia. Duas vezes em dois dias. Ao fechar um item, fechá-lo em **todos** os lugares que o
+   descrevem: a lista, e os comentários do código que apontam para ele.
+
+   Sobrou uma **terceira cópia da mesma família**, essa de verdade: `mCpPctErro` (Mini loja)
+   ainda tem a mensagem sem acento que o Checkout já perdeu. E, ao lado dela, `mCpRender` não
+   mostra a validade na lista de cupons — o Checkout e a `pac` mostram — e os seus campos de
+   código e valor não chamam `salvarEstado()`/`mPreview()`.
 
 ### Novas em 03/09/2026, rodada dos textos configuráveis
 

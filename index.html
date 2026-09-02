@@ -1687,8 +1687,9 @@
         <div class="dupla">
           <input type="number" id="u-cp-valor" placeholder="Valor do desconto" min="0" step="0.01">
           <input type="date" id="u-cp-val">
+          <input type="number" id="u-cp-min" placeholder="Mínimo do pedido" min="0" step="0.01" title="Valor mínimo do pedido para este cupom valer (vazio = sem mínimo)">
         </div>
-        <p class="ajuda">O segundo campo é a validade (opcional — vale até o fim do dia; vazio = sem validade).</p>
+        <p class="ajuda">O segundo campo é a validade (opcional — vale até o fim do dia; vazio = sem validade). O terceiro é o <b>valor mínimo do pedido</b> para este cupom valer — vazio = sem mínimo. A comparação é com o <b>subtotal</b>, antes do desconto do próprio cupom e antes do desconto do Pix; e se o cliente tirar itens e o pedido descer abaixo do mínimo, o cupom <b>sai sozinho</b>, com aviso na tela.</p>
         <div class="acoes"><button class="botao claro" id="u-cp-add">Adicionar cupom</button></div>
         <ul class="lista-imgs" id="u-cp-lista"></ul>
         <p class="vazio" id="u-cp-vazio">Nenhum cupom. O campo de cupom não aparecerá no carrinho.</p>
@@ -1763,6 +1764,11 @@
         <input type="text" id="u-txt-cupom-invalido" value="Cupom inválido.">
         <label for="u-txt-cupom-expirado">Cupom expirado</label>
         <input type="text" id="u-txt-cupom-expirado" value="Cupom expirado.">
+        <label for="u-txt-cupom-minimo">Cupom recusado por valor mínimo</label>
+        <input type="text" id="u-txt-cupom-minimo" value="Este cupom vale a partir de {valor}.">
+        <label for="u-txt-cupom-minimo-queda">Cupom que saiu porque o pedido desceu</label>
+        <input type="text" id="u-txt-cupom-minimo-queda" value="O cupom saiu: ele vale a partir de {valor}, e o pedido ficou abaixo disso.">
+        <p class="ajuda">As duas frases acima só aparecem em cupom que tenha <b>valor mínimo do pedido</b> (seção 2). Onde você escrever <code>{valor}</code>, entra o mínimo daquele cupom, já na moeda do bloco. São duas porque são dois momentos: a primeira responde <i>por que não aplicou</i>; a segunda, <i>por que o desconto que eu já tinha sumiu</i>.</p>
         <label for="u-txt-desconto">Linha do desconto</label>
         <input type="text" id="u-txt-desconto" value="Desconto ({codigo})">
         <label for="u-txt-cupom-validade">Validade, na linha do desconto</label>
@@ -2979,8 +2985,9 @@
         <div class="dupla">
           <input type="number" id="m-cp-valor" placeholder="Valor do desconto" min="0" step="0.01">
           <input type="date" id="m-cp-val">
+          <input type="number" id="m-cp-min" placeholder="Mínimo do pedido" min="0" step="0.01" title="Valor mínimo do pedido para este cupom valer (vazio = sem mínimo)">
         </div>
-        <p class="ajuda">O segundo campo é a validade (opcional — vale até o fim do dia; vazio = sem validade).</p>
+        <p class="ajuda">O segundo campo é a validade (opcional — vale até o fim do dia; vazio = sem validade). O terceiro é o <b>valor mínimo do pedido</b> para este cupom valer — vazio = sem mínimo. A comparação é com o <b>subtotal</b>, antes do desconto do próprio cupom e antes do desconto do Pix; e se o cliente tirar itens e o pedido descer abaixo do mínimo, o cupom <b>sai sozinho</b>, com aviso na tela.</p>
         <div class="acoes"><button class="botao claro" id="m-cp-add">Adicionar cupom</button></div>
         <ul class="lista-imgs" id="m-cp-lista"></ul>
         <p class="vazio" id="m-cp-vazio">Nenhum cupom. O campo de cupom não aparecerá no carrinho.</p>
@@ -3175,6 +3182,11 @@
         <input type="text" id="m-txt-cupom-invalido" value="Cupom inválido.">
         <label for="m-txt-cupom-expirado">Cupom expirado</label>
         <input type="text" id="m-txt-cupom-expirado" value="Cupom expirado.">
+        <label for="m-txt-cupom-minimo">Cupom recusado por valor mínimo</label>
+        <input type="text" id="m-txt-cupom-minimo" value="Este cupom vale a partir de {valor}.">
+        <label for="m-txt-cupom-minimo-queda">Cupom que saiu porque o pedido desceu</label>
+        <input type="text" id="m-txt-cupom-minimo-queda" value="O cupom saiu: ele vale a partir de {valor}, e o pedido ficou abaixo disso.">
+        <p class="ajuda">As duas frases acima só aparecem em cupom que tenha <b>valor mínimo do pedido</b> (seção 2). Onde você escrever <code>{valor}</code>, entra o mínimo daquele cupom, já na moeda do bloco. São duas porque são dois momentos: a primeira responde <i>por que não aplicou</i>; a segunda, <i>por que o desconto que eu já tinha sumiu</i>.</p>
         <label for="m-txt-desconto">Linha do desconto</label>
         <input type="text" id="m-txt-desconto" value="Desconto ({codigo})">
         <label for="m-txt-cupom-validade">Validade, na linha do desconto</label>
@@ -3600,8 +3612,9 @@
         <div class="dupla">
           <input type="number" id="a-cp-valor" placeholder="Valor do desconto" min="0" step="0.01">
           <input type="date" id="a-cp-val">
+          <input type="number" id="a-cp-min" placeholder="Mínimo do pedido" min="0" step="0.01" title="Valor mínimo do pedido para este cupom valer (vazio = sem mínimo)">
         </div>
-        <p class="ajuda">O segundo campo é a validade (opcional — vale até o fim do dia; vazio = sem validade).</p>
+        <p class="ajuda">O segundo campo é a validade (opcional — vale até o fim do dia; vazio = sem validade). O terceiro é o <b>valor mínimo do pedido</b> para este cupom valer — vazio = sem mínimo. A comparação é com o <b>subtotal</b>, antes do desconto do próprio cupom e antes do desconto do Pix; e se o cliente tirar itens e o pedido descer abaixo do mínimo, o cupom <b>sai sozinho</b>, com aviso na tela.</p>
         <div class="acoes"><button class="botao claro" id="a-cp-add">Adicionar cupom</button></div>
         <ul class="lista-imgs" id="a-cp-lista"></ul>
         <p class="vazio" id="a-cp-vazio">Nenhum cupom. O campo de cupom não aparecerá na página de obrigado.</p>
@@ -3737,6 +3750,11 @@
         <input type="text" id="a-txt-cupom-invalido" value="Cupom inválido.">
         <label for="a-txt-cupom-expirado">Cupom expirado</label>
         <input type="text" id="a-txt-cupom-expirado" value="Cupom expirado.">
+        <label for="a-txt-cupom-minimo">Cupom recusado por valor mínimo</label>
+        <input type="text" id="a-txt-cupom-minimo" value="Este cupom vale a partir de {valor}.">
+        <label for="a-txt-cupom-minimo-queda">Cupom que saiu porque o pedido desceu</label>
+        <input type="text" id="a-txt-cupom-minimo-queda" value="O cupom saiu: ele vale a partir de {valor}, e o pedido ficou abaixo disso.">
+        <p class="ajuda">As duas frases acima só aparecem em cupom que tenha <b>valor mínimo do pedido</b> (seção 2). Onde você escrever <code>{valor}</code>, entra o mínimo daquele cupom, já na moeda do bloco. São duas porque são dois momentos: a primeira responde <i>por que não aplicou</i>; a segunda, <i>por que o desconto que eu já tinha sumiu</i>.</p>
         <label for="a-txt-desconto">Linha do desconto</label>
         <input type="text" id="a-txt-desconto" value="Desconto ({codigo})">
         <label for="a-txt-cupom-validade">Validade do cupom, na linha de desconto</label>
@@ -3896,8 +3914,8 @@
    QUEM IMPEDE QUE ELE MINTA: scripts/conferir-versoes.sh, que recusa index.html
    alterado sem a versao mudar junto -- a mesma disciplina do fc-compartilhado.js,
    e pela mesma razao: carimbo que ninguem confere e o defeito de amanha. */
-var FC_VERSAO='2026-09-02f';
-var FC_PUBLICADO='2026-09-02 18:29';   /* America/Sao_Paulo -- escrito pelo carimbador */
+var FC_VERSAO='2026-09-02g';
+var FC_PUBLICADO='2026-09-02 19:36';   /* America/Sao_Paulo -- escrito pelo carimbador */
 (function(){
   var el=document.getElementById('fc-versao');
   if(!el) return;
@@ -4116,6 +4134,13 @@ var FC_TXT_FABRICA={
   cupomInvalido:'Cupom inválido.',
   cupomExpirado:'Cupom expirado.',
   cupomValidade:'Válido até:',
+  /* AS DUAS FRASES DO VALOR MINIMO (03/09/2026). Sao DUAS, e nao uma, porque sao dois fatos
+     diferentes e o cliente esta em momentos diferentes: a primeira responde "por que nao
+     aplicou", a segunda responde "por que sumiu o desconto que eu ja tinha". {valor} vira o
+     minimo daquele cupom, ja formatado na moeda do bloco; sem o marcador, a frase sai como o
+     dono escreveu -- a mesma regra dos outros 162 textos. */
+  cupomMinimo:'Este cupom vale a partir de {valor}.',
+  cupomMinimoQueda:'O cupom saiu: ele vale a partir de {valor}, e o pedido ficou abaixo disso.',
   nota:'Confira o nome do recebedor antes de confirmar o pagamento',
   pixInstrucao:'Abra o app do seu banco e pague pelo QR Code ou Pix Copia e Cola',
   pixCopiar:'Copiar código Pix',
@@ -4465,6 +4490,65 @@ FC_CARRINHO_SRC.validadeBr=
   'function validadeBr(v){\n'+
   "if(typeof v!=='string'||!/^\\d{4}-\\d{2}-\\d{2}$/.test(v))return '';\n"+
   "return v.slice(8,10)+'/'+v.slice(5,7)+'/'+v.slice(2,4);\n}\n\n";
+/* O VALOR MINIMO DO PEDIDO PARA O CUPOM VALER (03/09/2026, spec do valor minimo).
+   COMPARA COM O SUBTOTAL (decisao D1 da spec), e nao com o total: o total ja tem o proprio
+   cupom descontado, entao comparar com ele seria circular -- aplicar baixaria o total, que
+   cairia abaixo do minimo, que tiraria o cupom, que subiria o total de novo. Nao existe
+   resposta estavel para isso, e qual das duas o bloco mostraria dependeria da ordem em que as
+   contas rodam, que e o defeito silencioso que este projeto ja mediu tres vezes.
+   O desconto do Pix fica de fora pelo mesmo motivo por outro caminho: ele depende do botao
+   que o cliente clica DEPOIS, e o mesmo carrinho valeria ou nao valeria o cupom conforme a
+   forma de pagar. O minimo e regra sobre o PEDIDO, nao sobre a forma de pagar. Idem o sinal.
+   MINIMO AUSENTE OU ZERO = SEM MINIMO (decisao D3): cupom cadastrado antes desta rodada nao
+   tem a chave, e continua valendo como sempre valeu. Esta funcao so entra no bloco quando
+   ALGUM cupom da lista tem minimo -- e por isso que o bloco de quem nao usa a regra sai byte
+   a byte identico ao de antes, e a regressao prova isso.
+   O contrato e por NOME, como o resto de FC_CARRINHO_SRC: subtotal() ja foi declarada pelo
+   bloco que inclui este texto (o Checkout le radios e caixas; a Mini loja, as linhas do
+   carrinho; a aba pac, o pacote mais os opcionais marcados). */
+FC_CARRINHO_SRC.cupomMinimo=
+  'function cupomMinimoOk(cp){\n'+
+  'if(!cp||!cp.minimo||cp.minimo<=0)return true;\n'+
+  'return subtotal()>=cp.minimo;\n}\n\n';
+
+/* ===== UM CUPOM ESCRITO PARA DENTRO DO BLOCO, NUMA FONTE SO =====
+   As tres abas que tem cupom (Checkout, Mini loja e Agendamento por pacote) escreviam esta
+   MESMA linha, copiada tres vezes. Elas concordavam -- e por isso mesmo eram o defeito de
+   amanha: bastava uma ganhar a chave nova e as outras nao, e o cupom com minimo funcionaria
+   em duas abas e falharia em silencio na terceira. Unifica-se a FONTE QUE ESCREVE; a saida
+   continua autossuficiente dentro de cada bloco.
+   A chave 'minimo' so e escrita quando existe: sem ela, o texto e byte a byte o de antes. */
+function fcCpMinimo(cp){
+  var b=(cp&&cp.minimo!=null)?String(cp.minimo).trim():'';
+  if(b==='')return 0;
+  var n=parseFloat(b.replace(',','.'));
+  if(isNaN(n)||n<=0)return 0;
+  return Math.round(n*100)/100;
+}
+function fcCpTemMinimo(cps){
+  var i;
+  for(i=0;i<(cps||[]).length;i++){if(fcCpMinimo(cps[i])>0)return true;}
+  return false;
+}
+function fcCpSerial(cp){
+  var v=parseFloat(String(cp.valor).replace(',','.'))||0,mn=fcCpMinimo(cp);
+  return "  {codigo:'"+escJs(String(cp.codigo).trim().toUpperCase())+"', tipo:'"+cp.tipo+"', valor:"+v+", validade:'"+escJs(cp.validade||'')+"'"+(mn>0?", minimo:"+mn:"")+"}";
+}
+/* A linha de documentacao do 'minimo' dentro do comentario de CUPONS, para as tres abas
+   escreverem a mesma explicacao. So entra quando algum cupom tem minimo. */
+var FC_CP_MIN_DOC="   minimo: subtotal minimo do pedido para o cupom valer | ausente = sem minimo";
+/* A recusa da GERACAO quando o minimo digitado nao e numero. Ela existe pela mesma razao ja
+   escrita em uRecusa para o VALOR do desconto: o campo de minimo DENTRO da lista de cupons
+   nao valida nada, e um minimo ilegivel viraria "sem minimo" caladamente -- o dono acharia
+   que a regra vale, e ela nao valeria, sem erro nenhum na tela. Vazio continua sendo "sem
+   minimo", que e a decisao D3 e nao um acidente. */
+function fcCpMinErro(cp,cod){
+  var b=(cp&&cp.minimo!=null)?String(cp.minimo).trim():'';
+  if(b==='')return '';
+  var n=parseFloat(b.replace(',','.'));
+  if(isNaN(n)||n<0)return 'O cupom "'+cod+'" está com o valor mínimo do pedido ilegível ("'+b+'"). Deixe o campo vazio para o cupom valer sem mínimo, ou escreva um número.';
+  return '';
+}
 /* ARREDONDAMENTO EM CENTAVOS, NUM LUGAR SO -- e por que ele existe.
    O desconto percentual produz centavo quebrado (600,00 com 5% => 570,00; 10,50 com 5% =>
    9,975), e ate esta correcao o total saia com essa terceira casa intacta. Dai para baixo
@@ -5048,7 +5132,7 @@ var ABAS=[
    pref:'u',fora:[],resumo:uPresetResumo,redesenhar:uPresetDepois,antesDeSalvar:uPresetAntes,
    listas:[['u.prods',{nome:'',desc:'',preco:0,opsel:'unico',opnenhum:'nao',qtd:false,ops:[{nome:'',preco:0,qtd:false}]},'nome'],
            ['u.prods.ops',{nome:'',preco:0,qtd:false},'nome'],
-           ['u.cps',{codigo:'',tipo:'pct_total',valor:0,validade:''},'codigo']],
+           ['u.cps',{codigo:'',tipo:'pct_total',valor:0,validade:'',minimo:''},'codigo']],
    exemplo:'ex.: Natal 2026 - pacotes',
    guarda:'tudo o que está configurado nesta aba — formas de pagamento, moeda, <b>produtos com os opcionais de cada um</b>, cupons, código do pedido, sinal, desconto Pix, textos, largura e cores.'},
   {id:'bor',  nome:'Bordas com efeito',   chaves:['b'],         coleta:bColeta,restaura:bRestaura,gerar:bGerar,
@@ -5070,7 +5154,7 @@ var ABAS=[
    pref:'m',fora:[],resumo:mPresetResumo,redesenhar:mPresetDepois,antesDeSalvar:mPresetAntes,
    listas:[['m.prods',{nome:'',desc:'',preco:0,cat:'',img:'',opsel:'unico',opnenhum:'nao',qtd:false,ops:[{nome:'',preco:0,qtd:false}]},'nome'],
            ['m.prods.ops',{nome:'',preco:0,qtd:false},'nome'],
-           ['m.cps',{codigo:'',tipo:'pct_total',valor:0,validade:''},'codigo']],
+           ['m.cps',{codigo:'',tipo:'pct_total',valor:0,validade:'',minimo:''},'codigo']],
    importar:mImportarLimpar,
    exemplo:'ex.: Foto Certa - loja de álbuns',
    guarda:'tudo o que está configurado nesta aba — formas de pagamento, moeda, <b>o catálogo inteiro</b> (nome, descrição, preço, categoria, foto e os opcionais de cada produto), cupons, sinal, desconto Pix, a grade da vitrine, o tamanho pedido das fotos, textos e cores. Não guarda o que está no importador de galeria, que não é configuração e sim uma colagem de trabalho.'},
@@ -5094,7 +5178,7 @@ var ABAS=[
    listas:[['a.familias',{id:'',nome:'',dica:''},'id'],
            ['a.pacotes',{cod:'',nome:'',dur:'',preco:0,inclui:'',path:'',link:'',fam:'',ops:[{nome:'',preco:0,qtd:false}]},'cod'],
            ['a.pacotes.ops',{nome:'',preco:0,qtd:false},'nome'],
-           ['a.cps',{codigo:'',tipo:'pct_total',valor:0,validade:''},'codigo']],
+           ['a.cps',{codigo:'',tipo:'pct_total',valor:0,validade:'',minimo:''},'codigo']],
    exemplo:'ex.: Ensaios 2026 - pacotes',
    guarda:'tudo o que está configurado nesta aba — a <b>forma de pagamento</b> e a cor dos botões do PayPal, as <b>famílias de pacotes</b> e a família de cada pacote, os pacotes (código, nome, duração, preço, o que inclui, o caminho do TidyCal e os <b>itens opcionais</b> de cada um), os <b>cupons</b>, o endereço da página de obrigado, o prefixo do identificador, o prazo da reserva, o desconto no Pix, as parcelas, quais <b>marcadores da página de obrigado</b> viajam e o texto reserva de cada um, as alturas do calendário, a largura das linhas compactas, textos e cores. Aplicar um preset <b>substitui as famílias que estão na tela</b>: ele é a fotografia da aba inteira.'}
 ];
@@ -11494,8 +11578,8 @@ function uProdRender(){
     var txt=document.createElement('div');
     txt.style.fontSize='13px';
     /* Plural de 'opcional' e 'opcionais' (troca -al por -ais), nao 'opcional'+'is' -- isso
-       dava "2 opcionalis". Corrigido com a palavra inteira trocada, como aPacRender ja faz
-       (13391+, aba Agendamento por pacote). */
+       dava "2 opcionalis". Corrigido em 02/09/2026 (cc5aaae) com a palavra inteira trocada,
+       como aPacRender ja fazia (14622+, aba Agendamento por pacote). */
     var qtd=(p.ops&&p.ops.length)?(' \u00b7 '+p.ops.length+(p.ops.length>1?' opcionais':' opcional')):' \u00b7 sem opcionais';
     var nq=uQtdItens(p);
     txt.textContent=p.nome+' — '+uFmt(parseFloat(p.preco)||0)+qtd+(nq?(' \u00b7 '+nq+' com quantidade'):'');
@@ -11541,7 +11625,14 @@ function uCpRender(){
     sel.addEventListener('change',function(){uCps[i].tipo=sel.value;salvarEstado();uPreview();});
     var dt=document.createElement('input');dt.type='date';dt.value=cp.validade||'';
     dt.addEventListener('change',function(){uCps[i].validade=dt.value;salvarEstado();uPreview();});
-    info.appendChild(cod);info.appendChild(val);info.appendChild(sel);info.appendChild(dt);
+    /* O MINIMO APARECE NA LISTA (decisao D5): cupom cadastrado que nao mostra a propria
+       regra e cupom que o dono aplica errado -- ele leria "NATAL10, 10%" e nao saberia que
+       ele so vale acima de um valor. Vazio = sem minimo. */
+    var mn=document.createElement('input');mn.type='number';mn.step='0.01';mn.min='0';
+    mn.value=(cp.minimo==null?'':cp.minimo);mn.placeholder='M\u00ednimo';
+    mn.title='Valor m\u00ednimo do pedido para este cupom valer (vazio = sem m\u00ednimo)';
+    mn.addEventListener('input',function(){uCps[i].minimo=mn.value;salvarEstado();uPreview();});
+    info.appendChild(cod);info.appendChild(val);info.appendChild(sel);info.appendChild(dt);info.appendChild(mn);
     var ctrl=document.createElement('div');ctrl.className='ctrl';
     var bt=document.createElement('button');bt.textContent='\u2715';bt.title='Remover';bt.setAttribute('aria-label','Remover');
     bt.addEventListener('click',function(){uCpDel(i);});
@@ -11579,8 +11670,10 @@ function uCpAdd(){
   if(isNaN(v)||v<=0){alert('Informe o valor do desconto (maior que zero).');return;}
   var ePct=uCpPctErro(radio('u-cp-tipo')||'pct_total',v);
   if(ePct){alert(ePct);return;}
-  uCps.push({codigo:cod,tipo:radio('u-cp-tipo')||'pct_total',valor:v,validade:$('u-cp-val').value||''});
-  $('u-cp-cod').value='';$('u-cp-valor').value='';$('u-cp-val').value='';
+  var mn=String($('u-cp-min').value).trim(),eMin=fcCpMinErro({minimo:mn},cod);
+  if(eMin){alert(eMin);return;}
+  uCps.push({codigo:cod,tipo:radio('u-cp-tipo')||'pct_total',valor:v,validade:$('u-cp-val').value||'',minimo:mn});
+  $('u-cp-cod').value='';$('u-cp-valor').value='';$('u-cp-val').value='';$('u-cp-min').value='';
   uCpRender();salvarEstado();uPreview();
 }
 function uCpDel(i){uCps.splice(i,1);uCpRender();salvarEstado();uPreview();}
@@ -11767,6 +11860,8 @@ var U_TXT_DEFS=[
   ['txtCupomOk','u-txt-cupom-ok',FC_TXT_FABRICA.cupomOk],
   ['txtCupomInvalido','u-txt-cupom-invalido',FC_TXT_FABRICA.cupomInvalido],
   ['txtCupomExpirado','u-txt-cupom-expirado',FC_TXT_FABRICA.cupomExpirado],
+  ['txtCupomMinimo','u-txt-cupom-minimo',FC_TXT_FABRICA.cupomMinimo],
+  ['txtCupomMinimoQueda','u-txt-cupom-minimo-queda',FC_TXT_FABRICA.cupomMinimoQueda],
   ['txtDesconto','u-txt-desconto',FC_TXT_FABRICA.desconto],
   ['txtCupomValidade','u-txt-cupom-validade',FC_TXT_FABRICA.cupomValidade],
   ['txtSemOpcional','u-txt-semopcional',FC_TXT_FABRICA.semOpcional],
@@ -11886,6 +11981,8 @@ function uRecusa(cfg){
     if(isNaN(cpv)||cpv<=0)return 'O cupom "'+cpc+'" esta com o valor do desconto vazio ou zerado. Ele seria entregue no codigo como desconto de zero: o cliente digitaria o cupom, veria "Cupom aplicado!" e "Desconto - R$ 0,00", e o total nao mudaria. Preencha o valor ou remova o cupom.';
     cpe=uCpPctErro(cfg.cps[i].tipo,cpv);
     if(cpe)return 'Cupom "'+cpc+'": '+cpe;
+    cpe=fcCpMinErro(cfg.cps[i],cpc);
+    if(cpe)return cpe;
     /* Codigo repetido tambem aqui, e nao so no cadastro (uCpAdd) -- decisao 13: a lista se
        edita por dentro (uCpCodAjustar), e apagar/alterar um codigo la nao passa pelo
        cadastro. Comparacao ja ignora maiuscula/minuscula e espacos das pontas: cpc chega
@@ -11947,10 +12044,10 @@ function uBloco(cfg){
            "   selecaoOpcionais:'"+p.opsel+"', permitirNenhum:"+(p.opnenhum==='sim'?'true':'false')+(p.qtd?", quantidade:true":"")+",\n"+
            "   opcionais:["+ops+"]}";
   }).join(',\n');
-  var cps=cfg.cps.map(function(cp){
-    var v=parseFloat(String(cp.valor).replace(',','.'))||0;
-    return "  {codigo:'"+escJs(String(cp.codigo).trim().toUpperCase())+"', tipo:'"+cp.tipo+"', valor:"+v+", validade:'"+escJs(cp.validade||'')+"'}";
-  }).join(',\n');
+  /* Fonte unica (fcCpSerial, 4500+): a MESMA linha era escrita aqui, na Mini loja e na aba
+     pac. temMin decide se a maquinaria do minimo entra no bloco -- sem nenhum cupom com
+     minimo, nada disto e emitido e a saida e byte a byte a de antes (decisao D3). */
+  var cps=cfg.cps.map(fcCpSerial).join(',\n'),temMin=fcCpTemMinimo(cfg.cps);
 
   var c='';
   c+='<div class="fcuni" id="fcuni"></div>\n\n';
@@ -12068,7 +12165,7 @@ function uBloco(cfg){
   c+='\n';
   c+='/* ===== CUPONS DE DESCONTO ===== */\n';
   c+="/* tipo: 'pct_produto' = % sobre os produtos (sem opcionais) | 'pct_total' = % sobre tudo | 'fixo' = valor fixo\n";
-  c+="   validade: 'AAAA-MM-DD' (vale ate o fim do dia) | '' = sem validade */\n";
+  c+="   validade: 'AAAA-MM-DD' (vale ate o fim do dia) | '' = sem validade"+(temMin?"\n"+FC_CP_MIN_DOC:"")+" */\n";
   c+='var CUPONS=[\n'+(cps||'')+'\n];\n\n';
   if(usaSinal){
     c+='/* ===== COBRANCA DE SINAL (o saldo fica para a entrega) ===== */\n';
@@ -12151,7 +12248,12 @@ function uBloco(cfg){
      depois de ver "Valido ate" na tela. Em 01/09/2026 todo texto que uma pessoa le passou a sair
      acentuado -- a tela do cliente e tambem a mensagem do WhatsApp. Continua sem acento so o
      CODIGO: comentario, identificador, CSS e o payload Pix (item 10 do Manual, e a norma do BC). */
-  c+="var TXT_CUPOM_VALIDADE='"+escJs(cfg.txtCupomValidade)+"';   /* precede a data, na propria linha do desconto; so aparece se o cupom tiver validade */\n\n";
+  c+="var TXT_CUPOM_VALIDADE='"+escJs(cfg.txtCupomValidade)+"';   /* precede a data, na propria linha do desconto; so aparece se o cupom tiver validade */\n";
+  if(temMin){
+    c+="var TXT_CUPOM_MINIMO='"+escJs(cfg.txtCupomMinimo)+"';   /* recusa ao aplicar; {valor} vira o minimo daquele cupom, na moeda do bloco */\n";
+    c+="var TXT_CUPOM_MINIMO_QUEDA='"+escJs(cfg.txtCupomMinimoQueda)+"';   /* o cupom que CAIU porque o pedido desceu abaixo do minimo */\n";
+  }
+  c+='\n';
 
   c+='/* ============================================================\n   Daqui para baixo nao precisa mexer\n   ============================================================ */\n\n';
   c+=fcMoedaFmtGer(false);
@@ -12379,6 +12481,18 @@ function uBloco(cfg){
     c+="raiz.querySelector('.fcu-copiado').className='fcu-copiado';\n}\n\n";
   }
   c+='function atualizar(){\n';
+  /* A QUEDA AUTOMATICA DO CUPOM (decisao D2 da spec do valor minimo) -- NO RECALCULO, e nao
+     so no clique de aplicar. aplicarCupom() so roda quando o cliente clica no botao; se a
+     conferencia do minimo vivesse so la, o caminho seria: monta R$ 350, aplica o cupom de
+     minimo R$ 300, TIRA UM ITEM, fica em R$ 200 -- e o desconto continuaria valendo, porque
+     ninguem reconferiu. O dono pagaria o desconto de uma regra que o pedido nao cumpre mais,
+     sem erro nenhum na tela.
+     PRIMEIRA LINHA de atualizar(), antes de qualquer numero ser escrito: o total, o resumo, o
+     Pix e o PayPal leem de total(), e todos precisam ler o valor JA sem o cupom.
+     COM MENSAGEM, nunca em silencio: desconto que some sem explicacao e o cliente achando que
+     o site errou. E NAO REAPLICA sozinho quando o pedido volta a subir -- cupom que volta por
+     conta propria e magica que o cliente nao pediu, e esconde do dono que a regra falhou. */
+  if(temMin)c+='if(cupomAtivo&&!cupomMinimoOk(cupomAtivo)){var cpFora=cupomAtivo;cupomAtivo=null;msgCupom(TXT_CUPOM_MINIMO_QUEDA.replace(/\\{valor\\}/g,moedaFmt(cpFora.minimo)),false);}\n';
   c+='PRODUTOS.forEach(function(p,i){\n';
   c+="var caixa=blocos[i].querySelector('.fcu-ops');\n";
   c+="if(caixa)caixa.style.display=produtoAtivo(i)?'block':'none';\n";
@@ -12415,6 +12529,7 @@ function uBloco(cfg){
   c+="m.textContent=t;m.className='fcu-cupom-msg'+(t?(ok?' ok':' erro'):'');\n}\n\n";
   c+=FC_CARRINHO_SRC.cupomVigente;
   c+=FC_CARRINHO_SRC.validadeBr;
+  if(temMin)c+=FC_CARRINHO_SRC.cupomMinimo;
   c+='function aplicarCupom(){\n';
   c+="var v=raiz.querySelector('.fcu-cupom-l input').value.trim();\n";
   c+="if(!v){cupomAtivo=null;msgCupom('',true);atualizar();return;}\n";
@@ -12423,6 +12538,7 @@ function uBloco(cfg){
   c+='if(CUPONS[i].codigo.toUpperCase()===v.toUpperCase()){achado=CUPONS[i];break;}\n}\n';
   c+='if(!achado){cupomAtivo=null;msgCupom(TXT_CUPOM_INVALIDO,false);}\n';
   c+='else if(!cupomVigente(achado)){cupomAtivo=null;msgCupom(TXT_CUPOM_EXPIRADO,false);}\n';
+  if(temMin)c+='else if(!cupomMinimoOk(achado)){cupomAtivo=null;msgCupom(TXT_CUPOM_MINIMO.replace(/\\{valor\\}/g,moedaFmt(achado.minimo)),false);}\n';
   c+='else{cupomAtivo=achado;msgCupom(TXT_CUPOM_OK,true);}\n';
   c+='atualizar();\n}\n';
   c+="raiz.querySelector('.fcu-cupom-l button').addEventListener('click',aplicarCupom);\n\n";
@@ -14187,6 +14303,8 @@ var A_TXT_DEFS=[
   ['txtCupomOk','a-txt-cupom-ok',FC_TXT_FABRICA.cupomOk],
   ['txtCupomInvalido','a-txt-cupom-invalido',FC_TXT_FABRICA.cupomInvalido],
   ['txtCupomExpirado','a-txt-cupom-expirado',FC_TXT_FABRICA.cupomExpirado],
+  ['txtCupomMinimo','a-txt-cupom-minimo',FC_TXT_FABRICA.cupomMinimo],
+  ['txtCupomMinimoQueda','a-txt-cupom-minimo-queda',FC_TXT_FABRICA.cupomMinimoQueda],
   /* D-3 (03/09/2026): a frase INTEIRA, com {codigo}. Antes o campo valia so "Desconto" e o
      " (CODIGO)" era colado por fora, no bloco -- meia frase configuravel e armadilha. */
   ['txtDesconto','a-txt-desconto',FC_TXT_FABRICA.desconto],
@@ -14325,8 +14443,10 @@ function aCpCodAjustar(inp,i){
 }
 function aCpPctErro(tipo,v){
   if(tipo!=='pct_produto'&&tipo!=='pct_total')return '';
-  /* Acentuado, diferente do molde de uCpPctErro (10614): texto de interface, norma de
-     01/09/2026. Nao mexido no original por estar fora do arquivo desta tarefa (aba pac). */
+  /* Acentuado e sem nomear o provedor -- norma de 01/09/2026 e regra 10 do plano da v2.
+     Nasceu assim aqui; uCpPctErro (11557+), que era o molde e saiu sem acento e nomeando a
+     marca, foi alinhado a esta redacao em 02/09/2026 (commit cc5aaae). As duas dizem o
+     mesmo, de proposito -- o Checkout so acrescenta a frase sobre a cobranca zerada. */
   if(v>100)return 'Um cupom em porcentagem não pode passar de 100%: com '+v+'% o desconto é limitado ao subtotal e o pedido inteiro vai a R$ 0,00 — o cliente vê "Cupom aplicado!" e um total zerado. Se a intenção era 15%, corrija o valor; se era realmente dar o pedido, use um cupom de valor fixo igual ao preço.';
   return '';
 }
@@ -14359,7 +14479,14 @@ function aCpRender(){
     sel.addEventListener('change',function(){aCps[i].tipo=sel.value;salvarEstado();aPreview();});
     var dt=document.createElement('input');dt.type='date';dt.value=cp.validade||'';
     dt.addEventListener('change',function(){aCps[i].validade=dt.value;salvarEstado();aPreview();});
-    info.appendChild(cod);info.appendChild(val);info.appendChild(sel);info.appendChild(dt);
+    /* O MINIMO APARECE NA LISTA (decisao D5): cupom cadastrado que nao mostra a propria
+       regra e cupom que o dono aplica errado -- ele leria "NATAL10, 10%" e nao saberia que
+       ele so vale acima de um valor. Vazio = sem minimo. */
+    var mn=document.createElement('input');mn.type='number';mn.step='0.01';mn.min='0';
+    mn.value=(cp.minimo==null?'':cp.minimo);mn.placeholder='M\u00ednimo';
+    mn.title='Valor m\u00ednimo do pedido para este cupom valer (vazio = sem m\u00ednimo)';
+    mn.addEventListener('input',function(){aCps[i].minimo=mn.value;salvarEstado();aPreview();});
+    info.appendChild(cod);info.appendChild(val);info.appendChild(sel);info.appendChild(dt);info.appendChild(mn);
     var ctrl=document.createElement('div');ctrl.className='ctrl';
     var bt=document.createElement('button');bt.textContent='✕';bt.title='Remover';bt.setAttribute('aria-label','Remover');
     bt.addEventListener('click',function(){aCpDel(i);});
@@ -14377,8 +14504,10 @@ function aCpAdd(){
   if(isNaN(v)||v<=0){alert('Informe o valor do desconto (maior que zero).');return;}
   var ePct=aCpPctErro(radio('a-cp-tipo')||'pct_total',v);
   if(ePct){alert(ePct);return;}
-  aCps.push({codigo:cod,tipo:radio('a-cp-tipo')||'pct_total',valor:v,validade:$('a-cp-val').value||''});
-  $('a-cp-cod').value='';$('a-cp-valor').value='';$('a-cp-val').value='';
+  var mn=String($('a-cp-min').value).trim(),eMin=fcCpMinErro({minimo:mn},cod);
+  if(eMin){alert(eMin);return;}
+  aCps.push({codigo:cod,tipo:radio('a-cp-tipo')||'pct_total',valor:v,validade:$('a-cp-val').value||'',minimo:mn});
+  $('a-cp-cod').value='';$('a-cp-valor').value='';$('a-cp-val').value='';$('a-cp-min').value='';
   aCpRender();salvarEstado();aPreview();
 }
 function aCpDel(i){aCps.splice(i,1);aCpRender();salvarEstado();aPreview();}
@@ -14620,9 +14749,9 @@ function aPacRender(){
     var info=document.createElement('div');info.className='info';
     var txt=document.createElement('div');txt.style.fontSize='13px';
     /* Plural de 'opcional' e 'opcionais' (troca -al por -ais), nao 'opcional'+'is'/'ais' --
-       o molde de uProdRender (10640) escreve '+is' e da "2 opcionalis"; um '+ais' ingenuo
-       daria "2 opcionalais", igualmente errado. Palavra INTEIRA trocada no plural, e nao
-       mexido em uProdRender por estar fora do arquivo desta tarefa (aba pac). */
+       um '+is' da "2 opcionalis" e um '+ais' ingenuo daria "2 opcionalais", os dois errados.
+       Palavra INTEIRA trocada no plural. uProdRender (11487+) escrevia '+is' quando este
+       comentario foi escrito, e foi corrigido para a mesma forma em 02/09/2026 (cc5aaae). */
     var qtdops=(p.ops&&p.ops.length)?(' · '+p.ops.length+(p.ops.length>1?' opcionais':' opcional')):' · sem opcionais';
     txt.textContent=p.cod+' — '+p.nome+' — '+precoFmt('BRL',parseFloat(p.preco)||0)+qtdops;
     info.appendChild(txt);
@@ -14720,6 +14849,8 @@ function aRecusa(cfg){
     if(isNaN(cpv)||cpv<=0)return 'O cupom "'+cpc+'" está com o valor do desconto vazio ou zerado. Ele seria entregue no código como desconto de zero, e o total não mudaria. Preencha o valor ou remova o cupom.';
     cpe=aCpPctErro(cp.tipo,cpv);
     if(cpe)return 'Cupom "'+cpc+'": '+cpe;
+    cpe=fcCpMinErro(cp,cpc);
+    if(cpe)return cpe;
     limpo=cpc.toUpperCase();
     if(vistosCp[limpo])return 'Os cupons "'+vistosCp[limpo]+'" e "'+cpc+'" têm o mesmo código ("'+limpo+'"). O cliente digitaria um cupom só, e a página não tem como saber qual dos dois cadastros aplicar — troque um dos dois.';
     vistosCp[limpo]=cpc;
@@ -14866,7 +14997,9 @@ function aRestaura(st){
   for(i=0;i<aFamilias.length;i++)if(!aFamilias[i].nome){aFamilias[i].nome='Família '+(i+1);reparouNome++;}
   aFamRender();
   aPacRender();
-  aCps=(A.cps||[]).map(function(c){return {codigo:c.codigo,tipo:c.tipo,valor:c.valor,validade:c.validade||''};});
+  /* 'minimo' entra aqui porque este map RECONSTROI o cupom chave a chave: chave que nao for
+     nomeada some, e sumiria em silencio -- a aba continuaria gerando, so que sem a regra. */
+  aCps=(A.cps||[]).map(function(c){return {codigo:c.codigo,tipo:c.tipo,valor:c.valor,validade:c.validade||'',minimo:(c.minimo==null?'':c.minimo)};});
   aCpRender();
   el=$('a-urlobrigado');if(el)el.value=A.urlobrigado||'';
   el=$('a-prefixo');if(el)el.value=A.prefixo||'';
@@ -15584,10 +15717,8 @@ function aBlocoObrigado(cfg){
      Mesmo molde de uBloco/mBloco (cps): codigo em maiusculas, valor numerico, validade AAAA-MM-DD
      ou vazio. cupomVigente/validadeBr/descontoAtual vem da fonte unica logo abaixo -- nada aqui
      e reescrito, so serializado. */
-  var aObCps=cfg.cps.map(function(cp){
-    var v=parseFloat(String(cp.valor).replace(',','.'))||0;
-    return "  {codigo:'"+escJs(String(cp.codigo).trim().toUpperCase())+"', tipo:'"+cp.tipo+"', valor:"+v+", validade:'"+escJs(cp.validade||'')+"'}";
-  }).join(',\n');
+  /* Fonte unica (fcCpSerial, 4500+) -- ver o mesmo trecho no Checkout. */
+  var aObCps=cfg.cps.map(fcCpSerial).join(',\n'),temMin=fcCpTemMinimo(cfg.cps);
   c+="var PREFIXO='"+escJs(cfg.prefixo)+"';   /* comeca o identificador de conciliacao */\n";
   c+='var DESCONTO_PIX='+cfg.descpix+';\n';
   c+='var PARCELAS='+cfg.parcelas+';\n';
@@ -15626,6 +15757,10 @@ function aBlocoObrigado(cfg){
   c+="var TXT_CUPOM_EXPIRADO='"+escJs(cfg.txtCupomExpirado)+"';\n";
   c+="var TXT_DESCONTO='"+escJs(cfg.txtDesconto)+"';\n";
   c+="var TXT_CUPOM_VALIDADE='"+escJs(cfg.txtCupomValidade)+"';   /* precede a data, na propria linha do desconto -- so aparece se o cupom tiver validade (mesma regra do Checkout/Mini loja desde 01/09) */\n";
+  if(temMin){
+    c+="var TXT_CUPOM_MINIMO='"+escJs(cfg.txtCupomMinimo)+"';   /* recusa ao aplicar; {valor} vira o minimo daquele cupom, na moeda do bloco */\n";
+    c+="var TXT_CUPOM_MINIMO_QUEDA='"+escJs(cfg.txtCupomMinimoQueda)+"';   /* o cupom que CAIU porque o pedido desceu abaixo do minimo */\n";
+  }
   /* O aviso do recebedor: ja existia (hardcoded) no Checkout e na Mini loja (TXT_NOTA la
      tambem); aqui ele nasce configuravel, por decisao do dono na mesma rodada que criou os
      outros 30 campos desta aba (02/09/2026) -- e o UNICO dos 31 que muda a saida padrao desta
@@ -15642,7 +15777,7 @@ function aBlocoObrigado(cfg){
   c+='/* ===== CUPONS =====\n';
   c+="   tipo: 'pct_produto' = % sobre o pacote (SEM os opcionais) | 'pct_total' = % sobre tudo\n";
   c+="   com opcionais | 'fixo' = valor fixo. validade: 'AAAA-MM-DD' (vale ate o fim do dia) ou\n";
-  c+="   '' = sem validade. */\n";
+  c+="   '' = sem validade."+(temMin?"\n"+FC_CP_MIN_DOC:"")+" */\n";
   c+='var CUPONS=[\n'+(aObCps||'')+'\n];\n\n';
 
   c+='/* ============================================================\n   Daqui para baixo nao precisa mexer\n   ============================================================ */\n\n';
@@ -15884,12 +16019,13 @@ function aBlocoObrigado(cfg){
     c+='var qtdsOp=[];\n';
     c+='function qtdOp(j){var q=qtdsOp[j];return (q==null)?1:q;}\n';
   }
-  c+='var elValor,elLinha2,elParcela,elDescLinha,elDescTxt,elDescVal,elDescP;\n';
+  c+='var elValor,elLinha2,elParcela,elDescLinha,elDescTxt,elDescVal,elDescP'+(temMin?',elCupomMsg':'')+';\n';
   c+='var pixEsconder=null;\n\n';
   c+=FC_CARRINHO_SRC.descontoAtual;
   c+=FC_CARRINHO_SRC.total;
   c+=FC_CARRINHO_SRC.cupomVigente;
   c+=FC_CARRINHO_SRC.validadeBr;
+  if(temMin)c+=FC_CARRINHO_SRC.cupomMinimo;
   c+='/* Nomes do que foi escolhido -- o pacote sempre, os opcionais marcados por cima. Usado so\n';
   c+='   pelo nome do item que o cartao mostra ao cliente (secao 3d); NUNCA pelo identificador. */\n';
   c+='function nomesSelecionados(){\n';
@@ -15954,6 +16090,11 @@ function aBlocoObrigado(cfg){
   c+='  b.appendChild(dl);\n';
   c+='  cartao.appendChild(b);\n';
   c+='  elDescLinha=dl;elDescTxt=dt;elDescVal=dv;elDescP=dp;\n';
+  /* A caixa de recado do cupom sai de dentro de montarCupom porque atualizar() precisa
+     escrever nela para anunciar a queda automatica -- e atualizar() nao enxerga o 'm' local.
+     Guardada ANTES do 'return' de "sem cupom cadastrado", que e o unico caminho em que o
+     resto da funcao nao roda. */
+  if(temMin)c+='  elCupomMsg=m;\n';
   c+='  if(!CUPONS.length){b.style.display="none";return;}\n';
   c+='  function aplicar(){\n';
   c+='    var v=inp.value.trim();\n';
@@ -15962,6 +16103,7 @@ function aBlocoObrigado(cfg){
   c+='    for(i=0;i<CUPONS.length;i++){if(CUPONS[i].codigo.toUpperCase()===v.toUpperCase()){achado=CUPONS[i];break;}}\n';
   c+='    if(!achado){cupomAtivo=null;m.textContent=TXT_CUPOM_INVALIDO;m.className="fca-ob-cupom-msg erro";}\n';
   c+='    else if(!cupomVigente(achado)){cupomAtivo=null;m.textContent=TXT_CUPOM_EXPIRADO;m.className="fca-ob-cupom-msg erro";}\n';
+  if(temMin)c+='    else if(!cupomMinimoOk(achado)){cupomAtivo=null;m.textContent=TXT_CUPOM_MINIMO.replace(/\\{valor\\}/g,moedaFmt(achado.minimo));m.className="fca-ob-cupom-msg erro";}\n';
   c+='    else{cupomAtivo=achado;m.textContent=TXT_CUPOM_OK;m.className="fca-ob-cupom-msg ok";}\n';
   c+='    atualizar();\n';
   c+='  }\n';
@@ -16009,6 +16151,13 @@ function aBlocoObrigado(cfg){
   c+='   cupom aplicado/removido. O Pix ja gerado fica DESATUALIZADO se o carrinho muda depois --\n';
   c+='   por isso ele e escondido aqui, e so reaparece com um novo clique em "Gerar Pix". */\n';
   c+='function atualizar(){\n';
+  /* A QUEDA AUTOMATICA DO CUPOM (decisao D2) -- mesma regra do Checkout e da Mini loja. Aqui
+     o que muda o pedido e desmarcar um opcional (ou zerar a quantidade dele); o pacote e fixo.
+     PRIMEIRA linha de atualizar(), antes de linhaDesconto() e do preco. O 'if(elCupomMsg)'
+     protege o unico caminho em que montarCupom nao chegou a rodar: prazo vencido, em que a
+     pagina monta so o preco e o aviso -- ali cupomAtivo tambem e sempre null, mas depender
+     disso seria depender de uma coincidencia. */
+  if(temMin)c+='  if(cupomAtivo&&!cupomMinimoOk(cupomAtivo)){var cpFora=cupomAtivo;cupomAtivo=null;if(elCupomMsg){elCupomMsg.textContent=TXT_CUPOM_MINIMO_QUEDA.replace(/\\{valor\\}/g,moedaFmt(cpFora.minimo));elCupomMsg.className="fca-ob-cupom-msg erro";}}\n';
   c+='  linhaDesconto();\n';
   c+='  if(elValor)elValor.textContent=moedaFmt('+(cfg.usaPix?'precoPix(total())':'total()')+');\n';
   if(cfg.usaPix&&cfg.usaPP){
@@ -19109,8 +19258,10 @@ function mCpAdd(){
   if(isNaN(v)||v<=0){alert('Informe o valor do desconto do cupom.');return;}
   var tipo=radio('m-cp-tipo')||'pct_total',e=mCpPctErro(tipo,v);
   if(e){alert('Cupom "'+cod+'": '+e);return;}
-  mCps.push({codigo:cod,tipo:tipo,valor:v,validade:$('m-cp-val').value});
-  $('m-cp-cod').value='';$('m-cp-valor').value='';$('m-cp-val').value='';
+  var mn=String($('m-cp-min').value).trim(),eMin=fcCpMinErro({minimo:mn},cod);
+  if(eMin){alert(eMin);return;}
+  mCps.push({codigo:cod,tipo:tipo,valor:v,validade:$('m-cp-val').value,minimo:mn});
+  $('m-cp-cod').value='';$('m-cp-valor').value='';$('m-cp-val').value='';$('m-cp-min').value='';
   mCpRender();salvarEstado();mPreview();
 }
 function mCpDel(i){mCps.splice(i,1);mCpRender();salvarEstado();mPreview();}
@@ -19133,7 +19284,14 @@ function mCpRender(){
       if(cp.tipo===o[0])op.selected=true;sel.appendChild(op);
     });
     sel.addEventListener('change',function(){mCps[i].tipo=sel.value;salvarEstado();mPreview();});
-    info.appendChild(cod);info.appendChild(sel);info.appendChild(val);
+    /* O MINIMO APARECE NA LISTA (decisao D5): cupom cadastrado que nao mostra a propria
+       regra e cupom que o dono aplica errado -- ele leria "NATAL10, 10%" e nao saberia que
+       ele so vale acima de um valor. Vazio = sem minimo. */
+    var mn=document.createElement('input');mn.type='number';mn.step='0.01';mn.min='0';
+    mn.value=(cp.minimo==null?'':cp.minimo);mn.placeholder='M\u00ednimo';
+    mn.title='Valor m\u00ednimo do pedido para este cupom valer (vazio = sem m\u00ednimo)';
+    mn.addEventListener('input',function(){mCps[i].minimo=mn.value;salvarEstado();mPreview();});
+    info.appendChild(cod);info.appendChild(sel);info.appendChild(val);info.appendChild(mn);
     var ctrl=document.createElement('div');ctrl.className='ctrl';
     var bt=document.createElement('button');bt.textContent='\u2715';bt.title='Remover';bt.setAttribute('aria-label','Remover');
     bt.addEventListener('click',function(){mCpDel(i);});ctrl.appendChild(bt);
@@ -19366,6 +19524,8 @@ var M_TXT_DEFS=[
   ['txtCupomOk','m-txt-cupom-ok',FC_TXT_FABRICA.cupomOk],
   ['txtCupomInvalido','m-txt-cupom-invalido',FC_TXT_FABRICA.cupomInvalido],
   ['txtCupomExpirado','m-txt-cupom-expirado',FC_TXT_FABRICA.cupomExpirado],
+  ['txtCupomMinimo','m-txt-cupom-minimo',FC_TXT_FABRICA.cupomMinimo],
+  ['txtCupomMinimoQueda','m-txt-cupom-minimo-queda',FC_TXT_FABRICA.cupomMinimoQueda],
   ['txtDesconto','m-txt-desconto',FC_TXT_FABRICA.desconto],
   ['txtCupomValidade','m-txt-cupom-validade',FC_TXT_FABRICA.cupomValidade],
   ['txtOu','m-txt-ou',FC_TXT_FABRICA.ou],
@@ -19475,6 +19635,8 @@ function mRecusa(cfg){
     if(isNaN(cpv)||cpv<=0)return 'O cupom "'+cpc+'" esta com o valor do desconto vazio ou zerado. Ele seria entregue no codigo como desconto de zero: o cliente digitaria o cupom, veria "Cupom aplicado!" e "Desconto - R$ 0,00", e o total nao mudaria. Preencha o valor ou remova o cupom.';
     cpe=mCpPctErro(cfg.cps[i].tipo,cpv);
     if(cpe)return 'Cupom "'+cpc+'": '+cpe;
+    cpe=fcCpMinErro(cfg.cps[i],cpc);
+    if(cpe)return cpe;
     /* Codigo repetido tambem aqui, e nao so no cadastro (mCpAdd) -- decisao 13: a lista se
        edita por dentro (mCpCodAjustar), e apagar/alterar um codigo la nao passa pelo
        cadastro. Comparacao ja ignora maiuscula/minuscula e espacos das pontas: cpc chega
@@ -19551,10 +19713,8 @@ function mBloco(cfg){
            "   selecaoOpcionais:'"+p.opsel+"', permitirNenhum:"+(p.opnenhum==='sim'?'true':'false')+(p.qtd?", quantidade:true":"")+",\n"+
            "   opcionais:["+ops+"]}";
   }).join(',\n');
-  var cps=cfg.cps.map(function(cp){
-    var v=parseFloat(String(cp.valor).replace(',','.'))||0;
-    return "  {codigo:'"+escJs(String(cp.codigo).trim().toUpperCase())+"', tipo:'"+cp.tipo+"', valor:"+v+", validade:'"+escJs(cp.validade||'')+"'}";
-  }).join(',\n');
+  /* Fonte unica (fcCpSerial, 4500+) -- ver o mesmo trecho no Checkout. */
+  var cps=cfg.cps.map(fcCpSerial).join(',\n');
   var cats=cfg.cats.map(function(c){return "'"+escJs(c)+"'";}).join(', ');
 
   var c='';
@@ -19715,7 +19875,7 @@ function mAssinatura(txt){
 function mBlocoJs(cfg,prods,cps,cats,client,cod){
   var usaPP=cfg.usaPP,usaPix=cfg.usaPix,usaQtd=cfg.qtdLigada,usaSinal=cfg.sinal.ativo;
   var usaResumo=cfg.resumo,descpix=cfg.descpix,zap=cfg.zap;
-  var usaCupom=cfg.cps.length>0,usaFiltro=cfg.filtro&&cfg.cats.length>0;
+  var usaCupom=cfg.cps.length>0,usaFiltro=cfg.filtro&&cfg.cats.length>0,temMin=fcCpTemMinimo(cfg.cps);
   var c='';
   c+='<scr'+'ipt>\n(function(){\n';
   c+='/* ============================================================\n';
@@ -19760,6 +19920,7 @@ function mBlocoJs(cfg,prods,cps,cats,client,cod){
   c+='/* ===== CUPONS DE DESCONTO =====\n';
   c+="   tipo: 'pct_produto' = % sobre os produtos (sem opcionais) | 'pct_total' = % sobre tudo | 'fixo' = valor fixo\n";
   c+="   validade: 'AAAA-MM-DD' (vale ate o fim do dia) | '' = sem validade\n";
+  if(temMin)c+=FC_CP_MIN_DOC+"\n";
   c+='   ATENCAO: o cupom NAO e secreto -- ele esta escrito aqui, no codigo desta pagina, e\n';
   c+='   qualquer visitante consegue le-lo. Serve para divulgar um desconto, nao para dar\n';
   c+='   desconto a uma pessoa so. */\n';
@@ -19888,6 +20049,10 @@ function mBlocoJs(cfg,prods,cps,cats,client,cod){
        acentuado -- a tela do cliente e tambem a mensagem do WhatsApp. Continua sem acento so o
        CODIGO: comentario, identificador, CSS e o payload Pix (item 10 do Manual, e a norma do BC). */
     c+="var TXT_CUPOM_VALIDADE='"+escJs(cfg.txtCupomValidade)+"';   /* precede a data, na propria linha do desconto; so aparece se o cupom tiver validade */\n";
+    if(temMin){
+      c+="var TXT_CUPOM_MINIMO='"+escJs(cfg.txtCupomMinimo)+"';   /* recusa ao aplicar; {valor} vira o minimo daquele cupom, na moeda do bloco */\n";
+      c+="var TXT_CUPOM_MINIMO_QUEDA='"+escJs(cfg.txtCupomMinimoQueda)+"';   /* o cupom que CAIU porque o pedido desceu abaixo do minimo */\n";
+    }
   }
   /* Os limites da pagina sao TEXTO DA PAGINA, nao comentario: eles ficam a vista do cliente e
      do dono no rodape do carrinho. Escritos como sao -- prometer menos e o unico jeito de o
@@ -20369,7 +20534,7 @@ function mBlocoVitrine(cfg,usaPP,usaPix,usaQtd,usaSinal,usaResumo,descpix,zap,us
 
 /* O total na tela, o cupom, o resumo e as duas pontas de pagamento. */
 function mBlocoPagar(cfg,usaPP,usaPix,usaQtd,usaSinal,usaResumo,descpix,zap,usaCupom,usaFiltro){
-  var c='';
+  var c='',temMin=fcCpTemMinimo(cfg.cps);
   if(usaCupom){
     c+='function linhaDesconto(){\n';
     c+="var l=raiz.querySelector('.fcm-desconto');\n";
@@ -20389,6 +20554,12 @@ function mBlocoPagar(cfg,usaPP,usaPix,usaQtd,usaSinal,usaResumo,descpix,zap,usaC
     c+="raiz.querySelector('.fcm-copiado').className='fcm-copiado';\n}\n\n";
   }
   c+='function atualizar(){\n';
+  /* A QUEDA AUTOMATICA DO CUPOM (decisao D2) -- mesma regra e mesmo motivo do Checkout, com o
+     carrinho desta aba: aqui o cliente tira uma LINHA da cesta (ou baixa a quantidade dela)
+     em vez de desmarcar um radio, e o desfecho seria identico -- desconto de uma regra que o
+     pedido nao cumpre mais, sem erro na tela. PRIMEIRA linha de atualizar(), antes de o total
+     ser escrito. Com mensagem, e sem reaplicar sozinho quando o pedido volta a subir. */
+  if(temMin)c+='if(cupomAtivo&&!cupomMinimoOk(cupomAtivo)){var cpFora=cupomAtivo;cupomAtivo=null;msgCupom(TXT_CUPOM_MINIMO_QUEDA.replace(/\\{valor\\}/g,moedaFmt(cpFora.minimo)),false);}\n';
   c+="raiz.querySelector('.fcm-total-v').textContent=moedaFmt(total());\n";
   if(usaSinal){
     c+="raiz.querySelector('.fcm-sinal-v').textContent=moedaFmt(sinalAgora());\n";
@@ -20411,6 +20582,7 @@ function mBlocoPagar(cfg,usaPP,usaPix,usaQtd,usaSinal,usaResumo,descpix,zap,usaC
   if(usaCupom){
     c+=FC_CARRINHO_SRC.cupomVigente;
     c+=FC_CARRINHO_SRC.validadeBr;
+    if(temMin)c+=FC_CARRINHO_SRC.cupomMinimo;
     c+='function msgCupom(t,ok){\n';
     c+="var m=raiz.querySelector('.fcm-cupom-msg');\n";
     c+="m.textContent=t;m.className='fcm-cupom-msg'+(t?(ok?' ok':' erro'):'');\n}\n\n";
@@ -20422,6 +20594,7 @@ function mBlocoPagar(cfg,usaPP,usaPix,usaQtd,usaSinal,usaResumo,descpix,zap,usaC
     c+='if(CUPONS[i].codigo.toUpperCase()===v.toUpperCase()){achado=CUPONS[i];break;}\n}\n';
     c+='if(!achado){cupomAtivo=null;msgCupom(TXT_CUPOM_INVALIDO,false);}\n';
     c+='else if(!cupomVigente(achado)){cupomAtivo=null;msgCupom(TXT_CUPOM_EXPIRADO,false);}\n';
+    if(temMin)c+='else if(!cupomMinimoOk(achado)){cupomAtivo=null;msgCupom(TXT_CUPOM_MINIMO.replace(/\\{valor\\}/g,moedaFmt(achado.minimo)),false);}\n';
     c+='else{cupomAtivo=achado;msgCupom(TXT_CUPOM_OK,true);}\n';
     c+='atualizar();\n}\n';
     c+="raiz.querySelector('.fcm-cupom-l button').addEventListener('click',aplicarCupom);\n\n";
