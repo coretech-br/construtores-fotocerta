@@ -14635,63 +14635,25 @@ function aPvDoc(cfg){
   return h;
 }
 /* ===== Tarefa 10: a previa da pagina de obrigado =====
-   A sonda do PayPal desta previa espelha pPvPayPal (15985+ antes desta tarefa), e NAO
-   fcPvSondaPP: a diferenca e estrutural, nao estetica. fcPvSondaPP EXERCITA um onClick de
-   validacao de carrinho que o Checkout e a Mini loja tem e que este bloco -- item unico, sem
-   carrinho, decisao 1 do diario -- nao tem; chama-la aqui mostraria uma linha falsa ("Ao clicar
-   em pagar: erro --") para um gancho que nunca existiu neste gerador. Mesma familia da divida ja
-   registrada na decisao 8 (o pedido ao SDK NAO E fonte compartilhada entre os quatro geradores
-   que o escrevem): a sonda de previa de cada um segue a forma do gerador que ela espelha, e este
-   espelha a /pagar. */
-function aPvObPayPal(){
-  var s='';
-  s+="  var DESENHO_PP='"+escJs(mockPP())+"';\n";
-  s+='  var inserir=document.head.appendChild;\n';
-  s+='  document.head.appendChild=function(n){\n';
-  s+="    if(n&&n.tagName==='SCRIPT'&&/paypal\\.com/.test(String(n.src||''))){\n";
-  s+='      window.paypal={Buttons:function(bt){return {render:function(sel){\n';
-  s+="        var alvo=(typeof sel==='string')?document.querySelector(sel):sel;\n";
-  s+='        if(!alvo)return;\n';
-  s+="        var caixa=document.createElement('div');\n";
-  s+="        caixa.id='a-pv-ob-pp';\n";
-  s+='        caixa.setAttribute(\'style\',\'border:1px dashed #b9b3a4;border-radius:8px;padding:6px 8px 10px\');\n';
-  s+="        alvo.innerHTML='';alvo.appendChild(caixa);\n";
-  s+="        var valor='',descricao='';\n";
-  s+='        try{\n';
-  s+='          var ped=bt.createOrder(null,{order:{create:function(o){return o;}}});\n';
-  s+='          var am=ped.purchase_units[0].amount;\n';
-  s+="          valor=am.value+' '+am.currency_code;\n";
-  s+='          descricao=ped.purchase_units[0].description;\n';
-  s+="        }catch(e){valor='(erro: '+String(e&&e.message||e)+')';}\n";
-  s+="        var eti=document.createElement('div');\n";
-  s+='        eti.setAttribute(\'style\',\'font:600 10px/1.4 -apple-system,BlinkMacSystemFont,sans-serif;color:#8a8375;text-align:center;text-transform:uppercase;letter-spacing:.06em\');\n';
-  s+="        eti.textContent='desenho: o SDK do PayPal nao roda na previa';\n";
-  s+='        caixa.appendChild(eti);\n';
-  s+="        var des=document.createElement('div');des.innerHTML=DESENHO_PP;caixa.appendChild(des);\n";
-  s+="        var med=document.createElement('div');\n";
-  s+="        med.id='a-pv-ob-pp-valor';\n";
-  s+='        med.setAttribute(\'style\',\'margin-top:8px;border-top:1px dashed #d8d2c4;padding-top:7px;font:12px/1.5 -apple-system,BlinkMacSystemFont,sans-serif;color:#555;text-align:left\');\n';
-  s+="        med.textContent='Medido no proprio bloco -- valor que iria na ordem: '+valor+(descricao?(' | descricao: '+descricao):'');\n";
-  s+='        caixa.appendChild(med);\n';
-  s+='      }};}};\n';
-  s+='      setTimeout(function(){if(n.onload)n.onload();},0);\n';
-  s+='      return n;\n';
-  s+='    }\n';
-  s+='    return inserir.call(document.head,n);\n';
-  s+='  };\n';
-  s+='  document.head.appendChild.fcPvSemPayPal=true;\n';
-  return s;
-}
+   Ate a Tarefa 5 da v2, o pedido ao PayPal deste bloco era a quarta copia manuscrita de
+   actions.order.create (decisao 8 do diario), sem onClick nenhum -- e por isso esta sonda
+   tambem era manuscrita, sem exercitar clique. Isso deixou de ser verdade: o bloco passou a
+   consumir fcPpBotoesSrc (3613+), a mesma fonte do Checkout e da Mini loja, que SEMPRE emite
+   onClick com a guarda de total zero (item 6 da revisao pos-v2). A sonda agora usa
+   fcPvSondaPP, a mesma dos outros dois geradores, e a previa volta a mostrar a linha "Ao
+   clicar em pagar: recusa/aceita" -- que ate aqui faltava so nesta. */
 /* O WHATSAPP NAO E NEUTRALIZADO por window.open (o bloco usa <a target="_blank">, nao
    window.open): o mesmo limite ja aceito na previa da /pagar (16033, zapBotao identico). O
    aviso do shim descreve essa consequencia em vez de prometer o que nao entrega.
-   aPvObPayPal() entra como EXTRAS (nao concatenado a parte): e a mesma engrenagem que a
-   propria fcPvShim ja define para "trocas adicionais do ambiente, emitidas logo depois da
-   troca do storage" -- a sonda do PayPal roda DENTRO do IIFE do shim, nao como um segundo
-   bloco solto (aPvObPayPal devolve so as instrucoes, sem as tags de script em volta). */
+   A sonda entra como EXTRAS (nao concatenada a parte): e a mesma engrenagem que a propria
+   fcPvShim ja define para "trocas adicionais do ambiente, emitidas logo depois da troca do
+   storage" -- ela roda DENTRO do IIFE do shim, nao como um segundo bloco solto (fcPvSondaPP
+   devolve so as instrucoes, sem as tags de script em volta). raizId e o id do bloco inteiro
+   (fca-ob-raiz, 14083); msgSel e caixaId casam com secaoCartao (fca-ob-msg, e o id do
+   quadro do desenho, 14507+). */
 function aPvObShim(){
   return fcPvShim({pref:'a',
-    extras:aPvObPayPal(),
+    extras:fcPvSondaPP({ppcor:'gold',raizId:'fca-ob-raiz',msgSel:'fca-ob-msg',caixaId:'a-pv-ob-pp'}),
     semAbrir:true,
     abre:'',
     fecha:' deste quadro. Este bloco nao deveria gravar nada em armazenamento, mas se a troca nao pegou pode estar tocando as chaves reais do navegador -- ou abrindo o WhatsApp numa aba nova. O codigo gerado ao lado nao e afetado.'});
