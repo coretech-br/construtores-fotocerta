@@ -4571,7 +4571,7 @@ function parearCor(idCor){
      levantou o caso: trocar a cor da coruja para criar contraste com outro fundo).
 
    POR QUE A PALETA SO ALCANCA TRES ABAS. Medido nos rotulos do arquivo: sao 35 campos de cor e
-   so 9 sao a mesma coisa. 'c1', 'c2' e 'c3' significam destaque, fundo do cartao e cor do texto
+   so 18 sao a mesma coisa. 'c1', 'c2' e 'c3' significam destaque, fundo do cartao e cor do texto
    no Checkout, no Link de cobranca e na Mini loja -- mas na Captacao de leads 'c1' e o FUNDO DO
    CABECALHO e 'c3' e o BOTAO ENVIAR. Amarrar por nome quebraria aquela aba. Bordas
    (f1, f2, c1-c4) e Contagem (cfundo, ctexto, cdestaque, ctafundo, ctatexto, cprog, curg) tem
@@ -10644,7 +10644,7 @@ function uProdEditar(i){
   uEditIdx=i;uOpRender();
   setRadio('u-opsel',p.opsel);setRadio('u-opnenhum',p.opnenhum);
   setRadio('u-pqtd',p.qtd?'sim':'nao');
-  $('u-prod-salvar').textContent='Salvar alteracoes';
+  $('u-prod-salvar').textContent='Salvar alterações';
   $('u-prod-cancelar').style.display='inline-block';
   uToggles();
 }
@@ -17302,7 +17302,7 @@ function mProdSalvar(){
   var n=$('m-pnome').value.trim(),img=String($('m-pimg').value).trim();
   if(!n){alert('Informe o nome do produto.');return;}
   var v=parseFloat(String($('m-ppreco').value).replace(',','.'));
-  if(isNaN(v)||v<0){alert('Informe o preco do produto.');return;}
+  if(isNaN(v)||v<0){alert('Informe o preço do produto.');return;}
   /* Foto e OBRIGATORIA nesta aba, ao contrario do Checkout: a vitrine e feita de imagens, e um
      produto sem foto sairia como um retangulo cinza no meio da grade. A recusa nomeia o campo
      em vez de deixar passar e o defeito aparecer so na pagina publicada. */
@@ -17336,7 +17336,7 @@ function mProdEditar(i){
   mEditIdx=i;mOpRender();
   setRadio('m-opsel',p.opsel);setRadio('m-opnenhum',p.opnenhum);
   setRadio('m-pqtd',p.qtd?'sim':'nao');
-  $('m-prod-salvar').textContent='Salvar alteracoes';
+  $('m-prod-salvar').textContent='Salvar alterações';
   $('m-prod-cancelar').style.display='inline-block';
   mToggles();
 }
