@@ -42,6 +42,8 @@ Entregue em 24/08/2026, na mesma aba: a **prévia de celular**, a **proporção 
 
 Entregue em 01/09/2026: a **validade do cupom na linha do desconto** (`docs/specs/2026-09-01-validade-do-cupom-na-linha-do-desconto-design.md`) — nos dois construtores que têm cupom, Checkout e Mini loja. Cupom com prazo mostra `Válido até: dd/mm/aa` ao lado do rótulo; cupom sem prazo não mostra nada. Junto veio um buraco fechado no arnês: o cenário da regressão não cadastrava cupom nenhum, então todo o caminho do cupom da Mini loja estava fora da fotografia byte a byte.
 
+Entregue em 01/09/2026, na sequência: **todo texto que uma pessoa lê passou a sair acentuado** (`docs/specs/2026-09-01-acentuacao-do-texto-que-o-cliente-le-design.md`) — 24 textos nos blocos do Checkout e da Mini loja, incluindo o rodapé de limites inteiro da loja, mais 9 na tela da própria ferramenta. Continua sem acento, de propósito, a mensagem do WhatsApp e todo código. O arnês ganhou `FC_DUMP=<pasta>`, que grava o texto de cada saída além do hash — é o que permite enumerar o diff de uma rodada em vez de só contar divergências.
+
 **Opção registrada, não implementada:** mandar tambem o `invoice_id` ao PayPal. Ele apareceria no histórico e nos e-mails do comprador, mas é **único por conta** — a segunda cobrança com o mesmo identificador seria recusada. Serve como trava contra pagamento em duplicidade; é decisão do dono.
 
 A próxima sai do que o dono encontrar no uso.
@@ -76,7 +78,7 @@ Em 23/08/2026 o dono pediu que **todas** fossem feitas. Ficou uma, e ela é dele
 
 1. **A Tag Head da landing de Natal pode ainda ter a regra antiga de movimento reduzido** (`[style], * { animation-duration: 0.01ms !important }`), que mata toda animação **daquela página** para quem pede menos movimento. Quem a substitui é o **código 1 da aba Bordas com efeito**: gerar com o efeito em uso e colar no lugar do bloco antigo. Não é urgente, e o alcance é de uma página só — não do site, porque **o Prosite não tem cabeçalho global**.
 
-2. **Os textos do Checkout e da Mini loja que o cliente lê continuam sem acento.** Em 01/09/2026 `Válido até:` entrou acentuado, a pedido do dono, e virou o único acentuado desses dois blocos. Na mesma tela ainda aparecem `Cupom invalido.`, `Copiar codigo Pix`, `Codigo copiado!`, `Ja paguei - avisar no WhatsApp`, `Esta foto nao carregou…`, `Seu carrinho esta vazio…`, `O sinal deste pedido e maior que o total…`, `Escolha ao menos um item: o pedido esta em zero.` e as mensagens de item que saiu do catálogo. O Manual do Prosite permite acento em texto visível (item 10), e o bloco do Link de cobrança já é o precedente. É uma rodada pequena, com regressão própria — os dois blocos mudam de propósito e nenhum outro pode mudar.
+2. **A Mini loja escreve a mesma frase três vezes.** `Escolha ao menos um item: o pedido está em zero.` existe como `TXT_TOTAL_ZERO` **e** crua dentro de dois `alert()` do caminho Pix. Hoje as três concordam; amanhã, quem trocar `TXT_TOTAL_ZERO` no bloco publicado verá dois avisos continuarem com o texto antigo, sem erro e sem aviso. Não foi corrigido na rodada de acentuação de 01/09/2026 de propósito: `TXT_TOTAL_ZERO` só é emitido dentro de `if(usaPP)`, então usá-lo no caminho Pix exige mover a declaração — e loja em "somente Pix" com variável ausente é o defeito que já matou esta aba uma vez (`MOEDA is not defined`, sem produtos e sem aviso). É rodada pequena, mas precisa da conferência do modo "somente Pix" executando.
 
 ### Fechadas em 23/08/2026
 

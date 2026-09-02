@@ -149,6 +149,14 @@ const r = {arvore:ARV, geradores:{}, cobrancas:{}, erros:[]};
   for(const id of SAIDAS) textos[id] = (await ler(pg,id)) ?? '';
   textos['t-out1-direta'] = tDireta ?? '';
   for(const [id,t] of Object.entries(textos)) r.geradores[id] = sha(t);
+  /* FC_DUMP=<pasta> grava o TEXTO de cada saida, e nao so o hash. O hash responde "mudou?";
+     o texto responde "mudou o que?", que e a pergunta que toda rodada com divergencia
+     intencional precisa responder na spec. Sem isto, enumerar o diff exigia reconstruir a
+     captura a mao dos dois lados -- foi assim ate 01/09/2026. */
+  if(process.env.FC_DUMP){
+    fs.mkdirSync(process.env.FC_DUMP,{recursive:true});
+    for(const [id,t] of Object.entries(textos)) fs.writeFileSync(process.env.FC_DUMP+'/'+id+'.txt', t);
+  }
   r.bytes = Object.entries(textos).map(([id,t])=>id+':'+t.length).join(' ');
   r.alertas = await alertas(pg);
   r.erros.push(...pg.erros);
