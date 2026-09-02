@@ -270,6 +270,13 @@
   .secao{display:flex;align-items:center;gap:10px;margin:28px 0 14px;font-size:13px;font-weight:700;
     text-transform:uppercase;letter-spacing:.8px;color:var(--verde);border-top:1px solid var(--linha);padding-top:20px}
   .secao.primeira{border-top:none;padding-top:0;margin-top:20px}
+  /* Secao que nasce RECOLHIDA (rodada de textos configuraveis, 03/09/2026): as abas
+     Checkout e Mini loja ganharam 33 e 55 campos de texto, e soltos entre os campos de uso
+     diario eles afogariam a configuracao que o operador mexe toda semana. */
+  .secao.dobra{cursor:pointer;-webkit-user-select:none;user-select:none}
+  .secao.dobra:focus{outline:2px solid var(--verde);outline-offset:3px}
+  .secao-dobra-seta{margin-left:auto;font-size:11px;font-weight:400;letter-spacing:.4px;opacity:.75}
+  .fcd-oculto{display:none!important}
   .secao-n{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;
     border-radius:50%;background:var(--verde);color:#fff;font-size:12px;flex-shrink:0}
   .caixa-editor{border:1px dashed var(--linha);border-radius:10px;padding:14px;margin:10px 0}
@@ -1652,10 +1659,106 @@
     </div>
   </div>
 
-  <div class="secao"><span class="secao-n">4</span> Biblioteca de presets</div>
+  <div class="secao dobra" id="u-txt-cab" role="button" tabindex="0" aria-expanded="false" aria-controls="u-txt-corpo"><span class="secao-n">4</span> Textos que o cliente lê <span class="secao-dobra-seta">mostrar</span></div>
+  <div class="grade fcd-oculto" id="u-txt-corpo">
+    <div class="fcx-largo">
+      <p class="ajuda">Todos os campos desta seção já vêm com <b>exatamente o texto que o carrinho usa hoje</b> — mexer neles muda só o que o cliente lê, nunca uma conta. A seção nasce recolhida porque são dezenas de campos que quase nunca se mexe; o uso diário está nas seções acima.</p>
+    </div>
+    <div>
+      <fieldset>
+        <legend>Cupom de desconto</legend>
+        <label for="u-txt-cupom-rotulo">Rótulo do campo de cupom</label>
+        <input type="text" id="u-txt-cupom-rotulo" value="Cupom de desconto">
+        <label for="u-txt-cupom-botao">Botão de aplicar</label>
+        <input type="text" id="u-txt-cupom-botao" value="Aplicar">
+        <label for="u-txt-cupom-ok">Cupom aceito</label>
+        <input type="text" id="u-txt-cupom-ok" value="Cupom aplicado!">
+        <label for="u-txt-cupom-invalido">Cupom inválido</label>
+        <input type="text" id="u-txt-cupom-invalido" value="Cupom inválido.">
+        <label for="u-txt-cupom-expirado">Cupom expirado</label>
+        <input type="text" id="u-txt-cupom-expirado" value="Cupom expirado.">
+        <label for="u-txt-desconto">Linha do desconto</label>
+        <input type="text" id="u-txt-desconto" value="Desconto ({codigo})">
+        <label for="u-txt-cupom-validade">Validade, na linha do desconto</label>
+        <input type="text" id="u-txt-cupom-validade" value="Válido até:">
+        <p class="ajuda">Onde você escrever <code>{codigo}</code> na linha do desconto, entra o código do cupom aplicado. Sem <code>{codigo}</code>, o código não aparece — a frase sai como você escreveu.</p>
+      </fieldset>
+      <fieldset>
+        <legend>Itens e recusas do pedido</legend>
+        <label for="u-txt-semopcional">Opção “nenhum opcional” <small>(só no modo “escolhe 1”, com “permitir nenhum”)</small></label>
+        <input type="text" id="u-txt-semopcional" value="Sem opcional">
+        <label for="u-txt-totalzero">Pedido em zero</label>
+        <input type="text" id="u-txt-totalzero" value="Escolha ao menos um item: o pedido está em zero.">
+        <label for="u-txt-sinal-maior">Sinal maior que o total</label>
+        <input type="text" id="u-txt-sinal-maior" value="O sinal deste carrinho é maior que o total do pedido. Escolha mais itens, aumente a quantidade ou remova o cupom.">
+        <label for="u-txt-sinal-zero">Sinal arredonda para zero</label>
+        <input type="text" id="u-txt-sinal-zero" value="O sinal deste pedido arredonda para zero. Escolha mais itens ou aumente a quantidade.">
+        <label for="u-txt-sinal-recusado">Rótulo da recusa no resumo <small>(sai em MAIÚSCULAS)</small></label>
+        <input type="text" id="u-txt-sinal-recusado" value="pedido recusado">
+        <p class="ajuda">As três últimas só aparecem com a <b>cobrança de sinal</b> ligada. Elas explicam por que o pagamento está travado: reescrevê-las é livre, mas quem as lê está sem conseguir pagar — diga o que fazer.</p>
+      </fieldset>
+    </div>
+    <div>
+      <fieldset>
+        <legend>Pagamento pelo Pix</legend>
+        <label for="u-txt-ou">Separador entre PayPal e Pix</label>
+        <input type="text" id="u-txt-ou" value="ou pague com Pix">
+        <label for="u-txt-ou-desc">Separador quando há desconto no Pix</label>
+        <input type="text" id="u-txt-ou-desc" value="ou pague com Pix com {pct}% de desconto">
+        <label for="u-txt-pix-instrucao">Instrução de pagamento</label>
+        <input type="text" id="u-txt-pix-instrucao" value="Abra o app do seu banco e pague pelo QR Code ou Pix Copia e Cola">
+        <label for="u-txt-pixval">Rótulo do valor no Pix <small>(os dois-pontos são acrescentados pelo bloco)</small></label>
+        <input type="text" id="u-txt-pixval" value="Valor no Pix">
+        <label for="u-txt-pix-copiar">Botão de copiar o código</label>
+        <input type="text" id="u-txt-pix-copiar" value="Copiar código Pix">
+        <label for="u-txt-pix-copiado">Código copiado com sucesso</label>
+        <input type="text" id="u-txt-pix-copiado" value="Código copiado!">
+        <label for="u-txt-nota">Aviso para conferir o recebedor</label>
+        <input type="text" id="u-txt-nota" value="Confira o nome do recebedor antes de confirmar o pagamento">
+        <label for="u-txt-pix-rotulo">Linha “pagando via Pix” <small>(só com desconto no Pix)</small></label>
+        <input type="text" id="u-txt-pix-rotulo" value="Pagando via Pix (-{pct}%)">
+        <p class="ajuda">Onde você escrever <code>{pct}</code>, entra o percentual de desconto do Pix — nas duas frases acima que o usam. Sem <code>{pct}</code>, o número não aparece.</p>
+      </fieldset>
+      <fieldset>
+        <legend>Resumo copiável</legend>
+        <label for="u-txt-resumo-botao">Botão de copiar</label>
+        <input type="text" id="u-txt-resumo-botao" value="Copiar o resumo">
+        <label for="u-txt-resumo-copiado">Resumo copiado</label>
+        <input type="text" id="u-txt-resumo-copiado" value="Resumo copiado!">
+        <label for="u-txt-resumo-subtotal">Rótulo do subtotal</label>
+        <input type="text" id="u-txt-resumo-subtotal" value="Subtotal">
+        <label for="u-txt-resumo-pedido">Rótulo do código do pedido</label>
+        <input type="text" id="u-txt-resumo-pedido" value="Pedido">
+      </fieldset>
+      <fieldset>
+        <legend>Aviso pelo WhatsApp <small>(botão “Já paguei”)</small></legend>
+        <label for="u-txt-zap-botao">Texto do botão</label>
+        <input type="text" id="u-txt-zap-botao" value="Já paguei - avisar no WhatsApp">
+        <label for="u-txt-zap-abertura">Primeira linha da mensagem</label>
+        <input type="text" id="u-txt-zap-abertura" value="Olá! Acabei de pagar via Pix.">
+        <label for="u-txt-zap-abertura-sinal">Primeira linha, com sinal ligado</label>
+        <input type="text" id="u-txt-zap-abertura-sinal" value="Olá! Acabei de pagar o SINAL via Pix.">
+        <label for="u-txt-zap-pedido">Linha do código do pedido</label>
+        <input type="text" id="u-txt-zap-pedido" value="Pedido cod: *{cod}*">
+        <label for="u-txt-zap-cupom">Linha do cupom</label>
+        <input type="text" id="u-txt-zap-cupom" value="Cupom: {codigo}">
+        <label for="u-txt-zap-descpix">Linha do desconto do Pix</label>
+        <input type="text" id="u-txt-zap-descpix" value="Desconto Pix: -{pct}%">
+        <label for="u-txt-zap-total">Linha do total <small>(só com sinal ligado)</small></label>
+        <input type="text" id="u-txt-zap-total" value="Total do pedido: {valor}">
+        <label for="u-txt-zap-sinal">Linha do sinal pago <small>(só com sinal ligado)</small></label>
+        <input type="text" id="u-txt-zap-sinal" value="Sinal pago agora: *{valor}*">
+        <label for="u-txt-zap-valor">Linha do valor pago <small>(sem sinal)</small></label>
+        <input type="text" id="u-txt-zap-valor" value="Valor pago: *{valor}*">
+        <p class="ajuda">Marcadores: <code>{cod}</code> o código do pedido, <code>{codigo}</code> o código do cupom, <code>{pct}</code> o percentual do Pix e <code>{valor}</code> o valor já formatado. O <b>*asterisco*</b> é o negrito do WhatsApp. A linha do saldo usa o campo “Restante na entrega”, da seção 3.</p>
+      </fieldset>
+    </div>
+  </div>
+
+  <div class="secao"><span class="secao-n">5</span> Biblioteca de presets</div>
   <div class="grade" id="fcp-u-box"></div>
 
-  <div class="secao"><span class="secao-n">5</span> Prévia e código gerado</div>
+  <div class="secao"><span class="secao-n">6</span> Prévia e código gerado</div>
   <div class="acoes" style="margin-bottom:14px">
     <button class="botao" id="u-gerar">Gerar código</button>
     <button class="botao claro" id="u-atualizar">Atualizar prévia</button>
@@ -2870,10 +2973,162 @@
     </div>
   </div>
 
-  <div class="secao"><span class="secao-n">5</span> Biblioteca de presets</div>
+  <div class="secao dobra" id="m-txt-cab" role="button" tabindex="0" aria-expanded="false" aria-controls="m-txt-corpo"><span class="secao-n">5</span> Textos que o cliente lê <span class="secao-dobra-seta">mostrar</span></div>
+  <div class="grade fcd-oculto" id="m-txt-corpo">
+    <div class="fcx-largo">
+      <p class="ajuda">Todos os campos desta seção já vêm com <b>exatamente o texto que a loja usa hoje</b> — mexer neles muda só o que o cliente lê, nunca uma conta. A seção nasce recolhida porque são dezenas de campos que quase nunca se mexe; o uso diário está nas seções acima.</p>
+    </div>
+    <div>
+      <fieldset>
+        <legend>Vitrine e cartão do item</legend>
+        <label for="m-txt-todos">Primeiro botão de filtro <small>(mostra o catálogo inteiro)</small></label>
+        <input type="text" id="m-txt-todos" value="Todos">
+        <label for="m-txt-vazio-categoria">Categoria sem itens</label>
+        <input type="text" id="m-txt-vazio-categoria" value="Nenhum item nesta categoria.">
+        <label for="m-txt-foto-erro">Foto que não carregou</label>
+        <input type="text" id="m-txt-foto-erro" value="Esta foto não carregou. Confira o endereço dela no cadastro.">
+        <label for="m-txt-este-item">Rótulo do valor no cartão de detalhe</label>
+        <input type="text" id="m-txt-este-item" value="Este item">
+        <label for="m-txt-quantidade">Rótulo do seletor de quantidade <small>(o mesmo texto no cartão e no carrinho)</small></label>
+        <input type="text" id="m-txt-quantidade" value="Quantidade">
+        <label for="m-txt-atualizar">Botão de atualizar um item já no carrinho</label>
+        <input type="text" id="m-txt-atualizar" value="Atualizar no carrinho">
+        <p class="ajuda">O aviso de <b>foto que não carregou</b> é lido pelo cliente, não por você — é por isso que ele tem campo. Se acontecer, o endereço da foto está errado no cadastro.</p>
+      </fieldset>
+      <fieldset>
+        <legend>Carrinho</legend>
+        <label for="m-txt-cesta-vazia">Carrinho vazio</label>
+        <input type="text" id="m-txt-cesta-vazia" value="Seu carrinho está vazio. Escolha um item na vitrine ao lado.">
+        <label for="m-txt-tirar-titulo">Dica do botão ✕ <small>(aparece ao passar o mouse)</small></label>
+        <input type="text" id="m-txt-tirar-titulo" value="Tirar do carrinho">
+        <label for="m-txt-tirar-aria">O que o leitor de tela anuncia no botão ✕</label>
+        <input type="text" id="m-txt-tirar-aria" value="Tirar {nome} do carrinho">
+        <label for="m-txt-semopcional">Opção “nenhum opcional”</label>
+        <input type="text" id="m-txt-semopcional" value="Sem opcional">
+        <label for="m-txt-totalzero">Pedido em zero</label>
+        <input type="text" id="m-txt-totalzero" value="Escolha ao menos um item: o pedido está em zero.">
+        <label for="m-txt-sinal-maior">Sinal maior que o total</label>
+        <input type="text" id="m-txt-sinal-maior" value="O sinal deste pedido é maior que o total. Escolha mais itens, aumente a quantidade ou remova o cupom.">
+        <label for="m-txt-sinal-zero">Sinal arredonda para zero</label>
+        <input type="text" id="m-txt-sinal-zero" value="O sinal deste pedido arredonda para zero. Escolha mais itens ou aumente a quantidade.">
+        <label for="m-txt-sinal-recusado">Rótulo da recusa no resumo <small>(sai em MAIÚSCULAS)</small></label>
+        <input type="text" id="m-txt-sinal-recusado" value="pedido recusado">
+        <p class="ajuda">O <b>✕</b> do botão de tirar não é campo, de propósito: campo vazio faria o botão sumir da tela sem erro nenhum. O que se configura é o que o <b>leitor de tela</b> anuncia — onde você escrever <code>{nome}</code>, entra o nome do produto.</p>
+      </fieldset>
+      <fieldset>
+        <legend>Avisos do carrinho guardado</legend>
+        <label for="m-txt-cesta-estragada">Carrinho ilegível</label>
+        <input type="text" id="m-txt-cesta-estragada" value="O carrinho guardado neste navegador estava ilegível e foi descartado. Escolha os itens de novo.">
+        <label for="m-txt-outra-loja">Carrinho de outra versão da loja</label>
+        <input type="text" id="m-txt-outra-loja" value="O carrinho guardado neste navegador era de outra versão desta loja e foi descartado, para você não pagar um preço que não é o que está na tela. Escolha os itens de novo.">
+        <label for="m-txt-sumiu">Um item saiu do catálogo</label>
+        <input type="text" id="m-txt-sumiu" value="{n} item do seu carrinho saiu do catálogo e foi removido.">
+        <label for="m-txt-sumiram">Vários itens saíram do catálogo</label>
+        <input type="text" id="m-txt-sumiram" value="{n} itens do seu carrinho saíram do catálogo e foram removidos.">
+        <label for="m-txt-op-sumiu">Um opcional saiu do catálogo</label>
+        <input type="text" id="m-txt-op-sumiu" value="{n} opcional que você tinha escolhido saiu do catálogo e foi removido.">
+        <label for="m-txt-op-sumiram">Vários opcionais saíram do catálogo</label>
+        <input type="text" id="m-txt-op-sumiram" value="{n} opcionais que você tinha escolhido saíram do catálogo e foram removidos.">
+        <p class="ajuda">Onde você escrever <code>{n}</code>, entra <b>quantos</b> itens saíram — e por isso o número pode ficar onde você quiser na frase, inclusive no meio (“Removemos {n} itens…”). Sem <code>{n}</code>, o número não aparece.</p>
+      </fieldset>
+    </div>
+    <div>
+      <fieldset>
+        <legend>Cupom de desconto</legend>
+        <label for="m-txt-cupom-rotulo">Rótulo do campo de cupom</label>
+        <input type="text" id="m-txt-cupom-rotulo" value="Cupom de desconto">
+        <label for="m-txt-cupom-botao">Botão de aplicar</label>
+        <input type="text" id="m-txt-cupom-botao" value="Aplicar">
+        <label for="m-txt-cupom-ok">Cupom aceito</label>
+        <input type="text" id="m-txt-cupom-ok" value="Cupom aplicado!">
+        <label for="m-txt-cupom-invalido">Cupom inválido</label>
+        <input type="text" id="m-txt-cupom-invalido" value="Cupom inválido.">
+        <label for="m-txt-cupom-expirado">Cupom expirado</label>
+        <input type="text" id="m-txt-cupom-expirado" value="Cupom expirado.">
+        <label for="m-txt-desconto">Linha do desconto</label>
+        <input type="text" id="m-txt-desconto" value="Desconto ({codigo})">
+        <label for="m-txt-cupom-validade">Validade, na linha do desconto</label>
+        <input type="text" id="m-txt-cupom-validade" value="Válido até:">
+        <p class="ajuda">Onde você escrever <code>{codigo}</code> na linha do desconto, entra o código do cupom aplicado.</p>
+      </fieldset>
+      <fieldset>
+        <legend>Pagamento pelo Pix</legend>
+        <label for="m-txt-ou">Separador entre PayPal e Pix</label>
+        <input type="text" id="m-txt-ou" value="ou pague com Pix">
+        <label for="m-txt-ou-desc">Separador quando há desconto no Pix</label>
+        <input type="text" id="m-txt-ou-desc" value="ou pague com Pix com {pct}% de desconto">
+        <label for="m-txt-pix-instrucao">Instrução de pagamento</label>
+        <input type="text" id="m-txt-pix-instrucao" value="Abra o app do seu banco e pague pelo QR Code ou Pix Copia e Cola">
+        <label for="m-txt-pixval">Rótulo do valor no Pix <small>(os dois-pontos são acrescentados pelo bloco)</small></label>
+        <input type="text" id="m-txt-pixval" value="Valor no Pix">
+        <label for="m-txt-pix-copiar">Botão de copiar o código</label>
+        <input type="text" id="m-txt-pix-copiar" value="Copiar código Pix">
+        <label for="m-txt-pix-copiado">Código copiado com sucesso</label>
+        <input type="text" id="m-txt-pix-copiado" value="Código copiado!">
+        <label for="m-txt-nota">Aviso para conferir o recebedor</label>
+        <input type="text" id="m-txt-nota" value="Confira o nome do recebedor antes de confirmar o pagamento">
+        <label for="m-txt-pix-rotulo">Linha “pagando via Pix” <small>(só com desconto no Pix)</small></label>
+        <input type="text" id="m-txt-pix-rotulo" value="Pagando via Pix (-{pct}%)">
+        <p class="ajuda">Onde você escrever <code>{pct}</code>, entra o percentual de desconto do Pix.</p>
+      </fieldset>
+      <fieldset>
+        <legend>Resumo copiável</legend>
+        <label for="m-txt-resumo-botao">Botão de copiar</label>
+        <input type="text" id="m-txt-resumo-botao" value="Copiar o resumo">
+        <label for="m-txt-resumo-copiado">Resumo copiado</label>
+        <input type="text" id="m-txt-resumo-copiado" value="Resumo copiado!">
+        <label for="m-txt-resumo-subtotal">Rótulo do subtotal</label>
+        <input type="text" id="m-txt-resumo-subtotal" value="Subtotal">
+        <label for="m-txt-resumo-pedido">Rótulo do código do pedido</label>
+        <input type="text" id="m-txt-resumo-pedido" value="Pedido">
+      </fieldset>
+      <fieldset>
+        <legend>Aviso pelo WhatsApp <small>(botão “Já paguei”)</small></legend>
+        <label for="m-txt-zap-botao">Texto do botão</label>
+        <input type="text" id="m-txt-zap-botao" value="Já paguei - avisar no WhatsApp">
+        <label for="m-txt-zap-abertura">Primeira linha da mensagem</label>
+        <input type="text" id="m-txt-zap-abertura" value="Olá! Acabei de pagar via Pix.">
+        <label for="m-txt-zap-abertura-sinal">Primeira linha, com sinal ligado</label>
+        <input type="text" id="m-txt-zap-abertura-sinal" value="Olá! Acabei de pagar o SINAL via Pix.">
+        <label for="m-txt-zap-pedido">Linha do código do pedido</label>
+        <input type="text" id="m-txt-zap-pedido" value="Pedido cod: *{cod}*">
+        <label for="m-txt-zap-cupom">Linha do cupom</label>
+        <input type="text" id="m-txt-zap-cupom" value="Cupom: {codigo}">
+        <label for="m-txt-zap-descpix">Linha do desconto do Pix</label>
+        <input type="text" id="m-txt-zap-descpix" value="Desconto Pix: -{pct}%">
+        <label for="m-txt-zap-total">Linha do total <small>(só com sinal ligado)</small></label>
+        <input type="text" id="m-txt-zap-total" value="Total do pedido: {valor}">
+        <label for="m-txt-zap-sinal">Linha do sinal pago <small>(só com sinal ligado)</small></label>
+        <input type="text" id="m-txt-zap-sinal" value="Sinal pago agora: *{valor}*">
+        <label for="m-txt-zap-valor">Linha do valor pago <small>(sem sinal)</small></label>
+        <input type="text" id="m-txt-zap-valor" value="Valor pago: *{valor}*">
+        <label for="m-txt-pedido-enviado">Recado depois de avisar <small>(o carrinho é esvaziado)</small></label>
+        <input type="text" id="m-txt-pedido-enviado" value="Pedido enviado. O carrinho foi esvaziado -- combine o restante pelo WhatsApp.">
+        <p class="ajuda">Marcadores: <code>{cod}</code> o código do pedido, <code>{codigo}</code> o código do cupom, <code>{pct}</code> o percentual do Pix e <code>{valor}</code> o valor já formatado. O <b>*asterisco*</b> é o negrito do WhatsApp.</p>
+      </fieldset>
+      <fieldset>
+        <legend>Rodapé de limites</legend>
+        <label for="m-txt-limite-pedidos">Não guarda pedidos <small>(sempre aparece)</small></label>
+        <input type="text" id="m-txt-limite-pedidos" value="Esta página não guarda pedidos: cada compra existe como a mensagem que você recebe, a transação no PayPal e o Pix na conta.">
+        <label for="m-txt-limite-pix">Pix não confirma sozinho <small>(só com Pix)</small></label>
+        <input type="text" id="m-txt-limite-pix" value="O Pix estático não avisa ninguém quando o dinheiro cai -- a confirmação é por conferência do extrato.">
+        <label for="m-txt-limite-paypal">PayPal não avisa a página <small>(só com PayPal)</small></label>
+        <input type="text" id="m-txt-limite-paypal" value="O PayPal também não tem como avisar esta página: a liberação é manual.">
+        <label for="m-txt-limite-carrinho">Carrinho é deste aparelho <small>(sempre aparece)</small></label>
+        <input type="text" id="m-txt-limite-carrinho" value="O carrinho fica guardado neste navegador e neste aparelho: montado no celular, no computador ele aparece vazio.">
+        <label for="m-txt-limite-estoque">Não há controle de estoque <small>(sempre aparece)</small></label>
+        <input type="text" id="m-txt-limite-estoque" value="Não há estoque: todos os itens são sob encomenda e podem ser pedidos quantas vezes for preciso.">
+        <label for="m-txt-limite-cupons">Cupons não são secretos <small>(só com cupom cadastrado)</small></label>
+        <input type="text" id="m-txt-limite-cupons" value="Os cupons ficam dentro do código desta página e não são secretos.">
+        <p class="ajuda">As seis frases saem <b>emendadas em um parágrafo só</b> no rodapé do carrinho, e só entra a que corresponde a um limite real daquela loja. <b>Elas prometem menos de propósito</b>: cada uma descreve algo que este bloco realmente não faz. Reescrevê-las para prometer mais é escrever uma frase que a loja não cumpre.</p>
+      </fieldset>
+    </div>
+  </div>
+
+  <div class="secao"><span class="secao-n">6</span> Biblioteca de presets</div>
   <div class="grade" id="fcp-m-box"></div>
 
-  <div class="secao"><span class="secao-n">6</span> Prévia e código gerado</div>
+  <div class="secao"><span class="secao-n">7</span> Prévia e código gerado</div>
   <div class="acoes" style="margin-bottom:14px">
     <button class="botao" id="m-gerar">Gerar código</button>
     <button class="botao claro" id="m-atualizar">Atualizar prévia</button>
@@ -3661,6 +3916,116 @@ function aTplJs(q,texto,pares){
   return toks.map(function(t){
     return t.lit!=null?(q+(q==="'"?esc(t.lit):escJsD(t.lit)).replace(/<\//g,'<\\/').replace(/<!--/g,'<\\!--')+q):t.expr;
   }).join('+');
+}
+/* ===== OS TEXTOS DE FABRICA QUE MAIS DE UMA ABA USA =====
+   Rodada de textos configuraveis, Etapa 2 (03/09/2026). Sete frases que a Etapa 1 tornou
+   configuraveis na aba Agendamento por pacote reaparecem IDENTICAS no Checkout e na Mini
+   loja, e outras vinte e tantas existem nas duas abas grandes ao mesmo tempo. A decisao do
+   dono (docs/decisoes-2026-09-03-textos-configuraveis.md, "Regra que vale para os 112") e UM
+   CAMPO POR ABA -- ele pediu poder escrever coisas diferentes em cada uma --, mas com o TEXTO
+   DE FABRICA vindo de UMA TABELA SO: dois campos divergirem e escolha do dono; duas fabricas
+   divergirem por acidente e o defeito de amanha.
+   O que NAO entra aqui e o que so parece igual: 'Desconto' sai sem o codigo do cupom na aba
+   pac e com ele nas duas abas grandes (decisao D-3), e o aviso de sinal maior que o total fala
+   em "carrinho" no Checkout e em "pedido" na Mini loja. Frase parecida nao e frase unica. */
+var FC_TXT_FABRICA={
+  cupomRotulo:'Cupom de desconto',
+  cupomBotao:'Aplicar',
+  cupomOk:'Cupom aplicado!',
+  cupomInvalido:'Cupom inválido.',
+  cupomExpirado:'Cupom expirado.',
+  cupomValidade:'Válido até:',
+  nota:'Confira o nome do recebedor antes de confirmar o pagamento',
+  pixInstrucao:'Abra o app do seu banco e pague pelo QR Code ou Pix Copia e Cola',
+  pixCopiar:'Copiar código Pix',
+  semOpcional:'Sem opcional',
+  sinalZero:'O sinal deste pedido arredonda para zero. Escolha mais itens ou aumente a quantidade.',
+  sinalRecusado:'pedido recusado',
+  totalZero:'Escolha ao menos um item: o pedido está em zero.',
+  ou:'ou pague com Pix',
+  /* {pct} minusculo desde 03/09/2026 (decisao D-1): a Etapa 1 adotou {pct}/{valor}/{n}/{data}
+     e este era o unico marcador em MAIUSCULAS da ferramenta. A troca no bloco gerado aceita as
+     DUAS grafias (regex /i), para configuracao ja gravada com {PCT} continuar funcionando. */
+  ouDesc:'ou pague com Pix com {pct}% de desconto',
+  pixVal:'Valor no Pix',
+  pixCopiado:'Código copiado!',
+  zapBotao:'Já paguei - avisar no WhatsApp',
+  /* A FRASE INTEIRA, e nao so "Pagando via Pix" (decisao D-2): metade configuravel e
+     armadilha -- o dono trocaria a frase e o sufixo ' (-5%)', que ele nao controla, continuaria
+     grudado no fim. */
+  pixRotulo:'Pagando via Pix (-{pct}%)',
+  resumoBotao:'Copiar o resumo',
+  resumoCopiado:'Resumo copiado!',
+  resumoSubtotal:'Subtotal',
+  resumoPedido:'Pedido',
+  /* Idem D-2, com {codigo}: o codigo do cupom vinha colado por fora da frase. */
+  desconto:'Desconto ({codigo})',
+  zapAberturaSinal:'Olá! Acabei de pagar o SINAL via Pix.',
+  zapAbertura:'Olá! Acabei de pagar via Pix.',
+  zapPedido:'Pedido cod: *{cod}*',
+  zapCupom:'Cupom: {codigo}',
+  zapDescPix:'Desconto Pix: -{pct}%',
+  zapTotal:'Total do pedido: {valor}',
+  zapSinal:'Sinal pago agora: *{valor}*',
+  zapValor:'Valor pago: *{valor}*'
+};
+/* As duas metades da persistencia de uma tabela de textos, escritas UMA vez para as quatro
+   abas que ja tem uma (A_TXT_DEFS, P_TXT_DEFS, U_TXT_DEFS, M_TXT_DEFS). Na Etapa 1 cada aba
+   carregava o proprio laco, identico ao das outras -- quatro copias do mesmo for.
+   fcTxtLer serve tanto ao cfg() (aba aberta, campo sempre existe) quanto ao coleta() (que roda
+   a cada tecla, em qualquer aba): o fallback para o padrao da tabela cobre o segundo caso sem
+   custar nada ao primeiro. */
+function fcTxtLer(defs,alvo){
+  var i,el;
+  for(i=0;i<defs.length;i++){el=$(defs[i][1]);alvo[defs[i][0]]=el?el.value:defs[i][2];}
+  return alvo;
+}
+/* Estado gravado por versao anterior da ferramenta nao tem nenhuma destas chaves: o padrao de
+   cada campo e o terceiro item da propria tabela -- o mesmo texto que saia fixo no bloco. */
+function fcTxtRestaura(defs,st){
+  var i,el;
+  for(i=0;i<defs.length;i++){el=$(defs[i][1]);if(el)el.value=(st[defs[i][0]]!=null)?st[defs[i][0]]:defs[i][2];}
+}
+/* ===== A REDE CONTRA A FABRICA QUE DIVERGE =====
+   O padrao de cada campo de texto esta escrito em DOIS lugares: no atributo value= do <input>
+   (o que um navegador sem estado guardado mostra) e na terceira coluna da tabela da aba (o que
+   restaurar, e aplicar preset antigo, usam quando a chave nao existe). Se os dois discordarem,
+   dois operadores geram blocos DIFERENTES com "a configuracao de fabrica", e nada na tela diz
+   isso -- e a mesma familia de defeito silencioso que fccOrfas existe para denunciar.
+   Ela nao conserta; ela faz o buraco APARECER (a partida mostra a barra vermelha). Le o
+   ATRIBUTO, e nao a propriedade: a propriedade ja foi sobrescrita pela restauracao. */
+function fcTxtFabricaDiverge(){
+  var tabelas=[['Checkout',U_TXT_DEFS],['Mini loja',M_TXT_DEFS],
+               ['Agendamento por pacote',A_TXT_DEFS],['Link de cobranca',P_TXT_DEFS]],r=[],i,j,el,attr;
+  for(i=0;i<tabelas.length;i++)for(j=0;j<tabelas[i][1].length;j++){
+    el=$(tabelas[i][1][j][1]);
+    if(!el)continue;
+    attr=el.getAttribute('value');
+    if(attr!==tabelas[i][1][j][2])r.push(tabelas[i][0]+'/'+tabelas[i][1][j][1]);
+  }
+  return r;
+}
+/* ===== SECAO QUE NASCE RECOLHIDA =====
+   Uma mecanica so para todas as secoes marcadas com class="secao dobra": o cabecalho aponta,
+   por aria-controls, o container que ele esconde. addEventListener e nunca onclick (item 1 do
+   Manual do Prosite -- aqui e a propria ferramenta, mas a norma da casa e a mesma), e o teclado
+   entra junto: o cabecalho e um div, entao Enter e espaco precisam ser tratados a mao. */
+function fcdLigar(){
+  var cabs=document.querySelectorAll('.secao.dobra'),i;
+  for(i=0;i<cabs.length;i++)(function(cab){
+    var corpo=$(cab.getAttribute('aria-controls')),seta=cab.querySelector('.secao-dobra-seta');
+    if(!corpo)return;
+    function alterna(){
+      var aberto=corpo.className.indexOf('fcd-oculto')<0;
+      corpo.className=aberto?(corpo.className+' fcd-oculto'):corpo.className.replace(/\s*fcd-oculto/g,'');
+      cab.setAttribute('aria-expanded',aberto?'false':'true');
+      if(seta)seta.textContent=aberto?'mostrar':'esconder';
+    }
+    cab.addEventListener('click',alterna);
+    cab.addEventListener('keydown',function(e){
+      if(e.key==='Enter'||e.key===' '||e.key==='Spacebar'){e.preventDefault();alterna();}
+    });
+  })(cabs[i]);
 }
 /* Compartilhada por Bordas e Captacao de leads: hexadecimal -> "r, g, b", para montar rgba()
    dentro de @keyframes (onde nao da para usar a cor com alfa separado). Nasceu na aba Bordas;
@@ -10563,7 +10928,7 @@ var uEditIdx=-1;
 
 /* Salvamento e restauracao desta aba (registradas em ABAS). */
 function uColeta(){
-  return {
+  var r={
     /* Sem client, chave, nomer, cidade e zapnum: a identidade saiu desta aba e mora em
        'fcConstrutoresIdentidade'. Tirar as chaves daqui e o que impede uma segunda copia de
        nascer de novo -- o preset desta aba e uma fotografia deste coleta(). */
@@ -10577,6 +10942,9 @@ function uColeta(){
       larg:$('u-largura').value,ppcor:radio('u-ppcor'),qtdmax:$('u-qtdmax').value,
       c1:$('u-c1-t').value,c2:$('u-c2-t').value,c3:$('u-c3-t').value}
   };
+  /* Os 33 textos configuraveis (ver U_TXT_DEFS, logo antes de uCfg). */
+  fcTxtLer(U_TXT_DEFS,r.u);
+  return r;
 }
 function uRestaura(st){
   if(!st.u)return;
@@ -10613,6 +10981,9 @@ function uRestaura(st){
   $('u-c1-t').value=U.c1;$('u-c1').value=corValida(U.c1)?U.c1:'#075E54';
   $('u-c2-t').value=U.c2;$('u-c2').value=corValida(U.c2)?U.c2:'#ffffff';
   $('u-c3-t').value=U.c3;$('u-c3').value=corValida(U.c3)?U.c3:'#333333';
+  /* Os 33 textos configuraveis: estado gravado antes desta rodada nao tem nenhuma destas
+     chaves -- o padrao de cada campo e o terceiro item de U_TXT_DEFS. */
+  fcTxtRestaura(U_TXT_DEFS,U);
 }
 
 /* ===== O que esta aba poe na biblioteca de presets (ver o bloco compartilhado) =====
@@ -11077,6 +11448,49 @@ document.addEventListener('change',function(e){
   if(al)uPreview();
 });
 
+/* ===== os 33 textos configuraveis desta aba (Rodada de textos configuraveis, Etapa 2) =====
+   Mesmo molde de A_TXT_DEFS/P_TXT_DEFS (Etapa 1): [chave no cfg/estado, id do campo na aba,
+   texto padrao]. O padrao e EXATAMENTE o que saia fixo no bloco antes desta rodada -- e o
+   que faz a saida nao mudar um byte com a configuracao de fabrica --, e vem da tabela unica
+   FC_TXT_FABRICA sempre que a MESMA frase existe em outra aba (ver o comentario dela).
+   Uma tabela SO, usada por uCfg (le do DOM ao gerar), uColeta/uRestaura (persistencia) e,
+   por tabela, o padrao de preset antigo: 33 chaves escritas a mao tres vezes cada seriam
+   um convite ao erro de digitacao. */
+var U_TXT_DEFS=[
+  ['txtCupomRotulo','u-txt-cupom-rotulo',FC_TXT_FABRICA.cupomRotulo],
+  ['txtCupomBotao','u-txt-cupom-botao',FC_TXT_FABRICA.cupomBotao],
+  ['txtCupomOk','u-txt-cupom-ok',FC_TXT_FABRICA.cupomOk],
+  ['txtCupomInvalido','u-txt-cupom-invalido',FC_TXT_FABRICA.cupomInvalido],
+  ['txtCupomExpirado','u-txt-cupom-expirado',FC_TXT_FABRICA.cupomExpirado],
+  ['txtDesconto','u-txt-desconto',FC_TXT_FABRICA.desconto],
+  ['txtCupomValidade','u-txt-cupom-validade',FC_TXT_FABRICA.cupomValidade],
+  ['txtSemOpcional','u-txt-semopcional',FC_TXT_FABRICA.semOpcional],
+  ['txtTotalZero','u-txt-totalzero',FC_TXT_FABRICA.totalZero],
+  ['txtSinalMaior','u-txt-sinal-maior','O sinal deste carrinho é maior que o total do pedido. Escolha mais itens, aumente a quantidade ou remova o cupom.'],
+  ['txtSinalZero','u-txt-sinal-zero',FC_TXT_FABRICA.sinalZero],
+  ['txtSinalRecusado','u-txt-sinal-recusado',FC_TXT_FABRICA.sinalRecusado],
+  ['txtOu','u-txt-ou',FC_TXT_FABRICA.ou],
+  ['txtOuDesc','u-txt-ou-desc',FC_TXT_FABRICA.ouDesc],
+  ['txtPixInstrucao','u-txt-pix-instrucao',FC_TXT_FABRICA.pixInstrucao],
+  ['txtPixVal','u-txt-pixval',FC_TXT_FABRICA.pixVal],
+  ['txtPixCopiar','u-txt-pix-copiar',FC_TXT_FABRICA.pixCopiar],
+  ['txtPixCopiado','u-txt-pix-copiado',FC_TXT_FABRICA.pixCopiado],
+  ['txtNota','u-txt-nota',FC_TXT_FABRICA.nota],
+  ['txtPixRotulo','u-txt-pix-rotulo',FC_TXT_FABRICA.pixRotulo],
+  ['txtResumoBotao','u-txt-resumo-botao',FC_TXT_FABRICA.resumoBotao],
+  ['txtResumoCopiado','u-txt-resumo-copiado',FC_TXT_FABRICA.resumoCopiado],
+  ['txtResumoSubtotal','u-txt-resumo-subtotal',FC_TXT_FABRICA.resumoSubtotal],
+  ['txtResumoPedido','u-txt-resumo-pedido',FC_TXT_FABRICA.resumoPedido],
+  ['txtZapBotao','u-txt-zap-botao',FC_TXT_FABRICA.zapBotao],
+  ['txtZapAbertura','u-txt-zap-abertura',FC_TXT_FABRICA.zapAbertura],
+  ['txtZapAberturaSinal','u-txt-zap-abertura-sinal',FC_TXT_FABRICA.zapAberturaSinal],
+  ['txtZapPedido','u-txt-zap-pedido',FC_TXT_FABRICA.zapPedido],
+  ['txtZapCupom','u-txt-zap-cupom',FC_TXT_FABRICA.zapCupom],
+  ['txtZapDescPix','u-txt-zap-descpix',FC_TXT_FABRICA.zapDescPix],
+  ['txtZapTotal','u-txt-zap-total',FC_TXT_FABRICA.zapTotal],
+  ['txtZapSinal','u-txt-zap-sinal',FC_TXT_FABRICA.zapSinal],
+  ['txtZapValor','u-txt-zap-valor',FC_TXT_FABRICA.zapValor]
+];
 /* ===== configuracao da aba =====
    Uma leitura so da interface, ja presa nas faixas. E o que uGerar valida, e e o que uBloco
    monta -- e como a previa passou a executar o retorno de uBloco, nao sobrou nenhuma segunda
@@ -11099,7 +11513,7 @@ function uCfg(){
   var sinalTipo=radio('u-sinaltipo')||'pct';
   var sinalPct=uPreso('u-sinalpct');if(sinalPct==null)sinalPct=30;
   var sinalFixo=uPreso('u-sinalfixo');if(sinalFixo==null)sinalFixo=100;
-  return {
+  var r={
     sinal:{ativo:sinalOn,tipo:sinalTipo,valor:(sinalTipo==='fixo')?(Math.round(sinalFixo*100)/100):sinalPct},
     resumo:(radio('u-resumo')==='sim'),
     t8:$('u-t8').value, t9:$('u-t9').value, t10:$('u-t10').value,
@@ -11127,6 +11541,10 @@ function uCfg(){
     t1:$('u-t1').value, t2:$('u-t2').value, t3:$('u-t3').value, t4:$('u-t4').value,
     t5:$('u-t5').value, t6:$('u-t6').value, t7:$('u-t7').value
   };
+  /* Os 33 textos configuraveis (ver U_TXT_DEFS): lidos direto do DOM pela tabela unica --
+     uCfg() so roda com a aba aberta, entao os campos sempre existem, igual a t1..t10. */
+  fcTxtLer(U_TXT_DEFS,r);
+  return r;
 }
 
 /* ===== as guardas da geracao, sem efeito colateral =====
@@ -11370,13 +11788,13 @@ function uBloco(cfg){
   c+="var TXT_PRODUTOS='"+escJs(cfg.t7)+"';   /* rotulo da lista, so aparece com 2+ produtos */\n";
   c+="var TXT_OPCIONAIS='"+escJs(cfg.t2)+"';\n";
   c+="var TXT_TOTAL='"+escJs(cfg.t3)+"';\n";
-  c+="var TXT_SEM_OPCIONAL='Sem opcional';\n";
+  c+="var TXT_SEM_OPCIONAL='"+escJs(cfg.txtSemOpcional)+"';\n";
   if(usaSinal){
     c+="var TXT_SINAL='"+escJs(cfg.t8)+"';\n";
     c+="var TXT_SALDO='"+escJs(cfg.t9)+"';\n";
-    c+="var TXT_SINAL_MAIOR='O sinal deste carrinho é maior que o total do pedido. Escolha mais itens, aumente a quantidade ou remova o cupom.';\n";
-    c+="var TXT_SINAL_ZERO='O sinal deste pedido arredonda para zero. Escolha mais itens ou aumente a quantidade.';\n";
-    c+="var TXT_SINAL_RECUSADO='pedido recusado';\n";
+    c+="var TXT_SINAL_MAIOR='"+escJs(cfg.txtSinalMaior)+"';\n";
+    c+="var TXT_SINAL_ZERO='"+escJs(cfg.txtSinalZero)+"';\n";
+    c+="var TXT_SINAL_RECUSADO='"+escJs(cfg.txtSinalRecusado)+"';\n";
   }
   if(usaPP){
     c+="var TXT_SUCESSO='"+escJs(cfg.t5)+"';\n";
@@ -11388,42 +11806,42 @@ function uBloco(cfg){
      conseguia trocar. Emitir so em usaPP faria o Checkout em "somente Pix" referenciar
      variavel nao declarada, que e o defeito ja medido na Mini loja. */
   if(usaPP||usaPix){
-    c+="var TXT_TOTAL_ZERO='Escolha ao menos um item: o pedido está em zero.';\n";
+    c+="var TXT_TOTAL_ZERO='"+escJs(cfg.txtTotalZero)+"';\n";
   }
   if(usaPix){
     if(usaPP){
-      c+="var TXT_OU='ou pague com Pix';\n";
-      c+="var TXT_OU_DESC='ou pague com Pix com {PCT}% de desconto';\n";
+      c+="var TXT_OU='"+escJs(cfg.txtOu)+"';\n";
+      c+="var TXT_OU_DESC='"+escJs(cfg.txtOuDesc)+"';\n";
     }
     c+="var TXT_BOTAO_PIX='"+escJs(cfg.t4)+"';\n";
-    c+="var TXT_INSTRUCAO='Abra o app do seu banco e pague pelo QR Code ou Pix Copia e Cola';\n";
-    c+="var TXT_PIXVAL='Valor no Pix';\n";
-    c+="var TXT_COPIAR='Copiar código Pix';\n";
-    c+="var TXT_COPIADO='Código copiado!';\n";
-    if(zap)c+="var TXT_ZAP='Já paguei - avisar no WhatsApp';\n";
-    c+="var TXT_NOTA='Confira o nome do recebedor antes de confirmar o pagamento';\n";
+    c+="var TXT_INSTRUCAO='"+escJs(cfg.txtPixInstrucao)+"';\n";
+    c+="var TXT_PIXVAL='"+escJs(cfg.txtPixVal)+"';\n";
+    c+="var TXT_COPIAR='"+escJs(cfg.txtPixCopiar)+"';\n";
+    c+="var TXT_COPIADO='"+escJs(cfg.txtPixCopiado)+"';\n";
+    if(zap)c+="var TXT_ZAP='"+escJs(cfg.txtZapBotao)+"';\n";
+    c+="var TXT_NOTA='"+escJs(cfg.txtNota)+"';\n";
   }
-  if(descpix>0)c+="var TXT_PIX_ROTULO='Pagando via Pix';\n";
+  if(descpix>0)c+="var TXT_PIX_ROTULO='"+escJs(cfg.txtPixRotulo)+"';\n";
   if(usaResumo){
     c+="var TXT_RESUMO='"+escJs(cfg.t10)+"';\n";
-    c+="var TXT_RESUMO_BOTAO='Copiar o resumo';\n";
-    c+="var TXT_RESUMO_COPIADO='Resumo copiado!';\n";
-    c+="var TXT_RESUMO_SUBTOTAL='Subtotal';\n";
-    c+="var TXT_RESUMO_PEDIDO='Pedido';\n";
+    c+="var TXT_RESUMO_BOTAO='"+escJs(cfg.txtResumoBotao)+"';\n";
+    c+="var TXT_RESUMO_COPIADO='"+escJs(cfg.txtResumoCopiado)+"';\n";
+    c+="var TXT_RESUMO_SUBTOTAL='"+escJs(cfg.txtResumoSubtotal)+"';\n";
+    c+="var TXT_RESUMO_PEDIDO='"+escJs(cfg.txtResumoPedido)+"';\n";
   }
-  c+="var TXT_CUPOM_ROTULO='Cupom de desconto';\n";
-  c+="var TXT_CUPOM_BOTAO='Aplicar';\n";
-  c+="var TXT_CUPOM_OK='Cupom aplicado!';\n";
-  c+="var TXT_CUPOM_INVALIDO='Cupom inválido.';\n";
-  c+="var TXT_CUPOM_EXPIRADO='Cupom expirado.';\n";
-  c+="var TXT_DESCONTO='Desconto';\n";
+  c+="var TXT_CUPOM_ROTULO='"+escJs(cfg.txtCupomRotulo)+"';\n";
+  c+="var TXT_CUPOM_BOTAO='"+escJs(cfg.txtCupomBotao)+"';\n";
+  c+="var TXT_CUPOM_OK='"+escJs(cfg.txtCupomOk)+"';\n";
+  c+="var TXT_CUPOM_INVALIDO='"+escJs(cfg.txtCupomInvalido)+"';\n";
+  c+="var TXT_CUPOM_EXPIRADO='"+escJs(cfg.txtCupomExpirado)+"';\n";
+  c+="var TXT_DESCONTO='"+escJs(cfg.txtDesconto)+"';\n";
   /* ACENTO DE PROPOSITO, e o unico texto acentuado que estes dois blocos emitem. O item 10 do
      Manual do Prosite proibe acento em CODIGO, nao no texto que o cliente le -- o bloco do Link
      de cobranca ja carrega texto visivel acentuado desde ago/2026. Pedido do dono em 01/09/2026,
      depois de ver "Valido ate" na tela. Em 01/09/2026 todo texto que uma pessoa le passou a sair
      acentuado -- a tela do cliente e tambem a mensagem do WhatsApp. Continua sem acento so o
      CODIGO: comentario, identificador, CSS e o payload Pix (item 10 do Manual, e a norma do BC). */
-  c+="var TXT_CUPOM_VALIDADE='Válido até:';   /* precede a data, na propria linha do desconto; so aparece se o cupom tiver validade */\n\n";
+  c+="var TXT_CUPOM_VALIDADE='"+escJs(cfg.txtCupomValidade)+"';   /* precede a data, na propria linha do desconto; so aparece se o cupom tiver validade */\n\n";
 
   c+='/* ============================================================\n   Daqui para baixo nao precisa mexer\n   ============================================================ */\n\n';
   c+=fcMoedaFmtGer(false);
@@ -11502,10 +11920,16 @@ function uBloco(cfg){
     c+="raiz.querySelector('.fcu-copiado').textContent=TXT_COPIADO;\n";
     c+="raiz.querySelector('.fcu-nota').textContent=TXT_NOTA;\n";
     if(zap)c+="raiz.querySelector('.fcu-zap').textContent=TXT_ZAP;\n";
-    if(usaPP)c+="raiz.querySelector('.fcu-sep-t').textContent=(DESCONTO_PIX>0)?TXT_OU_DESC.replace('{PCT}',DESCONTO_PIX):TXT_OU;\n";
+    /* D-1: as DUAS grafias do marcador. O padrao virou {pct} (minusculo, como o resto da
+       ferramenta desde a Etapa 1), e a /i faz configuracao ja gravada com {PCT} continuar
+       funcionando -- trocar a convencao nao pode quebrar o bloco de quem ja configurou. */
+    if(usaPP)c+="raiz.querySelector('.fcu-sep-t').textContent=(DESCONTO_PIX>0)?TXT_OU_DESC.replace(/\\{pct\\}/gi,DESCONTO_PIX):TXT_OU;\n";
   }
   if(descpix>0){
-    c+="raiz.querySelector('.fcu-pixlinha-t').textContent=TXT_PIX_ROTULO+' (-'+DESCONTO_PIX+'%)';\n";
+    /* D-2: o (-N%) deixou de ser colado por fora -- ele mora DENTRO do texto configuravel,
+       como {pct}. Meia frase configuravel era armadilha: o dono trocava a frase e o sufixo
+       que ele nao controla continuava grudado. */
+    c+="raiz.querySelector('.fcu-pixlinha-t').textContent=TXT_PIX_ROTULO.replace(/\\{pct\\}/gi,DESCONTO_PIX);\n";
     c+="raiz.querySelector('.fcu-pixlinha').className='fcu-pixlinha on';\n";
   }
   c+='\n/* ===== monta a lista de produtos ===== */\n';
@@ -11623,7 +12047,9 @@ function uBloco(cfg){
   c+="var l=raiz.querySelector('.fcu-desconto');\n";
   c+='if(cupomAtivo){\n';
   c+="l.className='fcu-desconto on';\n";
-  c+="raiz.querySelector('.fcu-desconto-t').textContent=TXT_DESCONTO+' ('+cupomAtivo.codigo+')';\n";
+  /* D-3: o codigo do cupom mora DENTRO do texto configuravel, como {codigo} -- mesmo motivo
+     do D-2 logo acima. */
+  c+="raiz.querySelector('.fcu-desconto-t').textContent=TXT_DESCONTO.replace(/\\{codigo\\}/g,cupomAtivo.codigo);\n";
   c+="raiz.querySelector('.fcu-desconto-v').textContent='- '+moedaFmt(descontoAtual());\n";
   /* A validade sai do cupom ATIVO, nao de uma configuracao do bloco: quem tem prazo mostra,
      quem nao tem some. Por isso ela e emitida sempre que o bloco tem cupons -- amarra-la a
@@ -11717,7 +12143,7 @@ function uBloco(cfg){
     c+="L.push(TXT_RESUMO_PEDIDO+' '+CODIGO_PEDIDO);\n";
     c+="for(z=0;z<li.length;z++)L.push((li[z].opcional?'   + ':'- ')+li[z].rotulo+'  '+moedaFmt(li[z].valor));\n";
     c+="if(cupomAtivo)L.push(TXT_RESUMO_SUBTOTAL+': '+moedaFmt(subtotal()));\n";
-    c+="if(cupomAtivo)L.push(TXT_DESCONTO+' ('+cupomAtivo.codigo+'): - '+moedaFmt(descontoAtual()));\n";
+    c+="if(cupomAtivo)L.push(TXT_DESCONTO.replace(/\\{codigo\\}/g,cupomAtivo.codigo)+': - '+moedaFmt(descontoAtual()));\n";
     c+="L.push(TXT_TOTAL+': '+moedaFmt(total()));\n";
     if(usaSinal){
       /* pedido que as duas pontas de pagamento recusam nao pode sair do resumo como pedido
@@ -11730,7 +12156,7 @@ function uBloco(cfg){
       c+="L.push(TXT_SALDO+': '+moedaFmt(saldoDepois()));\n";
       c+='}\n';
     }
-    if(descpix>0)c+="L.push(TXT_PIX_ROTULO+' (-'+DESCONTO_PIX+'%): '+moedaFmt(totalPix()));\n";
+    if(descpix>0)c+="L.push(TXT_PIX_ROTULO.replace(/\\{pct\\}/gi,DESCONTO_PIX)+': '+moedaFmt(totalPix()));\n";
     c+="return L.join('\\n');\n}\n\n";
 
     c+='function copiarResumo(){\n';
@@ -11786,9 +12212,9 @@ function uBloco(cfg){
     if(zap){
       c+='function avisarZap(){\n';
       c+='var partes=[];\n';
-      if(usaSinal)c+="partes.push('Olá! Acabei de pagar o SINAL via Pix.');\n";
-      else c+="partes.push('Olá! Acabei de pagar via Pix.');\n";
-      c+="partes.push('Pedido cod: *'+CODIGO_PEDIDO+'*');\n";
+      if(usaSinal)c+="partes.push('"+escJs(cfg.txtZapAberturaSinal)+"');\n";
+      else c+="partes.push('"+escJs(cfg.txtZapAbertura)+"');\n";
+      c+="partes.push("+aTplJs("'",cfg.txtZapPedido,[['{cod}','CODIGO_PEDIDO']])+");\n";
       if(usaResumo){
       /* uma leitura so do que o cliente marcou, compartilhada com o resumo copiavel */
       c+='var li=itensEscolhidos(),z;\n';
@@ -11811,14 +12237,14 @@ function uBloco(cfg){
         c+="if(op&&!op.nenhum)partes.push('   + '+op.nome+' '+moedaFmt(op.preco));\n}\n});\n";
       }
       }
-      c+="if(cupomAtivo)partes.push('Cupom: '+cupomAtivo.codigo);\n";
-      if(descpix>0)c+="if(DESCONTO_PIX>0)partes.push('Desconto Pix: -'+DESCONTO_PIX+'%');\n";
+      c+="if(cupomAtivo)partes.push("+aTplJs("'",cfg.txtZapCupom,[['{codigo}','cupomAtivo.codigo']])+");\n";
+      if(descpix>0)c+="if(DESCONTO_PIX>0)partes.push("+aTplJs("'",cfg.txtZapDescPix,[['{pct}','DESCONTO_PIX']])+");\n";
       if(usaSinal){
-        c+="partes.push('Total do pedido: '+moedaFmt(total()));\n";
-        c+="partes.push('Sinal pago agora: *'+moedaFmt(sinalAgora())+'*');\n";
+        c+="partes.push("+aTplJs("'",cfg.txtZapTotal,[['{valor}','moedaFmt(total())']])+");\n";
+        c+="partes.push("+aTplJs("'",cfg.txtZapSinal,[['{valor}','moedaFmt(sinalAgora())']])+");\n";
         c+="partes.push(TXT_SALDO+': *'+moedaFmt(saldoDepois())+'*');\n";
       }else{
-        c+="partes.push('Valor pago: *'+moedaFmt(totalPix())+'*');\n";
+        c+="partes.push("+aTplJs("'",cfg.txtZapValor,[['{valor}','moedaFmt(totalPix())']])+");\n";
       }
       c+="var url='https://wa.me/'+ZAP_NUMERO+'?text='+encodeURIComponent(partes.join('\\n'));\n";
       c+="window.open(url,'_blank');\n}\n";
@@ -13409,21 +13835,21 @@ var A_TXT_DEFS=[
   ['txtRecusa','a-txt-recusa','Não encontramos seu agendamento nesta página. Se você acabou de agendar, use o link que aparece no e-mail de confirmação — ou fale com a gente que resolvemos na hora.'],
   ['txtOpcionais','a-txt-opcionais','Itens opcionais'],
   ['txtTotalZero','a-txt-totalzero','O cupom aplicado zera o valor deste pedido.'],
-  ['txtCupomRotulo','a-txt-cupom-rotulo','Cupom de desconto'],
-  ['txtCupomBotao','a-txt-cupom-botao','Aplicar'],
-  ['txtCupomOk','a-txt-cupom-ok','Cupom aplicado!'],
-  ['txtCupomInvalido','a-txt-cupom-invalido','Cupom inválido.'],
-  ['txtCupomExpirado','a-txt-cupom-expirado','Cupom expirado.'],
+  ['txtCupomRotulo','a-txt-cupom-rotulo',FC_TXT_FABRICA.cupomRotulo],
+  ['txtCupomBotao','a-txt-cupom-botao',FC_TXT_FABRICA.cupomBotao],
+  ['txtCupomOk','a-txt-cupom-ok',FC_TXT_FABRICA.cupomOk],
+  ['txtCupomInvalido','a-txt-cupom-invalido',FC_TXT_FABRICA.cupomInvalido],
+  ['txtCupomExpirado','a-txt-cupom-expirado',FC_TXT_FABRICA.cupomExpirado],
   ['txtDesconto','a-txt-desconto','Desconto'],
-  ['txtCupomValidade','a-txt-cupom-validade','Válido até:'],
+  ['txtCupomValidade','a-txt-cupom-validade',FC_TXT_FABRICA.cupomValidade],
   ['txtSucesso','a-txt-sucesso','Pagamento aprovado. Obrigado!'],
   ['txtErroComPix','a-txt-erro-compix','Não foi possível carregar o pagamento por cartão agora. Use o Pix acima, ou fale com a gente para receber outra forma de pagar.'],
   ['txtErroSemPix','a-txt-erro-sempix','Não foi possível carregar o pagamento por cartão agora. Fale com a gente para receber outra forma de pagar.'],
   ['txtPixRotulo','a-txt-pix-rotulo','Pix'],
   ['txtPixGerar','a-txt-pix-gerar','Gerar Pix'],
-  ['txtPixCopiar','a-txt-pix-copiar','Copiar código Pix'],
-  ['txtPixInstrucao','a-txt-pix-instrucao','Abra o app do seu banco e pague pelo QR Code ou Pix Copia e Cola'],
-  ['txtNota','a-txt-nota','Confira o nome do recebedor antes de confirmar o pagamento'],
+  ['txtPixCopiar','a-txt-pix-copiar',FC_TXT_FABRICA.pixCopiar],
+  ['txtPixInstrucao','a-txt-pix-instrucao',FC_TXT_FABRICA.pixInstrucao],
+  ['txtNota','a-txt-nota',FC_TXT_FABRICA.nota],
   ['txtPixCopiado','a-txt-pix-copiado','Código copiado! Cole no aplicativo do seu banco.'],
   ['txtPixNaocopiou','a-txt-pix-naocopiou','Não consegui copiar. Selecione o código acima e copie na mão.'],
   ['txtOu','a-txt-ou','OU'],
@@ -13805,7 +14231,7 @@ function aCfg(){
   /* ===== os 31 textos configuraveis (Rodada de textos configuraveis, 02/09/2026) =====
      Lidos direto do DOM pela tabela unica A_TXT_DEFS (ver o comentario dela): aCfg() so roda
      com a aba aberta, entao os campos sempre existem, igual a t1..t5 acima. */
-  for(var iTxt=0;iTxt<A_TXT_DEFS.length;iTxt++)r[A_TXT_DEFS[iTxt][0]]=$(A_TXT_DEFS[iTxt][1]).value;
+  fcTxtLer(A_TXT_DEFS,r);
   return r;
 }
 /* Leitura defensiva de um campo que pode ainda nao existir no DOM (ver o paragrafo do topo
@@ -13841,7 +14267,7 @@ function aColeta(){
   /* Os 31 textos configuraveis (ver A_TXT_DEFS): mesma leitura defensiva de aElVal, com o
      padrao de cada um vindo da tabela -- estado gravado por versao anterior desta ferramenta
      nao tem estas chaves. */
-  for(var iTxt=0;iTxt<A_TXT_DEFS.length;iTxt++)r[A_TXT_DEFS[iTxt][0]]=aElVal(A_TXT_DEFS[iTxt][1],A_TXT_DEFS[iTxt][2]);
+  fcTxtLer(A_TXT_DEFS,r);
   return {a:r};
 }
 function aRestaura(st){
@@ -13896,10 +14322,7 @@ function aRestaura(st){
   /* Os 31 textos configuraveis (ver A_TXT_DEFS, logo apos A_OB_VARS): estado gravado antes
      desta rodada (02/09/2026) nao tem nenhuma destas chaves -- o padrao de cada campo e o
      terceiro item da propria tabela, o mesmo texto que saia fixo no bloco. */
-  for(k=0;k<A_TXT_DEFS.length;k++){
-    el=$(A_TXT_DEFS[k][1]);
-    if(el)el.value=(A[A_TXT_DEFS[k][0]]!=null)?A[A_TXT_DEFS[k][0]]:A_TXT_DEFS[k][2];
-  }
+  fcTxtRestaura(A_TXT_DEFS,A);
   /* A migracao NUNCA fica calada (CLAUDE.md, secao "Em duvida entre descartar e preservar").
      Persistida na hora (salvarEstado()) para o aviso nao repetir na proxima carga: 'pac' e a
      ULTIMA aba do loop de restaurarEstado() (fim do array ABAS), entao todas as outras ja
@@ -14003,6 +14426,20 @@ function fcaPrecoParcelaSrc(){
   return 'function precoPix(p){return Math.round(p*(1-DESCONTO_PIX/100)*100)/100;}\n'+
     'function parcelaDe(p){return Math.ceil(p/PARCELAS*100)/100;}\n';
 }
+/* O MESMO campo "trecho do parcelamento" nos TRES lugares que escrevem "em ate Nx de R$Y"
+   (03/09/2026, decisao do dono; era pendencia deixada pela Etapa 1). Ele nasceu como SUFIXO da
+   linha do cartao -- ', em ate {n}x de {valor}' --, e por isso comeca com virgula e espaco. Nos
+   outros dois ele e a frase INTEIRA: a linha do cartao em "somente cartao", na vitrine, e a dica
+   ao lado do botao de cartao na pagina de obrigado, que comeca a frase e por isso quer maiuscula.
+   Antes desta rodada os tres eram literais separados, e o fraseado JA divergia ("Em ate", sem a
+   virgula) -- um campo so com dois ajustes feitos na GERACAO (tirar a pontuacao da frente; subir
+   a primeira letra quando comeca frase) em vez de um segundo campo, que e justamente o que
+   deixaria os tres divergirem de novo.
+   Com o texto de fabrica os tres saem BYTE A BYTE como saiam antes -- medido. */
+function aParcelaSolta(txt,maiuscula){
+  var s=String(txt).replace(/^[\s,;.:\u2013\u2014-]+/,'');
+  return maiuscula?(s.charAt(0).toUpperCase()+s.slice(1)):s;
+}
 function fcaTextoCartaoSrc(q,txtCartaoLinha,txtParcela){
   return 'function textoCartao(preco){\n'+
     '  var t='+aTplJs(q,txtCartaoLinha,[['{valor}','moedaFmt(preco)']])+';\n'+
@@ -14100,7 +14537,7 @@ function aBlocoVitrine(cfg){
     c+="  var l2=document.createElement('div');l2.className='fca-preco-linha2';l2.textContent=textoCartao(preco);\n";
     c+='  box.appendChild(l2);\n';
   }else if(!cfg.usaPix&&cfg.usaPP&&cfg.parcelas>1){
-    c+="  var l2=document.createElement('div');l2.className='fca-preco-linha2';l2.textContent='em até '+PARCELAS+'x de '+moedaFmt(parcelaDe(preco));\n";
+    c+="  var l2=document.createElement('div');l2.className='fca-preco-linha2';l2.textContent="+aTplJs("'",aParcelaSolta(cfg.txtParcela,false),[['{n}','PARCELAS'],['{valor}','moedaFmt(parcelaDe(preco))']])+";\n";
     c+='  box.appendChild(l2);\n';
   }
   c+='}\n\n';
@@ -14785,7 +15222,7 @@ function aBlocoObrigado(cfg){
   if(cfg.usaPix&&cfg.usaPP){
     c+='  if(elLinha2)elLinha2.textContent=textoCartao(total());\n';
   }
-  c+='  if(elParcela)elParcela.textContent="Em até "+PARCELAS+"x de "+moedaFmt(parcelaDe(total()));\n';
+  c+='  if(elParcela)elParcela.textContent='+aTplJs('"',aParcelaSolta(cfg.txtParcela,true),[['{n}','PARCELAS'],['{valor}','moedaFmt(parcelaDe(total()))']])+';\n';
   c+='  if(pixEsconder)pixEsconder();\n';
   c+='}\n\n';
 
@@ -16512,7 +16949,7 @@ var P_TXT_DEFS=[
   ['txtOu','p-txt-ou','OU'],
   ['txtPaypalFora','p-txt-paypalfora','Não foi possível carregar o PayPal agora. Use o Pix acima, ou fale com a gente para receber outro link.'],
   ['txtSucesso','p-txt-sucesso','Pagamento aprovado. Obrigado!'],
-  ['txtNota','p-txt-nota','Confira o nome do recebedor antes de confirmar o pagamento'],
+  ['txtNota','p-txt-nota',FC_TXT_FABRICA.nota],
   ['txtZapMsg','p-txt-zapmsg','Olá! Acabei de pagar: {desc} -- {valor}']
 ];
 function pCfg(){
@@ -16550,7 +16987,7 @@ function pCfg(){
   };
   /* Os 9 textos configuraveis (ver P_TXT_DEFS): lidos direto do DOM, como t1..t9 acima -- pCfg()
      so roda com a aba aberta. */
-  for(var iTxt=0;iTxt<P_TXT_DEFS.length;iTxt++)r[P_TXT_DEFS[iTxt][0]]=$(P_TXT_DEFS[iTxt][1]).value;
+  fcTxtLer(P_TXT_DEFS,r);
   return r;
 }
 
@@ -17319,7 +17756,7 @@ function pColeta(){
     validade:$('p-validade').value,descpix:$('p-descpix').value,
     ppmodo:radio('p-ppmodo'),pplink:$('p-pplink').value};
   /* Os 9 textos configuraveis (ver P_TXT_DEFS, logo antes de pCfg). */
-  for(var iTxt=0;iTxt<P_TXT_DEFS.length;iTxt++)r[P_TXT_DEFS[iTxt][0]]=$(P_TXT_DEFS[iTxt][1]).value;
+  fcTxtLer(P_TXT_DEFS,r);
   return {p:r};
 }
 function pRestaura(st){
@@ -17340,10 +17777,7 @@ function pRestaura(st){
   for(i=1;i<=9;i++)if(P['t'+i]!==undefined)$('p-t'+i).value=P['t'+i];
   /* Os 9 textos configuraveis: estado gravado antes desta rodada (02/09/2026) nao tem
      nenhuma destas chaves -- o padrao de cada campo e o terceiro item de P_TXT_DEFS. */
-  for(i=0;i<P_TXT_DEFS.length;i++){
-    var elTxt=$(P_TXT_DEFS[i][1]);
-    if(elTxt)elTxt.value=(P[P_TXT_DEFS[i][0]]!=null)?P[P_TXT_DEFS[i][0]]:P_TXT_DEFS[i][2];
-  }
+  fcTxtRestaura(P_TXT_DEFS,P);
   if(P.desc!==undefined)$('p-desc').value=P.desc;
   if(P.valor!==undefined)$('p-valor').value=P.valor;
   if(P.txid!==undefined)$('p-txid').value=P.txid;
@@ -17413,7 +17847,7 @@ function mFmt(v){return precoFmt(radio('m-metodo')==='paypal'?(radio('m-moeda')|
 /* ===== salvamento e restauracao (registradas em ABAS) ===== */
 function mColeta(){
   /* Sem client, chave, nomer, cidade e zapnum: a identidade saiu desta aba (ver uColeta). */
-  return {m:{metodo:radio('m-metodo'),moeda:radio('m-moeda'),ppcor:radio('m-ppcor'),
+  var r={m:{metodo:radio('m-metodo'),moeda:radio('m-moeda'),ppcor:radio('m-ppcor'),
     descpix:$('m-descpix').value,zap:radio('m-zap'),cod:$('m-cod').value,
     prods:mProds,cps:mCps,
     cols:$('m-cols').value,mob:$('m-mob').value,imgvit:$('m-imgvit').value,imgdet:$('m-imgdet').value,
@@ -17424,6 +17858,9 @@ function mColeta(){
     t1:$('m-t1').value,t2:$('m-t2').value,t3:$('m-t3').value,t4:$('m-t4').value,t5:$('m-t5').value,
     t6:$('m-t6').value,t7:$('m-t7').value,t8:$('m-t8').value,t9:$('m-t9').value,t10:$('m-t10').value,
     t11:$('m-t11').value,t12:$('m-t12').value}};
+  /* Os 55 textos configuraveis (ver M_TXT_DEFS, logo antes de mCfg). */
+  fcTxtLer(M_TXT_DEFS,r.m);
+  return r;
 }
 function mRestaura(st){
   var M=st.m;if(!M)return;
@@ -17456,6 +17893,9 @@ function mRestaura(st){
   if(M.c2!=null){$('m-c2-t').value=M.c2;$('m-c2').value=corValida(M.c2)?M.c2:'#ffffff';}
   if(M.c3!=null){$('m-c3-t').value=M.c3;$('m-c3').value=corValida(M.c3)?M.c3:'#333333';}
   var i;for(i=1;i<=12;i++){if(M['t'+i]!=null)$('m-t'+i).value=M['t'+i];}
+  /* Os 55 textos configuraveis: estado gravado antes desta rodada nao tem nenhuma destas
+     chaves -- o padrao de cada campo e o terceiro item de M_TXT_DEFS. */
+  fcTxtRestaura(M_TXT_DEFS,M);
 }
 function mPresetResumo(v){
   var M=(v&&v.m)||{},n=(M.prods||[]).length,c=(M.cps||[]).length;
@@ -18004,6 +18444,69 @@ function mToggles(){
   ver('m-qtdmax-campo',temQtd);
 }
 
+/* ===== os 55 textos configuraveis desta aba (Rodada de textos configuraveis, Etapa 2) =====
+   Mesmo molde de U_TXT_DEFS (aba Checkout, logo acima na ferramenta). Os quatro avisos de
+   catalogo ({n} item/itens/opcional/opcionais) ganharam o marcador {n} por decisao do dono
+   (D-5): antes o numero era concatenado FORA do texto e ficava sempre no comeco, e nao havia
+   como escrever 'Removemos 2 itens'. As seis frases do rodape de limites vem para ca porque
+   sao texto da PAGINA (mLimitesTexto so escolhe quais entram), nao comentario. */
+var M_TXT_DEFS=[
+  ['txtTodos','m-txt-todos','Todos'],
+  ['txtVazioCategoria','m-txt-vazio-categoria','Nenhum item nesta categoria.'],
+  ['txtFotoErro','m-txt-foto-erro','Esta foto não carregou. Confira o endereço dela no cadastro.'],
+  ['txtEsteItem','m-txt-este-item','Este item'],
+  ['txtQuantidade','m-txt-quantidade','Quantidade'],
+  ['txtAtualizar','m-txt-atualizar','Atualizar no carrinho'],
+  ['txtCestaVazia','m-txt-cesta-vazia','Seu carrinho está vazio. Escolha um item na vitrine ao lado.'],
+  ['txtTirarTitulo','m-txt-tirar-titulo','Tirar do carrinho'],
+  ['txtTirarAria','m-txt-tirar-aria','Tirar {nome} do carrinho'],
+  ['txtSemOpcional','m-txt-semopcional',FC_TXT_FABRICA.semOpcional],
+  ['txtTotalZero','m-txt-totalzero',FC_TXT_FABRICA.totalZero],
+  ['txtSinalMaior','m-txt-sinal-maior','O sinal deste pedido é maior que o total. Escolha mais itens, aumente a quantidade ou remova o cupom.'],
+  ['txtSinalZero','m-txt-sinal-zero',FC_TXT_FABRICA.sinalZero],
+  ['txtSinalRecusado','m-txt-sinal-recusado',FC_TXT_FABRICA.sinalRecusado],
+  ['txtCestaEstragada','m-txt-cesta-estragada','O carrinho guardado neste navegador estava ilegível e foi descartado. Escolha os itens de novo.'],
+  ['txtOutraLoja','m-txt-outra-loja','O carrinho guardado neste navegador era de outra versão desta loja e foi descartado, para você não pagar um preço que não é o que está na tela. Escolha os itens de novo.'],
+  ['txtSumiu','m-txt-sumiu','{n} item do seu carrinho saiu do catálogo e foi removido.'],
+  ['txtSumiram','m-txt-sumiram','{n} itens do seu carrinho saíram do catálogo e foram removidos.'],
+  ['txtOpSumiu','m-txt-op-sumiu','{n} opcional que você tinha escolhido saiu do catálogo e foi removido.'],
+  ['txtOpSumiram','m-txt-op-sumiram','{n} opcionais que você tinha escolhido saíram do catálogo e foram removidos.'],
+  ['txtCupomRotulo','m-txt-cupom-rotulo',FC_TXT_FABRICA.cupomRotulo],
+  ['txtCupomBotao','m-txt-cupom-botao',FC_TXT_FABRICA.cupomBotao],
+  ['txtCupomOk','m-txt-cupom-ok',FC_TXT_FABRICA.cupomOk],
+  ['txtCupomInvalido','m-txt-cupom-invalido',FC_TXT_FABRICA.cupomInvalido],
+  ['txtCupomExpirado','m-txt-cupom-expirado',FC_TXT_FABRICA.cupomExpirado],
+  ['txtDesconto','m-txt-desconto',FC_TXT_FABRICA.desconto],
+  ['txtCupomValidade','m-txt-cupom-validade',FC_TXT_FABRICA.cupomValidade],
+  ['txtOu','m-txt-ou',FC_TXT_FABRICA.ou],
+  ['txtOuDesc','m-txt-ou-desc',FC_TXT_FABRICA.ouDesc],
+  ['txtPixInstrucao','m-txt-pix-instrucao',FC_TXT_FABRICA.pixInstrucao],
+  ['txtPixVal','m-txt-pixval',FC_TXT_FABRICA.pixVal],
+  ['txtPixCopiar','m-txt-pix-copiar',FC_TXT_FABRICA.pixCopiar],
+  ['txtPixCopiado','m-txt-pix-copiado',FC_TXT_FABRICA.pixCopiado],
+  ['txtNota','m-txt-nota',FC_TXT_FABRICA.nota],
+  ['txtPixRotulo','m-txt-pix-rotulo',FC_TXT_FABRICA.pixRotulo],
+  ['txtResumoBotao','m-txt-resumo-botao',FC_TXT_FABRICA.resumoBotao],
+  ['txtResumoCopiado','m-txt-resumo-copiado',FC_TXT_FABRICA.resumoCopiado],
+  ['txtResumoSubtotal','m-txt-resumo-subtotal',FC_TXT_FABRICA.resumoSubtotal],
+  ['txtResumoPedido','m-txt-resumo-pedido',FC_TXT_FABRICA.resumoPedido],
+  ['txtZapBotao','m-txt-zap-botao',FC_TXT_FABRICA.zapBotao],
+  ['txtZapAbertura','m-txt-zap-abertura',FC_TXT_FABRICA.zapAbertura],
+  ['txtZapAberturaSinal','m-txt-zap-abertura-sinal',FC_TXT_FABRICA.zapAberturaSinal],
+  ['txtZapPedido','m-txt-zap-pedido',FC_TXT_FABRICA.zapPedido],
+  ['txtZapCupom','m-txt-zap-cupom',FC_TXT_FABRICA.zapCupom],
+  ['txtZapDescPix','m-txt-zap-descpix',FC_TXT_FABRICA.zapDescPix],
+  ['txtZapTotal','m-txt-zap-total',FC_TXT_FABRICA.zapTotal],
+  ['txtZapSinal','m-txt-zap-sinal',FC_TXT_FABRICA.zapSinal],
+  ['txtZapValor','m-txt-zap-valor',FC_TXT_FABRICA.zapValor],
+  ['txtPedidoEnviado','m-txt-pedido-enviado','Pedido enviado. O carrinho foi esvaziado -- combine o restante pelo WhatsApp.'],
+  ['txtLimitePedidos','m-txt-limite-pedidos','Esta página não guarda pedidos: cada compra existe como a mensagem que você recebe, a transação no PayPal e o Pix na conta.'],
+  ['txtLimitePix','m-txt-limite-pix','O Pix estático não avisa ninguém quando o dinheiro cai -- a confirmação é por conferência do extrato.'],
+  ['txtLimitePaypal','m-txt-limite-paypal','O PayPal também não tem como avisar esta página: a liberação é manual.'],
+  ['txtLimiteCarrinho','m-txt-limite-carrinho','O carrinho fica guardado neste navegador e neste aparelho: montado no celular, no computador ele aparece vazio.'],
+  ['txtLimiteEstoque','m-txt-limite-estoque','Não há estoque: todos os itens são sob encomenda e podem ser pedidos quantas vezes for preciso.'],
+  ['txtLimiteCupons','m-txt-limite-cupons','Os cupons ficam dentro do código desta página e não são secretos.']
+];
 /* ===== configuracao da aba =====
    Uma leitura so da interface, ja presa nas faixas. E o que mRecusa valida e o que mBloco
    monta -- e como a previa executa o retorno de mBloco, nao existe segunda implementacao da
@@ -18023,7 +18526,7 @@ function mCfg(){
     if(mProds[i].qtd)temQtd=true;
     for(j=0;j<(mProds[i].ops||[]).length;j++)if(mProds[i].ops[j].qtd)temQtd=true;
   }
-  return {
+  var r={
     m:m, usaPP:(m!=='pix'), usaPix:usaPix,
     /* IDENTIDADE: lida do painel global (ver o bloco "identidade e paleta"). */
     client:fciVal('client'),
@@ -18050,6 +18553,10 @@ function mCfg(){
     t5:$('m-t5').value, t6:$('m-t6').value, t7:$('m-t7').value, t8:$('m-t8').value,
     t9:$('m-t9').value, t10:$('m-t10').value, t11:$('m-t11').value, t12:$('m-t12').value
   };
+  /* Os 55 textos configuraveis (ver M_TXT_DEFS): lidos direto do DOM pela tabela unica --
+     mCfg() so roda com a aba aberta, entao os campos sempre existem, igual a t1..t12. */
+  fcTxtLer(M_TXT_DEFS,r);
+  return r;
 }
 /* As guardas da geracao, sem efeito colateral. A previa usa as MESMAS: com elas so no gerador,
    a previa executaria configuracao que o gerador se nega a produzir, e nesse instante deixaria
@@ -18408,27 +18915,31 @@ function mBlocoJs(cfg,prods,cps,cats,client,cod){
   c+="var TXT_OPCIONAIS='"+escJs(cfg.t2)+"';\n";
   c+="var TXT_TOTAL='"+escJs(cfg.t3)+"';\n";
   c+="var TXT_ADICIONAR='"+escJs(cfg.t7)+"';\n";
-  c+="var TXT_ATUALIZAR='Atualizar no carrinho';\n";
+  c+="var TXT_ATUALIZAR='"+escJs(cfg.txtAtualizar)+"';\n";
   c+="var TXT_VOLTAR='"+escJs(cfg.t11)+"';\n";
   c+="var TXT_CESTA='"+escJs(cfg.t10)+"';\n";
-  c+="var TXT_CESTA_VAZIA='Seu carrinho está vazio. Escolha um item na vitrine ao lado.';\n";
-  c+="var TXT_SEM_OPCIONAL='Sem opcional';\n";
-  c+="var TXT_TODOS='Todos';\n";
-  /* Nao e texto editavel de proposito: o operador nunca deveria ve-lo na pagina publicada, e
-     dar um campo a ele sugeriria o contrario. ASCII, como o resto do bloco. */
-  c+="var TXT_FOTO_ERRO='Esta foto não carregou. Confira o endereço dela no cadastro.';\n";
-  c+="var TXT_SUMIU='item do seu carrinho saiu do catálogo e foi removido.';\n";
-  c+="var TXT_SUMIRAM='itens do seu carrinho saíram do catálogo e foram removidos.';\n";
-  c+="var TXT_OP_SUMIU='opcional que você tinha escolhido saiu do catálogo e foi removido.';\n";
-  c+="var TXT_OP_SUMIRAM='opcionais que você tinha escolhido saíram do catálogo e foram removidos.';\n";
-  c+="var TXT_CESTA_ESTRAGADA='O carrinho guardado neste navegador estava ilegível e foi descartado. Escolha os itens de novo.';\n";
-  c+="var TXT_OUTRA_LOJA='O carrinho guardado neste navegador era de outra versão desta loja e foi descartado, para você não pagar um preço que não é o que está na tela. Escolha os itens de novo.';\n";
+  c+="var TXT_CESTA_VAZIA='"+escJs(cfg.txtCestaVazia)+"';\n";
+  c+="var TXT_SEM_OPCIONAL='"+escJs(cfg.txtSemOpcional)+"';\n";
+  c+="var TXT_TODOS='"+escJs(cfg.txtTodos)+"';\n";
+  /* EDITAVEL DESDE 03/09/2026, revertendo DE PROPOSITO a decisao anterior. Ela dizia "nao e
+     texto editavel: o operador nunca deveria ve-lo na pagina publicada, e dar um campo a ele
+     sugeriria o contrario" -- e protegia o OPERADOR. O criterio que o dono fixou em 03/09 e
+     outro, e e sobre quem LE: e configuravel todo texto que o CLIENTE le, e quem le este aviso
+     quando uma foto quebra e o cliente, na loja publicada. A reversao e deliberada, nao
+     descuido; o campo nasce com a mesma frase de sempre (ver M_TXT_DEFS). */
+  c+="var TXT_FOTO_ERRO='"+escJs(cfg.txtFotoErro)+"';\n";
+  c+="var TXT_SUMIU='"+escJs(cfg.txtSumiu)+"';\n";
+  c+="var TXT_SUMIRAM='"+escJs(cfg.txtSumiram)+"';\n";
+  c+="var TXT_OP_SUMIU='"+escJs(cfg.txtOpSumiu)+"';\n";
+  c+="var TXT_OP_SUMIRAM='"+escJs(cfg.txtOpSumiram)+"';\n";
+  c+="var TXT_CESTA_ESTRAGADA='"+escJs(cfg.txtCestaEstragada)+"';\n";
+  c+="var TXT_OUTRA_LOJA='"+escJs(cfg.txtOutraLoja)+"';\n";
   if(usaSinal){
     c+="var TXT_SINAL='"+escJs(cfg.t8)+"';\n";
     c+="var TXT_SALDO='"+escJs(cfg.t9)+"';\n";
-    c+="var TXT_SINAL_MAIOR='O sinal deste pedido é maior que o total. Escolha mais itens, aumente a quantidade ou remova o cupom.';\n";
-    c+="var TXT_SINAL_ZERO='O sinal deste pedido arredonda para zero. Escolha mais itens ou aumente a quantidade.';\n";
-    c+="var TXT_SINAL_RECUSADO='pedido recusado';\n";
+    c+="var TXT_SINAL_MAIOR='"+escJs(cfg.txtSinalMaior)+"';\n";
+    c+="var TXT_SINAL_ZERO='"+escJs(cfg.txtSinalZero)+"';\n";
+    c+="var TXT_SINAL_RECUSADO='"+escJs(cfg.txtSinalRecusado)+"';\n";
   }
   if(usaPP){
     c+="var TXT_SUCESSO='"+escJs(cfg.t5)+"';\n";
@@ -18443,44 +18954,44 @@ function mBlocoJs(cfg,prods,cps,cats,client,cod){
      aba uma vez (MOEDA is not defined -- vitrine sem produtos, sem aviso, e a regressao de
      texto nao enxergava porque o bloco nao chegava a executar). */
   if(usaPP||usaPix){
-    c+="var TXT_TOTAL_ZERO='Escolha ao menos um item: o pedido está em zero.';\n";
+    c+="var TXT_TOTAL_ZERO='"+escJs(cfg.txtTotalZero)+"';\n";
   }
   if(usaPix){
     if(usaPP){
-      c+="var TXT_OU='ou pague com Pix';\n";
-      c+="var TXT_OU_DESC='ou pague com Pix com {PCT}% de desconto';\n";
+      c+="var TXT_OU='"+escJs(cfg.txtOu)+"';\n";
+      c+="var TXT_OU_DESC='"+escJs(cfg.txtOuDesc)+"';\n";
     }
     c+="var TXT_BOTAO_PIX='"+escJs(cfg.t4)+"';\n";
-    c+="var TXT_INSTRUCAO='Abra o app do seu banco e pague pelo QR Code ou Pix Copia e Cola';\n";
-    c+="var TXT_PIXVAL='Valor no Pix';\n";
-    c+="var TXT_COPIAR='Copiar código Pix';\n";
-    c+="var TXT_COPIADO='Código copiado!';\n";
-    if(zap)c+="var TXT_ZAP='Já paguei - avisar no WhatsApp';\n";
-    c+="var TXT_NOTA='Confira o nome do recebedor antes de confirmar o pagamento';\n";
-    c+="var TXT_PEDIDO_ENVIADO='Pedido enviado. O carrinho foi esvaziado -- combine o restante pelo WhatsApp.';\n";
+    c+="var TXT_INSTRUCAO='"+escJs(cfg.txtPixInstrucao)+"';\n";
+    c+="var TXT_PIXVAL='"+escJs(cfg.txtPixVal)+"';\n";
+    c+="var TXT_COPIAR='"+escJs(cfg.txtPixCopiar)+"';\n";
+    c+="var TXT_COPIADO='"+escJs(cfg.txtPixCopiado)+"';\n";
+    if(zap)c+="var TXT_ZAP='"+escJs(cfg.txtZapBotao)+"';\n";
+    c+="var TXT_NOTA='"+escJs(cfg.txtNota)+"';\n";
+    c+="var TXT_PEDIDO_ENVIADO='"+escJs(cfg.txtPedidoEnviado)+"';\n";
   }
-  if(descpix>0)c+="var TXT_PIX_ROTULO='Pagando via Pix';\n";
+  if(descpix>0)c+="var TXT_PIX_ROTULO='"+escJs(cfg.txtPixRotulo)+"';\n";
   if(usaResumo){
     c+="var TXT_RESUMO='"+escJs(cfg.t12)+"';\n";
-    c+="var TXT_RESUMO_BOTAO='Copiar o resumo';\n";
-    c+="var TXT_RESUMO_COPIADO='Resumo copiado!';\n";
-    c+="var TXT_RESUMO_SUBTOTAL='Subtotal';\n";
-    c+="var TXT_RESUMO_PEDIDO='Pedido';\n";
+    c+="var TXT_RESUMO_BOTAO='"+escJs(cfg.txtResumoBotao)+"';\n";
+    c+="var TXT_RESUMO_COPIADO='"+escJs(cfg.txtResumoCopiado)+"';\n";
+    c+="var TXT_RESUMO_SUBTOTAL='"+escJs(cfg.txtResumoSubtotal)+"';\n";
+    c+="var TXT_RESUMO_PEDIDO='"+escJs(cfg.txtResumoPedido)+"';\n";
   }
   if(usaCupom){
-    c+="var TXT_CUPOM_ROTULO='Cupom de desconto';\n";
-    c+="var TXT_CUPOM_BOTAO='Aplicar';\n";
-    c+="var TXT_CUPOM_OK='Cupom aplicado!';\n";
-    c+="var TXT_CUPOM_INVALIDO='Cupom inválido.';\n";
-    c+="var TXT_CUPOM_EXPIRADO='Cupom expirado.';\n";
-    c+="var TXT_DESCONTO='Desconto';\n";
+    c+="var TXT_CUPOM_ROTULO='"+escJs(cfg.txtCupomRotulo)+"';\n";
+    c+="var TXT_CUPOM_BOTAO='"+escJs(cfg.txtCupomBotao)+"';\n";
+    c+="var TXT_CUPOM_OK='"+escJs(cfg.txtCupomOk)+"';\n";
+    c+="var TXT_CUPOM_INVALIDO='"+escJs(cfg.txtCupomInvalido)+"';\n";
+    c+="var TXT_CUPOM_EXPIRADO='"+escJs(cfg.txtCupomExpirado)+"';\n";
+    c+="var TXT_DESCONTO='"+escJs(cfg.txtDesconto)+"';\n";
     /* ACENTO DE PROPOSITO, e o unico texto acentuado que estes dois blocos emitem. O item 10 do
        Manual do Prosite proibe acento em CODIGO, nao no texto que o cliente le -- o bloco do Link
        de cobranca ja carrega texto visivel acentuado desde ago/2026. Pedido do dono em 01/09/2026,
        depois de ver "Valido ate" na tela. Em 01/09/2026 todo texto que uma pessoa le passou a sair
        acentuado -- a tela do cliente e tambem a mensagem do WhatsApp. Continua sem acento so o
        CODIGO: comentario, identificador, CSS e o payload Pix (item 10 do Manual, e a norma do BC). */
-    c+="var TXT_CUPOM_VALIDADE='Válido até:';   /* precede a data, na propria linha do desconto; so aparece se o cupom tiver validade */\n";
+    c+="var TXT_CUPOM_VALIDADE='"+escJs(cfg.txtCupomValidade)+"';   /* precede a data, na propria linha do desconto; so aparece se o cupom tiver validade */\n";
   }
   /* Os limites da pagina sao TEXTO DA PAGINA, nao comentario: eles ficam a vista do cliente e
      do dono no rodape do carrinho. Escritos como sao -- prometer menos e o unico jeito de o
@@ -18515,12 +19026,14 @@ function mBlocoJs(cfg,prods,cps,cats,client,cod){
    Cada frase corresponde a um limite real e medido do desenho, e nenhuma promete conserto. */
 function mLimitesTexto(cfg){
   var p=[];
-  p.push('Esta página não guarda pedidos: cada compra existe como a mensagem que você recebe, a transação no PayPal e o Pix na conta.');
-  if(cfg.usaPix)p.push('O Pix estático não avisa ninguém quando o dinheiro cai -- a confirmação é por conferência do extrato.');
-  if(cfg.usaPP)p.push('O PayPal também não tem como avisar esta página: a liberação é manual.');
-  p.push('O carrinho fica guardado neste navegador e neste aparelho: montado no celular, no computador ele aparece vazio.');
-  p.push('Não há estoque: todos os itens são sob encomenda e podem ser pedidos quantas vezes for preciso.');
-  if(cfg.cps.length)p.push('Os cupons ficam dentro do código desta página e não são secretos.');
+  /* As seis frases sao configuraveis desde 03/09/2026 (ver M_TXT_DEFS); esta funcao continua
+     decidindo QUAIS entram -- so entra o limite que aquela loja de fato tem. */
+  p.push(cfg.txtLimitePedidos);
+  if(cfg.usaPix)p.push(cfg.txtLimitePix);
+  if(cfg.usaPP)p.push(cfg.txtLimitePaypal);
+  p.push(cfg.txtLimiteCarrinho);
+  p.push(cfg.txtLimiteEstoque);
+  if(cfg.cps.length)p.push(cfg.txtLimiteCupons);
   return p.join(' ');
 }
 
@@ -18595,10 +19108,14 @@ function mBlocoRuntime(cfg,usaPP,usaPix,usaQtd,usaSinal,usaResumo,descpix,zap,us
     c+="raiz.querySelector('.fcm-copiado').textContent=TXT_COPIADO;\n";
     c+="raiz.querySelector('.fcm-nota').textContent=TXT_NOTA;\n";
     if(zap)c+="raiz.querySelector('.fcm-zap').textContent=TXT_ZAP;\n";
-    if(usaPP)c+="raiz.querySelector('.fcm-sep-t').textContent=(DESCONTO_PIX>0)?TXT_OU_DESC.replace('{PCT}',DESCONTO_PIX):TXT_OU;\n";
+    /* D-1: as DUAS grafias do marcador. O padrao virou {pct} (minusculo, como o resto da
+       ferramenta desde a Etapa 1), e a /i faz configuracao ja gravada com {PCT} continuar
+       funcionando -- trocar a convencao nao pode quebrar o bloco de quem ja configurou. */
+    if(usaPP)c+="raiz.querySelector('.fcm-sep-t').textContent=(DESCONTO_PIX>0)?TXT_OU_DESC.replace(/\\{pct\\}/gi,DESCONTO_PIX):TXT_OU;\n";
   }
   if(descpix>0){
-    c+="raiz.querySelector('.fcm-pixlinha-t').textContent=TXT_PIX_ROTULO+' (-'+DESCONTO_PIX+'%)';\n";
+    /* D-2, ver o mesmo trecho no Checkout. */
+    c+="raiz.querySelector('.fcm-pixlinha-t').textContent=TXT_PIX_ROTULO.replace(/\\{pct\\}/gi,DESCONTO_PIX);\n";
   }
   if(usaResumo){
     c+="raiz.querySelector('.fcm-resumo-t').textContent=TXT_RESUMO;\n";
@@ -18741,7 +19258,7 @@ function mBlocoVitrine(cfg,usaPP,usaPix,usaQtd,usaSinal,usaResumo,descpix,zap,us
   c+="grade.innerHTML='';\n";
   c+='if(!vis.length){\n';
   c+="var vz=document.createElement('div');vz.className='fcm-vazio-grade';\n";
-  c+="vz.textContent='Nenhum item nesta categoria.';\n";
+  c+="vz.textContent='"+escJs(cfg.txtVazioCategoria)+"';\n";
   c+='grade.appendChild(vz);\nreturn;\n}\n';
   c+='vis.forEach(function(i,pos){\n';
   c+='var p=PRODUTOS[i];\n';
@@ -18799,7 +19316,7 @@ function mBlocoVitrine(cfg,usaPP,usaPix,usaQtd,usaSinal,usaResumo,descpix,zap,us
   if(usaQtd){
     c+='if(p.quantidade){\n';
     c+="var lq=document.createElement('div');lq.className='fcm-linha-p';\n";
-    c+="var lqt=document.createElement('span');lqt.textContent='Quantidade';lq.appendChild(lqt);\n";
+    c+="var lqt=document.createElement('span');lqt.textContent='"+escJs(cfg.txtQuantidade)+"';lq.appendChild(lqt);\n";
     c+='lq.appendChild(fazQtd(escolha.q,function(n){escolha.q=n;linhaValor();}));\n';
     c+='lado.appendChild(lq);\n}\n';
   }
@@ -18838,7 +19355,7 @@ function mBlocoVitrine(cfg,usaPP,usaPix,usaQtd,usaSinal,usaResumo,descpix,zap,us
   c+='caixa.appendChild(row);\n});\n';
   c+='lado.appendChild(caixa);\n}\n';
   c+="var val=document.createElement('div');val.className='fcm-linha-p';\n";
-  c+="var valt=document.createElement('span');valt.textContent='Este item';\n";
+  c+="var valt=document.createElement('span');valt.textContent='"+escJs(cfg.txtEsteItem)+"';\n";
   c+="var valv=document.createElement('span');\n";
   c+='val.appendChild(valt);val.appendChild(valv);lado.appendChild(val);\n';
   c+='function linhaValor(){valv.textContent=moedaFmt(valorDaEscolha(p,escolha));}\n';
@@ -18916,14 +19433,17 @@ function mBlocoVitrine(cfg,usaPP,usaPix,usaQtd,usaSinal,usaResumo,descpix,zap,us
   c+="var nm=document.createElement('span');nm.textContent=p.nome+(it.q>1?(' x'+it.q):'');\n";
   c+="var pr=document.createElement('span');pr.textContent=moedaFmt(valorDaLinha(it));\n";
   c+="var tira=document.createElement('button');tira.type='button';tira.className='fcm-tirar';\n";
-  c+="tira.textContent='\\u2715';tira.title='Tirar do carrinho';tira.setAttribute('aria-label','Tirar '+p.nome+' do carrinho');\n";
+  /* D-7: o GLIFO nao e configuravel de proposito -- campo vazio faria o botao sumir da tela,
+     sem erro nenhum. O que ganha campo e o que a pessoa LE: a dica do mouse e, principalmente,
+     o que o leitor de tela anuncia (com {nome} = o nome do produto). */
+  c+="tira.textContent='\\u2715';tira.title='"+escJs(cfg.txtTirarTitulo)+"';tira.setAttribute('aria-label',"+aTplJs("'",cfg.txtTirarAria,[['{nome}','p.nome']])+");\n";
   c+="tira.addEventListener('click',function(){tirarDoCarrinho(pos);});\n";
   c+='l.appendChild(nm);l.appendChild(pr);l.appendChild(tira);\n';
   c+='li.appendChild(l);\n';
   if(usaQtd){
     c+='if(p.quantidade){\n';
     c+="var lq=document.createElement('div');lq.className='fcm-linha-p';\n";
-    c+="var lqt=document.createElement('span');lqt.textContent='Quantidade';lq.appendChild(lqt);\n";
+    c+="var lqt=document.createElement('span');lqt.textContent='"+escJs(cfg.txtQuantidade)+"';lq.appendChild(lqt);\n";
     c+='lq.appendChild(fazQtd(it.q,function(n){\n';
     c+='if(n<1){tirarDoCarrinho(pos);return;}\n';
     c+='it.q=n;cestaGravar();desenharCesta();atualizar();\n}));\n';
@@ -18949,7 +19469,8 @@ function mBlocoPagar(cfg,usaPP,usaPix,usaQtd,usaSinal,usaResumo,descpix,zap,usaC
     c+="var l=raiz.querySelector('.fcm-desconto');\n";
     c+='if(cupomAtivo){\n';
     c+="l.className='fcm-desconto on';\n";
-    c+="raiz.querySelector('.fcm-desconto-t').textContent=TXT_DESCONTO+' ('+cupomAtivo.codigo+')';\n";
+    /* D-3, ver o mesmo trecho no Checkout. */
+    c+="raiz.querySelector('.fcm-desconto-t').textContent=TXT_DESCONTO.replace(/\\{codigo\\}/g,cupomAtivo.codigo);\n";
     c+="raiz.querySelector('.fcm-desconto-v').textContent='- '+moedaFmt(descontoAtual());\n";
     c+="var p=raiz.querySelector('.fcm-desconto-p'),dv=validadeBr(cupomAtivo.validade);\n";
     c+="p.textContent=dv?TXT_CUPOM_VALIDADE+' '+dv:'';\n";
@@ -19021,7 +19542,7 @@ function mBlocoPagar(cfg,usaPP,usaPix,usaQtd,usaSinal,usaResumo,descpix,zap,usaC
     c+="for(z=0;z<li.length;z++)L.push((li[z].opcional?'   + ':'- ')+li[z].rotulo+'  '+moedaFmt(li[z].valor));\n";
     if(usaCupom){
       c+="if(cupomAtivo)L.push(TXT_RESUMO_SUBTOTAL+': '+moedaFmt(subtotal()));\n";
-      c+="if(cupomAtivo)L.push(TXT_DESCONTO+' ('+cupomAtivo.codigo+'): - '+moedaFmt(descontoAtual()));\n";
+      c+="if(cupomAtivo)L.push(TXT_DESCONTO.replace(/\\{codigo\\}/g,cupomAtivo.codigo)+': - '+moedaFmt(descontoAtual()));\n";
     }
     c+="L.push(TXT_TOTAL+': '+moedaFmt(total()));\n";
     if(usaSinal){
@@ -19033,7 +19554,7 @@ function mBlocoPagar(cfg,usaPP,usaPix,usaQtd,usaSinal,usaResumo,descpix,zap,usaC
       c+="L.push(TXT_SALDO+': '+moedaFmt(saldoDepois()));\n";
       c+='}\n';
     }
-    if(descpix>0)c+="L.push(TXT_PIX_ROTULO+' (-'+DESCONTO_PIX+'%): '+moedaFmt(totalPix()));\n";
+    if(descpix>0)c+="L.push(TXT_PIX_ROTULO.replace(/\\{pct\\}/gi,DESCONTO_PIX)+': '+moedaFmt(totalPix()));\n";
     c+="return L.join('\\n');\n}\n\n";
     c+='function copiarResumo(){\n';
     c+="var ta=raiz.querySelector('.fcm-resumo');\n";
@@ -19086,18 +19607,18 @@ function mBlocoPagar(cfg,usaPP,usaPix,usaQtd,usaSinal,usaResumo,descpix,zap,usaC
     if(zap){
       c+='function avisarZap(){\n';
       c+='var partes=[],li=itensEscolhidos(),z;\n';
-      if(usaSinal)c+="partes.push('Olá! Acabei de pagar o SINAL via Pix.');\n";
-      else c+="partes.push('Olá! Acabei de pagar via Pix.');\n";
-      c+="partes.push('Pedido cod: *'+CODIGO_PEDIDO+'*');\n";
+      if(usaSinal)c+="partes.push('"+escJs(cfg.txtZapAberturaSinal)+"');\n";
+      else c+="partes.push('"+escJs(cfg.txtZapAbertura)+"');\n";
+      c+="partes.push("+aTplJs("'",cfg.txtZapPedido,[['{cod}','CODIGO_PEDIDO']])+");\n";
       c+="for(z=0;z<li.length;z++)partes.push(li[z].opcional?('   + '+li[z].rotulo+' '+moedaFmt(li[z].valor)):('- *'+li[z].rotulo+'* '+moedaFmt(li[z].valor)));\n";
-      if(usaCupom)c+="if(cupomAtivo)partes.push('Cupom: '+cupomAtivo.codigo);\n";
-      if(descpix>0)c+="if(DESCONTO_PIX>0)partes.push('Desconto Pix: -'+DESCONTO_PIX+'%');\n";
+      if(usaCupom)c+="if(cupomAtivo)partes.push("+aTplJs("'",cfg.txtZapCupom,[['{codigo}','cupomAtivo.codigo']])+");\n";
+      if(descpix>0)c+="if(DESCONTO_PIX>0)partes.push("+aTplJs("'",cfg.txtZapDescPix,[['{pct}','DESCONTO_PIX']])+");\n";
       if(usaSinal){
-        c+="partes.push('Total do pedido: '+moedaFmt(total()));\n";
-        c+="partes.push('Sinal pago agora: *'+moedaFmt(sinalAgora())+'*');\n";
+        c+="partes.push("+aTplJs("'",cfg.txtZapTotal,[['{valor}','moedaFmt(total())']])+");\n";
+        c+="partes.push("+aTplJs("'",cfg.txtZapSinal,[['{valor}','moedaFmt(sinalAgora())']])+");\n";
         c+="partes.push(TXT_SALDO+': *'+moedaFmt(saldoDepois())+'*');\n";
       }else{
-        c+="partes.push('Valor pago: *'+moedaFmt(totalPix())+'*');\n";
+        c+="partes.push("+aTplJs("'",cfg.txtZapValor,[['{valor}','moedaFmt(totalPix())']])+");\n";
       }
       c+="var url='https://wa.me/'+ZAP_NUMERO+'?text='+encodeURIComponent(partes.join('\\n'));\n";
       c+="window.open(url,'_blank');\n";
@@ -20367,6 +20888,15 @@ prep('Agendamento por pacote','pac',function(){
    fcAjustarTodos de cada aba -- depois dos passos "desenhar a aba com o estado restaurado".
    Lendo antes, a barra compararia uma tela ainda por corrigir com o preset gravado e diria
    "alterado" numa ferramenta recem-aberta em que ninguem mexeu. */
+/* As secoes de texto das abas grandes nascem RECOLHIDAS, e a mesma passada confere se o padrao
+   de fabrica de cada campo bate nos dois lugares onde ele esta escrito (ver fcTxtFabricaDiverge).
+   Passo proprio, com rotulo proprio: se ele falhar, a barra vermelha precisa dizer que foram os
+   textos -- as abas continuam funcionando, so com as secoes abertas. */
+prep('Textos configuraveis','uni loja',function(){
+  fcdLigar();
+  var d=fcTxtFabricaDiverge();
+  if(d.length)throw new Error('o padrao de fabrica destes campos discorda entre o value= do HTML e a tabela da aba: '+d.join(', '));
+},'preparar as secoes de texto e conferir os padroes de fabrica');
 prep('Preset geral','',fcgIniciar,'preparar a barra do preset geral');
 /* Passo proprio, com rotulo proprio: se ligar os botoes de backup falhar, a barra vermelha
    precisa dizer que foi o backup -- e nao o preset geral, que continua funcionando. */
