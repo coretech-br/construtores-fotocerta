@@ -105,3 +105,27 @@ O que **não** se corta: a regressão byte a byte (`scripts/verificar/regressao.
 4. Ao mudar arquitetura, regra ou decisão, **atualizar a `docs/documentacao-fotocerta.md`** (e o inventário acima, se surgir arquivo novo).
 5. Ao mexer em `fc-compartilhado.js` ou em `cobrar/manifest.json`, **trocar a versão em todos os lugares e rodar `scripts/conferir-versoes.sh`** (`--registrar` depois de trocar). A guarda que as duas páginas fazem ao carregar é **cega por construção** — quem declara a versão é o próprio arquivo cuja atualidade está em dúvida —, então arquivo mudado sem troco de versão passa por ela sem aviso: medido, dois selos diferentes (`D57C` contra `625D`) para a mesma cobrança. E "só atrasa a publicação" é falso: o contrato tem três participantes, e os outros dois são o outro aparelho do dono e o bloco já colado na `/pagar`, que não é versionado.
 6. Sempre lembrar: **editor ≠ publicado** — vale para as páginas do Prosite (publicar para testar) e para o Pages (o deploy leva alguns instantes). Console do Safari (Cmd+Option+C) para diagnosticar.
+
+## Como reportar progresso ao dono (padrão fixado em 03/09/2026)
+
+Todo aviso de progresso de uma rodada leva a **tabela completa das etapas**, não só a que
+acabou de mudar. Quatro colunas, sempre:
+
+| # | Etapa | Estado | Estimativa | Tempo real |
+
+- **Estado**: concluída / em andamento / não iniciada. As três aparecem, sempre.
+- **Estimativa**: o tempo previsto daquela etapa, dito **antes** de ela começar.
+- **Tempo real**: preenchido só no que já terminou. Em branco no resto — nunca preenchido
+  com previsão disfarçada de medição.
+
+Fecha-se cada rodada com o comparativo entre as duas colunas.
+
+**Por que a tabela inteira:** ele acompanha uma rodada longa sem ler código. Contar só o que
+mudou o obriga a reconstruir de cabeça, a cada aviso, quanto falta. Etapa que se revelou
+maior que o previsto entra na lista **partida** (7a, 7b), nunca escondida dentro de outra.
+
+**Por que as duas colunas de tempo:** estimativa sem medição ao lado nunca melhora. Foi
+medindo a Etapa 1 (40 campos em 36 minutos) que a previsão da rodada caiu de 11–13 h para
+7–9 h — a previsão original vinha de impressão, e a medição a corrigiu. Estimativa que erra
+e é corrigida à vista vale mais que estimativa confortável. Ver "Método de execução:
+econômico por padrão", item 6: **medir antes de estimar**.
