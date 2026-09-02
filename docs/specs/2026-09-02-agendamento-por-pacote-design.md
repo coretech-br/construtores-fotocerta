@@ -47,7 +47,18 @@ Digitado **uma vez**, na aba. Cada pacote tem seis campos:
 | **O que inclui** | uma linha, opcional ("25 fotos tratadas") |
 | **Link do TidyCal** | o caminho do tipo de agendamento |
 
-Fora do catálogo, a aba tem campos que valem para a página inteira: o **endereço da página de obrigado**, o **prefixo do identificador**, o **prazo da reserva em horas**, o **desconto no Pix**, o **número de parcelas no cartão**, as **cores** e os **textos**.
+### 4.1 Os campos da aba, que valem para todos os pacotes
+
+Estavam escritos numa frase corrida, e o dono foi procurar o de parcelas e não achou. Se o leitor da spec não acha um campo, o defeito é da spec — viraram tabela:
+
+| Campo | Padrão | O que faz |
+|---|---|---|
+| **Endereço da página de obrigado** | vazio | para onde o TidyCal manda depois de agendar; entra nos N endereços da saída 2 |
+| **Prefixo do identificador** | vazio | começa o código que vai no Pix e no PayPal (ex.: `FC`) |
+| **Prazo da reserva** | 24 horas | quanto tempo o horário fica guardado antes de o dono liberá-lo |
+| **Desconto no Pix** | 5 % | aparece no cartão, no resumo e na página de obrigado |
+| **Parcelas no cartão** | 1 | o número que a página anuncia, e o divisor do valor da parcela |
+| **Cores e textos** | os padrões da paleta | mesma mecânica das outras abas |
 
 O catálogo é emitido **nos dois blocos** — a vitrine precisa dele para os cartões, a página de obrigado para saber o preço. Fonte única na ferramenta; cada bloco continua autossuficiente, como manda a regra do projeto.
 
@@ -86,7 +97,13 @@ O desconto deixa de ser surpresa da última tela e vira argumento na primeira. A
 
 **1. O número de parcelas é uma afirmação que a ferramenta não pode conferir.** "Em até 6x no cartão" é uma promessa sobre o que o cliente vai encontrar na hora de pagar, e quem decide isso é a operadora, não este código. A aba **diz isso ao lado do campo**, e o padrão nasce em 1x — o valor que é verdade sem configuração nenhuma. Prometer parcela que não existe é a mesma família de defeito que este projeto já corrigiu quatro vezes: texto que promete mais do que o sistema entrega.
 
-**2. O valor da parcela fica de fora do padrão, e a razão é a mesma.** "6x de R$ 70,00" converte mais que "em até 6x", e é fácil de calcular — mas afirma **parcelamento sem juros**, que é outra promessa, e mais cara de errar. Fica como **campo opcional, desligado por padrão**: quem ligar está declarando que confirmou com a operadora.
+**2. O valor da parcela entra, e ele traz uma conta com direção.** O dono aprovou mostrá-lo: *"pode incluir o valor da parcela, que será calculado de acordo com a quantidade de parcelas que eu informar"*. Com isso a linha fica **"ou R$ 700,00 no cartão, em até 6x de R$ 116,67"**.
+
+**A parcela arredonda para CIMA, e a direção não é detalhe.** R$ 700,00 em 6 vezes dá R$ 116,6667, que não existe em dinheiro. Arredondando para baixo (R$ 116,66) a soma das seis daria R$ 699,96, e **uma das parcelas teria de ser maior do que o cliente leu**. Para cima (R$ 116,67) a soma dá R$ 700,02, e o cliente **nunca paga por mês mais do que estava escrito na tela**.
+
+É a mesma lição que custou uma rodada nesta ferramenta em ago/2026, quando o Pix cobrava um centavo a mais do que a tela mostrava em 3 % das combinações: quando o arredondamento tem duas saídas, escolhe-se a que erra a favor de quem lê. `Math.ceil(preco / parcelas * 100) / 100`.
+
+Continua valendo o que a nota 1 diz: mostrar o valor da parcela afirma **parcelamento sem juros**. O dono declarou que garante isso à mão no PayPal, e é dele a garantia.
 
 **3. Nos botões de pagamento, "PayPal" aparece — e não há como evitar.** Os dois botões da página de obrigado são desenhados pelo **SDK do PayPal**, não por nós: o texto, a marca e as cores são deles. O que está sob nosso controle é todo o resto da página, e nele a palavra não entra. Isso precisa estar dito na aba, para o pedido não parecer atendido pela metade.
 
@@ -178,7 +195,8 @@ Regra do projeto: **a prévia executa o gerador, nunca o imita**. Duas prévias,
 - **Sem `pac`, com `pac` inexistente, e com `pac` hostil** (`<script>`, `../`, acentos): recusa cordial, zero pagamento na tela, nada interpretado como marcação.
 - **O identificador**: com data legível, com data ilegível (cai no aleatório), e dois códigos que colidiriam depois da limpeza (recusa no cadastro).
 - **A palavra "PayPal" não aparece em nenhum texto nosso** nas duas saídas — varredura sobre o texto gerado. O que sobrar tem de ser só o que o SDK deles desenha em tempo de execução.
-- **As parcelas**: com 1x (padrão) a linha some; com N>1 ela aparece nos cartões, no resumo e na página de obrigado; com o valor da parcela ligado, ele confere com o preço dividido.
+- **As parcelas**: com 1x (padrão) a linha some; com N>1 ela aparece nos cartões, no resumo e na página de obrigado.
+- **O arredondamento da parcela**, com os casos que separam as duas direções: preço que divide exato (R$ 420,00 em 6x = R$ 70,00), preço que não divide (R$ 700,00 em 6x = R$ 116,67, e **nunca** R$ 116,66), preço com centavos (R$ 419,90) e parcelas de 1 a 12. Em toda combinação, `parcela × N ≥ preço`.
 - **As N URLs**: uma por pacote, com o código certo em cada.
 - **Painel:** as três saídas aparecem; o aviso de colisão dispara com as duas abas ligadas; `fccOrfas` sem órfãs.
 - **Celular** em 360, 390 e 430 px, sem rolagem horizontal.
