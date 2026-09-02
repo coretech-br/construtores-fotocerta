@@ -1005,13 +1005,13 @@
       <fieldset>
       <legend>Mensagem enviada no WhatsApp</legend>
       <label for="l-m1">Saudação inicial</label>
-      <input type="text" id="l-m1" value="Ola Foto Certa">
+      <input type="text" id="l-m1" value="Olá Foto Certa">
       <label for="l-m2">Antecede o nome informado</label>
-      <input type="text" id="l-m2" value="meu nome e">
+      <input type="text" id="l-m2" value="meu nome é">
       <label for="l-m3">Antecede o nome da página</label>
-      <input type="text" id="l-m3" value="Estava olhando a pagina">
+      <input type="text" id="l-m3" value="Estava olhando a página">
       <label for="l-m4">Antecede o (cod: ...)</label>
-      <input type="text" id="l-m4" value="Tenho um pedido para voce">
+      <input type="text" id="l-m4" value="Tenho um pedido para você">
       </fieldset>
 
       <fieldset>
@@ -1628,7 +1628,7 @@
           <label><input type="radio" name="u-resumo" value="sim"><span>Incluir resumo copiável</span></label>
         </div>
         <div id="u-resumo-campos">
-          <label for="u-t10">Rótulo do resumo <small>(o que o cliente lê sai acentuado; o que vai na mensagem do WhatsApp sai sem acento, de propósito)</small></label>
+          <label for="u-t10">Rótulo do resumo <small>(sai acentuado, como todo texto que uma pessoa lê)</small></label>
           <input type="text" id="u-t10" value="Resumo para conferência">
         </div>
         <p class="ajuda">O Pix estático <b>não confirma pagamento</b> — a conferência é pelo extrato. O resumo sai no fim do carrinho, com um botão de copiar, e traz produtos, opcionais (com quantidade quando houver), cupom, subtotal, desconto, total e — com sinal ligado — sinal e saldo, tudo abaixo do <b>código do pedido</b>. O cliente cola no WhatsApp ou no e-mail e você concilia com o extrato sem redigitar nada.</p>
@@ -3100,8 +3100,8 @@
    QUEM IMPEDE QUE ELE MINTA: scripts/conferir-versoes.sh, que recusa index.html
    alterado sem a versao mudar junto -- a mesma disciplina do fc-compartilhado.js,
    e pela mesma razao: carimbo que ninguem confere e o defeito de amanha. */
-var FC_VERSAO='2026-09-01c';
-var FC_PUBLICADO='2026-09-01 22:17';   /* America/Sao_Paulo -- escrito pelo carimbador */
+var FC_VERSAO='2026-09-01d';
+var FC_PUBLICADO='2026-09-01 23:30';   /* America/Sao_Paulo -- escrito pelo carimbador */
 (function(){
   var el=document.getElementById('fc-versao');
   if(!el) return;
@@ -3200,8 +3200,11 @@ function fcCompartParar(pedida,chegou){
         setas, x de fechar, simbolo de moeda;
      3. string concatenada DENTRO do codigo gerado, onde o fonte da ferramenta se mantem em
         ASCII (o unico caso hoje e o desenho do botao PayPal em mockPP).
-   Lembrete que vale para os dois lados: isto e sobre o codigo da FERRAMENTA. O codigo
-   GERADO continua sem acento nenhum, pela regra do Manual do Prosite. */
+   Lembrete que vale para os dois lados: isto e sobre o codigo da FERRAMENTA. No codigo
+   GERADO a fronteira e outra, e mudou em 01/09/2026: TEXTO QUE UMA PESSOA LE sai acentuado
+   (tela do cliente e mensagem do WhatsApp); CODIGO -- comentario, identificador, CSS e o
+   payload Pix -- continua sem acento nenhum, pela regra do Manual do Prosite (item 10) e,
+   no Pix, pela norma do BC. */
 
 /* ============ utilidades ============ */
 function $(id){return document.getElementById(id);}
@@ -10866,9 +10869,9 @@ function uBloco(cfg){
   /* ACENTO DE PROPOSITO, e o unico texto acentuado que estes dois blocos emitem. O item 10 do
      Manual do Prosite proibe acento em CODIGO, nao no texto que o cliente le -- o bloco do Link
      de cobranca ja carrega texto visivel acentuado desde ago/2026. Pedido do dono em 01/09/2026,
-     depois de ver "Valido ate" na tela. Em 01/09/2026 os vizinhos foram junto: todo texto que
-     o CLIENTE le nestes dois blocos sai acentuado. Continua sem acento, de proposito, o que vai
-     para a mensagem do WhatsApp, e todo comentario e identificador (item 10 do Manual). */
+     depois de ver "Valido ate" na tela. Em 01/09/2026 todo texto que uma pessoa le passou a sair
+     acentuado -- a tela do cliente e tambem a mensagem do WhatsApp. Continua sem acento so o
+     CODIGO: comentario, identificador, CSS e o payload Pix (item 10 do Manual, e a norma do BC). */
   c+="var TXT_CUPOM_VALIDADE='Válido até:';   /* precede a data, na propria linha do desconto; so aparece se o cupom tiver validade */\n\n";
 
   c+='/* ============================================================\n   Daqui para baixo nao precisa mexer\n   ============================================================ */\n\n';
@@ -11285,8 +11288,8 @@ function uBloco(cfg){
     if(zap){
       c+='function avisarZap(){\n';
       c+='var partes=[];\n';
-      if(usaSinal)c+="partes.push('Ola! Acabei de pagar o SINAL via Pix.');\n";
-      else c+="partes.push('Ola! Acabei de pagar via Pix.');\n";
+      if(usaSinal)c+="partes.push('Olá! Acabei de pagar o SINAL via Pix.');\n";
+      else c+="partes.push('Olá! Acabei de pagar via Pix.');\n";
       c+="partes.push('Pedido cod: *'+CODIGO_PEDIDO+'*');\n";
       if(usaResumo){
       /* uma leitura so do que o cliente marcou, compartilhada com o resumo copiavel */
@@ -14293,8 +14296,10 @@ function pJs(cfg){
      aba os sete textos configuraveis ja nascem acentuados ("Copiar codigo Pix" com o acento,
      "Ja paguei" com o acento) e viajam assim para dentro do bloco. Deixar ao lado deles quatro
      frases sem acento -- que o CLIENTE le, numa pagina que representa a marca do dono -- era
-     inconsistencia visivel, nao economia. O que continua sem acento e o que vai para a mensagem
-     do WhatsApp (ver a funcao zap), pela mesma decisao deliberada da aba Captacao de leads. */
+     inconsistencia visivel, nao economia. Em 01/09/2026 a mensagem do WhatsApp foi junto, a
+     pedido do dono: ela ja carregava a descricao da cobranca, que e texto do operador e sempre
+     pode ter acento, entao o caminho ja era exercitado -- medido no href gerado, que sai 100%
+     ASCII por encodeURIComponent e volta identico ao decodificar. */
   j+="  var TXT_COPIADO='Código copiado! Cole no aplicativo do seu banco.';\n";
   j+="  var TXT_NAO_COPIOU='Não consegui copiar. Selecione o código acima e copie na mão.';\n";
   j+="  var TXT_REF='Identificador da cobrança: ';\n";
@@ -14601,7 +14606,7 @@ function pJs(cfg){
        ela montasse a secao, o caminho vencido precisaria de uma segunda montagem da mensagem,
        que e justamente o que o dono le no WhatsApp. */
     j+='  function zapBotao(valor,desc,txid){\n';
-    j+="    var msg='Ola! Acabei de pagar: '+desc+' -- '+moedaFmt(valor);\n";
+    j+="    var msg='Olá! Acabei de pagar: '+desc+' -- '+moedaFmt(valor);\n";
     /* Com desconto o cliente pode ter pago o total (PayPal) ou o valor com desconto (Pix). A
        mensagem cita os dois: um numero so aqui obrigaria o dono a adivinhar qual chegou. */
     j+="    if(DESCONTO_PIX>0)msg+=' (via Pix: '+moedaFmt(totalPix())+')';\n";
@@ -16041,6 +16046,16 @@ function mBlocoJs(cfg,prods,cps,cats,client,cod){
   if(usaPP){
     c+="var TXT_SUCESSO='"+escJs(cfg.t5)+"';\n";
     c+="var TXT_ERRO='"+escJs(cfg.t6)+"';\n";
+  }
+  /* TXT_TOTAL_ZERO SAI PARA FORA do if(usaPP), e a razao e medida. A mesma frase era escrita
+     tres vezes: uma aqui e mais duas CRUAS, dentro de dois alert() do caminho Pix. As tres
+     concordavam, e por isso o defeito era invisivel -- ate o dono trocar o texto no bloco
+     publicado e dois avisos continuarem com o antigo, sem erro nenhum.
+     Emitida em usaPP OU usaPix, e nao so em usaPP: o caminho Pix a consome, e loja em
+     "somente Pix" referenciando variavel nao emitida e exatamente o defeito que ja matou esta
+     aba uma vez (MOEDA is not defined -- vitrine sem produtos, sem aviso, e a regressao de
+     texto nao enxergava porque o bloco nao chegava a executar). */
+  if(usaPP||usaPix){
     c+="var TXT_TOTAL_ZERO='Escolha ao menos um item: o pedido está em zero.';\n";
   }
   if(usaPix){
@@ -16075,9 +16090,9 @@ function mBlocoJs(cfg,prods,cps,cats,client,cod){
     /* ACENTO DE PROPOSITO, e o unico texto acentuado que estes dois blocos emitem. O item 10 do
        Manual do Prosite proibe acento em CODIGO, nao no texto que o cliente le -- o bloco do Link
        de cobranca ja carrega texto visivel acentuado desde ago/2026. Pedido do dono em 01/09/2026,
-       depois de ver "Valido ate" na tela. Em 01/09/2026 os vizinhos foram junto: todo texto que
-       o CLIENTE le nestes dois blocos sai acentuado. Continua sem acento, de proposito, o que vai
-       para a mensagem do WhatsApp, e todo comentario e identificador (item 10 do Manual). */
+       depois de ver "Valido ate" na tela. Em 01/09/2026 todo texto que uma pessoa le passou a sair
+       acentuado -- a tela do cliente e tambem a mensagem do WhatsApp. Continua sem acento so o
+       CODIGO: comentario, identificador, CSS e o payload Pix (item 10 do Manual, e a norma do BC). */
     c+="var TXT_CUPOM_VALIDADE='Válido até:';   /* precede a data, na propria linha do desconto; so aparece se o cupom tiver validade */\n";
   }
   /* Os limites da pagina sao TEXTO DA PAGINA, nao comentario: eles ficam a vista do cliente e
@@ -16708,10 +16723,10 @@ function mBlocoPagar(cfg,usaPP,usaPix,usaQtd,usaSinal,usaResumo,descpix,zap,usaC
     c+='function gerarPix(){\n';
     c+='var v=totalPix();\n';
     if(usaSinal){
-      c+="if(total()<0.01){alert('Escolha ao menos um item: o pedido está em zero.');return;}\n";
+      c+='if(total()<0.01){alert(TXT_TOTAL_ZERO);return;}\n';
       c+='var rec=sinalRecusa();\nif(rec){alert(rec);return;}\n';
     }else{
-      c+="if(v<0.01){alert('Escolha ao menos um item: o pedido está em zero.');return;}\n";
+      c+='if(v<0.01){alert(TXT_TOTAL_ZERO);return;}\n';
     }
     c+='if(!CODIGO_PEDIDO)CODIGO_PEDIDO=novoPedido();\n';
     c+='payloadAtual=montarPayload(v);\n';
@@ -16736,8 +16751,8 @@ function mBlocoPagar(cfg,usaPP,usaPix,usaQtd,usaSinal,usaResumo,descpix,zap,usaC
     if(zap){
       c+='function avisarZap(){\n';
       c+='var partes=[],li=itensEscolhidos(),z;\n';
-      if(usaSinal)c+="partes.push('Ola! Acabei de pagar o SINAL via Pix.');\n";
-      else c+="partes.push('Ola! Acabei de pagar via Pix.');\n";
+      if(usaSinal)c+="partes.push('Olá! Acabei de pagar o SINAL via Pix.');\n";
+      else c+="partes.push('Olá! Acabei de pagar via Pix.');\n";
       c+="partes.push('Pedido cod: *'+CODIGO_PEDIDO+'*');\n";
       c+="for(z=0;z<li.length;z++)partes.push(li[z].opcional?('   + '+li[z].rotulo+' '+moedaFmt(li[z].valor)):('- *'+li[z].rotulo+'* '+moedaFmt(li[z].valor)));\n";
       if(usaCupom)c+="if(cupomAtivo)partes.push('Cupom: '+cupomAtivo.codigo);\n";
