@@ -58,10 +58,16 @@ Tenho um pedido para você (cod: *NATAL26*)
 Quero informação sobre o ensaio de família
 ```
 
-## 5. Resíduo declarado
+## 5. O resíduo, e a decisão do dono que o fechou no mesmo dia
 
-No **Checkout**, o caminho Pix recusa o pedido zerado com uma frase **diferente** da do PayPal: `O valor do pedido precisa ser maior que zero.` contra `Escolha ao menos um item: o pedido está em zero.` Não é duplicação (são frases distintas, cada uma num lugar só), mas é incoerência: a do PayPal é customizável e a do Pix não. Uniformizar mudaria texto que o cliente lê sem o dono ter pedido — fica registrado em `docs/pendencias.md`, para ser decisão dele.
+Ficou declarado que no **Checkout** o pedido zerado era recusado com **duas frases diferentes**: `Escolha ao menos um item: o pedido está em zero.` pelo PayPal (customizável, via `TXT_TOTAL_ZERO`) e `O valor do pedido precisa ser maior que zero.` pelo Pix (cravada). Não era duplicação — eram frases distintas, cada uma num lugar só —, mas era incoerência, e só uma delas o dono conseguia trocar. Como uniformizar muda texto que o cliente lê, a decisão foi levada a ele em vez de tomada aqui. Ele respondeu: *"Quero. Pode resolver unificar a frase no checkout tbm."*
+
+**Resolvido, e a frase que ficou é a customizável.** Os dois `alert()` do caminho Pix passaram a usar `TXT_TOTAL_ZERO`, e a declaração saiu de `if(usaPP)` para `if(usaPP||usaPix)` — pelo mesmo motivo medido na Mini loja. O comentário do código que explicava *qual valor* governa a recusa com sinal ligado (o **total**, não o valor a cobrar) continua onde estava: ele justifica a condição, nunca justificou a palavra.
+
+**Medido:** regressão com **1 divergência**, e o diff é **uma linha** — a troca do texto cru pela variável. As outras 20 saídas e as 9 cobranças idênticas. O Checkout executado nos **três modos de pagamento**, com dois produtos em modo "vários" para o pedido zerado ser alcançável: **19 verificações, 19 ok**, e a recusa lida do `alert` capturado é exatamente a frase da variável nos dois modos com Pix.
+
+Detalhe de método que vale registrar: a primeira versão desse roteiro usava **um** produto, e nesse caso o bloco não desenha seletor nenhum — o total nunca cai a zero, e o estado sob teste era **inalcançável**. As verificações falharam alto em vez de passar sobre nada, que é o comportamento certo, mas a lição é a de sempre: cenário que não alcança o estado não prova nada sobre ele.
 
 ## 6. Tempo
 
-Estimado: 30–45 min. Real: **~55 min**, com a bateria dos três modos de pagamento sendo a maior parte — e a que justificava a rodada.
+Estimado: 30–45 min para a rodada principal, mais 20–30 min para o Checkout. Real: **~55 min** e **~25 min**. A bateria dos três modos de pagamento foi a maior parte das duas — e é o que justifica ter mexido em variável de bloco que cobra dinheiro.
