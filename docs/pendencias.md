@@ -96,6 +96,45 @@ O sétimo dos antigos — atualizar o espelho da Tag Body da hospedeira — foi 
 
 ---
 
+## Entregue em 03/09/2026 — o endereço completo do TidyCal (2026-09-03b)
+
+O dono tem **domínio próprio** no TidyCal (`agendamento.fotocerta.com.br`) e pediu para colar
+o endereço inteiro no campo, em vez do pedaço depois de `tidycal.com/`. As duas abas que usam
+o campo passaram a aceitar as duas formas; quem já tinha o caminho cadastrado é migrado na
+abertura, com aviso, uma vez.
+
+**O pedido era o campo; o risco era outro.** Os dois blocos filtram por **origem** as mensagens
+que o TidyCal manda de dentro do iframe, e o filtro estava cravado em `https://tidycal.com`.
+Com domínio próprio, **todo sinal seria descartado** — o calendário apareceria e não se
+ajustaria, sem erro no console e sem nada na tela. A origem passou a derivar do endereço: em
+tempo de geração na aba `tidy` (um endereço por bloco) e em tempo de execução na aba `pac`,
+onde pacotes podem estar em domínios diferentes e o iframe é um só (`origemCal`).
+
+**Uma medição mudou o desenho.** O `embed.js` do TidyCal monta o `src` como
+`'https://tidycal.com/'+data-path` — o host é cravado **dentro dele**, e o arquivo servido pelo
+domínio próprio é byte a byte o mesmo do CDN. Logo, com domínio próprio não existe `data-path`
+que aponte para a página certa, e o bloco passa a criar o próprio iframe. **O preço está
+escrito no bloco gerado:** sem o `embed.js` não vem a biblioteca que ajusta a altura sozinha.
+
+**A guarda mudou de natureza.** Antes ela garantia que o host "nunca sai de `tidycal.com`";
+agora o host é o que o dono digitar, então ela exige `https`, host com ponto, e recusa `@` no
+host, esquema estranho e caractere perigoso. O que ela **não** pode fazer — dizer se o domínio
+é o dele — está escrito na aba: conferir no botão de teste deixou de ser extra e virou
+obrigação.
+
+**Prova:** uma divergência, `a-out1` nas duas passagens, que é a origem virando variável.
+`t-out1..t-out5` e `a-out3` **idênticos** — quem está em `tidycal.com` não ganha bloco novo.
+Mais 74 verificações com os blocos rodando, incluindo o caso **negativo** (sinal de outra
+origem recusado), sem o qual o filtro poderia ter sido apagado e o teste passaria igual.
+
+**Confirmado pelo dono depois:** `tidycal.com` e o domínio próprio **convivem** — o endereço
+original continua respondendo. Por isso ele fica no formato `tidycal.com/usuario/nome` na aba
+TidyCal, que é o único caminho com altura automática. Na aba `pac` a escolha é indiferente: ela
+nunca usou o `embed.js`, e por um motivo anterior a domínio próprio (o endereço muda quando o
+cliente troca de pacote, e o `embed.js` cria o iframe uma vez só).
+
+---
+
 ## Entregue em 03/09/2026 — a leva dos achados
 
 Sob a regra nova do dono (*"o que for identificado pelo caminho, registra, resolve e publica
