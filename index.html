@@ -18951,6 +18951,22 @@ var M_NUMS=[['m-larg',1080,600,1600,true],['m-cols',3,2,5,true],['m-mob',760,320
   ['m-descpix',10,0,90,false],['m-sinalpct',30,1,99,false],['m-sinalfixo',100,0.01,999999,false],
   ['m-qtdmax',10,2,99,true]];
 function mPreso(id){return fcPreso(M_NUMS,id);}
+/* Quantos itens DESTE produto (ele proprio e seus opcionais) foram marcados como vendidos por
+   quantidade, e se ALGUM produto do catalogo pede quantidade. Mesmo par de uQtdItens/uQtdLigada
+   no Checkout e de aQtdItens/aQtdLigada na aba Agendamento por pacote -- aqui ele NASCEU como
+   o mesmo laco escrito duas vezes, em mToggles e em mCfg. As duas copias concordavam, e por
+   isso mesmo uma podia ganhar uma regra nova e a outra nao: o campo "quantidade maxima"
+   apareceria na tela sem entrar no bloco entregue, ou o contrario, sem erro e sem aviso. */
+function mQtdItens(p){
+  var n=p.qtd?1:0,ops=p.ops||[],i;
+  for(i=0;i<ops.length;i++)if(ops[i].qtd)n++;
+  return n;
+}
+function mQtdLigada(prods){
+  var i;
+  for(i=0;i<prods.length;i++)if(mQtdItens(prods[i]))return true;
+  return false;
+}
 function mFmt(v){return precoFmt(radio('m-metodo')==='paypal'?(radio('m-moeda')||'BRL'):'BRL',v);}
 
 /* ===== salvamento e restauracao (registradas em ABAS) ===== */
@@ -19585,12 +19601,7 @@ function mToggles(){
   ver('m-sinalpct-campo',sinalOn&&radio('m-sinaltipo')==='pct');
   ver('m-sinalfixo-campo',sinalOn&&radio('m-sinaltipo')==='fixo');
   ver('m-opnenhum-campo',radio('m-opsel')==='unico');
-  var temQtd=false,i,j;
-  for(i=0;i<mProds.length;i++){
-    if(mProds[i].qtd)temQtd=true;
-    for(j=0;j<(mProds[i].ops||[]).length;j++)if(mProds[i].ops[j].qtd)temQtd=true;
-  }
-  ver('m-qtdmax-campo',temQtd);
+  ver('m-qtdmax-campo',mQtdLigada(mProds));
 }
 
 /* ===== os 55 textos configuraveis desta aba (Rodada de textos configuraveis, Etapa 2) =====
@@ -19673,11 +19684,6 @@ function mCfg(){
   var sinalTipo=radio('m-sinaltipo')||'pct';
   var sinalPct=mPreso('m-sinalpct');if(sinalPct==null)sinalPct=30;
   var sinalFixo=mPreso('m-sinalfixo');if(sinalFixo==null)sinalFixo=100;
-  var temQtd=false,i,j;
-  for(i=0;i<mProds.length;i++){
-    if(mProds[i].qtd)temQtd=true;
-    for(j=0;j<(mProds[i].ops||[]).length;j++)if(mProds[i].ops[j].qtd)temQtd=true;
-  }
   var r={
     m:m, usaPP:(m!=='pix'), usaPix:usaPix,
     /* IDENTIDADE: lida do painel global (ver o bloco "identidade e paleta"). */
@@ -19693,7 +19699,7 @@ function mCfg(){
     sinal:{ativo:sinalOn,tipo:sinalTipo,valor:(sinalTipo==='fixo')?(Math.round(sinalFixo*100)/100):sinalPct},
     resumo:(radio('m-resumo')==='sim'),
     prods:mProds, cps:mCps, cats:mCats(),
-    qtdLigada:temQtd, qtdmax:mPreso('m-qtdmax')||10,
+    qtdLigada:mQtdLigada(mProds), qtdmax:mPreso('m-qtdmax')||10,
     /* mob alimenta uma @media do bloco: preso AQUI, na fonte da configuracao, e nao so na
        largura da previa -- min/max de <input type="number"> nao sao impostos ao valor
        digitado, e prender so a previa deixaria o quadro num numero e o CSS gerado em outro. */
