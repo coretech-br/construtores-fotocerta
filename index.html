@@ -11515,9 +11515,19 @@ function uOpPrecoAjustar(inp,i){
 function uCpCodAjustar(inp,i){
   var alto=String(inp.value).toUpperCase();
   uCps[i].codigo=alto;
+  /* O gravador vem ANTES do desvio, e nao depois. Ate 03/09/2026 o codigo ja em maiusculas
+     saia por 'return false' sem gravar nada, e isso funcionava por um motivo que esta funcao
+     nao controla: o ouvinte de 'input' da propria linha ja tinha gravado a cada tecla. Era uma
+     dependencia implicita entre duas funcoes -- inofensiva hoje, e muda no dia em que aquele
+     ouvinte mudasse de ideia. Quem muda o modelo grava.
+     O REDESENHO DA PREVIA continua no ramo de baixo, de proposito: ele so e preciso quando o
+     valor MUDOU aqui, e remontar o iframe a cada 'blur' de um campo que nao mudou seria caro
+     e nao mostraria nada de novo. O contrato de retorno nao muda -- true quer dizer 'corrigi o
+     campo na tela', e e o que os dois ouvintes desta linha esperam. */
+  salvarEstado();
   if(alto===inp.value)return false;
   inp.value=alto;
-  salvarEstado();uPreview();
+  uPreview();
   return true;
 }
 function uOpRender(){
@@ -14494,9 +14504,11 @@ function aOpDel(i){aEditOps.splice(i,1);aOpRender();}
 function aCpCodAjustar(inp,i){
   var alto=String(inp.value).toUpperCase();
   aCps[i].codigo=alto;
+  /* salvarEstado ANTES do desvio -- ver uCpCodAjustar, a primeira das tres. */
+  salvarEstado();
   if(alto===inp.value)return false;
   inp.value=alto;
-  salvarEstado();aPreview();
+  aPreview();
   return true;
 }
 function aCpPctErro(tipo,v){
@@ -19333,9 +19345,11 @@ function mProdRender(){
 function mCpCodAjustar(inp,i){
   var alto=String(inp.value).toUpperCase();
   mCps[i].codigo=alto;
+  /* salvarEstado ANTES do desvio -- ver uCpCodAjustar, a primeira das tres. */
+  salvarEstado();
   if(alto===inp.value)return false;
   inp.value=alto;
-  salvarEstado();mPreview();
+  mPreview();
   return true;
 }
 function mCpPctErro(tipo,v){
