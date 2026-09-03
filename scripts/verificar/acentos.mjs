@@ -302,10 +302,25 @@ function marcasDaExpressao(esq, de, ateFecharParenteses){
    3. AS FRASES DE INTERFACE
    ========================================================================= */
 const frases = [];   // {txt, linha, origem}
+/* A CHAVE QUE VIAJA DENTRO DA FRASE. Uma concatenacao pode levar, no meio do texto, um
+   literal que nao e texto: o argumento de um ajudante chamado ali mesmo -- e o caso de
+   fcSecN('a-familias'), que devolve o NUMERO da secao para a frase nao cravar um numero
+   de secao a mao. Colado como se fosse prosa, ele fazia a frase inteira ser acusada de
+   "familias -> famílias" (medido em 03/09/2026: duas frases, as duas falsas).
+   O portao ja diz que CODIGO NAO LEVA ACENTO e que identificador nao e prosa; o que
+   faltava era aplicar isso tambem aos pedacos DE DENTRO de uma concatenacao. Cai fora o
+   pedaco que e um identificador puro -- minusculas, sem espaco, com hifen ou sublinhado --
+   e so quando ha OUTROS pedacos na mesma frase: sozinho ele ja nao passaria pelo portao
+   da prosa (menos de tres palavras).
+   O que isto custa, declarado: uma palavra acentuada que apareca SOZINHA num literal
+   hifenizado ASCII ('pre-pago') deixa de ser cobrada. Nao ha nenhuma hoje, e a forma
+   acentuada continua sendo cobrada em qualquer frase normal. */
+const CHAVE_SOLTA = /^[a-z][a-z0-9]*(?:[-_][a-z0-9]+)+$/;
 function juntar(lits, idxs, linha, origem, comidos){
-  const partes = idxs.map(n => lits[n] && lits[n].valor).filter(v => typeof v === 'string');
+  let partes = idxs.map(n => lits[n] && lits[n].valor).filter(v => typeof v === 'string');
   if(comidos) idxs.forEach(n => comidos.add(n));
   if(!partes.length) return;
+  if(partes.length > 1) partes = partes.filter(v => !CHAVE_SOLTA.test(v.trim()));
   const txt = partes.join(' ');
   if(txt.trim()) frases.push({txt, linha, origem});
 }

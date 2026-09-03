@@ -754,6 +754,8 @@
       <input type="text" id="s-leg" placeholder="Ensaio de Natal — família Silva">
       <div class="acoes"><button class="botao claro" id="s-add">Adicionar imagem</button></div>
       </fieldset>
+    </div>
+    <div>
       <fieldset>
       <legend>Importar de uma galeria ou de uma página</legend>
       <p class="ajuda"><b>Por que duas colagens:</b> o navegador não deixa esta ferramenta abrir uma página do fotocerta.com.br por conta própria (política de origem cruzada — medido: <i>Failed to fetch</i>). Então você traz a página até aqui. <b>Como fazer:</b> abra a galeria no navegador, aperte <b>Cmd&nbsp;⌥&nbsp;U</b> (ver código-fonte), depois <b>Cmd&nbsp;A</b> (selecionar tudo) e <b>Cmd&nbsp;C</b> (copiar). Cole o link no primeiro campo e o código-fonte no segundo. Vale para galerias (<i>/gallery/…</i>), para portfólios (<i>/portfolio/…</i>) e para as <b>páginas comuns</b> do site (<i>/albuns</i>), que servem as fotos de <i>cdn.alboompro.com</i> em vez do storage.</p>
@@ -763,11 +765,7 @@
       <textarea id="s-imp-fonte" spellcheck="false" placeholder="Cole aqui o código-fonte inteiro da página."></textarea>
       <div class="acoes"><button class="botao claro" id="s-imp-conferir">Conferir a página</button></div>
       <p class="ajuda">O código-fonte traz <b>mais fotos que a tela</b>: na galeria de exemplo, o navegador tinha 10 fotos carregadas e o código-fonte trazia 46. As fotos entram <b>na mesma ordem em que aparecem na página</b>, inclusive a de capa, que na página não é a primeira. Só entram endereços dos servidores da Alboom: qualquer outro é descartado com a contagem à vista. <b>Numa página comum</b> a mesma foto aparece em vários tamanhos (medido: 51 endereços para 10 fotos em <i>/albuns</i>) — cada foto entra <b>uma vez só, no maior tamanho que a página trouxe</b>, e só as da conta que aparece em mais fotos, que a conferência mostra. Nada do que você cola aqui é salvo — a ferramenta só lê os endereços das fotos e esquece o resto.</p>
-      </fieldset>
-    </div>
-    <div>
-      <fieldset>
-      <legend>Como as fotos entram na lista</legend>
+      <p class="ajuda"><b>Depois de conferir</b>, escolha como as fotos entram na lista. O botão <b>Adicionar à lista</b>, no fim desta caixa, só liga depois da conferência.</p>
       <label>Legenda das fotos</label>
       <div class="radios" id="s-imp-legmodo">
       <label><input type="radio" name="s-impleg" value="nao" checked><span>Sem legenda</span></label>
@@ -2897,6 +2895,18 @@
   <div class="grade">
     <div>
       <fieldset>
+        <legend>Importar as fotos de uma galeria inteira</legend>
+        <label for="m-imp-link">Link da galeria ou da página <small>(o endereço da barra do navegador)</small></label>
+        <input type="text" id="m-imp-link" placeholder="https://www.fotocerta.com.br/gallery/121894-estudio-tematico">
+        <label for="m-imp-fonte">Código-fonte da página <small>(Cmd ⌥ U, Cmd A, Cmd C — cole aqui)</small></label>
+        <textarea id="m-imp-fonte" spellcheck="false" placeholder="Cole aqui o código-fonte inteiro da página."></textarea>
+        <div class="acoes"><button class="botao claro" id="m-imp-conferir">Conferir a página</button></div>
+        <p class="ajuda s-alerta" id="m-imp-resultado" style="display:none"></p>
+        <p class="lista-conta" id="m-imp-conta" style="display:none"></p>
+        <ul class="lista-imgs lista-rolagem" id="m-imp-lista"></ul>
+        <p class="ajuda">Isto é a mesma leitura que a aba Slideshow faz, com outro destino: em vez de virar uma lista de fotos, os endereços ficam aqui para você <b>associar ao produto que estiver cadastrando</b>. Nada do que você cola nestes dois campos é salvo.</p>
+      </fieldset>
+      <fieldset>
         <legend>Cadastrar produto</legend>
         <p class="ajuda">De <b>15 a 50 produtos</b> é o tamanho para o qual esta vitrine foi desenhada. Cada produto pode ter os seus próprios itens opcionais, como no Checkout.</p>
         <div class="caixa-editor">
@@ -2909,7 +2919,7 @@
           <label for="m-pcat">Categoria <small>(livre; a lista sugere as que você já usou)</small></label>
           <input type="text" id="m-pcat" list="m-cat-lista" placeholder="Álbuns">
           <datalist id="m-cat-lista"></datalist>
-          <label for="m-pimg">Foto do produto <small>(endereço completo; use <b>Usar</b> na galeria importada ao lado)</small></label>
+          <label for="m-pimg">Foto do produto <small>(endereço completo; use <b>Usar</b> na galeria importada acima)</small></label>
           <input type="text" id="m-pimg" placeholder="https://storage.alboom.ninja/...">
           <label>Vende por quantidade? <small>(um ensaio se vende uma vez; um álbum se vende em vários)</small></label>
           <div class="radios">
@@ -2944,18 +2954,6 @@
             <button class="botao claro" id="m-prod-cancelar" style="display:none">Cancelar edição</button>
           </div>
         </div>
-      </fieldset>
-      <fieldset>
-        <legend>Importar as fotos de uma galeria inteira</legend>
-        <label for="m-imp-link">Link da galeria ou da página <small>(o endereço da barra do navegador)</small></label>
-        <input type="text" id="m-imp-link" placeholder="https://www.fotocerta.com.br/gallery/121894-estudio-tematico">
-        <label for="m-imp-fonte">Código-fonte da página <small>(Cmd ⌥ U, Cmd A, Cmd C — cole aqui)</small></label>
-        <textarea id="m-imp-fonte" spellcheck="false" placeholder="Cole aqui o código-fonte inteiro da página."></textarea>
-        <div class="acoes"><button class="botao claro" id="m-imp-conferir">Conferir a página</button></div>
-        <p class="ajuda s-alerta" id="m-imp-resultado" style="display:none"></p>
-        <p class="lista-conta" id="m-imp-conta" style="display:none"></p>
-        <ul class="lista-imgs lista-rolagem" id="m-imp-lista"></ul>
-        <p class="ajuda">Isto é a mesma leitura que a aba Slideshow faz, com outro destino: em vez de virar uma lista de fotos, os endereços ficam aqui para você <b>associar ao produto que estiver cadastrando</b>. Nada do que você cola nestes dois campos é salvo.</p>
       </fieldset>
     </div>
     <div>
@@ -3479,7 +3477,7 @@
 <div class="painel" id="painel-pac" role="tabpanel">
   <p class="descricao"><b>Agendamento por pacote</b> — agrupa vários tipos de agendamento do TidyCal numa página só. O cliente escolhe o pacote pelo preço e vê apenas o calendário daquela duração. Gera também a página de obrigado, que cobra o pacote agendado — com itens opcionais e cupom de desconto — por Pix ou cartão.</p>
 
-  <div class="secao primeira"><span class="secao-n">1</span> Formas de pagamento e identificação</div>
+  <div class="secao primeira" data-sec="a-pagamento"><span class="secao-n">1</span> Formas de pagamento e identificação</div>
   <div class="grade">
     <div>
       <fieldset>
@@ -3531,7 +3529,30 @@
     </div>
   </div>
 
-  <div class="secao"><span class="secao-n">2</span> Famílias, pacotes e itens opcionais</div>
+  <div class="secao" data-sec="a-familias"><span class="secao-n">2</span> Famílias de pacotes</div>
+  <div class="grade">
+    <div>
+      <fieldset>
+        <legend>Cadastrar família</legend>
+        <p class="ajuda">A família é o <b>passo 1</b> da vitrine: o cliente escolhe o tipo de ensaio e só então vê os pacotes daquela família. Com <b>uma família só</b> a vitrine volta a dois passos e a família não aparece para ninguém — nem no código gerado.</p>
+        <div class="dupla">
+          <input type="text" id="a-fam-nome" placeholder="Dias úteis">
+          <input type="text" id="a-fam-dica" placeholder="Segunda a sexta">
+        </div>
+        <p class="ajuda">O segundo campo é a descrição curta (opcional), que aparece embaixo do nome no cartão da família.</p>
+        <div class="acoes"><button class="botao claro" id="a-fam-add">Adicionar família</button></div>
+      </fieldset>
+    </div>
+    <div>
+      <fieldset>
+        <legend>Famílias cadastradas</legend>
+        <ul class="lista-imgs" id="a-fam-lista"></ul>
+        <p class="vazio" id="a-fam-vazio">Uma família só — a vitrine mostra dois passos, sem perguntar o tipo. Crie a segunda para a vitrine passar a perguntar.</p>
+      </fieldset>
+    </div>
+  </div>
+
+  <div class="secao" data-sec="a-pacotes"><span class="secao-n">3</span> Pacotes e itens opcionais</div>
   <div class="grade">
     <div>
       <fieldset>
@@ -3578,18 +3599,6 @@
     </div>
     <div>
       <fieldset>
-        <legend>Famílias de pacotes</legend>
-        <p class="ajuda">A família é o <b>passo 1</b> da vitrine: o cliente escolhe o tipo de ensaio e só então vê os pacotes daquela família. Com <b>uma família só</b> a vitrine volta a dois passos e a família não aparece para ninguém — nem no código gerado.</p>
-        <div class="dupla">
-          <input type="text" id="a-fam-nome" placeholder="Dias úteis">
-          <input type="text" id="a-fam-dica" placeholder="Segunda a sexta">
-        </div>
-        <p class="ajuda">O segundo campo é a descrição curta (opcional), que aparece embaixo do nome no cartão da família.</p>
-        <div class="acoes"><button class="botao claro" id="a-fam-add">Adicionar família</button></div>
-        <ul class="lista-imgs" id="a-fam-lista"></ul>
-        <p class="vazio" id="a-fam-vazio">Uma família só — a vitrine mostra dois passos, sem perguntar o tipo. Crie a segunda para a vitrine passar a perguntar.</p>
-      </fieldset>
-      <fieldset>
         <legend>Pacotes cadastrados</legend>
         <ul class="lista-imgs" id="a-pac-lista"></ul>
         <p class="vazio" id="a-pac-vazio">Nenhum pacote cadastrado ainda. Use o formulário ao lado.</p>
@@ -3622,7 +3631,7 @@
     </div>
   </div>
 
-  <div class="secao"><span class="secao-n">3</span> Página de obrigado e marcadores</div>
+  <div class="secao"><span class="secao-n">4</span> Página de obrigado e marcadores</div>
   <div class="grade">
     <div>
       <fieldset>
@@ -3657,7 +3666,7 @@
     </div>
   </div>
 
-  <div class="secao"><span class="secao-n">4</span> Textos e aparência</div>
+  <div class="secao" data-sec="a-aparencia"><span class="secao-n">5</span> Textos e aparência</div>
   <div class="grade">
     <div>
       <fieldset>
@@ -3666,7 +3675,7 @@
         <input type="text" id="a-t1" value="Agende seu ensaio">
         <label for="a-txt-subtitulo">Subtítulo da vitrine <small>(opcional — vazio, nada aparece)</small></label>
         <input type="text" id="a-txt-subtitulo" value="" placeholder="ex.: Pague no Pix e ganhe {pct}% de desconto">
-        <p class="ajuda">Entra logo abaixo do título, antes do passo 1. Onde você escrever <code>{pct}</code>, entra o <b>desconto do Pix</b> configurado na seção 1 — assim ele acompanha sozinho quando você mudar o desconto. Escrever o número à mão faz o subtítulo mentir no dia em que o desconto mudar, sem erro e sem aviso.</p>
+        <p class="ajuda">Entra logo abaixo do título, antes do passo 1. Onde você escrever <code>{pct}</code>, entra o <b>desconto do Pix</b> configurado na seção <span class="sec-ref" data-sec="a-pagamento"></span> — assim ele acompanha sozinho quando você mudar o desconto. Escrever o número à mão faz o subtítulo mentir no dia em que o desconto mudar, sem erro e sem aviso.</p>
         <label for="a-txt-passo-familia">Rótulo do passo da família <small>(só aparece com duas ou mais famílias)</small></label>
         <input type="text" id="a-txt-passo-familia" value="Escolha o tipo de ensaio">
         <label for="a-t2">Rótulo do passo dos pacotes <small>(passo 1 sem famílias; passo 2 com elas)</small></label>
@@ -3725,7 +3734,7 @@
     </div>
   </div>
 
-  <div class="secao"><span class="secao-n">5</span> Textos da página de obrigado</div>
+  <div class="secao"><span class="secao-n">6</span> Textos da página de obrigado</div>
   <div class="grade">
     <div>
       <fieldset>
@@ -3754,7 +3763,7 @@
         <input type="text" id="a-txt-cupom-minimo" value="Este cupom vale a partir de {valor}.">
         <label for="a-txt-cupom-minimo-queda">Cupom que saiu porque o pedido desceu</label>
         <input type="text" id="a-txt-cupom-minimo-queda" value="O cupom saiu: ele vale a partir de {valor}, e o pedido ficou abaixo disso.">
-        <p class="ajuda">As duas frases acima só aparecem em cupom que tenha <b>valor mínimo do pedido</b> (seção 2). Onde você escrever <code>{valor}</code>, entra o mínimo daquele cupom, já na moeda do bloco. São duas porque são dois momentos: a primeira responde <i>por que não aplicou</i>; a segunda, <i>por que o desconto que eu já tinha sumiu</i>.</p>
+        <p class="ajuda">As duas frases acima só aparecem em cupom que tenha <b>valor mínimo do pedido</b> (seção <span class="sec-ref" data-sec="a-pacotes"></span>). Onde você escrever <code>{valor}</code>, entra o mínimo daquele cupom, já na moeda do bloco. São duas porque são dois momentos: a primeira responde <i>por que não aplicou</i>; a segunda, <i>por que o desconto que eu já tinha sumiu</i>.</p>
         <label for="a-txt-desconto">Linha do desconto</label>
         <input type="text" id="a-txt-desconto" value="Desconto ({codigo})">
         <label for="a-txt-cupom-validade">Validade do cupom, na linha de desconto</label>
@@ -3819,10 +3828,10 @@
     </div>
   </div>
 
-  <div class="secao"><span class="secao-n">6</span> Biblioteca de presets</div>
+  <div class="secao"><span class="secao-n">7</span> Biblioteca de presets</div>
   <div class="grade" id="fcp-a-box"></div>
 
-  <div class="secao"><span class="secao-n">7</span> Prévia e códigos gerados</div>
+  <div class="secao"><span class="secao-n">8</span> Prévia e códigos gerados</div>
   <div class="acoes" style="margin-bottom:14px">
     <button class="botao" id="a-gerar">Gerar código</button>
     <button class="botao claro" id="a-atualizar">Atualizar prévia</button>
@@ -3837,7 +3846,7 @@
       </div>
       <div id="a-pv-box"></div>
       </div>
-      <p class="ajuda">A prévia roda o código gerado de verdade: escolher uma família mostra só os pacotes dela, escolher um pacote acende o passo do calendário, e o preço troca ao vivo. O modo Celular usa <b>380 pixels</b> de largura lógica — abaixo dos dois cortes configurados na seção 4 no padrão de fábrica, então os cartões aparecem como <b>linhas compactas</b>. Se você baixar a "Largura de corte das linhas compactas" para menos de 380, a prévia passa a mostrar cartões altos num quadro estreito: é o que a página publicada faria nessa largura, não um defeito da prévia. O que ainda difere da página publicada: o calendário do TidyCal não carrega aqui (é outro domínio, e a prévia não deve depender de rede) — no lugar dele aparece um retângulo cinza avisando "Aqui entra o calendário do TidyCal deste pacote."; e o quadro não carrega o CSS do tema do site.</p>
+      <p class="ajuda">A prévia roda o código gerado de verdade: escolher uma família mostra só os pacotes dela, escolher um pacote acende o passo do calendário, e o preço troca ao vivo. O modo Celular usa <b>380 pixels</b> de largura lógica — abaixo dos dois cortes configurados na seção <span class="sec-ref" data-sec="a-aparencia"></span> no padrão de fábrica, então os cartões aparecem como <b>linhas compactas</b>. Se você baixar a "Largura de corte das linhas compactas" para menos de 380, a prévia passa a mostrar cartões altos num quadro estreito: é o que a página publicada faria nessa largura, não um defeito da prévia. O que ainda difere da página publicada: o calendário do TidyCal não carrega aqui (é outro domínio, e a prévia não deve depender de rede) — no lugar dele aparece um retângulo cinza avisando "Aqui entra o calendário do TidyCal deste pacote."; e o quadro não carrega o CSS do tema do site.</p>
 
       <label for="a-pv-pac" style="display:block;margin-top:16px">Prévia da página de obrigado — prever como</label>
       <select id="a-pv-pac"></select>
@@ -4955,6 +4964,36 @@ function trocarAba(qual){
     if(p)p.classList.toggle('ativo',n===qual);
     if(a){a.classList.toggle('ativa',n===qual);a.setAttribute('aria-selected',n===qual?'true':'false');}
   });
+}
+
+/* ============ o numero de cada secao sai da POSICAO dela ============ */
+/* Numero de secao escrito a mao e a mesma armadilha que ABAS.length ja resolveu para a
+   contagem de abas. Medido em 03/09/2026: partir a secao 2 da aba Agendamento por pacote em
+   duas obrigou a renumerar CINCO cabecalhos e SETE textos que citam secao por numero -- e o
+   que ficasse para tras apontaria para o lugar errado sem erro nenhum, que e a classe de
+   defeito silencioso que este projeto mais paga para evitar.
+   Agora o cabecalho recebe o numero da POSICAO dele dentro do painel, e o texto que cita uma
+   secao aponta para ela pela CHAVE ('data-sec'), nunca pelo numero: em HTML por um
+   <span class="sec-ref" data-sec="..."></span>, em JavaScript por fcSecN('...').
+   Os numeros continuam escritos no HTML, corretos, por dois motivos: a fonte fica legivel
+   para quem le o arquivo, e a pagina nasce certa antes de o script rodar. Mas quem manda e
+   esta funcao -- numero errado no HTML e corrigido aqui em vez de mentir na tela. */
+function fcSecN(chave){
+  var el=document.querySelector('.secao[data-sec="'+chave+'"]');
+  var n=el?el.querySelector('.secao-n'):null;
+  return n?n.textContent:'?';
+}
+function fcSecoesNumerar(){
+  var pais=document.querySelectorAll('.painel'),refs,i,j,secs,n;
+  for(i=0;i<pais.length;i++){
+    secs=pais[i].querySelectorAll('.secao');
+    for(j=0;j<secs.length;j++){
+      n=secs[j].querySelector('.secao-n');
+      if(n)n.textContent=String(j+1);
+    }
+  }
+  refs=document.querySelectorAll('.sec-ref');
+  for(i=0;i<refs.length;i++)refs[i].textContent=fcSecN(refs[i].getAttribute('data-sec'));
 }
 
 /* ============ aviso de falha isolada ============ */
@@ -14830,7 +14869,7 @@ function aRecusa(cfg){
     if(!(parseFloat(p.preco)>0))return 'O pacote "'+p.cod+'" está com o preço vazio ou zerado. Ele seria entregue como uma cobrança de R$ 0,00.';
     if(!p.path)return 'O pacote "'+p.cod+'" está sem o caminho do TidyCal.';
     if(!tPathOk(p.path))return 'O caminho do TidyCal do pacote "'+p.cod+'" ("'+p.path+'") tem um caractere que não é permitido. Use apenas letras, números, ponto, hífen, sublinhado e barra separando os segmentos (ex.: usuario/nome-do-agendamento).';
-    if(!aFamAchaEm(cfg.familias,p.fam))return 'O pacote "'+p.cod+'" está numa família que não existe mais. Abra o pacote no lápis (seção 2), escolha uma família e salve.';
+    if(!aFamAchaEm(cfg.familias,p.fam))return 'O pacote "'+p.cod+'" está numa família que não existe mais. Abra o pacote no lápis (seção '+fcSecN('a-pacotes')+'), escolha uma família e salve.';
   }
   /* As familias sao conferidas AQUI, e nao so no cadastro, pela mesma razao ja registrada para
      os cupons: o editor EM LINHA nao valida nada -- apagar o nome de uma familia ja cadastrada
@@ -15056,7 +15095,7 @@ function aRestaura(st){
      esta com a tela inteira desenhada ha tempo, e a chamada continua segura pelo mesmo
      motivo -- nunca e a PRIMEIRA coisa que roda. */
   if(migrouPath){
-    alert('Os pacotes desta aba tinham o endereço COMPLETO do TidyCal gravado (versão anterior desta ferramenta). Ele foi convertido automaticamente para o CAMINHO, que é o que este campo pede agora — confira a lista de pacotes na seção 2. Nada foi perdido.');
+    alert('Os pacotes desta aba tinham o endereço COMPLETO do TidyCal gravado (versão anterior desta ferramenta). Ele foi convertido automaticamente para o CAMINHO, que é o que este campo pede agora — confira a lista de pacotes na seção '+fcSecN('a-pacotes')+'. Nada foi perdido.');
     salvarEstado();
   }
   /* Duas mensagens, porque são dois fatos diferentes: "esta aba mudou de forma" e "um pacote
@@ -15065,13 +15104,13 @@ function aRestaura(st){
   if(movidos){
     alert('Esta aba passou a organizar os pacotes em FAMÍLIAS — por exemplo: dias úteis e fins de semana. '+
       (movidos>1?('Os '+movidos+' pacotes que já estavam cadastrados foram colocados'):'O pacote que já estava cadastrado foi colocado')+
-      ' numa família única chamada "Pacotes". Nada foi perdido, e a vitrine continua com os mesmos dois passos de antes, porque com uma família só não há o que escolher. Para separar os pacotes, crie a segunda família na seção 2 e renomeie esta.');
+      ' numa família única chamada "Pacotes". Nada foi perdido, e a vitrine continua com os mesmos dois passos de antes, porque com uma família só não há o que escolher. Para separar os pacotes, crie a segunda família na seção '+fcSecN('a-familias')+' e renomeie esta.');
     salvarEstado();
   }else if(reparouOrfao||reparouNome){
     partes=[];
     if(reparouOrfao)partes.push(reparouOrfao+(reparouOrfao>1?' pacotes apontavam':' pacote apontava')+' para uma família que não existe neste arquivo — '+(reparouOrfao>1?'foram colocados':'foi colocado')+' na primeira família da lista ("'+aFamilias[0].nome+'")');
     if(reparouNome)partes.push(reparouNome+(reparouNome>1?' famílias estavam':' família estava')+' sem nome e ganh'+(reparouNome>1?'aram':'ou')+' um nome provisório');
-    alert('A lista de famílias desta aba precisou de conserto: '+partes.join('; ')+'. Confira a seção 2 antes de gerar — nada foi perdido.');
+    alert('A lista de famílias desta aba precisou de conserto: '+partes.join('; ')+'. Confira a seção '+fcSecN('a-familias')+' antes de gerar — nada foi perdido.');
     salvarEstado();
   }
 }
@@ -21840,6 +21879,10 @@ prep('Correção à vista das cores livres','leads uni bor cnt cob loja pac',fun
         conta quantos valores de identidade ignorou; o contador precisa existir antes.
    Passo proprio, com rotulo proprio: se ele falhar, a barra vermelha precisa dizer que foi a
    identidade -- as abas continuam funcionando, so vao recusar gerar por falta de chave. */
+/* A numeracao das secoes vem antes de tudo o que desenha: os textos que citam uma secao por
+   numero (class="sec-ref") nascem VAZIOS no HTML e sao preenchidos aqui. */
+prep('Ferramenta','',fcSecoesNumerar,'numerar as seções');
+
 prep('Identidade e paleta','',fciIniciar,'preparar a identidade e a paleta');
 
 /* restaurarEstado ja isola aba por aba por dentro: a aba que falhar ao restaurar nao
