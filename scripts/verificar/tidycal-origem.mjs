@@ -149,9 +149,14 @@ async function abaPacote(porta){
   chk('pac: gerou sem recusa', !alertas.length && bloco.length > 5000, alertas.join(' | '));
   chk('pac: os DOIS enderecos viajam inteiros no catalogo',
       bloco.indexOf("link:'" + TIDY + "'") >= 0 && bloco.indexOf("link:'" + PROPRIO + "'") >= 0);
+  /* Desde a unificacao do calendario (03/09/2026) a origem do endereco novo e calculada uma
+     vez, em 'nova' -- porque ela e usada DUAS vezes na mesma funcao: para decidir se o iframe
+     precisa ser recriado (dominio diferente) e para virar a origemCal. O que este teste cobra
+     continua sendo o mesmo: que ela venha do endereco, e nao de um literal. */
   chk('pac: a origem NAO e um literal no bloco',
       bloco.indexOf("e.origin!=='https://tidycal.com'") < 0 &&
-      bloco.indexOf('origemCal=origemDe(link)') >= 0);
+      bloco.indexOf('nova=origemDe(link)') >= 0 &&
+      bloco.indexOf('origemCal=nova') >= 0);
 
   const r = await comBlocoNaPagina({
     bloco, porta: porta + 1,

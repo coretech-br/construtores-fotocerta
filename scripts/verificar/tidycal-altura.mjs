@@ -50,8 +50,21 @@ const TETO     = '6000px';   /* ALTURA_MAXIMA */
 const CALIBRADA= '2350px';   /* ALTURA_DESKTOP de fabrica das duas abas */
 
 /* O aperto de mao, exatamente como foi medido saindo do embed.js do TidyCal. O que muda de
-   uma geracao para outra e so o <id>, sorteado dentro do bloco. */
-const INIT_RESTO = ':8:false:false:32:true:true:null:bodyOffset:null:null:0:false:parent:scroll:true';
+   uma geracao para outra e so o <id>, sorteado dentro do bloco.
+
+   DESDE A UNIFICACAO DO CALENDARIO (03/09/2026) o metodo de calculo da altura deixou de ser
+   um literal no meio da linha: ele vem de SIZER_METODO, que o interruptor MEDIR_FORMULARIO
+   troca entre 'bodyOffset' (padrao, o que o TidyCal usa) e 'lowestElement' (o unico metodo
+   que ENXERGA o formulario de reserva -- medido no mesmo dia, e registrado no cabecalho de
+   fcTidyCalSrc, com o preco). Por isso a conferencia do bloco olha as DUAS metades da linha
+   em vez de uma string inteira; o que roda dentro da pagina continua sendo a linha montada,
+   com 'bodyOffset' no padrao de fabrica. */
+const INIT_ANTES = ':8:false:false:32:true:true:null:';
+const INIT_DEPOIS = ':null:null:0:false:parent:scroll:true';
+const INIT_RESTO = INIT_ANTES + 'bodyOffset' + INIT_DEPOIS;
+const temHandshake = bloco =>
+  bloco.indexOf("var SIZER_METODO=MEDIR_FORMULARIO?'lowestElement':'bodyOffset';") >= 0 &&
+  bloco.indexOf("var SIZER_INIT='" + INIT_ANTES + "'+SIZER_METODO+'" + INIT_DEPOIS + "';") >= 0;
 
 /* A ESPIA DO APERTO DE MAO. O bloco fala com o filho por
    `iframe.contentWindow.postMessage(...)`; aqui o getter de `contentWindow` devolve um objeto
@@ -120,8 +133,7 @@ async function abaTidycalProprio(porta){
 
   const bloco = valores['t-out1'];
   chk('t proprio: gerou sem recusa', !alertas.length && bloco.length > 500, alertas.join(' | '));
-  chk('t proprio: o aperto de mao esta no bloco, com o formato medido',
-      bloco.indexOf("var SIZER_INIT='" + INIT_RESTO + "';") >= 0);
+  chk('t proprio: o aperto de mao esta no bloco, com o formato medido', temHandshake(bloco));
   chk('t proprio: a faixa da guarda esta declarada no bloco',
       bloco.indexOf('var ALTURA_MINIMA=500;') >= 0 && bloco.indexOf('var ALTURA_MAXIMA=6000;') >= 0);
 
@@ -214,8 +226,7 @@ async function abaPacote(porta){
 
   const bloco = valores['a-out1'];
   chk('pac: gerou sem recusa', !alertas.length && bloco.length > 5000, alertas.join(' | '));
-  chk('pac: o aperto de mao esta no bloco, com o formato medido',
-      bloco.indexOf("var SIZER_INIT='" + INIT_RESTO + "';") >= 0);
+  chk('pac: o aperto de mao esta no bloco, com o formato medido', temHandshake(bloco));
   chk('pac: a altura de partida existe (o iframe e criado por JS e nao tem atributo height)',
       bloco.indexOf('var ALTURA_INICIAL=700;') >= 0 &&
       bloco.indexOf("f.style.height=ALTURA_INICIAL+'px';") >= 0);
