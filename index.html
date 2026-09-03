@@ -1633,6 +1633,7 @@
           <div class="acoes"><button class="botao claro" id="u-op-add">Adicionar opcional</button></div>
           <ul class="lista-imgs" id="u-op-lista"></ul>
           <p class="vazio" id="u-op-vazio">Nenhum opcional neste produto.</p>
+          <p class="ajuda alerta" id="u-op-pendente" style="display:none"></p>
           <label>Seleção dos opcionais</label>
           <div class="radios">
             <label><input type="radio" name="u-opsel" value="unico" checked><span>Apenas 1</span></label>
@@ -2937,6 +2938,7 @@
           <div class="acoes"><button class="botao claro" id="m-op-add">Adicionar opcional</button></div>
           <ul class="lista-imgs" id="m-op-lista"></ul>
           <p class="vazio" id="m-op-vazio">Nenhum opcional neste produto.</p>
+          <p class="ajuda alerta" id="m-op-pendente" style="display:none"></p>
           <label>Seleção dos opcionais</label>
           <div class="radios">
             <label><input type="radio" name="m-opsel" value="unico" checked><span>Apenas 1</span></label>
@@ -3589,6 +3591,7 @@
           <div class="acoes"><button class="botao claro" id="a-op-add">Adicionar opcional</button></div>
           <ul class="lista-imgs" id="a-op-lista"></ul>
           <p class="vazio" id="a-op-vazio">Nenhum opcional neste pacote.</p>
+          <p class="ajuda alerta" id="a-op-pendente" style="display:none"></p>
 
           <div class="acoes">
             <button class="botao" id="a-pac-salvar">Adicionar pacote</button>
@@ -5099,8 +5102,14 @@ function prep(nome,abaId,fn,fase){
      pref         prefixo dos campos da aba ('s-', 'l-', ...). E TAMBEM a chave do fragmento
                   que carrega a configuracao (s, t, l, u, b, c) e onde a biblioteca fica
                   gravada (<pref>.presets) -- as duas coisas sempre coincidiram.
-     fora         campos do fragmento que NAO entram num preset (escolhas sobre outro
-                  componente). Ao aplicar, eles conservam o que esta na tela.
+     fora         campos do fragmento que NAO entram num preset. Ao aplicar, eles conservam
+                  o que esta na tela. Duas familias moram aqui: escolhas sobre OUTRO
+                  componente (a consolidacao do codigo 1 da Bordas) e o FORMULARIO INACABADO
+                  das tres abas que cadastram item com opcionais ('edops'/'editidx'). O
+                  segundo caso e o que explica a regra: o buffer e gravado no estado, para o
+                  dono nao perder o que digitou ao recarregar, mas ele nao e configuracao de
+                  campanha -- num preset ele seria ruido, e faria o aviso "veio de X, que
+                  mudou depois" disparar por causa de um opcional a meio de digitar.
      (ago/2026) 'operacionais' SAIU deste registro. Ela listava, por aba, os campos de contato
                   e pagamento -- e existia porque cada aba tinha a sua copia deles. Com a
                   identidade recolhida num lugar so (ver o bloco "identidade e paleta"), nao ha
@@ -5168,8 +5177,9 @@ var ABAS=[
    exemplo:'ex.: Natal 2026 - hospedeira',
    guarda:'tudo o que está configurado nesta aba — modo de exibição, ícone, formato, cores e posição do botão, os quatro trechos da mensagem, os textos do pop-up, o cabeçalho (coruja, movimento e efeitos), o horário de atendimento, a pergunta de qualificação com as opções cadastradas, a âncora e os <b>textos</b> da seção 8.'},
   {id:'uni',  nome:'Checkout',            chaves:['u'],         coleta:uColeta,restaura:uRestaura,gerar:uGerar,
-   pref:'u',fora:[],resumo:uPresetResumo,redesenhar:uPresetDepois,antesDeSalvar:uPresetAntes,
-   listas:[['u.prods',{nome:'',desc:'',preco:0,opsel:'unico',opnenhum:'nao',qtd:false,ops:[{nome:'',preco:0,qtd:false}]},'nome'],
+   pref:'u',fora:['edops','editidx'],resumo:uPresetResumo,redesenhar:uPresetDepois,antesDeSalvar:uPresetAntes,
+   listas:[['u.edops',{nome:'',preco:0,qtd:false},'nome'],
+           ['u.prods',{nome:'',desc:'',preco:0,opsel:'unico',opnenhum:'nao',qtd:false,ops:[{nome:'',preco:0,qtd:false}]},'nome'],
            ['u.prods.ops',{nome:'',preco:0,qtd:false},'nome'],
            ['u.cps',{codigo:'',tipo:'pct_total',valor:0,validade:'',minimo:''},'codigo']],
    exemplo:'ex.: Natal 2026 - pacotes',
@@ -5190,8 +5200,9 @@ var ABAS=[
    exemplo:'ex.: Foto Certa - página /pagar',
    guarda:'tudo o que está configurado nesta aba — o endereço da página, a aparência, os textos, e também a <b>cobrança que está na tela</b> (descrição, valor, identificador, a data de validade e o desconto no Pix). Aplicar um preset troca também essa cobrança: ele é a fotografia da aba inteira. Os dados de quem recebe <b>não</b> estão aqui: eles saíram desta aba para o painel Identidade, e nenhum preset os toca.'},
   {id:'loja', nome:'Mini loja',           chaves:['m'],         coleta:mColeta,restaura:mRestaura,gerar:mGerar,
-   pref:'m',fora:[],resumo:mPresetResumo,redesenhar:mPresetDepois,antesDeSalvar:mPresetAntes,
-   listas:[['m.prods',{nome:'',desc:'',preco:0,cat:'',img:'',opsel:'unico',opnenhum:'nao',qtd:false,ops:[{nome:'',preco:0,qtd:false}]},'nome'],
+   pref:'m',fora:['edops','editidx'],resumo:mPresetResumo,redesenhar:mPresetDepois,antesDeSalvar:mPresetAntes,
+   listas:[['m.edops',{nome:'',preco:0,qtd:false},'nome'],
+           ['m.prods',{nome:'',desc:'',preco:0,cat:'',img:'',opsel:'unico',opnenhum:'nao',qtd:false,ops:[{nome:'',preco:0,qtd:false}]},'nome'],
            ['m.prods.ops',{nome:'',preco:0,qtd:false},'nome'],
            ['m.cps',{codigo:'',tipo:'pct_total',valor:0,validade:'',minimo:''},'codigo']],
    importar:mImportarLimpar,
@@ -5203,7 +5214,7 @@ var ABAS=[
    exemplo:'ex.: Natal 2026 - neve na hospedeira',
    guarda:'tudo o que está configurado nesta aba — o efeito escolhido, o alcance (página inteira ou dentro de um bloco) com a altura, e os campos de <b>todos</b> os efeitos: quantidade, tamanho, deriva e cor das partículas, as quatro cores do confete, o tamanho, o desfoque e as três cores da aurora, a quantidade, o tamanho e as quatro cores das luzes, mais a duração do ciclo, a opacidade, a proporção no celular e o <b>fundo da prévia</b>.'},
   {id:'pac', nome:'Agendamento por pacote', chaves:['a'],       coleta:aColeta,restaura:aRestaura,gerar:aGerar,
-   pref:'a',fora:[],resumo:aPresetResumo,redesenhar:aPresetDepois,antesDeSalvar:aPresetAntes,
+   pref:'a',fora:['edops','editidx'],resumo:aPresetResumo,redesenhar:aPresetDepois,antesDeSalvar:aPresetAntes,
    /* A chave essencial de 'a.familias' e o 'id', e nao o 'nome': e o id que o 'fam' de cada
       pacote aponta. Uma familia {"nome":"X"} sem id e casca -- ninguem consegue pertencer a
       ela --, e fcxPodarListas a descarta e a CONTA; ja um nome em branco e recuperavel
@@ -5214,7 +5225,8 @@ var ABAS=[
       ausente, 'path' virava '' -- e o alerta afirmava "Nada foi perdido", que naquele caminho
       era FALSO. O dono so descobriria ao tentar gerar, pela recusa "esta sem o caminho do
       TidyCal", sem ligacao nenhuma com a importacao. */
-   listas:[['a.familias',{id:'',nome:'',dica:''},'id'],
+   listas:[['a.edops',{nome:'',preco:0,qtd:false},'nome'],
+           ['a.familias',{id:'',nome:'',dica:''},'id'],
            ['a.pacotes',{cod:'',nome:'',dur:'',preco:0,inclui:'',path:'',link:'',fam:'',ops:[{nome:'',preco:0,qtd:false}]},'cod'],
            ['a.pacotes.ops',{nome:'',preco:0,qtd:false},'nome'],
            ['a.cps',{codigo:'',tipo:'pct_total',valor:0,validade:'',minimo:''},'codigo']],
@@ -5305,6 +5317,24 @@ function restaurarEstado(){
       fcFalha(a.nome,'restaurar as configurações -- o que já estava gravado foi mantido, e esta aba não grava nada até a página ser recarregada',e,a.id);
     }
   }
+}
+/* ============ o formulario inacabado, dito na tela ============ */
+/* Os opcionais que o dono digitou e ainda NAO salvou passaram a sobreviver a recarga (chaves
+   'edops' e 'editidx' do fragmento de cada aba). Guardar sem avisar seria trocar uma perda
+   silenciosa por uma armadilha silenciosa: o dono reabre a ferramenta amanha, ve tres
+   opcionais embaixo do formulario e conclui que comecou do zero.
+   O rotulo do botao NAO e escrito aqui: ele e LIDO do proprio botao, que ja diz "Adicionar
+   produto" ou "Salvar alterações" conforme o modo. Assim o aviso nao tem como discordar do
+   botao que ele manda apertar. Uma funcao so para as tres abas -- o que muda entre elas cabe
+   em tres argumentos. */
+function fcOpPendente(idAviso,buf,idx,nomeItem,item,idBotao){
+  var el=document.getElementById(idAviso);if(!el)return;
+  if(!buf||!buf.length){el.style.display='none';el.textContent='';return;}
+  var b=document.getElementById(idBotao),rot=b?b.textContent:'';
+  el.style.display='block';
+  el.textContent=(idx>=0)
+    ? ('Estes opcionais ainda não foram salvos. Você está editando \u201c'+nomeItem+'\u201d — clique em \u201c'+rot+'\u201d para gravar.')
+    : ('Estes opcionais ainda não foram salvos em '+item+' nenhum. Termine o cadastro acima e clique em \u201c'+rot+'\u201d.');
 }
 function corValida(v){return /^#[0-9a-fA-F]{6}$/.test(v);}
 /* Rede do gerador: le o campo de texto da cor e devolve o padrao quando o valor nao e um
@@ -11376,6 +11406,12 @@ function uColeta(){
        nascer de novo -- o preset desta aba e uma fotografia deste coleta(). */
     u:{prods:uProds,cps:uCps,metodo:radio('u-metodo'),moeda:radio('u-moeda'),
       cod:$('u-cod').value,
+      /* O FORMULARIO INACABADO viaja junto (03/09/2026). E acrescimo, nao mudanca de
+         formato: estado ou preset gravado antes disto simplesmente nao tem as duas chaves, e
+         o restaura ja trata chave ausente. As duas estao declaradas em 'fora' -- elas
+         descrevem o que esta a MEIO de ser digitado, e nao a configuracao da campanha, entao
+         nao entram em preset nenhum. */
+      edops:uEditOps,editidx:uEditIdx,
       selprod:radio('u-selprod'),zap:radio('u-zap'),descpix:$('u-descpix').value,
       sinal:radio('u-sinal'),sinaltipo:radio('u-sinaltipo'),sinalpct:$('u-sinalpct').value,sinalfixo:$('u-sinalfixo').value,
       resumo:radio('u-resumo'),
@@ -11426,6 +11462,23 @@ function uRestaura(st){
   /* Os 33 textos configuraveis: estado gravado antes desta rodada nao tem nenhuma destas
      chaves -- o padrao de cada campo e o terceiro item de U_TXT_DEFS. */
   fcTxtRestaura(U_TXT_DEFS,U);
+  uEditRestaurar(U);
+}
+/* Devolve o FORMULARIO DE CADASTRO ao estado em que ele estava: os opcionais digitados e, se
+   havia um, o produto que estava sendo editado. Restaurar os opcionais SEM o indice seria pior
+   do que perde-los: o dono clicaria em "Adicionar produto" e criaria um duplicado do que ele
+   estava editando. O indice e conferido contra a lista atual -- preset aplicado ou arquivo
+   importado trocam o catalogo, e um indice que nao existe mais volta a ser "produto novo".
+   Os dois ramos passam por uProdEditar/uProdLimpar, que sao os donos do modo do formulario
+   (rotulo do botao, "Cancelar edição" e campos); so os OPCIONAIS sao os do formulario, e nao
+   os do produto salvo -- e essa a diferenca que estava se perdendo. */
+function uEditRestaurar(U){
+  var buf=(U.edops||[]).map(function(o){return {nome:o.nome,preco:o.preco,qtd:!!o.qtd};});
+  var i=(typeof U.editidx==='number')?U.editidx:-1;
+  if(i>=0&&i<uProds.length)uProdEditar(i);
+  else uProdLimpar();
+  uEditOps=buf;
+  uOpRender();
 }
 
 /* ===== O que esta aba poe na biblioteca de presets (ver o bloco compartilhado) =====
@@ -11507,9 +11560,10 @@ function uFmt(v){
    do resto da ferramenta: em 'change'/'blur', nunca em 'input'. */
 function uOpPrecoAjustar(inp,i){
   var v=parseFloat(String(inp.value).replace(',','.'));
-  if(!isNaN(v)&&v>=0){uEditOps[i].preco=v;return false;}
+  if(!isNaN(v)&&v>=0){uEditOps[i].preco=v;salvarEstado();return false;}
   uEditOps[i].preco=0;
   inp.value='0';
+  salvarEstado();
   return true;
 }
 function uCpCodAjustar(inp,i){
@@ -11545,16 +11599,16 @@ function uOpRender(){
        devolver: o campo se corrige A VISTA no change/blur, como o preco, em vez de recusar.
        Nunca no 'input' -- corrigir a cada tecla impediria apagar para redigitar. */
     var bom=op.nome;
-    n.addEventListener('input',function(){uEditOps[i].nome=n.value;if(n.value.replace(/^\s+|\s+$/g,''))bom=n.value;});
+    n.addEventListener('input',function(){uEditOps[i].nome=n.value;if(n.value.replace(/^\s+|\s+$/g,''))bom=n.value;salvarEstado();});
     (function(){
       function volta(){
         if(n.value.replace(/^\s+|\s+$/g,''))return;
-        n.value=bom;uEditOps[i].nome=bom;
+        n.value=bom;uEditOps[i].nome=bom;salvarEstado();
       }
       n.addEventListener('change',volta);n.addEventListener('blur',volta);
     })();
     var pr=document.createElement('input');pr.type='number';pr.step='0.01';pr.min='0';pr.value=op.preco;pr.placeholder='Preço';
-    pr.addEventListener('input',function(){uEditOps[i].preco=pr.value;});
+    pr.addEventListener('input',function(){uEditOps[i].preco=pr.value;salvarEstado();});
     /* Preco apagado na lista virava preco:0.00 no codigo com o campo em branco na tela. Aqui a
        recusa dos cupons NAO cabe: opcional gratis e configuracao legitima -- a propria aba ja
        emite "Sem opcional" a preco zero, e um brinde tem preco zero de proposito. O que nao pode
@@ -11569,7 +11623,7 @@ function uOpRender(){
     var lq=document.createElement('label');
     lq.style.cssText='display:flex;align-items:center;gap:6px;margin:5px 0 0;font-size:12px;font-weight:400;color:var(--tinta-suave)';
     var cq=document.createElement('input');cq.type='checkbox';cq.checked=!!op.qtd;
-    cq.addEventListener('change',function(){uEditOps[i].qtd=cq.checked;});
+    cq.addEventListener('change',function(){uEditOps[i].qtd=cq.checked;salvarEstado();});
     lq.appendChild(cq);lq.appendChild(document.createTextNode('vende por quantidade'));
     info.appendChild(lq);
     var ctrl=document.createElement('div');ctrl.className='ctrl';
@@ -11578,6 +11632,7 @@ function uOpRender(){
     li.appendChild(info);li.appendChild(ctrl);
     ul.appendChild(li);
   });
+  fcOpPendente('u-op-pendente',uEditOps,uEditIdx,(uEditIdx>=0&&uProds[uEditIdx])?uProds[uEditIdx].nome:'','produto','u-prod-salvar');
 }
 function uOpAdd(){
   var n=$('u-op-nome').value.trim();
@@ -11586,10 +11641,10 @@ function uOpAdd(){
   if(isNaN(v)||v<0)v=0;
   uEditOps.push({nome:n,preco:v,qtd:!!$('u-op-qtd').checked});
   $('u-op-nome').value='';$('u-op-preco').value='';$('u-op-qtd').checked=false;
-  uOpRender();
+  uOpRender();salvarEstado();
 }
-function uOpMove(i,d){var j=i+d;if(j<0||j>=uEditOps.length)return;var t=uEditOps[i];uEditOps[i]=uEditOps[j];uEditOps[j]=t;uOpRender();}
-function uOpDel(i){uEditOps.splice(i,1);uOpRender();}
+function uOpMove(i,d){var j=i+d;if(j<0||j>=uEditOps.length)return;var t=uEditOps[i];uEditOps[i]=uEditOps[j];uEditOps[j]=t;uOpRender();salvarEstado();}
+function uOpDel(i){uEditOps.splice(i,1);uOpRender();salvarEstado();}
 
 /* ===== produtos ===== */
 function uProdLimpar(){
@@ -11654,7 +11709,7 @@ function uProdRender(){
     info.appendChild(txt);
     var ctrl=document.createElement('div');ctrl.className='ctrl';
     [['\u2191',function(){uProdMove(i,-1);},'Subir'],['\u2193',function(){uProdMove(i,1);},'Descer'],
-     ['\u270E',function(){uProdEditar(i);},'Editar'],['\u2715',function(){uProdDel(i);},'Remover']]
+     ['\u270E',function(){uProdEditar(i);salvarEstado();},'Editar'],['\u2715',function(){uProdDel(i);},'Remover']]
       .forEach(function(b){var bt=document.createElement('button');bt.textContent=b[0];bt.title=b[2];bt.setAttribute('aria-label',b[2]);bt.addEventListener('click',b[1]);ctrl.appendChild(bt);});
     li.appendChild(info);li.appendChild(ctrl);
     ul.appendChild(li);
@@ -14440,9 +14495,10 @@ function aObCfg(){
    configuracao legitima). */
 function aOpPrecoAjustar(inp,i){
   var v=parseFloat(String(inp.value).replace(',','.'));
-  if(!isNaN(v)&&v>=0){aEditOps[i].preco=v;return false;}
+  if(!isNaN(v)&&v>=0){aEditOps[i].preco=v;salvarEstado();return false;}
   aEditOps[i].preco=0;
   inp.value='0';
+  salvarEstado();
   return true;
 }
 function aOpRender(){
@@ -14454,25 +14510,25 @@ function aOpRender(){
     var info=document.createElement('div');info.className='info';
     var n=document.createElement('input');n.type='text';n.value=op.nome;n.placeholder='Nome do opcional';
     var bom=op.nome;
-    n.addEventListener('input',function(){aEditOps[i].nome=n.value;if(n.value.replace(/^\s+|\s+$/g,''))bom=n.value;});
+    n.addEventListener('input',function(){aEditOps[i].nome=n.value;if(n.value.replace(/^\s+|\s+$/g,''))bom=n.value;salvarEstado();});
     (function(){
       function volta(){
         if(n.value.replace(/^\s+|\s+$/g,''))return;
-        n.value=bom;aEditOps[i].nome=bom;
+        n.value=bom;aEditOps[i].nome=bom;salvarEstado();
       }
       n.addEventListener('change',volta);n.addEventListener('blur',volta);
     })();
     /* Acentuado ("Preço"), diferente do molde de uOpRender (10553): texto de interface,
        norma de 01/09/2026. */
     var pr=document.createElement('input');pr.type='number';pr.step='0.01';pr.min='0';pr.value=op.preco;pr.placeholder='Preço';
-    pr.addEventListener('input',function(){aEditOps[i].preco=pr.value;});
+    pr.addEventListener('input',function(){aEditOps[i].preco=pr.value;salvarEstado();});
     pr.addEventListener('change',function(){aOpPrecoAjustar(pr,i);});
     pr.addEventListener('blur',function(){aOpPrecoAjustar(pr,i);});
     info.appendChild(n);info.appendChild(pr);
     var lq=document.createElement('label');
     lq.style.cssText='display:flex;align-items:center;gap:6px;margin:5px 0 0;font-size:12px;font-weight:400;color:var(--tinta-suave)';
     var cq=document.createElement('input');cq.type='checkbox';cq.checked=!!op.qtd;
-    cq.addEventListener('change',function(){aEditOps[i].qtd=cq.checked;});
+    cq.addEventListener('change',function(){aEditOps[i].qtd=cq.checked;salvarEstado();});
     lq.appendChild(cq);lq.appendChild(document.createTextNode('vende por quantidade'));
     info.appendChild(lq);
     var ctrl=document.createElement('div');ctrl.className='ctrl';
@@ -14481,6 +14537,7 @@ function aOpRender(){
     li.appendChild(info);li.appendChild(ctrl);
     ul.appendChild(li);
   });
+  fcOpPendente('a-op-pendente',aEditOps,aEditIdx,(aEditIdx>=0&&aPacotes[aEditIdx])?aPacotes[aEditIdx].nome:'','pacote','a-pac-salvar');
 }
 function aOpAdd(){
   var n=$('a-op-nome').value.trim();
@@ -14489,10 +14546,10 @@ function aOpAdd(){
   if(isNaN(v)||v<0)v=0;
   aEditOps.push({nome:n,preco:v,qtd:!!$('a-op-qtd').checked});
   $('a-op-nome').value='';$('a-op-preco').value='';$('a-op-qtd').checked=false;
-  aOpRender();
+  aOpRender();salvarEstado();
 }
-function aOpMove(i,d){var j=i+d;if(j<0||j>=aEditOps.length)return;var t=aEditOps[i];aEditOps[i]=aEditOps[j];aEditOps[j]=t;aOpRender();}
-function aOpDel(i){aEditOps.splice(i,1);aOpRender();}
+function aOpMove(i,d){var j=i+d;if(j<0||j>=aEditOps.length)return;var t=aEditOps[i];aEditOps[i]=aEditOps[j];aEditOps[j]=t;aOpRender();salvarEstado();}
+function aOpDel(i){aEditOps.splice(i,1);aOpRender();salvarEstado();}
 
 /* ===== cupons de desconto =====
    Copia de uCpCodAjustar/uCpRender/uCpPctErro/uCpAdd/uCpDel (10436+ antes desta tarefa), com o
@@ -14789,6 +14846,15 @@ function aPacDel(i){
    quantidade propria aqui, so os opcionais dele (aOpRender, o checkbox 'lq'). Sem isto o
    Checkout e a Mini loja escondiam o campo quando nao ha o que ele configure, e esta aba o
    deixava sempre visivel. */
+/* Molde de uEditRestaurar (Checkout), com aPacEditar/aPacLimpar no lugar. */
+function aEditRestaurar(A){
+  var buf=(A.edops||[]).map(function(o){return {nome:o.nome,preco:o.preco,qtd:!!o.qtd};});
+  var i=(typeof A.editidx==='number')?A.editidx:-1;
+  if(i>=0&&i<aPacotes.length)aPacEditar(i);
+  else aPacLimpar();
+  aEditOps=buf;
+  aOpRender();
+}
 function aQtdItens(p){
   var ops=p.ops||[],n=0,i;
   for(i=0;i<ops.length;i++)if(ops[i].qtd)n++;
@@ -14834,7 +14900,7 @@ function aPacRender(){
     var ctrl=document.createElement('div');ctrl.className='ctrl';
     [['↑',function(){aPacMove(i,-1);},'Subir',aPacVizinho(i,-1)<0],
      ['↓',function(){aPacMove(i,1);},'Descer',aPacVizinho(i,1)<0],
-     ['✎',function(){aPacEditar(i);},'Editar',false],
+     ['✎',function(){aPacEditar(i);salvarEstado();},'Editar',false],
      ['✕',function(){aPacDel(i);},'Remover',false]]
       .forEach(function(b){var bt=document.createElement('button');bt.textContent=b[0];bt.title=b[2];bt.setAttribute('aria-label',b[2]);bt.disabled=!!b[3];bt.addEventListener('click',b[1]);ctrl.appendChild(bt);});
     li.appendChild(info);li.appendChild(ctrl);
@@ -14999,6 +15065,8 @@ function aColeta(){
     pacotes:aPacotes,
     familias:aFamilias,
     cps:aCps,
+    /* O FORMULARIO INACABADO viaja junto -- ver uColeta, a primeira das tres. */
+    edops:aEditOps,editidx:aEditIdx,
     urlobrigado:aElVal('a-urlobrigado',''),
     prefixo:aElVal('a-prefixo',''),
     metodo:radio('a-metodo'),
@@ -15109,6 +15177,7 @@ function aRestaura(st){
      desta rodada (02/09/2026) nao tem nenhuma destas chaves -- o padrao de cada campo e o
      terceiro item da propria tabela, o mesmo texto que saia fixo no bloco. */
   fcTxtRestaura(A_TXT_DEFS,A);
+  aEditRestaurar(A);
   /* A migracao NUNCA fica calada (CLAUDE.md, secao "Em duvida entre descartar e preservar").
      Persistida na hora (salvarEstado()) para o aviso nao repetir na proxima carga: 'pac' e a
      ULTIMA aba do loop de restaurarEstado() (fim do array ABAS), entao todas as outras ja
@@ -18998,6 +19067,8 @@ function mColeta(){
   var r={m:{metodo:radio('m-metodo'),moeda:radio('m-moeda'),ppcor:radio('m-ppcor'),
     descpix:$('m-descpix').value,zap:radio('m-zap'),cod:$('m-cod').value,
     prods:mProds,cps:mCps,
+    /* O FORMULARIO INACABADO viaja junto -- ver uColeta, a primeira das tres. */
+    edops:mEditOps,editidx:mEditIdx,
     cols:$('m-cols').value,mob:$('m-mob').value,imgvit:$('m-imgvit').value,imgdet:$('m-imgdet').value,
     prop:radio('m-prop'),filtro:radio('m-filtro'),
     sinal:radio('m-sinal'),sinaltipo:radio('m-sinaltipo'),sinalpct:$('m-sinalpct').value,
@@ -19044,6 +19115,16 @@ function mRestaura(st){
   /* Os 55 textos configuraveis: estado gravado antes desta rodada nao tem nenhuma destas
      chaves -- o padrao de cada campo e o terceiro item de M_TXT_DEFS. */
   fcTxtRestaura(M_TXT_DEFS,M);
+  mEditRestaurar(M);
+}
+/* Molde de uEditRestaurar (Checkout), com mProdEditar/mProdLimpar no lugar. */
+function mEditRestaurar(M){
+  var buf=(M.edops||[]).map(function(o){return {nome:o.nome,preco:o.preco,qtd:!!o.qtd};});
+  var i=(typeof M.editidx==='number')?M.editidx:-1;
+  if(i>=0&&i<mProds.length)mProdEditar(i);
+  else mProdLimpar();
+  mEditOps=buf;
+  mOpRender();
 }
 function mPresetResumo(v){
   var M=(v&&v.m)||{},n=(M.prods||[]).length,c=(M.cps||[]).length;
@@ -19096,9 +19177,10 @@ function mCatsRender(){
 /* ===== opcionais do produto em edicao ===== */
 function mOpPrecoAjustar(inp,i){
   var v=parseFloat(String(inp.value).replace(',','.'));
-  if(!isNaN(v)&&v>=0){mEditOps[i].preco=v;return false;}
+  if(!isNaN(v)&&v>=0){mEditOps[i].preco=v;salvarEstado();return false;}
   mEditOps[i].preco=0;
   inp.value='0';
+  salvarEstado();
   return true;
 }
 function mOpRender(){
@@ -19116,23 +19198,23 @@ function mOpRender(){
        devolver: o campo se corrige A VISTA no change/blur, como o preco, em vez de recusar.
        Nunca no 'input' -- corrigir a cada tecla impediria apagar para redigitar. */
     var bom=op.nome;
-    n.addEventListener('input',function(){mEditOps[i].nome=n.value;if(n.value.replace(/^\s+|\s+$/g,''))bom=n.value;});
+    n.addEventListener('input',function(){mEditOps[i].nome=n.value;if(n.value.replace(/^\s+|\s+$/g,''))bom=n.value;salvarEstado();});
     (function(){
       function volta(){
         if(n.value.replace(/^\s+|\s+$/g,''))return;
-        n.value=bom;mEditOps[i].nome=bom;
+        n.value=bom;mEditOps[i].nome=bom;salvarEstado();
       }
       n.addEventListener('change',volta);n.addEventListener('blur',volta);
     })();
     var pr=document.createElement('input');pr.type='number';pr.step='0.01';pr.min='0';pr.value=op.preco;pr.placeholder='Preço';
-    pr.addEventListener('input',function(){mEditOps[i].preco=pr.value;});
+    pr.addEventListener('input',function(){mEditOps[i].preco=pr.value;salvarEstado();});
     pr.addEventListener('change',function(){mOpPrecoAjustar(pr,i);});
     pr.addEventListener('blur',function(){mOpPrecoAjustar(pr,i);});
     info.appendChild(n);info.appendChild(pr);
     var lq=document.createElement('label');
     lq.style.cssText='display:flex;align-items:center;gap:6px;margin:5px 0 0;font-size:12px;font-weight:400;color:var(--tinta-suave)';
     var cq=document.createElement('input');cq.type='checkbox';cq.checked=!!op.qtd;
-    cq.addEventListener('change',function(){mEditOps[i].qtd=cq.checked;});
+    cq.addEventListener('change',function(){mEditOps[i].qtd=cq.checked;salvarEstado();});
     lq.appendChild(cq);lq.appendChild(document.createTextNode('vende por quantidade'));
     info.appendChild(lq);
     var ctrl=document.createElement('div');ctrl.className='ctrl';
@@ -19141,6 +19223,7 @@ function mOpRender(){
     li.appendChild(info);li.appendChild(ctrl);
     ul.appendChild(li);
   });
+  fcOpPendente('m-op-pendente',mEditOps,mEditIdx,(mEditIdx>=0&&mProds[mEditIdx])?mProds[mEditIdx].nome:'','produto','m-prod-salvar');
 }
 function mOpAdd(){
   var n=$('m-op-nome').value.trim();
@@ -19149,10 +19232,10 @@ function mOpAdd(){
   if(isNaN(v)||v<0)v=0;
   mEditOps.push({nome:n,preco:v,qtd:!!$('m-op-qtd').checked});
   $('m-op-nome').value='';$('m-op-preco').value='';$('m-op-qtd').checked=false;
-  mOpRender();
+  mOpRender();salvarEstado();
 }
-function mOpMove(i,d){var j=i+d;if(j<0||j>=mEditOps.length)return;var t=mEditOps[i];mEditOps[i]=mEditOps[j];mEditOps[j]=t;mOpRender();}
-function mOpDel(i){mEditOps.splice(i,1);mOpRender();}
+function mOpMove(i,d){var j=i+d;if(j<0||j>=mEditOps.length)return;var t=mEditOps[i];mEditOps[i]=mEditOps[j];mEditOps[j]=t;mOpRender();salvarEstado();}
+function mOpDel(i){mEditOps.splice(i,1);mOpRender();salvarEstado();}
 
 /* ===== produtos ===== */
 function mProdLimpar(){
@@ -19330,7 +19413,7 @@ function mProdRender(){
     info.appendChild(t);info.appendChild(url);info.appendChild(cat);info.appendChild(ops);
     var ctrl=document.createElement('div');ctrl.className='ctrl';
     [['\u2191',function(){mProdMove(i,-1);},'Subir'],['\u2193',function(){mProdMove(i,1);},'Descer'],
-     ['\u270E',function(){mProdEditar(i);},'Editar'],['\u2715',function(){mProdDel(i);},'Remover']]
+     ['\u270E',function(){mProdEditar(i);salvarEstado();},'Editar'],['\u2715',function(){mProdDel(i);},'Remover']]
       .forEach(function(b){var bt=document.createElement('button');bt.textContent=b[0];bt.title=b[2];bt.setAttribute('aria-label',b[2]);bt.addEventListener('click',b[1]);ctrl.appendChild(bt);});
     li.appendChild(img);li.appendChild(info);li.appendChild(ctrl);
     ul.appendChild(li);
@@ -21779,7 +21862,7 @@ prep('Agendamento TidyCal','tidy',function(){
 prep('Checkout','uni',function(){
   liga('u-op-add',uOpAdd);
   liga('u-prod-salvar',uProdSalvar);
-  liga('u-prod-cancelar',uProdLimpar);
+  liga('u-prod-cancelar',function(){uProdLimpar();salvarEstado();});
   liga('u-cp-add',uCpAdd);
   liga('u-gerar',uGerar);
   liga('u-atualizar',function(){uPreview(true);});
@@ -21866,7 +21949,7 @@ prep('Link de cobrança','cob',function(){
 prep('Mini loja','loja',function(){
   liga('m-op-add',mOpAdd);
   liga('m-prod-salvar',mProdSalvar);
-  liga('m-prod-cancelar',mProdLimpar);
+  liga('m-prod-cancelar',function(){mProdLimpar();salvarEstado();});
   liga('m-prod-limpar',mProdListaLimpar);
   liga('m-cp-add',mCpAdd);
   liga('m-gerar',mGerar);
@@ -22086,7 +22169,7 @@ prep('Agendamento por pacote','pac',function(){
      tecla e impediria digitar. Mesmo padrao da chave Pix do painel Identidade. */
   (function(){var el=$('a-pcod');if(el){el.addEventListener('change',aPcodAjustar);el.addEventListener('blur',aPcodAjustar);}})();
   liga('a-pac-salvar',aPacSalvar);
-  liga('a-pac-cancelar',aPacLimpar);
+  liga('a-pac-cancelar',function(){aPacLimpar();salvarEstado();});
   liga('a-ptestar',aPacTestar);
   liga('a-op-add',aOpAdd);
   liga('a-fam-add',aFamAdd);
