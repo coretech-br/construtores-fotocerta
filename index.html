@@ -1313,7 +1313,7 @@
 </div>
 
 <div class="painel" id="painel-tidy" role="tabpanel">
-  <p class="descricao"><b>Agendamento TidyCal</b> — gera o código do calendário de agendamento com expansão e recolhimento automáticos quando o formulário de reserva abre e fecha (sem barra de rolagem interna no modal), com alturas calibráveis separadamente para computador e celular. Suporta as duas arquiteturas: componente direto na página final, ou página intermediária embutida por iframe na hospedeira — neste caso gera as três peças necessárias (componente do TidyCal, Tag Body da intermediária e iframe da hospedeira).</p>
+  <p class="descricao"><b>Agendamento TidyCal</b> — gera o código do calendário de agendamento com expansão automática quando o formulário de reserva abre (sem barra de rolagem interna no modal), de duas formas à escolha: <b>medindo</b> o formulário, para o quadro crescer só o necessário, ou pela <b>altura calibrada</b>, separadamente para computador e celular. Suporta as duas arquiteturas: componente direto na página final, ou página intermediária embutida por iframe na hospedeira — neste caso gera as três peças necessárias (componente do TidyCal, Tag Body da intermediária e iframe da hospedeira).</p>
 
   <div class="secao primeira"><span class="secao-n">1</span> Configuração do calendário</div>
   <div class="grade">
@@ -1325,6 +1325,13 @@
       <div class="acoes"><button type="button" class="botao mini claro" id="t-testar">Abrir a página de teste</button></div>
       <p class="ajuda"><b>Cole o endereço completo</b>, do jeito que o TidyCal mostra — inclusive quando ele está em <b>domínio próprio</b> (ex.: <code>https://agendamento.seudominio.com.br/ensaio-1-hora</code>). Digitar só o caminho também vale: ele vira um endereço em <code>https://tidycal.com/</code>, e o campo se corrige sozinho ao sair dele.</p>
       <p class="ajuda"><b>Antes de gerar:</b> o botão abre numa aba nova <b>exatamente o endereço configurado</b>. É a mesma página que o código embute — se ela não existir aqui, também não vai existir no site publicado. Descobrir agora custa um clique; descobrir depois custa publicar, testar e voltar. <b>Conferir virou obrigação, e não um extra:</b> o domínio deixou de ser fixo, então um erro de digitação no meio dele apontaria o calendário para outro site — e só você sabe qual é o seu.</p>
+      <label>Espaço para o formulário de reserva <small>(o que abre quando o cliente clica num horário)</small></label>
+      <div class="radios">
+      <label><input type="radio" name="t-medir" value="sim"><span>Medir o formulário <small>(o quadro cresce só o necessário)</small></span></label>
+      <label><input type="radio" name="t-medir" value="nao" checked><span>Abrir espaço pela altura calibrada</span></label>
+      </div>
+      <p class="ajuda"><b>É uma troca, e os dois lados foram medidos em 03/09/2026 contra o TidyCal de verdade.</b> <b>Medindo o formulário:</b> o quadro fica com <b>764 px</b> em repouso e vai para <b>1662 px</b> quando o formulário abre — exatamente o que ele precisa. O preço é um <b>vão vazio de cerca de 205 px</b> embaixo do calendário <b>em repouso</b>, no computador: a lista de horários do TidyCal rola por dentro, e esta medição conta o conteúdo inteiro dela — então o vão cresce junto com o número de horários. No celular esse preço é de <b>1 px</b>. <b>Abrindo espaço pela altura calibrada:</b> o quadro fica com <b>559 px</b> em repouso, sem vão nenhum, mas o formulário é <b>invisível</b> para a medição — quem abre espaço são as duas alturas abaixo, e são elas que precisam caber nele. Se ficarem curtas, aparece <b>barra de rolagem dentro do calendário</b>; se sobrarem, é vão vazio. <b>A altura calibrada é o padrão, e a razão é medida — não cautela.</b> Medir <i>deveria</i> ser melhor, porque dispensa o número escrito à mão e acompanha o formulário se ele crescer. Mas em 03/09/2026 a mesma página foi carregada quatro vezes seguidas e a altura medida foi aplicada em <b>uma</b> delas: nas outras três o quadro ficou nos 700 px iniciais. A biblioteca do próprio TidyCal estava no comando nas quatro, e recebeu as mesmas duas mensagens em todas — ou seja, <b>não é o nosso código competindo com o deles</b>, é a medição por este método que não é confiável. Defeito que aparece em uma carga de quatro é pior que uma altura fixa: funciona quando você testa e falha quando o cliente usa. <b>O campo fica aqui para você experimentar</b> na sua página — se na sua conta ele se mostrar estável, é a escolha melhor.</p><p class="ajuda"><b>O que vale para as duas escolhas, e é bom saber antes:</b> depois que o cliente abre o formulário de reserva, <b>o quadro não encolhe sozinho</b> — o TidyCal não avisa quando o formulário fecha, então nem a medição nem o recolhimento da altura calibrada chegam a acontecer, e o espaço fica até a página ser recarregada. Isso não é desta escolha: já era assim, e é igual nos dois lados. O que muda é <b>quanto</b> fica sobrando — cerca de <b>1662 px</b> medindo, contra <b>2350 px</b> pela altura calibrada de fábrica.</p>
+      <div id="t-alt-campos">
       <label>Tipo de agendamento <small>(preenche as duas alturas abaixo)</small></label>
       <div class="radios">
       <label><input type="radio" name="t-preset" value="curto"><span>Conversa rápida <small>(só data, hora e nome)</small></span></label>
@@ -1339,6 +1346,13 @@
       <input type="number" id="t-mob" value="2700" min="500" max="20000" step="50">
       <label for="t-larg">Largura de corte do modo celular <small>(pixels, de 320 a 1024; telas até esse tamanho usam a altura mobile — 700 é o valor validado em produção)</small></label>
       <input type="number" id="t-larg" value="700" min="320" max="1024" step="10">
+      <label>Quando abrir o espaço calibrado</label>
+      <div class="radios">
+      <label><input type="radio" name="t-sempre" value="nao" checked><span>Só quando o formulário abre</span></label>
+      <label><input type="radio" name="t-sempre" value="sim"><span>Sempre, desde que a página carrega</span></label>
+      </div>
+      <p class="ajuda">O normal é o calendário ocupar a altura natural dele (cerca de <b>559 px</b> no computador) e crescer só no instante em que o formulário abre. <b>Sempre</b> deixa o quadro na altura calibrada acima o tempo todo: com os 2350 px de fábrica, são quase <b>1800 px de vão vazio</b> embaixo do calendário em <b>toda</b> visita, mesmo em quem nunca clicar num horário. Ligue <b>apenas</b> se, na sua página publicada, o modal de confirmação do TidyCal aparecer cortado — é o sinal de que o aviso de abertura não está chegando ao bloco. Com o calendário <b>medindo o formulário</b> esta escolha não faz nada, e por isso ela nem aparece: a altura vem medida, e não há espaço calibrado para abrir.</p>
+      </div>
       </fieldset>
     </div>
     <div>
@@ -3724,6 +3738,13 @@
       </fieldset>
       <fieldset>
         <legend>Medidas: calendário e cartões</legend>
+        <label>Espaço para o formulário de reserva <small>(o que abre quando o cliente clica num horário)</small></label>
+        <div class="radios">
+        <label><input type="radio" name="a-medir" value="sim"><span>Medir o formulário <small>(o quadro cresce só o necessário)</small></span></label>
+        <label><input type="radio" name="a-medir" value="nao" checked><span>Abrir espaço pela altura calibrada</span></label>
+        </div>
+        <p class="ajuda"><b>É uma troca, e os dois lados foram medidos em 03/09/2026 contra o TidyCal de verdade.</b> <b>Medindo o formulário:</b> o quadro fica com <b>764 px</b> em repouso e vai para <b>1662 px</b> quando o formulário abre — exatamente o que ele precisa. O preço é um <b>vão vazio de cerca de 205 px</b> embaixo do calendário <b>em repouso</b>, no computador: a lista de horários do TidyCal rola por dentro, e esta medição conta o conteúdo inteiro dela — então o vão cresce junto com o número de horários. No celular esse preço é de <b>1 px</b>. <b>Abrindo espaço pela altura calibrada:</b> o quadro fica com <b>559 px</b> em repouso, sem vão nenhum, mas o formulário é <b>invisível</b> para a medição — quem abre espaço são as duas alturas abaixo, e são elas que precisam caber nele. Se ficarem curtas, aparece <b>barra de rolagem dentro do calendário</b>; se sobrarem, é vão vazio. <b>A altura calibrada é o padrão, e a razão é medida — não cautela.</b> Medir <i>deveria</i> ser melhor, porque dispensa o número escrito à mão e acompanha o formulário se ele crescer. Mas em 03/09/2026 a mesma página foi carregada quatro vezes seguidas e a altura medida foi aplicada em <b>uma</b> delas: nas outras três o quadro ficou nos 700 px iniciais. A biblioteca do próprio TidyCal estava no comando nas quatro, e recebeu as mesmas duas mensagens em todas — ou seja, <b>não é o nosso código competindo com o deles</b>, é a medição por este método que não é confiável. Defeito que aparece em uma carga de quatro é pior que uma altura fixa: funciona quando você testa e falha quando o cliente usa. <b>O campo fica aqui para você experimentar</b> na sua página — se na sua conta ele se mostrar estável, é a escolha melhor.</p><p class="ajuda"><b>O que vale para as duas escolhas, e é bom saber antes:</b> depois que o cliente abre o formulário de reserva, <b>o quadro não encolhe sozinho</b> — o TidyCal não avisa quando o formulário fecha, então nem a medição nem o recolhimento da altura calibrada chegam a acontecer, e o espaço fica até a página ser recarregada. Isso não é desta escolha: já era assim, e é igual nos dois lados. O que muda é <b>quanto</b> fica sobrando — cerca de <b>1662 px</b> medindo, contra <b>2350 px</b> pela altura calibrada de fábrica.</p>
+        <div id="a-alt-campos">
         <p class="ajuda">Medidas calibradas em produção, com o formulário do TidyCal aberto. São o mesmo par usado na aba Agendamento TidyCal — não precisam mudar a não ser que o seu formulário seja diferente do padrão.</p>
         <label for="a-altdesk">Altura com o modal aberto — desktop <small>(pixels)</small></label>
         <input type="number" id="a-altdesk" value="2350" min="800" max="6000" step="50">
@@ -3731,9 +3752,16 @@
         <input type="number" id="a-altmob" value="2700" min="800" max="6000" step="50">
         <label for="a-largmob">Largura de corte do modo celular <small>(pixels, de 320 a 1024)</small></label>
         <input type="number" id="a-largmob" value="700" min="320" max="1024" step="10">
+        <label>Quando abrir o espaço calibrado</label>
+        <div class="radios">
+        <label><input type="radio" name="a-sempre" value="nao" checked><span>Só quando o formulário abre</span></label>
+        <label><input type="radio" name="a-sempre" value="sim"><span>Sempre, desde que a página carrega</span></label>
+        </div>
+        <p class="ajuda">O normal é o calendário ocupar a altura natural dele (cerca de <b>559 px</b> no computador) e crescer só no instante em que o formulário abre. <b>Sempre</b> deixa o quadro na altura calibrada acima o tempo todo: com os 2350 px de fábrica, são quase <b>1800 px de vão vazio</b> embaixo do calendário em <b>toda</b> visita, mesmo em quem nunca clicar num horário. Ligue <b>apenas</b> se, na sua página publicada, o modal de confirmação do TidyCal aparecer cortado — é o sinal de que o aviso de abertura não está chegando ao bloco. Com o calendário <b>medindo o formulário</b> esta escolha não faz nada, e por isso ela nem aparece: a altura vem medida, e não há espaço calibrado para abrir.</p>
+        </div>
         <label for="a-largcards">Largura de corte das linhas compactas <small>(pixels, de 320 a 1024)</small></label>
         <input type="number" id="a-largcards" value="640" min="320" max="1024" step="10">
-        <p class="ajuda">Abaixo desta largura os cartões da vitrine viram <b>linhas compactas</b> (nome e duração à esquerda, preço à direita, sem a linha do que inclui). São <b>duas medidas diferentes</b>: a de cima decide a altura do calendário e é lida em JavaScript; esta decide o formato dos cartões e é lida em CSS. Amarrar as duas ao mesmo número faria uma calibragem de altura reformatar a vitrine inteira, sem aviso.</p>
+        <p class="ajuda">Abaixo desta largura os cartões da vitrine viram <b>linhas compactas</b> (nome e duração à esquerda, preço à direita, sem a linha do que inclui). São <b>duas medidas diferentes</b>: a de cima decide a altura do calendário e é lida em JavaScript; esta decide o formato dos cartões e é lida em CSS. Amarrar as duas ao mesmo número faria uma calibragem de altura reformatar a vitrine inteira, sem aviso. É por isso que <b>esta</b> continua aparecendo quando o calendário mede o formulário: ela é da vitrine, não do calendário.</p>
       </fieldset>
     </div>
   </div>
@@ -3927,8 +3955,8 @@
    QUEM IMPEDE QUE ELE MINTA: scripts/conferir-versoes.sh, que recusa index.html
    alterado sem a versao mudar junto -- a mesma disciplina do fc-compartilhado.js,
    e pela mesma razao: carimbo que ninguem confere e o defeito de amanha. */
-var FC_VERSAO='2026-09-03d';
-var FC_PUBLICADO='2026-09-03 04:20';   /* America/Sao_Paulo -- escrito pelo carimbador */
+var FC_VERSAO='2026-09-03e';
+var FC_PUBLICADO='2026-09-03 13:16';   /* America/Sao_Paulo -- escrito pelo carimbador */
 (function(){
   var el=document.getElementById('fc-versao');
   if(!el) return;
@@ -5167,7 +5195,7 @@ var ABAS=[
   {id:'tidy', nome:'Agendamento TidyCal', chaves:['t'],         coleta:tColeta,restaura:tRestaura,gerar:tGerar,
    pref:'t',fora:[],resumo:tPresetResumo,redesenhar:tPresetDepois,antesDeSalvar:tPresetAntes,
    exemplo:'ex.: Natal 2026 - ensaio temático',
-   guarda:'tudo o que está configurado nesta aba — o endereço do agendamento no TidyCal, as duas alturas, a largura de corte, o modo (direto ou embutido), o endereço da página intermediária, a altura inicial do iframe e os <b>textos</b> da seção 3.'},
+   guarda:'tudo o que está configurado nesta aba — o endereço do agendamento no TidyCal, como o quadro abre espaço para o formulário de reserva (medindo ou pela altura calibrada), as duas alturas, a largura de corte, quando abrir o espaço calibrado, o modo (direto ou embutido), o endereço da página intermediária, a altura inicial do iframe e os <b>textos</b> da seção 3.'},
   /* 'nome' e TEXTO DE INTERFACE: aparece na barra vermelha de falhas, nas perguntas do preset
      geral e no interruptor de cada aba. Por isso vai com acento, como manda a convencao do
      arquivo -- e por isso os prep() desta aba usam exatamente a mesma grafia, senao a barra
@@ -5235,7 +5263,7 @@ var ABAS=[
            ['a.pacotes.ops',{nome:'',preco:0,qtd:false},'nome'],
            ['a.cps',{codigo:'',tipo:'pct_total',valor:0,validade:'',minimo:''},'codigo']],
    exemplo:'ex.: Ensaios 2026 - pacotes',
-   guarda:'tudo o que está configurado nesta aba — a <b>forma de pagamento</b> e a cor dos botões do PayPal, as <b>famílias de pacotes</b> e a família de cada pacote, os pacotes (código, nome, duração, preço, o que inclui, o endereço do TidyCal e os <b>itens opcionais</b> de cada um), os <b>cupons</b>, o endereço da página de obrigado, o prefixo do identificador, o prazo da reserva, o desconto no Pix, as parcelas, quais <b>marcadores da página de obrigado</b> viajam e o texto reserva de cada um, as alturas do calendário, a largura das linhas compactas, textos e cores. Aplicar um preset <b>substitui as famílias que estão na tela</b> e <b>esvazia o formulário de cadastro</b>: ele é a fotografia da aba inteira.'}
+   guarda:'tudo o que está configurado nesta aba — a <b>forma de pagamento</b> e a cor dos botões do PayPal, as <b>famílias de pacotes</b> e a família de cada pacote, os pacotes (código, nome, duração, preço, o que inclui, o endereço do TidyCal e os <b>itens opcionais</b> de cada um), os <b>cupons</b>, o endereço da página de obrigado, o prefixo do identificador, o prazo da reserva, o desconto no Pix, as parcelas, quais <b>marcadores da página de obrigado</b> viajam e o texto reserva de cada um, como o quadro abre espaço para o formulário de reserva (medindo ou pela altura calibrada), as alturas do calendário, quando abrir o espaço calibrado, a largura das linhas compactas, textos e cores. Aplicar um preset <b>substitui as famílias que estão na tela</b> e <b>esvazia o formulário de cadastro</b>: ele é a fotografia da aba inteira.'}
 ];
 var fcFrag={};       /* ultimo pedaco bom de cada aba, para nao apagar o que a aba quebrada tinha */
 var fcSoLeitura={};  /* abas que falharam ao restaurar: param de coletar do DOM ate recarregar */
@@ -11143,6 +11171,7 @@ function tColeta(){
        e e outra coisa (o endereco da pagina intermediaria), por isso o nome 'cal'. */
     t:{cal:$('t-path').value,desk:$('t-desk').value,mob:$('t-mob').value,larg:$('t-larg').value,
       arq:radio('t-arq'),url:$('t-url').value,alt0:$('t-alt0').value,preset:radio('t-preset'),
+      medir:radio('t-medir'),sempre:radio('t-sempre'),
       obusar:radio('t-ob-usar'),oburl:$('t-ob-url').value,obfmt:radio('t-ob-fmt'),
       obvars:tObMarcadas().join(','),
       obfb:T_OB_VARS.map(function(v){return $('t-ob-fb-'+v.id).value;}).join('\u0001')}
@@ -11177,6 +11206,20 @@ function tRestaura(st){
      deixar o radio no padrao do HTML (que diria "formulario padrao" sobre alturas que podem
      ser outras), a marca e deduzida das alturas restauradas. */
   setRadio('t-preset',st.t.preset||tPresetInferir());
+  /* O INTERRUPTOR DE MEDICAO (03/09/2026). Estado gravado por versao anterior desta ferramenta
+     NAO tem a chave 'medir' -- e o ausente cai no padrao de fabrica, que passou a ser LIGADO.
+     A comparacao e escrita ao contrario de 'obusar' logo abaixo, e de proposito: la o padrao e
+     NAO e a linha pergunta se veio 'sim'; aqui o padrao e SIM, entao a linha pergunta se veio
+     'nao'. Nos dois casos quem manda na ausencia e o padrao daquele campo, e nao o do outro.
+     Sem alerta nenhum: nada foi convertido, nada se perdeu,
+     e as duas alturas continuam gravadas do jeito que estavam (o campo delas so fica
+     escondido, ver tArqToggle). */
+  setRadio('t-medir',st.t.medir==='nao'?'nao':'sim');
+  /* ALTURA_SEMPRE virou campo na mesma rodada, e pelo mesmo motivo: ele nascia fixo no bloco e
+     o proprio comentario mandava o operador edita-lo a mao -- escolha que se perde na proxima
+     geracao, sem aviso. Aqui o padrao de fabrica e DESLIGADO, que e o valor que o bloco ja
+     trazia, entao estado gravado sem a chave continua gerando exatamente o mesmo bloco. */
+  setRadio('t-sempre',st.t.sempre==='sim'?'sim':'nao');
   /* Estado gravado antes desta versao nao traz nenhum campo da pagina de obrigado. O ausente
      vale o padrao de fabrica -- e o padrao de 'obusar' e NAO, para quem nunca usou o recurso
      continuar vendo a aba exatamente como ela era. */
@@ -11214,7 +11257,12 @@ function tRestaura(st){
    salvas pelo operador. */
 function tPresetResumo(v){
   var T=v.t||{};
-  var t=(T.arq==='embutida'?'embutido na intermediária':'direto na página')+' — '+T.desk+'/'+T.mob+' px, corte '+T.larg+' px';
+  /* O resumo diz qual protecao esta ATIVA, e nao as duas: com a medicao ligada as alturas
+     calibradas nao sao usadas, e mostra-las faria o resumo descrever um numero que o bloco
+     ignora. Preset gravado antes de 03/09/2026 nao tem a chave, e cai no padrao (ligado), que
+     e o mesmo que o restaura da aba faz com ele. */
+  var t=(T.arq==='embutida'?'embutido na intermediária':'direto na página')+' — '+
+    (T.medir==='nao'?(T.desk+'/'+T.mob+' px, corte '+T.larg+' px'):'mede o formulário');
   if(T.obusar==='sim')t+=' + página de obrigado';
   return t;
 }
@@ -11420,11 +11468,26 @@ function fcTidyRecusa(v){
 
    Com o metodo de fabrica ('bodyOffset', o que o embed.js deles usa) o formulario e invisivel
    para a medicao: ele e sobreposicao, e a altura anunciada nao muda (511 antes, 511 depois).
-   Com 'lowestElement' o formulario APARECE, e some ao fechar:
+   Com 'lowestElement' o formulario APARECE:
 
-       repouso 764  ->  formulario aberto 1662  ->  fechado 764     (tidycal.com, 1100px)
-       repouso 716  ->  formulario aberto 1128  ->  fechado 716     (dominio proprio, 1100px)
-       repouso 1521 ->  formulario aberto 1747  ->  fechado 1521    (tidycal.com, 375px)
+       repouso 764  ->  formulario aberto 1662     (tidycal.com, 1100px)
+       repouso 716  ->  formulario aberto 1128     (dominio proprio, 1100px)
+       repouso 1521 ->  formulario aberto 1747     (tidycal.com, 375px)
+
+   O QUE A REMEDICAO DO MESMO DIA CORRIGIU, e vale registrar porque a primeira leitura dizia o
+   contrario ("fechado 764"): FECHANDO o formulario pelo X do modal, dentro do arnes, o quadro
+   NAO encolheu -- nem com 'lowestElement' nem com 'bodyOffset'. A razao esta medida elemento a
+   elemento: o conteudo do calendario volta mesmo (o elemento mais baixo COM ALTURA cai de 1662
+   para ~869), mas a pagina do TidyCal tem um '.alert-float-container' que fica esticado ate a
+   maior altura que ela ja teve, e 'lowestElement' conta esse elemento -- entao a medida do
+   filho continua 1662, ele nao tem o que anunciar, e o bloco nunca fica sabendo que o modal
+   fechou. Com 'bodyOffset' o filho tambem nao anuncia nada (a altura do body e 559 nos dois
+   estados), entao o recolher() calibrado tambem nao roda e o min-height de 2350 fica.
+   ISSO NAO E DEFEITO DESTE INTERRUPTOR -- e o mesmo nos dois valores, e ja era assim antes
+   dele. O que ele muda e o TAMANHO do que sobra depois de o cliente abrir o formulario:
+   1662px medindo contra 2350px calibrado. Consertar de verdade exige um jeito de saber que o
+   modal fechou, e o calendario nao da nenhum; tentar adivinhar pelo proprio sinal de
+   'mutationObserver' foi medido nesta rodada e nao funciona, porque sinal nenhum chega.
 
    O PRECO, medido no mesmo dia: em repouso, no computador, 'lowestElement' anuncia 764 onde
    'bodyOffset' anuncia 511. A diferenca nao e erro -- e a lista de horarios do TidyCal, que
@@ -11433,10 +11496,27 @@ function fcTidyRecusa(v){
    de vao vazio embaixo, e esse vao cresce com o numero de horarios. No CELULAR o preco e de
    1px (868 contra 867), porque ali a lista nao e container de rolagem.
 
-   Por isso 'lowestElement' entrou como INTERRUPTOR (MEDIR_FORMULARIO), e nao como padrao:
-   liga-lo troca uma protecao por outra -- a altura calibrada deixa de ser necessaria, porque
-   a altura do formulario passa a ser MEDIDA. O padrao continua sendo o comportamento provado
-   em producao desde agosto.
+   'lowestElement' e um INTERRUPTOR (MEDIR_FORMULARIO), porque liga-lo troca uma protecao por
+   outra -- a altura calibrada deixa de ser necessaria, porque a altura do formulario passa a
+   ser MEDIDA -- e as duas nao somam.
+   DESDE 03/09/2026 ELE NASCE LIGADO, e por decisao do dono, medida e nao suposta: o vao em
+   repouso (cerca de 200px no computador -- 205 na ultima medicao, e o numero varia com quantos
+   horarios o calendario mostra; 1px no celular) incomoda menos do que uma barra de rolagem
+   DENTRO do calendario, que e o que aparece quando a altura calibrada fica curta -- e ligado
+   o quadro fica imune ao formulario crescer, porque ele deixa de ser um numero escrito a mao.
+   Para comparar, com o formulario aberto: o desligado abre os 2350 calibrados; o ligado acerta
+   em 1662, que e o que o formulario de fato ocupa.
+   E O INTERRUPTOR VIROU CAMPO DAS DUAS ABAS ('t-medir' e 'a-medir'), em vez de uma linha para
+   o dono editar no bloco depois de gerar: bloco editado a mao se perde na proxima geracao.
+   Quem escolhe 'Abrir espaco pela altura calibrada' continua vendo -- e configurando -- as
+   alturas; quem escolhe 'Medir o formulario' nao ve, porque elas nao seriam usadas.
+   ALTURA_SEMPRE SEGUIU O MESMO CAMINHO, na mesma rodada e pela mesma razao ('t-sempre' e
+   'a-sempre'): ele tambem nascia fixo no bloco com um comentario mandando o operador edita-lo
+   a mao. O padrao dele NAO mudou -- continua desligado, que e o valor que o bloco ja trazia.
+   Ele mora dentro do mesmo grupo escondido das alturas, e isso e MEDIDO, nao suposto: com
+   MEDIR_FORMULARIO ligado, expandir() volta na primeira linha, entao ALTURA_SEMPRE nao tem
+   efeito nenhum -- inclusive quando a biblioteca do TidyCal nao carrega, porque o aperto de
+   mao proprio manda o MESMO SIZER_METODO e portanto tambem mede o formulario.
 
    OS OUTROS METODOS FORAM TESTADOS NA PRATICA, e nao pela documentacao: 'max' e
    'documentElementScroll' incluem a altura da JANELA do iframe e entram em realimentacao --
@@ -11459,8 +11539,15 @@ function fcTidyRecusa(v){
    'medida' dentro do ouvinte de 'message'. */
 function fcTidyCalSrc(op){
   var i=op.ind||'', j=op.indOuvinte||'', c='', o='';
-  o+=i+'var ALTURA_SEMPRE=false;   /* true = o calendario fica sempre na altura maxima. Ligue APENAS se, na sua pagina publicada, o modal de confirmacao do TidyCal aparecer cortado -- o preco de ligar e um vao vazio embaixo do calendario. */\n';
-  o+=i+"var MEDIR_FORMULARIO=false;  /* true = o calendario MEDE o formulario de reserva em vez de abrir espaco com as alturas calibradas abaixo (que passam a nao ser usadas). Medido em 03/09/2026: com isto ligado o quadro vai de 764px para 1662px ao abrir o formulario e volta ao fechar, sem sobra. O preco, no computador, e cerca de 253px de vao vazio EM REPOUSO -- a lista de horarios do TidyCal rola por dentro, e esta medida conta o conteudo inteiro dela. No celular o preco e de 1px. */\n";
+  /* O PADRAO E LIGADO: so 'medir:false' desliga. Quem chama sao as duas abas, e as duas
+     passam o valor do proprio campo -- este default existe para o dia em que uma terceira
+     chamada aparecer sem passar nada, e nunca para ser o caminho normal. */
+  var med=(op.medir===false)?'false':'true';
+  /* ALTURA_SEMPRE nasce DESLIGADO -- o valor que o bloco ja trazia antes de o interruptor
+     virar campo. So 'sempre:true' liga. */
+  var smp=(op.sempre===true)?'true':'false';
+  o+=i+'var ALTURA_SEMPRE='+smp+';   /* true = o calendario fica sempre na altura maxima (ALTURA_DESKTOP/ALTURA_MOBILE), e nao so no instante em que o formulario abre. Ligue APENAS se, na sua pagina publicada, o modal de confirmacao do TidyCal aparecer cortado -- o preco de ligar e um vao vazio embaixo do calendario o tempo todo, em toda visita. So tem efeito com MEDIR_FORMULARIO desligado: com ele ligado a altura vem MEDIDA e expandir() volta na primeira linha, entao esta opcao nao faz nada. */\n';
+  o+=i+'var MEDIR_FORMULARIO='+med+';  /* true = o calendario MEDE o formulario de reserva: o quadro cresce so o necessario quando ele abre, e as alturas calibradas abaixo deixam de ser usadas. false = o formulario e INVISIVEL para a medicao, e quem abre espaco sao aquelas alturas. Medido em 03/09/2026, no computador: ligado, o quadro vai de 764px em repouso para 1662px com o formulario aberto; desligado, fica em 559px em repouso e continua em 559 com o formulario aberto -- por isso ele precisa dos 2350px calibrados. O preco de ligar e cerca de 205px de vao vazio EM REPOUSO no computador, porque a lista de horarios do TidyCal rola por dentro e esta medida conta o conteudo inteiro dela; no celular o preco e de 1px. DEPOIS QUE O CLIENTE ABRE O FORMULARIO O QUADRO NAO ENCOLHE SOZINHO, e isso vale para os DOIS valores: medido, o TidyCal nao anuncia altura nenhuma ao fechar o formulario, entao nem esta medicao nem o recolhimento calibrado chegam a acontecer. O que muda e o tamanho do que sobra na pagina depois disso -- 1662px com true, 2350px com false. */\n';
   c+=i+'/* ===== a altura do calendario: a biblioteca deles quando ela carrega, o aperto de mao\n';
   c+=i+'   proprio quando ela nao carrega. Os campos do aperto de mao, na ordem, sao os do\n';
   c+=i+'   proprio embed.js do TidyCal: bodyMarginV1, sizeWidth, log, interval,\n';
@@ -11628,6 +11715,13 @@ function tArqToggle(){
   $('t-emb').style.display=emb?'block':'none';
   $('t-s2').style.display=(emb&&$('t-out2').value)?'block':'none';
   $('t-s3').style.display=(emb&&$('t-out3').value)?'block':'none';
+  /* As alturas calibradas -- e o interruptor de quando abri-las -- so aparecem quando SAO
+     USADAS, mesmo criterio de 'a-pp-campos' e 'a-descpix-campo' em aToggles: campo que o bloco
+     gerado nao vai ler nao fica na tela pedindo calibragem. Medido: com MEDIR_FORMULARIO
+     ligado, expandir() volta na primeira linha, entao ALTURA_SEMPRE nao tem efeito nenhum.
+     Escondido, e nao apagado: os campos continuam no DOM, tColeta continua lendo o value deles
+     e nada se perde ao voltar o interruptor. */
+  $('t-alt-campos').style.display=(radio('t-medir')==='nao')?'block':'none';
   /* A pagina de obrigado nasce desligada: quem nao a usa nao ve secao nem saida nova. */
   var ob=(radio('t-ob-usar')==='sim');
   $('t-ob-campos').style.display=ob?'block':'none';
@@ -11635,7 +11729,7 @@ function tArqToggle(){
   $('t-s5').style.display=(ob&&$('t-out5').value)?'block':'none';
 }
 document.addEventListener('change',function(e){
-  if(e.target.name==='t-arq'||e.target.name==='t-ob-usar')tArqToggle();
+  if(e.target.name==='t-arq'||e.target.name==='t-ob-usar'||e.target.name==='t-medir')tArqToggle();
 });
 
 function tGerar(){
@@ -11727,7 +11821,8 @@ function tGerar(){
   c+="  var ALTURA_DESKTOP = '"+desk+"px';\n";
   c+="  var ALTURA_MOBILE  = '"+mob+"px';   /* calibrar no aparelho se o modal cortar */\n";
   c+='  var LARGURA_MOBILE = '+larg+';        /* telas ate este tamanho usam a altura mobile */\n';
-  var ALT=fcTidyCalSrc({ind:'  ',indOuvinte:'    ',origem:"'"+escJs(origem)+"'",inicial:0});
+  var ALT=fcTidyCalSrc({ind:'  ',indOuvinte:'    ',origem:"'"+escJs(origem)+"'",inicial:0,
+    medir:(radio('t-medir')!=='nao'),sempre:(radio('t-sempre')==='sim')});
   c+=ALT.opcoes+'\n';
   c+='  /* ===== Daqui para baixo nao precisa mexer ===== */\n';
   c+='  var modalAberto = false;\n  var ignorarMutacoesAte = 0;\n\n';
@@ -14777,6 +14872,17 @@ function aToggles(){
   ver('a-pix-campos',usaPix);
   ver('a-descpix-campo',m==='ambos');
   ver('a-parcelas-campo',usaPP);
+  /* As alturas calibradas do calendario -- e o interruptor de quando abri-las -- so aparecem
+     quando SAO USADAS, mesmo criterio das quatro linhas acima: campo que o bloco gerado nao vai
+     ler nao fica na tela pedindo calibragem. Medido: com MEDIR_FORMULARIO ligado, expandir()
+     volta na primeira linha, entao ALTURA_SEMPRE nao tem efeito NENHUM -- inclusive no caminho
+     em que a biblioteca do TidyCal nao carrega, porque o aperto de mao proprio manda o mesmo
+     SIZER_METODO e tambem mede o formulario.
+     Escondido, e nao apagado: os campos continuam no DOM, aColeta continua lendo o value deles
+     e nada se perde ao voltar o interruptor. 'a-largcards' fica de FORA deste grupo de
+     proposito: ela e a largura de corte das linhas compactas da vitrine, lida em CSS, e nao
+     tem nada a ver com a altura do calendario. */
+  ver('a-alt-campos',radio('a-medir')==='nao');
 }
 /* ===== marcadores configuraveis da pagina de obrigado (Tarefa 4, passo 5) =====
    Mesma mecanica de T_OB_VARS/tObMarcadas/tObMarcar (9826+), com quatro diferencas: so os
@@ -15429,6 +15535,12 @@ function aCfg(){
   var altdesk=aPreso('a-altdesk');if(altdesk==null)altdesk=2350;
   var altmob=aPreso('a-altmob');if(altmob==null)altmob=2700;
   var largmob=aPreso('a-largmob');if(largmob==null)largmob=700;
+  /* Os dois interruptores do calendario (ver o cabecalho de fcTidyCalSrc). Em cada um a
+     comparacao e escrita do lado do PADRAO daquele campo: 'medir' nasce ligado, entao a
+     pergunta e "veio 'nao'?"; 'sempre' nasce desligado, entao a pergunta e "veio 'sim'?".
+     Assim a ausencia do radio no DOM vale o padrao de fabrica nos dois casos. */
+  var medir=(radio('a-medir')!=='nao');
+  var sempre=(radio('a-sempre')==='sim');
   var qtdmax=aPreso('a-qtdmax');if(qtdmax==null)qtdmax=10;
   /* PRESO DENTRO DA PROPRIA FUNCAO DE CONFIGURACAO (regra do CLAUDE.md sobre campo numerico que
      alimenta uma @media): prender so a largura da previa deixaria o iframe num valor e o CSS
@@ -15441,6 +15553,7 @@ function aCfg(){
     metodo:m, usaPP:usaPP, usaPix:usaPix, ppcor:radio('a-ppcor')||'gold',
     prazoh:prazoh, descpix:descpix, parcelas:parcelas,
     altdesk:altdesk, altmob:altmob, largmob:largmob, largcards:largcards, qtdmax:qtdmax,
+    medir:medir, sempre:sempre,
     c1:corSegura('a-c1','#0F3A30'), c2:corSegura('a-c2','#ffffff'), c3:corSegura('a-c3','#333333'),
     t1:$('a-t1').value, t2:$('a-t2').value, t3:$('a-t3').value, t4:$('a-t4').value, t5:$('a-t5').value,
     ob:aObCfg()
@@ -15472,6 +15585,7 @@ function aColeta(){
     parcelas:aElVal('a-parcelas',1),
     altdesk:aElVal('a-altdesk',2350),altmob:aElVal('a-altmob',2700),largmob:aElVal('a-largmob',700),
     largcards:aElVal('a-largcards',640),
+    medir:radio('a-medir'),sempre:radio('a-sempre'),
     qtdmax:aElVal('a-qtdmax',10),
     c1:aElVal('a-c1-t','#0F3A30'),c2:aElVal('a-c2-t','#ffffff'),c3:aElVal('a-c3-t','#333333'),
     t1:aElVal('a-t1','Agende seu ensaio'),
@@ -15556,6 +15670,13 @@ function aRestaura(st){
   el=$('a-altdesk');if(el)el.value=(A.altdesk!=null&&A.altdesk!=='')?A.altdesk:2350;
   el=$('a-altmob');if(el)el.value=(A.altmob!=null&&A.altmob!=='')?A.altmob:2700;
   el=$('a-largmob');if(el)el.value=(A.largmob!=null&&A.largmob!=='')?A.largmob:700;
+  /* OS DOIS INTERRUPTORES DO CALENDARIO (03/09/2026), mesmo molde de tRestaura: estado gravado
+     por versao anterior NAO tem nenhuma das duas chaves, e o ausente cai no padrao de fabrica
+     de CADA uma -- 'medir' ligado (por isso a pergunta e "veio 'nao'?") e 'sempre' desligado
+     (por isso a pergunta e "veio 'sim'?"). Sem alerta: nada foi convertido, e as tres medidas
+     calibradas continuam gravadas, so escondidas (ver aToggles). */
+  setRadio('a-medir',A.medir==='nao'?'nao':'sim');
+  setRadio('a-sempre',A.sempre==='sim'?'sim':'nao');
   el=$('a-qtdmax');if(el)el.value=(A.qtdmax!=null&&A.qtdmax!=='')?A.qtdmax:10;
   el=$('a-c1-t');if(el){el.value=A.c1;elc=$('a-c1');if(elc)elc.value=corValida(A.c1)?A.c1:'#0F3A30';}
   el=$('a-c2-t');if(el){el.value=A.c2;elc=$('a-c2');if(elc)elc.value=corValida(A.c2)?A.c2:'#ffffff';}
@@ -15853,7 +15974,8 @@ function aBlocoVitrine(cfg){
   /* MESMA fonte que a aba TidyCal usa -- unifica-se a fonte que ESCREVE, nunca a saida: o
      bloco entregue continua autossuficiente. Aqui a origem nao pode ser literal (cada pacote
      tem o seu endereco), entao ela e a expressao 'origemCal'. */
-  var ALT=fcTidyCalSrc({ind:'',indOuvinte:'  ',origem:'origemCal',inicial:700});
+  var ALT=fcTidyCalSrc({ind:'',indOuvinte:'  ',origem:'origemCal',inicial:700,
+    medir:cfg.medir,sempre:cfg.sempre});
   c+='<scr'+'ipt>\n(function(){\n';
   c+='/* ===== customizacao ===== */\n';
   c+=aPacotesSrc(cfg.pacotes,temFam);
