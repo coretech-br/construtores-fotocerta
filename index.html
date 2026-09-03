@@ -11490,7 +11490,7 @@ function uOpRender(){
       }
       n.addEventListener('change',volta);n.addEventListener('blur',volta);
     })();
-    var pr=document.createElement('input');pr.type='number';pr.step='0.01';pr.min='0';pr.value=op.preco;pr.placeholder='Preco';
+    var pr=document.createElement('input');pr.type='number';pr.step='0.01';pr.min='0';pr.value=op.preco;pr.placeholder='Preço';
     pr.addEventListener('input',function(){uEditOps[i].preco=pr.value;});
     /* Preco apagado na lista virava preco:0.00 no codigo com o campo em branco na tela. Aqui a
        recusa dos cupons NAO cabe: opcional gratis e configuracao legitima -- a propria aba ja
@@ -11602,7 +11602,7 @@ function uCpRender(){
   uCps.forEach(function(cp,i){
     var li=document.createElement('li');
     var info=document.createElement('div');info.className='info';
-    var cod=document.createElement('input');cod.type='text';cod.value=cp.codigo;cod.placeholder='Codigo';
+    var cod=document.createElement('input');cod.type='text';cod.value=cp.codigo;cod.placeholder='Código';
     cod.addEventListener('input',function(){uCps[i].codigo=cod.value.toUpperCase();salvarEstado();uPreview();});
     /* O modelo ja guardava em maiusculas, mas o CAMPO continuava mostrando o que foi digitado:
        tela "promo abc", codigo gerado 'PROMO ABC'. Funcionava (a comparacao em runtime ignora
@@ -11663,7 +11663,7 @@ function uCpAchaRepetido(cod,ignorar){
 }
 function uCpAdd(){
   var cod=$('u-cp-cod').value.trim().toUpperCase();
-  if(!cod){alert('Informe o codigo do cupom.');return;}
+  if(!cod){alert('Informe o código do cupom.');return;}
   var repetido=uCpAchaRepetido(cod,-1);
   if(repetido){alert('Já existe um cupom com o código "'+cod+'". O cliente digitaria um código só, e a página não tem como saber qual dos dois cadastros aplicar — escolha outro código ou edite o cupom já existente na lista.');return;}
   var v=parseFloat(String($('u-cp-valor').value).replace(',','.'));
@@ -11966,7 +11966,7 @@ function uRecusa(cfg){
     if(erroChave)return erroChave;
     if(!cfg.chave||!cfg.nomer||!cfg.cidade)return fciRecusa('Preencha a chave Pix, o nome do recebedor e a cidade.');
   }
-  if(cfg.zap&&!cfg.zapnum)return fciRecusa('Informe o numero do WhatsApp de destino.');
+  if(cfg.zap&&!cfg.zapnum)return fciRecusa('Informe o número do WhatsApp de destino.');
 
   /* Os cupons sao conferidos AQUI, e nao so no formulario de cadastro: o campo de valor
      DENTRO da lista de cupons nao valida nada, entao apagar o numero de um cupom ja cadastrado
@@ -11976,9 +11976,9 @@ function uRecusa(cfg){
      de um campo que o operador esvaziou. */
   for(i=0;i<cfg.cps.length;i++){
     cpc=String(cfg.cps[i].codigo||'').trim();
-    if(!cpc)return 'O cupom na posicao '+(i+1)+' da lista esta sem codigo. Um cupom sem codigo nunca pode ser digitado pelo cliente: preencha o codigo ou remova a linha.';
+    if(!cpc)return 'O cupom na posição '+(i+1)+' da lista está sem código. Um cupom sem código nunca pode ser digitado pelo cliente: preencha o código ou remova a linha.';
     cpv=parseFloat(String(cfg.cps[i].valor).replace(',','.'));
-    if(isNaN(cpv)||cpv<=0)return 'O cupom "'+cpc+'" esta com o valor do desconto vazio ou zerado. Ele seria entregue no codigo como desconto de zero: o cliente digitaria o cupom, veria "Cupom aplicado!" e "Desconto - R$ 0,00", e o total nao mudaria. Preencha o valor ou remova o cupom.';
+    if(isNaN(cpv)||cpv<=0)return 'O cupom "'+cpc+'" está com o valor do desconto vazio ou zerado. Ele seria entregue no código como desconto de zero: o cliente digitaria o cupom, veria "Cupom aplicado!" e "Desconto - R$ 0,00", e o total não mudaria. Preencha o valor ou remova o cupom.';
     cpe=uCpPctErro(cfg.cps[i].tipo,cpv);
     if(cpe)return 'Cupom "'+cpc+'": '+cpe;
     cpe=fcCpMinErro(cfg.cps[i],cpc);
@@ -19015,7 +19015,7 @@ function mOpRender(){
       }
       n.addEventListener('change',volta);n.addEventListener('blur',volta);
     })();
-    var pr=document.createElement('input');pr.type='number';pr.step='0.01';pr.min='0';pr.value=op.preco;pr.placeholder='Preco';
+    var pr=document.createElement('input');pr.type='number';pr.step='0.01';pr.min='0';pr.value=op.preco;pr.placeholder='Preço';
     pr.addEventListener('input',function(){mEditOps[i].preco=pr.value;});
     pr.addEventListener('change',function(){mOpPrecoAjustar(pr,i);});
     pr.addEventListener('blur',function(){mOpPrecoAjustar(pr,i);});
@@ -19237,7 +19237,15 @@ function mCpCodAjustar(inp,i){
   return true;
 }
 function mCpPctErro(tipo,v){
-  if((tipo==='pct_total'||tipo==='pct_produto')&&v>100)return 'desconto de '+v+'% zera o pedido (o maximo e 100%).';
+  if(tipo!=='pct_produto'&&tipo!=='pct_total')return '';
+  /* Acentuada e sem nomear o provedor -- norma de 01/09/2026 e regra 10 do plano da v2.
+     Nasceu aqui sem acento e com redacao propria ("desconto de X% zera o pedido"), a terceira
+     copia de uma familia cujas outras duas ja tinham sido alinhadas: uCpPctErro (11648+) em
+     02/09/2026 e aCpPctErro (14444+), que nasceu certa. A redacao COPIADA e a do Checkout, e
+     nao a da aba pac, porque a Mini loja e o gemeo do Checkout: as duas fecham um pagamento de
+     verdade, entao a frase sobre a cobranca zerada tambem vale aqui. Nenhuma das tres nomeia
+     quem processa o pagamento. */
+  if(v>100)return 'Um cupom em porcentagem não pode passar de 100%: com '+v+'% o desconto é limitado ao subtotal e o pedido inteiro vai a R$ 0,00 — o cliente vê "Cupom aplicado!" e um total zerado, e o pagamento recusa a cobrança zerada. Se a intenção era 15%, corrija o valor; se era realmente dar o pedido, use um cupom de valor fixo igual ao preço.';
   return '';
 }
 /* Recusa de codigo repetido -- decisao 13 de 02/09/2026, uniformizada com a aba pac
@@ -19251,13 +19259,17 @@ function mCpAchaRepetido(cod,ignorar){
 }
 function mCpAdd(){
   var cod=String($('m-cp-cod').value).trim().toUpperCase();
-  if(!cod){alert('Informe o codigo do cupom.');return;}
+  if(!cod){alert('Informe o código do cupom.');return;}
   var repetido=mCpAchaRepetido(cod,-1);
   if(repetido){alert('Já existe um cupom com o código "'+cod+'". O cliente digitaria um código só, e a página não tem como saber qual dos dois cadastros aplicar — escolha outro código ou edite o cupom já existente na lista.');return;}
   var v=parseFloat(String($('m-cp-valor').value).replace(',','.'));
-  if(isNaN(v)||v<=0){alert('Informe o valor do desconto do cupom.');return;}
+  if(isNaN(v)||v<=0){alert('Informe o valor do desconto (maior que zero).');return;}
   var tipo=radio('m-cp-tipo')||'pct_total',e=mCpPctErro(tipo,v);
-  if(e){alert('Cupom "'+cod+'": '+e);return;}
+  /* Sem o prefixo 'Cupom "X": ' que estava aqui: a mensagem nova ja comeca dizendo do que
+     trata, e o codigo e o que o operador acabou de digitar no campo ao lado. As irmas
+     (uCpAdd/aCpAdd) sempre alertaram assim. O prefixo continua em mRecusa, onde ele e
+     necessario -- la o cupom vem de uma lista, e sem o codigo nao da para saber qual e. */
+  if(e){alert(e);return;}
   var mn=String($('m-cp-min').value).trim(),eMin=fcCpMinErro({minimo:mn},cod);
   if(eMin){alert(eMin);return;}
   mCps.push({codigo:cod,tipo:tipo,valor:v,validade:$('m-cp-val').value,minimo:mn});
@@ -19272,18 +19284,37 @@ function mCpRender(){
   mCps.forEach(function(cp,i){
     var li=document.createElement('li');
     var info=document.createElement('div');info.className='info';
-    var cod=document.createElement('input');cod.type='text';cod.value=cp.codigo;cod.placeholder='CODIGO';
-    cod.addEventListener('input',function(){mCps[i].codigo=cod.value;});
+    var cod=document.createElement('input');cod.type='text';cod.value=cp.codigo;cod.placeholder='Código';
+    /* MAIUSCULAS NO MODELO ja no 'input', como uCpRender e aCpRender: sem isto o codigo ficava
+       gravado como foi digitado ate o change/blur normalizar, e a tela dizia uma coisa enquanto
+       o estado dizia outra. A correcao do CAMPO continua so no change/blur (mCpCodAjustar) --
+       reescrever a cada tecla mexeria com o cursor. */
+    cod.addEventListener('input',function(){mCps[i].codigo=cod.value.toUpperCase();salvarEstado();mPreview();});
     cod.addEventListener('change',function(){mCpCodAjustar(cod,i);});
     cod.addEventListener('blur',function(){mCpCodAjustar(cod,i);});
-    var val=document.createElement('input');val.type='number';val.step='0.01';val.min='0';val.value=cp.valor;
-    val.addEventListener('input',function(){mCps[i].valor=val.value;});
+    var val=document.createElement('input');val.type='number';val.step='0.01';val.min='0';val.value=cp.valor;val.placeholder='Valor';
+    /* salvarEstado()+mPreview() nos DOIS campos, como nas irmas. O salvamento ja acontecia por
+       tabela (o 'input' sobe ate document, que chama salvarEstado) -- medido, o valor nao se
+       perdia; o que se perdia era a PREVIA: os ouvintes delegados desta aba filtram por id ou
+       name comecando em 'm-', e os campos desta lista nao tem nem um nem outro. Cupom trocado
+       de 10% para R$ 50 fixo e o quadro continuava mostrando o desconto velho -- exatamente a
+       divergencia que uCpRender ja registra (11614+). Chamar salvarEstado aqui tambem torna a
+       gravacao explicita, e nao dependente de um ouvinte de document a 14 mil linhas daqui. */
+    val.addEventListener('input',function(){mCps[i].valor=val.value;salvarEstado();mPreview();});
     var sel=document.createElement('select');
     [['pct_produto','% sobre os produtos'],['pct_total','% sobre o total'],['fixo','valor fixo']].forEach(function(o){
       var op=document.createElement('option');op.value=o[0];op.textContent=o[1];
       if(cp.tipo===o[0])op.selected=true;sel.appendChild(op);
     });
     sel.addEventListener('change',function(){mCps[i].tipo=sel.value;salvarEstado();mPreview();});
+    /* A VALIDADE APARECE NA LISTA, como no Checkout (uCpRender) e na aba pac (aCpRender). O
+       campo do CADASTRO ('m-cp-val') sempre existiu e mCpAdd sempre gravou o prazo -- so a
+       lista nao o mostrava, e cupom cadastrado que esconde a propria regra e cupom que o dono
+       aplica errado: ele leria "NATAL10, 10%" sem saber que o prazo venceu no Natal passado.
+       Vazio = sem prazo. */
+    var dt=document.createElement('input');dt.type='date';dt.value=cp.validade||'';
+    dt.title='Prazo de validade do cupom (vazio = sem prazo)';
+    dt.addEventListener('change',function(){mCps[i].validade=dt.value;salvarEstado();mPreview();});
     /* O MINIMO APARECE NA LISTA (decisao D5): cupom cadastrado que nao mostra a propria
        regra e cupom que o dono aplica errado -- ele leria "NATAL10, 10%" e nao saberia que
        ele so vale acima de um valor. Vazio = sem minimo. */
@@ -19291,7 +19322,7 @@ function mCpRender(){
     mn.value=(cp.minimo==null?'':cp.minimo);mn.placeholder='M\u00ednimo';
     mn.title='Valor m\u00ednimo do pedido para este cupom valer (vazio = sem m\u00ednimo)';
     mn.addEventListener('input',function(){mCps[i].minimo=mn.value;salvarEstado();mPreview();});
-    info.appendChild(cod);info.appendChild(sel);info.appendChild(val);info.appendChild(mn);
+    info.appendChild(cod);info.appendChild(sel);info.appendChild(val);info.appendChild(dt);info.appendChild(mn);
     var ctrl=document.createElement('div');ctrl.className='ctrl';
     var bt=document.createElement('button');bt.textContent='\u2715';bt.title='Remover';bt.setAttribute('aria-label','Remover');
     bt.addEventListener('click',function(){mCpDel(i);});ctrl.appendChild(bt);
@@ -19627,12 +19658,12 @@ function mRecusa(cfg){
     if(erroChave)return erroChave;
     if(!cfg.chave||!cfg.nomer||!cfg.cidade)return fciRecusa('Preencha a chave Pix, o nome do recebedor e a cidade.');
   }
-  if(cfg.zap&&!cfg.zapnum)return fciRecusa('Informe o numero do WhatsApp de destino.');
+  if(cfg.zap&&!cfg.zapnum)return fciRecusa('Informe o número do WhatsApp de destino.');
   for(i=0;i<cfg.cps.length;i++){
     cpc=String(cfg.cps[i].codigo||'').trim();
-    if(!cpc)return 'O cupom na posicao '+(i+1)+' da lista esta sem codigo. Um cupom sem codigo nunca pode ser digitado pelo cliente: preencha o codigo ou remova a linha.';
+    if(!cpc)return 'O cupom na posição '+(i+1)+' da lista está sem código. Um cupom sem código nunca pode ser digitado pelo cliente: preencha o código ou remova a linha.';
     cpv=parseFloat(String(cfg.cps[i].valor).replace(',','.'));
-    if(isNaN(cpv)||cpv<=0)return 'O cupom "'+cpc+'" esta com o valor do desconto vazio ou zerado. Ele seria entregue no codigo como desconto de zero: o cliente digitaria o cupom, veria "Cupom aplicado!" e "Desconto - R$ 0,00", e o total nao mudaria. Preencha o valor ou remova o cupom.';
+    if(isNaN(cpv)||cpv<=0)return 'O cupom "'+cpc+'" está com o valor do desconto vazio ou zerado. Ele seria entregue no código como desconto de zero: o cliente digitaria o cupom, veria "Cupom aplicado!" e "Desconto - R$ 0,00", e o total não mudaria. Preencha o valor ou remova o cupom.';
     cpe=mCpPctErro(cfg.cps[i].tipo,cpv);
     if(cpe)return 'Cupom "'+cpc+'": '+cpe;
     cpe=fcCpMinErro(cfg.cps[i],cpc);

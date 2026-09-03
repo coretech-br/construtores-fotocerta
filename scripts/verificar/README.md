@@ -14,6 +14,7 @@ material de apoio, roda no seu computador.
 | `regressao.sh` | Compara a fotografia da arvore de trabalho com a de uma referencia (`main` por padrao). | Ao fim de toda rodada que mexer em codigo gerado. `scripts/verificar/regressao.sh` ou `scripts/verificar/regressao.sh <ref>`. |
 | `textos-escape.mjs` | Pega os blocos gerados COM os textos de escape (aspas simples e duplas, barra invertida, acento e `</script`) e os EXECUTA numa pagina de verdade, uma por bloco. Checa que nenhum `</script` engoliu o resto do documento, que o bloco desenhou, que nao houve erro de console e que o texto do dono chegou inteiro a tela. | Ao mexer em qualquer escape (`esc`, `escJs`, `escJsD`, `escAttr`, `aTplJs`) ou em qualquer texto configuravel. `node scripts/verificar/textos-escape.mjs`. |
 | `cupom-minimo.mjs` | O VALOR MINIMO DO PEDIDO PARA O CUPOM VALER, com os blocos RODANDO: gera as tres abas que tem cupom (Checkout, Mini loja e Agendamento por pacote) com um cupom de minimo e um sem, executa cada bloco numa pagina e percorre os cinco casos -- aplicado acima, recusado abaixo, a QUEDA AUTOMATICA ao tirar um item, o voltar a subir que nao reaplica, e o cupom sem minimo intacto. Le o total NA TELA, nunca a variavel. Fecha com a compatibilidade: estado de versao anterior, "Exportar tudo"/importar e preset de aba. | Ao mexer em qualquer coisa do cupom nas tres abas -- a regra do minimo, `FC_CARRINHO_SRC`, `fcCpSerial` ou os dois textos novos. `node scripts/verificar/cupom-minimo.mjs`. |
+| `lista-cupons.mjs` | O EDITOR EM LINHA da lista de cupons, nas TRES abas que tem cupom. Para cada um dos cinco campos da linha (codigo, tipo, valor, validade, minimo): que ele APARECE, que edita-lo GRAVA (le o `localStorage`), que edita-lo REMONTA A PREVIA (le a lista `CUPONS` de dentro do iframe) e que o valor sobrevive a recarga. | Ao mexer em qualquer `*CpRender`, ou ao criar lista cadastrada com campo editavel na propria linha. A regressao NAO alcanca isto: os campos da linha sao criados por JavaScript, nao tem id nem name, e escapam dos ouvintes delegados de cada aba -- foi assim que a Mini loja passou a mentir na previa e a esconder a validade sem quebrar nada. `node scripts/verificar/lista-cupons.mjs`. |
 | `pagina.mjs` | O MOLDE reutilizavel para pegar um bloco gerado e executa-lo de verdade numa pagina que imita uma do Prosite (servidor de uma rota, rede externa bloqueada, relogio falso opcional, `reducedMotion` opcional). Exporta `comBlocoNaPagina`, `gerarNaFerramenta`, `textoSemScripts`, `chk`, `resumo`. | Quando o teste precisa que o bloco RODE num DOM (anima? o botao aparece? o valor calculado bate?), nao so que o texto gerado seja igual a uma referencia. Cada teste concreto e um script pequeno que importa este modulo -- ver exemplo abaixo. |
 
 ## Como rodar
@@ -34,6 +35,9 @@ node scripts/verificar/textos-escape.mjs
 
 # o valor minimo do cupom, com os tres blocos rodando de verdade
 node scripts/verificar/cupom-minimo.mjs
+
+# o editor em linha da lista de cupons, nas tres abas
+node scripts/verificar/lista-cupons.mjs
 
 # um teste novo que use o molde de pagina.mjs (exemplo, nao existe no repo)
 node scripts/verificar/teste-bordas.mjs
@@ -110,6 +114,11 @@ uma "cobranca" -- quem sabe e a funcao `medir` que cada teste escreve.
   Para conferir comportamento (anima, calcula, reage a clique) o teste
   precisa ser escrito com `pagina.mjs` -- e `textos-escape.mjs` e o exemplo
   vivo disso para os textos configuraveis.
+- **A INTERFACE da ferramenta fica quase toda fora.** `geradores.mjs` preenche
+  campos e le saidas; ele nao confere se um campo da tela gravou, se uma lista
+  mostra o que guarda, ou se um alerta esta acentuado. `lista-cupons.mjs` cobre
+  um pedaco disso (o editor em linha das listas de cupons) porque foi ali que o
+  defeito apareceu; o resto continua dependendo de leitura e de olhar.
 - **O cenario nao percorre todo ramo da ferramenta.** Os quatro ramos que a
   passagem configurada declara hoje como fora dele: o formato de data da pagina
   de obrigado do TidyCal (o cenario mantem "como o TidyCal mandar"), o modo
