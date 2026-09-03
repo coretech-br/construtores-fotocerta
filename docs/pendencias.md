@@ -268,3 +268,75 @@ Duas coisas ficam para as próximas rodadas:
 
 1. **Campo que parece inútil é sintoma de explicação faltando, não de campo sobrando.** A queixa original ("estes quatro campos não fazem nada no formato padrão") era legítima; a resposta é dizer onde eles agem, e não estender o alcance deles até que façam algo.
 2. **Toda decisão de "unificar dois campos" tem de ser conferida contra o padrão de fábrica dos dois**, não só contra o que eles significam. Aqui os dois significavam "o rótulo da unidade" e mesmo assim os padrões eram incompatíveis — a incompatibilidade estava no valor, não no conceito, e só apareceu quando o relógio foi lido na tela.
+
+---
+
+## Entregue em 03/09/2026 — a altura do calendario, e o ouvinte que era codigo morto
+
+O dono perguntou por que a aba `pac` nao usa a altura automatica do TidyCal, e se o formulario
+de reserva caberia sem barra de rolagem. A investigacao mediu as mensagens **cruas** em vez de
+deduzir da documentacao, e o achado foi pior e melhor que o esperado.
+
+### O achado: o ouvinte nunca recebeu nada
+
+Iframe nu, calendario real, escutando `message`:
+
+```
+1518ms  [https://agendamento.fotocerta.com.br]  "[iFrameResizerChild]Ready"
+total: 1
+```
+
+**Uma linha, e mais nada** — nem ao carregar, nem ao clicar num horario. O filho do
+iframe-resizer so passa a emitir depois de um **handshake do pai**, e o pai vinha dentro do
+`embed.js`. Como a aba `pac` nunca usou o `embed.js` (o endereco muda a cada troca de pacote, e
+o `embed.js` cria o iframe uma vez so), **ninguem mandava o handshake**.
+
+Consequencia: toda a mecanica de `scrollToOffset`/`mutationObserver` da aba `pac` — e do
+caminho de dominio proprio da aba `t`, criado no mesmo dia — era **codigo morto**. E, sem
+sinal, `expandir()` nunca rodava; `recolher()` **remove** o `min-height`; e o iframe, criado por
+JavaScript sem atributo de altura, caia no padrao do navegador: **150px**. O calendario
+aparecia como uma fresta.
+
+**A decisao errada foi minha, na rodada da decima aba**, e o comentario do codigo registra o
+raciocinio: *"o padrao volta a ser o comportamento provado em producao na aba TidyCal: altura
+natural, e o sinal expande"*. O erro esta em "provado em producao na aba TidyCal" — la funciona
+porque o `embed.js` define a altura **e** faz o handshake. Sem ele, "altura natural" quer dizer
+150px. Eu avaliei duas opcoes ruins (expandir sempre, com ~1500px de vazio; ou altura natural,
+que e a fresta) e nao considerei a terceira, que era medir o protocolo.
+
+### O conserto
+
+O bloco manda o handshake — **uma linha**, a mesma que o `embed.js` deles manda, so com os
+valores de fabrica — e passa a ler a altura da mensagem. O formato, medido:
+
+```
+[iFrameSizer]<id>:<altura>:<largura>:<tipo>
+```
+
+| | antes | depois | conteudo real |
+|---|---|---|---|
+| `t` dominio proprio, 1100px | 700px fixos | **511px** | 511px |
+| `t` dominio proprio, 375px | 700px (cortando) | **716px** | 716px |
+| `pac` vitrine, 1100px | **150px** | **949px** | 949px |
+| `pac` vitrine, 375px | **150px** | **716px** | 716px |
+
+**A guarda e `[500, 6000]`**, e os dois numeros sao medidos, nao escolhidos: o piso e o
+`minHeight:500` que o proprio TidyCal usa (no carregamento o calendario chega a anunciar 38px e
+75px — sem piso, ele piscaria achatado); o teto e quase oito vezes o calendario mais alto
+medido. Valor fora da faixa, negativo ou nao-numero **nao mexe em nada**.
+
+**Degradacao segura:** se o `init` nao for reconhecido um dia, nenhuma altura chega e o bloco
+fica na altura de partida — exatamente o comportamento de hoje. Provado no caso "SEM SINAL".
+
+### O que a altura automatica NAO resolve
+
+Medido: ao abrir o formulario "Confirme a reserva", a altura anunciada **nao muda** (553 -> 553).
+O modal e sobreposicao, nao empurra o conteudo. **As alturas calibradas continuam obrigatorias**,
+e o `ALTURA_SEMPRE` continua sendo o escape para quem vir o modal cortado na pagina publicada.
+
+### Sobre a fragilidade, que era o criterio para parar
+
+O handshake e **uma linha**, nao uma reimplementacao da biblioteca. A dependencia da versao do
+protocolo **ja existia** no codigo (o prefixo `[iFrameSizer]` e os nomes dos tipos), e o que o
+TidyCal customiza (`minHeight`, `checkOrigin`) e do lado do pai e nao entra na mensagem. Por
+isso nao se aplicou a regra de parar.
