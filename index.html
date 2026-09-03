@@ -3971,8 +3971,8 @@
    QUEM IMPEDE QUE ELE MINTA: scripts/conferir-versoes.sh, que recusa index.html
    alterado sem a versao mudar junto -- a mesma disciplina do fc-compartilhado.js,
    e pela mesma razao: carimbo que ninguem confere e o defeito de amanha. */
-var FC_VERSAO='2026-09-03f';
-var FC_PUBLICADO='2026-09-03 15:10';   /* America/Sao_Paulo -- escrito pelo carimbador */
+var FC_VERSAO='2026-09-03g';
+var FC_PUBLICADO='2026-09-03 16:41';   /* America/Sao_Paulo -- escrito pelo carimbador */
 (function(){
   var el=document.getElementById('fc-versao');
   if(!el) return;
@@ -5150,7 +5150,7 @@ function prep(nome,abaId,fn,fase){
      fora         campos do fragmento que NAO entram num preset. Ao aplicar, eles conservam
                   o que esta na tela. Duas familias moram aqui: escolhas sobre OUTRO
                   componente (a consolidacao do codigo 1 da Bordas) e o FORMULARIO INACABADO
-                  das tres abas que cadastram item com opcionais ('edops'/'editidx'). O
+                  das tres abas que cadastram item com opcionais ('edops'/'editidx'/'form'). O
                   segundo caso e o que explica a regra: o buffer e gravado no estado, para o
                   dono nao perder o que digitou ao recarregar, mas ele nao e configuracao de
                   campanha -- num preset ele seria ruido, e faria o aviso "veio de X, que
@@ -5222,7 +5222,7 @@ var ABAS=[
    exemplo:'ex.: Natal 2026 - hospedeira',
    guarda:'tudo o que está configurado nesta aba — modo de exibição, ícone, formato, cores e posição do botão, os quatro trechos da mensagem, os textos do pop-up, o cabeçalho (coruja, movimento e efeitos), o horário de atendimento, a pergunta de qualificação com as opções cadastradas, a âncora e os <b>textos</b> da seção 8.'},
   {id:'uni',  nome:'Checkout',            chaves:['u'],         coleta:uColeta,restaura:uRestaura,gerar:uGerar,
-   pref:'u',fora:[],formulario:['edops','editidx'],resumo:uPresetResumo,redesenhar:uPresetDepois,antesDeSalvar:uPresetAntes,
+   pref:'u',fora:[],formulario:['edops','editidx','form'],resumo:uPresetResumo,redesenhar:uPresetDepois,antesDeSalvar:uPresetAntes,
    listas:[['u.edops',{nome:'',preco:0,qtd:false},'nome'],
            ['u.prods',{nome:'',desc:'',preco:0,opsel:'unico',opnenhum:'nao',qtd:false,ops:[{nome:'',preco:0,qtd:false}]},'nome'],
            ['u.prods.ops',{nome:'',preco:0,qtd:false},'nome'],
@@ -5245,7 +5245,7 @@ var ABAS=[
    exemplo:'ex.: Foto Certa - página /pagar',
    guarda:'tudo o que está configurado nesta aba — o endereço da página, a aparência, os textos, e também a <b>cobrança que está na tela</b> (descrição, valor, identificador, a data de validade e o desconto no Pix). Aplicar um preset troca também essa cobrança: ele é a fotografia da aba inteira. Os dados de quem recebe <b>não</b> estão aqui: eles saíram desta aba para o painel Identidade, e nenhum preset os toca.'},
   {id:'loja', nome:'Mini loja',           chaves:['m'],         coleta:mColeta,restaura:mRestaura,gerar:mGerar,
-   pref:'m',fora:[],formulario:['edops','editidx'],resumo:mPresetResumo,redesenhar:mPresetDepois,antesDeSalvar:mPresetAntes,
+   pref:'m',fora:[],formulario:['edops','editidx','form'],resumo:mPresetResumo,redesenhar:mPresetDepois,antesDeSalvar:mPresetAntes,
    listas:[['m.edops',{nome:'',preco:0,qtd:false},'nome'],
            ['m.prods',{nome:'',desc:'',preco:0,cat:'',img:'',opsel:'unico',opnenhum:'nao',qtd:false,ops:[{nome:'',preco:0,qtd:false}]},'nome'],
            ['m.prods.ops',{nome:'',preco:0,qtd:false},'nome'],
@@ -5259,7 +5259,7 @@ var ABAS=[
    exemplo:'ex.: Natal 2026 - neve na hospedeira',
    guarda:'tudo o que está configurado nesta aba — o efeito escolhido, o alcance (página inteira ou dentro de um bloco) com a altura, e os campos de <b>todos</b> os efeitos: quantidade, tamanho, deriva e cor das partículas, as quatro cores do confete, o tamanho, o desfoque e as três cores da aurora, a quantidade, o tamanho e as quatro cores das luzes, mais a duração do ciclo, a opacidade, a proporção no celular e o <b>fundo da prévia</b>.'},
   {id:'pac', nome:'Agendamento por pacote', chaves:['a'],       coleta:aColeta,restaura:aRestaura,gerar:aGerar,
-   pref:'a',fora:[],formulario:['edops','editidx'],resumo:aPresetResumo,redesenhar:aPresetDepois,antesDeSalvar:aPresetAntes,
+   pref:'a',fora:[],formulario:['edops','editidx','form'],resumo:aPresetResumo,redesenhar:aPresetDepois,antesDeSalvar:aPresetAntes,
    /* A chave essencial de 'a.familias' e o 'id', e nao o 'nome': e o id que o 'fam' de cada
       pacote aponta. Uma familia {"nome":"X"} sem id e casca -- ninguem consegue pertencer a
       ela --, e fcxPodarListas a descarta e a CONTA; ja um nome em branco e recuperavel
@@ -5383,6 +5383,51 @@ function fcOpPendente(idAviso,buf,idx,nomeItem,item,idBotao){
   el.textContent=(idx>=0)
     ? ('Estes opcionais ainda não foram salvos. Você está editando \u201c'+nomeItem+'\u201d — clique em \u201c'+rot+'\u201d para gravar.')
     : ('Estes opcionais ainda não foram salvos em '+item+' nenhum. Termine o cadastro acima e clique em \u201c'+rot+'\u201d.');
+}
+/* ============ os CAMPOS DE TEXTO do formulario de cadastro ============ */
+/* 03/09/2026. Ate aqui o formulario inacabado das tres abas com catalogo sobrevivia a recarga
+   PELA METADE: os opcionais digitados voltavam ('edops') e o item em edicao voltava ('editidx'),
+   mas o nome, o preco, a descricao -- tudo o que o dono tinha ACABADO DE DIGITAR nos campos --
+   se perdia. Com o botao de duplicar (do mesmo dia) isso deixou de ser incomodo e virou perda
+   de trabalho: duplicar pre-enche o formulario inteiro com uma copia, e recarregar antes de
+   salvar devolvia os opcionais da copia sem os campos dela.
+   UMA CHAVE NOVA POR ABA ('form'), e nao um campo novo por campo: e ACRESCIMO. Estado, preset
+   ou backup gravado antes disto simplesmente nao tem a chave, e fcFormRestaura devolve sem
+   tocar em nada -- o formulario fica exatamente como *ProdEditar/*ProdLimpar o deixou, que e o
+   comportamento de antes. A chave entra na lista 'formulario' de ABAS pelo mesmo motivo das
+   outras duas: aplicar um preset a ZERA (ver fcPresetZerarForm).
+   O NOME DA CHAVE SAI DO PROPRIO ID do campo, e nao de uma segunda lista escrita a mao: lista
+   paralela e onde as duas metades divergem sem ninguem ver. O hifen vira '_' porque
+   FCX_CHAVE_OK (a conferencia da importacao) so aceita letra, numero e sublinhado -- 'u-pnome'
+   seria descartado como chave ma na volta de um backup, calado.
+   NAO GRAVA SOZINHA: quem chama salvarEstado sao os pontos interativos que ja o chamavam (o
+   'input'/'change' global, os botoes de editar, cancelar, salvar e duplicar). fcFormRestaura
+   escreve .value direto, sem disparar evento -- de proposito: *ProdEditar e *ProdLimpar tambem
+   rodam DENTRO da restauracao, e gravar ali faria fcEstadoAtual() coletar abas que ainda nao
+   voltaram. */
+function fcFormChave(id){return String(id).replace(/[^A-Za-z0-9_]/g,'_');}
+/* defs: ['c',id,padrao] para campo (input/textarea/select) e ['r',nome,padrao] para radio. */
+function fcFormLer(defs){
+  var o={},i,d,el;
+  for(i=0;i<defs.length;i++){
+    d=defs[i];
+    if(d[0]==='r'){o[fcFormChave(d[1])]=radio(d[1])||d[2];}
+    else{el=$(d[1]);o[fcFormChave(d[1])]=el?String(el.value):d[2];}
+  }
+  return o;
+}
+/* Chave ausente ou de tipo errado NAO mexe no campo: ela significa "esta versao do estado nao
+   sabia deste campo", e o que estiver na tela ja e o certo. */
+function fcFormRestaura(defs,f){
+  var i,d,el,v;
+  if(!fcEhObjeto(f))return;
+  for(i=0;i<defs.length;i++){
+    d=defs[i];
+    v=f[fcFormChave(d[1])];
+    if(typeof v!=='string')continue;
+    if(d[0]==='r'){if(v)setRadio(d[1],v);}
+    else{el=$(d[1]);if(el)el.value=v;}
+  }
 }
 /* ============ duplicar um item de lista cadastrada ============ */
 /* Pedido do dono em 03/09/2026, na aba Agendamento por pacote: "a maioria dos pacotes mudam
@@ -6191,8 +6236,9 @@ function fcAba(id){var i;for(i=0;i<ABAS.length;i++){if(ABAS[i].id===id)return AB
                   codigo 1 das Bordas). Aplicar um preset os CONSERVA como estao na tela: o
                   preset nao tem o que dizer sobre um componente que nao e este.
    'formulario' : campos que descrevem o FORMULARIO DE CADASTRO a meio de preencher -- os
-                  opcionais digitados e ainda nao salvos, e o indice do item em edicao --, nas
-                  tres abas com catalogo (Checkout, Mini loja, Agendamento por pacote).
+                  opcionais digitados e ainda nao salvos ('edops'), o indice do item em edicao
+                  ('editidx') e os CAMPOS DE TEXTO dele ('form', ver fcFormLer) --, nas tres
+                  abas com catalogo (Checkout, Mini loja, Agendamento por pacote).
                   Aplicar um preset os ZERA (fcPresetZerarForm, logo abaixo).
    Em TODO o resto as duas valem a mesma coisa: "nao entra em preset nenhum". Quem precisa
    desse conjunto chama fcForaTodos em vez de repetir a uniao -- os nomes ficam escritos numa
@@ -11966,6 +12012,11 @@ var uProds=[];
 var uCps=[];
 var uEditOps=[];
 var uEditIdx=-1;
+/* OS CAMPOS DE TEXTO do formulario "Cadastrar produto" -- a lista foi MEDIDA em uProdSalvar,
+   que e quem decide o que compoe um produto: nome, descricao, preco e os tres radios. Os
+   opcionais nao estao aqui; eles ja viajam em 'edops'. Ver fcFormLer. */
+var U_FORM=[['c','u-pnome',''],['c','u-pdesc',''],['c','u-ppreco',''],
+            ['r','u-opsel','unico'],['r','u-opnenhum','nao'],['r','u-pqtd','nao']];
 
 /* Salvamento e restauracao desta aba (registradas em ABAS). */
 function uColeta(){
@@ -11975,13 +12026,15 @@ function uColeta(){
        nascer de novo -- o preset desta aba e uma fotografia deste coleta(). */
     u:{prods:uProds,cps:uCps,metodo:radio('u-metodo'),moeda:radio('u-moeda'),
       cod:$('u-cod').value,
-      /* O FORMULARIO INACABADO viaja junto (03/09/2026). E acrescimo, nao mudanca de
-         formato: estado ou preset gravado antes disto simplesmente nao tem as duas chaves, e
-         o restaura ja trata chave ausente. As duas estao declaradas em 'formulario' (ABAS) --
-         elas descrevem o que esta a MEIO de ser digitado, e nao a configuracao da campanha,
-         entao nao entram em preset nenhum E aplicar um preset as zera; ver fcPresetZerarForm.
+      /* O FORMULARIO INACABADO viaja junto (03/09/2026): os opcionais digitados ('edops'), o
+         indice do item em edicao ('editidx') e os campos de texto ('form', acrescentado no
+         mesmo dia -- ver fcFormLer). E acrescimo, nao mudanca de formato: estado ou preset
+         gravado antes disto simplesmente nao tem as chaves, e o restaura ja trata chave
+         ausente. As tres estao declaradas em 'formulario' (ABAS) -- elas descrevem o que esta
+         a MEIO de ser digitado, e nao a configuracao da campanha, entao nao entram em preset
+         nenhum E aplicar um preset as zera; ver fcPresetZerarForm.
          Sao coisa diferente de 'fora', que CONSERVA o que esta na tela. */
-      edops:uEditOps,editidx:uEditIdx,
+      edops:uEditOps,editidx:uEditIdx,form:fcFormLer(U_FORM),
       selprod:radio('u-selprod'),zap:radio('u-zap'),descpix:$('u-descpix').value,
       sinal:radio('u-sinal'),sinaltipo:radio('u-sinaltipo'),sinalpct:$('u-sinalpct').value,sinalfixo:$('u-sinalfixo').value,
       resumo:radio('u-resumo'),
@@ -12049,6 +12102,12 @@ function uEditRestaurar(U){
   else uProdLimpar();
   uEditOps=buf;
   uOpRender();
+  /* OS CAMPOS DE TEXTO POR CIMA, e nunca antes: uProdEditar acabou de preencher o formulario
+     com o produto GRAVADO, e 'form' e o que estava na TELA no instante do salvamento -- que e
+     o mesmo produto ja com o que o dono digitou por cima e ainda nao salvou. uToggles de novo
+     porque os tres radios mandam em campos que aparecem e somem. */
+  fcFormRestaura(U_FORM,U.form);
+  uToggles();
 }
 
 /* ===== O que esta aba poe na biblioteca de presets (ver o bloco compartilhado) =====
@@ -15494,9 +15553,14 @@ function aPacDuplicar(i){
    parecem (criar e editar), e uma copia carregada nele e um TERCEIRO estado, que so o rotulo
    "Adicionar pacote" distinguiria do primeiro. O aviso diz de qual pacote a copia veio, que ela
    ainda nao existe, e que o original nao foi tocado.
-   Ele NAO sobrevive a recarga, e nem teria o que dizer se sobrevivesse: os campos de texto do
-   formulario nunca foram gravados no estado (aColeta guarda so 'edops' e 'editidx'), entao
-   depois de recarregar nao ha copia nenhuma na tela sobre a qual avisar. */
+   Ele NAO sobrevive a recarga -- e desde 03/09/2026 isso e uma DECISAO, e nao uma consequencia:
+   ate aquele dia os campos de texto do formulario nao eram gravados, e depois da recarga nao
+   havia copia nenhuma na tela sobre a qual avisar; agora ha ('form', em aColeta). O que volta
+   e um formulario preenchido em modo CRIAR -- botao "Adicionar pacote", editidx = -1 --, que e
+   exatamente o que uma copia ainda nao salva e; e o codigo derivado ('-COPIA') continua a vista
+   no primeiro campo. O aviso e a confirmacao do CLIQUE ("o original nao foi tocado"), e repeti-lo
+   a cada abertura da ferramenta o transformaria em ruido permanente sobre um pacote que talvez
+   ja nem exista mais na lista. */
 function aPacCopiaAviso(p){
   var el=$('a-pac-copia');if(!el)return;
   if(!p){el.style.display='none';el.textContent='';return;}
@@ -15533,11 +15597,18 @@ function aPacDel(i){
 /* Molde de uEditRestaurar (Checkout), com aPacEditar/aPacLimpar no lugar. */
 function aEditRestaurar(A){
   var buf=(A.edops||[]).map(function(o){return {nome:o.nome,preco:o.preco,qtd:!!o.qtd};});
-  var i=(typeof A.editidx==='number')?A.editidx:-1;
+  var i=(typeof A.editidx==='number')?A.editidx:-1,sel;
   if(i>=0&&i<aPacotes.length)aPacEditar(i);
   else aPacLimpar();
   aEditOps=buf;
   aOpRender();
+  fcFormRestaura(A_FORM,A.form);   /* ver o mesmo passo em uEditRestaurar, onde esta explicado */
+  /* A FAMILIA GRAVADA PODE JA NAO EXISTIR -- backup importado, preset aplicado ou a familia
+     apagada antes da recarga. O seletor NUNCA pode ficar em branco (aPacSalvar le o valor
+     dele), entao vale a mesma regra de aFamOpcoes e aPacEditar: sem familia valida, a
+     primeira. */
+  sel=$('a-pfam');
+  if(sel&&!(sel.value&&aFamAcha(sel.value)))sel.value=aFamilias.length?aFamilias[0].id:'';
 }
 function aQtdItens(p){
   var ops=p.ops||[],n=0,i;
@@ -15752,13 +15823,19 @@ function aCfg(){
    cada tecla digitada em QUALQUER aba da ferramenta -- e a barra vermelha acenderia nesta aba
    o tempo todo, mesmo com o operador nunca tendo aberto Agendamento por pacote. */
 function aElVal(id,def){var el=$(id);return el?el.value:def;}
+/* OS CAMPOS DE TEXTO do formulario "Cadastrar pacote" -- lista medida em aPacSalvar, que e
+   quem decide o que compoe um pacote. 'a-pfam' e um <select> e entra como campo comum: o que
+   se guarda e o id da familia escolhida, e aEditRestaurar confere se ela ainda existe. Ver
+   fcFormLer. */
+var A_FORM=[['c','a-pcod',''],['c','a-pnome',''],['c','a-pdur',''],['c','a-ppreco',''],
+            ['c','a-pinclui',''],['c','a-ppath',''],['c','a-pfam','']];
 function aColeta(){
   var r={
     pacotes:aPacotes,
     familias:aFamilias,
     cps:aCps,
     /* O FORMULARIO INACABADO viaja junto -- ver uColeta, a primeira das tres. */
-    edops:aEditOps,editidx:aEditIdx,
+    edops:aEditOps,editidx:aEditIdx,form:fcFormLer(A_FORM),
     urlobrigado:aElVal('a-urlobrigado',''),
     prefixo:aElVal('a-prefixo',''),
     metodo:radio('a-metodo'),
@@ -19809,6 +19886,13 @@ function mQtdLigada(prods){
 }
 function mFmt(v){return precoFmt(radio('m-metodo')==='paypal'?(radio('m-moeda')||'BRL'):'BRL',v);}
 
+/* OS CAMPOS DE TEXTO do formulario "Cadastrar produto" desta aba -- lista medida em
+   mProdSalvar. Dois campos a mais que o Checkout (categoria e foto); 'larg' nao entra porque
+   nao e campo: e a largura DEDUZIDA da foto (sLargSabida). Ver fcFormLer. */
+var M_FORM=[['c','m-pnome',''],['c','m-pdesc',''],['c','m-ppreco',''],['c','m-pcat',''],
+            ['c','m-pimg',''],
+            ['r','m-opsel','unico'],['r','m-opnenhum','nao'],['r','m-pqtd','nao']];
+
 /* ===== salvamento e restauracao (registradas em ABAS) ===== */
 function mColeta(){
   /* Sem client, chave, nomer, cidade e zapnum: a identidade saiu desta aba (ver uColeta). */
@@ -19816,7 +19900,7 @@ function mColeta(){
     descpix:$('m-descpix').value,zap:radio('m-zap'),cod:$('m-cod').value,
     prods:mProds,cps:mCps,
     /* O FORMULARIO INACABADO viaja junto -- ver uColeta, a primeira das tres. */
-    edops:mEditOps,editidx:mEditIdx,
+    edops:mEditOps,editidx:mEditIdx,form:fcFormLer(M_FORM),
     cols:$('m-cols').value,mob:$('m-mob').value,imgvit:$('m-imgvit').value,imgdet:$('m-imgdet').value,
     prop:radio('m-prop'),filtro:radio('m-filtro'),
     sinal:radio('m-sinal'),sinaltipo:radio('m-sinaltipo'),sinalpct:$('m-sinalpct').value,
@@ -19873,6 +19957,8 @@ function mEditRestaurar(M){
   else mProdLimpar();
   mEditOps=buf;
   mOpRender();
+  fcFormRestaura(M_FORM,M.form);   /* ver o mesmo passo em uEditRestaurar, onde esta explicado */
+  mToggles();
 }
 function mPresetResumo(v){
   var M=(v&&v.m)||{},n=(M.prods||[]).length,c=(M.cps||[]).length;

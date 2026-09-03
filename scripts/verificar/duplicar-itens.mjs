@@ -24,7 +24,13 @@
      2. DUPLICAR ENQUANTO EDITA OUTRO PACOTE -- o formulario troca para a copia em modo
         criar, e o pacote que estava sendo editado fica intacto depois do salvamento.
      3. DUPLICAR E RECARREGAR SEM SALVAR -- o estado persistido devolve a copia ainda em
-        modo criar; o catalogo continua com os pacotes que tinha.
+        modo criar; o catalogo continua com os pacotes que tinha. Desde 03/09/2026 devolve
+        tambem os SETE CAMPOS de texto da copia (chave `form`, ver fcFormLer): sem eles a
+        recarga entregava os opcionais da copia num formulario em branco -- o dono via dois
+        opcionais soltos e nenhum pacote a que pertencessem. E o caminho fecha onde importa:
+        SALVAR depois da recarga cria a copia e deixa o original intacto campo a campo.
+        Na `main` de 03/09/2026 os sete campos voltam vazios e o salvamento e recusado
+        ("Informe o codigo do pacote").
      4. DUPLICAR UM OPCIONAL -- a copia entra LOGO ABAIXO da original, com preco e
         "vende por quantidade" iguais e o nome marcado, e salvar grava as duas.
      5. A RECUSA DE CODIGO REPETIDO -- no cadastro (nova) e na geracao (a que ja
@@ -287,6 +293,39 @@ try {
     t.pendenteVisivel && t.pendenteTexto.indexOf('pacote nenhum') > 0, t.pendenteTexto);
   chk('o aviso manda apertar o botao que ESTA na tela',
     t.pendenteTexto.indexOf(t.botao) > 0, t.botao + ' / ' + t.pendenteTexto);
+
+  /* OS SETE CAMPOS DA COPIA. Sem eles a recarga devolvia opcionais sem pacote nenhum. */
+  chk('a recarga devolve o codigo derivado da copia', t.cod === 'E905-DU-1H-COPIA', t.cod);
+  chk('a recarga devolve o nome marcado como copia', t.nome === 'Ensaio 1 hora (cópia)', t.nome);
+  chk('a recarga devolve a duracao', t.dur === '1 hora', t.dur);
+  chk('a recarga devolve o preco', String(t.preco) === '420', t.preco);
+  chk('a recarga devolve o que inclui', t.inclui === '10 fotos tratadas', t.inclui);
+  chk('a recarga devolve o endereco do TidyCal',
+    t.path === 'https://tidycal.com/fotocerta/e905-du-1h', t.path);
+  chk('a recarga devolve a familia escolhida (nunca em branco)', !!t.fam, JSON.stringify(t.fam));
+
+  /* ---- e o caminho fecha: SALVAR depois da recarga ---- */
+  await zerarAlertas(pg);
+  await clicar(pg, 'a-pac-salvar');
+  await espera(PAUSA);
+  const dep = await gravado(pg);
+  const av = await alertas(pg);
+  chk('salvar depois da recarga nao e recusado', av.length === 0, av.join(' | '));
+  chk('salvar depois da recarga CRIA a copia (dois pacotes viram tres)',
+    dep.pacotes.length === 3, dep.pacotes.length);
+  chk('e o pacote de ORIGEM continua intacto, campo a campo',
+    foto(dep.pacotes[0]) === foto(antes.pacotes[0]),
+    foto(dep.pacotes[0]) + ' != ' + foto(antes.pacotes[0]));
+  chk('o segundo pacote do cenario tambem continua intacto',
+    foto(dep.pacotes[1]) === foto(antes.pacotes[1]),
+    foto(dep.pacotes[1]) + ' != ' + foto(antes.pacotes[1]));
+  const nova = dep.pacotes[2] || {};
+  chk('a copia gravada tem o codigo, o nome e o preco da copia',
+    nova.cod === 'E905-DU-1H-COPIA' && nova.nome === 'Ensaio 1 hora (cópia)' && String(nova.preco) === '420',
+    JSON.stringify(nova));
+  chk('a copia gravada levou os dois opcionais, com a marca de quantidade',
+    (nova.ops || []).length === 2 && nova.ops[0].qtd === true && nova.ops[1].qtd === false,
+    JSON.stringify(nova.ops));
   chk('sem erro de console', pg.erros.length === 0, pg.erros.join(' | '));
   await pg.close();
 } catch (e) { chk('o roteiro deste caso rodou ate o fim', false, String(e.message || e)); }
