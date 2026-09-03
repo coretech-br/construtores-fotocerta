@@ -96,6 +96,58 @@ O sétimo dos antigos — atualizar o espelho da Tag Body da hospedeira — foi 
 
 ---
 
+## Entregue em 03/09/2026 — a leva dos achados
+
+Sob a regra nova do dono (*"o que for identificado pelo caminho, registra, resolve e publica
+na nova versão"*), a lista de dívidas pequenas foi **zerada** nesta leva, com uma exceção
+declarada no fim. O que saiu:
+
+- **As três dívidas da lista de cupons da Mini loja.** A descrição de uma delas estava errada
+  e a medição corrigiu: o valor **não** se perdia (uma rede global de gravação o pegava) — o
+  que se perdia era a **prévia**, que continuava mostrando o valor antigo enquanto o código
+  gerado já levava o novo. Defeito pior de enxergar que o descrito. Junto, a **validade** do
+  cupom voltou a aparecer na lista (estava sendo gravada e nunca mostrada).
+- **A quantidade do opcional no recibo do PayPal**, na página de obrigado: o pedido cobrava
+  3× e escrevia o nome sem o `x3`. Uma linha, provada lendo o pedido de verdade que o bloco
+  monta. E, junto, **opcional com quantidade zero** deixou de entrar no nome (saía
+  `Album 20x30 x0`, cobrando zero).
+- **As 118 frases de interface sem acento**, achadas por um detector novo e versionado
+  (`scripts/verificar/acentos.mjs`) que lê o JavaScript **como código** — enxergando frase
+  montada em pedaços, que a varredura anterior perdia — e tira o vocabulário da **própria
+  árvore**: palavra já escrita certa em algum lugar vira a referência para achar a errada em
+  outro. Três tinham irmã e foram copiadas; **as outras 115 foram só acentuadas, nenhuma
+  reescrita** — a tarefa era acentuação, não melhoria de texto.
+- **A ordem das caixas** (spec: `docs/specs/2026-09-03-ordem-logica-das-abas-design.md`).
+  Seis abas estavam certas. Três não: a aba `pac` virou duas seções numeradas (famílias antes
+  de pacotes), o Slideshow juntou os dois passos da importação numa caixa, e a Mini loja pôs a
+  fonte antes do consumidor. **O número da seção deixou de ser digitado**: `fcSecoesNumerar()`
+  o escreve pela posição, e as sete citações apontam pela chave — mesma armadilha que
+  `ABAS.length` já tinha resolvido para a contagem de abas.
+- **O laço de quantidade da Mini loja** virou peça única, no molde das irmãs (`m-out` idêntico
+  byte a byte, que é a prova de que a extração não mudou a saída).
+- **A dependência implícita** entre as três `*CpCodAjustar`: gravavam por tabela, contando com
+  um ouvinte a 14 mil linhas dali.
+- **O formulário inacabado sobrevive à recarga**, nas três abas — com o índice de edição
+  junto, porque restaurar os opcionais sem saber que o dono estava **editando** um item, e não
+  criando um novo, seria pior que perder: ele clicaria em "Adicionar" e duplicaria. E a tela
+  diz que o formulário está pendente, nomeando o item.
+
+**Prova da leva:** `regressao.sh main` → **2 divergências, as duas em `a-out3`**, que são as
+duas mudanças intencionais do recibo do PayPal. As outras 23 saídas e as 9 cobranças, byte a
+byte idênticas, nas duas passagens. Mais as cinco suítes de navegador (`cupom-minimo` 68,
+`textos-escape` 51, `lista-cupons` 51, `pac-quantidade` 44, `acentos` limpo).
+
+### O que ficou, e é decisão do dono
+
+**Aplicar um preset com um item em edição** deixa o formulário apontando para a posição N do
+catálogo **novo** — o botão diz "Salvar alterações" e gravaria por cima de outro produto. É
+anterior a esta rodada, e a mudança do formulário inacabado já **melhora** o caminho (índice
+fora da faixa vira "item novo"). Zerar o formulário ao aplicar um preset é uma decisão sobre o
+que "aplicar preset" significa — e a resposta provável é sim, porque preset já é declarado
+como *fotografia da aba inteira*. Fica para a palavra do dono.
+
+---
+
 ## Dívidas registradas, pequenas, sem dono
 
 Em 23/08/2026 o dono pediu que **todas** fossem feitas. Ficou uma, e ela é dele:
