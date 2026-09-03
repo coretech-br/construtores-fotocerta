@@ -129,3 +129,40 @@ medindo a Etapa 1 (40 campos em 36 minutos) que a previsão da rodada caiu de 11
 7–9 h — a previsão original vinha de impressão, e a medição a corrigiu. Estimativa que erra
 e é corrigida à vista vale mais que estimativa confortável. Ver "Método de execução:
 econômico por padrão", item 6: **medir antes de estimar**.
+
+## O que se acha pelo caminho: registra, RESOLVE e publica (regra de 03/09/2026)
+
+Fixada pelo dono: *"Não registre apenas, resolva também, mesmo que seja na sequência dessa
+rodada. Regra para o projeto: o que for identificado pelo caminho, registra, resolve e publica
+na nova versão."*
+
+Isso **substitui** o padrão anterior, em que achado fora do escopo era registrado e deixado
+para depois. O registro continua obrigatório — ele é o que impede o achado de se perder entre
+uma rodada e outra —, mas deixou de ser o ponto final.
+
+**Como fica, na prática:**
+
+1. Achado durante uma rodada **entra na fila daquela mesma rodada**, ou da seguinte,
+   imediatamente. Não vai para uma lista que ninguém puxa.
+2. A rodada pode ser **partida** para isso: fecha-se e publica-se o que está pronto, e o
+   achado sai logo em seguida, na versão seguinte. Segurar entrega pronta por causa de um
+   achado novo é o inverso do que a regra pede.
+3. **A dívida some da lista quando o código muda**, e some **de todos os lugares que a
+   descrevem** — a `pendencias.md` e os comentários do `index.html` que apontam para ela.
+   Isto foi aprendido duas vezes em dois dias: registro que descreve como pendente o que já
+   foi feito **manda procurar no lugar errado**, e quem lê confia.
+
+**A única classe que continua exigindo uma palavra do dono antes** — e não por burocracia,
+mas porque o custo do erro é dele e não se desfaz sozinho:
+
+- mudança no **formato do que fica gravado** (estado, preset, "Exportar tudo"), porque ela
+  atinge backups que ele já tem em arquivo;
+- mudança que toque **payload de pagamento, selo, link de cobrança ou recusa**.
+
+Essas duas **também se resolvem** — a diferença é que se avisa antes de começar, com a
+medição do alcance, em vez de aparecer com elas prontas.
+
+**O que a regra NÃO autoriza:** trocar medição por pressa. A regressão byte a byte, o teste
+com o bloco entregue rodando de verdade e a conferência de versões continuam valendo para
+tudo, inclusive para o conserto de uma linha. Achado resolvido sem prova é achado trocado por
+outro, que ninguém sabe onde está.

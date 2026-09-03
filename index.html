@@ -619,7 +619,7 @@
           <label for="fci-nomer">Nome do recebedor <small>(máx. 25 caracteres, acentos removidos no código Pix)</small></label>
           <input type="text" id="fci-nomer" value="Foto Certa" maxlength="25" placeholder="nome que aparece no Pix">
           <label for="fci-cidade">Cidade do recebedor <small>(máx. 15 caracteres, acentos removidos no código Pix)</small></label>
-          <input type="text" id="fci-cidade" value="Vitoria" maxlength="15" placeholder="cidade do recebedor">
+          <input type="text" id="fci-cidade" value="Vitória" maxlength="15" placeholder="cidade do recebedor">
           <label for="fci-client">Client ID do PayPal <small>(Live, público)</small></label>
           <input type="text" id="fci-client" value="" placeholder="Cole aqui o Client ID Live da sua conta PayPal">
           <label for="fci-zapnum">WhatsApp <small>(DDI+DDD+número, só dígitos)</small></label>
@@ -754,6 +754,8 @@
       <input type="text" id="s-leg" placeholder="Ensaio de Natal — família Silva">
       <div class="acoes"><button class="botao claro" id="s-add">Adicionar imagem</button></div>
       </fieldset>
+    </div>
+    <div>
       <fieldset>
       <legend>Importar de uma galeria ou de uma página</legend>
       <p class="ajuda"><b>Por que duas colagens:</b> o navegador não deixa esta ferramenta abrir uma página do fotocerta.com.br por conta própria (política de origem cruzada — medido: <i>Failed to fetch</i>). Então você traz a página até aqui. <b>Como fazer:</b> abra a galeria no navegador, aperte <b>Cmd&nbsp;⌥&nbsp;U</b> (ver código-fonte), depois <b>Cmd&nbsp;A</b> (selecionar tudo) e <b>Cmd&nbsp;C</b> (copiar). Cole o link no primeiro campo e o código-fonte no segundo. Vale para galerias (<i>/gallery/…</i>), para portfólios (<i>/portfolio/…</i>) e para as <b>páginas comuns</b> do site (<i>/albuns</i>), que servem as fotos de <i>cdn.alboompro.com</i> em vez do storage.</p>
@@ -763,11 +765,7 @@
       <textarea id="s-imp-fonte" spellcheck="false" placeholder="Cole aqui o código-fonte inteiro da página."></textarea>
       <div class="acoes"><button class="botao claro" id="s-imp-conferir">Conferir a página</button></div>
       <p class="ajuda">O código-fonte traz <b>mais fotos que a tela</b>: na galeria de exemplo, o navegador tinha 10 fotos carregadas e o código-fonte trazia 46. As fotos entram <b>na mesma ordem em que aparecem na página</b>, inclusive a de capa, que na página não é a primeira. Só entram endereços dos servidores da Alboom: qualquer outro é descartado com a contagem à vista. <b>Numa página comum</b> a mesma foto aparece em vários tamanhos (medido: 51 endereços para 10 fotos em <i>/albuns</i>) — cada foto entra <b>uma vez só, no maior tamanho que a página trouxe</b>, e só as da conta que aparece em mais fotos, que a conferência mostra. Nada do que você cola aqui é salvo — a ferramenta só lê os endereços das fotos e esquece o resto.</p>
-      </fieldset>
-    </div>
-    <div>
-      <fieldset>
-      <legend>Como as fotos entram na lista</legend>
+      <p class="ajuda"><b>Depois de conferir</b>, escolha como as fotos entram na lista. O botão <b>Adicionar à lista</b>, no fim desta caixa, só liga depois da conferência.</p>
       <label>Legenda das fotos</label>
       <div class="radios" id="s-imp-legmodo">
       <label><input type="radio" name="s-impleg" value="nao" checked><span>Sem legenda</span></label>
@@ -1635,6 +1633,7 @@
           <div class="acoes"><button class="botao claro" id="u-op-add">Adicionar opcional</button></div>
           <ul class="lista-imgs" id="u-op-lista"></ul>
           <p class="vazio" id="u-op-vazio">Nenhum opcional neste produto.</p>
+          <p class="ajuda alerta" id="u-op-pendente" style="display:none"></p>
           <label>Seleção dos opcionais</label>
           <div class="radios">
             <label><input type="radio" name="u-opsel" value="unico" checked><span>Apenas 1</span></label>
@@ -2897,6 +2896,18 @@
   <div class="grade">
     <div>
       <fieldset>
+        <legend>Importar as fotos de uma galeria inteira</legend>
+        <label for="m-imp-link">Link da galeria ou da página <small>(o endereço da barra do navegador)</small></label>
+        <input type="text" id="m-imp-link" placeholder="https://www.fotocerta.com.br/gallery/121894-estudio-tematico">
+        <label for="m-imp-fonte">Código-fonte da página <small>(Cmd ⌥ U, Cmd A, Cmd C — cole aqui)</small></label>
+        <textarea id="m-imp-fonte" spellcheck="false" placeholder="Cole aqui o código-fonte inteiro da página."></textarea>
+        <div class="acoes"><button class="botao claro" id="m-imp-conferir">Conferir a página</button></div>
+        <p class="ajuda s-alerta" id="m-imp-resultado" style="display:none"></p>
+        <p class="lista-conta" id="m-imp-conta" style="display:none"></p>
+        <ul class="lista-imgs lista-rolagem" id="m-imp-lista"></ul>
+        <p class="ajuda">Isto é a mesma leitura que a aba Slideshow faz, com outro destino: em vez de virar uma lista de fotos, os endereços ficam aqui para você <b>associar ao produto que estiver cadastrando</b>. Nada do que você cola nestes dois campos é salvo.</p>
+      </fieldset>
+      <fieldset>
         <legend>Cadastrar produto</legend>
         <p class="ajuda">De <b>15 a 50 produtos</b> é o tamanho para o qual esta vitrine foi desenhada. Cada produto pode ter os seus próprios itens opcionais, como no Checkout.</p>
         <div class="caixa-editor">
@@ -2909,7 +2920,7 @@
           <label for="m-pcat">Categoria <small>(livre; a lista sugere as que você já usou)</small></label>
           <input type="text" id="m-pcat" list="m-cat-lista" placeholder="Álbuns">
           <datalist id="m-cat-lista"></datalist>
-          <label for="m-pimg">Foto do produto <small>(endereço completo; use <b>Usar</b> na galeria importada ao lado)</small></label>
+          <label for="m-pimg">Foto do produto <small>(endereço completo; use <b>Usar</b> na galeria importada acima)</small></label>
           <input type="text" id="m-pimg" placeholder="https://storage.alboom.ninja/...">
           <label>Vende por quantidade? <small>(um ensaio se vende uma vez; um álbum se vende em vários)</small></label>
           <div class="radios">
@@ -2927,6 +2938,7 @@
           <div class="acoes"><button class="botao claro" id="m-op-add">Adicionar opcional</button></div>
           <ul class="lista-imgs" id="m-op-lista"></ul>
           <p class="vazio" id="m-op-vazio">Nenhum opcional neste produto.</p>
+          <p class="ajuda alerta" id="m-op-pendente" style="display:none"></p>
           <label>Seleção dos opcionais</label>
           <div class="radios">
             <label><input type="radio" name="m-opsel" value="unico" checked><span>Apenas 1</span></label>
@@ -2944,18 +2956,6 @@
             <button class="botao claro" id="m-prod-cancelar" style="display:none">Cancelar edição</button>
           </div>
         </div>
-      </fieldset>
-      <fieldset>
-        <legend>Importar as fotos de uma galeria inteira</legend>
-        <label for="m-imp-link">Link da galeria ou da página <small>(o endereço da barra do navegador)</small></label>
-        <input type="text" id="m-imp-link" placeholder="https://www.fotocerta.com.br/gallery/121894-estudio-tematico">
-        <label for="m-imp-fonte">Código-fonte da página <small>(Cmd ⌥ U, Cmd A, Cmd C — cole aqui)</small></label>
-        <textarea id="m-imp-fonte" spellcheck="false" placeholder="Cole aqui o código-fonte inteiro da página."></textarea>
-        <div class="acoes"><button class="botao claro" id="m-imp-conferir">Conferir a página</button></div>
-        <p class="ajuda s-alerta" id="m-imp-resultado" style="display:none"></p>
-        <p class="lista-conta" id="m-imp-conta" style="display:none"></p>
-        <ul class="lista-imgs lista-rolagem" id="m-imp-lista"></ul>
-        <p class="ajuda">Isto é a mesma leitura que a aba Slideshow faz, com outro destino: em vez de virar uma lista de fotos, os endereços ficam aqui para você <b>associar ao produto que estiver cadastrando</b>. Nada do que você cola nestes dois campos é salvo.</p>
       </fieldset>
     </div>
     <div>
@@ -3479,7 +3479,7 @@
 <div class="painel" id="painel-pac" role="tabpanel">
   <p class="descricao"><b>Agendamento por pacote</b> — agrupa vários tipos de agendamento do TidyCal numa página só. O cliente escolhe o pacote pelo preço e vê apenas o calendário daquela duração. Gera também a página de obrigado, que cobra o pacote agendado — com itens opcionais e cupom de desconto — por Pix ou cartão.</p>
 
-  <div class="secao primeira"><span class="secao-n">1</span> Formas de pagamento e identificação</div>
+  <div class="secao primeira" data-sec="a-pagamento"><span class="secao-n">1</span> Formas de pagamento e identificação</div>
   <div class="grade">
     <div>
       <fieldset>
@@ -3531,7 +3531,30 @@
     </div>
   </div>
 
-  <div class="secao"><span class="secao-n">2</span> Famílias, pacotes e itens opcionais</div>
+  <div class="secao" data-sec="a-familias"><span class="secao-n">2</span> Famílias de pacotes</div>
+  <div class="grade">
+    <div>
+      <fieldset>
+        <legend>Cadastrar família</legend>
+        <p class="ajuda">A família é o <b>passo 1</b> da vitrine: o cliente escolhe o tipo de ensaio e só então vê os pacotes daquela família. Com <b>uma família só</b> a vitrine volta a dois passos e a família não aparece para ninguém — nem no código gerado.</p>
+        <div class="dupla">
+          <input type="text" id="a-fam-nome" placeholder="Dias úteis">
+          <input type="text" id="a-fam-dica" placeholder="Segunda a sexta">
+        </div>
+        <p class="ajuda">O segundo campo é a descrição curta (opcional), que aparece embaixo do nome no cartão da família.</p>
+        <div class="acoes"><button class="botao claro" id="a-fam-add">Adicionar família</button></div>
+      </fieldset>
+    </div>
+    <div>
+      <fieldset>
+        <legend>Famílias cadastradas</legend>
+        <ul class="lista-imgs" id="a-fam-lista"></ul>
+        <p class="vazio" id="a-fam-vazio">Uma família só — a vitrine mostra dois passos, sem perguntar o tipo. Crie a segunda para a vitrine passar a perguntar.</p>
+      </fieldset>
+    </div>
+  </div>
+
+  <div class="secao" data-sec="a-pacotes"><span class="secao-n">3</span> Pacotes e itens opcionais</div>
   <div class="grade">
     <div>
       <fieldset>
@@ -3568,6 +3591,7 @@
           <div class="acoes"><button class="botao claro" id="a-op-add">Adicionar opcional</button></div>
           <ul class="lista-imgs" id="a-op-lista"></ul>
           <p class="vazio" id="a-op-vazio">Nenhum opcional neste pacote.</p>
+          <p class="ajuda alerta" id="a-op-pendente" style="display:none"></p>
 
           <div class="acoes">
             <button class="botao" id="a-pac-salvar">Adicionar pacote</button>
@@ -3577,18 +3601,6 @@
       </fieldset>
     </div>
     <div>
-      <fieldset>
-        <legend>Famílias de pacotes</legend>
-        <p class="ajuda">A família é o <b>passo 1</b> da vitrine: o cliente escolhe o tipo de ensaio e só então vê os pacotes daquela família. Com <b>uma família só</b> a vitrine volta a dois passos e a família não aparece para ninguém — nem no código gerado.</p>
-        <div class="dupla">
-          <input type="text" id="a-fam-nome" placeholder="Dias úteis">
-          <input type="text" id="a-fam-dica" placeholder="Segunda a sexta">
-        </div>
-        <p class="ajuda">O segundo campo é a descrição curta (opcional), que aparece embaixo do nome no cartão da família.</p>
-        <div class="acoes"><button class="botao claro" id="a-fam-add">Adicionar família</button></div>
-        <ul class="lista-imgs" id="a-fam-lista"></ul>
-        <p class="vazio" id="a-fam-vazio">Uma família só — a vitrine mostra dois passos, sem perguntar o tipo. Crie a segunda para a vitrine passar a perguntar.</p>
-      </fieldset>
       <fieldset>
         <legend>Pacotes cadastrados</legend>
         <ul class="lista-imgs" id="a-pac-lista"></ul>
@@ -3622,7 +3634,7 @@
     </div>
   </div>
 
-  <div class="secao"><span class="secao-n">3</span> Página de obrigado e marcadores</div>
+  <div class="secao"><span class="secao-n">4</span> Página de obrigado e marcadores</div>
   <div class="grade">
     <div>
       <fieldset>
@@ -3657,7 +3669,7 @@
     </div>
   </div>
 
-  <div class="secao"><span class="secao-n">4</span> Textos e aparência</div>
+  <div class="secao" data-sec="a-aparencia"><span class="secao-n">5</span> Textos e aparência</div>
   <div class="grade">
     <div>
       <fieldset>
@@ -3666,7 +3678,7 @@
         <input type="text" id="a-t1" value="Agende seu ensaio">
         <label for="a-txt-subtitulo">Subtítulo da vitrine <small>(opcional — vazio, nada aparece)</small></label>
         <input type="text" id="a-txt-subtitulo" value="" placeholder="ex.: Pague no Pix e ganhe {pct}% de desconto">
-        <p class="ajuda">Entra logo abaixo do título, antes do passo 1. Onde você escrever <code>{pct}</code>, entra o <b>desconto do Pix</b> configurado na seção 1 — assim ele acompanha sozinho quando você mudar o desconto. Escrever o número à mão faz o subtítulo mentir no dia em que o desconto mudar, sem erro e sem aviso.</p>
+        <p class="ajuda">Entra logo abaixo do título, antes do passo 1. Onde você escrever <code>{pct}</code>, entra o <b>desconto do Pix</b> configurado na seção <span class="sec-ref" data-sec="a-pagamento"></span> — assim ele acompanha sozinho quando você mudar o desconto. Escrever o número à mão faz o subtítulo mentir no dia em que o desconto mudar, sem erro e sem aviso.</p>
         <label for="a-txt-passo-familia">Rótulo do passo da família <small>(só aparece com duas ou mais famílias)</small></label>
         <input type="text" id="a-txt-passo-familia" value="Escolha o tipo de ensaio">
         <label for="a-t2">Rótulo do passo dos pacotes <small>(passo 1 sem famílias; passo 2 com elas)</small></label>
@@ -3725,7 +3737,7 @@
     </div>
   </div>
 
-  <div class="secao"><span class="secao-n">5</span> Textos da página de obrigado</div>
+  <div class="secao"><span class="secao-n">6</span> Textos da página de obrigado</div>
   <div class="grade">
     <div>
       <fieldset>
@@ -3754,7 +3766,7 @@
         <input type="text" id="a-txt-cupom-minimo" value="Este cupom vale a partir de {valor}.">
         <label for="a-txt-cupom-minimo-queda">Cupom que saiu porque o pedido desceu</label>
         <input type="text" id="a-txt-cupom-minimo-queda" value="O cupom saiu: ele vale a partir de {valor}, e o pedido ficou abaixo disso.">
-        <p class="ajuda">As duas frases acima só aparecem em cupom que tenha <b>valor mínimo do pedido</b> (seção 2). Onde você escrever <code>{valor}</code>, entra o mínimo daquele cupom, já na moeda do bloco. São duas porque são dois momentos: a primeira responde <i>por que não aplicou</i>; a segunda, <i>por que o desconto que eu já tinha sumiu</i>.</p>
+        <p class="ajuda">As duas frases acima só aparecem em cupom que tenha <b>valor mínimo do pedido</b> (seção <span class="sec-ref" data-sec="a-pacotes"></span>). Onde você escrever <code>{valor}</code>, entra o mínimo daquele cupom, já na moeda do bloco. São duas porque são dois momentos: a primeira responde <i>por que não aplicou</i>; a segunda, <i>por que o desconto que eu já tinha sumiu</i>.</p>
         <label for="a-txt-desconto">Linha do desconto</label>
         <input type="text" id="a-txt-desconto" value="Desconto ({codigo})">
         <label for="a-txt-cupom-validade">Validade do cupom, na linha de desconto</label>
@@ -3819,10 +3831,10 @@
     </div>
   </div>
 
-  <div class="secao"><span class="secao-n">6</span> Biblioteca de presets</div>
+  <div class="secao"><span class="secao-n">7</span> Biblioteca de presets</div>
   <div class="grade" id="fcp-a-box"></div>
 
-  <div class="secao"><span class="secao-n">7</span> Prévia e códigos gerados</div>
+  <div class="secao"><span class="secao-n">8</span> Prévia e códigos gerados</div>
   <div class="acoes" style="margin-bottom:14px">
     <button class="botao" id="a-gerar">Gerar código</button>
     <button class="botao claro" id="a-atualizar">Atualizar prévia</button>
@@ -3837,7 +3849,7 @@
       </div>
       <div id="a-pv-box"></div>
       </div>
-      <p class="ajuda">A prévia roda o código gerado de verdade: escolher uma família mostra só os pacotes dela, escolher um pacote acende o passo do calendário, e o preço troca ao vivo. O modo Celular usa <b>380 pixels</b> de largura lógica — abaixo dos dois cortes configurados na seção 4 no padrão de fábrica, então os cartões aparecem como <b>linhas compactas</b>. Se você baixar a "Largura de corte das linhas compactas" para menos de 380, a prévia passa a mostrar cartões altos num quadro estreito: é o que a página publicada faria nessa largura, não um defeito da prévia. O que ainda difere da página publicada: o calendário do TidyCal não carrega aqui (é outro domínio, e a prévia não deve depender de rede) — no lugar dele aparece um retângulo cinza avisando "Aqui entra o calendário do TidyCal deste pacote."; e o quadro não carrega o CSS do tema do site.</p>
+      <p class="ajuda">A prévia roda o código gerado de verdade: escolher uma família mostra só os pacotes dela, escolher um pacote acende o passo do calendário, e o preço troca ao vivo. O modo Celular usa <b>380 pixels</b> de largura lógica — abaixo dos dois cortes configurados na seção <span class="sec-ref" data-sec="a-aparencia"></span> no padrão de fábrica, então os cartões aparecem como <b>linhas compactas</b>. Se você baixar a "Largura de corte das linhas compactas" para menos de 380, a prévia passa a mostrar cartões altos num quadro estreito: é o que a página publicada faria nessa largura, não um defeito da prévia. O que ainda difere da página publicada: o calendário do TidyCal não carrega aqui (é outro domínio, e a prévia não deve depender de rede) — no lugar dele aparece um retângulo cinza avisando "Aqui entra o calendário do TidyCal deste pacote."; e o quadro não carrega o CSS do tema do site.</p>
 
       <label for="a-pv-pac" style="display:block;margin-top:16px">Prévia da página de obrigado — prever como</label>
       <select id="a-pv-pac"></select>
@@ -3914,8 +3926,8 @@
    QUEM IMPEDE QUE ELE MINTA: scripts/conferir-versoes.sh, que recusa index.html
    alterado sem a versao mudar junto -- a mesma disciplina do fc-compartilhado.js,
    e pela mesma razao: carimbo que ninguem confere e o defeito de amanha. */
-var FC_VERSAO='2026-09-02g';
-var FC_PUBLICADO='2026-09-02 19:36';   /* America/Sao_Paulo -- escrito pelo carimbador */
+var FC_VERSAO='2026-09-02h';
+var FC_PUBLICADO='2026-09-02 22:45';   /* America/Sao_Paulo -- escrito pelo carimbador */
 (function(){
   var el=document.getElementById('fc-versao');
   if(!el) return;
@@ -3995,8 +4007,8 @@ function fcCompartParar(pedida,chegou){
     'padding:14px 18px;font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;text-align:left';
   try{document.documentElement.className+=' fc-parado';}catch(e){}
   d.textContent=chegou
-    ? 'A ferramenta parou antes de comecar: o arquivo compartilhado que chegou e a versao "'+chegou+'", e esta pagina pediu a "'+pedida+'". Isso costuma ser uma copia velha guardada pelo navegador. Recarregue segurando Shift; se continuar, avise que a publicacao saiu pela metade. Nada foi gerado, e nada do que estava salvo foi tocado.'
-    : 'A ferramenta parou antes de comecar: o arquivo fc-compartilhado.js (versao "'+pedida+'") nao carregou. Sem ele nao ha como montar codigo Pix nem selar um link. Confira a conexao e recarregue. Nada foi gerado, e nada do que estava salvo foi tocado.';
+    ? 'A ferramenta parou antes de começar: o arquivo compartilhado que chegou é a versão "'+chegou+'", e esta página pediu a "'+pedida+'". Isso costuma ser uma cópia velha guardada pelo navegador. Recarregue segurando Shift; se continuar, avise que a publicação saiu pela metade. Nada foi gerado, e nada do que estava salvo foi tocado.'
+    : 'A ferramenta parou antes de começar: o arquivo fc-compartilhado.js (versão "'+pedida+'") não carregou. Sem ele não há como montar código Pix nem selar um link. Confira a conexão e recarregue. Nada foi gerado, e nada do que estava salvo foi tocado.';
   if(document.body)document.body.insertBefore(d,document.body.firstChild);
 }
 
@@ -4214,7 +4226,7 @@ function fcTxtRestaura(defs,st){
    ATRIBUTO, e nao a propriedade: a propriedade ja foi sobrescrita pela restauracao. */
 function fcTxtFabricaDiverge(){
   var tabelas=[['Checkout',U_TXT_DEFS],['Mini loja',M_TXT_DEFS],
-               ['Agendamento por pacote',A_TXT_DEFS],['Link de cobranca',P_TXT_DEFS],
+               ['Agendamento por pacote',A_TXT_DEFS],['Link de cobrança',P_TXT_DEFS],
                ['Slideshow',S_TXT_DEFS],['Capta\u00e7\u00e3o de leads',L_TXT_DEFS],
                ['Agendamento TidyCal',T_TXT_DEFS],['Contagem regressiva',C_TXT_DEFS]],r=[],i,j,el,attr;
   for(i=0;i<tabelas.length;i++)for(j=0;j<tabelas[i][1].length;j++){
@@ -4779,7 +4791,7 @@ function fcPvSondaPP(o){
   s+="          caixa.innerHTML='';\n";
   s+="          var eti=document.createElement('div');\n";
   s+='          eti.setAttribute(\'style\',\'font:600 10px/1.4 -apple-system,BlinkMacSystemFont,sans-serif;color:#8a8375;text-align:center;text-transform:uppercase;letter-spacing:.06em\');\n';
-  s+="          eti.textContent='desenho: o SDK do PayPal nao roda na previa';\n";
+  s+="          eti.textContent='desenho: o SDK do PayPal não roda na prévia';\n";
   s+='          caixa.appendChild(eti);\n';
   s+="          var des=document.createElement('div');des.innerHTML=DESENHO_PP;caixa.appendChild(des);\n";
   s+="          var pai=document.createElement('div');\n";
@@ -4957,6 +4969,36 @@ function trocarAba(qual){
   });
 }
 
+/* ============ o numero de cada secao sai da POSICAO dela ============ */
+/* Numero de secao escrito a mao e a mesma armadilha que ABAS.length ja resolveu para a
+   contagem de abas. Medido em 03/09/2026: partir a secao 2 da aba Agendamento por pacote em
+   duas obrigou a renumerar CINCO cabecalhos e SETE textos que citam secao por numero -- e o
+   que ficasse para tras apontaria para o lugar errado sem erro nenhum, que e a classe de
+   defeito silencioso que este projeto mais paga para evitar.
+   Agora o cabecalho recebe o numero da POSICAO dele dentro do painel, e o texto que cita uma
+   secao aponta para ela pela CHAVE ('data-sec'), nunca pelo numero: em HTML por um
+   <span class="sec-ref" data-sec="..."></span>, em JavaScript por fcSecN('...').
+   Os numeros continuam escritos no HTML, corretos, por dois motivos: a fonte fica legivel
+   para quem le o arquivo, e a pagina nasce certa antes de o script rodar. Mas quem manda e
+   esta funcao -- numero errado no HTML e corrigido aqui em vez de mentir na tela. */
+function fcSecN(chave){
+  var el=document.querySelector('.secao[data-sec="'+chave+'"]');
+  var n=el?el.querySelector('.secao-n'):null;
+  return n?n.textContent:'?';
+}
+function fcSecoesNumerar(){
+  var pais=document.querySelectorAll('.painel'),refs,i,j,secs,n;
+  for(i=0;i<pais.length;i++){
+    secs=pais[i].querySelectorAll('.secao');
+    for(j=0;j<secs.length;j++){
+      n=secs[j].querySelector('.secao-n');
+      if(n)n.textContent=String(j+1);
+    }
+  }
+  refs=document.querySelectorAll('.sec-ref');
+  for(i=0;i<refs.length;i++)refs[i].textContent=fcSecN(refs[i].getAttribute('data-sec'));
+}
+
 /* ============ aviso de falha isolada ============ */
 /* Falha isolada nao pode virar falha muda. Cada aba salva, restaura e se prepara por conta
    propria -- um defeito numa delas nao derruba as demais --, mas o operador precisa
@@ -4989,7 +5031,7 @@ function fcBarra(msg){
       'text-align:left;box-shadow:0 2px 10px rgba(0,0,0,.35)';
     var t=document.createElement('div');
     t.style.cssText='font-weight:700;margin-bottom:4px';
-    t.appendChild(document.createTextNode('Algo parou nesta ferramenta. O que nao aparece abaixo segue funcionando; o detalhe esta no console (Cmd+Option+C).'));
+    t.appendChild(document.createTextNode('Algo parou nesta ferramenta. O que não aparece abaixo segue funcionando; o detalhe está no console (Cmd+Option+C).'));
     bar.appendChild(t);
     var l=document.createElement('div');l.id='fc-falhas-lista';
     bar.appendChild(l);
@@ -5060,8 +5102,14 @@ function prep(nome,abaId,fn,fase){
      pref         prefixo dos campos da aba ('s-', 'l-', ...). E TAMBEM a chave do fragmento
                   que carrega a configuracao (s, t, l, u, b, c) e onde a biblioteca fica
                   gravada (<pref>.presets) -- as duas coisas sempre coincidiram.
-     fora         campos do fragmento que NAO entram num preset (escolhas sobre outro
-                  componente). Ao aplicar, eles conservam o que esta na tela.
+     fora         campos do fragmento que NAO entram num preset. Ao aplicar, eles conservam
+                  o que esta na tela. Duas familias moram aqui: escolhas sobre OUTRO
+                  componente (a consolidacao do codigo 1 da Bordas) e o FORMULARIO INACABADO
+                  das tres abas que cadastram item com opcionais ('edops'/'editidx'). O
+                  segundo caso e o que explica a regra: o buffer e gravado no estado, para o
+                  dono nao perder o que digitou ao recarregar, mas ele nao e configuracao de
+                  campanha -- num preset ele seria ruido, e faria o aviso "veio de X, que
+                  mudou depois" disparar por causa de um opcional a meio de digitar.
      (ago/2026) 'operacionais' SAIU deste registro. Ela listava, por aba, os campos de contato
                   e pagamento -- e existia porque cada aba tinha a sua copia deles. Com a
                   identidade recolhida num lugar so (ver o bloco "identidade e paleta"), nao ha
@@ -5129,8 +5177,9 @@ var ABAS=[
    exemplo:'ex.: Natal 2026 - hospedeira',
    guarda:'tudo o que está configurado nesta aba — modo de exibição, ícone, formato, cores e posição do botão, os quatro trechos da mensagem, os textos do pop-up, o cabeçalho (coruja, movimento e efeitos), o horário de atendimento, a pergunta de qualificação com as opções cadastradas, a âncora e os <b>textos</b> da seção 8.'},
   {id:'uni',  nome:'Checkout',            chaves:['u'],         coleta:uColeta,restaura:uRestaura,gerar:uGerar,
-   pref:'u',fora:[],resumo:uPresetResumo,redesenhar:uPresetDepois,antesDeSalvar:uPresetAntes,
-   listas:[['u.prods',{nome:'',desc:'',preco:0,opsel:'unico',opnenhum:'nao',qtd:false,ops:[{nome:'',preco:0,qtd:false}]},'nome'],
+   pref:'u',fora:['edops','editidx'],resumo:uPresetResumo,redesenhar:uPresetDepois,antesDeSalvar:uPresetAntes,
+   listas:[['u.edops',{nome:'',preco:0,qtd:false},'nome'],
+           ['u.prods',{nome:'',desc:'',preco:0,opsel:'unico',opnenhum:'nao',qtd:false,ops:[{nome:'',preco:0,qtd:false}]},'nome'],
            ['u.prods.ops',{nome:'',preco:0,qtd:false},'nome'],
            ['u.cps',{codigo:'',tipo:'pct_total',valor:0,validade:'',minimo:''},'codigo']],
    exemplo:'ex.: Natal 2026 - pacotes',
@@ -5151,8 +5200,9 @@ var ABAS=[
    exemplo:'ex.: Foto Certa - página /pagar',
    guarda:'tudo o que está configurado nesta aba — o endereço da página, a aparência, os textos, e também a <b>cobrança que está na tela</b> (descrição, valor, identificador, a data de validade e o desconto no Pix). Aplicar um preset troca também essa cobrança: ele é a fotografia da aba inteira. Os dados de quem recebe <b>não</b> estão aqui: eles saíram desta aba para o painel Identidade, e nenhum preset os toca.'},
   {id:'loja', nome:'Mini loja',           chaves:['m'],         coleta:mColeta,restaura:mRestaura,gerar:mGerar,
-   pref:'m',fora:[],resumo:mPresetResumo,redesenhar:mPresetDepois,antesDeSalvar:mPresetAntes,
-   listas:[['m.prods',{nome:'',desc:'',preco:0,cat:'',img:'',opsel:'unico',opnenhum:'nao',qtd:false,ops:[{nome:'',preco:0,qtd:false}]},'nome'],
+   pref:'m',fora:['edops','editidx'],resumo:mPresetResumo,redesenhar:mPresetDepois,antesDeSalvar:mPresetAntes,
+   listas:[['m.edops',{nome:'',preco:0,qtd:false},'nome'],
+           ['m.prods',{nome:'',desc:'',preco:0,cat:'',img:'',opsel:'unico',opnenhum:'nao',qtd:false,ops:[{nome:'',preco:0,qtd:false}]},'nome'],
            ['m.prods.ops',{nome:'',preco:0,qtd:false},'nome'],
            ['m.cps',{codigo:'',tipo:'pct_total',valor:0,validade:'',minimo:''},'codigo']],
    importar:mImportarLimpar,
@@ -5164,7 +5214,7 @@ var ABAS=[
    exemplo:'ex.: Natal 2026 - neve na hospedeira',
    guarda:'tudo o que está configurado nesta aba — o efeito escolhido, o alcance (página inteira ou dentro de um bloco) com a altura, e os campos de <b>todos</b> os efeitos: quantidade, tamanho, deriva e cor das partículas, as quatro cores do confete, o tamanho, o desfoque e as três cores da aurora, a quantidade, o tamanho e as quatro cores das luzes, mais a duração do ciclo, a opacidade, a proporção no celular e o <b>fundo da prévia</b>.'},
   {id:'pac', nome:'Agendamento por pacote', chaves:['a'],       coleta:aColeta,restaura:aRestaura,gerar:aGerar,
-   pref:'a',fora:[],resumo:aPresetResumo,redesenhar:aPresetDepois,antesDeSalvar:aPresetAntes,
+   pref:'a',fora:['edops','editidx'],resumo:aPresetResumo,redesenhar:aPresetDepois,antesDeSalvar:aPresetAntes,
    /* A chave essencial de 'a.familias' e o 'id', e nao o 'nome': e o id que o 'fam' de cada
       pacote aponta. Uma familia {"nome":"X"} sem id e casca -- ninguem consegue pertencer a
       ela --, e fcxPodarListas a descarta e a CONTA; ja um nome em branco e recuperavel
@@ -5175,7 +5225,8 @@ var ABAS=[
       ausente, 'path' virava '' -- e o alerta afirmava "Nada foi perdido", que naquele caminho
       era FALSO. O dono so descobriria ao tentar gerar, pela recusa "esta sem o caminho do
       TidyCal", sem ligacao nenhuma com a importacao. */
-   listas:[['a.familias',{id:'',nome:'',dica:''},'id'],
+   listas:[['a.edops',{nome:'',preco:0,qtd:false},'nome'],
+           ['a.familias',{id:'',nome:'',dica:''},'id'],
            ['a.pacotes',{cod:'',nome:'',dur:'',preco:0,inclui:'',path:'',link:'',fam:'',ops:[{nome:'',preco:0,qtd:false}]},'cod'],
            ['a.pacotes.ops',{nome:'',preco:0,qtd:false},'nome'],
            ['a.cps',{codigo:'',tipo:'pct_total',valor:0,validade:'',minimo:''},'codigo']],
@@ -5209,7 +5260,7 @@ function fcEstadoAtual(){
         if(frag&&frag[a.pref])frag[a.pref].presets=fcPresets[a.id]||[];
         fcFrag[a.id]=frag;
       }
-      catch(e){frag=fcFrag[a.id];fcFalha(a.nome,'salvar as configuracoes',e,a.id);}
+      catch(e){frag=fcFrag[a.id];fcFalha(a.nome,'salvar as configurações',e,a.id);}
     }
     if(frag){for(k in frag){if(Object.prototype.hasOwnProperty.call(frag,k))st[k]=frag[k];}}
   }
@@ -5218,7 +5269,7 @@ function fcEstadoAtual(){
 function salvarEstado(){
   var st=fcEstadoAtual();
   try{localStorage.setItem('fcConstrutores',JSON.stringify(st));}
-  catch(e){fcFalha('Ferramenta','gravar as configuracoes -- armazenamento do navegador indisponivel, nada esta sendo salvo',e,'');}
+  catch(e){fcFalha('Ferramenta','gravar as configurações -- armazenamento do navegador indisponível, nada está sendo salvo',e,'');}
   /* A barra do preset geral (fase 3) diz se a tela ainda confere com o preset selecionado, e
      tem de acordar em TODA mudanca de valor -- nao so nas que passam por uma tecla. Ligar isso
      aos eventos 'input'/'change' de document parecia bastar e NAO bastava: adicionar uma foto,
@@ -5235,10 +5286,10 @@ function salvarEstado(){
 function restaurarEstado(){
   var raw,st,i,j,a,c;
   try{raw=localStorage.getItem('fcConstrutores');}
-  catch(e){fcFalha('Ferramenta','ler as configuracoes gravadas -- armazenamento do navegador indisponivel',e,'');return;}
+  catch(e){fcFalha('Ferramenta','ler as configurações gravadas -- armazenamento do navegador indisponível',e,'');return;}
   if(!raw)return;
   try{st=JSON.parse(raw);}
-  catch(e){fcFalha('Ferramenta','entender o estado gravado -- o conteudo salvo esta corrompido',e,'');return;}
+  catch(e){fcFalha('Ferramenta','entender o estado gravado -- o conteúdo salvo está corrompido',e,'');return;}
   if(!st||typeof st!=='object')return;
   for(i=0;i<ABAS.length;i++){
     a=ABAS[i];
@@ -5259,13 +5310,31 @@ function restaurarEstado(){
        valor gravado ser marcado. Try proprio: biblioteca ilegivel nao derruba a restauracao
        dos campos, que e o que o operador tem a perder. */
     try{fcPresets[a.id]=fcPresetsLer(a,(st[a.pref]&&st[a.pref].presets));}
-    catch(e){fcPresets[a.id]=[];fcFalha(a.nome,'ler a biblioteca de presets -- os campos da aba nao foram afetados',e,a.id);}
+    catch(e){fcPresets[a.id]=[];fcFalha(a.nome,'ler a biblioteca de presets -- os campos da aba não foram afetados',e,a.id);}
     try{a.restaura(st);}
     catch(e){
       fcSoLeitura[a.id]=true;
-      fcFalha(a.nome,'restaurar as configuracoes -- o que ja estava gravado foi mantido, e esta aba nao grava nada ate a pagina ser recarregada',e,a.id);
+      fcFalha(a.nome,'restaurar as configurações -- o que já estava gravado foi mantido, e esta aba não grava nada até a página ser recarregada',e,a.id);
     }
   }
+}
+/* ============ o formulario inacabado, dito na tela ============ */
+/* Os opcionais que o dono digitou e ainda NAO salvou passaram a sobreviver a recarga (chaves
+   'edops' e 'editidx' do fragmento de cada aba). Guardar sem avisar seria trocar uma perda
+   silenciosa por uma armadilha silenciosa: o dono reabre a ferramenta amanha, ve tres
+   opcionais embaixo do formulario e conclui que comecou do zero.
+   O rotulo do botao NAO e escrito aqui: ele e LIDO do proprio botao, que ja diz "Adicionar
+   produto" ou "Salvar alterações" conforme o modo. Assim o aviso nao tem como discordar do
+   botao que ele manda apertar. Uma funcao so para as tres abas -- o que muda entre elas cabe
+   em tres argumentos. */
+function fcOpPendente(idAviso,buf,idx,nomeItem,item,idBotao){
+  var el=document.getElementById(idAviso);if(!el)return;
+  if(!buf||!buf.length){el.style.display='none';el.textContent='';return;}
+  var b=document.getElementById(idBotao),rot=b?b.textContent:'';
+  el.style.display='block';
+  el.textContent=(idx>=0)
+    ? ('Estes opcionais ainda não foram salvos. Você está editando \u201c'+nomeItem+'\u201d — clique em \u201c'+rot+'\u201d para gravar.')
+    : ('Estes opcionais ainda não foram salvos em '+item+' nenhum. Termine o cadastro acima e clique em \u201c'+rot+'\u201d.');
 }
 function corValida(v){return /^#[0-9a-fA-F]{6}$/.test(v);}
 /* Rede do gerador: le o campo de texto da cor e devolve o padrao quando o valor nao e um
@@ -5474,7 +5543,7 @@ function fciGravar(){
           pendente:fciPendenteViva(),
           migrou:FCI.migrou.slice(0)};
   try{localStorage.setItem(FCI_CHAVE,JSON.stringify(st));}
-  catch(e){fcFalha('Identidade','gravar a identidade e a paleta -- armazenamento do navegador indisponivel',e,'');}
+  catch(e){fcFalha('Identidade','gravar a identidade e a paleta -- armazenamento do navegador indisponível',e,'');}
 }
 function fciLerBruto(chave,rotulo){
   return fcLerJson(chave,function(fase,e){fcFalha(rotulo,fase,e,'');});
@@ -6077,14 +6146,14 @@ function fcPresetConverter(a,x){
    Os tres param com a mesma explicacao, em vez de parecerem funcionar. */
 function fcPresetBloqueado(a){
   if(!fcSoLeitura[a.id])return false;
-  alert('Esta aba parou de gravar nesta sessao (o aviso vermelho no topo diz por que), entao a biblioteca de presets dela esta so para leitura. Recarregue a pagina para voltar a salvar, aplicar e remover presets aqui.');
+  alert('Esta aba parou de gravar nesta sessão (o aviso vermelho no topo diz por que), então a biblioteca de presets dela está só para leitura. Recarregue a página para voltar a salvar, aplicar e remover presets aqui.');
   return true;
 }
 function fcPresetSalvar(a){
   var campo=$('fcp-'+a.pref+'-nome'),nome=campo?campo.value.trim():'',lista,i,erro;
   if(fcPresetBloqueado(a))return;
-  if(!nome){alert('De um nome ao preset antes de salvar. E por ele que a lista identifica a configuracao.');return;}
-  if(nome.length>FC_PRESET_NOME_MAX){alert('O nome do preset passa de '+FC_PRESET_NOME_MAX+' caracteres. Um nome curto (campanha + onde a configuracao e usada) e o que cabe na lista.');return;}
+  if(!nome){alert('De um nome ao preset antes de salvar. É por ele que a lista identifica a configuração.');return;}
+  if(nome.length>FC_PRESET_NOME_MAX){alert('O nome do preset passa de '+FC_PRESET_NOME_MAX+' caracteres. Um nome curto (campanha + onde a configuração é usada) é o que cabe na lista.');return;}
   /* prende os numeros A VISTA antes de congelar a configuracao: um preset guardado com valor
      fora da faixa devolveria, meses depois, um numero que o proprio campo ja nao aceita */
   if(a.antesDeSalvar){
@@ -6093,7 +6162,7 @@ function fcPresetSalvar(a){
   }
   lista=fcPresets[a.id]||(fcPresets[a.id]=[]);
   i=fcPresetIndice(a,nome);
-  if(i>=0&&!confirm('Ja existe um preset chamado "'+lista[i].nome+'". Substituir a configuracao dele pela que esta na tela? A anterior nao volta.'))return;
+  if(i>=0&&!confirm('Já existe um preset chamado "'+lista[i].nome+'". Substituir a configuração dele pela que está na tela? A anterior não volta.'))return;
   var valores=fcPresetCapturar(a);
   /* O carimbo e a data em que o preset MUDOU, e a fase 3 vai usar exatamente isso para avisar
      "veio de 'X', que mudou depois". Regravar o mesmo preset com os mesmos valores nao e
@@ -6133,8 +6202,8 @@ function fcPresetAplicar(a,i){
     /* mesma regra do estado gravado: o DOM ficou meio escrito e ja nao representa nada, entao
        a aba para de coletar ate recarregar em vez de sobrescrever o que estava salvo */
     fcSoLeitura[a.id]=true;
-    fcFalha(a.nome,'aplicar um preset -- o que ja estava gravado foi mantido, e esta aba nao grava nada ate a pagina ser recarregada',e,a.id);
-    alert('Nao foi possivel aplicar o preset "'+p.nome+'" nesta aba. O que estava gravado foi mantido; recarregue a pagina. O aviso vermelho no topo tem o detalhe.');
+    fcFalha(a.nome,'aplicar um preset -- o que já estava gravado foi mantido, e esta aba não grava nada até a página ser recarregada',e,a.id);
+    alert('Não foi possível aplicar o preset "'+p.nome+'" nesta aba. O que estava gravado foi mantido; recarregue a página. O aviso vermelho no topo tem o detalhe.');
     return;
   }
   try{if(a.redesenhar)a.redesenhar();}
@@ -6150,7 +6219,7 @@ function fcPresetRemover(a,i){
   var lista=fcPresets[a.id]||[],p=lista[i];
   if(!p)return;
   if(fcPresetBloqueado(a))return;
-  if(!confirm('Remover o preset "'+p.nome+'"? Isto apaga so o preset -- nenhum codigo ja colado no site e afetado.'))return;
+  if(!confirm('Remover o preset "'+p.nome+'"? Isto apaga só o preset -- nenhum código já colado no site é afetado.'))return;
   lista.splice(i,1);
   fcPresetsRender(a);salvarEstado();
 }
@@ -6158,8 +6227,8 @@ function fcPresetsRender(a){
   var lista=$('fcp-'+a.pref+'-lista'),arr=fcPresets[a.id]||[],fora=fcPresetsFora[a.id]||0,i,h,btns,aviso='';
   if(fora>0){
     aviso='<p class="ajuda" style="border-color:#8C1D18;color:#8C1D18"><b>'+fora+
-      (fora===1?' item da biblioteca estava ilegivel e ficou de fora.'
-               :' itens da biblioteca estavam ilegiveis e ficaram de fora.')+
+      (fora===1?' item da biblioteca estava ilegível e ficou de fora.'
+               :' itens da biblioteca estavam ilegíveis e ficaram de fora.')+
       '</b> Isso acontece quando o armazenamento do navegador e editado a mao ou corrompe. '+
       'O que estava legivel continua na lista; o que nao aparece aqui precisa ser salvo de novo.</p>';
   }
@@ -6198,7 +6267,7 @@ function fcPresetsRender(a){
 function fcPresetResumo(a,p){
   var t='';
   try{if(a.resumo)t=a.resumo(p.valores||{});}catch(e){t='';}
-  return t||'configuracao salva desta aba';
+  return t||'configuração salva desta aba';
 }
 
 /* A secao "Biblioteca de presets" de TODAS as abas e desenhada por esta funcao, e nao copiada
@@ -6294,7 +6363,7 @@ var FCG_CHAVE='fcConstrutoresGerais';
    qual para nao mandar a Tag Body de uma para o campo da outra. */
 var FCG_PAGINAS=[['hospedeira','Hospedeira','HOSPEDEIRA'],
                  ['embutida','Embutida','EMBUTIDA'],
-                 ['obrigado','Página de obrigado','PAGINA DE OBRIGADO']];
+                 ['obrigado','Página de obrigado','PÁGINA DE OBRIGADO']];
 var FCG_CAMPANHA_MAX=60;
 var fcgTimer=null;       /* timer UNICO do redesenho adiado; cancelado antes de reagendar */
 var fcgCacheInt={};      /* ultimo HTML de cada bloco de aviso, para nao redesenhar a toa */
@@ -6398,7 +6467,7 @@ function fcgGravar(){
   if(!FCG.pronto)return;
   var st={v:1,presets:FCG.presets,ativo:FCG.ativo,ativas:FCG.ativas,origens:FCG.origens,codigos:FCG.codigos};
   try{localStorage.setItem(FCG_CHAVE,JSON.stringify(st));}
-  catch(e){fcFalha('Preset geral','gravar os presets gerais -- armazenamento do navegador indisponivel',e,'');}
+  catch(e){fcFalha('Preset geral','gravar os presets gerais -- armazenamento do navegador indisponível',e,'');}
 }
 /* Leitura defensiva, no mesmo criterio da biblioteca de presets: item a item, e o que fica de
    fora e ANUNCIADO na barra em vez de sumir calado. Preset geral ilegivel nao pode derrubar a
@@ -6435,10 +6504,10 @@ function fcgLerOrigem(o){
 function fcgLer(){
   var raw,st,i,p,a;
   try{raw=localStorage.getItem(FCG_CHAVE);}
-  catch(e){fcFalha('Preset geral','ler os presets gerais -- armazenamento do navegador indisponivel',e,'');return;}
+  catch(e){fcFalha('Preset geral','ler os presets gerais -- armazenamento do navegador indisponível',e,'');return;}
   if(!raw)return;
   try{st=JSON.parse(raw);}
-  catch(e){fcFalha('Preset geral','entender os presets gerais gravados -- o conteudo salvo esta corrompido',e,'');return;}
+  catch(e){fcFalha('Preset geral','entender os presets gerais gravados -- o conteúdo salvo está corrompido',e,'');return;}
   if(!fcEhObjeto(st))return;
   if(fcEhArray(st.presets)){
     for(i=0;i<st.presets.length;i++){
@@ -6688,7 +6757,7 @@ function fcgAdotar(p){
           /* mesma regra do estado gravado: o DOM ficou meio escrito e ja nao representa nada,
              entao a aba para de coletar ate recarregar em vez de sobrescrever o que esta salvo */
           fcSoLeitura[a.id]=true;
-          fcFalha(a.nome,'aplicar um preset geral -- o que ja estava gravado foi mantido, e esta aba nao grava nada ate a pagina ser recarregada',e,a.id);
+          fcFalha(a.nome,'aplicar um preset geral -- o que já estava gravado foi mantido, e esta aba não grava nada até a página ser recarregada',e,a.id);
           travadas.push(a.nome);
         }
       }
@@ -6957,12 +7026,12 @@ function fcgRenderBarra(){
   if(FCG.fora>0&&!fcgAvisouFora){
     fcgAvisouFora=true;
     /* a barra monta "<rotulo>: falha ao <fase>.", entao a fase tem de ser uma acao */
-    fcFalha('Preset geral','ler '+FCG.fora+' dos presets gerais gravados -- eles estavam ilegiveis e ficaram de fora; os legiveis continuam na lista','','');
+    fcFalha('Preset geral','ler '+FCG.fora+' dos presets gerais gravados -- eles estavam ilegíveis e ficaram de fora; os legíveis continuam na lista','','');
   }
   /* par repetido no armazenamento: dito uma vez, com o conserto explicado */
   if(FCG.dup>0&&!fcgAvisouDup){
     fcgAvisouDup=true;
-    fcFalha('Preset geral','ler '+FCG.dup+' dos presets gerais gravados sem repetir campanha e pagina -- o(s) repetido(s) ganharam um numero no fim do nome da campanha para poderem aparecer na lista e ser apagados; confira qual e o que vale','','');
+    fcFalha('Preset geral','ler '+FCG.dup+' dos presets gerais gravados sem repetir campanha e página -- o(s) repetido(s) ganharam um número no fim do nome da campanha para poderem aparecer na lista e ser apagados; confira qual é o que vale','','');
   }
 }
 /* Estado da aba na barra de abas: esmaecida com selo quando esta fora da pagina, e CLICAVEL
@@ -7087,7 +7156,7 @@ function fcgAtualizarComOrigem(a){
   try{fcgAplicarAba(a,org.pa.valores);}
   catch(e){
     fcSoLeitura[a.id]=true;
-    fcFalha(a.nome,'atualizar a aba com o preset de origem -- o que ja estava gravado foi mantido, e esta aba nao grava nada ate a pagina ser recarregada',e,a.id);
+    fcFalha(a.nome,'atualizar a aba com o preset de origem -- o que já estava gravado foi mantido, e esta aba não grava nada até a página ser recarregada',e,a.id);
     alert('Não foi possível atualizar esta aba. O que estava gravado foi mantido; recarregue a página.');
     return;
   }
@@ -7505,13 +7574,23 @@ function fcxData(){
   var d=new Date(),m=d.getMonth()+1,x=d.getDate();
   return d.getFullYear()+'-'+(m<10?'0':'')+m+'-'+(x<10?'0':'')+x;
 }
+/* TIRAR O ACENTO, e so isso -- FONTE UNICA das tres vezes que a ferramenta precisa disso.
+   Nasceu de tres copias da mesma decomposicao: fcxSlug (nome de arquivo), fccSeguro (linha de
+   identificacao do painel) e o comentario que a aba TidyCal escreve dentro do bloco entregue.
+   As tres concordavam; a quarta e onde uma delas ganharia uma regra que as outras nao ganham.
+   Ela NAO limpa mais nada -- quem precisa de mais (minusculas, hifen, faixa ASCII) faz por
+   cima, porque cada uma quer uma coisa diferente depois deste passo.
+   A faixa dos acentos separados que a decomposicao produz vai em escape: faixa de caracteres
+   em expressao regular e um dos tres casos em que este arquivo usa \uXXXX. */
+function fcSemAcento(s){
+  var t=String(s==null?'':s);
+  if(t.normalize)t=t.normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  return t;
+}
 /* Pedaco de nome de arquivo a partir de um texto do operador. E rotulo, nao identificador: o
    que nao for letra sem acento ou numero vira hifen, e o resultado e cortado. */
 function fcxSlug(s){
-  var t=String(s==null?'':s);
-  /* A faixa dos acentos separados que a decomposicao produz vai em escape: faixa de
-     caracteres em expressao regular e um dos tres casos em que este arquivo usa \uXXXX. */
-  if(t.normalize)t=t.normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  var t=fcSemAcento(s);
   t=t.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+/,'').replace(/-+$/,'');
   if(t.length>40)t=t.substring(0,40).replace(/-+$/,'');
   return t||'sem-nome';
@@ -8072,7 +8151,7 @@ function fcxAplicar(plano,politica,comRascunho){
       }catch(e){
         /* mesma regra do estado gravado: o DOM ficou meio escrito e ja nao representa nada */
         fcSoLeitura[a.id]=true;
-        fcFalha(a.nome,'aplicar o rascunho de um arquivo importado -- o que ja estava gravado foi mantido, e esta aba nao grava nada ate a pagina ser recarregada',e,a.id);
+        fcFalha(a.nome,'aplicar o rascunho de um arquivo importado -- o que já estava gravado foi mantido, e esta aba não grava nada até a página ser recarregada',e,a.id);
         travou.push(a.nome);
       }
     }
@@ -8298,11 +8377,11 @@ function sUrlOk(v){
   if(/^[a-zA-Z][a-zA-Z0-9+.\-]*:/.test(limpo))return false;
   return /^\/[^/\\]/.test(limpo);
 }
-var S_URL_AVISO='O link da imagem precisa ser um endereco: http(s) completo '+
-  '(https://storage.alboom.ninja/foto.jpg), endereco sem esquema com duas barras e o host '+
+var S_URL_AVISO='O link da imagem precisa ser um endereço: http(s) completo '+
+  '(https://storage.alboom.ninja/foto.jpg), endereço sem esquema com duas barras e o host '+
   '(//storage.alboom.ninja/foto.jpg) ou caminho a partir da raiz do site (/fotos/foto.jpg). '+
   'Texto solto, nome de arquivo do computador, outros esquemas (javascript:, data:) e barra '+
-  'a mais ou barra invertida no comeco nao carregam foto nenhuma na pagina publicada.';
+  'a mais ou barra invertida no começo não carregam foto nenhuma na página publicada.';
 /* Host do endereco, quando ha um. Aceita as tres formas que sUrlOk deixa passar: https://host,
    //host e caminho a partir da raiz (que nao tem host nenhum, e por isso devolve vazio). */
 function sUrlHost(v){
@@ -9254,7 +9333,7 @@ function sImpAplicar(){
 }
 
 function sLimpar(){
-  if(!confirm('Limpar todas as imagens e configuracoes do slideshow?'))return;
+  if(!confirm('Limpar todas as imagens e configurações do slideshow?'))return;
   /* O agendamento da previa precisa morrer AQUI. Na versao anterior era um setInterval que
      rodava sobre o sImgs antigo e, com a lista zerada logo abaixo, caia em sImgs[novo].legenda
      de um indice inexistente -- um TypeError por tique, para sempre. Hoje o motor de troca de
@@ -9337,7 +9416,7 @@ function sCfg(){
 function sPvShim(){
   return fcPvShim({pref:'s',
     abre:'o ',
-    fecha:' deste quadro. A previa esta gravando nas chaves reais do navegador. O codigo gerado ao lado nao e afetado.'});
+    fecha:' deste quadro. A prévia está gravando nas chaves reais do navegador. O código gerado ao lado não é afetado.'});
 }
 /* Sem conteudo abaixo do slideshow nao da para ver que a pagina continua rolando enquanto o
    dedo arrasta na diagonal -- que e justamente o que o recurso de arrastar nao pode quebrar.
@@ -9470,7 +9549,7 @@ function sGerar(){
      dizendo a posicao, para o operador achar a linha na lista ao lado. */
   for(var iu=0;iu<sImgs.length;iu++){
     if(!sUrlOk(sImgs[iu].url)){
-      alert('A imagem na posicao '+(iu+1)+' da lista nao tem um link valido ("'+sImgs[iu].url+'"). '+S_URL_AVISO+' Remova essa linha e adicione a imagem de novo.');
+      alert('A imagem na posição '+(iu+1)+' da lista não tem um link válido ("'+sImgs[iu].url+'"). '+S_URL_AVISO+' Remova essa linha e adicione a imagem de novo.');
       return;
     }
   }
@@ -9860,7 +9939,7 @@ function lPresetResumo(v){
   var L=v.l||{},n=(L.qops&&L.qops.length)||0;
   var t=(L.modo==='automatico'?'abre sozinho':'abre no clique')+' — icone '+String(L.icone||'');
   t+=', '+(L.hor==='sim'?'com horario':'sem horario');
-  if(n)t+=', '+n+(n===1?' opcao de pergunta':' opcoes de pergunta');
+  if(n)t+=', '+n+(n===1?' opção de pergunta':' opções de pergunta');
   return t;
 }
 function lPresetAntes(){
@@ -9880,7 +9959,7 @@ function lPresetDepois(){
 }
 
 function lPadroes(){
-  if(!confirm('Restaurar todos os campos para os valores padrao?'))return;
+  if(!confirm('Restaurar todos os campos para os valores padrão?'))return;
   $('l-cod').value='';$('l-pag').value='';
   setRadio('l-modo','botao');$('l-segauto').value=8;
   setRadio('l-efeito','normal');$('l-segef').value=10;
@@ -9923,7 +10002,7 @@ function lPadroes(){
 var L_Q_MAX=20;
 function lQAdd(){
   var t=$('l-qop').value.trim(),i;
-  if(!t){alert('Escreva o texto da opcao.');return;}
+  if(!t){alert('Escreva o texto da opção.');return;}
   /* Duas opcoes com o mesmo texto sao indistinguiveis para o visitante: ele escolhe uma das
      duas, a mensagem chega igual nos dois casos e o operador nunca fica sabendo que cadastrou
      duas. Recusa com aviso, no criterio desta fase -- nao ha o que assumir no lugar (apagar a
@@ -9932,12 +10011,12 @@ function lQAdd(){
      mesma opcao para quem le a lista, entao o teste ignora maiusculas e espacos das pontas. */
   for(i=0;i<lQops.length;i++){
     if(String(lQops[i]).trim().toLowerCase()===t.toLowerCase()){
-      alert('A opcao "'+lQops[i]+'" ja esta na lista (posicao '+(i+1)+'). Duas opcoes com o mesmo texto ficam indistinguiveis para o visitante: ele escolhe uma das duas e a mensagem chega igual nos dois casos.');
+      alert('A opção "'+lQops[i]+'" já está na lista (posição '+(i+1)+'). Duas opções com o mesmo texto ficam indistinguíveis para o visitante: ele escolhe uma das duas e a mensagem chega igual nos dois casos.');
       return;
     }
   }
   if(lQops.length>=L_Q_MAX){
-    alert('A lista ja tem '+L_Q_MAX+' opcoes, que e o maximo. Uma lista maior que isso deixa de ajudar o visitante a se qualificar e vira rolagem dentro do pop-up, que no celular ja e apertado. Remova alguma antes de acrescentar outra.');
+    alert('A lista já tem '+L_Q_MAX+' opções, que é o máximo. Uma lista maior que isso deixa de ajudar o visitante a se qualificar e vira rolagem dentro do pop-up, que no celular já é apertado. Remova alguma antes de acrescentar outra.');
     return;
   }
   lQops.push(t);
@@ -10048,7 +10127,7 @@ function lToggles(){
     if(!lHoraOk($('l-horfim').value))falta.push('hora de fechamento em branco');
     if(horLigado&&falta.length){
       av.style.display='block';
-      av.innerHTML='<b>O modo esta desligado no codigo gerado:</b> '+escHtml(falta.join(', '))+'. O bloco sai sem o aviso de horario, exatamente como se o modo nunca tivesse sido ligado.';
+      av.innerHTML='<b>O modo está desligado no código gerado:</b> '+escHtml(falta.join(', '))+'. O bloco sai sem o aviso de horário, exatamente como se o modo nunca tivesse sido ligado.';
     }else{
       av.style.display='none';
       av.textContent='';
@@ -10147,18 +10226,18 @@ function lGerar(){
      identificacao. Nao ha valor certo a assumir no lugar (inventar "PADRAO" juntaria campanhas
      diferentes no mesmo balde), entao a geracao e recusada com aviso -- mesmo criterio que a
      Contagem regressiva ja aplica ao codigo da campanha. */
-  if(!$('l-cod').value.trim()){alert('Informe o codigo da pagina. E ele que identifica a campanha na mensagem que chega no seu WhatsApp: sem ele o lead chega com "(cod: **)" e nao ha como saber de qual pagina veio.');return;}
+  if(!$('l-cod').value.trim()){alert('Informe o código da página. É ele que identifica a campanha na mensagem que chega no seu WhatsApp: sem ele o lead chega com "(cod: **)" e não há como saber de qual página veio.');return;}
   /* Ancora resolvida e validada ANTES de montar qualquer coisa: recusar no fim deixaria a
      textarea com o bloco anterior enquanto o alerta diz que nao gerou. */
   if(v.anc.ativo&&!v.anc.ok){
-    alert('A ancora precisa ser # seguido de uma letra e depois so letras, numeros, hifen ou sublinhado (ex.: #reserva, #secao-2). O valor digitado vira seletor no CSS do plano B: com espaco ou acento a regra nasce invalida e o plano B nao funciona, sem nenhum aviso na pagina; com chave, chaveta ou tag, o CSS gerado deixa de ser CSS.');
+    alert('A âncora precisa ser # seguido de uma letra e depois só letras, números, hífen ou sublinhado (ex.: #reserva, #secao-2). O valor digitado vira seletor no CSS do plano B: com espaço ou acento a regra nasce inválida e o plano B não funciona, sem nenhum aviso na página; com chave, chaveta ou tag, o CSS gerado deixa de ser CSS.');
     return;
   }
   /* Abrir e fechar na MESMA hora nao tem leitura unica: pode ser "24 horas" ou "nenhum minuto",
      e as duas mudam o que o visitante ve. Recusa com aviso, no mesmo criterio da chave Pix e do
      codigo da pagina -- assumir uma das duas por conta propria seria decidir calado. */
   if(v.hor.ligado&&v.hor.ini===v.hor.fim&&lHoraOk(v.hor.ini)){
-    alert('A hora de abertura e a de fechamento estao iguais ('+v.hor.ini+'). Nao da para saber se voce quis dizer 24 horas por dia ou nenhum minuto de atendimento. Ajuste uma das duas.');
+    alert('A hora de abertura e a de fechamento estão iguais ('+v.hor.ini+'). Não dá para saber se você quis dizer 24 horas por dia ou nenhum minuto de atendimento. Ajuste uma das duas.');
     return;
   }
   $('l-out').value=lBloco(v);
@@ -10675,7 +10754,7 @@ function lPvShim(){
     conferencias:'  try{if(!HTMLElement.prototype.fcPvSemFoco)falhou.push(\'foco automatico\');}catch(e){falhou.push(\'foco automatico\');}\n',
     semAbrir:true,
     abre:'',
-    fecha:' neste quadro. A previa pode gravar nas chaves reais do navegador, roubar o cursor do formulario ao lado ou abrir o WhatsApp numa aba nova. O codigo gerado ao lado nao e afetado.'});
+    fecha:' neste quadro. A prévia pode gravar nas chaves reais do navegador, roubar o cursor do formulário ao lado ou abrir o WhatsApp numa aba nova. O código gerado ao lado não é afetado.'});
 }
 /* Sem conteudo abaixo nao da para ver o botao flutuante se comportando como fixo enquanto a
    pagina rola -- que e justamente o que a distancia do rodape configura. Blocos cinzentos e
@@ -10816,7 +10895,7 @@ var T_OB_VARS=[
   {id:'tipo',  tidy:'booking_type.title',rot:'tipo de agendamento'},
   {id:'data',  tidy:'booking.date',      rot:'data'},
   {id:'hora',  tidy:'booking.time',      rot:'horario'},
-  {id:'quando',tidy:'booking.starts_at', rot:'data e horario juntos'}
+  {id:'quando',tidy:'booking.starts_at', rot:'data e horário juntos'}
 ];
 /* Sempre na ordem de T_OB_VARS, pelo mesmo motivo dos enfeites da guirlanda: a ordem em que o
    operador clicou nao pode mudar o endereco gerado. */
@@ -10894,7 +10973,11 @@ function tObBloco(cfg){
   for(i=0;i<itens.length;i++){
     var corpo='    '+itens[i].txt+(i<itens.length-1?',':'');
     do{corpo+=' ';}while(corpo.length<48);
-    j+=corpo+'/* '+itens[i].rot+' */\n';
+    /* O ROTULO E DA TELA, o comentario e do BLOCO ENTREGUE -- e a regra 10 do Manual do
+       Prosite vale para todo codigo colado, entao o acento sai aqui. Sem isto, acentuar o
+       rotulo na tela (norma de 01/09/2026) mudava a saida 5 e mandava acento para dentro de
+       um comentario do bloco: medido pela regressao. */
+    j+=corpo+'/* '+fcSemAcento(itens[i].rot)+' */\n';
   }
   j+='  ];\n';
   j+="  var FORMATO_DATA = '"+cfg.fmt+"';   /* comoveio | curto | extenso | extensodia */\n";
@@ -11052,8 +11135,8 @@ function tRestaura(st){
    salvas pelo operador. */
 function tPresetResumo(v){
   var T=v.t||{};
-  var t=(T.arq==='embutida'?'embutido na intermediaria':'direto na pagina')+' — '+T.desk+'/'+T.mob+' px, corte '+T.larg+' px';
-  if(T.obusar==='sim')t+=' + pagina de obrigado';
+  var t=(T.arq==='embutida'?'embutido na intermediária':'direto na página')+' — '+T.desk+'/'+T.mob+' px, corte '+T.larg+' px';
+  if(T.obusar==='sim')t+=' + página de obrigado';
   return t;
 }
 function tPresetAntes(){
@@ -11163,12 +11246,12 @@ function tAbrir(url){
   var w=null;
   try{w=window.open(url,'_blank');}catch(e){w=null;}
   if(w){try{w.opener=null;}catch(e2){}return;}
-  alert('O navegador bloqueou a aba nova. Libere os pop-ups desta pagina e clique de novo. O endereco montado e: '+url);
+  alert('O navegador bloqueou a aba nova. Libere os pop-ups desta página e clique de novo. O endereço montado é: '+url);
 }
 function tTestar(){
   var p=tPathNorm();
-  if(!p){alert('Informe o caminho do booking type antes de abrir a pagina de teste.');return;}
-  if(!tPathOk(p)){alert('O caminho do booking type aceita apenas letras, numeros, ponto, hifen, sublinhado e barra separando os segmentos (ex.: usuario/nome-do-agendamento). O valor digitado ("'+p+'") tem outro caractere: com ele, o endereco montado deixaria de apontar para tidycal.com.');return;}
+  if(!p){alert('Informe o caminho do booking type antes de abrir a página de teste.');return;}
+  if(!tPathOk(p)){alert('O caminho do booking type aceita apenas letras, números, ponto, hífen, sublinhado e barra separando os segmentos (ex.: usuario/nome-do-agendamento). O valor digitado ("'+p+'") tem outro caractere: com ele, o endereço montado deixaria de apontar para tidycal.com.');return;}
   tAbrir('https://tidycal.com/'+p);
 }
 function tTestarUrl(){
@@ -11176,12 +11259,12 @@ function tTestarUrl(){
   /* dois avisos, porque sao dois problemas diferentes: campo em branco e campo preenchido com
      endereco que o tUrlOk recusa. Um texto so descrevia o vazio e deixava quem digitou algo
      torto procurando um campo que ja esta preenchido. */
-  if(!u){alert('Informe o endereco da pagina intermediaria antes de abrir: um endereco http(s) completo (https://www.fotocerta.com.br/iframe-agendamento-natal).');return;}
-  if(!tUrlOk(u)){alert('O endereco digitado ("'+u+'") nao e um endereco que este botao possa abrir. Sao aceitos apenas http(s) completos (https://www.fotocerta.com.br/iframe-agendamento-natal); outros esquemas, como javascript:, e endereco comecando com duas barras, que resolve para OUTRO host, nao sao.');return;}
+  if(!u){alert('Informe o endereço da página intermediária antes de abrir: um endereço http(s) completo (https://www.fotocerta.com.br/iframe-agendamento-natal).');return;}
+  if(!tUrlOk(u)){alert('O endereço digitado ("'+u+'") não é um endereço que este botão possa abrir. São aceitos apenas http(s) completos (https://www.fotocerta.com.br/iframe-agendamento-natal); outros esquemas, como javascript:, e endereço começando com duas barras, que resolve para OUTRO host, não são.');return;}
   /* O caminho relativo e valido para o codigo 3 -- la ele e resolvido no dominio do SITE --,
      mas aqui seria resolvido no dominio desta ferramenta, e o botao abriria uma pagina que
      nao existe. Recusar e dizer por que vale mais do que abrir a pagina errada. */
-  if(u.charAt(0)==='/'){alert('Este botao so abre endereco http(s) completo. O caminho relativo ("'+u+'") e resolvido no dominio do site publicado, que nao e o desta ferramenta -- abrir daqui levaria a uma pagina que nao existe. Para testar, cole o endereco completo da pagina intermediaria.');return;}
+  if(u.charAt(0)==='/'){alert('Este botão só abre endereço http(s) completo. O caminho relativo ("'+u+'") é resolvido no domínio do site publicado, que não é o desta ferramenta -- abrir daqui levaria a uma página que não existe. Para testar, cole o endereço completo da página intermediária.');return;}
   tAbrir(u);
 }
 
@@ -11212,11 +11295,11 @@ function tGerar(){
   var tTxt=fcTxtLer(T_TXT_DEFS,{});
   if(ob.usar){
     if(!ob.vars.length){
-      alert('Escolha pelo menos um dado para a pagina de obrigado receber (nome, tipo, data, horario). Sem nenhum, nao ha o que preencher na pagina -- ou desligue a pagina de obrigado na secao 2.');
+      alert('Escolha pelo menos um dado para a página de obrigado receber (nome, tipo, data, horário). Sem nenhum, não há o que preencher na página -- ou desligue a página de obrigado na seção 2.');
       $('t-out4').value='';$('t-out5').value='';tArqToggle();return;
     }
     if(!/^https?:\/\//i.test(urlLimpa(ob.url))){
-      alert('Informe o endereco COMPLETO da pagina de confirmacao, com https:// e o dominio (https://www.fotocerta.com.br/natal-agendamento-confirmado). O TidyCal redireciona para fora do editor, entao um caminho comecando com barra nao resolve para lugar nenhum.');
+      alert('Informe o endereço COMPLETO da página de confirmação, com https:// e o domínio (https://www.fotocerta.com.br/natal-agendamento-confirmado). O TidyCal redireciona para fora do editor, então um caminho começando com barra não resolve para lugar nenhum.');
       $('t-out4').value='';$('t-out5').value='';tArqToggle();return;
     }
     $('t-out4').value=tObEndereco(ob);
@@ -11229,7 +11312,7 @@ function tGerar(){
      conferido no botao e o endereco embutido no codigo poderiam divergir. */
   var path=tPathNorm();
   if(!path){
-    alert('Informe o caminho do booking type.'+(obFeita?' Os codigos 4 e 5, da pagina de obrigado, foram gerados normalmente -- eles nao dependem dele.':''));
+    alert('Informe o caminho do booking type.'+(obFeita?' Os códigos 4 e 5, da página de obrigado, foram gerados normalmente -- eles não dependem dele.':''));
     tArqToggle();return;
   }
   var emb=radio('t-arq')==='embutida';
@@ -11237,7 +11320,7 @@ function tGerar(){
   /* Validacao ANTES de montar qualquer coisa: recusar no fim deixaria as textareas com o
      bloco anterior enquanto o alerta diz que nao gerou. */
   if(emb&&!tUrlOk(u)){
-    alert('Informe o endereco da pagina intermediaria: um endereco http(s) completo (https://www.fotocerta.com.br/iframe-agendamento-natal) ou um caminho do proprio site comecando com barra (/iframe-agendamento-natal). Vazio, o codigo 3 sai com src="" e o iframe colado na hospedeira nao carrega nada; outros esquemas, como javascript:, nao sao aceitos.');
+    alert('Informe o endereço da página intermediária: um endereço http(s) completo (https://www.fotocerta.com.br/iframe-agendamento-natal) ou um caminho do próprio site começando com barra (/iframe-agendamento-natal). Vazio, o código 3 sai com src="" e o iframe colado na hospedeira não carrega nada; outros esquemas, como javascript:, não são aceitos.');
     return;
   }
   /* Os quatro campos numericos se corrigem na tela antes de a saida ser montada -- assim o
@@ -11323,6 +11406,12 @@ function uColeta(){
        nascer de novo -- o preset desta aba e uma fotografia deste coleta(). */
     u:{prods:uProds,cps:uCps,metodo:radio('u-metodo'),moeda:radio('u-moeda'),
       cod:$('u-cod').value,
+      /* O FORMULARIO INACABADO viaja junto (03/09/2026). E acrescimo, nao mudanca de
+         formato: estado ou preset gravado antes disto simplesmente nao tem as duas chaves, e
+         o restaura ja trata chave ausente. As duas estao declaradas em 'fora' -- elas
+         descrevem o que esta a MEIO de ser digitado, e nao a configuracao da campanha, entao
+         nao entram em preset nenhum. */
+      edops:uEditOps,editidx:uEditIdx,
       selprod:radio('u-selprod'),zap:radio('u-zap'),descpix:$('u-descpix').value,
       sinal:radio('u-sinal'),sinaltipo:radio('u-sinaltipo'),sinalpct:$('u-sinalpct').value,sinalfixo:$('u-sinalfixo').value,
       resumo:radio('u-resumo'),
@@ -11373,6 +11462,23 @@ function uRestaura(st){
   /* Os 33 textos configuraveis: estado gravado antes desta rodada nao tem nenhuma destas
      chaves -- o padrao de cada campo e o terceiro item de U_TXT_DEFS. */
   fcTxtRestaura(U_TXT_DEFS,U);
+  uEditRestaurar(U);
+}
+/* Devolve o FORMULARIO DE CADASTRO ao estado em que ele estava: os opcionais digitados e, se
+   havia um, o produto que estava sendo editado. Restaurar os opcionais SEM o indice seria pior
+   do que perde-los: o dono clicaria em "Adicionar produto" e criaria um duplicado do que ele
+   estava editando. O indice e conferido contra a lista atual -- preset aplicado ou arquivo
+   importado trocam o catalogo, e um indice que nao existe mais volta a ser "produto novo".
+   Os dois ramos passam por uProdEditar/uProdLimpar, que sao os donos do modo do formulario
+   (rotulo do botao, "Cancelar edição" e campos); so os OPCIONAIS sao os do formulario, e nao
+   os do produto salvo -- e essa a diferenca que estava se perdendo. */
+function uEditRestaurar(U){
+  var buf=(U.edops||[]).map(function(o){return {nome:o.nome,preco:o.preco,qtd:!!o.qtd};});
+  var i=(typeof U.editidx==='number')?U.editidx:-1;
+  if(i>=0&&i<uProds.length)uProdEditar(i);
+  else uProdLimpar();
+  uEditOps=buf;
+  uOpRender();
 }
 
 /* ===== O que esta aba poe na biblioteca de presets (ver o bloco compartilhado) =====
@@ -11454,17 +11560,28 @@ function uFmt(v){
    do resto da ferramenta: em 'change'/'blur', nunca em 'input'. */
 function uOpPrecoAjustar(inp,i){
   var v=parseFloat(String(inp.value).replace(',','.'));
-  if(!isNaN(v)&&v>=0){uEditOps[i].preco=v;return false;}
+  if(!isNaN(v)&&v>=0){uEditOps[i].preco=v;salvarEstado();return false;}
   uEditOps[i].preco=0;
   inp.value='0';
+  salvarEstado();
   return true;
 }
 function uCpCodAjustar(inp,i){
   var alto=String(inp.value).toUpperCase();
   uCps[i].codigo=alto;
+  /* O gravador vem ANTES do desvio, e nao depois. Ate 03/09/2026 o codigo ja em maiusculas
+     saia por 'return false' sem gravar nada, e isso funcionava por um motivo que esta funcao
+     nao controla: o ouvinte de 'input' da propria linha ja tinha gravado a cada tecla. Era uma
+     dependencia implicita entre duas funcoes -- inofensiva hoje, e muda no dia em que aquele
+     ouvinte mudasse de ideia. Quem muda o modelo grava.
+     O REDESENHO DA PREVIA continua no ramo de baixo, de proposito: ele so e preciso quando o
+     valor MUDOU aqui, e remontar o iframe a cada 'blur' de um campo que nao mudou seria caro
+     e nao mostraria nada de novo. O contrato de retorno nao muda -- true quer dizer 'corrigi o
+     campo na tela', e e o que os dois ouvintes desta linha esperam. */
+  salvarEstado();
   if(alto===inp.value)return false;
   inp.value=alto;
-  salvarEstado();uPreview();
+  uPreview();
   return true;
 }
 function uOpRender(){
@@ -11482,16 +11599,16 @@ function uOpRender(){
        devolver: o campo se corrige A VISTA no change/blur, como o preco, em vez de recusar.
        Nunca no 'input' -- corrigir a cada tecla impediria apagar para redigitar. */
     var bom=op.nome;
-    n.addEventListener('input',function(){uEditOps[i].nome=n.value;if(n.value.replace(/^\s+|\s+$/g,''))bom=n.value;});
+    n.addEventListener('input',function(){uEditOps[i].nome=n.value;if(n.value.replace(/^\s+|\s+$/g,''))bom=n.value;salvarEstado();});
     (function(){
       function volta(){
         if(n.value.replace(/^\s+|\s+$/g,''))return;
-        n.value=bom;uEditOps[i].nome=bom;
+        n.value=bom;uEditOps[i].nome=bom;salvarEstado();
       }
       n.addEventListener('change',volta);n.addEventListener('blur',volta);
     })();
-    var pr=document.createElement('input');pr.type='number';pr.step='0.01';pr.min='0';pr.value=op.preco;pr.placeholder='Preco';
-    pr.addEventListener('input',function(){uEditOps[i].preco=pr.value;});
+    var pr=document.createElement('input');pr.type='number';pr.step='0.01';pr.min='0';pr.value=op.preco;pr.placeholder='Preço';
+    pr.addEventListener('input',function(){uEditOps[i].preco=pr.value;salvarEstado();});
     /* Preco apagado na lista virava preco:0.00 no codigo com o campo em branco na tela. Aqui a
        recusa dos cupons NAO cabe: opcional gratis e configuracao legitima -- a propria aba ja
        emite "Sem opcional" a preco zero, e um brinde tem preco zero de proposito. O que nao pode
@@ -11506,7 +11623,7 @@ function uOpRender(){
     var lq=document.createElement('label');
     lq.style.cssText='display:flex;align-items:center;gap:6px;margin:5px 0 0;font-size:12px;font-weight:400;color:var(--tinta-suave)';
     var cq=document.createElement('input');cq.type='checkbox';cq.checked=!!op.qtd;
-    cq.addEventListener('change',function(){uEditOps[i].qtd=cq.checked;});
+    cq.addEventListener('change',function(){uEditOps[i].qtd=cq.checked;salvarEstado();});
     lq.appendChild(cq);lq.appendChild(document.createTextNode('vende por quantidade'));
     info.appendChild(lq);
     var ctrl=document.createElement('div');ctrl.className='ctrl';
@@ -11515,6 +11632,7 @@ function uOpRender(){
     li.appendChild(info);li.appendChild(ctrl);
     ul.appendChild(li);
   });
+  fcOpPendente('u-op-pendente',uEditOps,uEditIdx,(uEditIdx>=0&&uProds[uEditIdx])?uProds[uEditIdx].nome:'','produto','u-prod-salvar');
 }
 function uOpAdd(){
   var n=$('u-op-nome').value.trim();
@@ -11523,10 +11641,10 @@ function uOpAdd(){
   if(isNaN(v)||v<0)v=0;
   uEditOps.push({nome:n,preco:v,qtd:!!$('u-op-qtd').checked});
   $('u-op-nome').value='';$('u-op-preco').value='';$('u-op-qtd').checked=false;
-  uOpRender();
+  uOpRender();salvarEstado();
 }
-function uOpMove(i,d){var j=i+d;if(j<0||j>=uEditOps.length)return;var t=uEditOps[i];uEditOps[i]=uEditOps[j];uEditOps[j]=t;uOpRender();}
-function uOpDel(i){uEditOps.splice(i,1);uOpRender();}
+function uOpMove(i,d){var j=i+d;if(j<0||j>=uEditOps.length)return;var t=uEditOps[i];uEditOps[i]=uEditOps[j];uEditOps[j]=t;uOpRender();salvarEstado();}
+function uOpDel(i){uEditOps.splice(i,1);uOpRender();salvarEstado();}
 
 /* ===== produtos ===== */
 function uProdLimpar(){
@@ -11581,12 +11699,17 @@ function uProdRender(){
        dava "2 opcionalis". Corrigido em 02/09/2026 (cc5aaae) com a palavra inteira trocada,
        como aPacRender ja fazia (14622+, aba Agendamento por pacote). */
     var qtd=(p.ops&&p.ops.length)?(' \u00b7 '+p.ops.length+(p.ops.length>1?' opcionais':' opcional')):' \u00b7 sem opcionais';
-    var nq=uQtdItens(p);
-    txt.textContent=p.nome+' — '+uFmt(parseFloat(p.preco)||0)+qtd+(nq?(' \u00b7 '+nq+' com quantidade'):'');
+    /* A conta e dos OPCIONAIS, e o produto em si e dito a parte, com o mesmo '(por quantidade)'
+       que a Mini loja ja usava. Antes ela era uQtdItens INTEIRO -- que conta o produto junto,
+       porque e o gatilho do recurso --, e um produto por quantidade sem nenhum opcional
+       aparecia como "1 com quantidade" ao lado de "sem opcionais": a linha afirmava um opcional
+       que nao existe. Agora a frase quer dizer a MESMA coisa nas tres abas que a mostram. */
+    var nq=uQtdItens(p)-(p.qtd?1:0);
+    txt.textContent=p.nome+' — '+uFmt(parseFloat(p.preco)||0)+(p.qtd?' (por quantidade)':'')+qtd+(nq?(' \u00b7 '+nq+' com quantidade'):'');
     info.appendChild(txt);
     var ctrl=document.createElement('div');ctrl.className='ctrl';
     [['\u2191',function(){uProdMove(i,-1);},'Subir'],['\u2193',function(){uProdMove(i,1);},'Descer'],
-     ['\u270E',function(){uProdEditar(i);},'Editar'],['\u2715',function(){uProdDel(i);},'Remover']]
+     ['\u270E',function(){uProdEditar(i);salvarEstado();},'Editar'],['\u2715',function(){uProdDel(i);},'Remover']]
       .forEach(function(b){var bt=document.createElement('button');bt.textContent=b[0];bt.title=b[2];bt.setAttribute('aria-label',b[2]);bt.addEventListener('click',b[1]);ctrl.appendChild(bt);});
     li.appendChild(info);li.appendChild(ctrl);
     ul.appendChild(li);
@@ -11602,7 +11725,7 @@ function uCpRender(){
   uCps.forEach(function(cp,i){
     var li=document.createElement('li');
     var info=document.createElement('div');info.className='info';
-    var cod=document.createElement('input');cod.type='text';cod.value=cp.codigo;cod.placeholder='Codigo';
+    var cod=document.createElement('input');cod.type='text';cod.value=cp.codigo;cod.placeholder='Código';
     cod.addEventListener('input',function(){uCps[i].codigo=cod.value.toUpperCase();salvarEstado();uPreview();});
     /* O modelo ja guardava em maiusculas, mas o CAMPO continuava mostrando o que foi digitado:
        tela "promo abc", codigo gerado 'PROMO ABC'. Funcionava (a comparacao em runtime ignora
@@ -11663,7 +11786,7 @@ function uCpAchaRepetido(cod,ignorar){
 }
 function uCpAdd(){
   var cod=$('u-cp-cod').value.trim().toUpperCase();
-  if(!cod){alert('Informe o codigo do cupom.');return;}
+  if(!cod){alert('Informe o código do cupom.');return;}
   var repetido=uCpAchaRepetido(cod,-1);
   if(repetido){alert('Já existe um cupom com o código "'+cod+'". O cliente digitaria um código só, e a página não tem como saber qual dos dois cadastros aplicar — escolha outro código ou edite o cupom já existente na lista.');return;}
   var v=parseFloat(String($('u-cp-valor').value).replace(',','.'));
@@ -11735,7 +11858,7 @@ function uPvShim(cfg){
   return fcPvShim({pref:'u',
     semAbrir:true,
     abre:'o ',
-    fecha:' deste quadro. A previa pode estar gravando nas chaves reais do navegador ou abrindo o WhatsApp numa aba nova. O codigo gerado ao lado nao e afetado.',
+    fecha:' deste quadro. A prévia pode estar gravando nas chaves reais do navegador ou abrindo o WhatsApp numa aba nova. O código gerado ao lado não é afetado.',
     depois:s});
 }
 /* Sem conteudo abaixo do carrinho nao da para ver onde ele termina nem rolar ate a area do Pix
@@ -11966,7 +12089,7 @@ function uRecusa(cfg){
     if(erroChave)return erroChave;
     if(!cfg.chave||!cfg.nomer||!cfg.cidade)return fciRecusa('Preencha a chave Pix, o nome do recebedor e a cidade.');
   }
-  if(cfg.zap&&!cfg.zapnum)return fciRecusa('Informe o numero do WhatsApp de destino.');
+  if(cfg.zap&&!cfg.zapnum)return fciRecusa('Informe o número do WhatsApp de destino.');
 
   /* Os cupons sao conferidos AQUI, e nao so no formulario de cadastro: o campo de valor
      DENTRO da lista de cupons nao valida nada, entao apagar o numero de um cupom ja cadastrado
@@ -11976,9 +12099,9 @@ function uRecusa(cfg){
      de um campo que o operador esvaziou. */
   for(i=0;i<cfg.cps.length;i++){
     cpc=String(cfg.cps[i].codigo||'').trim();
-    if(!cpc)return 'O cupom na posicao '+(i+1)+' da lista esta sem codigo. Um cupom sem codigo nunca pode ser digitado pelo cliente: preencha o codigo ou remova a linha.';
+    if(!cpc)return 'O cupom na posição '+(i+1)+' da lista está sem código. Um cupom sem código nunca pode ser digitado pelo cliente: preencha o código ou remova a linha.';
     cpv=parseFloat(String(cfg.cps[i].valor).replace(',','.'));
-    if(isNaN(cpv)||cpv<=0)return 'O cupom "'+cpc+'" esta com o valor do desconto vazio ou zerado. Ele seria entregue no codigo como desconto de zero: o cliente digitaria o cupom, veria "Cupom aplicado!" e "Desconto - R$ 0,00", e o total nao mudaria. Preencha o valor ou remova o cupom.';
+    if(isNaN(cpv)||cpv<=0)return 'O cupom "'+cpc+'" está com o valor do desconto vazio ou zerado. Ele seria entregue no código como desconto de zero: o cliente digitaria o cupom, veria "Cupom aplicado!" e "Desconto - R$ 0,00", e o total não mudaria. Preencha o valor ou remova o cupom.';
     cpe=uCpPctErro(cfg.cps[i].tipo,cpv);
     if(cpe)return 'Cupom "'+cpc+'": '+cpe;
     cpe=fcCpMinErro(cfg.cps[i],cpc);
@@ -11997,7 +12120,7 @@ function uRecusa(cfg){
      criterio do cupom acima de 100% e da chave Pix. */
   if(cfg.sinal.ativo&&cfg.sinal.tipo==='fixo'){
     var tmax=uTotalMaximo(cfg.prods,cfg.selprod,cfg.qtdmax);
-    if(cfg.sinal.valor>tmax)return 'O sinal fixo de '+uFmt(cfg.sinal.valor)+' e maior que o maior pedido que este carrinho consegue montar ('+uFmt(tmax)+', ja contando o teto da quantidade). Nenhum cliente conseguiria pagar: o carrinho recusaria toda tentativa. Reduza o sinal, use sinal percentual ou aumente os precos.';
+    if(cfg.sinal.valor>tmax)return 'O sinal fixo de '+uFmt(cfg.sinal.valor)+' é maior que o maior pedido que este carrinho consegue montar ('+uFmt(tmax)+', já contando o teto da quantidade). Nenhum cliente conseguiria pagar: o carrinho recusaria toda tentativa. Reduza o sinal, use sinal percentual ou aumente os preços.';
   }
   return '';
 }
@@ -12985,7 +13108,7 @@ function bSeloCamadas(cfg){
   var f=cfg.selo;
   if(!f||f==='nao')return null;
   var txt=cfg.seloTxt;
-  if(!txt)return {erro:'Escolha um texto para o selo de destaque, ou marque "Nao usar" na forma do selo. Um selo sem texto e so uma mancha colorida no canto do componente.'};
+  if(!txt)return {erro:'Escolha um texto para o selo de destaque, ou marque "Não usar" na forma do selo. Um selo sem texto é só uma mancha colorida no canto do componente.'};
   var tam=cfg.seloTam,fundo=cfg.seloF,cor=cfg.seloC;
   if(f==='faixa'){
     return {camadas:[bDataUri(bSeloFaixa(txt,fundo,cor,tam)),'linear-gradient('+fundo+', '+fundo+')'],
@@ -13190,7 +13313,7 @@ function bPresetOk(valores){
 function bPresetAntes(){
   if(fcAjustarTodos(B_NUMS))salvarEstado();
   var m=bMontar(bCfgDom());
-  if(m.erro)return 'A configuracao atual nao gera codigo, entao nao ha o que salvar: '+m.erro;
+  if(m.erro)return 'A configuração atual não gera código, então não há o que salvar: '+m.erro;
   return '';
 }
 /* Depois de aplicar: o mesmo passo que a partida da aba executa com o estado restaurado.
@@ -13378,10 +13501,10 @@ function bMontar(cfg){
   var camadas=(ef==='brilho'||ef==='gradiente'||ef==='listras');
 
   if((camadas||ef==='natal')&&fu==='manter'){
-    return {erro:'Para este efeito, o fundo interno precisa ser cor solida ou degrade: a tecnica de borda animada pinta o miolo do componente. Dica: capture a cor atual do componente com o conta-gotas e use como cor solida.'};
+    return {erro:'Para este efeito, o fundo interno precisa ser cor sólida ou degradê: a técnica de borda animada pinta o miolo do componente. Dica: capture a cor atual do componente com o conta-gotas e use como cor sólida.'};
   }
   if(pad&&!bPadOk(pad)){
-    return {erro:'O espacamento interno aceita apenas um valor de padding CSS: de um a quatro numeros com unidade, separados por espaco (ex.: 40px, "40px 32px", "12px 20px 16px 20px"). Unidades aceitas: px, em, rem, %, vw, vh, ch -- e "0" sozinho. O valor digitado ("'+pad+'") entra direto no CSS do componente, entao um ponto e virgula ali acrescenta uma segunda propriedade: um "background" colado no meio apaga de uma vez o fundo interno E a moldura animada, sem nenhum aviso. Deixe o campo vazio para nao mexer no espacamento.'};
+    return {erro:'O espaçamento interno aceita apenas um valor de padding CSS: de um a quatro números com unidade, separados por espaço (ex.: 40px, "40px 32px", "12px 20px 16px 20px"). Unidades aceitas: px, em, rem, %, vw, vh, ch -- e "0" sozinho. O valor digitado ("'+pad+'") entra direto no CSS do componente, então um ponto e vírgula ali acrescenta uma segunda propriedade: um "background" colado no meio apaga de uma vez o fundo interno E a moldura animada, sem nenhum aviso. Deixe o campo vazio para não mexer no espaçamento.'};
   }
 
   var interna='';
@@ -13443,7 +13566,7 @@ function bMontar(cfg){
        So as TIRAS andam: background-position e uma lista por camada, e a animacao repete as
        outras identicas nos dois quadros. */
     if(!cfg.ntMotivos.length){
-      return {erro:'Escolha pelo menos um enfeite para a guirlanda (bola, estrela, pisca-pisca...). Sem nenhum nao ha o que desenhar na moldura.'};
+      return {erro:'Escolha pelo menos um enfeite para a guirlanda (bola, estrela, pisca-pisca...). Sem nenhum não há o que desenhar na moldura.'};
     }
     var corA=(cfg.ntPaleta==='natural')?'#C62828':c1;
     var corB=(cfg.ntPaleta==='natural')?'#F4C430':c2;
@@ -13637,8 +13760,8 @@ function bConsolidar(mAtual){
   if(!nomes.length)return null;
   if(nomes.length>B_CONSOL_MAX){
     return {erro:'Voce marcou '+nomes.length+' presets, e a ferramenta tem lugar para '+B_CONSOL_MAX+
-      ' outros componentes nesta pagina (o desta tela mais '+B_CONSOL_MAX+' = '+(B_CONSOL_MAX+1)+
-      ' ao todo). Nao e limite do CSS: e o numero de caixas de saida que existem aqui. Desmarque '+
+      ' outros componentes nesta página (o desta tela mais '+B_CONSOL_MAX+' = '+(B_CONSOL_MAX+1)+
+      ' ao todo). Não é limite do CSS: é o número de caixas de saída que existem aqui. Desmarque '+
       (nomes.length-B_CONSOL_MAX)+' e gere; para os que sobrarem, monte a Tag Head numa segunda passagem.'};
   }
   var a=fcAba('bor'),lista=[],vistos={},k,i,idx,p,m2;
@@ -13646,11 +13769,11 @@ function bConsolidar(mAtual){
   vistos[mAtual.anim]={keys:mAtual.keys,keysRm:mAtual.keysRm,dono:'o componente desta tela'};
   for(i=0;i<nomes.length;i++){
     idx=fcPresetIndice(a,nomes[i]);
-    if(idx<0)return {erro:'O preset "'+nomes[i]+'" nao esta mais salvo neste navegador, entao nao ha de onde tirar a animacao dele. Desmarque-o na lista de consolidacao do codigo 1.'};
+    if(idx<0)return {erro:'O preset "'+nomes[i]+'" não está mais salvo neste navegador, então não há de onde tirar a animação dele. Desmarque-o na lista de consolidação do código 1.'};
     p=fcPresets.bor[idx];
     m2=bMontar(bCfgPreset(p.valores.b||{}));
-    if(m2.erro)return {erro:'O preset "'+p.nome+'" nao gera codigo com a configuracao que esta guardada nele: '+m2.erro};
-    if(!m2.keys)return {erro:'O preset "'+p.nome+'" usa a borda fixa, que nao tem animacao: nao ha nada para consolidar no codigo 1. Gere o CSS dele abrindo o preset na aba, e desmarque-o aqui.'};
+    if(m2.erro)return {erro:'O preset "'+p.nome+'" não gera código com a configuração que está guardada nele: '+m2.erro};
+    if(!m2.keys)return {erro:'O preset "'+p.nome+'" usa a borda fixa, que não tem animação: não há nada para consolidar no código 1. Gere o CSS dele abrindo o preset na aba, e desmarque-o aqui.'};
     k=vistos[m2.anim];
     if(k){
       /* Nome igual e corpo igual nao e conflito: e a MESMA animacao, e um bloco so serve aos
@@ -13658,7 +13781,7 @@ function bConsolidar(mAtual){
          tem corpos identicos, porque a duracao mora no 'animation' de cada componente e nao
          nos quadros). Nome igual com corpo diferente so pode ser colisao de assinatura. */
       if(k.keys!==m2.keys||k.keysRm!==m2.keysRm){
-        return {erro:'O preset "'+p.nome+'" produziu uma animacao DIFERENTE com a mesma assinatura de '+k.dono+' ("'+m2.anim+'"). E uma colisao rara do rotulo de quatro digitos, e emitir os dois @keyframes com esse nome faria valer o ultimo para os dois componentes. Mude um parametro de animacao de um dos dois (a espessura da listra, o alcance do halo, o tamanho do selo) e gere de novo: a assinatura muda junto.'};
+        return {erro:'O preset "'+p.nome+'" produziu uma animação DIFERENTE com a mesma assinatura de '+k.dono+' ("'+m2.anim+'"). É uma colisão rara do rótulo de quatro dígitos, e emitir os dois @keyframes com esse nome faria valer o último para os dois componentes. Mude um parâmetro de animação de um dos dois (a espessura da listra, o alcance do halo, o tamanho do selo) e gere de novo: a assinatura muda junto.'};
       }
       lista.push({nome:p.nome,efeito:m2.efeito,anim:m2.anim,keys:m2.keys,keysRm:m2.keysRm,props:m2.props,mesma:true});
       continue;
@@ -13682,8 +13805,8 @@ function bPeso(props,ef){
   var kb=Math.round(props.length/102.4)/10;
   el.style.display='block';
   el.textContent=(kb>12)
-    ? 'O codigo 2 ficou com '+kb+' KB. Campos de CSS de painel costumam ter limite de tamanho, e nao sabemos qual e o do Prosite: cole e confira que ele aceitou. Se recusar, tire enfeites da lista.'
-    : 'Tamanho do codigo 2: '+kb+' KB.';
+    ? 'O código 2 ficou com '+kb+' KB. Campos de CSS de painel costumam ter limite de tamanho, e não sabemos qual é o do Prosite: cole e confira que ele aceitou. Se recusar, tire enfeites da lista.'
+    : 'Tamanho do código 2: '+kb+' KB.';
 }
 /* As saidas dos OUTROS componentes existem so enquanto o preset de cada um esta marcado, e
    somem junto com ele. Um CSS de outro componente parado na tela e pior que caixa vazia: ele
@@ -14179,7 +14302,7 @@ function ePresetOk(valores){return typeof valores.e.efeito==='string';}
 function ePresetAntes(){
   if(fcAjustarTodos(E_NUMS))salvarEstado();
   var m=eMontar(eCfgDom());
-  if(m.erro)return 'A configuracao atual nao gera codigo, entao nao ha o que salvar: '+m.erro;
+  if(m.erro)return 'A configuração atual não gera código, então não há o que salvar: '+m.erro;
   return '';
 }
 function ePresetDepois(){
@@ -14271,7 +14394,7 @@ var A_OB_VARS=[
   {id:'nome',  tidy:'contact.name',      rot:'nome de quem agendou',  padrao:'tudo certo'},
   {id:'data',  tidy:'booking.date',      rot:'data',                  padrao:'a data combinada'},
   {id:'hora',  tidy:'booking.time',      rot:'horario',               padrao:'o horário combinado'},
-  {id:'quando',tidy:'booking.starts_at', rot:'data e horario juntos', padrao:'a data e o horário combinados'}
+  {id:'quando',tidy:'booking.starts_at', rot:'data e horário juntos', padrao:'a data e o horário combinados'}
 ];
 /* ===== os 31 textos configuraveis desta aba (Rodada de textos configuraveis, 02/09/2026) =====
    Pedido do dono: "quanto mais customizado o que aparece de texto para o cliente, mais
@@ -14372,9 +14495,10 @@ function aObCfg(){
    configuracao legitima). */
 function aOpPrecoAjustar(inp,i){
   var v=parseFloat(String(inp.value).replace(',','.'));
-  if(!isNaN(v)&&v>=0){aEditOps[i].preco=v;return false;}
+  if(!isNaN(v)&&v>=0){aEditOps[i].preco=v;salvarEstado();return false;}
   aEditOps[i].preco=0;
   inp.value='0';
+  salvarEstado();
   return true;
 }
 function aOpRender(){
@@ -14386,25 +14510,25 @@ function aOpRender(){
     var info=document.createElement('div');info.className='info';
     var n=document.createElement('input');n.type='text';n.value=op.nome;n.placeholder='Nome do opcional';
     var bom=op.nome;
-    n.addEventListener('input',function(){aEditOps[i].nome=n.value;if(n.value.replace(/^\s+|\s+$/g,''))bom=n.value;});
+    n.addEventListener('input',function(){aEditOps[i].nome=n.value;if(n.value.replace(/^\s+|\s+$/g,''))bom=n.value;salvarEstado();});
     (function(){
       function volta(){
         if(n.value.replace(/^\s+|\s+$/g,''))return;
-        n.value=bom;aEditOps[i].nome=bom;
+        n.value=bom;aEditOps[i].nome=bom;salvarEstado();
       }
       n.addEventListener('change',volta);n.addEventListener('blur',volta);
     })();
     /* Acentuado ("Preço"), diferente do molde de uOpRender (10553): texto de interface,
        norma de 01/09/2026. */
     var pr=document.createElement('input');pr.type='number';pr.step='0.01';pr.min='0';pr.value=op.preco;pr.placeholder='Preço';
-    pr.addEventListener('input',function(){aEditOps[i].preco=pr.value;});
+    pr.addEventListener('input',function(){aEditOps[i].preco=pr.value;salvarEstado();});
     pr.addEventListener('change',function(){aOpPrecoAjustar(pr,i);});
     pr.addEventListener('blur',function(){aOpPrecoAjustar(pr,i);});
     info.appendChild(n);info.appendChild(pr);
     var lq=document.createElement('label');
     lq.style.cssText='display:flex;align-items:center;gap:6px;margin:5px 0 0;font-size:12px;font-weight:400;color:var(--tinta-suave)';
     var cq=document.createElement('input');cq.type='checkbox';cq.checked=!!op.qtd;
-    cq.addEventListener('change',function(){aEditOps[i].qtd=cq.checked;});
+    cq.addEventListener('change',function(){aEditOps[i].qtd=cq.checked;salvarEstado();});
     lq.appendChild(cq);lq.appendChild(document.createTextNode('vende por quantidade'));
     info.appendChild(lq);
     var ctrl=document.createElement('div');ctrl.className='ctrl';
@@ -14413,6 +14537,7 @@ function aOpRender(){
     li.appendChild(info);li.appendChild(ctrl);
     ul.appendChild(li);
   });
+  fcOpPendente('a-op-pendente',aEditOps,aEditIdx,(aEditIdx>=0&&aPacotes[aEditIdx])?aPacotes[aEditIdx].nome:'','pacote','a-pac-salvar');
 }
 function aOpAdd(){
   var n=$('a-op-nome').value.trim();
@@ -14421,10 +14546,10 @@ function aOpAdd(){
   if(isNaN(v)||v<0)v=0;
   aEditOps.push({nome:n,preco:v,qtd:!!$('a-op-qtd').checked});
   $('a-op-nome').value='';$('a-op-preco').value='';$('a-op-qtd').checked=false;
-  aOpRender();
+  aOpRender();salvarEstado();
 }
-function aOpMove(i,d){var j=i+d;if(j<0||j>=aEditOps.length)return;var t=aEditOps[i];aEditOps[i]=aEditOps[j];aEditOps[j]=t;aOpRender();}
-function aOpDel(i){aEditOps.splice(i,1);aOpRender();}
+function aOpMove(i,d){var j=i+d;if(j<0||j>=aEditOps.length)return;var t=aEditOps[i];aEditOps[i]=aEditOps[j];aEditOps[j]=t;aOpRender();salvarEstado();}
+function aOpDel(i){aEditOps.splice(i,1);aOpRender();salvarEstado();}
 
 /* ===== cupons de desconto =====
    Copia de uCpCodAjustar/uCpRender/uCpPctErro/uCpAdd/uCpDel (10436+ antes desta tarefa), com o
@@ -14436,9 +14561,11 @@ function aOpDel(i){aEditOps.splice(i,1);aOpRender();}
 function aCpCodAjustar(inp,i){
   var alto=String(inp.value).toUpperCase();
   aCps[i].codigo=alto;
+  /* salvarEstado ANTES do desvio -- ver uCpCodAjustar, a primeira das tres. */
+  salvarEstado();
   if(alto===inp.value)return false;
   inp.value=alto;
-  salvarEstado();aPreview();
+  aPreview();
   return true;
 }
 function aCpPctErro(tipo,v){
@@ -14719,12 +14846,23 @@ function aPacDel(i){
    quantidade propria aqui, so os opcionais dele (aOpRender, o checkbox 'lq'). Sem isto o
    Checkout e a Mini loja escondiam o campo quando nao ha o que ele configure, e esta aba o
    deixava sempre visivel. */
+/* Molde de uEditRestaurar (Checkout), com aPacEditar/aPacLimpar no lugar. */
+function aEditRestaurar(A){
+  var buf=(A.edops||[]).map(function(o){return {nome:o.nome,preco:o.preco,qtd:!!o.qtd};});
+  var i=(typeof A.editidx==='number')?A.editidx:-1;
+  if(i>=0&&i<aPacotes.length)aPacEditar(i);
+  else aPacLimpar();
+  aEditOps=buf;
+  aOpRender();
+}
+function aQtdItens(p){
+  var ops=p.ops||[],n=0,i;
+  for(i=0;i<ops.length;i++)if(ops[i].qtd)n++;
+  return n;
+}
 function aQtdLigada(pacotes){
-  var i,j,ops;
-  for(i=0;i<pacotes.length;i++){
-    ops=pacotes[i].ops||[];
-    for(j=0;j<ops.length;j++)if(ops[j].qtd)return true;
-  }
+  var i;
+  for(i=0;i<pacotes.length;i++)if(aQtdItens(pacotes[i]))return true;
   return false;
 }
 /* A lista passa a ser desenhada AGRUPADA POR FAMILIA, com um cabecalho por familia -- mas so
@@ -14753,12 +14891,16 @@ function aPacRender(){
        Palavra INTEIRA trocada no plural. uProdRender (11487+) escrevia '+is' quando este
        comentario foi escrito, e foi corrigido para a mesma forma em 02/09/2026 (cc5aaae). */
     var qtdops=(p.ops&&p.ops.length)?(' · '+p.ops.length+(p.ops.length>1?' opcionais':' opcional')):' · sem opcionais';
-    txt.textContent=p.cod+' — '+p.nome+' — '+precoFmt('BRL',parseFloat(p.preco)||0)+qtdops;
+    /* Quantos opcionais deste pacote vendem por quantidade -- a mesma frase do Checkout e da
+       Mini loja. Aqui nao ha o que somar do proprio pacote: pacote nao tem quantidade, so os
+       opcionais dele (e por isso aQtdItens conta so os opcionais). */
+    var nq=aQtdItens(p);
+    txt.textContent=p.cod+' — '+p.nome+' — '+precoFmt('BRL',parseFloat(p.preco)||0)+qtdops+(nq?(' · '+nq+' com quantidade'):'');
     info.appendChild(txt);
     var ctrl=document.createElement('div');ctrl.className='ctrl';
     [['↑',function(){aPacMove(i,-1);},'Subir',aPacVizinho(i,-1)<0],
      ['↓',function(){aPacMove(i,1);},'Descer',aPacVizinho(i,1)<0],
-     ['✎',function(){aPacEditar(i);},'Editar',false],
+     ['✎',function(){aPacEditar(i);salvarEstado();},'Editar',false],
      ['✕',function(){aPacDel(i);},'Remover',false]]
       .forEach(function(b){var bt=document.createElement('button');bt.textContent=b[0];bt.title=b[2];bt.setAttribute('aria-label',b[2]);bt.disabled=!!b[3];bt.addEventListener('click',b[1]);ctrl.appendChild(bt);});
     li.appendChild(info);li.appendChild(ctrl);
@@ -14816,7 +14958,7 @@ function aRecusa(cfg){
     if(!(parseFloat(p.preco)>0))return 'O pacote "'+p.cod+'" está com o preço vazio ou zerado. Ele seria entregue como uma cobrança de R$ 0,00.';
     if(!p.path)return 'O pacote "'+p.cod+'" está sem o caminho do TidyCal.';
     if(!tPathOk(p.path))return 'O caminho do TidyCal do pacote "'+p.cod+'" ("'+p.path+'") tem um caractere que não é permitido. Use apenas letras, números, ponto, hífen, sublinhado e barra separando os segmentos (ex.: usuario/nome-do-agendamento).';
-    if(!aFamAchaEm(cfg.familias,p.fam))return 'O pacote "'+p.cod+'" está numa família que não existe mais. Abra o pacote no lápis (seção 2), escolha uma família e salve.';
+    if(!aFamAchaEm(cfg.familias,p.fam))return 'O pacote "'+p.cod+'" está numa família que não existe mais. Abra o pacote no lápis (seção '+fcSecN('a-pacotes')+'), escolha uma família e salve.';
   }
   /* As familias sao conferidas AQUI, e nao so no cadastro, pela mesma razao ja registrada para
      os cupons: o editor EM LINHA nao valida nada -- apagar o nome de uma familia ja cadastrada
@@ -14923,6 +15065,8 @@ function aColeta(){
     pacotes:aPacotes,
     familias:aFamilias,
     cps:aCps,
+    /* O FORMULARIO INACABADO viaja junto -- ver uColeta, a primeira das tres. */
+    edops:aEditOps,editidx:aEditIdx,
     urlobrigado:aElVal('a-urlobrigado',''),
     prefixo:aElVal('a-prefixo',''),
     metodo:radio('a-metodo'),
@@ -15033,6 +15177,7 @@ function aRestaura(st){
      desta rodada (02/09/2026) nao tem nenhuma destas chaves -- o padrao de cada campo e o
      terceiro item da propria tabela, o mesmo texto que saia fixo no bloco. */
   fcTxtRestaura(A_TXT_DEFS,A);
+  aEditRestaurar(A);
   /* A migracao NUNCA fica calada (CLAUDE.md, secao "Em duvida entre descartar e preservar").
      Persistida na hora (salvarEstado()) para o aviso nao repetir na proxima carga: 'pac' e a
      ULTIMA aba do loop de restaurarEstado() (fim do array ABAS), entao todas as outras ja
@@ -15042,7 +15187,7 @@ function aRestaura(st){
      esta com a tela inteira desenhada ha tempo, e a chamada continua segura pelo mesmo
      motivo -- nunca e a PRIMEIRA coisa que roda. */
   if(migrouPath){
-    alert('Os pacotes desta aba tinham o endereço COMPLETO do TidyCal gravado (versão anterior desta ferramenta). Ele foi convertido automaticamente para o CAMINHO, que é o que este campo pede agora — confira a lista de pacotes na seção 2. Nada foi perdido.');
+    alert('Os pacotes desta aba tinham o endereço COMPLETO do TidyCal gravado (versão anterior desta ferramenta). Ele foi convertido automaticamente para o CAMINHO, que é o que este campo pede agora — confira a lista de pacotes na seção '+fcSecN('a-pacotes')+'. Nada foi perdido.');
     salvarEstado();
   }
   /* Duas mensagens, porque são dois fatos diferentes: "esta aba mudou de forma" e "um pacote
@@ -15051,13 +15196,13 @@ function aRestaura(st){
   if(movidos){
     alert('Esta aba passou a organizar os pacotes em FAMÍLIAS — por exemplo: dias úteis e fins de semana. '+
       (movidos>1?('Os '+movidos+' pacotes que já estavam cadastrados foram colocados'):'O pacote que já estava cadastrado foi colocado')+
-      ' numa família única chamada "Pacotes". Nada foi perdido, e a vitrine continua com os mesmos dois passos de antes, porque com uma família só não há o que escolher. Para separar os pacotes, crie a segunda família na seção 2 e renomeie esta.');
+      ' numa família única chamada "Pacotes". Nada foi perdido, e a vitrine continua com os mesmos dois passos de antes, porque com uma família só não há o que escolher. Para separar os pacotes, crie a segunda família na seção '+fcSecN('a-familias')+' e renomeie esta.');
     salvarEstado();
   }else if(reparouOrfao||reparouNome){
     partes=[];
     if(reparouOrfao)partes.push(reparouOrfao+(reparouOrfao>1?' pacotes apontavam':' pacote apontava')+' para uma família que não existe neste arquivo — '+(reparouOrfao>1?'foram colocados':'foi colocado')+' na primeira família da lista ("'+aFamilias[0].nome+'")');
     if(reparouNome)partes.push(reparouNome+(reparouNome>1?' famílias estavam':' família estava')+' sem nome e ganh'+(reparouNome>1?'aram':'ou')+' um nome provisório');
-    alert('A lista de famílias desta aba precisou de conserto: '+partes.join('; ')+'. Confira a seção 2 antes de gerar — nada foi perdido.');
+    alert('A lista de famílias desta aba precisou de conserto: '+partes.join('; ')+'. Confira a seção '+fcSecN('a-familias')+' antes de gerar — nada foi perdido.');
     salvarEstado();
   }
 }
@@ -16026,12 +16171,29 @@ function aBlocoObrigado(cfg){
   c+=FC_CARRINHO_SRC.cupomVigente;
   c+=FC_CARRINHO_SRC.validadeBr;
   if(temMin)c+=FC_CARRINHO_SRC.cupomMinimo;
+  /* A QUANTIDADE ENTRA NO NOME, na mesma forma das duas irmas (uBloco 12602, mBloco 20680):
+     o preco ja multiplicava (subtotal, acima: op.preco*qtdOp(j)) e o nome nao dizia por
+     quanto -- tres albuns de 50 chegavam ao PayPal como 'Album 20x30' cobrando 150, e o
+     recibo nao fechava com o preco unitario. So quando o opcional vende por quantidade
+     (op.qtd), como as irmas fazem. O PACOTE nao ganha sufixo porque nao tem quantidade
+     nenhuma aqui: aPacotesSrc nao emite o campo, somaProdutos() devolve PAC.preco sem
+     multiplicar, e aQtdLigada so olha os opcionais (14717+). */
   c+='/* Nomes do que foi escolhido -- o pacote sempre, os opcionais marcados por cima. Usado so\n';
   c+='   pelo nome do item que o cartao mostra ao cliente (secao 3d); NUNCA pelo identificador. */\n';
   c+='function nomesSelecionados(){\n';
   c+='  var ns=[PAC.nome];\n';
   c+='  (PAC.ops||[]).forEach(function(op,j){\n';
-  c+='    if(opChecks[j]&&opChecks[j].checked)ns.push(op.nome);\n';
+  /* Quantidade zero equivale a opcional nao escolhido -- a mesma regra das duas irmas
+     (produtoAtivo: 'if(qtdProd(i)<1)return false'; itensEscolhidos: 'if(qtdOp(i,j)<1)
+     continue'). Sem isto, um opcional marcado e depois zerado no proprio seletor continuava
+     entrando no nome que vai ao PayPal ("Album 20x30 x0"), cobrado por zero: o recibo
+     anunciava um item que ninguem comprou. Esta e a UNICA lista de itens desta pagina -- o
+     resumo (montarResumo) mostra so o pacote, e o WhatsApp daqui leva recado fixo, sem
+     itens --, entao barrar aqui basta para os tres lugares concordarem. subtotal() nao
+     ganha guarda pelo mesmo motivo que a irma nao tem: multiplicar por zero ja soma zero. */
+  if(usaQtd)c+='    if(qtdOp(j)<1)return;\n';
+  if(usaQtd)c+="    if(opChecks[j]&&opChecks[j].checked)ns.push(op.nome+(op.qtd?(' x'+qtdOp(j)):''));\n";
+  else c+='    if(opChecks[j]&&opChecks[j].checked)ns.push(op.nome);\n';
   c+='  });\n';
   c+='  return ns;\n';
   c+='}\n\n';
@@ -16334,7 +16496,7 @@ function aPvShim(cfg){
   return fcPvShim({pref:'a',
     extras:extras,
     abre:'o ',
-    fecha:' deste quadro. Este bloco nao deveria gravar nada em armazenamento, mas se a troca nao pegou pode estar tocando as chaves reais do navegador. O codigo gerado ao lado nao e afetado.'});
+    fecha:' deste quadro. Este bloco não deveria gravar nada em armazenamento, mas se a troca não pegou pode estar tocando as chaves reais do navegador. O código gerado ao lado não é afetado.'});
 }
 /* Sem conteudo abaixo nao da para ver onde o passo 2 termina nem rolar ate o calendario depois
    de escolher um pacote. Blocos cinzentos e mudos, de proposito. */
@@ -16407,7 +16569,7 @@ function aPvObShim(cfg){
     extras:cfg.usaPP?fcPvSondaPP({ppcor:cfg.ppcor,raizId:'fca-ob-raiz',msgSel:'fca-ob-msg',caixaId:'a-pv-ob-pp'}):'',
     semAbrir:true,
     abre:'',
-    fecha:' deste quadro. Este bloco nao deveria gravar nada em armazenamento, mas se a troca nao pegou pode estar tocando as chaves reais do navegador -- ou abrindo o WhatsApp numa aba nova. O codigo gerado ao lado nao e afetado.'});
+    fecha:' deste quadro. Este bloco não deveria gravar nada em armazenamento, mas se a troca não pegou pode estar tocando as chaves reais do navegador -- ou abrindo o WhatsApp numa aba nova. O código gerado ao lado não é afetado.'});
 }
 /* Fragmento (sem doctype/html/head/body): esta previa nao ESCREVE um documento novo, ela
    ACRESCENTA a um documento JA NAVEGADO (ver aPvObEscrever, abaixo, e o motivo de existir). */
@@ -16771,8 +16933,8 @@ function cRestaura(st){
 /* ===== O que esta aba poe na biblioteca de presets (ver o bloco compartilhado) ===== */
 function cPresetResumo(v){
   var C=v.c||{},n=(v.cmsgs&&v.cmsgs.length)||0;
-  var t=(C.modo==='data'?'ate uma data':'a partir da abertura')+' — '+(C.formato==='blocos'?'blocos':'compacto');
-  t+=', '+(C.fixa==='fixa'?'barra fixa no topo':'no fluxo da pagina');
+  var t=(C.modo==='data'?'até uma data':'a partir da abertura')+' — '+(C.formato==='blocos'?'blocos':'compacto');
+  t+=', '+(C.fixa==='fixa'?'barra fixa no topo':'no fluxo da página');
   if(n)t+=', '+n+(n===1?' mensagem':' mensagens');
   return t;
 }
@@ -17042,7 +17204,7 @@ function cGerar(){
   if(!$('c-cod').value.trim()){alert('Informe o código da campanha. Sem ele, duas campanhas diferentes dividem a mesma chave no navegador do visitante e a segunda nasce já encerrada para quem visitou a primeira.');return;}
   /* So vale com o contador ligado: com ele desligado, "nenhuma unidade" e a configuracao
      pedida, e nao um descuido. */
-  if(cfg.contador&&!cfg.unidades.d&&!cfg.unidades.h&&!cfg.unidades.m&&!cfg.unidades.s){alert('Marque pelo menos uma unidade (dias, horas, minutos ou segundos). Sem nenhuma, a barra sai sem contador. Se e isso que voce quer, desligue o contador em "Mostrar o tempo restante na barra?" -- assim os campos do relogio param de valer e a barra sai sem eles.');return;}
+  if(cfg.contador&&!cfg.unidades.d&&!cfg.unidades.h&&!cfg.unidades.m&&!cfg.unidades.s){alert('Marque pelo menos uma unidade (dias, horas, minutos ou segundos). Sem nenhuma, a barra sai sem contador. Se é isso que você quer, desligue o contador em "Mostrar o tempo restante na barra?" -- assim os campos do relógio param de valer e a barra sai sem eles.');return;}
   if(cfg.cta.ativo&&!cUrlOk(cfg.cta.url)){alert('O link do botão de ação precisa ser uma âncora (#reserva), um caminho do site (/natal-2026) ou um endereço http(s). Outros esquemas, como javascript:, não são aceitos.');return;}
   if(cfg.urg.ativo){
     var totalMs=(cfg.modo==='data')?(Date.parse(cfg.alvoIso)-(new Date()).getTime()):cfg.duracaoMs;
@@ -17695,7 +17857,7 @@ function cSvgCorujaGer(cfg){
 }
 
 function cLimpar(){
-  if(!confirm('Limpar todas as mensagens e configuracoes da contagem regressiva?'))return;
+  if(!confirm('Limpar todas as mensagens e configurações da contagem regressiva?'))return;
   cMsgs=[];cMsgRender();
   $('c-msg').value='';$('c-msgcurta').value='';
   setRadio('c-modo','abertura');setRadio('c-diaszero','sim');setRadio('c-fim','esconder');
@@ -17740,7 +17902,7 @@ function cLimpar(){
 function cPvShim(){
   return fcPvShim({pref:'c',
     abre:'o ',
-    fecha:' deste quadro. A previa esta gravando nas chaves reais do navegador e pode nascer com a contagem ja vencida. O codigo gerado ao lado nao e afetado.'});
+    fecha:' deste quadro. A prévia está gravando nas chaves reais do navegador e pode nascer com a contagem já vencida. O código gerado ao lado não é afetado.'});
 }
 /* Sem conteudo abaixo da barra nao da para ver o padding-top empurrando a pagina, nem a
    entrada "depois de rolar", nem a barra fixa se comportando como fixa. Blocos cinzentos e
@@ -18537,7 +18699,7 @@ function pGerarLink(){
   pPreview(true);
 }
 function pLimpar(){
-  if(!confirm('Isto devolve a aba inteira aos padroes de fabrica: a aparencia da pagina, os textos e a cobranca que esta na tela. Os dados do recebedor NAO sao tocados -- eles sao da ferramenta inteira, no painel Identidade. Nenhum codigo ja colado no site e afetado, e os links ja enviados continuam funcionando. Continuar?'))return;
+  if(!confirm('Isto devolve a aba inteira aos padrões de fábrica: a aparência da página, os textos e a cobrança que está na tela. Os dados do recebedor NÃO são tocados -- eles são da ferramenta inteira, no painel Identidade. Nenhum código já colado no site é afetado, e os links já enviados continuam funcionando. Continuar?'))return;
   /* A identidade nao entra aqui: ela nao pertence a esta aba, e "restaurar os padroes desta
      aba" nao pode apagar a chave Pix que as outras duas abas tambem usam. */
   /* O endereco volta VAZIO, e nao para "/pagar": o padrao de fabrica nao pode ser um valor que
@@ -18673,13 +18835,13 @@ function pPvPayPal(cfg){
   s+="        }catch(e){valor='(erro: '+String(e&&e.message||e)+')';}\n";
   s+="        var eti=document.createElement('div');\n";
   s+='        eti.setAttribute(\'style\',\'font:600 10px/1.4 -apple-system,BlinkMacSystemFont,sans-serif;color:#8a8375;text-align:center;text-transform:uppercase;letter-spacing:.06em\');\n';
-  s+="        eti.textContent='desenho: o SDK do PayPal nao roda na previa';\n";
+  s+="        eti.textContent='desenho: o SDK do PayPal não roda na prévia';\n";
   s+='        caixa.appendChild(eti);\n';
   s+="        var des=document.createElement('div');des.innerHTML=DESENHO_PP;caixa.appendChild(des);\n";
   s+="        var med=document.createElement('div');\n";
   s+="        med.id='p-pv-pp-valor';\n";
   s+='        med.setAttribute(\'style\',\'margin-top:8px;border-top:1px dashed #d8d2c4;padding-top:7px;font:12px/1.5 -apple-system,BlinkMacSystemFont,sans-serif;color:#555;text-align:left\');\n';
-  s+="        med.textContent='Medido no proprio bloco -- valor que iria na ordem: '+valor+(descricao?(' | descricao: '+descricao):'');\n";
+  s+="        med.textContent='Medido no próprio bloco -- valor que iria na ordem: '+valor+(descricao?(' | descricao: '+descricao):'');\n";
   s+='        caixa.appendChild(med);\n';
   s+='      }};}};\n';
   s+='      setTimeout(function(){if(n.onload)n.onload();},0);\n';
@@ -18700,7 +18862,7 @@ function pPvShim(busca,cfg){
       (cfg.usapp?'  try{if(!document.head.appendChild.fcPvSemPayPal)falhou.push(\'o SDK do PayPal\');}catch(e){falhou.push(\'o SDK do PayPal\');}\n':''),
     semAbrir:true,
     abre:'',
-    fecha:' deste quadro. A previa pode estar gravando nas chaves reais do navegador, mostrando a pagina sem a cobranca simulada, abrindo o WhatsApp numa aba nova ou mandando o seu Client ID para o PayPal -- o que aparece abaixo nao prova nada. O codigo gerado ao lado nao e afetado.'});
+    fecha:' deste quadro. A prévia pode estar gravando nas chaves reais do navegador, mostrando a página sem a cobrança simulada, abrindo o WhatsApp numa aba nova ou mandando o seu Client ID para o PayPal -- o que aparece abaixo não prova nada. O código gerado ao lado não é afetado.'});
 }
 /* Enchimento cinzento abaixo do cartao: sem ele nao da para ver onde a pagina termina nem
    rolar ate o QR Code em cobranca com descricao longa. */
@@ -18726,7 +18888,7 @@ function pPvDoc(cfg,busca,recusa){
      com etiqueta continuaria exibindo valores que o operador le antes de ler a etiqueta. */
   if(recusa){
     h+='<div class="p-pv-recusa"></div>\n';
-    h+='<scr'+'ipt>document.querySelector(\'.p-pv-recusa\').textContent='+pJson('Esta configuracao ainda nao gera codigo: '+recusa)+';</scr'+'ipt>\n';
+    h+='<scr'+'ipt>document.querySelector(\'.p-pv-recusa\').textContent='+pJson('Esta configuração ainda não gera código: '+recusa)+';</scr'+'ipt>\n';
   }else{
     h+=pBloco(cfg);
   }
@@ -18881,6 +19043,22 @@ var M_NUMS=[['m-larg',1080,600,1600,true],['m-cols',3,2,5,true],['m-mob',760,320
   ['m-descpix',10,0,90,false],['m-sinalpct',30,1,99,false],['m-sinalfixo',100,0.01,999999,false],
   ['m-qtdmax',10,2,99,true]];
 function mPreso(id){return fcPreso(M_NUMS,id);}
+/* Quantos itens DESTE produto (ele proprio e seus opcionais) foram marcados como vendidos por
+   quantidade, e se ALGUM produto do catalogo pede quantidade. Mesmo par de uQtdItens/uQtdLigada
+   no Checkout e de aQtdItens/aQtdLigada na aba Agendamento por pacote -- aqui ele NASCEU como
+   o mesmo laco escrito duas vezes, em mToggles e em mCfg. As duas copias concordavam, e por
+   isso mesmo uma podia ganhar uma regra nova e a outra nao: o campo "quantidade maxima"
+   apareceria na tela sem entrar no bloco entregue, ou o contrario, sem erro e sem aviso. */
+function mQtdItens(p){
+  var n=p.qtd?1:0,ops=p.ops||[],i;
+  for(i=0;i<ops.length;i++)if(ops[i].qtd)n++;
+  return n;
+}
+function mQtdLigada(prods){
+  var i;
+  for(i=0;i<prods.length;i++)if(mQtdItens(prods[i]))return true;
+  return false;
+}
 function mFmt(v){return precoFmt(radio('m-metodo')==='paypal'?(radio('m-moeda')||'BRL'):'BRL',v);}
 
 /* ===== salvamento e restauracao (registradas em ABAS) ===== */
@@ -18889,6 +19067,8 @@ function mColeta(){
   var r={m:{metodo:radio('m-metodo'),moeda:radio('m-moeda'),ppcor:radio('m-ppcor'),
     descpix:$('m-descpix').value,zap:radio('m-zap'),cod:$('m-cod').value,
     prods:mProds,cps:mCps,
+    /* O FORMULARIO INACABADO viaja junto -- ver uColeta, a primeira das tres. */
+    edops:mEditOps,editidx:mEditIdx,
     cols:$('m-cols').value,mob:$('m-mob').value,imgvit:$('m-imgvit').value,imgdet:$('m-imgdet').value,
     prop:radio('m-prop'),filtro:radio('m-filtro'),
     sinal:radio('m-sinal'),sinaltipo:radio('m-sinaltipo'),sinalpct:$('m-sinalpct').value,
@@ -18935,6 +19115,16 @@ function mRestaura(st){
   /* Os 55 textos configuraveis: estado gravado antes desta rodada nao tem nenhuma destas
      chaves -- o padrao de cada campo e o terceiro item de M_TXT_DEFS. */
   fcTxtRestaura(M_TXT_DEFS,M);
+  mEditRestaurar(M);
+}
+/* Molde de uEditRestaurar (Checkout), com mProdEditar/mProdLimpar no lugar. */
+function mEditRestaurar(M){
+  var buf=(M.edops||[]).map(function(o){return {nome:o.nome,preco:o.preco,qtd:!!o.qtd};});
+  var i=(typeof M.editidx==='number')?M.editidx:-1;
+  if(i>=0&&i<mProds.length)mProdEditar(i);
+  else mProdLimpar();
+  mEditOps=buf;
+  mOpRender();
 }
 function mPresetResumo(v){
   var M=(v&&v.m)||{},n=(M.prods||[]).length,c=(M.cps||[]).length;
@@ -18987,9 +19177,10 @@ function mCatsRender(){
 /* ===== opcionais do produto em edicao ===== */
 function mOpPrecoAjustar(inp,i){
   var v=parseFloat(String(inp.value).replace(',','.'));
-  if(!isNaN(v)&&v>=0){mEditOps[i].preco=v;return false;}
+  if(!isNaN(v)&&v>=0){mEditOps[i].preco=v;salvarEstado();return false;}
   mEditOps[i].preco=0;
   inp.value='0';
+  salvarEstado();
   return true;
 }
 function mOpRender(){
@@ -19007,23 +19198,23 @@ function mOpRender(){
        devolver: o campo se corrige A VISTA no change/blur, como o preco, em vez de recusar.
        Nunca no 'input' -- corrigir a cada tecla impediria apagar para redigitar. */
     var bom=op.nome;
-    n.addEventListener('input',function(){mEditOps[i].nome=n.value;if(n.value.replace(/^\s+|\s+$/g,''))bom=n.value;});
+    n.addEventListener('input',function(){mEditOps[i].nome=n.value;if(n.value.replace(/^\s+|\s+$/g,''))bom=n.value;salvarEstado();});
     (function(){
       function volta(){
         if(n.value.replace(/^\s+|\s+$/g,''))return;
-        n.value=bom;mEditOps[i].nome=bom;
+        n.value=bom;mEditOps[i].nome=bom;salvarEstado();
       }
       n.addEventListener('change',volta);n.addEventListener('blur',volta);
     })();
-    var pr=document.createElement('input');pr.type='number';pr.step='0.01';pr.min='0';pr.value=op.preco;pr.placeholder='Preco';
-    pr.addEventListener('input',function(){mEditOps[i].preco=pr.value;});
+    var pr=document.createElement('input');pr.type='number';pr.step='0.01';pr.min='0';pr.value=op.preco;pr.placeholder='Preço';
+    pr.addEventListener('input',function(){mEditOps[i].preco=pr.value;salvarEstado();});
     pr.addEventListener('change',function(){mOpPrecoAjustar(pr,i);});
     pr.addEventListener('blur',function(){mOpPrecoAjustar(pr,i);});
     info.appendChild(n);info.appendChild(pr);
     var lq=document.createElement('label');
     lq.style.cssText='display:flex;align-items:center;gap:6px;margin:5px 0 0;font-size:12px;font-weight:400;color:var(--tinta-suave)';
     var cq=document.createElement('input');cq.type='checkbox';cq.checked=!!op.qtd;
-    cq.addEventListener('change',function(){mEditOps[i].qtd=cq.checked;});
+    cq.addEventListener('change',function(){mEditOps[i].qtd=cq.checked;salvarEstado();});
     lq.appendChild(cq);lq.appendChild(document.createTextNode('vende por quantidade'));
     info.appendChild(lq);
     var ctrl=document.createElement('div');ctrl.className='ctrl';
@@ -19032,6 +19223,7 @@ function mOpRender(){
     li.appendChild(info);li.appendChild(ctrl);
     ul.appendChild(li);
   });
+  fcOpPendente('m-op-pendente',mEditOps,mEditIdx,(mEditIdx>=0&&mProds[mEditIdx])?mProds[mEditIdx].nome:'','produto','m-prod-salvar');
 }
 function mOpAdd(){
   var n=$('m-op-nome').value.trim();
@@ -19040,10 +19232,10 @@ function mOpAdd(){
   if(isNaN(v)||v<0)v=0;
   mEditOps.push({nome:n,preco:v,qtd:!!$('m-op-qtd').checked});
   $('m-op-nome').value='';$('m-op-preco').value='';$('m-op-qtd').checked=false;
-  mOpRender();
+  mOpRender();salvarEstado();
 }
-function mOpMove(i,d){var j=i+d;if(j<0||j>=mEditOps.length)return;var t=mEditOps[i];mEditOps[i]=mEditOps[j];mEditOps[j]=t;mOpRender();}
-function mOpDel(i){mEditOps.splice(i,1);mOpRender();}
+function mOpMove(i,d){var j=i+d;if(j<0||j>=mEditOps.length)return;var t=mEditOps[i];mEditOps[i]=mEditOps[j];mEditOps[j]=t;mOpRender();salvarEstado();}
+function mOpDel(i){mEditOps.splice(i,1);mOpRender();salvarEstado();}
 
 /* ===== produtos ===== */
 function mProdLimpar(){
@@ -19064,8 +19256,8 @@ function mProdSalvar(){
   /* Foto e OBRIGATORIA nesta aba, ao contrario do Checkout: a vitrine e feita de imagens, e um
      produto sem foto sairia como um retangulo cinza no meio da grade. A recusa nomeia o campo
      em vez de deixar passar e o defeito aparecer so na pagina publicada. */
-  if(!img){alert('Informe o endereco da foto do produto. A vitrine e feita de imagens: um produto sem foto sai como um retangulo vazio no meio da grade.');return;}
-  if(!sUrlOk(img)){alert('O endereco da foto nao parece valido. Use um endereco completo comecando por https:// ou um caminho do proprio site comecando por barra.');return;}
+  if(!img){alert('Informe o endereço da foto do produto. A vitrine é feita de imagens: um produto sem foto sai como um retângulo vazio no meio da grade.');return;}
+  if(!sUrlOk(img)){alert('O endereço da foto não parece válido. Use um endereço completo começando por https:// ou um caminho do próprio site começando por barra.');return;}
   /* Foto que nao encolhe e DITA, nao recusada -- a mesma decisao da lista de imagens do
      Slideshow: o operador pode ter motivo legitimo para hospedar uma foto em outro lugar. O que
      ele perde, e o aviso diz, e o redimensionador da Alboom: a foto vai inteira para a vitrine.
@@ -19073,7 +19265,7 @@ function mProdSalvar(){
      que o bloco entregue executa. Com sHostEsperado, '/fotos/promo.jpg' (que nao tem host) e
      '//storage.alboom.ninja/foto.jpg' (que tem host, mas nao tem esquema) passavam calados --
      um ia inteiro para a vitrine sem aviso nenhum. */
-  if(!mImgResize(img)&&!confirm('Esta foto nao passa pelo redimensionador da Alboom, que so alcanca enderecos completos em '+S_HOSTS_ALBOOM.join(' ou ')+'.\n\nEla vai funcionar, mas sera carregada no tamanho ORIGINAL na vitrine, e nao na miniatura. Com muitos produtos isso pesa.\n\nContinuar mesmo assim?'))return;
+  if(!mImgResize(img)&&!confirm('Esta foto não passa pelo redimensionador da Alboom, que só alcança endereços completos em '+S_HOSTS_ALBOOM.join(' ou ')+'.\n\nEla vai funcionar, mas será carregada no tamanho ORIGINAL na vitrine, e não na miniatura. Com muitos produtos isso pesa.\n\nContinuar mesmo assim?'))return;
   var p={nome:n,desc:$('m-pdesc').value.trim(),preco:v,cat:String($('m-pcat').value).trim(),img:img,
     larg:sLargSabida(img),
     opsel:radio('m-opsel')||'unico',opnenhum:radio('m-opnenhum')||'nao',
@@ -19212,11 +19404,16 @@ function mProdRender(){
     cat.textContent=p.cat?p.cat:'sem categoria';
     if(!p.cat)cat.className='m-cat-selo vazio';
     var ops=document.createElement('div');ops.className='sub';
-    ops.textContent=(p.ops||[]).length?((p.ops.length===1?'1 opcional':p.ops.length+' opcionais')+' ('+(p.opsel==='multiplo'?'vários':'apenas 1')+')'):'sem opcionais';
+    /* A conta entra na linha que JA fala dos opcionais, e conta so eles: o produto em si ja
+       diz '(por quantidade)' na linha do preco, logo acima, e repetir aqui faria o mesmo
+       cartao afirmar duas vezes a mesma coisa. mQtdItens e o gatilho do recurso e conta o
+       produto junto -- por isso ele sai da conta aqui. */
+    var nq=mQtdItens(p)-(p.qtd?1:0);
+    ops.textContent=((p.ops||[]).length?((p.ops.length===1?'1 opcional':p.ops.length+' opcionais')+' ('+(p.opsel==='multiplo'?'vários':'apenas 1')+')'):'sem opcionais')+(nq?(' · '+nq+' com quantidade'):'');
     info.appendChild(t);info.appendChild(url);info.appendChild(cat);info.appendChild(ops);
     var ctrl=document.createElement('div');ctrl.className='ctrl';
     [['\u2191',function(){mProdMove(i,-1);},'Subir'],['\u2193',function(){mProdMove(i,1);},'Descer'],
-     ['\u270E',function(){mProdEditar(i);},'Editar'],['\u2715',function(){mProdDel(i);},'Remover']]
+     ['\u270E',function(){mProdEditar(i);salvarEstado();},'Editar'],['\u2715',function(){mProdDel(i);},'Remover']]
       .forEach(function(b){var bt=document.createElement('button');bt.textContent=b[0];bt.title=b[2];bt.setAttribute('aria-label',b[2]);bt.addEventListener('click',b[1]);ctrl.appendChild(bt);});
     li.appendChild(img);li.appendChild(info);li.appendChild(ctrl);
     ul.appendChild(li);
@@ -19231,13 +19428,23 @@ function mProdRender(){
 function mCpCodAjustar(inp,i){
   var alto=String(inp.value).toUpperCase();
   mCps[i].codigo=alto;
+  /* salvarEstado ANTES do desvio -- ver uCpCodAjustar, a primeira das tres. */
+  salvarEstado();
   if(alto===inp.value)return false;
   inp.value=alto;
-  salvarEstado();mPreview();
+  mPreview();
   return true;
 }
 function mCpPctErro(tipo,v){
-  if((tipo==='pct_total'||tipo==='pct_produto')&&v>100)return 'desconto de '+v+'% zera o pedido (o maximo e 100%).';
+  if(tipo!=='pct_produto'&&tipo!=='pct_total')return '';
+  /* Acentuada e sem nomear o provedor -- norma de 01/09/2026 e regra 10 do plano da v2.
+     Nasceu aqui sem acento e com redacao propria ("desconto de X% zera o pedido"), a terceira
+     copia de uma familia cujas outras duas ja tinham sido alinhadas: uCpPctErro (11648+) em
+     02/09/2026 e aCpPctErro (14444+), que nasceu certa. A redacao COPIADA e a do Checkout, e
+     nao a da aba pac, porque a Mini loja e o gemeo do Checkout: as duas fecham um pagamento de
+     verdade, entao a frase sobre a cobranca zerada tambem vale aqui. Nenhuma das tres nomeia
+     quem processa o pagamento. */
+  if(v>100)return 'Um cupom em porcentagem não pode passar de 100%: com '+v+'% o desconto é limitado ao subtotal e o pedido inteiro vai a R$ 0,00 — o cliente vê "Cupom aplicado!" e um total zerado, e o pagamento recusa a cobrança zerada. Se a intenção era 15%, corrija o valor; se era realmente dar o pedido, use um cupom de valor fixo igual ao preço.';
   return '';
 }
 /* Recusa de codigo repetido -- decisao 13 de 02/09/2026, uniformizada com a aba pac
@@ -19251,13 +19458,17 @@ function mCpAchaRepetido(cod,ignorar){
 }
 function mCpAdd(){
   var cod=String($('m-cp-cod').value).trim().toUpperCase();
-  if(!cod){alert('Informe o codigo do cupom.');return;}
+  if(!cod){alert('Informe o código do cupom.');return;}
   var repetido=mCpAchaRepetido(cod,-1);
   if(repetido){alert('Já existe um cupom com o código "'+cod+'". O cliente digitaria um código só, e a página não tem como saber qual dos dois cadastros aplicar — escolha outro código ou edite o cupom já existente na lista.');return;}
   var v=parseFloat(String($('m-cp-valor').value).replace(',','.'));
-  if(isNaN(v)||v<=0){alert('Informe o valor do desconto do cupom.');return;}
+  if(isNaN(v)||v<=0){alert('Informe o valor do desconto (maior que zero).');return;}
   var tipo=radio('m-cp-tipo')||'pct_total',e=mCpPctErro(tipo,v);
-  if(e){alert('Cupom "'+cod+'": '+e);return;}
+  /* Sem o prefixo 'Cupom "X": ' que estava aqui: a mensagem nova ja comeca dizendo do que
+     trata, e o codigo e o que o operador acabou de digitar no campo ao lado. As irmas
+     (uCpAdd/aCpAdd) sempre alertaram assim. O prefixo continua em mRecusa, onde ele e
+     necessario -- la o cupom vem de uma lista, e sem o codigo nao da para saber qual e. */
+  if(e){alert(e);return;}
   var mn=String($('m-cp-min').value).trim(),eMin=fcCpMinErro({minimo:mn},cod);
   if(eMin){alert(eMin);return;}
   mCps.push({codigo:cod,tipo:tipo,valor:v,validade:$('m-cp-val').value,minimo:mn});
@@ -19272,18 +19483,37 @@ function mCpRender(){
   mCps.forEach(function(cp,i){
     var li=document.createElement('li');
     var info=document.createElement('div');info.className='info';
-    var cod=document.createElement('input');cod.type='text';cod.value=cp.codigo;cod.placeholder='CODIGO';
-    cod.addEventListener('input',function(){mCps[i].codigo=cod.value;});
+    var cod=document.createElement('input');cod.type='text';cod.value=cp.codigo;cod.placeholder='Código';
+    /* MAIUSCULAS NO MODELO ja no 'input', como uCpRender e aCpRender: sem isto o codigo ficava
+       gravado como foi digitado ate o change/blur normalizar, e a tela dizia uma coisa enquanto
+       o estado dizia outra. A correcao do CAMPO continua so no change/blur (mCpCodAjustar) --
+       reescrever a cada tecla mexeria com o cursor. */
+    cod.addEventListener('input',function(){mCps[i].codigo=cod.value.toUpperCase();salvarEstado();mPreview();});
     cod.addEventListener('change',function(){mCpCodAjustar(cod,i);});
     cod.addEventListener('blur',function(){mCpCodAjustar(cod,i);});
-    var val=document.createElement('input');val.type='number';val.step='0.01';val.min='0';val.value=cp.valor;
-    val.addEventListener('input',function(){mCps[i].valor=val.value;});
+    var val=document.createElement('input');val.type='number';val.step='0.01';val.min='0';val.value=cp.valor;val.placeholder='Valor';
+    /* salvarEstado()+mPreview() nos DOIS campos, como nas irmas. O salvamento ja acontecia por
+       tabela (o 'input' sobe ate document, que chama salvarEstado) -- medido, o valor nao se
+       perdia; o que se perdia era a PREVIA: os ouvintes delegados desta aba filtram por id ou
+       name comecando em 'm-', e os campos desta lista nao tem nem um nem outro. Cupom trocado
+       de 10% para R$ 50 fixo e o quadro continuava mostrando o desconto velho -- exatamente a
+       divergencia que uCpRender ja registra (11614+). Chamar salvarEstado aqui tambem torna a
+       gravacao explicita, e nao dependente de um ouvinte de document a 14 mil linhas daqui. */
+    val.addEventListener('input',function(){mCps[i].valor=val.value;salvarEstado();mPreview();});
     var sel=document.createElement('select');
     [['pct_produto','% sobre os produtos'],['pct_total','% sobre o total'],['fixo','valor fixo']].forEach(function(o){
       var op=document.createElement('option');op.value=o[0];op.textContent=o[1];
       if(cp.tipo===o[0])op.selected=true;sel.appendChild(op);
     });
     sel.addEventListener('change',function(){mCps[i].tipo=sel.value;salvarEstado();mPreview();});
+    /* A VALIDADE APARECE NA LISTA, como no Checkout (uCpRender) e na aba pac (aCpRender). O
+       campo do CADASTRO ('m-cp-val') sempre existiu e mCpAdd sempre gravou o prazo -- so a
+       lista nao o mostrava, e cupom cadastrado que esconde a propria regra e cupom que o dono
+       aplica errado: ele leria "NATAL10, 10%" sem saber que o prazo venceu no Natal passado.
+       Vazio = sem prazo. */
+    var dt=document.createElement('input');dt.type='date';dt.value=cp.validade||'';
+    dt.title='Prazo de validade do cupom (vazio = sem prazo)';
+    dt.addEventListener('change',function(){mCps[i].validade=dt.value;salvarEstado();mPreview();});
     /* O MINIMO APARECE NA LISTA (decisao D5): cupom cadastrado que nao mostra a propria
        regra e cupom que o dono aplica errado -- ele leria "NATAL10, 10%" e nao saberia que
        ele so vale acima de um valor. Vazio = sem minimo. */
@@ -19291,7 +19521,7 @@ function mCpRender(){
     mn.value=(cp.minimo==null?'':cp.minimo);mn.placeholder='M\u00ednimo';
     mn.title='Valor m\u00ednimo do pedido para este cupom valer (vazio = sem m\u00ednimo)';
     mn.addEventListener('input',function(){mCps[i].minimo=mn.value;salvarEstado();mPreview();});
-    info.appendChild(cod);info.appendChild(sel);info.appendChild(val);info.appendChild(mn);
+    info.appendChild(cod);info.appendChild(sel);info.appendChild(val);info.appendChild(dt);info.appendChild(mn);
     var ctrl=document.createElement('div');ctrl.className='ctrl';
     var bt=document.createElement('button');bt.textContent='\u2715';bt.title='Remover';bt.setAttribute('aria-label','Remover');
     bt.addEventListener('click',function(){mCpDel(i);});ctrl.appendChild(bt);
@@ -19484,12 +19714,7 @@ function mToggles(){
   ver('m-sinalpct-campo',sinalOn&&radio('m-sinaltipo')==='pct');
   ver('m-sinalfixo-campo',sinalOn&&radio('m-sinaltipo')==='fixo');
   ver('m-opnenhum-campo',radio('m-opsel')==='unico');
-  var temQtd=false,i,j;
-  for(i=0;i<mProds.length;i++){
-    if(mProds[i].qtd)temQtd=true;
-    for(j=0;j<(mProds[i].ops||[]).length;j++)if(mProds[i].ops[j].qtd)temQtd=true;
-  }
-  ver('m-qtdmax-campo',temQtd);
+  ver('m-qtdmax-campo',mQtdLigada(mProds));
 }
 
 /* ===== os 55 textos configuraveis desta aba (Rodada de textos configuraveis, Etapa 2) =====
@@ -19572,11 +19797,6 @@ function mCfg(){
   var sinalTipo=radio('m-sinaltipo')||'pct';
   var sinalPct=mPreso('m-sinalpct');if(sinalPct==null)sinalPct=30;
   var sinalFixo=mPreso('m-sinalfixo');if(sinalFixo==null)sinalFixo=100;
-  var temQtd=false,i,j;
-  for(i=0;i<mProds.length;i++){
-    if(mProds[i].qtd)temQtd=true;
-    for(j=0;j<(mProds[i].ops||[]).length;j++)if(mProds[i].ops[j].qtd)temQtd=true;
-  }
   var r={
     m:m, usaPP:(m!=='pix'), usaPix:usaPix,
     /* IDENTIDADE: lida do painel global (ver o bloco "identidade e paleta"). */
@@ -19592,7 +19812,7 @@ function mCfg(){
     sinal:{ativo:sinalOn,tipo:sinalTipo,valor:(sinalTipo==='fixo')?(Math.round(sinalFixo*100)/100):sinalPct},
     resumo:(radio('m-resumo')==='sim'),
     prods:mProds, cps:mCps, cats:mCats(),
-    qtdLigada:temQtd, qtdmax:mPreso('m-qtdmax')||10,
+    qtdLigada:mQtdLigada(mProds), qtdmax:mPreso('m-qtdmax')||10,
     /* mob alimenta uma @media do bloco: preso AQUI, na fonte da configuracao, e nao so na
        largura da previa -- min/max de <input type="number"> nao sao impostos ao valor
        digitado, e prender so a previa deixaria o quadro num numero e o CSS gerado em outro. */
@@ -19615,11 +19835,11 @@ function mCfg(){
    o gesto deliberado do operador; a previa roda a cada tecla. */
 function mRecusa(cfg){
   var i,cpv,cpc,cpe,tmax,cpvisto,vistosCp={};
-  if(!cfg.cod)return 'Informe o codigo da loja. Ele identifica o carrinho no navegador do cliente (e a chave do armazenamento) e vira o comeco do identificador do pedido no extrato -- sem ele, duas lojas no mesmo site dividiriam o mesmo carrinho.';
-  if(!/^[A-Za-z0-9_-]+$/.test(cfg.cod))return 'O codigo da loja aceita apenas letras sem acento, numeros, hifen e sublinhado. Ele vira chave de armazenamento e identificador de pedido: espaco e acento ali produzem um identificador diferente do que voce esta lendo.';
+  if(!cfg.cod)return 'Informe o código da loja. Ele identifica o carrinho no navegador do cliente (e a chave do armazenamento) e vira o começo do identificador do pedido no extrato -- sem ele, duas lojas no mesmo site dividiriam o mesmo carrinho.';
+  if(!/^[A-Za-z0-9_-]+$/.test(cfg.cod))return 'O código da loja aceita apenas letras sem acento, números, hífen e sublinhado. Ele vira chave de armazenamento e identificador de pedido: espaço e acento ali produzem um identificador diferente do que você está lendo.';
   if(!cfg.prods.length)return 'Cadastre ao menos um produto.';
   for(i=0;i<cfg.prods.length;i++){
-    if(!String(cfg.prods[i].img||'').trim())return 'O produto "'+cfg.prods[i].nome+'" esta sem foto. A vitrine e feita de imagens: sem foto ele sai como um retangulo vazio no meio da grade.';
+    if(!String(cfg.prods[i].img||'').trim())return 'O produto "'+cfg.prods[i].nome+'" está sem foto. A vitrine é feita de imagens: sem foto ele sai como um retângulo vazio no meio da grade.';
   }
   if(cfg.usaPP&&!cfg.client)return fciRecusa('Informe o Client ID do PayPal.');
   if(cfg.usaPix){
@@ -19627,12 +19847,12 @@ function mRecusa(cfg){
     if(erroChave)return erroChave;
     if(!cfg.chave||!cfg.nomer||!cfg.cidade)return fciRecusa('Preencha a chave Pix, o nome do recebedor e a cidade.');
   }
-  if(cfg.zap&&!cfg.zapnum)return fciRecusa('Informe o numero do WhatsApp de destino.');
+  if(cfg.zap&&!cfg.zapnum)return fciRecusa('Informe o número do WhatsApp de destino.');
   for(i=0;i<cfg.cps.length;i++){
     cpc=String(cfg.cps[i].codigo||'').trim();
-    if(!cpc)return 'O cupom na posicao '+(i+1)+' da lista esta sem codigo. Um cupom sem codigo nunca pode ser digitado pelo cliente: preencha o codigo ou remova a linha.';
+    if(!cpc)return 'O cupom na posição '+(i+1)+' da lista está sem código. Um cupom sem código nunca pode ser digitado pelo cliente: preencha o código ou remova a linha.';
     cpv=parseFloat(String(cfg.cps[i].valor).replace(',','.'));
-    if(isNaN(cpv)||cpv<=0)return 'O cupom "'+cpc+'" esta com o valor do desconto vazio ou zerado. Ele seria entregue no codigo como desconto de zero: o cliente digitaria o cupom, veria "Cupom aplicado!" e "Desconto - R$ 0,00", e o total nao mudaria. Preencha o valor ou remova o cupom.';
+    if(isNaN(cpv)||cpv<=0)return 'O cupom "'+cpc+'" está com o valor do desconto vazio ou zerado. Ele seria entregue no código como desconto de zero: o cliente digitaria o cupom, veria "Cupom aplicado!" e "Desconto - R$ 0,00", e o total não mudaria. Preencha o valor ou remova o cupom.';
     cpe=mCpPctErro(cfg.cps[i].tipo,cpv);
     if(cpe)return 'Cupom "'+cpc+'": '+cpe;
     cpe=fcCpMinErro(cfg.cps[i],cpc);
@@ -19649,7 +19869,7 @@ function mRecusa(cfg){
      carrinho, cada item no teto da quantidade. Acima disso nenhum cliente conseguiria pagar. */
   if(cfg.sinal.ativo&&cfg.sinal.tipo==='fixo'){
     tmax=mTotalMaximo(cfg.prods,cfg.qtdmax);
-    if(cfg.sinal.valor>tmax)return 'O sinal fixo de '+mFmt(cfg.sinal.valor)+' e maior que o maior pedido que esta loja consegue montar ('+mFmt(tmax)+', com tudo no carrinho e cada item no teto da quantidade). Nenhum cliente conseguiria pagar. Reduza o sinal, use sinal percentual ou aumente os precos.';
+    if(cfg.sinal.valor>tmax)return 'O sinal fixo de '+mFmt(cfg.sinal.valor)+' é maior que o maior pedido que esta loja consegue montar ('+mFmt(tmax)+', com tudo no carrinho e cada item no teto da quantidade). Nenhum cliente conseguiria pagar. Reduza o sinal, use sinal percentual ou aumente os preços.';
   }
   return '';
 }
@@ -20752,7 +20972,7 @@ function mPvShim(cfg){
   return fcPvShim({pref:'m',
     semAbrir:true,
     abre:'o ',
-    fecha:' deste quadro. A previa pode estar gravando o carrinho nas chaves reais do navegador ou abrindo o WhatsApp numa aba nova. O codigo gerado ao lado nao e afetado.',
+    fecha:' deste quadro. A prévia pode estar gravando o carrinho nas chaves reais do navegador ou abrindo o WhatsApp numa aba nova. O código gerado ao lado não é afetado.',
     depois:s});
 }
 function mPvEnchimento(){
@@ -21014,9 +21234,7 @@ function fccAgendar(){
      - hifens repetidos viram um so, pela mesma razao.
    E os acentos saem porque a regra 10 do Manual do Prosite vale para todo codigo colado. */
 function fccSeguro(s){
-  var t=String(s==null?'':s);
-  /* faixa de caracteres em expressao regular: um dos tres casos em que este arquivo usa \uXXXX */
-  if(t.normalize)t=t.normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  var t=fcSemAcento(s);
   t=t.replace(/[^\x20-\x7E]/g,'').replace(/[<>]/g,'').replace(/-{2,}/g,'-');
   t=t.replace(/\s+/g,' ').replace(/^\s+/,'').replace(/\s+$/,'');
   return t||'sem nome';
@@ -21200,7 +21418,7 @@ function fccDaAba(a,p,plano,vals){
    e esquecimento, e saida que aquela configuracao nao usa.
    Ela nao conserta o mapa; ela faz o buraco APARECER, que e o que faltava. */
 var FCC_FORA={
-  'p-out2':'o link de cada cobranca vai para o CLIENTE e muda a cada uma: nao e campo do Prosite nem passo de montagem desta pagina'
+  'p-out2':'o link de cada cobrança vai para o CLIENTE e muda a cada uma: não é campo do Prosite nem passo de montagem desta página'
 };
 function fccAbaDoOut(id){
   var pref=id.split('-')[0],i;
@@ -21440,7 +21658,7 @@ function fccGerarTodos(){
       a=ABAS[i];
       if(!FCG.ativas[a.id])continue;
       if(fcSoLeitura[a.id]){travadas.push(a.nome);continue;}
-      if(typeof a.gerar!=='function'){recusas.push([a.nome,'esta aba nao tem gerador declarado no registro.']);continue;}
+      if(typeof a.gerar!=='function'){recusas.push([a.nome,'esta aba não tem gerador declarado no registro.']);continue;}
       recado=null;
       try{ a.gerar(); }
       catch(e){ recado='a aba falhou ao gerar: '+(e&&e.message?e.message:e); }
@@ -21644,7 +21862,7 @@ prep('Agendamento TidyCal','tidy',function(){
 prep('Checkout','uni',function(){
   liga('u-op-add',uOpAdd);
   liga('u-prod-salvar',uProdSalvar);
-  liga('u-prod-cancelar',uProdLimpar);
+  liga('u-prod-cancelar',function(){uProdLimpar();salvarEstado();});
   liga('u-cp-add',uCpAdd);
   liga('u-gerar',uGerar);
   liga('u-atualizar',function(){uPreview(true);});
@@ -21731,7 +21949,7 @@ prep('Link de cobrança','cob',function(){
 prep('Mini loja','loja',function(){
   liga('m-op-add',mOpAdd);
   liga('m-prod-salvar',mProdSalvar);
-  liga('m-prod-cancelar',mProdLimpar);
+  liga('m-prod-cancelar',function(){mProdLimpar();salvarEstado();});
   liga('m-prod-limpar',mProdListaLimpar);
   liga('m-cp-add',mCpAdd);
   liga('m-gerar',mGerar);
@@ -21760,7 +21978,7 @@ prep('Mini loja','loja',function(){
    ramo redesenha a previa por conta propria, e por prefixo (fcCorRedesenhar).
    So em 'change'/'blur', nunca em 'input': corrigir a cada tecla impediria digitar '#075E54',
    porque '#0' viraria o padrao antes do resto chegar. */
-prep('Correcao a vista das cores livres','leads uni bor cnt cob loja pac',function(){
+prep('Correção à vista das cores livres','leads uni bor cnt cob loja pac',function(){
   CORES_LIVRES.forEach(function(par){
     var t=$(par[0]+'-t');if(!t)return;
     /* Os dois gravadores sao chamados sempre: 'salvarEstado' guarda as cores das abas e
@@ -21780,6 +21998,10 @@ prep('Correcao a vista das cores livres','leads uni bor cnt cob loja pac',functi
         conta quantos valores de identidade ignorou; o contador precisa existir antes.
    Passo proprio, com rotulo proprio: se ele falhar, a barra vermelha precisa dizer que foi a
    identidade -- as abas continuam funcionando, so vao recusar gerar por falta de chave. */
+/* A numeracao das secoes vem antes de tudo o que desenha: os textos que citam uma secao por
+   numero (class="sec-ref") nascem VAZIOS no HTML e sao preenchidos aqui. */
+prep('Ferramenta','',fcSecoesNumerar,'numerar as seções');
+
 prep('Identidade e paleta','',fciIniciar,'preparar a identidade e a paleta');
 
 /* restaurarEstado ja isola aba por aba por dentro: a aba que falhar ao restaurar nao
@@ -21800,7 +22022,7 @@ for(var iAba=0;iAba<ABAS.length;iAba++){
    carga, para o campo nunca exibir algo diferente do que o gerador vai usar, e regrava para o
    valor velho nao ressurgir na proxima sessao. Roda ANTES das previas para elas ja desenharem
    o valor corrigido. */
-prep('Correcao das cores livres e da chave Pix na carga','leads uni bor cnt pac',function(){
+prep('Correção das cores livres e da chave Pix na carga','leads uni bor cnt pac',function(){
   var mudou=false;
   CORES_LIVRES.forEach(function(par){if(corAjustar(par[0],par[1]))mudou=true;});
   if(fcPixChaveAjustar('fci-chave'))mudou=true;
@@ -21947,7 +22169,7 @@ prep('Agendamento por pacote','pac',function(){
      tecla e impediria digitar. Mesmo padrao da chave Pix do painel Identidade. */
   (function(){var el=$('a-pcod');if(el){el.addEventListener('change',aPcodAjustar);el.addEventListener('blur',aPcodAjustar);}})();
   liga('a-pac-salvar',aPacSalvar);
-  liga('a-pac-cancelar',aPacLimpar);
+  liga('a-pac-cancelar',function(){aPacLimpar();salvarEstado();});
   liga('a-ptestar',aPacTestar);
   liga('a-op-add',aOpAdd);
   liga('a-fam-add',aFamAdd);
@@ -21983,11 +22205,11 @@ prep('Textos configuraveis','slide leads tidy uni cnt cob loja pac',function(){
   fcdLigar();
   var d=fcTxtFabricaDiverge();
   if(d.length)throw new Error('o padrao de fabrica destes campos discorda entre o value= do HTML e a tabela da aba: '+d.join(', '));
-},'preparar as secoes de texto e conferir os padroes de fabrica');
+},'preparar as seções de texto e conferir os padrões de fábrica');
 prep('Preset geral','',fcgIniciar,'preparar a barra do preset geral');
 /* Passo proprio, com rotulo proprio: se ligar os botoes de backup falhar, a barra vermelha
    precisa dizer que foi o backup -- e nao o preset geral, que continua funcionando. */
-prep('Backup em arquivo','',fcxIniciar,'preparar os botoes de exportar e importar');
+prep('Backup em arquivo','',fcxIniciar,'preparar os botões de exportar e importar');
 /* O recado da migracao e a linha de estado da paleta sao os ULTIMOS: o recado precisa da
    contagem do que foi podado dos presets (que so termina depois de todas as bibliotecas serem
    lidas) e a linha de estado compara a paleta com os campos de cor das abas, que so terminam
