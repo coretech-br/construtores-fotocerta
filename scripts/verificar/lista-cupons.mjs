@@ -25,12 +25,30 @@
         previa, que e onde a divergencia aparecia;
      4. o valor sobrevive a RECARGA.
 
+   A SEGUNDA SECAO (03/09/2026) cobre a IDENTIDADE DO CODIGO -- que dois cadastros
+   nao possam ser o mesmo cupom para o cliente. Ela existe porque a recusa do cadastro
+   e o carrinho entregue faziam perguntas DIFERENTES: o cadastro comparava as cadeias
+   cruas com '===', e o bloco casa o que o cliente digita por trim()+toUpperCase(). Um
+   codigo gravado com espaco nas pontas ou em minusculas -- o editor em linha nao
+   aparava, e backup/preset devolve o que guardou -- entrava como distinto e o carrinho
+   o casaria com o outro. Medido na main de 03/09/2026, nas TRES abas.
+   O que ela verifica, em cada aba:
+     5. o cadastro recusa o codigo IDENTICO;
+     6. a edicao em linha APARA -- tela, gravado e codigo gerado dizem o mesmo;
+     7. um codigo ja gravado sem normalizar RECUSA o cadastro do equivalente;
+     8. e o BLOCO casaria os dois -- o CUPONS emitido do codigo sujo e o mesmo texto
+        que o cadastro recusou (e o que amarra a recusa a comparacao do carrinho);
+     9. NEGATIVO: editar um cupom sem mexer no codigo nao e recusado, e reescrever o
+        codigo com ele mesmo tambem nao (o proprio item e ignorado na comparacao);
+    10. a edicao em linha que CRIA duplicata avisa e marca a linha -- sem reverter o
+        que o dono digitou, que e dado dele.
+
    NAO E CODIGO DO SITE. Utilitario de linha de comando, roda em Node.
    Uso:  node scripts/verificar/lista-cupons.mjs  [raiz]
    ============================================================================ */
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { navegador, servir, abrir, set, clicar } from './lib.mjs';
+import { navegador, servir, abrir, set, clicar, alertas, zerarAlertas } from './lib.mjs';
 import { IDENT } from './cenario.mjs';
 import { chk, resumo } from './pagina.mjs';
 
@@ -41,16 +59,16 @@ const PORTA = 8817;
 /* O minimo que cada aba precisa ter cadastrado para a previa montar o carrinho. Menos que
    isto e a previa cai no quadro de recusa, e a lista CUPONS nem chega a ser emitida. */
 const ABAS = [
-  {pref:'u', nome:'Checkout',   botao:'aba-uni',  preparar: async pg => {
+  {pref:'u', nome:'Checkout',   botao:'aba-uni',  gerar:'u-gerar', preparar: async pg => {
     await set(pg,'u-pnome','Ensaio de Natal'); await set(pg,'u-ppreco','420');
     await clicar(pg,'u-prod-salvar');
   }},
-  {pref:'m', nome:'Mini loja',  botao:'aba-loja', preparar: async pg => {
+  {pref:'m', nome:'Mini loja',  botao:'aba-loja', gerar:'m-gerar', preparar: async pg => {
     await set(pg,'m-pnome','Album 30x30'); await set(pg,'m-ppreco','890');
     await set(pg,'m-pimg','https://storage.alboom.ninja/album.jpg');
     await clicar(pg,'m-prod-salvar');
   }},
-  {pref:'a', nome:'Agendamento por pacote', botao:'aba-pac', preparar: async pg => {
+  {pref:'a', nome:'Agendamento por pacote', botao:'aba-pac', gerar:'a-gerar', preparar: async pg => {
     await set(pg,'a-urlobrigado','https://www.fotocerta.com.br/obrigado');
     await set(pg,'a-pcod','MINI'); await set(pg,'a-pnome','Mini ensaio');
     await set(pg,'a-pdur','1 hora'); await set(pg,'a-ppreco','420');
@@ -171,6 +189,164 @@ for (const aba of ABAS) {
   chk(aba.nome + ': o cupom editado sobrevive a recarga', antes === depois,
       'antes: ' + antes + ' | depois: ' + depois);
   chk(aba.nome + ': sem erro de console', pg.erros.length === 0, pg.erros.join(' | '));
+  await pg.close();
+}
+
+/* ============================================================================
+   SECAO 2 -- A IDENTIDADE DO CODIGO DO CUPOM
+   ============================================================================ */
+
+/* A recarga devolve o window.alert original: quem quiser ler alerta depois dela precisa
+   re-neutralizar, como abrir() faz. Sem isto o alerta abriria de verdade e travaria o teste. */
+const neutralizar = pg => pg.evaluate(() => {
+  window.__alertas = [];
+  window.alert = m => { window.__alertas.push(String(m)); };
+  window.confirm = () => true;
+  window.open = () => null;
+});
+
+/* O que esta GRAVADO, os codigos na ordem da lista. */
+const codigos = (pg, pref) => pg.evaluate(p => {
+  const st = JSON.parse(localStorage.getItem('fcConstrutores') || '{}');
+  const cps = st[p] && st[p].cps;
+  return cps ? cps.map(c => c.codigo) : null;
+}, pref);
+
+/* Escreve no ESTADO GRAVADO um codigo fora do padrao e recarrega -- e o que um backup, um
+   preset antigo ou o editor em linha de antes de 03/09/2026 deixam para tras. Nao ha como
+   chegar nesse estado pela interface de hoje, e e exatamente por isso que ele precisa ser
+   testado: a recusa nova tem de valer para o que JA ESTAVA la, e nao so para o que ela
+   mesma deixou entrar. */
+const sujarGravado = (pg, pref, cod) => pg.evaluate(([p, cod]) => {
+  const st = JSON.parse(localStorage.getItem('fcConstrutores') || '{}');
+  if (!st[p] || !st[p].cps || !st[p].cps[0]) throw new Error('sem cupom gravado em ' + p);
+  st[p].cps[0].codigo = cod;
+  localStorage.setItem('fcConstrutores', JSON.stringify(st));
+}, [pref, cod]);
+
+/* Edita o campo de codigo de UMA linha da lista disparando os eventos do teclado. 'change'
+   e o que significa "terminou de editar E o valor mudou" -- e o unico que avisa. */
+const editarCodigo = (pg, pref, linha, valor, comChange) => pg.evaluate(([p, linha, valor, comChange]) => {
+  const li = document.querySelectorAll('#' + p + '-cp-lista li')[linha];
+  if (!li) throw new Error('a lista de ' + p + ' nao tem a linha ' + linha);
+  const el = li.querySelector('input[type=text]');
+  el.value = valor;
+  el.dispatchEvent(new Event('input', {bubbles:true}));
+  if (comChange) el.dispatchEvent(new Event('change', {bubbles:true}));
+  el.dispatchEvent(new Event('blur', {bubbles:true}));
+  return {tela: el.value, marcado: !!el.style.borderColor};
+}, [pref, linha, valor, comChange]);
+
+for (const aba of ABAS) {
+  console.log('\n' + aba.nome + ' -- identidade do codigo');
+  /* ---------- (5) a (8): a recusa faz a MESMA pergunta que o bloco ---------- */
+  let pg = await abrir(browser, 'http://127.0.0.1:' + PORTA);
+  for (const [k, v] of Object.entries(IDENT)) await set(pg, 'fci-' + k, v);
+  await clicar(pg, aba.botao);
+  await aba.preparar(pg);
+  await set(pg, aba.pref + '-cp-cod', 'NATAL10');
+  await set(pg, aba.pref + '-cp-valor', '10');
+  await clicar(pg, aba.pref + '-cp-add');
+  await espera(200);
+
+  /* (5) codigo IDENTICO */
+  await zerarAlertas(pg);
+  await set(pg, aba.pref + '-cp-cod', 'NATAL10');
+  await set(pg, aba.pref + '-cp-valor', '20');
+  await clicar(pg, aba.pref + '-cp-add');
+  let al = await alertas(pg), cs = await codigos(pg, aba.pref);
+  chk(aba.nome + ': o cadastro RECUSA o codigo identico',
+      cs.length === 1 && (al[0] || '').indexOf('Já existe um cupom') === 0, JSON.stringify(cs) + ' | ' + al.join(' | '));
+
+  /* (6) a edicao em linha APARA -- tela e gravado dizem o mesmo que o codigo gerado */
+  await zerarAlertas(pg);
+  let r = await editarCodigo(pg, aba.pref, 0, '  natal10  ', true);
+  await espera(PAUSA_PREVIA);
+  cs = await codigos(pg, aba.pref);
+  chk(aba.nome + ': a edicao em linha APARA o codigo na tela', r.tela === 'NATAL10', JSON.stringify(r.tela));
+  chk(aba.nome + ': a edicao em linha APARA o codigo gravado', cs[0] === 'NATAL10', JSON.stringify(cs));
+  chk(aba.nome + ': e a previa emite o mesmo codigo',
+      (await previaCupom(pg)).indexOf("codigo:'NATAL10'") >= 0, await previaCupom(pg));
+
+  /* (7) um codigo JA GRAVADO fora do padrao recusa o cadastro do equivalente */
+  await sujarGravado(pg, aba.pref, '  natal10  ');
+  await pg.reload();
+  await espera(400);
+  await neutralizar(pg);
+  await clicar(pg, aba.botao);
+  await espera(200);
+  cs = await codigos(pg, aba.pref);
+  chk(aba.nome + ': o estado sujo foi mesmo restaurado (a medida vale)',
+      cs.length === 1 && cs[0] === '  natal10  ', JSON.stringify(cs));
+  await set(pg, aba.pref + '-cp-cod', 'NATAL10');
+  await set(pg, aba.pref + '-cp-valor', '30');
+  await clicar(pg, aba.pref + '-cp-add');
+  al = await alertas(pg); cs = await codigos(pg, aba.pref);
+  chk(aba.nome + ': o cadastro RECUSA o equivalente de um codigo ja gravado sem normalizar',
+      cs.length === 1 && (al[0] || '').indexOf('Já existe um cupom') === 0,
+      JSON.stringify(cs) + ' | ' + al.join(' | '));
+
+  /* (8) e o BLOCO casaria os dois: o codigo sujo vira, no CUPONS entregue, o MESMO texto
+     que o cadastro acabou de recusar. E o que amarra a recusa a comparacao do carrinho --
+     se ela usasse outra pergunta, deixaria passar justamente este par. */
+  await espera(PAUSA_PREVIA);
+  const emitido = await previaCupom(pg);
+  chk(aba.nome + ': o BLOCO emite "  natal10  " como NATAL10 -- o codigo recusado',
+      emitido.indexOf("codigo:'NATAL10'") >= 0, emitido);
+  chk(aba.nome + ': sem erro de console (identidade)', pg.erros.length === 0, pg.erros.join(' | '));
+  await pg.close();
+
+  /* ---------- (9) e (10): a edicao em linha ---------- */
+  pg = await abrir(browser, 'http://127.0.0.1:' + PORTA);
+  for (const [k, v] of Object.entries(IDENT)) await set(pg, 'fci-' + k, v);
+  await clicar(pg, aba.botao);
+  await aba.preparar(pg);
+  for (const c of ['NATAL10', 'PASCOA']) {
+    await set(pg, aba.pref + '-cp-cod', c);
+    await set(pg, aba.pref + '-cp-valor', '10');
+    await clicar(pg, aba.pref + '-cp-add');
+  }
+  await espera(200);
+  chk(aba.nome + ': os dois cupons distintos entraram',
+      JSON.stringify(await codigos(pg, aba.pref)) === '["NATAL10","PASCOA"]', JSON.stringify(await codigos(pg, aba.pref)));
+
+  /* (9a) editar o VALOR nao e recusado */
+  await zerarAlertas(pg);
+  await pg.evaluate(p => {
+    const el = document.querySelector('#' + p + '-cp-lista li input[type=number]');
+    el.value = '77';
+    el.dispatchEvent(new Event('input', {bubbles:true}));
+    el.dispatchEvent(new Event('change', {bubbles:true}));
+    el.dispatchEvent(new Event('blur', {bubbles:true}));
+  }, aba.pref);
+  chk(aba.nome + ': editar o VALOR de um cupom nao e recusado', (await alertas(pg)).length === 0,
+      (await alertas(pg)).join(' | '));
+
+  /* (9b) reescrever o codigo COM ELE MESMO nao e recusado -- o proprio item e ignorado */
+  await zerarAlertas(pg);
+  await editarCodigo(pg, aba.pref, 0, 'NATAL10', true);
+  chk(aba.nome + ': reescrever o codigo com ELE MESMO nao e recusado', (await alertas(pg)).length === 0,
+      (await alertas(pg)).join(' | '));
+
+  /* (10) editar o codigo de um cupom para bater com OUTRO avisa, marca e MANTEM o valor */
+  await zerarAlertas(pg);
+  r = await editarCodigo(pg, aba.pref, 1, 'natal10', true);
+  al = await alertas(pg);
+  chk(aba.nome + ': a edicao em linha que CRIA duplicata avisa',
+      al.length === 1 && al[0].indexOf('Agora existem dois cupons') === 0, al.join(' | '));
+  chk(aba.nome + ': e marca a linha repetida', r.marcado === true, JSON.stringify(r));
+  chk(aba.nome + ': e MANTEM o que o dono digitou (nada e revertido nem apagado)',
+      JSON.stringify(await codigos(pg, aba.pref)) === '["NATAL10","NATAL10"]',
+      JSON.stringify(await codigos(pg, aba.pref)));
+
+  /* e o Gerar continua recusando enquanto os dois existirem */
+  await zerarAlertas(pg);
+  await clicar(pg, aba.gerar);
+  await espera(300);
+  al = await alertas(pg);
+  chk(aba.nome + ': e o Gerar recusa enquanto os dois existirem',
+      al.some(m => m.indexOf('têm o mesmo código') > 0), al.join(' | '));
+  chk(aba.nome + ': sem erro de console (edicao em linha)', pg.erros.length === 0, pg.erros.join(' | '));
   await pg.close();
 }
 

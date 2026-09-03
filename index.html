@@ -3971,8 +3971,8 @@
    QUEM IMPEDE QUE ELE MINTA: scripts/conferir-versoes.sh, que recusa index.html
    alterado sem a versao mudar junto -- a mesma disciplina do fc-compartilhado.js,
    e pela mesma razao: carimbo que ninguem confere e o defeito de amanha. */
-var FC_VERSAO='2026-09-03g';
-var FC_PUBLICADO='2026-09-03 16:41';   /* America/Sao_Paulo -- escrito pelo carimbador */
+var FC_VERSAO='2026-09-03h';
+var FC_PUBLICADO='2026-09-03 18:11';   /* America/Sao_Paulo -- escrito pelo carimbador */
 (function(){
   var el=document.getElementById('fc-versao');
   if(!el) return;
@@ -4587,9 +4587,58 @@ function fcCpTemMinimo(cps){
   for(i=0;i<(cps||[]).length;i++){if(fcCpMinimo(cps[i])>0)return true;}
   return false;
 }
+/* A IDENTIDADE de um codigo de cupom -- a MESMA pergunta que o BLOCO faz.
+   O carrinho entregue casa o que o cliente digita assim, nas tres abas:
+       CUPONS[i].codigo.toUpperCase() === v.toUpperCase(),  com v = campo.value.trim()
+   e o codigo que ele carrega saiu daqui ja aparado e em maiusculas (fcCpSerial, logo abaixo).
+   Entao dois cadastros sao O MESMO CUPOM para o cliente exatamente quando fcCpCod bate -- e a
+   recusa do cadastro TEM de fazer esta pergunta, e nao comparar as cadeias cruas.
+   MEDIDO em 03/09/2026 na main: as tres abas comparavam com '===' contra o valor GRAVADO. Um
+   codigo gravado com espaco nas pontas ou em minusculas (o editor em linha nao aparava, e
+   backup/preset devolve o que guardou) passava como DISTINTO no cadastro enquanto o bloco o
+   casaria com o outro -- exatamente o par que causa o defeito. fcCpSerial usa esta funcao para
+   escrever o codigo, entao nao existe segunda implementacao nem por descuido. */
+function fcCpCod(c){return String(c==null?'':c).trim().toUpperCase();}
+/* A busca do codigo repetido, UMA para as tres abas (uCps, mCps, aCps). Devolve o codigo
+   GRAVADO do outro cupom -- e nao o normalizado -- porque a mensagem tem de mostrar ao dono o
+   que esta na lista dele. 'ignorar' e o indice do proprio item quando se esta editando: sem
+   ele, todo cupom colidiria consigo mesmo. */
+function fcCpAchaRepetido(lista,cod,ignorar){
+  var k=fcCpCod(cod),i;
+  if(!k)return '';
+  for(i=0;i<lista.length;i++){if(i!==ignorar&&fcCpCod(lista[i].codigo)===k)return lista[i].codigo;}
+  return '';
+}
+/* O AVISO dos duplicados que JA ESTAVAM gravados. A recusa nova protege o cadastro daqui para
+   frente e nao limpa o que existe -- e nao pode limpar: os dados sao do dono, e apagar cupom
+   por conta propria seria mexer no cadastro dele sem ele mandar (mesmo criterio de aFamDel).
+   Ate aqui um par desses so aparecia ao Gerar, que recusa nomeando os dois. Isto nao conserta
+   o cadastro; faz o buraco APARECER na propria lista, como fccOrfas faz no painel. */
+function fcCpDupMarcar(inp,lista,i){
+  var k=fcCpCod(lista[i]&&lista[i].codigo);
+  if(!k||!fcCpAchaRepetido(lista,k,i))return false;
+  inp.style.borderColor='#8C1D18';inp.style.background='#FFF4F3';
+  inp.title='Este c\u00f3digo est\u00e1 repetido na lista ("'+k+'"). O cliente digitaria um c\u00f3digo s\u00f3, e a p\u00e1gina n\u00e3o tem como saber qual dos dois cadastros aplicar \u2014 o c\u00f3digo n\u00e3o \u00e9 gerado enquanto os dois existirem. Troque um dos dois ou remova a linha.';
+  return true;
+}
+/* O aviso da EDICAO EM LINHA. No cadastro da para recusar antes de criar; aqui nao ha o que
+   recusar -- o cupom ja existe, e reverter o que o dono acabou de digitar seria mexer no dado
+   dele. Entao avisa, marca a linha e MANTEM o valor: quem decide qual dos dois muda e ele. O
+   Gerar continua recusando enquanto os dois existirem, e a previa cai no quadro de recusa.
+   SO no 'change', nunca no 'blur': os dois ouvintes da linha chamam xCpCodAjustar, e 'change'
+   e o que quer dizer "terminou de editar E o valor mudou" -- avisar nos dois daria dois
+   alertas seguidos para a mesma edicao. */
+function fcCpDupAvisar(inp,lista,i,avisar){
+  if(!avisar)return false;
+  var rep=fcCpAchaRepetido(lista,lista[i]&&lista[i].codigo,i);
+  if(!rep)return false;
+  fcCpDupMarcar(inp,lista,i);
+  alert('Agora existem dois cupons com o c\u00f3digo "'+fcCpCod(rep)+'". O cliente digitaria um c\u00f3digo s\u00f3, e a p\u00e1gina n\u00e3o tem como saber qual dos dois cadastros aplicar: o c\u00f3digo n\u00e3o vai ser gerado enquanto os dois existirem. Troque um dos dois ou remova a linha.');
+  return true;
+}
 function fcCpSerial(cp){
   var v=parseFloat(String(cp.valor).replace(',','.'))||0,mn=fcCpMinimo(cp);
-  return "  {codigo:'"+escJs(String(cp.codigo).trim().toUpperCase())+"', tipo:'"+cp.tipo+"', valor:"+v+", validade:'"+escJs(cp.validade||'')+"'"+(mn>0?", minimo:"+mn:"")+"}";
+  return "  {codigo:'"+escJs(fcCpCod(cp.codigo))+"', tipo:'"+cp.tipo+"', valor:"+v+", validade:'"+escJs(cp.validade||'')+"'"+(mn>0?", minimo:"+mn:"")+"}";
 }
 /* A linha de documentacao do 'minimo' dentro do comentario de CUPONS, para as tres abas
    escreverem a mesma explicacao. So entra quando algum cupom tem minimo. */
@@ -12195,8 +12244,12 @@ function uOpPrecoAjustar(inp,i){
   salvarEstado();
   return true;
 }
-function uCpCodAjustar(inp,i){
-  var alto=String(inp.value).toUpperCase();
+function uCpCodAjustar(inp,i,avisar){
+  /* fcCpCod, e nao toUpperCase() sozinho: sem o aparo, "  natal10  " digitado aqui ficava
+     gravado com os espacos e a tela mostrava "  NATAL10  " enquanto o codigo gerado dizia
+     "NATAL10" -- a mesma "tela diferente do codigo" que esta funcao existe para eliminar,
+     e a porta por onde entrava um duplicado que o cadastro nao via. Medido em 03/09/2026. */
+  var alto=fcCpCod(inp.value),mudou;
   uCps[i].codigo=alto;
   /* O gravador vem ANTES do desvio, e nao depois. Ate 03/09/2026 o codigo ja em maiusculas
      saia por 'return false' sem gravar nada, e isso funcionava por um motivo que esta funcao
@@ -12208,10 +12261,10 @@ function uCpCodAjustar(inp,i){
      e nao mostraria nada de novo. O contrato de retorno nao muda -- true quer dizer 'corrigi o
      campo na tela', e e o que os dois ouvintes desta linha esperam. */
   salvarEstado();
-  if(alto===inp.value)return false;
-  inp.value=alto;
-  uPreview();
-  return true;
+  mudou=(alto!==inp.value);
+  if(mudou){inp.value=alto;uPreview();}
+  fcCpDupAvisar(inp,uCps,i,avisar);
+  return mudou;
 }
 function uOpRender(){
   var ul=$('u-op-lista');if(!ul)return;
@@ -12358,12 +12411,18 @@ function uCpRender(){
     var li=document.createElement('li');
     var info=document.createElement('div');info.className='info';
     var cod=document.createElement('input');cod.type='text';cod.value=cp.codigo;cod.placeholder='Código';
+    /* A marca vermelha do codigo repetido, desenhada A CADA render: e assim que um par que JA
+       estava gravado (backup, preset, ou o editor em linha antes de 03/09/2026) aparece sem
+       esperar o Gerar. Nao apaga nem corrige nada -- ver fcCpDupMarcar. */
+    fcCpDupMarcar(cod,uCps,i);
     cod.addEventListener('input',function(){uCps[i].codigo=cod.value.toUpperCase();salvarEstado();uPreview();});
     /* O modelo ja guardava em maiusculas, mas o CAMPO continuava mostrando o que foi digitado:
        tela "promo abc", codigo gerado 'PROMO ABC'. Funcionava (a comparacao em runtime ignora
        caixa), e era exatamente o "tela diferente do codigo" que esta fase existiu para eliminar.
        So em 'change'/'blur', nunca em 'input': reescrever a cada tecla mexeria com o cursor. */
-    cod.addEventListener('change',function(){uCpCodAjustar(cod,i);});
+    /* 'true' SO no change: e ele que significa "terminou de editar E o valor mudou". Avisar
+       tambem no blur daria dois alertas para a mesma edicao. Ver fcCpDupAvisar. */
+    cod.addEventListener('change',function(){uCpCodAjustar(cod,i,true);});
     cod.addEventListener('blur',function(){uCpCodAjustar(cod,i);});
     var val=document.createElement('input');val.type='number';val.step='0.01';val.min='0';val.value=cp.valor;val.placeholder='Valor';
     /* Valor, tipo e validade tambem redesenham a previa. Antes so o CODIGO do cupom chamava
@@ -12407,17 +12466,15 @@ function uCpPctErro(tipo,v){
   if(v>100)return 'Um cupom em porcentagem não pode passar de 100%: com '+v+'% o desconto é limitado ao subtotal e o pedido inteiro vai a R$ 0,00 — o cliente vê "Cupom aplicado!" e um total zerado, e o pagamento recusa a cobrança zerada. Se a intenção era 15%, corrija o valor; se era realmente dar o pedido, use um cupom de valor fixo igual ao preço.';
   return '';
 }
-/* Recusa de codigo repetido -- decisao 13 de 02/09/2026, uniformizada com a aba pac
-   (aCpAchaRepetido, 13268+): sem isto, dois cupons com o mesmo codigo eram aceitos em
-   silencio e o carrinho aplicava sempre o PRIMEIRO que batesse -- o segundo nunca era
-   encontrado. */
-function uCpAchaRepetido(cod,ignorar){
-  var i;
-  for(i=0;i<uCps.length;i++){if(i!==ignorar&&uCps[i].codigo===cod)return uCps[i].codigo;}
-  return '';
-}
+/* Recusa de codigo repetido -- decisao 13 de 02/09/2026: sem isto, dois cupons com o mesmo
+   codigo eram aceitos em silencio e o carrinho aplicava sempre o PRIMEIRO que batesse -- o
+   segundo nunca era encontrado. Em 03/09/2026 as tres copias desta busca viraram uma so
+   (fcCpAchaRepetido, 4606+), que pergunta pelo fcCpCod e nao pela cadeia crua: a copia daqui
+   comparava com '===' contra o valor GRAVADO, e por isso ainda deixava entrar o par que o
+   BLOCO casaria -- codigo gravado com espaco nas pontas ou em minusculas. */
+function uCpAchaRepetido(cod,ignorar){return fcCpAchaRepetido(uCps,cod,ignorar);}
 function uCpAdd(){
-  var cod=$('u-cp-cod').value.trim().toUpperCase();
+  var cod=fcCpCod($('u-cp-cod').value);
   if(!cod){alert('Informe o código do cupom.');return;}
   var repetido=uCpAchaRepetido(cod,-1);
   if(repetido){alert('Já existe um cupom com o código "'+cod+'". O cliente digitaria um código só, e a página não tem como saber qual dos dois cadastros aplicar — escolha outro código ou edite o cupom já existente na lista.');return;}
@@ -12740,9 +12797,10 @@ function uRecusa(cfg){
     if(cpe)return cpe;
     /* Codigo repetido tambem aqui, e nao so no cadastro (uCpAdd) -- decisao 13: a lista se
        edita por dentro (uCpCodAjustar), e apagar/alterar um codigo la nao passa pelo
-       cadastro. Comparacao ja ignora maiuscula/minuscula e espacos das pontas: cpc chega
-       aqui aparado, e os codigos gravados ja sao maiusculos. */
-    cpvisto=cpc.toUpperCase();
+       cadastro. A pergunta e a MESMA do bloco e a mesma do cadastro -- fcCpCod, fonte unica
+       (4601+): ate 03/09/2026 esta varredura era a unica das duas que normalizava, e por isso
+       ela pegava pares que o cadastro tinha deixado entrar. */
+    cpvisto=fcCpCod(cpc);
     if(vistosCp[cpvisto])return 'Os cupons "'+vistosCp[cpvisto]+'" e "'+cpc+'" têm o mesmo código ("'+cpvisto+'"). O cliente digitaria um cupom só, e a página não tem como saber qual dos dois cadastros aplicar — troque um dos dois.';
     vistosCp[cpvisto]=cpc;
   }
@@ -15207,21 +15265,26 @@ function aOpDuplicar(i){
 }
 
 /* ===== cupons de desconto =====
-   Copia de uCpCodAjustar/uCpRender/uCpPctErro/uCpAdd/uCpDel (10436+ antes desta tarefa), com o
-   prefixo a- e aCps no lugar de uCps. A UNICA diferenca de comportamento e a recusa de codigo
-   REPETIDO (pedido explicito da Task 4, "veio de 01/09"): nem o Checkout nem a Mini loja
-   recusam isso hoje -- medido, os dois aceitam dois cupons com o mesmo codigo sem aviso, e o
-   carrinho aplicaria sempre o PRIMEIRO que bater. Aqui e recusado, no cadastro E na geracao
-   (aRecusa), porque a lista tambem se edita por dentro (o campo de codigo na propria linha). */
-function aCpCodAjustar(inp,i){
-  var alto=String(inp.value).toUpperCase();
+   Copia de uCpCodAjustar/uCpRender/uCpPctErro/uCpAdd/uCpDel, com o prefixo a- e aCps no lugar
+   de uCps. A recusa de codigo REPETIDO nasceu aqui (Task 4, "veio de 01/09"), quando o
+   Checkout e a Mini loja ainda aceitavam dois cupons com o mesmo codigo sem aviso; ela foi
+   levada para as duas em 02/09/2026 (decisao 13) e as TRES passaram a perguntar pelo mesmo
+   fcCpCod em 03/09/2026. A recusa vale no cadastro E na geracao (aRecusa), porque a lista
+   tambem se edita por dentro (o campo de codigo na propria linha) -- e a edicao em linha que
+   cria uma duplicata avisa na hora, por fcCpDupAvisar. */
+function aCpCodAjustar(inp,i,avisar){
+  /* fcCpCod, e nao toUpperCase() sozinho: sem o aparo, "  natal10  " digitado aqui ficava
+     gravado com os espacos e a tela mostrava "  NATAL10  " enquanto o codigo gerado dizia
+     "NATAL10" -- a mesma "tela diferente do codigo" que esta funcao existe para eliminar,
+     e a porta por onde entrava um duplicado que o cadastro nao via. Medido em 03/09/2026. */
+  var alto=fcCpCod(inp.value),mudou;
   aCps[i].codigo=alto;
   /* salvarEstado ANTES do desvio -- ver uCpCodAjustar, a primeira das tres. */
   salvarEstado();
-  if(alto===inp.value)return false;
-  inp.value=alto;
-  aPreview();
-  return true;
+  mudou=(alto!==inp.value);
+  if(mudou){inp.value=alto;aPreview();}
+  fcCpDupAvisar(inp,aCps,i,avisar);
+  return mudou;
 }
 function aCpPctErro(tipo,v){
   if(tipo!=='pct_produto'&&tipo!=='pct_total')return '';
@@ -15232,11 +15295,7 @@ function aCpPctErro(tipo,v){
   if(v>100)return 'Um cupom em porcentagem não pode passar de 100%: com '+v+'% o desconto é limitado ao subtotal e o pedido inteiro vai a R$ 0,00 — o cliente vê "Cupom aplicado!" e um total zerado. Se a intenção era 15%, corrija o valor; se era realmente dar o pedido, use um cupom de valor fixo igual ao preço.';
   return '';
 }
-function aCpAchaRepetido(cod,ignorar){
-  var i;
-  for(i=0;i<aCps.length;i++){if(i!==ignorar&&aCps[i].codigo===cod)return aCps[i].codigo;}
-  return '';
-}
+function aCpAchaRepetido(cod,ignorar){return fcCpAchaRepetido(aCps,cod,ignorar);}
 function aCpRender(){
   var ul=$('a-cp-lista');if(!ul)return;
   ul.innerHTML='';
@@ -15247,8 +15306,14 @@ function aCpRender(){
     /* Acentuado ("Código"), diferente do molde de uCpRender (10662): texto de interface,
        norma de 01/09/2026. */
     var cod=document.createElement('input');cod.type='text';cod.value=cp.codigo;cod.placeholder='Código';
+    /* A marca vermelha do codigo repetido, desenhada A CADA render: e assim que um par que JA
+       estava gravado (backup, preset, ou o editor em linha antes de 03/09/2026) aparece sem
+       esperar o Gerar. Nao apaga nem corrige nada -- ver fcCpDupMarcar. */
+    fcCpDupMarcar(cod,aCps,i);
     cod.addEventListener('input',function(){aCps[i].codigo=cod.value.toUpperCase();salvarEstado();aPreview();});
-    cod.addEventListener('change',function(){aCpCodAjustar(cod,i);});
+    /* 'true' SO no change: e ele que significa "terminou de editar E o valor mudou". Avisar
+       tambem no blur daria dois alertas para a mesma edicao. Ver fcCpDupAvisar. */
+    cod.addEventListener('change',function(){aCpCodAjustar(cod,i,true);});
     cod.addEventListener('blur',function(){aCpCodAjustar(cod,i);});
     var val=document.createElement('input');val.type='number';val.step='0.01';val.min='0';val.value=cp.valor;val.placeholder='Valor';
     val.addEventListener('input',function(){aCps[i].valor=val.value;salvarEstado();aPreview();});
@@ -15278,7 +15343,7 @@ function aCpRender(){
   });
 }
 function aCpAdd(){
-  var cod=$('a-cp-cod').value.trim().toUpperCase();
+  var cod=fcCpCod($('a-cp-cod').value);
   if(!cod){alert('Informe o código do cupom.');return;}
   var repetido=aCpAchaRepetido(cod,-1);
   if(repetido){alert('Já existe um cupom com o código "'+cod+'". O cliente digitaria um código só, e a página não tem como saber qual dos dois cadastros aplicar — escolha outro código ou edite o cupom já existente na lista.');return;}
@@ -15749,7 +15814,8 @@ function aRecusa(cfg){
     if(cpe)return 'Cupom "'+cpc+'": '+cpe;
     cpe=fcCpMinErro(cp,cpc);
     if(cpe)return cpe;
-    limpo=cpc.toUpperCase();
+    /* fcCpCod: a MESMA pergunta do bloco e do cadastro -- fonte unica (4601+). */
+    limpo=fcCpCod(cpc);
     if(vistosCp[limpo])return 'Os cupons "'+vistosCp[limpo]+'" e "'+cpc+'" têm o mesmo código ("'+limpo+'"). O cliente digitaria um cupom só, e a página não tem como saber qual dos dois cadastros aplicar — troque um dos dois.';
     vistosCp[limpo]=cpc;
   }
@@ -20262,15 +20328,19 @@ function mProdRender(){
 }
 
 /* ===== cupons ===== */
-function mCpCodAjustar(inp,i){
-  var alto=String(inp.value).toUpperCase();
+function mCpCodAjustar(inp,i,avisar){
+  /* fcCpCod, e nao toUpperCase() sozinho: sem o aparo, "  natal10  " digitado aqui ficava
+     gravado com os espacos e a tela mostrava "  NATAL10  " enquanto o codigo gerado dizia
+     "NATAL10" -- a mesma "tela diferente do codigo" que esta funcao existe para eliminar,
+     e a porta por onde entrava um duplicado que o cadastro nao via. Medido em 03/09/2026. */
+  var alto=fcCpCod(inp.value),mudou;
   mCps[i].codigo=alto;
   /* salvarEstado ANTES do desvio -- ver uCpCodAjustar, a primeira das tres. */
   salvarEstado();
-  if(alto===inp.value)return false;
-  inp.value=alto;
-  mPreview();
-  return true;
+  mudou=(alto!==inp.value);
+  if(mudou){inp.value=alto;mPreview();}
+  fcCpDupAvisar(inp,mCps,i,avisar);
+  return mudou;
 }
 function mCpPctErro(tipo,v){
   if(tipo!=='pct_produto'&&tipo!=='pct_total')return '';
@@ -20284,17 +20354,15 @@ function mCpPctErro(tipo,v){
   if(v>100)return 'Um cupom em porcentagem não pode passar de 100%: com '+v+'% o desconto é limitado ao subtotal e o pedido inteiro vai a R$ 0,00 — o cliente vê "Cupom aplicado!" e um total zerado, e o pagamento recusa a cobrança zerada. Se a intenção era 15%, corrija o valor; se era realmente dar o pedido, use um cupom de valor fixo igual ao preço.';
   return '';
 }
-/* Recusa de codigo repetido -- decisao 13 de 02/09/2026, uniformizada com a aba pac
-   (aCpAchaRepetido, 13268+): sem isto, dois cupons com o mesmo codigo eram aceitos em
-   silencio e o carrinho aplicava sempre o PRIMEIRO que batesse -- o segundo nunca era
-   encontrado. */
-function mCpAchaRepetido(cod,ignorar){
-  var i;
-  for(i=0;i<mCps.length;i++){if(i!==ignorar&&mCps[i].codigo===cod)return mCps[i].codigo;}
-  return '';
-}
+/* Recusa de codigo repetido -- decisao 13 de 02/09/2026: sem isto, dois cupons com o mesmo
+   codigo eram aceitos em silencio e o carrinho aplicava sempre o PRIMEIRO que batesse -- o
+   segundo nunca era encontrado. Em 03/09/2026 as tres copias desta busca viraram uma so
+   (fcCpAchaRepetido, 4606+), que pergunta pelo fcCpCod e nao pela cadeia crua: a copia daqui
+   comparava com '===' contra o valor GRAVADO, e por isso ainda deixava entrar o par que o
+   BLOCO casaria -- codigo gravado com espaco nas pontas ou em minusculas. */
+function mCpAchaRepetido(cod,ignorar){return fcCpAchaRepetido(mCps,cod,ignorar);}
 function mCpAdd(){
-  var cod=String($('m-cp-cod').value).trim().toUpperCase();
+  var cod=fcCpCod($('m-cp-cod').value);
   if(!cod){alert('Informe o código do cupom.');return;}
   var repetido=mCpAchaRepetido(cod,-1);
   if(repetido){alert('Já existe um cupom com o código "'+cod+'". O cliente digitaria um código só, e a página não tem como saber qual dos dois cadastros aplicar — escolha outro código ou edite o cupom já existente na lista.');return;}
@@ -20321,12 +20389,18 @@ function mCpRender(){
     var li=document.createElement('li');
     var info=document.createElement('div');info.className='info';
     var cod=document.createElement('input');cod.type='text';cod.value=cp.codigo;cod.placeholder='Código';
+    /* A marca vermelha do codigo repetido, desenhada A CADA render: e assim que um par que JA
+       estava gravado (backup, preset, ou o editor em linha antes de 03/09/2026) aparece sem
+       esperar o Gerar. Nao apaga nem corrige nada -- ver fcCpDupMarcar. */
+    fcCpDupMarcar(cod,mCps,i);
     /* MAIUSCULAS NO MODELO ja no 'input', como uCpRender e aCpRender: sem isto o codigo ficava
        gravado como foi digitado ate o change/blur normalizar, e a tela dizia uma coisa enquanto
        o estado dizia outra. A correcao do CAMPO continua so no change/blur (mCpCodAjustar) --
        reescrever a cada tecla mexeria com o cursor. */
     cod.addEventListener('input',function(){mCps[i].codigo=cod.value.toUpperCase();salvarEstado();mPreview();});
-    cod.addEventListener('change',function(){mCpCodAjustar(cod,i);});
+    /* 'true' SO no change: e ele que significa "terminou de editar E o valor mudou". Avisar
+       tambem no blur daria dois alertas para a mesma edicao. Ver fcCpDupAvisar. */
+    cod.addEventListener('change',function(){mCpCodAjustar(cod,i,true);});
     cod.addEventListener('blur',function(){mCpCodAjustar(cod,i);});
     var val=document.createElement('input');val.type='number';val.step='0.01';val.min='0';val.value=cp.valor;val.placeholder='Valor';
     /* salvarEstado()+mPreview() nos DOIS campos, como nas irmas. O salvamento ja acontecia por
@@ -20696,9 +20770,10 @@ function mRecusa(cfg){
     if(cpe)return cpe;
     /* Codigo repetido tambem aqui, e nao so no cadastro (mCpAdd) -- decisao 13: a lista se
        edita por dentro (mCpCodAjustar), e apagar/alterar um codigo la nao passa pelo
-       cadastro. Comparacao ja ignora maiuscula/minuscula e espacos das pontas: cpc chega
-       aqui aparado, e os codigos gravados ja sao maiusculos. */
-    cpvisto=cpc.toUpperCase();
+       cadastro. A pergunta e a MESMA do bloco e a mesma do cadastro -- fcCpCod, fonte unica
+       (4601+): ate 03/09/2026 esta varredura era a unica das duas que normalizava, e por isso
+       ela pegava pares que o cadastro tinha deixado entrar. */
+    cpvisto=fcCpCod(cpc);
     if(vistosCp[cpvisto])return 'Os cupons "'+vistosCp[cpvisto]+'" e "'+cpc+'" têm o mesmo código ("'+cpvisto+'"). O cliente digitaria um cupom só, e a página não tem como saber qual dos dois cadastros aplicar — troque um dos dois.';
     vistosCp[cpvisto]=cpc;
   }
