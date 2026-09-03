@@ -11364,17 +11364,37 @@ function fcTidyRecusa(v){
   return 'O endereço do TidyCal ("'+v+'") não é aceito. Cole o endereço completo que o TidyCal mostra, começando com https:// — por exemplo https://tidycal.com/usuario/nome-do-agendamento ou, se você usa domínio próprio, https://agendamento.seudominio.com.br/nome-do-agendamento. Digitar só o caminho (usuario/nome-do-agendamento) também vale: ele vira um endereço em tidycal.com. Não são aceitos: http:// (a página publicada é https, e o navegador bloquearia o calendário), outros esquemas como javascript:, domínio sozinho sem o nome do agendamento depois da barra, e espaço, aspas ou barra invertida no meio.';
 }
 /* ============================================================
-   A ALTURA AUTOMATICA DO CALENDARIO -- fonte unica das DUAS abas (03/09/2026)
+   O CALENDARIO DO TIDYCAL -- fonte unica dos TRES casos (03/09/2026)
    ============================================================
-   O QUE FOI MEDIDO, e nao deduzido da documentacao da biblioteca. O calendario do TidyCal
-   carrega um iframe-resizer 4 DENTRO do iframe. Posto num iframe nu (sem o embed.js deles),
-   ele manda UMA linha e para:
+   ANTES desta rodada existiam TRES implementacoes para uma coisa so: a aba TidyCal em
+   tidycal.com usava <div class="tidycal-embed"> mais o embed.js deles (que achava a div e
+   criava o iframe sozinho); a mesma aba em dominio proprio criava o iframe e fazia o aperto
+   de mao a mao; e a aba Agendamento por pacote fazia o mesmo, sempre. Agora e UMA estrutura
+   nos tres: o bloco cria o proprio iframe e, quando a biblioteca deles carrega, e ELA quem
+   conversa com o calendario.
+
+   POR QUE O BLOCO CRIA O PROPRIO IFRAME EM TODOS OS CASOS. O embed.js monta o endereco assim,
+   dentro dele:  new URL('https://tidycal.com/' + <data-path>). O host e CRAVADO la -- medido:
+   o arquivo servido pelo dominio proprio do dono e BYTE A BYTE o mesmo do CDN, e
+   https://tidycal.com/<slug-do-dominio-proprio> responde 404. Ou seja, o caminho automatico
+   deles so serve um dos tres casos. Criar o iframe aqui serve os tres, com um codigo so.
+
+   A BIBLIOTECA DELES CONTINUA SENDO USADA, e essa e a diferenca para a versao anterior: o
+   embed.js expoe window.iFrameResize (a biblioteca de altura crua, que se aplica a QUALQUER
+   iframe -- medido, inclusive a um iframe apontado para dominio proprio, com checkOrigin
+   ligado). O bloco a carrega e a aplica ao proprio iframe. Assim a paridade com o site deles
+   e por CONSTRUCAO, e nao por enumeracao: o dia em que o TidyCal mudar a mecanica, o bloco
+   muda junto. Quando a biblioteca NAO carrega (CDN fora do ar, bloqueio, endereco trocado), o
+   aperto de mao manual abaixo assume -- o bloco nunca fica refem do servidor deles.
+   Medido: com o CDN bloqueado o 'error' da tag <script> chega em 5ms, entao a queda para o
+   caminho manual e imediata, e nao depende do prazo de 2,5s (que existe para o outro caso: a
+   biblioteca carregar e mesmo assim nao trazer altura nenhuma).
+
+   O QUE FOI MEDIDO sobre o aperto de mao, e nao deduzido da documentacao. O calendario do
+   TidyCal carrega um iframe-resizer 4 DENTRO do iframe. Posto num iframe nu, ele manda UMA
+   linha e para:
 
        "[iFrameResizerChild]Ready"
-
-   Nada mais. Ou seja: o ouvinte de '[iFrameSizer]' que estas duas abas ja tinham NUNCA
-   recebia nada quando o embed.js nao estava na pagina -- a mecanica de expansao do modal
-   era codigo morto no caminho de dominio proprio e na aba Agendamento por pacote.
 
    Mandado o aperto de mao abaixo (a MESMA linha que o embed.js deles manda -- o formato saiu
    da funcao Ee() do proprio arquivo servido pelo TidyCal), o filho responde na hora e passa a
@@ -11386,36 +11406,79 @@ function fcTidyRecusa(v){
        [iFrameSizer]fcm:75:1069:init
        [iFrameSizer]fcm:507:1069:mutationObserver
        [iFrameSizer]fcm:553:1069:mutationObserver
-   e no celular (375px): 716. A altura ACOMPANHA o conteudo -- e o que faltava.
+   e no celular (375px): 716. A altura ACOMPANHA o conteudo.
 
-   O QUE ISTO NAO RESOLVE, e por isso as alturas calibradas CONTINUAM existindo: o formulario
-   de reserva ("Confirme a reserva") e uma sobreposicao. Medido: com ele aberto a altura
-   anunciada nao muda (fica em 553) e o sinal chega como ":0:0:scrollToOffset". Quem abre
-   espaco para ele e, como sempre, ALTURA_DESKTOP/ALTURA_MOBILE.
+   O FILHO ACEITA UM 'init' SO. Medido em 03/09/2026: reenviar o aperto de mao com outro
+   heightCalculationMethod nao produz sinal NENHUM -- o segundo init e ignorado em silencio.
+   E por isso que o aperto de mao manual so entra depois de a biblioteca desistir, e nunca
+   junto com ela: mandar os dois ao mesmo tempo faria um deles vencer por sorte, e o perdedor
+   ficaria achando que esta no comando da altura.
+
+   ===== O FORMULARIO DE RESERVA, e a medicao de 03/09/2026 que a rodada pediu =====
+   Pergunta: existe alguma forma de saber a altura do formulario de reserva quando ele abre?
+   RESPOSTA: existe UMA -- heightCalculationMethod 'lowestElement' --, e ela cobra um preco.
+
+   Com o metodo de fabrica ('bodyOffset', o que o embed.js deles usa) o formulario e invisivel
+   para a medicao: ele e sobreposicao, e a altura anunciada nao muda (511 antes, 511 depois).
+   Com 'lowestElement' o formulario APARECE, e some ao fechar:
+
+       repouso 764  ->  formulario aberto 1662  ->  fechado 764     (tidycal.com, 1100px)
+       repouso 716  ->  formulario aberto 1128  ->  fechado 716     (dominio proprio, 1100px)
+       repouso 1521 ->  formulario aberto 1747  ->  fechado 1521    (tidycal.com, 375px)
+
+   O PRECO, medido no mesmo dia: em repouso, no computador, 'lowestElement' anuncia 764 onde
+   'bodyOffset' anuncia 511. A diferenca nao e erro -- e a lista de horarios do TidyCal, que
+   e um container de rolagem PROPRIO (.time-list, overflow:scroll, 321px a vista e 606px de
+   conteudo). 'lowestElement' mede o conteudo inteiro dela, entao o calendario ganharia ~253px
+   de vao vazio embaixo, e esse vao cresce com o numero de horarios. No CELULAR o preco e de
+   1px (868 contra 867), porque ali a lista nao e container de rolagem.
+
+   Por isso 'lowestElement' entrou como INTERRUPTOR (MEDIR_FORMULARIO), e nao como padrao:
+   liga-lo troca uma protecao por outra -- a altura calibrada deixa de ser necessaria, porque
+   a altura do formulario passa a ser MEDIDA. O padrao continua sendo o comportamento provado
+   em producao desde agosto.
+
+   OS OUTROS METODOS FORAM TESTADOS NA PRATICA, e nao pela documentacao: 'max' e
+   'documentElementScroll' incluem a altura da JANELA do iframe e entram em realimentacao --
+   medido, o filho oscila para sempre entre 511 e 700, mandando 'reset' a cada duas linhas.
+   Nao servem.
+
+   A BIBLIOTECA DELES NAO SABE MAIS QUE NOS. Medido: window.iFrameResize aplicada ao nosso
+   proprio iframe da 511 em repouso e 511 com o formulario aberto -- exatamente a mesma
+   leitura que o aperto de mao manual obtem. Ela tambem aceita heightCalculationMethod
+   'lowestElement' e ai devolve os mesmos 764/1662. Ou seja: os dois caminhos enxergam a mesma
+   coisa, e o que decide e o metodo, nao quem faz a conversa.
 
    O QUE ACONTECE SE O SINAL NAO VIER (bloqueio, rede lenta, ou o dia em que o TidyCal trocar
    a biblioteca e o formato do init deixar de ser reconhecido): nada quebra e nada zera. A
    altura fica na de partida (700px, o mesmo numero que o embed.js deles usa antes de medir) e
-   as alturas calibradas seguem valendo, exatamente como antes desta rodada.
+   as alturas calibradas seguem valendo.
 
-   Devolve os TRES pedacos porque eles vao para lugares diferentes do bloco: 'topo' junto das
-   outras funcoes, 'pronto' e 'medida' dentro do ouvinte de 'message'. */
-function fcTidyAlturaSrc(op){
-  var i=op.ind||'', j=op.indOuvinte||'', c='';
-  c+=i+'/* ===== altura automatica: o aperto de mao com o iframe-resizer do TidyCal =====\n';
-  c+=i+'   Sem esta linha o calendario nao anuncia altura nenhuma (medido). Com ela, ele passa\n';
-  c+=i+'   a mandar [iFrameSizer]<id>:<altura>:<largura>:<tipo> a cada mudanca de conteudo.\n';
-  c+=i+'   Os campos, na ordem, sao os do proprio embed.js do TidyCal: bodyMarginV1, sizeWidth,\n';
-  c+=i+'   log, interval, enablePublicMethods, autoResize, bodyMargin, heightCalculationMethod,\n';
-  c+=i+'   bodyBackground, bodyPadding, tolerance, inPageLinks, resizeFrom,\n';
-  c+=i+'   widthCalculationMethod, mouseEvents. Sao os valores de fabrica -- iguais aos que o\n';
-  c+=i+'   TidyCal manda no site deles. */\n';
-  c+=i+"var SIZER_INIT=':8:false:false:32:true:true:null:bodyOffset:null:null:0:false:parent:scroll:true';\n";
+   Devolve QUATRO pedacos, porque eles vao para lugares diferentes do bloco: 'opcoes' no topo,
+   junto das outras variaveis de customizacao; 'topo' junto das outras funcoes; 'pronto' e
+   'medida' dentro do ouvinte de 'message'. */
+function fcTidyCalSrc(op){
+  var i=op.ind||'', j=op.indOuvinte||'', c='', o='';
+  o+=i+'var ALTURA_SEMPRE=false;   /* true = o calendario fica sempre na altura maxima. Ligue APENAS se, na sua pagina publicada, o modal de confirmacao do TidyCal aparecer cortado -- o preco de ligar e um vao vazio embaixo do calendario. */\n';
+  o+=i+"var MEDIR_FORMULARIO=false;  /* true = o calendario MEDE o formulario de reserva em vez de abrir espaco com as alturas calibradas abaixo (que passam a nao ser usadas). Medido em 03/09/2026: com isto ligado o quadro vai de 764px para 1662px ao abrir o formulario e volta ao fechar, sem sobra. O preco, no computador, e cerca de 253px de vao vazio EM REPOUSO -- a lista de horarios do TidyCal rola por dentro, e esta medida conta o conteudo inteiro dela. No celular o preco e de 1px. */\n";
+  c+=i+'/* ===== a altura do calendario: a biblioteca deles quando ela carrega, o aperto de mao\n';
+  c+=i+'   proprio quando ela nao carrega. Os campos do aperto de mao, na ordem, sao os do\n';
+  c+=i+'   proprio embed.js do TidyCal: bodyMarginV1, sizeWidth, log, interval,\n';
+  c+=i+'   enablePublicMethods, autoResize, bodyMargin, heightCalculationMethod, bodyBackground,\n';
+  c+=i+'   bodyPadding, tolerance, inPageLinks, resizeFrom, widthCalculationMethod, mouseEvents.\n';
+  c+=i+'   Sao os valores de fabrica -- iguais aos que o TidyCal manda no site deles. */\n';
+  c+=i+"var TIDYCAL_LIB='https://asset-tidycal.b-cdn.net/js/embed.js';\n";
+  c+=i+"var SIZER_METODO=MEDIR_FORMULARIO?'lowestElement':'bodyOffset';\n";
+  c+=i+"var SIZER_INIT=':8:false:false:32:true:true:null:'+SIZER_METODO+':null:null:0:false:parent:scroll:true';\n";
   c+=i+'var ALTURA_MINIMA=500;    /* piso. Mesmo numero que o TidyCal usa no embed.js deles (minHeight:500). Medido: no meio do carregamento o calendario chega a anunciar 38px e 75px -- sem piso ele piscaria achatado na tela do cliente. */\n';
-  c+=i+'var ALTURA_MAXIMA=6000;   /* teto. Altura que vem de dentro do iframe e DADO, nao verdade: uma mensagem malformada nao pode virar uma pagina de 50.000px. Medido, o calendario mais alto deu 770px -- 6000 e quase oito vezes isso, entao cabe qualquer calendario de verdade e ainda assim segura o absurdo. */\n';
+  c+=i+'var ALTURA_MAXIMA=6000;   /* teto. Altura que vem de dentro do iframe e DADO, nao verdade: uma mensagem malformada nao pode virar uma pagina de 50.000px. Medido, o calendario mais alto deu 1747px -- 6000 e quase quatro vezes isso, entao cabe qualquer calendario de verdade e ainda assim segura o absurdo. */\n';
   if(op.inicial)c+=i+'var ALTURA_INICIAL='+op.inicial+';  /* altura de partida, ate a primeira medida chegar -- e a que fica se ela nunca chegar. Mesmo numero que o embed.js do TidyCal usa. */\n';
   c+=i+"var sizerId='fc'+Math.random().toString(36).slice(2,8);\n";
-  c+=i+'var alturaViva=false, sizerTimers=[];\n';
+  c+=i+'var alturaViva=false, libNoComando=false, manualAtivo=false, libFalhou=false, sizerTimers=[];\n';
+  c+=i+'function limparTimers(){\n';
+  c+=i+'  for(var k=0;k<sizerTimers.length;k++)clearTimeout(sizerTimers[k]);\n';
+  c+=i+'  sizerTimers=[];\n';
+  c+=i+'}\n';
   c+=i+'function pedirAltura(){\n';
   c+=i+'  var f=frame(); if(!f||!f.contentWindow)return;\n';
   c+=i+'  var o='+op.origem+'; if(!o)return;\n';
@@ -11426,23 +11489,90 @@ function fcTidyAlturaSrc(op){
   c+=i+'   chegar -- depois disso para, para nao ficar reiniciando o filho a toa. */\n';
   c+=i+'function comecarHandshake(){\n';
   c+=i+'  var k, esperas=[400,1200,3000];\n';
-  c+=i+'  alturaViva=false;\n';
-  c+=i+'  for(k=0;k<sizerTimers.length;k++)clearTimeout(sizerTimers[k]);\n';
-  c+=i+'  sizerTimers=[];\n';
+  c+=i+'  manualAtivo=true;\n';
   c+=i+'  pedirAltura();\n';
   c+=i+'  for(k=0;k<esperas.length;k++)sizerTimers.push(setTimeout(function(){if(!alturaViva)pedirAltura();},esperas[k]));\n';
   c+=i+'}\n';
   c+=i+'function aplicarAltura(bruto){\n';
   c+=i+'  var n=parseInt(bruto,10), f=frame();\n';
   c+=i+'  if(!f||!(n>0))return;   /* ":0:0:" e o que scrollToOffset e mouseenter mandam -- nao e altura */\n';
+  c+=i+'  alturaViva=true;\n';
+  c+=i+'  if(libNoComando)return;   /* quem escreve a altura deste iframe e a biblioteca do TidyCal; dois dedos no mesmo botao brigariam por um pixel a cada sinal */\n';
   c+=i+'  if(n<ALTURA_MINIMA)n=ALTURA_MINIMA;\n';
   c+=i+'  if(n>ALTURA_MAXIMA)n=ALTURA_MAXIMA;\n';
-  c+=i+'  alturaViva=true;\n';
   c+=i+"  f.style.height=n+'px';\n";
   c+=i+'}\n';
+  c+=i+'/* A biblioteca de altura do proprio TidyCal, aplicada AO NOSSO iframe. E a mesma que o\n';
+  c+=i+'   site deles carrega, e por isso a paridade e por construcao. O elemento so recebe a\n';
+  c+=i+'   biblioteca uma vez -- aplicar duas vezes no mesmo iframe e ignorado por ela, com\n';
+  c+=i+'   aviso no console. */\n';
+  c+=i+'function aplicarBiblioteca(){\n';
+  c+=i+'  var f=frame(), o='+op.origem+';\n';
+  c+=i+"  if(!f||!o||!f.src||typeof window.iFrameResize!=='function')return;   /* sem src ainda a biblioteca guardaria a origem errada, e depois recusaria em silencio tudo que viesse do calendario */\n";
+  c+=i+"  if(f.getAttribute('data-fc-lib')){libNoComando=true;return;}\n";
+  c+=i+'  try{\n';
+  c+=i+'    /* checkOrigin como LISTA, e nao \'true\': com \'true\' a biblioteca deduz a origem do src do\n';
+  c+=i+'       iframe no instante da aplicacao, e quem depende de instante depende de sorte. Aqui a\n';
+  c+=i+'       origem e a MESMA que o ouvinte de message ja exige -- uma fonte so para as duas guardas. */\n';
+  c+=i+"    window.iFrameResize({log:false,checkOrigin:[o],minHeight:ALTURA_MINIMA,heightCalculationMethod:SIZER_METODO},f);\n";
+  c+=i+"    f.setAttribute('data-fc-lib','1');\n";
+  c+=i+'    libNoComando=true;\n';
+  c+=i+'  }catch(e){}\n';
+  c+=i+'}\n';
+  c+=i+'/* Desfaz o vinculo da biblioteca com um iframe que vai embora (troca de dominio na aba\n';
+  c+=i+'   de pacotes). Sem isto ela continuaria com o endereco anterior na conferencia de\n';
+  c+=i+'   origem, e o calendario novo ficaria mudo para ela. */\n';
+  c+=i+'function soltarBiblioteca(f){\n';
+  c+=i+'  libNoComando=false;\n';
+  c+=i+'  try{ if(f&&f.iFrameResizer&&f.iFrameResizer.close)f.iFrameResizer.close(); }catch(e){}\n';
+  c+=i+'}\n';
+  c+=i+'/* Uma tag de script por PAGINA, e nao por bloco: dois blocos destes podem cair na mesma\n';
+  c+=i+'   pagina (um calendario simples e uma vitrine de pacotes, por exemplo), e o embed.js\n';
+  c+=i+'   nao precisa -- nem deve -- ser baixado duas vezes. O marcador data-fc-tidycal e o que\n';
+  c+=i+'   um bloco usa para reconhecer a tag que o outro ja pos. */\n';
+  c+=i+'function carregarBiblioteca(){\n';
+  c+=i+"  if(typeof window.iFrameResize==='function'){aplicarBiblioteca();return;}\n";
+  c+=i+'  /* Ja se sabe que ela nao vem (a tentativa anterior falhou): esperar de novo os 2,5s a\n';
+  c+=i+'     cada troca de pacote seria adiar o calendario por um resultado ja conhecido. */\n';
+  c+=i+'  if(libFalhou){comecarHandshake();return;}\n';
+  c+=i+"  var s=document.querySelector('script[data-fc-tidycal]');\n";
+  c+=i+'  if(!s){\n';
+  c+=i+"    s=document.createElement('scr'+'ipt');\n";
+  c+=i+"    s.setAttribute('data-fc-tidycal','1');\n";
+  c+=i+'    s.async=true;\n';
+  c+=i+'    s.src=TIDYCAL_LIB;\n';
+  c+=i+'    (document.head||document.body||document.documentElement).appendChild(s);\n';
+  c+=i+'  }\n';
+  c+=i+"  s.addEventListener('load',aplicarBiblioteca);\n";
+  c+=i+'  /* Medido: com o CDN bloqueado este "error" chega em 5ms. E o caminho rapido para o\n';
+  c+=i+'     aperto de mao proprio -- sem ele a queda esperaria os 2,5s do prazo abaixo. */\n';
+  c+=i+"  s.addEventListener('error',function(){libFalhou=true;if(!alturaViva)comecarHandshake();});\n";
+  c+=i+'}\n';
+  c+=i+'/* O comeco, e o unico lugar que decide QUEM cuida da altura. Ordem, e a razao dela: a\n';
+  c+=i+'   biblioteca deles tem a primeira chance; se em 2,5s nenhuma altura tiver chegado --\n';
+  c+=i+'   porque ela nao carregou, ou carregou e ficou calada --, o aperto de mao proprio\n';
+  c+=i+'   assume. Nunca os dois juntos: o filho aceita um init so (medido), e o perdedor ficaria\n';
+  c+=i+'   achando que esta no comando. */\n';
+  c+=i+'function comecarCalendario(){\n';
+  c+=i+'  limparTimers();\n';
+  c+=i+'  alturaViva=false;\n';
+  c+=i+'  manualAtivo=false;\n';
+  c+=i+'  carregarBiblioteca();\n';
+  c+=i+'  sizerTimers.push(setTimeout(function(){\n';
+  c+=i+'    if(alturaViva)return;\n';
+  c+=i+'    libNoComando=false;\n';
+  c+=i+'    comecarHandshake();\n';
+  c+=i+'  },2500));\n';
+  c+=i+'}\n';
   return {
+    opcoes:o,
     topo:c,
-    pronto:j+"if (e.data === '[iFrameResizerChild]Ready') { pedirAltura(); return; }\n",
+    /* 'Ready' e do FILHO avisando que acordou. Quem responde e quem esta no comando: a
+       biblioteca deles trata esse aviso sozinha (medido no embed.js: ele reenvia o init a
+       todos os iframes dela). Responder aqui antes de o caminho manual ser escolhido faria o
+       nosso init chegar primeiro, e o init da biblioteca -- que viria depois -- seria
+       ignorado pelo filho, deixando-a achando que esta no comando sem estar. */
+    pronto:j+"if (e.data === '[iFrameResizerChild]Ready') { if (manualAtivo) pedirAltura(); return; }\n",
     medida:j+"aplicarAltura(e.data.split(':')[1]);   /* [iFrameSizer]<id>:<altura>:<largura>:<tipo> */\n"
   };
 }
@@ -11547,7 +11677,6 @@ function tGerar(){
     tArqToggle();return;
   }
   var origem=fcTidyOrigem(url);
-  var noTidycal=(origem==='https://tidycal.com');
   var emb=radio('t-arq')==='embutida';
   var u=$('t-url').value.trim();
   /* Validacao ANTES de montar qualquer coisa: recusar no fim deixaria as textareas com o
@@ -11564,38 +11693,29 @@ function tGerar(){
   var larg=tPreso('t-larg');
 
   var c='';
-  /* ===== DOIS CAMINHOS, e a MEDICAO e que os separa (03/09/2026) =====
-     O embed.js do TidyCal monta o endereco do iframe assim, dentro dele:
-        new URL('https://tidycal.com/' + <data-path>)   ->   src = origin + pathname + '?embed=1'
-     O host e CRAVADO la dentro. Medido no dia: o arquivo servido pelo dominio proprio do dono
-     (https://agendamento.fotocerta.com.br/js/embed.js) e BYTE A BYTE o mesmo do CDN, e
-     https://tidycal.com/<slug-do-dominio-proprio> responde 404. Ou seja: com dominio proprio
-     nao existe data-path que faca o embed.js apontar para a pagina certa.
-       - endereco em tidycal.com -> o bloco de sempre (div + embed.js), byte a byte igual ao de
-         antes desta rodada. Quem ja publicou nao ganha bloco novo sem ter pedido, e continua
-         com a altura automatica que o embed.js traz junto.
-       - dominio proprio         -> o bloco cria o proprio <iframe>, como a aba Agendamento por
-         pacote ja faz. O preco esta escrito dentro do bloco, e nao escondido aqui: sem o
-         embed.js nao vem a biblioteca que ajusta a altura sozinha, entao a altura e a que
-         estiver no atributo style do iframe. */
-  if(noTidycal){
-    c+='<div class="tidycal-embed" data-path="'+escAttr(url.slice(origem.length+1))+'"></div>\n';
-    c+='<scr'+'ipt src="https://asset-tidycal.b-cdn.net/js/embed.js" async></scr'+'ipt>\n\n';
-  }else{
-    c+='<!-- Calendario em DOMINIO PROPRIO do TidyCal. O iframe e criado aqui, e nao pelo\n';
-    c+='     embed.js do TidyCal: aquele script monta o endereco sempre como\n';
-    c+='     https://tidycal.com/ + caminho, entao nao tem como apontar para este dominio.\n';
-    c+='     A altura SE AJUSTA sozinha ao conteudo assim mesmo: o script abaixo faz, com as\n';
-    c+='     proprias maos, o aperto de mao que o embed.js faria -- e ai o calendario passa a\n';
-    c+='     anunciar a propria altura. O "height" abaixo e so a altura de PARTIDA, a que fica\n';
-    c+='     se o anuncio nunca chegar. A expansao do formulario de reserva continua vindo das\n';
-    c+='     alturas calibradas mais abaixo: medido, o formulario e sobreposicao e nao muda a\n';
-    c+='     altura anunciada. -->\n';
-    c+='<ifr'+'ame class="tidycal-embed" title="Agenda"\n';
-    c+='  src="'+escAttr(url+((url.indexOf('?')<0)?'?':'&')+'embed=1')+'"\n';
-    c+='  style="border:none; width:1px; min-width:100%; height:700px; display:block"\n';
-    c+='  scrolling="no" frameborder="0" allow="payment"></ifr'+'ame>\n\n';
-  }
+  /* ===== UMA ESTRUTURA SO NOS TRES CASOS (03/09/2026) =====
+     Ate esta rodada esta aba tinha DOIS caminhos: em tidycal.com ela emitia
+     <div class="tidycal-embed" data-path="..."> mais o embed.js deles, que achava a div e
+     criava o iframe sozinho; em dominio proprio ela criava o iframe com as proprias maos,
+     porque o embed.js monta o endereco como https://tidycal.com/ + caminho, com o host CRAVADO
+     dentro dele (medido: o arquivo servido pelo dominio proprio do dono e byte a byte o mesmo
+     do CDN, e https://tidycal.com/<slug-do-dominio-proprio> responde 404).
+     Agora e um caminho so, igual ao da aba Agendamento por pacote: o bloco cria o proprio
+     iframe e a biblioteca de altura do TidyCal e aplicada A ELE -- ver fcTidyCalSrc, que e a
+     fonte unica dos tres casos. O bloco deixa de ter <div class="tidycal-embed"> e de ter
+     id "tidycal-embed": sao exatamente os dois seletores que o embed.js varre ao carregar
+     (medido no arquivo deles), e ter um deles faria nascer um SEGUNDO iframe, apontando para
+     tidycal.com, ao lado do nosso. */
+  c+='<!-- Calendario do TidyCal. O iframe e criado por ESTE bloco, e nao pelo embed.js deles:\n';
+  c+='     aquele script so sabe montar enderecos em https://tidycal.com/ + caminho, entao nao\n';
+  c+='     serve para quem usa dominio proprio. A altura se ajusta sozinha ao conteudo: o script\n';
+  c+='     abaixo carrega a biblioteca de altura do proprio TidyCal e a aplica a este iframe; se\n';
+  c+='     ela nao carregar, ele mesmo faz o aperto de mao com o calendario. O "height" abaixo e\n';
+  c+='     so a altura de PARTIDA, a que fica se nenhuma medida chegar. -->\n';
+  c+='<ifr'+'ame class="tidycal-embed" title="Agenda"\n';
+  c+='  src="'+escAttr(url+((url.indexOf('?')<0)?'?':'&')+'embed=1')+'"\n';
+  c+='  style="border:none; width:1px; min-width:100%; height:700px; display:block"\n';
+  c+='  scrolling="no" frameborder="0" allow="payment"></ifr'+'ame>\n\n';
   /* Movimento reduzido: desliga o que ESTE bloco criou e nada mais -- a unica animacao daqui
      e a transicao de altura do iframe quando o modal do TidyCal abre e fecha. Era a unica das
      seis abas de entao sem esta guarda. O seletor repete a especificidade da regra de cima e vem
@@ -11606,40 +11726,36 @@ function tGerar(){
   c+='<scr'+'ipt>\n(function () {\n';
   c+="  var ALTURA_DESKTOP = '"+desk+"px';\n";
   c+="  var ALTURA_MOBILE  = '"+mob+"px';   /* calibrar no aparelho se o modal cortar */\n";
-  c+='  var LARGURA_MOBILE = '+larg+';        /* telas ate este tamanho usam a altura mobile */\n\n';
+  c+='  var LARGURA_MOBILE = '+larg+';        /* telas ate este tamanho usam a altura mobile */\n';
+  var ALT=fcTidyCalSrc({ind:'  ',indOuvinte:'    ',origem:"'"+escJs(origem)+"'",inicial:0});
+  c+=ALT.opcoes+'\n';
+  c+='  /* ===== Daqui para baixo nao precisa mexer ===== */\n';
   c+='  var modalAberto = false;\n  var ignorarMutacoesAte = 0;\n\n';
   c+="  function frame() { return document.querySelector('iframe.tidycal-embed'); }\n\n";
   c+='  function alturaAlvo() {\n    return (window.innerWidth <= LARGURA_MOBILE) ? ALTURA_MOBILE : ALTURA_DESKTOP;\n  }\n\n';
-  c+="  function expandir() {\n    var f = frame(); if (!f) return;\n    f.style.setProperty('min-height', alturaAlvo(), 'important');\n  }\n\n";
+  c+='  /* Com MEDIR_FORMULARIO ligado a altura do formulario vem MEDIDA do calendario, e abrir\n';
+  c+='     espaco a mais so criaria vao vazio: as duas protecoes sao alternativas, nao somam. */\n';
+  c+="  function expandir() {\n    var f = frame(); if (!f || MEDIR_FORMULARIO) return;\n    f.style.setProperty('min-height', alturaAlvo(), 'important');\n  }\n\n";
   c+="  function recolher() {\n    var f = frame(); if (!f) return;\n    f.style.removeProperty('min-height');\n  }\n\n";
-  /* A ALTURA AUTOMATICA SO ENTRA NO CAMINHO DE DOMINIO PROPRIO. Em tidycal.com quem faz o
-     aperto de mao e o proprio embed.js, que ja esta na pagina -- e mexer neste bloco mudaria
-     um codigo que ja esta publicado e funcionando. A prova disso e a regressao byte a byte:
-     't-out1' no caminho tidycal.com nao muda um caractere nesta rodada. */
-  var ALT=null;
-  if(!noTidycal){
-    ALT=fcTidyAlturaSrc({ind:'  ',indOuvinte:'    ',origem:"'"+escJs(origem)+"'",inicial:0});
-    c+=ALT.topo+'\n';
-  }
+  c+=ALT.topo+'\n';
   c+='  /* rotacao do celular com o modal aberto: reaplica a altura certa */\n';
   c+="  window.addEventListener('resize', function () {\n    if (modalAberto) expandir();\n  });\n\n";
   c+='  /* sinais reais do TidyCal */\n';
   c+="  window.addEventListener('message', function (e) {\n";
   c+="    if (e.origin !== '"+escJs(origem)+"') return;\n";
   c+="    if (typeof e.data !== 'string') return;\n";
-  if(ALT)c+=ALT.pronto;
+  c+=ALT.pronto;
   c+="    if (e.data.indexOf('[iFrameSizer]') !== 0) return;\n\n";
-  if(ALT)c+=ALT.medida+'\n';
+  c+=ALT.medida+'\n';
   c+="    var tipo = e.data.split(':').pop();\n\n";
   c+='    /* MODAL ABRIU */\n';
   c+="    if (tipo === 'scrollToOffset') {\n      modalAberto = true;\n      ignorarMutacoesAte = Date.now() + 800;\n      expandir();\n      return;\n    }\n\n";
   c+='    /* MODAL FECHOU (X, cancelar ou agendamento concluido) */\n';
   c+="    if (modalAberto && tipo === 'mutationObserver' && Date.now() > ignorarMutacoesAte) {\n      modalAberto = false;\n      recolher();\n    }\n  });\n";
-  if(ALT){
-    c+="\n  /* pede a altura assim que a pagina abre, e de novo se o iframe recarregar */\n";
-    c+='  comecarHandshake();\n';
-    c+="  (function () {\n    var f = frame(); if (f) f.addEventListener('load', comecarHandshake);\n  })();\n";
-  }
+  c+="\n  /* comeca assim que a pagina abre, e de novo se o iframe recarregar */\n";
+  c+='  comecarCalendario();\n';
+  c+="  (function () {\n    var f = frame(); if (f) f.addEventListener('load', comecarCalendario);\n  })();\n";
+  c+='  if (ALTURA_SEMPRE) expandir();\n';
   c+='})();\n</scr'+'ipt>';
   $('t-out1').value=c;
 
@@ -15734,13 +15850,17 @@ function aBlocoVitrine(cfg){
   c+='@media(prefers-reduced-motion: reduce){\n  .fca-card'+(temFam?',.fca-fam':'')+'{transition:none}\n}\n';
   c+='</sty'+'le>\n\n';
 
+  /* MESMA fonte que a aba TidyCal usa -- unifica-se a fonte que ESCREVE, nunca a saida: o
+     bloco entregue continua autossuficiente. Aqui a origem nao pode ser literal (cada pacote
+     tem o seu endereco), entao ela e a expressao 'origemCal'. */
+  var ALT=fcTidyCalSrc({ind:'',indOuvinte:'  ',origem:'origemCal',inicial:700});
   c+='<scr'+'ipt>\n(function(){\n';
   c+='/* ===== customizacao ===== */\n';
   c+=aPacotesSrc(cfg.pacotes,temFam);
   if(temFam)c+=aFamiliasSrc(cfg.familias);
   c+='var DESCONTO_PIX='+cfg.descpix+';   /* percentual de desconto no Pix; 0 = sem desconto -- some o selo */\n';
   c+='var PARCELAS='+cfg.parcelas+';   /* numero de parcelas anunciado no cartao; e uma promessa que a operadora decide, nao este codigo */\n';
-  c+="var ALTURA_SEMPRE=false;   /* true = o calendario fica sempre na altura maxima. Ligue APENAS se, na sua pagina publicada, o modal de confirmacao do TidyCal aparecer cortado -- o preco de ligar e um vao vazio embaixo do calendario. */\n";
+  c+=ALT.opcoes;
   c+="var ALTURA_DESKTOP='"+cfg.altdesk+"px';\n";
   c+="var ALTURA_MOBILE='"+cfg.altmob+"px';   /* calibrar no aparelho se o modal cortar */\n";
   c+='var LARGURA_MOBILE='+cfg.largmob+';        /* telas ate este tamanho usam a altura mobile */\n';
@@ -15942,15 +16062,22 @@ function aBlocoVitrine(cfg){
   c+="function origemDe(u){var m=/^https:\\/\\/[^\\/?#]+/.exec(String(u||''));return m?m[0]:'';}\n";
   c+="function frame(){return elCal.querySelector('iframe.fca-tidycal');}\n";
   c+='function alturaAlvo(){return (window.innerWidth<=LARGURA_MOBILE)?ALTURA_MOBILE:ALTURA_DESKTOP;}\n';
-  c+="function expandir(){var f=frame();if(f)f.style.setProperty('min-height',alturaAlvo(),'important');}\n";
+  c+='/* Com MEDIR_FORMULARIO ligado a altura do formulario vem MEDIDA do calendario, e abrir\n';
+  c+='   espaco a mais so criaria vao vazio: as duas protecoes sao alternativas, nao somam. */\n';
+  c+="function expandir(){var f=frame();if(!f||MEDIR_FORMULARIO)return;f.style.setProperty('min-height',alturaAlvo(),'important');}\n";
   c+="function recolher(){var f=frame();if(f)f.style.removeProperty('min-height');}\n";
-  /* MESMA fonte que a aba TidyCal usa no caminho de dominio proprio -- unifica-se a fonte que
-     ESCREVE, nunca a saida: o bloco entregue continua autossuficiente. Aqui a origem nao pode
-     ser literal (cada pacote tem o seu endereco), entao ela e a expressao 'origemCal'. */
-  var ALT=fcTidyAlturaSrc({ind:'',indOuvinte:'  ',origem:'origemCal',inicial:700});
   c+=ALT.topo;
   c+='function abrirCalendario(link){\n';
-  c+='  var f=frame();\n';
+  c+='  var f=frame(), nova=origemDe(link);\n';
+  /* TROCAR DE DOMINIO EXIGE IFRAME NOVO, e nao so um src novo: a biblioteca do TidyCal confere
+     a origem das mensagens contra o endereco que o iframe tinha NA HORA em que ela foi
+     aplicada (checkOrigin). Reaproveitar o elemento com um pacote de outro dominio a deixaria
+     descartando em silencio todo sinal do calendario novo -- exatamente o defeito mudo que a
+     linha de origem existe para evitar. Dentro do MESMO dominio o elemento continua sendo
+     reaproveitado: segue existindo um iframe por vez, que e o peso que esta aba evita. */
+  c+='  /* dominio diferente do que esta carregado: iframe novo, senao a conferencia de origem\n';
+  c+='     da biblioteca do TidyCal continuaria presa ao endereco anterior */\n';
+  c+='  if(f&&nova!==origemCal){soltarBiblioteca(f);if(f.parentNode)f.parentNode.removeChild(f);f=null;}\n';
   c+='  if(!f){\n';
   c+="    f=document.createElement('ifr'+'ame');\n";
   c+="    f.className='fca-tidycal';\n";
@@ -15962,15 +16089,15 @@ function aBlocoVitrine(cfg){
      JavaScript e nao tem atributo 'height' nenhum -- sem esta linha o navegador lhe da os
      150px de fabrica, e o calendario nascia esmagado. */
   c+="    f.style.height=ALTURA_INICIAL+'px';\n";
-  c+="    f.addEventListener('load',comecarHandshake);\n";
+  c+="    f.addEventListener('load',comecarCalendario);\n";
   c+='    elCal.appendChild(f);\n  }\n';
-  c+='  origemCal=origemDe(link);\n';
+  c+='  origemCal=nova;\n';
   c+='  f.src=link;\n';
   /* Trocar de pacote troca o src, e src novo e DOCUMENTO novo: o aperto de mao anterior morreu
      junto com o documento anterior. Volta para a altura de partida e recomeca -- senao o
      calendario do pacote novo ficaria com a altura medida do pacote velho. */
   c+="  f.style.height=ALTURA_INICIAL+'px';\n";
-  c+='  comecarHandshake();\n';
+  c+='  comecarCalendario();\n';
   /* O CAMINHO B E UM INTERRUPTOR, E NAO O PADRAO -- corrigido depois de medir o bloco gerado.
      A primeira versao chamava expandir() aqui, sempre, com o argumento de que a altura
      calibrada seria "o piso desde a criacao". A medicao desmente o argumento: recolher() so
