@@ -5177,13 +5177,13 @@ var ABAS=[
    exemplo:'ex.: Natal 2026 - hospedeira',
    guarda:'tudo o que está configurado nesta aba — modo de exibição, ícone, formato, cores e posição do botão, os quatro trechos da mensagem, os textos do pop-up, o cabeçalho (coruja, movimento e efeitos), o horário de atendimento, a pergunta de qualificação com as opções cadastradas, a âncora e os <b>textos</b> da seção 8.'},
   {id:'uni',  nome:'Checkout',            chaves:['u'],         coleta:uColeta,restaura:uRestaura,gerar:uGerar,
-   pref:'u',fora:['edops','editidx'],resumo:uPresetResumo,redesenhar:uPresetDepois,antesDeSalvar:uPresetAntes,
+   pref:'u',fora:[],formulario:['edops','editidx'],resumo:uPresetResumo,redesenhar:uPresetDepois,antesDeSalvar:uPresetAntes,
    listas:[['u.edops',{nome:'',preco:0,qtd:false},'nome'],
            ['u.prods',{nome:'',desc:'',preco:0,opsel:'unico',opnenhum:'nao',qtd:false,ops:[{nome:'',preco:0,qtd:false}]},'nome'],
            ['u.prods.ops',{nome:'',preco:0,qtd:false},'nome'],
            ['u.cps',{codigo:'',tipo:'pct_total',valor:0,validade:'',minimo:''},'codigo']],
    exemplo:'ex.: Natal 2026 - pacotes',
-   guarda:'tudo o que está configurado nesta aba — formas de pagamento, moeda, <b>produtos com os opcionais de cada um</b>, cupons, código do pedido, sinal, desconto Pix, textos, largura e cores.'},
+   guarda:'tudo o que está configurado nesta aba — formas de pagamento, moeda, <b>produtos com os opcionais de cada um</b>, cupons, código do pedido, sinal, desconto Pix, textos, largura e cores. Não guarda o <b>formulário de cadastro</b> pela metade, e aplicar um preset <b>esvazia</b> esse formulário: ele descreve um produto que ainda não existe no catálogo que está chegando.'},
   {id:'bor',  nome:'Bordas com efeito',   chaves:['b'],         coleta:bColeta,restaura:bRestaura,gerar:bGerar,
    pref:'b',fora:['consol'],resumo:bPresetResumo,redesenhar:bPresetDepois,antesDeSalvar:bPresetAntes,
    presetOk:bPresetOk,aposPresets:bConsolRender,
@@ -5200,21 +5200,21 @@ var ABAS=[
    exemplo:'ex.: Foto Certa - página /pagar',
    guarda:'tudo o que está configurado nesta aba — o endereço da página, a aparência, os textos, e também a <b>cobrança que está na tela</b> (descrição, valor, identificador, a data de validade e o desconto no Pix). Aplicar um preset troca também essa cobrança: ele é a fotografia da aba inteira. Os dados de quem recebe <b>não</b> estão aqui: eles saíram desta aba para o painel Identidade, e nenhum preset os toca.'},
   {id:'loja', nome:'Mini loja',           chaves:['m'],         coleta:mColeta,restaura:mRestaura,gerar:mGerar,
-   pref:'m',fora:['edops','editidx'],resumo:mPresetResumo,redesenhar:mPresetDepois,antesDeSalvar:mPresetAntes,
+   pref:'m',fora:[],formulario:['edops','editidx'],resumo:mPresetResumo,redesenhar:mPresetDepois,antesDeSalvar:mPresetAntes,
    listas:[['m.edops',{nome:'',preco:0,qtd:false},'nome'],
            ['m.prods',{nome:'',desc:'',preco:0,cat:'',img:'',opsel:'unico',opnenhum:'nao',qtd:false,ops:[{nome:'',preco:0,qtd:false}]},'nome'],
            ['m.prods.ops',{nome:'',preco:0,qtd:false},'nome'],
            ['m.cps',{codigo:'',tipo:'pct_total',valor:0,validade:'',minimo:''},'codigo']],
    importar:mImportarLimpar,
    exemplo:'ex.: Foto Certa - loja de álbuns',
-   guarda:'tudo o que está configurado nesta aba — formas de pagamento, moeda, <b>o catálogo inteiro</b> (nome, descrição, preço, categoria, foto e os opcionais de cada produto), cupons, sinal, desconto Pix, a grade da vitrine, o tamanho pedido das fotos, textos e cores. Não guarda o que está no importador de galeria, que não é configuração e sim uma colagem de trabalho.'},
+   guarda:'tudo o que está configurado nesta aba — formas de pagamento, moeda, <b>o catálogo inteiro</b> (nome, descrição, preço, categoria, foto e os opcionais de cada produto), cupons, sinal, desconto Pix, a grade da vitrine, o tamanho pedido das fotos, textos e cores. Não guarda o que está no importador de galeria, que não é configuração e sim uma colagem de trabalho, nem o <b>formulário de cadastro</b> pela metade — aplicar um preset <b>esvazia</b> esse formulário.'},
   {id:'efe',  nome:'Efeitos de página',   chaves:['e'],         coleta:eColeta,restaura:eRestaura,gerar:eGerar,
    pref:'e',fora:[],resumo:ePresetResumo,redesenhar:ePresetDepois,antesDeSalvar:ePresetAntes,
    presetOk:ePresetOk,
    exemplo:'ex.: Natal 2026 - neve na hospedeira',
    guarda:'tudo o que está configurado nesta aba — o efeito escolhido, o alcance (página inteira ou dentro de um bloco) com a altura, e os campos de <b>todos</b> os efeitos: quantidade, tamanho, deriva e cor das partículas, as quatro cores do confete, o tamanho, o desfoque e as três cores da aurora, a quantidade, o tamanho e as quatro cores das luzes, mais a duração do ciclo, a opacidade, a proporção no celular e o <b>fundo da prévia</b>.'},
   {id:'pac', nome:'Agendamento por pacote', chaves:['a'],       coleta:aColeta,restaura:aRestaura,gerar:aGerar,
-   pref:'a',fora:['edops','editidx'],resumo:aPresetResumo,redesenhar:aPresetDepois,antesDeSalvar:aPresetAntes,
+   pref:'a',fora:[],formulario:['edops','editidx'],resumo:aPresetResumo,redesenhar:aPresetDepois,antesDeSalvar:aPresetAntes,
    /* A chave essencial de 'a.familias' e o 'id', e nao o 'nome': e o id que o 'fam' de cada
       pacote aponta. Uma familia {"nome":"X"} sem id e casca -- ninguem consegue pertencer a
       ela --, e fcxPodarListas a descarta e a CONTA; ja um nome em branco e recuperavel
@@ -5231,7 +5231,7 @@ var ABAS=[
            ['a.pacotes.ops',{nome:'',preco:0,qtd:false},'nome'],
            ['a.cps',{codigo:'',tipo:'pct_total',valor:0,validade:'',minimo:''},'codigo']],
    exemplo:'ex.: Ensaios 2026 - pacotes',
-   guarda:'tudo o que está configurado nesta aba — a <b>forma de pagamento</b> e a cor dos botões do PayPal, as <b>famílias de pacotes</b> e a família de cada pacote, os pacotes (código, nome, duração, preço, o que inclui, o caminho do TidyCal e os <b>itens opcionais</b> de cada um), os <b>cupons</b>, o endereço da página de obrigado, o prefixo do identificador, o prazo da reserva, o desconto no Pix, as parcelas, quais <b>marcadores da página de obrigado</b> viajam e o texto reserva de cada um, as alturas do calendário, a largura das linhas compactas, textos e cores. Aplicar um preset <b>substitui as famílias que estão na tela</b>: ele é a fotografia da aba inteira.'}
+   guarda:'tudo o que está configurado nesta aba — a <b>forma de pagamento</b> e a cor dos botões do PayPal, as <b>famílias de pacotes</b> e a família de cada pacote, os pacotes (código, nome, duração, preço, o que inclui, o caminho do TidyCal e os <b>itens opcionais</b> de cada um), os <b>cupons</b>, o endereço da página de obrigado, o prefixo do identificador, o prazo da reserva, o desconto no Pix, as parcelas, quais <b>marcadores da página de obrigado</b> viajam e o texto reserva de cada um, as alturas do calendário, a largura das linhas compactas, textos e cores. Aplicar um preset <b>substitui as famílias que estão na tela</b> e <b>esvazia o formulário de cadastro</b>: ele é a fotografia da aba inteira.'}
 ];
 var fcFrag={};       /* ultimo pedaco bom de cada aba, para nao apagar o que a aba quebrada tinha */
 var fcSoLeitura={};  /* abas que falharam ao restaurar: param de coletar do DOM ate recarregar */
@@ -6075,17 +6075,55 @@ function fcValoresIguais(a,b){return fcCanon(a)===fcCanon(b);}
 
 function fcAba(id){var i;for(i=0;i<ABAS.length;i++){if(ABAS[i].id===id)return ABAS[i];}return null;}
 
+/* DUAS LISTAS, e a diferenca entre elas aparece em UM lugar so -- o "Aplicar" de um preset.
+   'fora'       : campos que descrevem OUTRO componente (hoje so b.consol, a consolidacao do
+                  codigo 1 das Bordas). Aplicar um preset os CONSERVA como estao na tela: o
+                  preset nao tem o que dizer sobre um componente que nao e este.
+   'formulario' : campos que descrevem o FORMULARIO DE CADASTRO a meio de preencher -- os
+                  opcionais digitados e ainda nao salvos, e o indice do item em edicao --, nas
+                  tres abas com catalogo (Checkout, Mini loja, Agendamento por pacote).
+                  Aplicar um preset os ZERA (fcPresetZerarForm, logo abaixo).
+   Em TODO o resto as duas valem a mesma coisa: "nao entra em preset nenhum". Quem precisa
+   desse conjunto chama fcForaTodos em vez de repetir a uniao -- os nomes ficam escritos numa
+   lista so, que e o que impede as duas de divergirem. */
+function fcForaTodos(a){
+  var f=a.fora||[],g=a.formulario||[];
+  return g.length?f.concat(g):f;
+}
+/* APLICAR UM PRESET ZERA O FORMULARIO DE CADASTRO (decisao do dono, 03/09/2026).
+   O preset e a fotografia da ABA INTEIRA, e um formulario meio preenchido, herdado do catalogo
+   ANTERIOR, nao pertence a fotografia que esta chegando. Medido antes deste conserto, na aba
+   Checkout com dois presets e catalogos diferentes: com o produto de indice 1 em edicao e dois
+   opcionais digitados, aplicar o outro preset deixava o botao dizendo "Salvar alterações"
+   apontando para o produto de indice 1 do catalogo NOVO -- um produto que o dono nunca escolheu
+   editar, e que o clique seguinte sobrescreveria inteiro, sem aviso.
+   NAO CONFUNDIR COM A RECARGA: ao abrir a ferramenta o formulario inacabado tem de VOLTAR, e
+   volta -- restaurarEstado entrega ao restaura() da aba o estado gravado INTEIRO, com as duas
+   chaves dentro dele. Os dois caminhos chamam o mesmo restaura(); a unica diferenca entre eles
+   e esta funcao, e ela e chamada so pelos dois "Aplicar" (fcPresetAplicar, da biblioteca da
+   aba, e fcgAplicarAba, do preset geral). Foi de proposito que a diferenca virou uma chamada
+   visivel no chamador, e nao um sinalizador global lido la dentro: o restaura de cada aba nao
+   precisa saber de onde os valores vieram. */
+function fcPresetZerarForm(a,frag){
+  var o=frag&&frag[a.pref],g=a.formulario||[],i;
+  /* CHAVE AUSENTE ja significa "formulario novo" para o *EditRestaurar de cada aba: e o ramo
+     'else', que chama uProdLimpar/mProdLimpar/aPacLimpar. Preset gravado por esta ferramenta
+     nunca traz as chaves (fcPresetCapturar as tira), mas preset vindo de arquivo de fora pode
+     trazer -- e o delete e o que garante que o ramo tomado seja o mesmo nos dois casos. */
+  if(!o)return;
+  for(i=0;i<g.length;i++)delete o[g[i]];
+}
 /* O que um preset desta aba guarda, lido pelo coleta() dela -- caminho unico.
    'manterFora' existe para a fase 4 e tem UM chamador: o molde com que a importacao confere o
    RASCUNHO vindo de arquivo. O rascunho e o estado inteiro da aba, e ali os campos 'fora'
-   (hoje so b.consol) fazem parte do que estava gravado -- tira-los do molde faria a conferencia
-   descartar 'consol' como chave desconhecida, e o codigo 1 das Bordas voltaria de um backup
-   sem a consolidacao que tinha. Quem guarda PRESET (de aba ou geral) nao passa o sinalizador e
-   continua sem os campos 'fora', como sempre. */
+   (b.consol e, nas tres abas com catalogo, o formulario de cadastro) fazem parte do que estava
+   gravado -- tira-los do molde faria a conferencia descartar 'consol' como chave desconhecida,
+   e o codigo 1 das Bordas voltaria de um backup sem a consolidacao que tinha. Quem guarda
+   PRESET (de aba ou geral) nao passa o sinalizador e continua sem esses campos, como sempre. */
 function fcPresetCapturar(a,manterFora){
-  var frag=fcClone(a.coleta()),o=frag?frag[a.pref]:null,i;
+  var frag=fcClone(a.coleta()),o=frag?frag[a.pref]:null,fx,i;
   /* a biblioteca nao entra: quem a injeta no fragmento e o salvarEstado, depois do coleta */
-  if(o&&a.fora&&!manterFora){for(i=0;i<a.fora.length;i++)delete o[a.fora[i]];}
+  if(o&&!manterFora){fx=fcForaTodos(a);for(i=0;i<fx.length;i++)delete o[fx[i]];}
   return frag;
 }
 /* nomes sao comparados sem diferenca de caixa e sem espaco nas pontas: "Natal 2026" e
@@ -6197,6 +6235,9 @@ function fcPresetAplicar(a,i){
     o=frag[a.pref]||(frag[a.pref]={});
     for(k=0;k<a.fora.length;k++)o[a.fora[k]]=cur[a.fora[k]];
   }
+  /* ...e os campos 'formulario' fazem o CONTRARIO: o formulario de cadastro nao viaja num
+     preset nem por dentro nem por fora, e volta a zero. Ver fcPresetZerarForm. */
+  fcPresetZerarForm(a,frag);
   try{a.restaura(frag);}
   catch(e){
     /* mesma regra do estado gravado: o DOM ficou meio escrito e ja nao representa nada, entao
@@ -6434,13 +6475,13 @@ function fcgValoresDaAba(a){
   return r;
 }
 function fcgValoresDaAbaLer(a){
-  var frag,o,i;
+  var frag,o,fx,i;
   if(fcSoLeitura[a.id]){
     frag=fcClone(fcFrag[a.id])||{};
     o=frag[a.pref];
     if(o){
       delete o.presets;                                        /* a biblioteca nao entra */
-      if(a.fora){for(i=0;i<a.fora.length;i++)delete o[a.fora[i]];}
+      fx=fcForaTodos(a);for(i=0;i<fx.length;i++)delete o[fx[i]];
     }
     return frag;
   }
@@ -6458,6 +6499,9 @@ function fcgAplicarAba(a,valores){
     o=frag[a.pref]||(frag[a.pref]={});
     for(k=0;k<a.fora.length;k++)o[a.fora[k]]=cur[a.fora[k]];
   }
+  /* mesma regra do "Aplicar" da biblioteca da aba: adotar um preset geral e adotar a fotografia
+     inteira, entao o formulario de cadastro volta a zero em vez de apontar para o catalogo novo */
+  fcPresetZerarForm(a,frag);
   a.restaura(frag);
   if(a.redesenhar)a.redesenhar();
 }
@@ -7481,7 +7525,7 @@ function fcxMolde(a,manterFora){
 /* Um fragmento de aba vindo de arquivo, conferido e limpo. 'manterFora' so e verdade para o
    RASCUNHO -- ver o comentario de fcPresetCapturar. */
 function fcxLimparValores(a,valores,conta,manterFora){
-  var tpl,frag={},j,c,n,o;
+  var tpl,frag={},j,c,n,o,fx;
   if(!fcEhObjeto(valores))return frag;
   tpl=fcxMolde(a,manterFora);
   for(j=0;j<a.chaves.length;j++){
@@ -7494,7 +7538,7 @@ function fcxLimparValores(a,valores,conta,manterFora){
   if(fcEhObjeto(o)){
     /* a biblioteca viaja no seu proprio lugar do arquivo, nunca dentro de 'valores' */
     if(o.presets!==undefined){delete o.presets;conta.descartados++;}
-    if(!manterFora&&a.fora){for(j=0;j<a.fora.length;j++){if(o[a.fora[j]]!==undefined){delete o[a.fora[j]];conta.descartados++;}}}
+    if(!manterFora){fx=fcForaTodos(a);for(j=0;j<fx.length;j++){if(o[fx[j]]!==undefined){delete o[fx[j]];conta.descartados++;}}}
   }
   fcxPodarListas(a,frag,conta);
   if(a.importar)frag=a.importar(frag,conta);
@@ -11408,9 +11452,10 @@ function uColeta(){
       cod:$('u-cod').value,
       /* O FORMULARIO INACABADO viaja junto (03/09/2026). E acrescimo, nao mudanca de
          formato: estado ou preset gravado antes disto simplesmente nao tem as duas chaves, e
-         o restaura ja trata chave ausente. As duas estao declaradas em 'fora' -- elas
-         descrevem o que esta a MEIO de ser digitado, e nao a configuracao da campanha, entao
-         nao entram em preset nenhum. */
+         o restaura ja trata chave ausente. As duas estao declaradas em 'formulario' (ABAS) --
+         elas descrevem o que esta a MEIO de ser digitado, e nao a configuracao da campanha,
+         entao nao entram em preset nenhum E aplicar um preset as zera; ver fcPresetZerarForm.
+         Sao coisa diferente de 'fora', que CONSERVA o que esta na tela. */
       edops:uEditOps,editidx:uEditIdx,
       selprod:radio('u-selprod'),zap:radio('u-zap'),descpix:$('u-descpix').value,
       sinal:radio('u-sinal'),sinaltipo:radio('u-sinaltipo'),sinalpct:$('u-sinalpct').value,sinalfixo:$('u-sinalfixo').value,
@@ -21203,13 +21248,14 @@ function fccSemNaoEmite(a,vals){
   return o;
 }
 function fccAssinar(a,vals){
-  var o,extra,i;
+  var o,extra,fx,i;
   if(fcSoLeitura[a.id])return null;
   vals=fccSemNaoEmite(a,vals);
-  if(!a.fora||!a.fora.length)return fcCanon(vals);
+  fx=fcForaTodos(a);
+  if(!fx.length)return fcCanon(vals);
   o=(fcPresetCapturar(a,true)||{})[a.pref]||{};
   extra='';
-  for(i=0;i<a.fora.length;i++)extra+='|'+a.fora[i]+'='+fcCanon(o[a.fora[i]]);
+  for(i=0;i<fx.length;i++)extra+='|'+fx[i]+'='+fcCanon(o[fx[i]]);
   return fcCanon(vals)+extra;
 }
 /* Chamada no fim de cada gerador, e SO no caminho em que a caixa de codigo foi escrita. Ela

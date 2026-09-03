@@ -16,6 +16,7 @@ material de apoio, roda no seu computador.
 | `cupom-minimo.mjs` | O VALOR MINIMO DO PEDIDO PARA O CUPOM VALER, com os blocos RODANDO: gera as tres abas que tem cupom (Checkout, Mini loja e Agendamento por pacote) com um cupom de minimo e um sem, executa cada bloco numa pagina e percorre os cinco casos -- aplicado acima, recusado abaixo, a QUEDA AUTOMATICA ao tirar um item, o voltar a subir que nao reaplica, e o cupom sem minimo intacto. Le o total NA TELA, nunca a variavel. Fecha com a compatibilidade: estado de versao anterior, "Exportar tudo"/importar e preset de aba. | Ao mexer em qualquer coisa do cupom nas tres abas -- a regra do minimo, `FC_CARRINHO_SRC`, `fcCpSerial` ou os dois textos novos. `node scripts/verificar/cupom-minimo.mjs`. |
 | `lista-cupons.mjs` | O EDITOR EM LINHA da lista de cupons, nas TRES abas que tem cupom. Para cada um dos cinco campos da linha (codigo, tipo, valor, validade, minimo): que ele APARECE, que edita-lo GRAVA (le o `localStorage`), que edita-lo REMONTA A PREVIA (le a lista `CUPONS` de dentro do iframe) e que o valor sobrevive a recarga. | Ao mexer em qualquer `*CpRender`, ou ao criar lista cadastrada com campo editavel na propria linha. A regressao NAO alcanca isto: os campos da linha sao criados por JavaScript, nao tem id nem name, e escapam dos ouvintes delegados de cada aba -- foi assim que a Mini loja passou a mentir na previa e a esconder a validade sem quebrar nada. `node scripts/verificar/lista-cupons.mjs`. |
 | `pac-quantidade.mjs` | A QUANTIDADE DO OPCIONAL NO QUE VAI PARA O PAYPAL, na aba Agendamento por pacote, com o bloco RODANDO. Intercepta o `document.head.appendChild` do proprio bloco (o mesmo caminho da sonda da previa, `fcPvSondaPP`), instala um `window.paypal` que guarda a configuracao dos Buttons e chama o `createOrder` do bloco com um `order.create` que so devolve o pedido. Le o `name`/`description` que iriam a ordem nos quatro casos (com quantidade, sem quantidade, os dois juntos, so o pacote) e o corte em 127 caracteres. | Ao mexer em `nomesSelecionados` de qualquer aba, ou em `fcPpBotoesSrc` -- que e a fonte unica do que o PayPal recebe. A regressao NAO alcanca isto: ela compara texto gerado, e o defeito que este arquivo pegou (preco multiplicava pela quantidade, nome nao dizia por quanto) era texto gerado coerente e recibo errado. `node scripts/verificar/pac-quantidade.mjs`. |
+| `preset-formulario.mjs` | O FORMULARIO DE CADASTRO nos DOIS caminhos que passam pelo `restaura()` de cada aba, e que querem coisas opostas: **recarregar** a ferramenta tem de DEVOLVER o formulario inacabado (opcionais digitados e item em edicao), e **aplicar um preset** tem de ZERA-LO. Nas tres abas com catalogo (Checkout, Mini loja, Agendamento por pacote): monta o cenario, mede o estado ANTES do clique, aplica, e fecha com a prova que importa -- cadastrar logo depois ACRESCENTA em vez de sobrescrever o item de indice 1. | Ao mexer em `fcPresetAplicar`, `fcgAplicarAba`, `restaurarEstado`, em qualquer `*EditRestaurar`/`*ProdLimpar`/`*PacLimpar`, ou nas listas `fora`/`formulario` de `ABAS`. A regressao NAO alcanca isto: e interface, e o defeito (03/09/2026) gravava por cima de um produto sem erro de console e sem alerta. `node scripts/verificar/preset-formulario.mjs`; um caminho como argumento aponta outra arvore (um `git worktree` da referencia) para ver o defeito falhar la. |
 | `acentos.mjs` | O ACENTO QUE FALTA no texto que uma PESSOA le. Tokeniza o `index.html` de verdade (string, comentario e codigo separados), recolhe as frases que chegam a um sink de interface (`alert`, `confirm`, `.textContent`, `.placeholder`, `.title`, `.alt`, `setAttribute('aria-label')`, `fcFalha`, `fciRecusa`, o texto e os atributos do HTML da ferramenta) mais todo literal que PARECE PROSA, e cobra acento comparando com o VOCABULARIO acentuado da propria arvore. Nao acusa codigo: comentario, `<style>`, `<code>`, marcador `{codigo}`, identificador, classe CSS, `value` de radio, comentario do bloco gerado e a lista declarada de HOMOGRAFOS (`e`/`é`, `esta`/`está`, `pode`/`pôde`...). Sai com codigo 1 quando acha algo. | Ao escrever qualquer texto novo que uma pessoa va ler -- e como guarda, antes de fechar a rodada. `node scripts/verificar/acentos.mjs`; `--vocabulario` mostra o que ele aprendeu; um caminho como argumento analisa outro arquivo. Medido em 03/09/2026: 118 frases na `main`, zero depois da rodada dos acentos. |
 | `pagina.mjs` | O MOLDE reutilizavel para pegar um bloco gerado e executa-lo de verdade numa pagina que imita uma do Prosite (servidor de uma rota, rede externa bloqueada, relogio falso opcional, `reducedMotion` opcional). Exporta `comBlocoNaPagina`, `gerarNaFerramenta`, `textoSemScripts`, `chk`, `resumo`. | Quando o teste precisa que o bloco RODE num DOM (anima? o botao aparece? o valor calculado bate?), nao so que o texto gerado seja igual a uma referencia. Cada teste concreto e um script pequeno que importa este modulo -- ver exemplo abaixo. |
 
@@ -43,6 +44,11 @@ node scripts/verificar/lista-cupons.mjs
 
 # a quantidade do opcional no que vai para o PayPal, com o bloco rodando
 node scripts/verificar/pac-quantidade.mjs
+
+# o formulario de cadastro: a recarga devolve, o preset zera (as tres abas)
+node scripts/verificar/preset-formulario.mjs
+# o mesmo teste apontado para uma arvore de referencia, para ver o defeito falhar la
+git worktree add /tmp/ref main && node scripts/verificar/preset-formulario.mjs /tmp/ref
 
 # o acento que falta no texto que uma pessoa le (sai 1 se achar algo)
 node scripts/verificar/acentos.mjs
@@ -133,8 +139,10 @@ uma "cobranca" -- quem sabe e a funcao `medir` que cada teste escreve.
 - **A INTERFACE da ferramenta fica quase toda fora.** `geradores.mjs` preenche
   campos e le saidas; ele nao confere se um campo da tela gravou, se uma lista
   mostra o que guarda, ou se um alerta esta acentuado. `lista-cupons.mjs` cobre
-  um pedaco disso (o editor em linha das listas de cupons) porque foi ali que o
-  defeito apareceu; o resto continua dependendo de leitura e de olhar.
+  um pedaco disso (o editor em linha das listas de cupons) e
+  `preset-formulario.mjs` outro (o formulario de cadastro na recarga e no
+  "Aplicar") porque foi ali que os defeitos apareceram; o resto continua
+  dependendo de leitura e de olhar.
 - **O cenario nao percorre todo ramo da ferramenta.** Os quatro ramos que a
   passagem configurada declara hoje como fora dele: o formato de data da pagina
   de obrigado do TidyCal (o cenario mantem "como o TidyCal mandar"), o modo
