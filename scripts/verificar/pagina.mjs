@@ -104,7 +104,7 @@ function instalarRelogioFalso(pg, quando){
    em uso", e esse erro nao teria nada a ver com o que de fato quebrou. */
 export async function comBlocoNaPagina({
   bloco = '', cabeca = '', corpoAntes = '', corpoDepois = '',
-  busca = '', porta = 8790, reducedMotion = false, relogio = null, medir
+  busca = '', porta = 8790, reducedMotion = false, relogio = null, permitir = [], bloquear = [], medir
 }){
   if(typeof medir !== 'function'){
     throw new Error('comBlocoNaPagina precisa de uma funcao medir(pg) -- e ela quem sabe o que este teste esta verificando.');
@@ -132,10 +132,31 @@ export async function comBlocoNaPagina({
 
       /* So a origem do proprio servidor passa. Qualquer outra requisicao --
          CDN, fonte, SDK, telemetria -- e abortada, para o teste falhar por
-         falta de rede nunca ser confundido com o bloco estar quebrado. */
+         falta de rede nunca ser confundido com o bloco estar quebrado.
+
+         A EXCECAO E `permitir`, e ela e para um caso so: quando o que esta
+         sob teste E a conversa com um servico de fora. O calendario do TidyCal
+         e esse caso -- so o TidyCal de verdade sabe se a altura acompanha o
+         conteudo, e transcrever sinais (o que tidycal-altura.mjs faz, de
+         proposito) nao alcanca uma biblioteca que pode mudar amanha. Quem usar
+         isto assume o preco: o teste passa a poder falhar por rede, e a falha
+         nao teria nada a ver com o bloco. Cada host liberado tem de estar
+         escrito no teste, com o motivo. */
+      /* `bloquear` e o oposto de `permitir`, e existe porque host nao e
+         granularidade suficiente: para medir "o bloco quando o embed.js do
+         TidyCal nao carrega" nao serve fechar o host inteiro do CDN deles --
+         medido, o proprio calendario tambem e servido de la, e o que se
+         mediria seria uma pagina em branco. Cada padrao e um PEDACO de URL. */
+      const liberados = permitir.slice(), barrados = bloquear.slice();
       await pg.route('**/*', route => {
+        const u = route.request().url();
+        for(let i = 0; i < barrados.length; i++)
+          if(u.indexOf(barrados[i]) >= 0){ route.abort(); return; }
         let deixaPassar = false;
-        try{ deixaPassar = new URL(route.request().url()).host === origemPropria; }catch(e){}
+        try{
+          const h = new URL(u).host;
+          deixaPassar = (h === origemPropria) || liberados.indexOf(h) >= 0;
+        }catch(e){}
         if(deixaPassar) route.continue(); else route.abort();
       });
 
