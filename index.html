@@ -12310,10 +12310,15 @@ function uOpRender(){
     cq.addEventListener('change',function(){uEditOps[i].qtd=cq.checked;salvarEstado();});
     lq.appendChild(cq);lq.appendChild(document.createTextNode('vende por quantidade'));
     info.appendChild(lq);
-    var ctrl=document.createElement('div');ctrl.className='ctrl';
-    [['\u2191',function(){uOpMove(i,-1);},'Subir'],['\u2193',function(){uOpMove(i,1);},'Descer'],['\u2715',function(){uOpDel(i);},'Remover']]
-      .forEach(function(b){var bt=document.createElement('button');bt.textContent=b[0];bt.title=b[2];bt.setAttribute('aria-label',b[2]);bt.addEventListener('click',b[1]);ctrl.appendChild(bt);});
-    li.appendChild(info);li.appendChild(ctrl);
+    li.appendChild(info);
+    /* O DUPLICAR DO OPCIONAL ACRESCENTA NA LISTA, e nao carrega um formulario -- ao contrario
+       do produto. Medido na propria interface, como em aOpRender: os TRES campos do opcional
+       (nome, preco e "vende por quantidade") sao editaveis NA PROPRIA LINHA, enquanto os do
+       produto so existem no formulario ao lado. Levar a copia para um formulario seria tirar o
+       dono de onde ele ja pode digitar. A copia entra LOGO ABAIXO da original. */
+    fcCtrl(li,[['\u2191',function(){uOpMove(i,-1);},'Subir'],['\u2193',function(){uOpMove(i,1);},'Descer'],
+      ['\u29C9',function(){uOpDuplicar(i);},'Duplicar este opcional'],
+      ['\u2715',function(){uOpDel(i);},'Remover']],true);
     ul.appendChild(li);
   });
   fcOpPendente('u-op-pendente',uEditOps,uEditIdx,(uEditIdx>=0&&uProds[uEditIdx])?uProds[uEditIdx].nome:'','produto','u-prod-salvar');
@@ -12329,6 +12334,11 @@ function uOpAdd(){
 }
 function uOpMove(i,d){var j=i+d;if(j<0||j>=uEditOps.length)return;var t=uEditOps[i];uEditOps[i]=uEditOps[j];uEditOps[j]=t;uOpRender();salvarEstado();}
 function uOpDel(i){uEditOps.splice(i,1);uOpRender();salvarEstado();}
+function uOpDuplicar(i){
+  var o=uEditOps[i];if(!o)return;
+  uEditOps.splice(i+1,0,{nome:fcDupNome(o.nome),preco:o.preco,qtd:!!o.qtd});
+  uOpRender();salvarEstado();
+}
 
 /* ===== produtos ===== */
 function uProdLimpar(){
@@ -20171,10 +20181,11 @@ function mOpRender(){
     cq.addEventListener('change',function(){mEditOps[i].qtd=cq.checked;salvarEstado();});
     lq.appendChild(cq);lq.appendChild(document.createTextNode('vende por quantidade'));
     info.appendChild(lq);
-    var ctrl=document.createElement('div');ctrl.className='ctrl';
-    [['\u2191',function(){mOpMove(i,-1);},'Subir'],['\u2193',function(){mOpMove(i,1);},'Descer'],['\u2715',function(){mOpDel(i);},'Remover']]
-      .forEach(function(b){var bt=document.createElement('button');bt.textContent=b[0];bt.title=b[2];bt.setAttribute('aria-label',b[2]);bt.addEventListener('click',b[1]);ctrl.appendChild(bt);});
-    li.appendChild(info);li.appendChild(ctrl);
+    li.appendChild(info);
+    /* Ver uOpRender: a copia ACRESCENTA na lista, logo abaixo da original. */
+    fcCtrl(li,[['\u2191',function(){mOpMove(i,-1);},'Subir'],['\u2193',function(){mOpMove(i,1);},'Descer'],
+      ['\u29C9',function(){mOpDuplicar(i);},'Duplicar este opcional'],
+      ['\u2715',function(){mOpDel(i);},'Remover']],true);
     ul.appendChild(li);
   });
   fcOpPendente('m-op-pendente',mEditOps,mEditIdx,(mEditIdx>=0&&mProds[mEditIdx])?mProds[mEditIdx].nome:'','produto','m-prod-salvar');
@@ -20190,6 +20201,11 @@ function mOpAdd(){
 }
 function mOpMove(i,d){var j=i+d;if(j<0||j>=mEditOps.length)return;var t=mEditOps[i];mEditOps[i]=mEditOps[j];mEditOps[j]=t;mOpRender();salvarEstado();}
 function mOpDel(i){mEditOps.splice(i,1);mOpRender();salvarEstado();}
+function mOpDuplicar(i){
+  var o=mEditOps[i];if(!o)return;
+  mEditOps.splice(i+1,0,{nome:fcDupNome(o.nome),preco:o.preco,qtd:!!o.qtd});
+  mOpRender();salvarEstado();
+}
 
 /* ===== produtos ===== */
 function mProdLimpar(){
