@@ -1640,6 +1640,7 @@
         <legend>Cadastrar produto</legend>
         <p class="ajuda">Cadastre <b>um ou vários</b> produtos; cada um pode ter seus próprios itens opcionais. Com um único produto, o carrinho o exibe direto (sem seletor), como uma compra simples.</p>
         <div class="caixa-editor">
+          <p class="ajuda alerta" id="u-prod-copia" style="display:none"></p>
           <label for="u-pnome">Nome do produto</label>
           <input type="text" id="u-pnome" placeholder="Ensaio de Natal">
           <label for="u-pdesc">Descrição curta <small>(opcional)</small></label>
@@ -2941,6 +2942,7 @@
         <legend>Cadastrar produto</legend>
         <p class="ajuda">De <b>15 a 50 produtos</b> é o tamanho para o qual esta vitrine foi desenhada. Cada produto pode ter os seus próprios itens opcionais, como no Checkout.</p>
         <div class="caixa-editor">
+          <p class="ajuda alerta" id="m-prod-copia" style="display:none"></p>
           <label for="m-pnome">Nome do produto</label>
           <input type="text" id="m-pnome" placeholder="Álbum 20x30">
           <label for="m-pdesc">Descrição <small>(opcional, aparece no cartão de detalhe)</small></label>
@@ -3971,8 +3973,8 @@
    QUEM IMPEDE QUE ELE MINTA: scripts/conferir-versoes.sh, que recusa index.html
    alterado sem a versao mudar junto -- a mesma disciplina do fc-compartilhado.js,
    e pela mesma razao: carimbo que ninguem confere e o defeito de amanha. */
-var FC_VERSAO='2026-09-03h';
-var FC_PUBLICADO='2026-09-03 18:11';   /* America/Sao_Paulo -- escrito pelo carimbador */
+var FC_VERSAO='2026-09-03i';
+var FC_PUBLICADO='2026-09-03 19:02';   /* America/Sao_Paulo -- escrito pelo carimbador */
 (function(){
   var el=document.getElementById('fc-versao');
   if(!el) return;
@@ -4611,7 +4613,9 @@ function fcCpAchaRepetido(lista,cod,ignorar){
 }
 /* O AVISO dos duplicados que JA ESTAVAM gravados. A recusa nova protege o cadastro daqui para
    frente e nao limpa o que existe -- e nao pode limpar: os dados sao do dono, e apagar cupom
-   por conta propria seria mexer no cadastro dele sem ele mandar (mesmo criterio de aFamDel).
+   por conta propria seria mexer no cadastro dele sem ele mandar. Mesmo criterio de aFamDel, que
+   desde 03/09/2026 APAGA os pacotes de uma familia -- mas so depois de listar cada um pelo nome
+   e o dono confirmar: o que nao se faz e apagar CALADO.
    Ate aqui um par desses so aparecia ao Gerar, que recusa nomeando os dois. Isto nao conserta
    o cadastro; faz o buraco APARECER na propria lista, como fccOrfas faz no painel. */
 function fcCpDupMarcar(inp,lista,i){
@@ -10250,6 +10254,17 @@ function lPadroes(){
 /* Teto da lista fechada. Nao e limite tecnico: um <select> com dezenas de linhas deixa de ser
    "lista fechada para qualificar" e vira rolagem no celular, onde o pop-up ja e apertado. */
 var L_Q_MAX=20;
+/* A pergunta "esta opcao JA esta na lista?", num lugar so. lQAdd recusa por ela; lQDuplicar
+   deriva o texto ate ela dizer que nao. Escrita duas vezes, uma delas podia ganhar uma regra
+   nova (outra comparacao, outro aparo) e a outra continuar como estava -- e o duplicar passaria
+   a criar exatamente o par que o cadastro recusa. Comparacao sem acento nao entra, pelo mesmo
+   criterio ja registrado em lQAdd. */
+function lQAcha(t){
+  var k=String(t==null?'':t).trim().toLowerCase(),i;
+  if(!k)return -1;
+  for(i=0;i<lQops.length;i++)if(String(lQops[i]).trim().toLowerCase()===k)return i;
+  return -1;
+}
 function lQAdd(){
   var t=$('l-qop').value.trim(),i;
   if(!t){alert('Escreva o texto da opção.');return;}
@@ -10259,11 +10274,10 @@ function lQAdd(){
      segunda calado seria decidir por ele), e o texto que ele acabou de digitar continua no
      campo para ser corrigido. Comparacao sem acento nao entra: "Gestante" e "gestante" sao a
      mesma opcao para quem le a lista, entao o teste ignora maiusculas e espacos das pontas. */
-  for(i=0;i<lQops.length;i++){
-    if(String(lQops[i]).trim().toLowerCase()===t.toLowerCase()){
-      alert('A opção "'+lQops[i]+'" já está na lista (posição '+(i+1)+'). Duas opções com o mesmo texto ficam indistinguíveis para o visitante: ele escolhe uma das duas e a mensagem chega igual nos dois casos.');
-      return;
-    }
+  i=lQAcha(t);
+  if(i>=0){
+    alert('A opção "'+lQops[i]+'" já está na lista (posição '+(i+1)+'). Duas opções com o mesmo texto ficam indistinguíveis para o visitante: ele escolhe uma das duas e a mensagem chega igual nos dois casos.');
+    return;
   }
   if(lQops.length>=L_Q_MAX){
     alert('A lista já tem '+L_Q_MAX+' opções, que é o máximo. Uma lista maior que isso deixa de ajudar o visitante a se qualificar e vira rolagem dentro do pop-up, que no celular já é apertado. Remova alguma antes de acrescentar outra.');
@@ -10279,6 +10293,25 @@ function lQMove(i,d){
   lQRender();salvarEstado();lPreview();
 }
 function lQDel(i){lQops.splice(i,1);lQRender();salvarEstado();lPreview();}
+/* A copia entra LOGO ABAIXO da original, como a do opcional: a opcao se edita na propria lista
+   (nao ha formulario para carregar).
+   O TEXTO E DERIVADO ATE FICAR UNICO, e nao so marcado uma vez. Esta lista e a unica com recusa
+   de TEXTO repetido (lQAdd), e duplicar "Casamento" duas vezes produziria dois "Casamento
+   (cópia)" -- justamente o par que o cadastro ao lado recusa, criado por outra porta. A
+   numeracao de fcDupNome ("(cópia 2)") e o que faz o laco convergir.
+   O TETO DA LISTA VALE AQUI TAMBEM: a razao dele (um <select> longo vira rolagem no pop-up do
+   celular) nao muda porque a opcao chegou por copia, e o aviso e o mesmo de lQAdd. */
+function lQDuplicar(i){
+  var t=lQops[i];if(t==null)return;
+  if(lQops.length>=L_Q_MAX){
+    alert('A lista já tem '+L_Q_MAX+' opções, que é o máximo. Uma lista maior que isso deixa de ajudar o visitante a se qualificar e vira rolagem dentro do pop-up, que no celular já é apertado. Remova alguma antes de duplicar outra.');
+    return;
+  }
+  var novo=fcDupNome(t),v=0;
+  while(lQAcha(novo)>=0&&v<L_Q_MAX){novo=fcDupNome(novo);v++;}
+  lQops.splice(i+1,0,novo);
+  lQRender();salvarEstado();lPreview();
+}
 function lQRender(){
   var ul=$('l-q-lista');if(!ul)return;
   ul.innerHTML='';
@@ -10288,10 +10321,10 @@ function lQRender(){
     var info=document.createElement('div');info.className='info';
     var tx=document.createElement('div');tx.className='url';tx.textContent=txt;tx.title=txt;
     info.appendChild(tx);
-    var ctrl=document.createElement('div');ctrl.className='ctrl';
-    [['\u2191',function(){lQMove(i,-1);},'Subir'],['\u2193',function(){lQMove(i,1);},'Descer'],['\u2715',function(){lQDel(i);},'Remover']]
-      .forEach(function(b){var bt=document.createElement('button');bt.textContent=b[0];bt.title=b[2];bt.setAttribute('aria-label',b[2]);bt.addEventListener('click',b[1]);ctrl.appendChild(bt);});
-    li.appendChild(info);li.appendChild(ctrl);
+    li.appendChild(info);
+    fcCtrl(li,[['\u2191',function(){lQMove(i,-1);},'Subir'],['\u2193',function(){lQMove(i,1);},'Descer'],
+      ['\u29C9',function(){lQDuplicar(i);},'Duplicar esta opção'],
+      ['\u2715',function(){lQDel(i);},'Remover']],true);
     ul.appendChild(li);
   });
 }
@@ -12308,10 +12341,15 @@ function uOpRender(){
     cq.addEventListener('change',function(){uEditOps[i].qtd=cq.checked;salvarEstado();});
     lq.appendChild(cq);lq.appendChild(document.createTextNode('vende por quantidade'));
     info.appendChild(lq);
-    var ctrl=document.createElement('div');ctrl.className='ctrl';
-    [['\u2191',function(){uOpMove(i,-1);},'Subir'],['\u2193',function(){uOpMove(i,1);},'Descer'],['\u2715',function(){uOpDel(i);},'Remover']]
-      .forEach(function(b){var bt=document.createElement('button');bt.textContent=b[0];bt.title=b[2];bt.setAttribute('aria-label',b[2]);bt.addEventListener('click',b[1]);ctrl.appendChild(bt);});
-    li.appendChild(info);li.appendChild(ctrl);
+    li.appendChild(info);
+    /* O DUPLICAR DO OPCIONAL ACRESCENTA NA LISTA, e nao carrega um formulario -- ao contrario
+       do produto. Medido na propria interface, como em aOpRender: os TRES campos do opcional
+       (nome, preco e "vende por quantidade") sao editaveis NA PROPRIA LINHA, enquanto os do
+       produto so existem no formulario ao lado. Levar a copia para um formulario seria tirar o
+       dono de onde ele ja pode digitar. A copia entra LOGO ABAIXO da original. */
+    fcCtrl(li,[['\u2191',function(){uOpMove(i,-1);},'Subir'],['\u2193',function(){uOpMove(i,1);},'Descer'],
+      ['\u29C9',function(){uOpDuplicar(i);},'Duplicar este opcional'],
+      ['\u2715',function(){uOpDel(i);},'Remover']],true);
     ul.appendChild(li);
   });
   fcOpPendente('u-op-pendente',uEditOps,uEditIdx,(uEditIdx>=0&&uProds[uEditIdx])?uProds[uEditIdx].nome:'','produto','u-prod-salvar');
@@ -12327,6 +12365,11 @@ function uOpAdd(){
 }
 function uOpMove(i,d){var j=i+d;if(j<0||j>=uEditOps.length)return;var t=uEditOps[i];uEditOps[i]=uEditOps[j];uEditOps[j]=t;uOpRender();salvarEstado();}
 function uOpDel(i){uEditOps.splice(i,1);uOpRender();salvarEstado();}
+function uOpDuplicar(i){
+  var o=uEditOps[i];if(!o)return;
+  uEditOps.splice(i+1,0,{nome:fcDupNome(o.nome),preco:o.preco,qtd:!!o.qtd});
+  uOpRender();salvarEstado();
+}
 
 /* ===== produtos ===== */
 function uProdLimpar(){
@@ -12335,7 +12378,11 @@ function uProdLimpar(){
   setRadio('u-opsel','unico');setRadio('u-opnenhum','nao');setRadio('u-pqtd','nao');
   $('u-op-qtd').checked=false;
   $('u-prod-salvar').textContent='Adicionar produto';
+  /* O ROTULO VOLTA A "Cancelar edição": duplicar troca este mesmo botao para "Descartar cópia",
+     e sem esta linha o rotulo da copia sobreviveria ao proximo cadastro comum. */
+  $('u-prod-cancelar').textContent='Cancelar edição';
   $('u-prod-cancelar').style.display='none';
+  uProdCopiaAviso(null);
   uToggles();
 }
 function uProdSalvar(){
@@ -12361,8 +12408,52 @@ function uProdEditar(i){
   uOpRender();
   setRadio('u-opsel',p.opsel);setRadio('u-opnenhum',p.opnenhum);
   setRadio('u-pqtd',p.qtd?'sim':'nao');
+  $('u-prod-cancelar').textContent='Cancelar edição';
   $('u-prod-cancelar').style.display='inline-block';
+  uProdCopiaAviso(null);
   uToggles();
+}
+/* ===== duplicar um produto (03/09/2026) =====
+   MESMA FORMA DE aPacDuplicar, e pela mesma medicao: o produto tem formulario proprio, e a
+   copia so passa a existir quando o dono salva. A PRIMEIRA LINHA E O uProdLimpar, e ela e a que
+   importa -- o formulario guarda 'uEditIdx', que SOBREVIVE A RECARGA, e duplicar a partir de um
+   formulario em modo EDICAO deixaria o botao dizendo "Salvar alterações" apontando para o
+   produto que estava sendo editado: o clique seguinte gravaria a copia POR CIMA dele.
+   NAO HA CODIGO NESTA ABA -- a identidade do produto e o NOME, e por isso so fcDupNome entra
+   aqui. O nome marcado nao e enfeite: dois produtos com o mesmo nome no carrinho sao duas
+   linhas identicas que o cliente nao tem como distinguir, e nenhuma recusa existe (nem poderia)
+   para nome repetido. Com a marca, o esquecimento fica gritante nas duas telas. */
+function uProdDuplicar(i){
+  var p=uProds[i];if(!p)return;
+  uProdLimpar();
+  $('u-pnome').value=fcDupNome(p.nome);
+  $('u-pdesc').value=p.desc||'';
+  $('u-ppreco').value=p.preco;
+  setRadio('u-opsel',p.opsel);setRadio('u-opnenhum',p.opnenhum);
+  setRadio('u-pqtd',p.qtd?'sim':'nao');
+  /* OS OPCIONAIS VAO JUNTO, copiados chave a chave como em uProdEditar: sem isto os dois
+     produtos apontariam para o MESMO array, e mexer num opcional da copia mexeria no original
+     ja gravado. */
+  uEditOps=(p.ops||[]).map(function(o){return {nome:o.nome,preco:o.preco,qtd:!!o.qtd};});
+  $('u-prod-cancelar').textContent='Descartar cópia';
+  $('u-prod-cancelar').style.display='inline-block';
+  uProdCopiaAviso(p);
+  uOpRender();
+  uToggles();
+  salvarEstado();
+  var el=$('u-pnome');
+  if(el){try{el.focus();el.select();}catch(e){}}
+}
+/* O AVISO DE COPIA no alto do formulario -- ver aPacCopiaAviso, onde a razao esta escrita: o
+   formulario tem dois modos que se parecem (criar e editar), e uma copia carregada nele e um
+   TERCEIRO estado, que so o rotulo do botao distinguiria do primeiro. Ele NAO sobrevive a
+   recarga, pela mesma decisao: o que volta e um formulario preenchido em modo CRIAR, com o nome
+   marcado a vista, e o aviso e a confirmacao do CLIQUE. */
+function uProdCopiaAviso(p){
+  var el=$('u-prod-copia');if(!el)return;
+  if(!p){el.style.display='none';el.textContent='';return;}
+  el.style.display='block';
+  el.textContent='Esta é uma cópia de \u201c'+p.nome+'\u201d. Ela ainda não existe: confira o nome e o preço e clique em \u201cAdicionar produto\u201d. O produto original não é alterado.';
 }
 function uProdMove(i,d){var j=i+d;if(j<0||j>=uProds.length)return;var t=uProds[i];uProds[i]=uProds[j];uProds[j]=t;uProdRender();salvarEstado();uPreview();}
 function uProdDel(i){
@@ -12392,11 +12483,15 @@ function uProdRender(){
     var nq=uQtdItens(p)-(p.qtd?1:0);
     txt.textContent=p.nome+' — '+uFmt(parseFloat(p.preco)||0)+(p.qtd?' (por quantidade)':'')+qtd+(nq?(' \u00b7 '+nq+' com quantidade'):'');
     info.appendChild(txt);
-    var ctrl=document.createElement('div');ctrl.className='ctrl';
-    [['\u2191',function(){uProdMove(i,-1);},'Subir'],['\u2193',function(){uProdMove(i,1);},'Descer'],
-     ['\u270E',function(){uProdEditar(i);salvarEstado();},'Editar'],['\u2715',function(){uProdDel(i);},'Remover']]
-      .forEach(function(b){var bt=document.createElement('button');bt.textContent=b[0];bt.title=b[2];bt.setAttribute('aria-label',b[2]);bt.addEventListener('click',b[1]);ctrl.appendChild(bt);});
-    li.appendChild(info);li.appendChild(ctrl);
+    li.appendChild(info);
+    /* CINCO BOTOES, EMBAIXO DO ITEM -- ver a regra .lista-imgs li.acoes-abaixo, onde a medicao
+       esta escrita: com o quinto botao a pilha na lateral passa de 130 px e a lista cresce por
+       causa dos BOTOES, e nao do conteudo. */
+    fcCtrl(li,[['\u2191',function(){uProdMove(i,-1);},'Subir',false],
+     ['\u2193',function(){uProdMove(i,1);},'Descer',false],
+     ['\u29C9',function(){uProdDuplicar(i);},'Duplicar este produto',false],
+     ['\u270E',function(){uProdEditar(i);salvarEstado();},'Editar',false],
+     ['\u2715',function(){uProdDel(i);},'Remover',false]],true);
     ul.appendChild(li);
   });
   uToggles();
@@ -12447,11 +12542,12 @@ function uCpRender(){
     mn.title='Valor m\u00ednimo do pedido para este cupom valer (vazio = sem m\u00ednimo)';
     mn.addEventListener('input',function(){uCps[i].minimo=mn.value;salvarEstado();uPreview();});
     info.appendChild(cod);info.appendChild(val);info.appendChild(sel);info.appendChild(dt);info.appendChild(mn);
-    var ctrl=document.createElement('div');ctrl.className='ctrl';
-    var bt=document.createElement('button');bt.textContent='\u2715';bt.title='Remover';bt.setAttribute('aria-label','Remover');
-    bt.addEventListener('click',function(){uCpDel(i);});
-    ctrl.appendChild(bt);
-    li.appendChild(info);li.appendChild(ctrl);
+    li.appendChild(info);
+    /* DOIS botoes: a faixa continua na LATERAL, e nao embaixo. O arranjo 'abaixo' foi medido
+       para as listas que chegaram a quatro e cinco botoes -- com dois, a pilha e mais baixa que
+       a linha de campos, e mover a faixa so gastaria altura. */
+    fcCtrl(li,[['\u29C9',function(){uCpDuplicar(i);},'Duplicar este cupom'],
+      ['\u2715',function(){uCpDel(i);},'Remover']]);
     ul.appendChild(li);
   });
 }
@@ -12489,6 +12585,21 @@ function uCpAdd(){
   uCpRender();salvarEstado();uPreview();
 }
 function uCpDel(i){uCps.splice(i,1);uCpRender();salvarEstado();uPreview();}
+/* A COPIA JA NASCE COM CODIGO DERIVADO, e por isso a recusa de codigo repetido -- que passou a
+   valer nas tres abas em 03/09/2026 -- nao acende sozinha logo depois do clique. Sem a
+   derivacao, duplicar produziria em silencio o par que o cadastro ao lado recusa, e o Gerar se
+   negaria a emitir o codigo dos dois.
+   A pergunta e fcCpCod, a MESMA normalizacao que fcCpAchaRepetido faz: um codigo com espaco nas
+   pontas ou em minusculas e o mesmo cupom para o bloco entregue, e comparar cadeias cruas
+   deixaria passar exatamente esse par.
+   A copia entra LOGO ABAIXO da original: o cupom se edita na propria linha, entao nao ha
+   formulario para carregar, e a vizinhanca deixa obvio de quem ela e copia. */
+function uCpDuplicar(i){
+  var cp=uCps[i];if(!cp)return;
+  uCps.splice(i+1,0,{codigo:fcDupCod(fcCpCod(cp.codigo),uCps.map(function(c){return c.codigo;}),fcCpCod),
+    tipo:cp.tipo,valor:cp.valor,validade:cp.validade||'',minimo:(cp.minimo==null?'':cp.minimo)});
+  uCpRender();salvarEstado();uPreview();
+}
 
 /* ===== mostra/esconde campos conforme as escolhas ===== */
 function uToggles(){
@@ -15334,11 +15445,10 @@ function aCpRender(){
     mn.title='Valor m\u00ednimo do pedido para este cupom valer (vazio = sem m\u00ednimo)';
     mn.addEventListener('input',function(){aCps[i].minimo=mn.value;salvarEstado();aPreview();});
     info.appendChild(cod);info.appendChild(val);info.appendChild(sel);info.appendChild(dt);info.appendChild(mn);
-    var ctrl=document.createElement('div');ctrl.className='ctrl';
-    var bt=document.createElement('button');bt.textContent='✕';bt.title='Remover';bt.setAttribute('aria-label','Remover');
-    bt.addEventListener('click',function(){aCpDel(i);});
-    ctrl.appendChild(bt);
-    li.appendChild(info);li.appendChild(ctrl);
+    li.appendChild(info);
+    /* Faixa na lateral -- ver uCpRender. */
+    fcCtrl(li,[['⧉',function(){aCpDuplicar(i);},'Duplicar este cupom'],
+      ['✕',function(){aCpDel(i);},'Remover']]);
     ul.appendChild(li);
   });
 }
@@ -15358,6 +15468,14 @@ function aCpAdd(){
   aCpRender();salvarEstado();aPreview();
 }
 function aCpDel(i){aCps.splice(i,1);aCpRender();salvarEstado();aPreview();}
+/* Ver uCpDuplicar, a primeira das tres: a copia nasce com o codigo derivado para a recusa de
+   repetido nao acender sozinha. */
+function aCpDuplicar(i){
+  var cp=aCps[i];if(!cp)return;
+  aCps.splice(i+1,0,{codigo:fcDupCod(fcCpCod(cp.codigo),aCps.map(function(c){return c.codigo;}),fcCpCod),
+    tipo:cp.tipo,valor:cp.valor,validade:cp.validade||'',minimo:(cp.minimo==null?'':cp.minimo)});
+  aCpRender();salvarEstado();aPreview();
+}
 
 /* ===== cadastro de familias =====
    As funcoes novas desta rodada. Nenhuma delas emite codigo: elas so mantem a lista aFamilias
@@ -15394,13 +15512,88 @@ function aFamAdd(){
   $('a-fam-nome').value='';$('a-fam-dica').value='';
   aFamRender();aPacRender();salvarEstado();aPreview();
 }
-/* As duas recusas do CADASTRO (alert, e nao recusa de geracao): apagar a ultima familia
-   deixaria os pacotes sem para onde apontar, e apagar uma familia que ainda tem pacotes
-   moveria dado do dono em silencio. Nada de mover pacotes sozinho -- quem decide e ele. */
+/* ===== duplicar uma familia COM O CONTEUDO DELA (03/09/2026) =====
+   Decidido com o dono, e registrado em docs/specs/2026-09-03-duplicar-familia-design.md. A
+   pergunta dele foi "essa duplicacao vai carregar tudo que tem abaixo da original?", e a razao
+   dele e melhor que o desenho anterior: "duplicar leva o que esta dentro" e uma REGRA -- a
+   duplicacao de pacote ja leva os opcionais --, e familia funcionando diferente seria a
+   incoerencia. O caso real sao as mesmas duracoes em duas familias com precos diferentes.
+
+   ESTA E A UNICA OPERACAO DA FERRAMENTA QUE CRIA VARIOS ITENS SEM CONFIRMAR CADA UM. As outras
+   seis duplicacoes pre-preenchem um formulario, ou acrescentam UM item. A excecao e consciente,
+   e o preco dela e pago em aFamDel, logo abaixo: apagar a familia passou a poder levar os
+   pacotes junto, com confirmacao nominal. Criar barato e desfazer caro e como um cadastro vira
+   bagunca.
+
+   O QUE GANHA MARCA, E O QUE NAO GANHA:
+   - O NOME DA FAMILIA ganha, e nao e escolha: aRecusa barra duas familias com o mesmo nome, e
+     sem a marca a recusa acenderia sozinha logo depois do clique e pareceria defeito.
+   - O CODIGO DE CADA PACOTE ganha, pela mesma mecanica ja publicada (fcDupCod com aCodPix, a
+     normalizacao que decide o identificador do Pix). Sem ele os dois pacotes seriam conciliados
+     como um so.
+   - O NOME DE CADA PACOTE NAO GANHA, e isto e medido, nao esquecido. fcDupNome existe porque
+     duas linhas identicas na MESMA vitrine sao indistinguiveis para o cliente; aqui os pacotes
+     nascem em familias DIFERENTES, e o proprio comentario de fcDupNome ja diz que dois pacotes
+     de familias diferentes podem legitimamente se chamar "Ensaio 1h". Mais: o caso de uso que
+     originou isto e exatamente esse -- as mesmas duracoes, outro preco --, entao marcar o nome
+     obrigaria o dono a desfazer a marca N vezes.
+
+   OS PACOTES ENTRAM NO FIM DE aPacotes, nunca no meio. A lista e desenhada agrupada por
+   familia (aPacRender), entao a posicao plana nao muda nada na tela -- e 'aEditIdx' aponta para
+   um INDICE dessa lista: inserir no meio deslocaria o pacote que esta em edicao sem ninguem
+   perceber, que e a classe de defeito que esta rodada existe para nao criar. */
+function aFamDuplicar(i){
+  var f=aFamilias[i];if(!f)return;
+  /* O id sai ANTES do splice: aFamProxId varre a lista viva. */
+  var id=aFamProxId(),itens=aFamPacotes(f.id),usados=aPacotes.map(function(q){return q.cod;});
+  var k,p,cod;
+  aFamilias.splice(i+1,0,{id:id,nome:fcDupNome(f.nome),dica:f.dica||''});
+  for(k=0;k<itens.length;k++){
+    p=aPacotes[itens[k]];
+    /* 'usados' cresce a cada copia: sem isso, duas copias do mesmo lote receberiam o mesmo
+       '-COPIA' e colidiriam entre si. Codigo estourado volta VAZIO (fcDupCod), e o pacote
+       aparece na lista com o codigo em branco e a geracao recusa -- visivel, em vez de o
+       pacote sumir calado. */
+    cod=fcDupCod(p.cod,usados,aCodPix);
+    usados.push(cod);
+    aPacotes.push({cod:cod,nome:p.nome,dur:p.dur,preco:p.preco,inclui:p.inclui,
+      cal:p.cal,fam:id,
+      /* Chave a chave, como aPacDuplicar: sem isto os dois pacotes apontariam para o MESMO
+         array de opcionais, e mexer num opcional da copia mexeria no original ja gravado. */
+      ops:(p.ops||[]).map(function(o){return {nome:o.nome,preco:o.preco,qtd:!!o.qtd};})});
+  }
+  aFamRender();aPacRender();salvarEstado();aPreview();
+}
+/* A recusa da ULTIMA familia continua: apagar a unica deixaria os pacotes sem para onde
+   apontar.
+   A SEGUNDA RECUSA VIROU CONFIRMACAO NOMINAL (03/09/2026). Ate aqui apagar uma familia com
+   pacotes era PROIBIDO, e a razao era boa: "mover os pacotes sozinho seria mexer no seu
+   cadastro sem voce mandar". Com aFamDuplicar ela cria um desequilibrio -- um clique cria uma
+   familia com quatro pacotes, e desfazer custava nove passos (abrir cada um, trocar a familia,
+   salvar; so entao apagar). Criar barato e desfazer caro e como um cadastro vira bagunca.
+   A CONFIRMACAO LISTA OS PACOTES PELO NOME, e nao so conta. "Vai apagar 4 pacotes" faz o dono
+   CONFIAR no numero; a lista dos nomes deixa ele CONFERIR -- e conferir e o unico jeito de
+   perceber que a familia certa nao era esta. E a mesma razao pela qual o contador do importador,
+   que diz quantos itens nao reconheceu e nao diz quais, esta registrado como divida.
+   O CAMINHO ANTIGO NAO DESAPARECEU: Cancelar devolve tudo, e a mensagem diz como mover os
+   pacotes antes de apagar, que continua sendo o que fazer quando eles nao devem morrer. */
 function aFamDel(i){
   if(aFamilias.length<2){alert('Esta é a única família. Todo pacote precisa pertencer a alguma — renomeie esta em vez de apagá-la.');return;}
-  var usados=aFamPacotes(aFamilias[i].id);
-  if(usados.length){alert('A família "'+aFamilias[i].nome+'" ainda tem '+usados.length+(usados.length>1?' pacotes':' pacote')+'. Abra cada um no lápis, escolha outra família e salve; depois apague esta. Mover os pacotes sozinho seria mexer no seu cadastro sem você mandar.');return;}
+  var f=aFamilias[i],usados=aFamPacotes(f.id),k,j,lista='',perdeuEdicao=false;
+  if(usados.length){
+    for(k=0;k<usados.length;k++)lista+='\n\u2022 '+aPacotes[usados[k]].cod+' \u2014 '+aPacotes[usados[k]].nome;
+    if(!confirm('Apagar a família "'+f.nome+'" apaga junto '+usados.length+(usados.length>1?' pacotes':' pacote')+', com os opcionais deles:\n'+lista+'\n\nConfira a lista acima: nenhum pacote de outra família é tocado, e isto não pode ser desfeito.\n\nSe você quer manter estes pacotes, clique em Cancelar, abra cada um no lápis, escolha outra família e salve — depois apague esta família.'))return;
+    /* DE TRAS PARA A FRENTE: apagar de frente para tras deslocaria os indices ainda por apagar
+       e a lista mediria o pacote errado. E 'aEditIdx' acompanha, pela mesma conta de aPacDel --
+       se o pacote em edicao for um dos que morrem, o formulario e zerado UMA vez, no fim. */
+    for(k=usados.length-1;k>=0;k--){
+      j=usados[k];
+      aPacotes.splice(j,1);
+      if(aEditIdx===j)perdeuEdicao=true;
+      else if(aEditIdx>j)aEditIdx--;
+    }
+    if(perdeuEdicao)aPacLimpar();
+  }
   aFamilias.splice(i,1);
   aFamRender();aPacRender();salvarEstado();aPreview();
 }
@@ -15457,12 +15650,13 @@ function aFamRender(){
     var np=aFamPacotes(f.id).length;
     qt.textContent=np?(np+(np>1?' pacotes nesta família':' pacote nesta família')):'nenhum pacote nesta família';
     info.appendChild(qt);
-    var ctrl=document.createElement('div');ctrl.className='ctrl';
-    [['↑',function(){aFamMove(i,-1);},'Subir',i===0],
+    li.appendChild(info);
+    /* A faixa embaixo do item, como as outras duas listas desta aba. O titulo do duplicar DIZ
+       que ele leva os pacotes: e a unica pista antes do clique, e o clique nao pergunta nada. */
+    fcCtrl(li,[['↑',function(){aFamMove(i,-1);},'Subir',i===0],
      ['↓',function(){aFamMove(i,1);},'Descer',i===aFamilias.length-1],
-     ['✕',function(){aFamDel(i);},'Remover',false]]
-      .forEach(function(b){var bt=document.createElement('button');bt.textContent=b[0];bt.title=b[2];bt.setAttribute('aria-label',b[2]);bt.disabled=!!b[3];bt.addEventListener('click',b[1]);ctrl.appendChild(bt);});
-    li.appendChild(info);li.appendChild(ctrl);
+     ['⧉',function(){aFamDuplicar(i);},'Duplicar esta família com os pacotes dela',false],
+     ['✕',function(){aFamDel(i);},'Remover',false]],true);
     ul.appendChild(li);
   });
   aFamOpcoes();
@@ -17865,6 +18059,19 @@ function cMsgMove(i,d){
   cPreview();
 }
 function cMsgDel(i){cMsgs.splice(i,1);cMsgRender();salvarEstado();cToggles();cPreview();}
+/* A copia entra LOGO ABAIXO da original -- a mensagem se edita pelo formulario de cadastro,
+   mas a lista aqui e curta e a copia serve para variar o texto de uma que ja funciona.
+   OS DOIS TEXTOS GANHAM A MARCA, e nao so o principal. A barra mostra o texto longo ou o curto
+   conforme a largura da tela: marcar so um deixaria a copia esquecida INVISIVEL em metade dos
+   aparelhos, que e exatamente o defeito que a marca existe para impedir. fcDupNome devolve ''
+   para texto vazio, entao mensagem sem versao curta continua sem.
+   cToggles junto, como em cMsgAdd e cMsgDel: o aviso do modo "Estático" depende de QUANTAS
+   mensagens existem. */
+function cMsgDuplicar(i){
+  var m=cMsgs[i];if(!m)return;
+  cMsgs.splice(i+1,0,{texto:fcDupNome(m.texto),curta:fcDupNome(m.curta)});
+  cMsgRender();salvarEstado();cToggles();cPreview();
+}
 function cMsgRender(){
   var ul=$('c-msg-lista');if(!ul)return;
   ul.innerHTML='';
@@ -17878,10 +18085,10 @@ function cMsgRender(){
       var cu=document.createElement('div');cu.className='url';cu.textContent='celular: '+m.curta;cu.title=m.curta;
       info.appendChild(cu);
     }
-    var ctrl=document.createElement('div');ctrl.className='ctrl';
-    [['\u2191',function(){cMsgMove(i,-1);},'Subir'],['\u2193',function(){cMsgMove(i,1);},'Descer'],['\u2715',function(){cMsgDel(i);},'Remover']]
-      .forEach(function(b){var bt=document.createElement('button');bt.textContent=b[0];bt.title=b[2];bt.setAttribute('aria-label',b[2]);bt.addEventListener('click',b[1]);ctrl.appendChild(bt);});
-    li.appendChild(info);li.appendChild(ctrl);
+    li.appendChild(info);
+    fcCtrl(li,[['\u2191',function(){cMsgMove(i,-1);},'Subir'],['\u2193',function(){cMsgMove(i,1);},'Descer'],
+      ['\u29C9',function(){cMsgDuplicar(i);},'Duplicar esta mensagem'],
+      ['\u2715',function(){cMsgDel(i);},'Remover']],true);
     ul.appendChild(li);
   });
 }
@@ -20117,10 +20324,11 @@ function mOpRender(){
     cq.addEventListener('change',function(){mEditOps[i].qtd=cq.checked;salvarEstado();});
     lq.appendChild(cq);lq.appendChild(document.createTextNode('vende por quantidade'));
     info.appendChild(lq);
-    var ctrl=document.createElement('div');ctrl.className='ctrl';
-    [['\u2191',function(){mOpMove(i,-1);},'Subir'],['\u2193',function(){mOpMove(i,1);},'Descer'],['\u2715',function(){mOpDel(i);},'Remover']]
-      .forEach(function(b){var bt=document.createElement('button');bt.textContent=b[0];bt.title=b[2];bt.setAttribute('aria-label',b[2]);bt.addEventListener('click',b[1]);ctrl.appendChild(bt);});
-    li.appendChild(info);li.appendChild(ctrl);
+    li.appendChild(info);
+    /* Ver uOpRender: a copia ACRESCENTA na lista, logo abaixo da original. */
+    fcCtrl(li,[['\u2191',function(){mOpMove(i,-1);},'Subir'],['\u2193',function(){mOpMove(i,1);},'Descer'],
+      ['\u29C9',function(){mOpDuplicar(i);},'Duplicar este opcional'],
+      ['\u2715',function(){mOpDel(i);},'Remover']],true);
     ul.appendChild(li);
   });
   fcOpPendente('m-op-pendente',mEditOps,mEditIdx,(mEditIdx>=0&&mProds[mEditIdx])?mProds[mEditIdx].nome:'','produto','m-prod-salvar');
@@ -20136,6 +20344,11 @@ function mOpAdd(){
 }
 function mOpMove(i,d){var j=i+d;if(j<0||j>=mEditOps.length)return;var t=mEditOps[i];mEditOps[i]=mEditOps[j];mEditOps[j]=t;mOpRender();salvarEstado();}
 function mOpDel(i){mEditOps.splice(i,1);mOpRender();salvarEstado();}
+function mOpDuplicar(i){
+  var o=mEditOps[i];if(!o)return;
+  mEditOps.splice(i+1,0,{nome:fcDupNome(o.nome),preco:o.preco,qtd:!!o.qtd});
+  mOpRender();salvarEstado();
+}
 
 /* ===== produtos ===== */
 function mProdLimpar(){
@@ -20145,7 +20358,10 @@ function mProdLimpar(){
   setRadio('m-opsel','unico');setRadio('m-opnenhum','nao');setRadio('m-pqtd','nao');
   $('m-op-qtd').checked=false;
   $('m-prod-salvar').textContent='Adicionar produto';
+  /* O ROTULO VOLTA A "Cancelar edição" -- ver uProdLimpar. */
+  $('m-prod-cancelar').textContent='Cancelar edição';
   $('m-prod-cancelar').style.display='none';
+  mProdCopiaAviso(null);
   mToggles();
 }
 function mProdSalvar(){
@@ -20190,8 +20406,55 @@ function mProdEditar(i){
   mOpRender();
   setRadio('m-opsel',p.opsel);setRadio('m-opnenhum',p.opnenhum);
   setRadio('m-pqtd',p.qtd?'sim':'nao');
+  $('m-prod-cancelar').textContent='Cancelar edição';
   $('m-prod-cancelar').style.display='inline-block';
+  mProdCopiaAviso(null);
   mToggles();
+}
+/* ===== duplicar um produto (03/09/2026) =====
+   Copia de uProdDuplicar, com os DOIS campos a mais desta aba. Ver la a razao da primeira
+   linha ser o mProdLimpar.
+   A COPIA HERDA A FOTO E A CATEGORIA, e isto foi medido em vez de suposto:
+   - CATEGORIA. Ela classifica o produto ("Álbuns", "Ampliações"), e uma copia quase sempre
+     nasce para ficar na mesma prateleira -- o caso de uso e o mesmo album em outro tamanho.
+     Herdar poupa o passo; nao herdar deixaria a copia "sem categoria", que a lista pinta com
+     selo proprio e a vitrine trata como avulsa.
+   - FOTO. Duas razoes, e a segunda e a que decide. A primeira: e o mesmo produto em outra
+     medida, entao a foto costuma servir. A segunda: mProdSalvar RECUSA produto sem foto ("a
+     vitrine e feita de imagens"). Uma copia que nascesse sem foto seria recusada no primeiro
+     clique em "Adicionar produto" -- o dono pediu uma copia e ganhou uma recusa, que e o pior
+     dos dois erros possiveis aqui. O risco do outro lado -- duas fotos iguais na grade -- e
+     VISIVEL na lista, no cartao e na vitrine, e o nome ja chega marcado com "(cópia)" ao lado.
+     Trocar defeito invisivel por visivel e a escolha que este projeto ja fez no limiar de
+     urgencia e na correcao a vista dos campos numericos.
+   A LARGURA ('larg') nao e copiada porque nao e campo: mProdSalvar a deduz da foto
+   (sLargSabida) na hora de gravar, e mLargTodas mede o que faltar. */
+function mProdDuplicar(i){
+  var p=mProds[i];if(!p)return;
+  mProdLimpar();
+  $('m-pnome').value=fcDupNome(p.nome);
+  $('m-pdesc').value=p.desc||'';
+  $('m-ppreco').value=p.preco;
+  $('m-pcat').value=p.cat||'';
+  $('m-pimg').value=p.img||'';
+  setRadio('m-opsel',p.opsel);setRadio('m-opnenhum',p.opnenhum);
+  setRadio('m-pqtd',p.qtd?'sim':'nao');
+  mEditOps=(p.ops||[]).map(function(o){return {nome:o.nome,preco:o.preco,qtd:!!o.qtd};});
+  $('m-prod-cancelar').textContent='Descartar cópia';
+  $('m-prod-cancelar').style.display='inline-block';
+  mProdCopiaAviso(p);
+  mOpRender();
+  mToggles();
+  salvarEstado();
+  var el=$('m-pnome');
+  if(el){try{el.focus();el.select();}catch(e){}}
+}
+/* Ver uProdCopiaAviso, onde a razao esta escrita. */
+function mProdCopiaAviso(p){
+  var el=$('m-prod-copia');if(!el)return;
+  if(!p){el.style.display='none';el.textContent='';return;}
+  el.style.display='block';
+  el.textContent='Esta é uma cópia de \u201c'+p.nome+'\u201d, com a mesma foto e a mesma categoria. Ela ainda não existe: confira o nome e o preço e clique em \u201cAdicionar produto\u201d. O produto original não é alterado.';
 }
 function mProdMove(i,d){var j=i+d;if(j<0||j>=mProds.length)return;var t=mProds[i];mProds[i]=mProds[j];mProds[j]=t;mProdRender();salvarEstado();mPreview();}
 function mProdDel(i){
@@ -20314,11 +20577,13 @@ function mProdRender(){
     var nq=mQtdItens(p)-(p.qtd?1:0);
     ops.textContent=((p.ops||[]).length?((p.ops.length===1?'1 opcional':p.ops.length+' opcionais')+' ('+(p.opsel==='multiplo'?'vários':'apenas 1')+')'):'sem opcionais')+(nq?(' · '+nq+' com quantidade'):'');
     info.appendChild(t);info.appendChild(url);info.appendChild(cat);info.appendChild(ops);
-    var ctrl=document.createElement('div');ctrl.className='ctrl';
-    [['\u2191',function(){mProdMove(i,-1);},'Subir'],['\u2193',function(){mProdMove(i,1);},'Descer'],
-     ['\u270E',function(){mProdEditar(i);salvarEstado();},'Editar'],['\u2715',function(){mProdDel(i);},'Remover']]
-      .forEach(function(b){var bt=document.createElement('button');bt.textContent=b[0];bt.title=b[2];bt.setAttribute('aria-label',b[2]);bt.addEventListener('click',b[1]);ctrl.appendChild(bt);});
-    li.appendChild(img);li.appendChild(info);li.appendChild(ctrl);
+    li.appendChild(img);li.appendChild(info);
+    /* CINCO BOTOES, EMBAIXO DO ITEM -- ver uProdRender. */
+    fcCtrl(li,[['\u2191',function(){mProdMove(i,-1);},'Subir',false],
+     ['\u2193',function(){mProdMove(i,1);},'Descer',false],
+     ['\u29C9',function(){mProdDuplicar(i);},'Duplicar este produto',false],
+     ['\u270E',function(){mProdEditar(i);salvarEstado();},'Editar',false],
+     ['\u2715',function(){mProdDel(i);},'Remover',false]],true);
     ul.appendChild(li);
   });
   ul.scrollTop=rolagem;
@@ -20381,6 +20646,13 @@ function mCpAdd(){
   mCpRender();salvarEstado();mPreview();
 }
 function mCpDel(i){mCps.splice(i,1);mCpRender();salvarEstado();mPreview();}
+/* Ver uCpDuplicar, a primeira das tres. */
+function mCpDuplicar(i){
+  var cp=mCps[i];if(!cp)return;
+  mCps.splice(i+1,0,{codigo:fcDupCod(fcCpCod(cp.codigo),mCps.map(function(c){return c.codigo;}),fcCpCod),
+    tipo:cp.tipo,valor:cp.valor,validade:cp.validade||'',minimo:(cp.minimo==null?'':cp.minimo)});
+  mCpRender();salvarEstado();mPreview();
+}
 function mCpRender(){
   var ul=$('m-cp-lista');if(!ul)return;
   ul.innerHTML='';
@@ -20433,10 +20705,10 @@ function mCpRender(){
     mn.title='Valor m\u00ednimo do pedido para este cupom valer (vazio = sem m\u00ednimo)';
     mn.addEventListener('input',function(){mCps[i].minimo=mn.value;salvarEstado();mPreview();});
     info.appendChild(cod);info.appendChild(sel);info.appendChild(val);info.appendChild(dt);info.appendChild(mn);
-    var ctrl=document.createElement('div');ctrl.className='ctrl';
-    var bt=document.createElement('button');bt.textContent='\u2715';bt.title='Remover';bt.setAttribute('aria-label','Remover');
-    bt.addEventListener('click',function(){mCpDel(i);});ctrl.appendChild(bt);
-    li.appendChild(info);li.appendChild(ctrl);
+    li.appendChild(info);
+    /* Faixa na lateral -- ver uCpRender. */
+    fcCtrl(li,[['\u29C9',function(){mCpDuplicar(i);},'Duplicar este cupom'],
+      ['\u2715',function(){mCpDel(i);},'Remover']]);
     ul.appendChild(li);
   });
 }

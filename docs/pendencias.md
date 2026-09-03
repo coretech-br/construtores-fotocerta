@@ -340,3 +340,73 @@ O handshake e **uma linha**, nao uma reimplementacao da biblioteca. A dependenci
 protocolo **ja existia** no codigo (o prefixo `[iFrameSizer]` e os nomes dos tipos), e o que o
 TidyCal customiza (`minHeight`, `checkOrigin`) e do lado do pai e nao entra na mensagem. Por
 isso nao se aplicou a regra de parar.
+
+---
+
+## Entregue em 03/09/2026 — duplicar itens, nas listas que cadastram varios
+
+Pedido do dono, testando a aba de pacotes com o catalogo real dele: duplicar um pacote com os
+opcionais, e depois a mesma ideia nas outras listas. Saiu em tres levas.
+
+**Leva 1 (`2026-09-03g`) — o formulario de cadastro sobrevive a recarga por inteiro.** Ontem
+os opcionais nao salvos passaram a persistir; a duplicacao tornou visivel que os campos de
+texto nao. Uma chave nova por aba (`form`), com os campos saindo do proprio `*ProdSalvar` de
+cada uma. **Acrescimo provado em tres caminhos reais**: estado sem a chave abre no
+comportamento anterior sem alerta; nenhum preset de aba a leva; e o backup, exportado e
+reimportado pelos botoes de verdade com a chave apagada, nao conta um item a mais como "nao
+reconhecido".
+
+**Leva 2 (`2026-09-03h`) — cupom com codigo repetido recusado nas tres abas.** Medido antes: o
+Checkout e a Mini loja aceitavam dois cupons iguais sem aviso, e o carrinho aplica **o
+primeiro que bater** — o segundo virava um cupom que o dono cadastra, ve na lista e que nunca
+funciona. A comparacao da recusa e a **mesma** que o bloco usa para casar o cupom digitado
+pelo cliente: se divergisse, ela deixaria passar exatamente os pares que causam o defeito. A
+edicao em linha tambem podia criar duplicata, e avisa **sem apagar nem corrigir nada**.
+
+**Leva 3 — duplicar nas demais listas, e a familia com o conteudo.** Produtos e opcionais do
+Checkout e da Mini loja, mensagens da Contagem, opcoes de qualificacao dos Leads, cupons das
+tres, e a familia. O Slideshow ficou de fora, declarado: a lista tem area de rolagem com
+cortes calibrados em cartoes inteiros.
+
+### A pergunta do dono que corrigiu o plano
+
+O levantamento tratava familia como mais um item de lista — a copia levaria nome e descricao,
+sem os pacotes. Ele perguntou se a duplicacao levaria "tudo que tem abaixo" e, ao saber que a
+do pacote **ja leva os opcionais**, concluiu: *"e o mesmo comportamento que eu espero para a
+familia"*.
+
+**"Duplicar leva o que esta dentro" e uma regra**, e familia funcionando diferente seria a
+incoerencia. A objecao que eu tinha — o ganho e so evitar quatro cliques, porque codigos e
+precos continuam a ser editados um a um — e verdadeira e vale menos que a coerencia da regra.
+Spec: `docs/specs/2026-09-03-duplicar-familia-design.md`.
+
+### A assimetria que veio junto, e nao foi deixada para depois
+
+`aFamDel` **proibia** apagar familia com pacotes, com razao registrada ("mover os pacotes
+sozinho seria mexer no seu cadastro sem voce mandar"). Com a duplicacao isso vira
+desequilibrio: **um clique cria cinco itens, e desfazer custava nove passos**. Criar barato e
+desfazer caro e como um cadastro vira bagunca.
+
+Agora apagar pode levar os pacotes, com **confirmacao nominal** — uma linha por pacote,
+`• CODIGO — Nome`, e nao so a contagem. "Vai apagar 4 pacotes" faz confiar no numero; a lista
+deixa **conferir**. Mesma razao pela qual o contador da importacao, que diz quantos itens nao
+reconheceu e nao diz quais, esta registrado como divida.
+
+### Defeitos pre-existentes achados e corrigidos no caminho
+
+- **`aPacSalvar` nao conferia codigo repetido**: dois pacotes com o mesmo codigo entravam no
+  catalogo sem aviso, e a recusa so aparecia depois, na previa e no Gerar. Com o duplicar
+  isso deixaria de ser hipotese.
+- **`fcOpPendente` lia o rotulo do botao ANTES da troca**, nas tres abas: o aviso mandava
+  clicar em "Adicionar pacote" enquanto o botao ja dizia "Salvar alteracoes" — mandava apertar
+  um botao que nao estava na tela.
+
+### Uma licao de metodo, sobre a maquina e nao sobre o codigo
+
+A suite `tidycal-unificado.mjs` e a **unica** do arnes que fala com o TidyCal de verdade, e
+**nao tolera duas execucoes ao mesmo tempo**. Nesta rodada ela deu um resultado inconclusivo
+porque tres instancias dirigiam Chromium contra o mesmo servidor; e a rodada limpa seguinte
+foi morta por um `pkill -f "verificar/"` que **eu** emiti para limpar processos orfaos.
+
+Duas regras que ficam: limpeza por padrao de nome derruba trabalho legitimo junto com o lixo;
+e essa suite pede a maquina so para ela.
