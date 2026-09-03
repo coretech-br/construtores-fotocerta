@@ -52,7 +52,7 @@
    Uso:  node scripts/verificar/tidycal-origem.mjs
    ============================================================================ */
 import { comBlocoNaPagina, gerarNaFerramenta, chk, resumo } from './pagina.mjs';
-import { navegador, servir, abrir, set, clicar, ler, alertas, zerarAlertas } from './lib.mjs';
+import { navegador, servir, abrir, set, clicar, ler, alertas, zerarAlertas, radio } from './lib.mjs';
 import { preparar } from './cenario.mjs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -64,6 +64,24 @@ const PROPRIO_ORIG = 'https://agendamento.fotocerta.com.br';
 const TIDY         = 'https://tidycal.com/fotocerta/natal-2026';
 const TIDY_ORIG    = 'https://tidycal.com';
 const ALTURA       = '2350px';   /* ALTURA_DESKTOP de fabrica das duas abas */
+const PARTIDA      = '700px';    /* a altura de partida dos dois iframes */
+const MEDIDA       = '900px';    /* a altura que o sinal abaixo carrega */
+
+/* ===== O QUE DENUNCIA QUE O SINAL FOI ACEITO, nos dois modos do campo 'Espaco para o
+   formulario de reserva' ('t-medir' / 'a-medir', que desde 03/09/2026 nasce LIGADO).
+   O filtro de origem e o mesmo nos dois -- o que muda e o que se pode OLHAR depois dele:
+     [calibrado] o sinal 'scrollToOffset' chama expandir(), que escreve min-height;
+     [medindo]   expandir() volta na primeira linha (de proposito -- a altura vem medida),
+                 entao min-height nunca aparece e quem denuncia a aceitacao e a ALTURA, que
+                 aplicarAltura() escreveu a partir do mesmo sinal.
+   Medir so o modo calibrado deixaria o novo padrao sem prova nenhuma de filtro de origem. */
+const observador = medir => medir
+  ? { ler: (pg, sel) => pg.$eval(sel, el => el.style.height || ''),
+      inicial: PARTIDA, aceito: MEDIDA,
+      rot: 'a altura medida', rotInicial: 'comeca na altura de partida' }
+  : { ler: (pg, sel) => pg.$eval(sel, el => el.style.minHeight || ''),
+      inicial: '', aceito: ALTURA,
+      rot: 'o espaco calibrado', rotInicial: 'comeca sem altura forcada' };
 
 /* O sinal, do jeito que o TidyCal manda: prefixo, id, altura, largura e o tipo no fim --
    'scrollToOffset' e o que abre o formulario de reserva, e o unico que expande. */
@@ -72,14 +90,16 @@ const sinal = (pg, origem, tipo = 'scrollToOffset') => pg.evaluate(
     data: '[iFrameSizer]fc:900:1200:' + t, origin: o
   })), [origem, tipo]);
 
-const minAltura = (pg, sel) => pg.$eval(sel, el => el.style.minHeight || '');
 const soPageError = erros => erros.filter(e => e.indexOf('pageerror:') === 0);
 
 /* ---------------------------------------------------------------- aba TidyCal */
-async function abaTidycal(endereco, origemCerta, origemErrada, rotulo, porta){
+async function abaTidycal(endereco, origemCerta, origemErrada, rotuloBase, porta, medir){
+  const rotulo = rotuloBase + (medir ? ' [medindo]' : ' [calibrado]');
+  const obs = observador(medir);
   const { valores, alertas } = await gerarNaFerramenta(async pg => {
     await clicar(pg, 'aba-tidy');
     await set(pg, 't-path', endereco);
+    await radio(pg, 't-medir', medir ? 'sim' : 'nao');
     await clicar(pg, 't-gerar');
   }, ['t-out1'], { porta });
 
@@ -102,11 +122,11 @@ async function abaTidycal(endereco, origemCerta, origemErrada, rotulo, porta){
     porta: porta + 1,
     medir: async pg => {
       const src = await pg.$eval('iframe.tidycal-embed', el => el.getAttribute('src') || '');
-      const inicial = await minAltura(pg, 'iframe.tidycal-embed');
+      const inicial = await obs.ler(pg, 'iframe.tidycal-embed');
       await sinal(pg, origemErrada);
-      const depoisErrada = await minAltura(pg, 'iframe.tidycal-embed');
+      const depoisErrada = await obs.ler(pg, 'iframe.tidycal-embed');
       await sinal(pg, origemCerta);
-      const depoisCerta = await minAltura(pg, 'iframe.tidycal-embed');
+      const depoisCerta = await obs.ler(pg, 'iframe.tidycal-embed');
       return { src, inicial, depoisErrada, depoisCerta };
     }
   });
@@ -118,20 +138,23 @@ async function abaTidycal(endereco, origemCerta, origemErrada, rotulo, porta){
     chk(rotulo + ': o data-path e o caminho do endereco configurado',
         bloco.indexOf('data-path="' + endereco.slice(TIDY_ORIG.length + 1) + '"') >= 0);
   }
-  chk(rotulo + ': comeca sem altura forcada', r.inicial === '', r.inicial);
+  chk(rotulo + ': ' + obs.rotInicial, r.inicial === obs.inicial, r.inicial);
   chk(rotulo + ': NEGATIVO -- sinal de ' + origemErrada + ' e descartado',
-      r.depoisErrada === '', r.depoisErrada);
-  chk(rotulo + ': sinal de ' + origemCerta + ' e ACEITO e expande',
-      r.depoisCerta === ALTURA, r.depoisCerta);
+      r.depoisErrada === obs.inicial, r.depoisErrada);
+  chk(rotulo + ': sinal de ' + origemCerta + ' e ACEITO -- ' + obs.rot + ' muda',
+      r.depoisCerta === obs.aceito, r.depoisCerta);
   chk(rotulo + ': sem erro de script na pagina', soPageError(r.erros).length === 0,
       soPageError(r.erros).join(' | '));
 }
 
 /* ------------------------------------------------- aba Agendamento por pacote */
-async function abaPacote(porta){
+async function abaPacote(porta, medir){
+  const rot = 'pac' + (medir ? ' [medindo]' : ' [calibrado]');
+  const obs = observador(medir);
   const { valores, alertas } = await gerarNaFerramenta(async pg => {
     await preparar(pg);
     await clicar(pg, 'aba-pac');
+    await radio(pg, 'a-medir', medir ? 'sim' : 'nao');
     await set(pg, 'a-urlobrigado', 'https://www.fotocerta.com.br/obrigado');
     await set(pg, 'a-prefixo', 'FC');
     for(const [cod, nome, preco, end] of [
@@ -146,14 +169,14 @@ async function abaPacote(porta){
   }, ['a-out1'], { porta });
 
   const bloco = valores['a-out1'];
-  chk('pac: gerou sem recusa', !alertas.length && bloco.length > 5000, alertas.join(' | '));
-  chk('pac: os DOIS enderecos viajam inteiros no catalogo',
+  chk(rot + ': gerou sem recusa', !alertas.length && bloco.length > 5000, alertas.join(' | '));
+  chk(rot + ': os DOIS enderecos viajam inteiros no catalogo',
       bloco.indexOf("link:'" + TIDY + "'") >= 0 && bloco.indexOf("link:'" + PROPRIO + "'") >= 0);
   /* Desde a unificacao do calendario (03/09/2026) a origem do endereco novo e calculada uma
      vez, em 'nova' -- porque ela e usada DUAS vezes na mesma funcao: para decidir se o iframe
      precisa ser recriado (dominio diferente) e para virar a origemCal. O que este teste cobra
      continua sendo o mesmo: que ela venha do endereco, e nao de um literal. */
-  chk('pac: a origem NAO e um literal no bloco',
+  chk(rot + ': a origem NAO e um literal no bloco',
       bloco.indexOf("e.origin!=='https://tidycal.com'") < 0 &&
       bloco.indexOf('nova=origemDe(link)') >= 0 &&
       bloco.indexOf('origemCal=nova') >= 0);
@@ -175,9 +198,9 @@ async function abaPacote(porta){
       };
       const medida = async (errada, certa) => {
         await sinal(pg, errada);
-        const naoDeve = await minAltura(pg, 'iframe.fca-tidycal');
+        const naoDeve = await obs.ler(pg, 'iframe.fca-tidycal');
         await sinal(pg, certa);
-        const deve = await minAltura(pg, 'iframe.fca-tidycal');
+        const deve = await obs.ler(pg, 'iframe.fca-tidycal');
         return { naoDeve, deve };
       };
       await cartao(0);
@@ -192,17 +215,18 @@ async function abaPacote(porta){
     }
   });
 
-  chk('pac: o iframe do 1o pacote aponta para tidycal.com', r.src1 === TIDY, r.src1);
-  chk('pac: NEGATIVO -- com tidycal.com carregado, sinal do dominio proprio e descartado',
-      r.p1.naoDeve === '', r.p1.naoDeve);
-  chk('pac: com tidycal.com carregado, sinal de tidycal.com e ACEITO', r.p1.deve === ALTURA, r.p1.deve);
-  chk('pac: trocar de pacote reaproveita o MESMO iframe (nunca um segundo)', r.quantos === 1, String(r.quantos));
-  chk('pac: o iframe do 2o pacote aponta para o dominio proprio', r.src2 === PROPRIO, r.src2);
-  chk('pac: NEGATIVO -- com o dominio proprio carregado, sinal de tidycal.com e descartado',
-      r.p2.naoDeve === '', r.p2.naoDeve);
-  chk('pac: com o dominio proprio carregado, sinal do dominio proprio e ACEITO',
-      r.p2.deve === ALTURA, r.p2.deve);
-  chk('pac: sem erro de script na pagina', soPageError(r.erros).length === 0,
+  chk(rot + ': o iframe do 1o pacote aponta para tidycal.com', r.src1 === TIDY, r.src1);
+  chk(rot + ': NEGATIVO -- com tidycal.com carregado, sinal do dominio proprio e descartado',
+      r.p1.naoDeve === obs.inicial, r.p1.naoDeve);
+  chk(rot + ': com tidycal.com carregado, sinal de tidycal.com e ACEITO -- ' + obs.rot + ' muda',
+      r.p1.deve === obs.aceito, r.p1.deve);
+  chk(rot + ': trocar de pacote reaproveita o MESMO iframe (nunca um segundo)', r.quantos === 1, String(r.quantos));
+  chk(rot + ': o iframe do 2o pacote aponta para o dominio proprio', r.src2 === PROPRIO, r.src2);
+  chk(rot + ': NEGATIVO -- com o dominio proprio carregado, sinal de tidycal.com e descartado',
+      r.p2.naoDeve === obs.inicial, r.p2.naoDeve);
+  chk(rot + ': com o dominio proprio carregado, sinal do dominio proprio e ACEITO -- ' + obs.rot + ' muda',
+      r.p2.deve === obs.aceito, r.p2.deve);
+  chk(rot + ': sem erro de script na pagina', soPageError(r.erros).length === 0,
       soPageError(r.erros).join(' | '));
 }
 
@@ -362,11 +386,14 @@ async function recarregarCom(pg, base, estado){
 
 console.log('ORIGEM DAS MENSAGENS DO TIDYCAL -- os blocos rodando de verdade\n');
 console.log(' aba Agendamento TidyCal -- DOMINIO PROPRIO');
-await abaTidycal(PROPRIO, PROPRIO_ORIG, TIDY_ORIG, 'tidy/proprio', 8811);
+await abaTidycal(PROPRIO, PROPRIO_ORIG, TIDY_ORIG, 'tidy/proprio', 8811, true);
+await abaTidycal(PROPRIO, PROPRIO_ORIG, TIDY_ORIG, 'tidy/proprio', 8831, false);
 console.log('\n aba Agendamento TidyCal -- tidycal.com (o caso de hoje)');
-await abaTidycal(TIDY, TIDY_ORIG, PROPRIO_ORIG, 'tidy/tidycal', 8813);
+await abaTidycal(TIDY, TIDY_ORIG, PROPRIO_ORIG, 'tidy/tidycal', 8813, true);
+await abaTidycal(TIDY, TIDY_ORIG, PROPRIO_ORIG, 'tidy/tidycal', 8833, false);
 console.log('\n aba Agendamento por pacote -- os dois dominios na mesma pagina');
-await abaPacote(8815);
+await abaPacote(8815, true);
+await abaPacote(8835, false);
 console.log('\n a guarda do que se digita no campo');
 await guarda(8819);
 console.log('\n a migracao do que ja estava gravado');

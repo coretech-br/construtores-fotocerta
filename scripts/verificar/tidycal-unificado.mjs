@@ -29,6 +29,21 @@
    quando o formulario de reserva abre? nasceu algum iframe fantasma? houve
    erro de console?
 
+   OS DOIS MODOS DO CAMPO NOVO (03/09/2026). A aba ganhou o campo 'Espaco para o
+   formulario de reserva' ('t-medir' / 'a-medir'), e ele nasce LIGADO -- o bloco
+   de fabrica passou a medir o formulario ('lowestElement') em vez de abrir
+   espaco pela altura calibrada ('bodyOffset'). Por isso cada caso e gerado DUAS
+   vezes na arvore de trabalho:
+     [calibrado] -- e o que se compara com a referencia, porque e o MESMO
+        comportamento que ela tem. Comparar o modo novo contra o antigo acusaria
+        uma "regressao" que e a mudanca pedida: em repouso, 764 contra 511.
+     [medindo]   -- o padrao de hoje, medido contra os numeros de 03/09/2026:
+        em repouso ele fica ACIMA do calibrado (o preco, ~253px no computador) e
+        com o formulario aberto ele cresce ate o necessario, ficando ABAIXO dos
+        2350 calibrados (medido: 1662). Os dois lados da troca, na mesma tela.
+   Relaxar a assercao para um modo so faria este arquivo passar sem dizer nada
+   sobre o outro -- e o outro seria justamente o novo padrao.
+
    E MEDE OS TRES CASOS DE DEGRADACAO no bloco novo, que sao a razao de o
    aperto de mao proprio continuar existindo:
      a. a biblioteca deles carrega          -> e ela quem cuida da altura
@@ -44,7 +59,7 @@ import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { comBlocoNaPagina, gerarNaFerramenta, chk, resumo } from './pagina.mjs';
-import { set, clicar } from './lib.mjs';
+import { set, clicar, radio } from './lib.mjs';
 import { preparar } from './cenario.mjs';
 
 const RAIZ = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
@@ -56,16 +71,26 @@ const TIDY = 'https://tidycal.com/fotocerta/natal-2026';
 const PROP = 'https://agendamento.fotocerta.com.br/estudio-905-seg-a-sex-1-hora';
 const REDE = ['tidycal.com', 'agendamento.fotocerta.com.br', 'asset-tidycal.b-cdn.net'];
 
-/* A altura calibrada de fabrica das duas abas. E o piso que a expansao do formulario tem de
-   alcancar quando MEDIR_FORMULARIO esta desligado (o padrao). */
+/* A altura calibrada de fabrica das duas abas. Ela e o PISO que a expansao do formulario tem
+   de alcancar no modo [calibrado] -- e, no modo [medindo], o TETO que ele nao deve alcancar:
+   medido em 03/09/2026, o formulario aberto pede 1662px, e abrir 2350 seria deixar 688px de
+   vao vazio, que e exatamente o que o modo novo existe para evitar. */
 const CALIBRADA = 2350;
+/* Quanto o quadro tem de CRESCER, no minimo, para a abertura do formulario contar como
+   medida e nao como ruido. Medido: 764 -> 1662, quase 900px. 300 e folgado de proposito --
+   o numero exato depende do formulario configurado no TidyCal, e o que se prova aqui e que
+   ele cresceu de verdade, nao um pixel a mais. */
+const CRESCIMENTO_MINIMO = 300;
 
 /* ===== gerar ===== */
-async function gerarTidy(raiz, url, porta){
+/* 'medir' e null para a REFERENCIA: la o campo nao existe, e mexer nele lancaria. Na arvore de
+   trabalho ele e sempre explicito, para o teste nunca depender de qual e o padrao do dia. */
+async function gerarTidy(raiz, url, porta, medir = null){
   const { valores } = await gerarNaFerramenta(async pg => {
     await preparar(pg);
     await clicar(pg, 'aba-tidy');
     await set(pg, 't-path', url);
+    if(medir !== null) await radio(pg, 't-medir', medir ? 'sim' : 'nao');
     await clicar(pg, 't-gerar');
   }, ['t-out1'], { raiz, porta });
   return valores['t-out1'];
@@ -74,10 +99,11 @@ async function gerarTidy(raiz, url, porta){
 /* A vitrine com DOIS pacotes em DOMINIOS DIFERENTES, de proposito: e a unica forma de medir
    a troca de dominio, que e o caso em que a conferencia de origem da biblioteca do TidyCal
    ficaria presa ao endereco anterior se o iframe fosse reaproveitado. */
-async function gerarPac(raiz, porta){
+async function gerarPac(raiz, porta, medir = null){
   const { valores } = await gerarNaFerramenta(async pg => {
     await preparar(pg);
     await clicar(pg, 'aba-pac');
+    if(medir !== null) await radio(pg, 'a-medir', medir ? 'sim' : 'nao');
     await set(pg, 'a-urlobrigado', 'https://www.fotocerta.com.br/obrigado');
     await set(pg, 'a-prefixo', 'FC');
     const campo = await pg.$('#a-ppath') ? 'a-ppath' : 'a-plink';
@@ -156,7 +182,29 @@ async function abrirFormulario(pg){
   }catch(e){ return String(e.message || e).split('\n')[0]; }
 }
 
-async function medirCalendario({ bloco, porta, escolherPacote = false, permitir = REDE, bloquear = [], esperaExtra = 0 }){
+/* FECHAR o formulario de reserva. So faz sentido no modo [medindo] -- no calibrado a altura
+   anunciada nunca muda, entao nao ha o que voltar.
+   O ALVO E A CLASSE, E NAO O ROTULO, e isso e medido: o modal do TidyCal tem um '.btn-close'
+   (a classe do Bootstrap) cujo aria-label vem TRADUZIDO pela conta -- na conta da Foto Certa
+   ele diz "Fechar", e num idioma diferente diria outra coisa. Procurar pelo rotulo faria o
+   teste falhar no dia em que a conta mudasse de idioma, o que nao teria nada a ver com o
+   bloco. O segundo alvo e o botao "Cancelar"/"Cancel" do proprio formulario.
+   A TECLA ESCAPE NAO ENTRA, e tambem por medicao (03/09/2026): ela e aceita pela pagina sem
+   erro nenhum e NAO fecha o modal -- ou seja, ela devolvia "fechei" sobre um formulario que
+   continuava aberto, que e a pior resposta possivel para uma medicao. */
+async function fecharFormulario(pg){
+  const fr = pg.frames().find(f => /^https:\/\/(tidycal\.com|agendamento\.fotocerta\.com\.br)\//.test(f.url()));
+  if(!fr) return 'sem iframe do TidyCal';
+  for(const loc of [fr.locator('.btn-close').first(),
+                    fr.locator('button', { hasText: /^\s*(Cancelar|Cancel)\s*$/i }).first()]){
+    try{
+      if(await loc.count() > 0){ await loc.click({ timeout: 10000 }); return null; }
+    }catch(e){}
+  }
+  return 'nao achei o X nem o Cancelar do modal';
+}
+
+async function medirCalendario({ bloco, porta, escolherPacote = false, permitir = REDE, bloquear = [], esperaExtra = 0, fechar = false }){
   return await comBlocoNaPagina({
     bloco, porta, permitir, bloquear,
     corpoDepois: ENCHIMENTO,
@@ -176,6 +224,11 @@ async function medirCalendario({ bloco, porta, escolherPacote = false, permitir 
       r.falhaClique = await abrirFormulario(pg);
       await pg.waitForTimeout(5000);
       r.comFormulario = await alturaReal(pg);
+      if(fechar){
+        r.falhaFechar = await fecharFormulario(pg);
+        await pg.waitForTimeout(4000);
+        r.aposFechar = await alturaReal(pg);
+      }
       /* a expansao do formulario vem de min-height, e min-height ganha do height: o valor
          lido acima ja e o do quadro expandido */
       if(escolherPacote){
@@ -212,6 +265,7 @@ async function medirComSegundaChance(op, tentativas = 3){
 
 /* ===== a comparacao NOVO x ATUAL ===== */
 function comparar(rot, novo, atual){
+  rot = rot + ' [calibrado]';
   const eA = errosDoBloco(atual.erros), eN = errosDoBloco(novo.erros);
   console.log('\n  ' + rot);
   console.log('      atual: repouso=' + atual.repouso + '  formulario=' + atual.comFormulario +
@@ -235,6 +289,68 @@ function comparar(rot, novo, atual){
       eN.length === 0, JSON.stringify(eN.slice(0, 2)));
 }
 
+/* A PROVA DO MODO NOVO, e a unica que mede a TROCA inteira: o que se ganha (o quadro cresce
+   so o necessario, e volta) e o que se paga (o vao em repouso). Os dois numeros aparecem na
+   tela lado a lado com os do modo calibrado, para a decisao do dono continuar a vista. */
+function conferirMedindo(rot, med, cal){
+  const eM = errosDoBloco(med.erros);
+  rot = rot + ' [medindo]';
+  console.log('      medindo: repouso=' + med.repouso + '  formulario=' + med.comFormulario +
+              '  apos fechar=' + med.aposFechar + '  iframes=' + med.iframes +
+              '  erros=' + eM.length +
+              (med.falhaClique ? '  [clique: ' + med.falhaClique.slice(0, 40) + ']' : '') +
+              (med.falhaFechar ? '  [fechar: ' + med.falhaFechar.slice(0, 40) + ']' : ''));
+  console.log('      preco em repouso: ' + (med.repouso - cal.repouso) + 'px de vao a mais que o calibrado');
+  /* TAMBEM MEDICAO, E NAO ASSERCAO, pelo mesmo motivo do 'apos fechar' mais abaixo: se a
+     altura medida chega a ser APLICADA nao depende do nosso bloco. Medido em 03/09/2026, quatro
+     cargas da mesma pagina: aplicada em UMA, e nas outras tres o quadro ficou nos 700px de
+     partida -- com a biblioteca do proprio TidyCal no comando nas quatro, recebendo as mesmas
+     duas mensagens ('init' e 'mutationObserver'). Cobrar isto aqui produziria uma suite que
+     falha em ~3 de 4 execucoes por causa de terceiro, e suite que falha por acaso deixa de ser
+     lida -- que e como um defeito de verdade passa depois.
+     O que CONTINUA sendo cobrado logo abaixo: quando a medicao acontece, ela cresce ate o que o
+     formulario pede e nao ate a altura calibrada. Esse e o nosso lado. */
+  console.log('       [medicao, nao assercao] ' + rot + ': repouso=' + med.repouso +
+              (med.repouso === 700 ? '   -- ficou na de partida: a medicao NAO foi aplicada nesta carga'
+                                   : '   -- a medicao foi aplicada nesta carga'));
+  /* O PRECO, medido e nao suposto: 'lowestElement' conta o conteudo inteiro da lista de
+     horarios, que rola por dentro -- entao o repouso fica ACIMA do calibrado. Cobrar que ele
+     nao seja MENOR e o que denunciaria o interruptor nao ter chegado ao bloco. */
+  chk(rot + ': quando a medicao E aplicada, em repouso ela fica acima do calibrado (o preco do metodo)',
+      med.repouso === 700 || (med.repouso !== null && cal.repouso !== null && med.repouso >= cal.repouso),
+      'medindo=' + med.repouso + ' calibrado=' + cal.repouso);
+  chk(rot + ': o formulario de reserva faz o quadro CRESCER de verdade',
+      med.repouso === 700 || (med.comFormulario !== null && med.repouso !== null &&
+      med.comFormulario - med.repouso >= CRESCIMENTO_MINIMO),
+      'repouso=' + med.repouso + ' formulario=' + med.comFormulario);
+  /* O GANHO: ele cresce ate o que o formulario pede, e nao ate a altura calibrada. Medido em
+     03/09/2026: 1662 contra os 2350 calibrados, ou seja, 688px de vao a menos. */
+  chk(rot + ': e cresce SO o necessario -- fica abaixo dos ' + CALIBRADA + 'px calibrados',
+      med.repouso === 700 || (med.comFormulario !== null && med.comFormulario < CALIBRADA), 'formulario=' + med.comFormulario);
+  /* FECHAR O FORMULARIO NAO E ASSERCAO, E MEDICAO -- e a razao esta medida, nao suposta.
+     Em 03/09/2026 esta assercao existia e falhava nos tres casos. Ao investigar, o modo
+     'medindo' se mostrou INTERMITENTE: a mesma pagina, carregada quatro vezes seguidas, teve a
+     altura medida aplicada em UMA delas -- nas outras tres o quadro ficou nos 700px iniciais. A
+     biblioteca do proprio TidyCal estava no comando nas quatro e recebeu as mesmas duas
+     mensagens ('init' e 'mutationObserver') em todas, o que descarta disputa com o nosso
+     mecanismo: e a medicao por 'lowestElement' que nao e confiavel.
+     Ao fechar, chega uma mensagem so ('transitionstart') e ela carrega a altura ANTIGA -- a
+     menor nunca vem por esse caminho.
+     Por que nao virou assercao afrouxada nem foi apagada: afrouxar seria esconder o defeito, e
+     apagar seria perder a unica medicao que existe dele. Ela IMPRIME o numero a cada rodada. Se
+     um dia o TidyCal passar a anunciar a altura de volta, o numero aparece aqui e a assercao
+     volta -- de proposito, e nao por acaso.
+     E por isso que o modo 'medindo' nao e o padrao da ferramenta. Ver o texto de ajuda do campo
+     't-medir'/'a-medir' no index.html, que carrega a mesma medicao. */
+  console.log('       [medicao, nao assercao] ' + rot + ': apos fechar=' + med.aposFechar +
+              '  repouso=' + med.repouso +
+              (med.falhaFechar ? '  (' + med.falhaFechar + ')' : '') +
+              '   -- o quadro NAO volta; ver o comentario acima');
+  chk(rot + ': um iframe do calendario, sem fantasma do embed.js',
+      med.iframes <= cal.iframes, 'medindo=' + med.iframes + ' calibrado=' + cal.iframes);
+  chk(rot + ': sem erro de console no bloco novo', eM.length === 0, JSON.stringify(eM.slice(0, 2)));
+}
+
 /* ===== main ===== */
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'fc-tidy-'));
 try{
@@ -247,30 +363,46 @@ console.log('referencia: ' + REF + '\nhosts liberados: ' + REDE.join(', ') + '\n
 
 console.log('gerando os blocos (arvore de trabalho e referencia)...');
 const bloco = {
-  novoTidy:  await gerarTidy(RAIZ, TIDY, 8961),
-  novoProp:  await gerarTidy(RAIZ, PROP, 8962),
-  novoPac:   await gerarPac(RAIZ, 8963),
-  atualTidy: await gerarTidy(tmp, TIDY, 8964),
-  atualProp: await gerarTidy(tmp, PROP, 8965),
-  atualPac:  await gerarPac(tmp, 8966)
+  novoTidy:     await gerarTidy(RAIZ, TIDY, 8961, true),
+  novoProp:     await gerarTidy(RAIZ, PROP, 8962, true),
+  novoPac:      await gerarPac(RAIZ, 8963, true),
+  novoTidyCal:  await gerarTidy(RAIZ, TIDY, 8967, false),
+  novoPropCal:  await gerarTidy(RAIZ, PROP, 8968, false),
+  novoPacCal:   await gerarPac(RAIZ, 8969, false),
+  atualTidy:    await gerarTidy(tmp, TIDY, 8964),
+  atualProp:    await gerarTidy(tmp, PROP, 8965),
+  atualPac:     await gerarPac(tmp, 8966)
 };
+/* O interruptor tem de ter CHEGADO ao bloco -- sem isto os dois modos poderiam ser o mesmo
+   bloco medido duas vezes, e todas as comparacoes abaixo passariam sem dizer nada. */
+for(const [k, esperado] of [['novoTidy', true], ['novoProp', true], ['novoPac', true],
+                            ['novoTidyCal', false], ['novoPropCal', false], ['novoPacCal', false]])
+  chk('o campo da aba decidiu MEDIR_FORMULARIO em ' + k,
+      (bloco[k] || '').indexOf('var MEDIR_FORMULARIO=' + esperado + ';') >= 0);
 for(const k of Object.keys(bloco))
   chk('bloco ' + k + ' foi gerado', (bloco[k] || '').length > 200, 'tamanho=' + (bloco[k] || '').length);
 
 console.log('\n===== 1. aba TidyCal em tidycal.com (o bloco que esta em producao) =====');
-comparar('tidycal.com',
-  await medirComSegundaChance({ bloco: bloco.novoTidy,  porta: 8971 }),
+const t1Cal = await medirComSegundaChance({ bloco: bloco.novoTidyCal, porta: 8971 });
+comparar('tidycal.com', t1Cal,
   await medirComSegundaChance({ bloco: bloco.atualTidy, porta: 8972 }));
+conferirMedindo('tidycal.com',
+  await medirComSegundaChance({ bloco: bloco.novoTidy, porta: 8991, fechar: true }), t1Cal);
 
 console.log('\n===== 2. aba TidyCal em dominio proprio =====');
-comparar('dominio proprio',
-  await medirComSegundaChance({ bloco: bloco.novoProp,  porta: 8973 }),
+const t2Cal = await medirComSegundaChance({ bloco: bloco.novoPropCal, porta: 8973 });
+comparar('dominio proprio', t2Cal,
   await medirComSegundaChance({ bloco: bloco.atualProp, porta: 8974 }));
+conferirMedindo('dominio proprio',
+  await medirComSegundaChance({ bloco: bloco.novoProp, porta: 8993, fechar: true }), t2Cal);
 
 console.log('\n===== 3. Agendamento por pacote (dois pacotes, dois dominios) =====');
-const pacNovo  = await medirComSegundaChance({ bloco: bloco.novoPac,  porta: 8975, escolherPacote: true });
-const pacAtual = await medirComSegundaChance({ bloco: bloco.atualPac, porta: 8976, escolherPacote: true });
+const pacNovo  = await medirComSegundaChance({ bloco: bloco.novoPacCal, porta: 8975, escolherPacote: true });
+const pacAtual = await medirComSegundaChance({ bloco: bloco.atualPac,   porta: 8976, escolherPacote: true });
 comparar('por pacote', pacNovo, pacAtual);
+conferirMedindo('por pacote',
+  await medirComSegundaChance({ bloco: bloco.novoPac, porta: 8995, escolherPacote: true, fechar: true }),
+  pacNovo);
 console.log('      troca de pacote (e de dominio): atual=' + pacAtual.aposTrocar +
             '  novo=' + pacNovo.aposTrocar + '  iframes depois=' + pacNovo.iframesAposTrocar);
 chk('por pacote: trocar de pacote (e de dominio) mede a altura do novo calendario',
@@ -297,7 +429,13 @@ console.log('      b) embed.js bloqueado: repouso=' + degB.repouso + '  formular
             '  lib=' + (degB.lib || '-') + '  erros=' + errosDoBloco(degB.erros).length);
 chk('degradacao b) sem a biblioteca, o aperto de mao proprio assume', degB.lib !== '1', 'data-fc-lib=' + degB.lib);
 chk('degradacao b) e a altura continua acompanhando o conteudo', degB.repouso > 0 && degB.repouso !== 700, 'repouso=' + degB.repouso);
-chk('degradacao b) e o formulario continua abrindo espaco', degB.comFormulario >= CALIBRADA, 'altura=' + degB.comFormulario);
+/* O bloco daqui e o de FABRICA, que agora mede o formulario -- entao o que se cobra e o
+   crescimento, e nao os 2350 calibrados. E a prova de que o aperto de mao proprio manda o
+   MESMO SIZER_METODO que a biblioteca mandaria: se ele tivesse ficado em 'bodyOffset', o
+   quadro nao se mexeria ao abrir o formulario. */
+chk('degradacao b) e o formulario continua abrindo espaco, agora pela medida',
+    degB.comFormulario - degB.repouso >= CRESCIMENTO_MINIMO,
+    'repouso=' + degB.repouso + ' formulario=' + degB.comFormulario);
 chk('degradacao b) sem erro de console', errosDoBloco(degB.erros).length === 0, JSON.stringify(errosDoBloco(degB.erros).slice(0, 2)));
 
 /* c. a biblioteca carrega e o calendario nao responde (aqui: o proprio iframe bloqueado).

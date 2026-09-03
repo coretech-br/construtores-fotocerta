@@ -33,10 +33,27 @@
      2. fica na de partida quando o sinal NAO chega;
      3. valor fora da faixa [ALTURA_MINIMA, ALTURA_MAXIMA] nao passa.
 
+   E DESDE 03/09/2026 CADA UM DOS DOIS BLOCOS RODA A BATERIA INTEIRA DUAS VEZES,
+   uma por valor do campo 'Espaco para o formulario de reserva' ('t-medir' /
+   'a-medir'), que passou a nascer LIGADO. Nao e zelo: as duas escolhas produzem
+   blocos que se comportam de forma diferente exatamente no ponto que este
+   arquivo mede.
+     medir=nao (altura calibrada) -- o aperto de mao sai com 'bodyOffset', o
+       formulario e invisivel para a medicao, e o scrollToOffset expande por
+       min-height ate a altura calibrada (2350px).
+     medir=sim (padrao)           -- o aperto de mao sai com 'lowestElement', o
+       scrollToOffset NAO expande nada (expandir() volta na primeira linha) e
+       quem faz o quadro crescer e a propria altura anunciada. Os numeros do
+       formulario aberto (1662) e do repouso (764) sao TRANSCRICOES da medicao
+       de 03/09/2026 contra o TidyCal de verdade, no mesmo espirito do resto
+       desta bateria.
+   Relaxar a assercao para um valor so faria o arquivo passar sem dizer nada
+   sobre o outro -- e o outro e justamente o novo padrao.
+
    Rodar: node scripts/verificar/tidycal-altura.mjs
 ============================================================================ */
 import { comBlocoNaPagina, gerarNaFerramenta, chk, resumo } from './pagina.mjs';
-import { set, clicar } from './lib.mjs';
+import { set, clicar, radio } from './lib.mjs';
 import { preparar } from './cenario.mjs';
 
 const PROPRIO      = 'https://agendamento.fotocerta.com.br/estudio-905-seg-a-sex-1-hora';
@@ -61,7 +78,7 @@ const CALIBRADA= '2350px';   /* ALTURA_DESKTOP de fabrica das duas abas */
    com 'bodyOffset' no padrao de fabrica. */
 const INIT_ANTES = ':8:false:false:32:true:true:null:';
 const INIT_DEPOIS = ':null:null:0:false:parent:scroll:true';
-const INIT_RESTO = INIT_ANTES + 'bodyOffset' + INIT_DEPOIS;
+const initResto = medir => INIT_ANTES + (medir ? 'lowestElement' : 'bodyOffset') + INIT_DEPOIS;
 const temHandshake = bloco =>
   bloco.indexOf("var SIZER_METODO=MEDIR_FORMULARIO?'lowestElement':'bodyOffset';") >= 0 &&
   bloco.indexOf("var SIZER_INIT='" + INIT_ANTES + "'+SIZER_METODO+'" + INIT_DEPOIS + "';") >= 0;
@@ -105,18 +122,35 @@ function bateria(partida){
   ];
 }
 
-async function correrBateria(pg, sel, origem, rotulo){
+async function correrBateria(pg, sel, origem, rotulo, medir){
   for(const [nome, texto, esperado] of bateria()){
     await sinal(pg, origem, texto);
     const h = await alturaDe(pg, sel);
     chk(rotulo + ': ' + nome, h === esperado, 'ficou ' + h + ', esperado ' + esperado);
   }
-  /* O formulario de reserva: a altura anunciada nao muda (medido), mas a expansao calibrada
-     precisa continuar acontecendo -- e ela e min-height, nao height. */
+  /* O FORMULARIO DE RESERVA, nos dois modos. O sinal 'scrollToOffset' e o mesmo nos dois --
+     o que muda e quem abre o espaco depois dele. */
   await sinal(pg, origem, '[iFrameSizer]fcm:0:0:scrollToOffset');
   chk(rotulo + ': scrollToOffset nao mexe na altura medida', (await alturaDe(pg, sel)) === '770px');
-  chk(rotulo + ': scrollToOffset AINDA expande pela altura calibrada',
-      (await minAlturaDe(pg, sel)) === CALIBRADA, await minAlturaDe(pg, sel));
+  if(medir){
+    /* Com a medicao ligada NAO ha expansao calibrada -- e isso e o ponto, nao uma falta: abrir
+       espaco a mais so criaria vao vazio embaixo de um quadro que ja vai crescer sozinho. */
+    chk(rotulo + ': scrollToOffset NAO expande por min-height (a altura vem medida)',
+        (await minAlturaDe(pg, sel)) === '', await minAlturaDe(pg, sel));
+    /* E o que faz o quadro crescer e a altura ANUNCIADA. Os dois numeros sao transcricoes da
+       medicao de 03/09/2026: 1662 com o formulario aberto, 764 depois de fechar. */
+    await sinal(pg, origem, '[iFrameSizer]fcm:1662:1069:mutationObserver');
+    chk(rotulo + ': com o formulario aberto o quadro cresce pela medida (1662px)',
+        (await alturaDe(pg, sel)) === '1662px', await alturaDe(pg, sel));
+    await sinal(pg, origem, '[iFrameSizer]fcm:764:1069:mutationObserver');
+    chk(rotulo + ': e volta ao fechar (764px), sem sobra',
+        (await alturaDe(pg, sel)) === '764px', await alturaDe(pg, sel));
+    /* volta para 770 para o caso seguinte (origem errada) medir contra o mesmo numero de sempre */
+    await sinal(pg, origem, '[iFrameSizer]fcm:770:669:mutationObserver');
+  }else{
+    chk(rotulo + ': scrollToOffset expande pela altura calibrada',
+        (await minAlturaDe(pg, sel)) === CALIBRADA, await minAlturaDe(pg, sel));
+  }
   /* Sinal da origem errada: descartado, inclusive a altura. */
   await sinal(pg, 'https://intruso.example.com', '[iFrameSizer]fcm:1234:1:mutationObserver');
   chk(rotulo + ': NEGATIVO -- altura vinda de outra origem e descartada',
@@ -124,17 +158,21 @@ async function correrBateria(pg, sel, origem, rotulo){
 }
 
 /* ------------------------------------------------ aba TidyCal, dominio proprio */
-async function abaTidycalProprio(porta){
+async function abaTidycalProprio(porta, medir){
+  const rot = 't proprio' + (medir ? ' [medindo]' : ' [calibrado]');
   const { valores, alertas } = await gerarNaFerramenta(async pg => {
     await clicar(pg, 'aba-tidy');
     await set(pg, 't-path', PROPRIO);
+    await radio(pg, 't-medir', medir ? 'sim' : 'nao');
     await clicar(pg, 't-gerar');
   }, ['t-out1'], { porta });
 
   const bloco = valores['t-out1'];
-  chk('t proprio: gerou sem recusa', !alertas.length && bloco.length > 500, alertas.join(' | '));
-  chk('t proprio: o aperto de mao esta no bloco, com o formato medido', temHandshake(bloco));
-  chk('t proprio: a faixa da guarda esta declarada no bloco',
+  chk(rot + ': gerou sem recusa', !alertas.length && bloco.length > 500, alertas.join(' | '));
+  chk(rot + ': o aperto de mao esta no bloco, com o formato medido', temHandshake(bloco));
+  chk(rot + ': o campo da aba decidiu o valor de MEDIR_FORMULARIO no bloco',
+      bloco.indexOf('var MEDIR_FORMULARIO=' + (medir ? 'true' : 'false') + ';') >= 0);
+  chk(rot + ': a faixa da guarda esta declarada no bloco',
       bloco.indexOf('var ALTURA_MINIMA=500;') >= 0 && bloco.indexOf('var ALTURA_MAXIMA=6000;') >= 0);
 
   const r = await comBlocoNaPagina({
@@ -148,7 +186,7 @@ async function abaTidycalProprio(porta){
       const antes = handshake.length;
       await sinal(pg, PROPRIO_ORIG, '[iFrameResizerChild]Ready');
       const depoisReady = (await pg.evaluate(() => window.FC_HANDSHAKE.length)) - antes;
-      await correrBateria(pg, sel, PROPRIO_ORIG, 't proprio');
+      await correrBateria(pg, sel, PROPRIO_ORIG, rot, medir);
       /* DEPOIS que a primeira altura chegou, o bloco para de insistir: as tentativas
          pendentes conferem 'alturaViva' antes de mandar. Sem isto ele reiniciaria o filho
          para sempre, a cada 400/1200/3000ms. */
@@ -159,21 +197,21 @@ async function abaTidycalProprio(porta){
     }
   });
 
-  chk('t proprio: comeca na altura de partida (700px)', r.inicial === PARTIDA, r.inicial);
-  chk('t proprio: o bloco MANDOU o aperto de mao sozinho', r.handshake.length >= 1,
+  chk(rot + ': comeca na altura de partida (700px)', r.inicial === PARTIDA, r.inicial);
+  chk(rot + ': o bloco MANDOU o aperto de mao sozinho', r.handshake.length >= 1,
       JSON.stringify(r.handshake));
-  chk('t proprio: mandou para a origem do endereco configurado',
+  chk(rot + ': mandou para a origem do endereco configurado',
       r.handshake.length >= 1 && r.handshake[0].o === PROPRIO_ORIG,
       r.handshake.length ? r.handshake[0].o : '(nada)');
-  chk('t proprio: a mensagem tem o prefixo, um id e o resto medido',
+  chk(rot + ': a mensagem tem o prefixo, um id e o resto medido, com o metodo da escolha',
       r.handshake.length >= 1 &&
       /^\[iFrameSizer\]fc[a-z0-9]+$/.test(r.handshake[0].m.slice(0, r.handshake[0].m.indexOf(':'))) &&
-      r.handshake[0].m.slice(r.handshake[0].m.indexOf(':')) === INIT_RESTO,
+      r.handshake[0].m.slice(r.handshake[0].m.indexOf(':')) === initResto(medir),
       r.handshake.length ? r.handshake[0].m : '(nada)');
-  chk('t proprio: o "Ready" do filho dispara um pedido novo', r.depoisReady >= 1, String(r.depoisReady));
-  chk('t proprio: com a altura ja recebida, para de insistir', r.depoisDaAltura === 0,
+  chk(rot + ': o "Ready" do filho dispara um pedido novo', r.depoisReady >= 1, String(r.depoisReady));
+  chk(rot + ': com a altura ja recebida, para de insistir', r.depoisDaAltura === 0,
       String(r.depoisDaAltura));
-  chk('t proprio: sem erro de script na pagina', soPageError(r.erros).length === 0,
+  chk(rot + ': sem erro de script na pagina', soPageError(r.erros).length === 0,
       soPageError(r.erros).join(' | '));
 }
 
@@ -207,10 +245,12 @@ async function silencioTidycal(porta){
 }
 
 /* ------------------------------------------------ aba Agendamento por pacote */
-async function abaPacote(porta){
+async function abaPacote(porta, medir){
+  const rot = 'pac' + (medir ? ' [medindo]' : ' [calibrado]');
   const { valores, alertas } = await gerarNaFerramenta(async pg => {
     await preparar(pg);
     await clicar(pg, 'aba-pac');
+    await radio(pg, 'a-medir', medir ? 'sim' : 'nao');
     await set(pg, 'a-urlobrigado', 'https://www.fotocerta.com.br/obrigado');
     await set(pg, 'a-prefixo', 'FC');
     for(const [cod, nome, preco, end] of [
@@ -225,9 +265,11 @@ async function abaPacote(porta){
   }, ['a-out1'], { porta });
 
   const bloco = valores['a-out1'];
-  chk('pac: gerou sem recusa', !alertas.length && bloco.length > 5000, alertas.join(' | '));
-  chk('pac: o aperto de mao esta no bloco, com o formato medido', temHandshake(bloco));
-  chk('pac: a altura de partida existe (o iframe e criado por JS e nao tem atributo height)',
+  chk(rot + ': gerou sem recusa', !alertas.length && bloco.length > 5000, alertas.join(' | '));
+  chk(rot + ': o aperto de mao esta no bloco, com o formato medido', temHandshake(bloco));
+  chk(rot + ': o campo da aba decidiu o valor de MEDIR_FORMULARIO no bloco',
+      bloco.indexOf('var MEDIR_FORMULARIO=' + (medir ? 'true' : 'false') + ';') >= 0);
+  chk(rot + ': a altura de partida existe (o iframe e criado por JS e nao tem atributo height)',
       bloco.indexOf('var ALTURA_INICIAL=700;') >= 0 &&
       bloco.indexOf("f.style.height=ALTURA_INICIAL+'px';") >= 0);
 
@@ -246,7 +288,7 @@ async function abaPacote(porta){
       await cartao(0);
       const nasceu = await alturaDe(pg, sel);
       const hs1 = await pg.evaluate(() => window.FC_HANDSHAKE.slice());
-      await correrBateria(pg, sel, TIDY_ORIG, 'pac');
+      await correrBateria(pg, sel, TIDY_ORIG, rot, medir);
       const antesTroca = await alturaDe(pg, sel);
 
       /* TROCAR DE PACOTE: src novo e documento novo -- a altura tem de voltar para a de
@@ -267,19 +309,22 @@ async function abaPacote(porta){
     }
   });
 
-  chk('pac: o calendario NASCE em 700px (antes desta rodada nascia nos 150px do navegador)',
+  chk(rot + ': o calendario NASCE em 700px (antes desta rodada nascia nos 150px do navegador)',
       r.nasceu === PARTIDA, r.nasceu);
-  chk('pac: o bloco mandou o aperto de mao para a origem do 1o pacote',
+  chk(rot + ': o bloco mandou o aperto de mao para a origem do 1o pacote',
       r.hs1.length >= 1 && r.hs1[0].o === TIDY_ORIG, JSON.stringify(r.hs1.slice(0, 2)));
-  chk('pac: a altura seguiu o conteudo antes da troca', r.antesTroca === '770px', r.antesTroca);
-  chk('pac: TROCAR de pacote devolve a altura de partida', r.depoisTroca === PARTIDA, r.depoisTroca);
-  chk('pac: TROCAR de pacote refaz o aperto de mao, para a origem NOVA',
+  chk(rot + ': e com o metodo de altura da escolha do campo',
+      r.hs1.length >= 1 && r.hs1[0].m.slice(r.hs1[0].m.indexOf(':')) === initResto(medir),
+      r.hs1.length ? r.hs1[0].m : '(nada)');
+  chk(rot + ': a altura seguiu o conteudo antes da troca', r.antesTroca === '770px', r.antesTroca);
+  chk(rot + ': TROCAR de pacote devolve a altura de partida', r.depoisTroca === PARTIDA, r.depoisTroca);
+  chk(rot + ': TROCAR de pacote refaz o aperto de mao, para a origem NOVA',
       r.hs2.length >= 1 && r.hs2[r.hs2.length - 1].o === PROPRIO_ORIG, JSON.stringify(r.hs2.slice(0, 2)));
-  chk('pac: NEGATIVO -- altura do pacote ANTERIOR nao redimensiona o novo',
+  chk(rot + ': NEGATIVO -- altura do pacote ANTERIOR nao redimensiona o novo',
       r.velhaIgnorada === PARTIDA, r.velhaIgnorada);
-  chk('pac: altura da origem carregada AGORA e aceita', r.novaAceita === '600px', r.novaAceita);
-  chk('pac: continua existindo UM iframe so', r.quantos === 1, String(r.quantos));
-  chk('pac: sem erro de script na pagina', soPageError(r.erros).length === 0,
+  chk(rot + ': altura da origem carregada AGORA e aceita', r.novaAceita === '600px', r.novaAceita);
+  chk(rot + ': continua existindo UM iframe so', r.quantos === 1, String(r.quantos));
+  chk(rot + ': sem erro de script na pagina', soPageError(r.erros).length === 0,
       soPageError(r.erros).join(' | '));
 }
 
@@ -314,12 +359,16 @@ async function silencioPacote(porta){
       soPageError(r.erros).join(' | '));
 }
 
-console.log('ALTURA AUTOMATICA DO CALENDARIO -- os dois blocos rodando\n');
-await abaTidycalProprio(8961);
+console.log('ALTURA AUTOMATICA DO CALENDARIO -- os dois blocos rodando, nos DOIS modos\n');
+await abaTidycalProprio(8961, true);
+console.log('');
+await abaTidycalProprio(8981, false);
 console.log('');
 await silencioTidycal(8965);
 console.log('');
-await abaPacote(8969);
+await abaPacote(8969, true);
+console.log('');
+await abaPacote(8985, false);
 console.log('');
 await silencioPacote(8973);
 process.exit(resumo());
