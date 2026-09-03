@@ -10252,6 +10252,17 @@ function lPadroes(){
 /* Teto da lista fechada. Nao e limite tecnico: um <select> com dezenas de linhas deixa de ser
    "lista fechada para qualificar" e vira rolagem no celular, onde o pop-up ja e apertado. */
 var L_Q_MAX=20;
+/* A pergunta "esta opcao JA esta na lista?", num lugar so. lQAdd recusa por ela; lQDuplicar
+   deriva o texto ate ela dizer que nao. Escrita duas vezes, uma delas podia ganhar uma regra
+   nova (outra comparacao, outro aparo) e a outra continuar como estava -- e o duplicar passaria
+   a criar exatamente o par que o cadastro recusa. Comparacao sem acento nao entra, pelo mesmo
+   criterio ja registrado em lQAdd. */
+function lQAcha(t){
+  var k=String(t==null?'':t).trim().toLowerCase(),i;
+  if(!k)return -1;
+  for(i=0;i<lQops.length;i++)if(String(lQops[i]).trim().toLowerCase()===k)return i;
+  return -1;
+}
 function lQAdd(){
   var t=$('l-qop').value.trim(),i;
   if(!t){alert('Escreva o texto da opção.');return;}
@@ -10261,11 +10272,10 @@ function lQAdd(){
      segunda calado seria decidir por ele), e o texto que ele acabou de digitar continua no
      campo para ser corrigido. Comparacao sem acento nao entra: "Gestante" e "gestante" sao a
      mesma opcao para quem le a lista, entao o teste ignora maiusculas e espacos das pontas. */
-  for(i=0;i<lQops.length;i++){
-    if(String(lQops[i]).trim().toLowerCase()===t.toLowerCase()){
-      alert('A opção "'+lQops[i]+'" já está na lista (posição '+(i+1)+'). Duas opções com o mesmo texto ficam indistinguíveis para o visitante: ele escolhe uma das duas e a mensagem chega igual nos dois casos.');
-      return;
-    }
+  i=lQAcha(t);
+  if(i>=0){
+    alert('A opção "'+lQops[i]+'" já está na lista (posição '+(i+1)+'). Duas opções com o mesmo texto ficam indistinguíveis para o visitante: ele escolhe uma das duas e a mensagem chega igual nos dois casos.');
+    return;
   }
   if(lQops.length>=L_Q_MAX){
     alert('A lista já tem '+L_Q_MAX+' opções, que é o máximo. Uma lista maior que isso deixa de ajudar o visitante a se qualificar e vira rolagem dentro do pop-up, que no celular já é apertado. Remova alguma antes de acrescentar outra.');
@@ -10281,6 +10291,25 @@ function lQMove(i,d){
   lQRender();salvarEstado();lPreview();
 }
 function lQDel(i){lQops.splice(i,1);lQRender();salvarEstado();lPreview();}
+/* A copia entra LOGO ABAIXO da original, como a do opcional: a opcao se edita na propria lista
+   (nao ha formulario para carregar).
+   O TEXTO E DERIVADO ATE FICAR UNICO, e nao so marcado uma vez. Esta lista e a unica com recusa
+   de TEXTO repetido (lQAdd), e duplicar "Casamento" duas vezes produziria dois "Casamento
+   (cópia)" -- justamente o par que o cadastro ao lado recusa, criado por outra porta. A
+   numeracao de fcDupNome ("(cópia 2)") e o que faz o laco convergir.
+   O TETO DA LISTA VALE AQUI TAMBEM: a razao dele (um <select> longo vira rolagem no pop-up do
+   celular) nao muda porque a opcao chegou por copia, e o aviso e o mesmo de lQAdd. */
+function lQDuplicar(i){
+  var t=lQops[i];if(t==null)return;
+  if(lQops.length>=L_Q_MAX){
+    alert('A lista já tem '+L_Q_MAX+' opções, que é o máximo. Uma lista maior que isso deixa de ajudar o visitante a se qualificar e vira rolagem dentro do pop-up, que no celular já é apertado. Remova alguma antes de duplicar outra.');
+    return;
+  }
+  var novo=fcDupNome(t),v=0;
+  while(lQAcha(novo)>=0&&v<L_Q_MAX){novo=fcDupNome(novo);v++;}
+  lQops.splice(i+1,0,novo);
+  lQRender();salvarEstado();lPreview();
+}
 function lQRender(){
   var ul=$('l-q-lista');if(!ul)return;
   ul.innerHTML='';
@@ -10290,10 +10319,10 @@ function lQRender(){
     var info=document.createElement('div');info.className='info';
     var tx=document.createElement('div');tx.className='url';tx.textContent=txt;tx.title=txt;
     info.appendChild(tx);
-    var ctrl=document.createElement('div');ctrl.className='ctrl';
-    [['\u2191',function(){lQMove(i,-1);},'Subir'],['\u2193',function(){lQMove(i,1);},'Descer'],['\u2715',function(){lQDel(i);},'Remover']]
-      .forEach(function(b){var bt=document.createElement('button');bt.textContent=b[0];bt.title=b[2];bt.setAttribute('aria-label',b[2]);bt.addEventListener('click',b[1]);ctrl.appendChild(bt);});
-    li.appendChild(info);li.appendChild(ctrl);
+    li.appendChild(info);
+    fcCtrl(li,[['\u2191',function(){lQMove(i,-1);},'Subir'],['\u2193',function(){lQMove(i,1);},'Descer'],
+      ['\u29C9',function(){lQDuplicar(i);},'Duplicar esta opção'],
+      ['\u2715',function(){lQDel(i);},'Remover']],true);
     ul.appendChild(li);
   });
 }
@@ -12511,11 +12540,12 @@ function uCpRender(){
     mn.title='Valor m\u00ednimo do pedido para este cupom valer (vazio = sem m\u00ednimo)';
     mn.addEventListener('input',function(){uCps[i].minimo=mn.value;salvarEstado();uPreview();});
     info.appendChild(cod);info.appendChild(val);info.appendChild(sel);info.appendChild(dt);info.appendChild(mn);
-    var ctrl=document.createElement('div');ctrl.className='ctrl';
-    var bt=document.createElement('button');bt.textContent='\u2715';bt.title='Remover';bt.setAttribute('aria-label','Remover');
-    bt.addEventListener('click',function(){uCpDel(i);});
-    ctrl.appendChild(bt);
-    li.appendChild(info);li.appendChild(ctrl);
+    li.appendChild(info);
+    /* DOIS botoes: a faixa continua na LATERAL, e nao embaixo. O arranjo 'abaixo' foi medido
+       para as listas que chegaram a quatro e cinco botoes -- com dois, a pilha e mais baixa que
+       a linha de campos, e mover a faixa so gastaria altura. */
+    fcCtrl(li,[['\u29C9',function(){uCpDuplicar(i);},'Duplicar este cupom'],
+      ['\u2715',function(){uCpDel(i);},'Remover']]);
     ul.appendChild(li);
   });
 }
@@ -12553,6 +12583,21 @@ function uCpAdd(){
   uCpRender();salvarEstado();uPreview();
 }
 function uCpDel(i){uCps.splice(i,1);uCpRender();salvarEstado();uPreview();}
+/* A COPIA JA NASCE COM CODIGO DERIVADO, e por isso a recusa de codigo repetido -- que passou a
+   valer nas tres abas em 03/09/2026 -- nao acende sozinha logo depois do clique. Sem a
+   derivacao, duplicar produziria em silencio o par que o cadastro ao lado recusa, e o Gerar se
+   negaria a emitir o codigo dos dois.
+   A pergunta e fcCpCod, a MESMA normalizacao que fcCpAchaRepetido faz: um codigo com espaco nas
+   pontas ou em minusculas e o mesmo cupom para o bloco entregue, e comparar cadeias cruas
+   deixaria passar exatamente esse par.
+   A copia entra LOGO ABAIXO da original: o cupom se edita na propria linha, entao nao ha
+   formulario para carregar, e a vizinhanca deixa obvio de quem ela e copia. */
+function uCpDuplicar(i){
+  var cp=uCps[i];if(!cp)return;
+  uCps.splice(i+1,0,{codigo:fcDupCod(fcCpCod(cp.codigo),uCps.map(function(c){return c.codigo;}),fcCpCod),
+    tipo:cp.tipo,valor:cp.valor,validade:cp.validade||'',minimo:(cp.minimo==null?'':cp.minimo)});
+  uCpRender();salvarEstado();uPreview();
+}
 
 /* ===== mostra/esconde campos conforme as escolhas ===== */
 function uToggles(){
@@ -15398,11 +15443,10 @@ function aCpRender(){
     mn.title='Valor m\u00ednimo do pedido para este cupom valer (vazio = sem m\u00ednimo)';
     mn.addEventListener('input',function(){aCps[i].minimo=mn.value;salvarEstado();aPreview();});
     info.appendChild(cod);info.appendChild(val);info.appendChild(sel);info.appendChild(dt);info.appendChild(mn);
-    var ctrl=document.createElement('div');ctrl.className='ctrl';
-    var bt=document.createElement('button');bt.textContent='✕';bt.title='Remover';bt.setAttribute('aria-label','Remover');
-    bt.addEventListener('click',function(){aCpDel(i);});
-    ctrl.appendChild(bt);
-    li.appendChild(info);li.appendChild(ctrl);
+    li.appendChild(info);
+    /* Faixa na lateral -- ver uCpRender. */
+    fcCtrl(li,[['⧉',function(){aCpDuplicar(i);},'Duplicar este cupom'],
+      ['✕',function(){aCpDel(i);},'Remover']]);
     ul.appendChild(li);
   });
 }
@@ -15422,6 +15466,14 @@ function aCpAdd(){
   aCpRender();salvarEstado();aPreview();
 }
 function aCpDel(i){aCps.splice(i,1);aCpRender();salvarEstado();aPreview();}
+/* Ver uCpDuplicar, a primeira das tres: a copia nasce com o codigo derivado para a recusa de
+   repetido nao acender sozinha. */
+function aCpDuplicar(i){
+  var cp=aCps[i];if(!cp)return;
+  aCps.splice(i+1,0,{codigo:fcDupCod(fcCpCod(cp.codigo),aCps.map(function(c){return c.codigo;}),fcCpCod),
+    tipo:cp.tipo,valor:cp.valor,validade:cp.validade||'',minimo:(cp.minimo==null?'':cp.minimo)});
+  aCpRender();salvarEstado();aPreview();
+}
 
 /* ===== cadastro de familias =====
    As funcoes novas desta rodada. Nenhuma delas emite codigo: elas so mantem a lista aFamilias
@@ -18005,6 +18057,19 @@ function cMsgMove(i,d){
   cPreview();
 }
 function cMsgDel(i){cMsgs.splice(i,1);cMsgRender();salvarEstado();cToggles();cPreview();}
+/* A copia entra LOGO ABAIXO da original -- a mensagem se edita pelo formulario de cadastro,
+   mas a lista aqui e curta e a copia serve para variar o texto de uma que ja funciona.
+   OS DOIS TEXTOS GANHAM A MARCA, e nao so o principal. A barra mostra o texto longo ou o curto
+   conforme a largura da tela: marcar so um deixaria a copia esquecida INVISIVEL em metade dos
+   aparelhos, que e exatamente o defeito que a marca existe para impedir. fcDupNome devolve ''
+   para texto vazio, entao mensagem sem versao curta continua sem.
+   cToggles junto, como em cMsgAdd e cMsgDel: o aviso do modo "Estático" depende de QUANTAS
+   mensagens existem. */
+function cMsgDuplicar(i){
+  var m=cMsgs[i];if(!m)return;
+  cMsgs.splice(i+1,0,{texto:fcDupNome(m.texto),curta:fcDupNome(m.curta)});
+  cMsgRender();salvarEstado();cToggles();cPreview();
+}
 function cMsgRender(){
   var ul=$('c-msg-lista');if(!ul)return;
   ul.innerHTML='';
@@ -18018,10 +18083,10 @@ function cMsgRender(){
       var cu=document.createElement('div');cu.className='url';cu.textContent='celular: '+m.curta;cu.title=m.curta;
       info.appendChild(cu);
     }
-    var ctrl=document.createElement('div');ctrl.className='ctrl';
-    [['\u2191',function(){cMsgMove(i,-1);},'Subir'],['\u2193',function(){cMsgMove(i,1);},'Descer'],['\u2715',function(){cMsgDel(i);},'Remover']]
-      .forEach(function(b){var bt=document.createElement('button');bt.textContent=b[0];bt.title=b[2];bt.setAttribute('aria-label',b[2]);bt.addEventListener('click',b[1]);ctrl.appendChild(bt);});
-    li.appendChild(info);li.appendChild(ctrl);
+    li.appendChild(info);
+    fcCtrl(li,[['\u2191',function(){cMsgMove(i,-1);},'Subir'],['\u2193',function(){cMsgMove(i,1);},'Descer'],
+      ['\u29C9',function(){cMsgDuplicar(i);},'Duplicar esta mensagem'],
+      ['\u2715',function(){cMsgDel(i);},'Remover']],true);
     ul.appendChild(li);
   });
 }
@@ -20579,6 +20644,13 @@ function mCpAdd(){
   mCpRender();salvarEstado();mPreview();
 }
 function mCpDel(i){mCps.splice(i,1);mCpRender();salvarEstado();mPreview();}
+/* Ver uCpDuplicar, a primeira das tres. */
+function mCpDuplicar(i){
+  var cp=mCps[i];if(!cp)return;
+  mCps.splice(i+1,0,{codigo:fcDupCod(fcCpCod(cp.codigo),mCps.map(function(c){return c.codigo;}),fcCpCod),
+    tipo:cp.tipo,valor:cp.valor,validade:cp.validade||'',minimo:(cp.minimo==null?'':cp.minimo)});
+  mCpRender();salvarEstado();mPreview();
+}
 function mCpRender(){
   var ul=$('m-cp-lista');if(!ul)return;
   ul.innerHTML='';
@@ -20631,10 +20703,10 @@ function mCpRender(){
     mn.title='Valor m\u00ednimo do pedido para este cupom valer (vazio = sem m\u00ednimo)';
     mn.addEventListener('input',function(){mCps[i].minimo=mn.value;salvarEstado();mPreview();});
     info.appendChild(cod);info.appendChild(sel);info.appendChild(val);info.appendChild(dt);info.appendChild(mn);
-    var ctrl=document.createElement('div');ctrl.className='ctrl';
-    var bt=document.createElement('button');bt.textContent='\u2715';bt.title='Remover';bt.setAttribute('aria-label','Remover');
-    bt.addEventListener('click',function(){mCpDel(i);});ctrl.appendChild(bt);
-    li.appendChild(info);li.appendChild(ctrl);
+    li.appendChild(info);
+    /* Faixa na lateral -- ver uCpRender. */
+    fcCtrl(li,[['\u29C9',function(){mCpDuplicar(i);},'Duplicar este cupom'],
+      ['\u2715',function(){mCpDel(i);},'Remover']]);
     ul.appendChild(li);
   });
 }
