@@ -4613,7 +4613,9 @@ function fcCpAchaRepetido(lista,cod,ignorar){
 }
 /* O AVISO dos duplicados que JA ESTAVAM gravados. A recusa nova protege o cadastro daqui para
    frente e nao limpa o que existe -- e nao pode limpar: os dados sao do dono, e apagar cupom
-   por conta propria seria mexer no cadastro dele sem ele mandar (mesmo criterio de aFamDel).
+   por conta propria seria mexer no cadastro dele sem ele mandar. Mesmo criterio de aFamDel, que
+   desde 03/09/2026 APAGA os pacotes de uma familia -- mas so depois de listar cada um pelo nome
+   e o dono confirmar: o que nao se faz e apagar CALADO.
    Ate aqui um par desses so aparecia ao Gerar, que recusa nomeando os dois. Isto nao conserta
    o cadastro; faz o buraco APARECER na propria lista, como fccOrfas faz no painel. */
 function fcCpDupMarcar(inp,lista,i){
