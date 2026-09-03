@@ -16026,12 +16026,20 @@ function aBlocoObrigado(cfg){
   c+=FC_CARRINHO_SRC.cupomVigente;
   c+=FC_CARRINHO_SRC.validadeBr;
   if(temMin)c+=FC_CARRINHO_SRC.cupomMinimo;
+  /* A QUANTIDADE ENTRA NO NOME, na mesma forma das duas irmas (uBloco 12602, mBloco 20680):
+     o preco ja multiplicava (subtotal, acima: op.preco*qtdOp(j)) e o nome nao dizia por
+     quanto -- tres albuns de 50 chegavam ao PayPal como 'Album 20x30' cobrando 150, e o
+     recibo nao fechava com o preco unitario. So quando o opcional vende por quantidade
+     (op.qtd), como as irmas fazem. O PACOTE nao ganha sufixo porque nao tem quantidade
+     nenhuma aqui: aPacotesSrc nao emite o campo, somaProdutos() devolve PAC.preco sem
+     multiplicar, e aQtdLigada so olha os opcionais (14717+). */
   c+='/* Nomes do que foi escolhido -- o pacote sempre, os opcionais marcados por cima. Usado so\n';
   c+='   pelo nome do item que o cartao mostra ao cliente (secao 3d); NUNCA pelo identificador. */\n';
   c+='function nomesSelecionados(){\n';
   c+='  var ns=[PAC.nome];\n';
   c+='  (PAC.ops||[]).forEach(function(op,j){\n';
-  c+='    if(opChecks[j]&&opChecks[j].checked)ns.push(op.nome);\n';
+  if(usaQtd)c+="    if(opChecks[j]&&opChecks[j].checked)ns.push(op.nome+(op.qtd?(' x'+qtdOp(j)):''));\n";
+  else c+='    if(opChecks[j]&&opChecks[j].checked)ns.push(op.nome);\n';
   c+='  });\n';
   c+='  return ns;\n';
   c+='}\n\n';
