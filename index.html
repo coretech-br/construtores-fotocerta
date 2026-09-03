@@ -16038,6 +16038,15 @@ function aBlocoObrigado(cfg){
   c+='function nomesSelecionados(){\n';
   c+='  var ns=[PAC.nome];\n';
   c+='  (PAC.ops||[]).forEach(function(op,j){\n';
+  /* Quantidade zero equivale a opcional nao escolhido -- a mesma regra das duas irmas
+     (produtoAtivo: 'if(qtdProd(i)<1)return false'; itensEscolhidos: 'if(qtdOp(i,j)<1)
+     continue'). Sem isto, um opcional marcado e depois zerado no proprio seletor continuava
+     entrando no nome que vai ao PayPal ("Album 20x30 x0"), cobrado por zero: o recibo
+     anunciava um item que ninguem comprou. Esta e a UNICA lista de itens desta pagina -- o
+     resumo (montarResumo) mostra so o pacote, e o WhatsApp daqui leva recado fixo, sem
+     itens --, entao barrar aqui basta para os tres lugares concordarem. subtotal() nao
+     ganha guarda pelo mesmo motivo que a irma nao tem: multiplicar por zero ja soma zero. */
+  if(usaQtd)c+='    if(qtdOp(j)<1)return;\n';
   if(usaQtd)c+="    if(opChecks[j]&&opChecks[j].checked)ns.push(op.nome+(op.qtd?(' x'+qtdOp(j)):''));\n";
   else c+='    if(opChecks[j]&&opChecks[j].checked)ns.push(op.nome);\n';
   c+='  });\n';

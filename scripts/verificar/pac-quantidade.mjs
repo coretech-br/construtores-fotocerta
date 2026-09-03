@@ -123,6 +123,13 @@ async function subirAte(pg, i, n){
   const mais = pg.locator('.fca-ob-op').nth(i).locator('.fca-ob-qtd-b').nth(1);
   for(let k=1;k<n;k++) await mais.click();
 }
+/* Desce a quantidade do opcional i ate n, pelo "-" do proprio seletor. O piso do seletor e
+   ZERO (fazQtd: 'if(n<0)n=0'), e nao um -- e por isso que o zero e alcancavel com o dedo,
+   e por isso que ele precisa de guarda. */
+async function descerAte(pg, i, n){
+  const menos = pg.locator('.fca-ob-op').nth(i).locator('.fca-ob-qtd-b').nth(0);
+  for(let k=1;k>n;k--) await menos.click();
+}
 
 const CASOS = [
   {rotulo:'opcional COM quantidade, levado em 3',
@@ -143,7 +150,27 @@ const CASOS = [
   {rotulo:'nenhum opcional -- so o pacote (que nao tem quantidade nenhuma)',
    busca:'?pac=TESTE&data=2027-01-10&hora=10:00',
    acao: async () => {},
-   nome:'Ensaio teste', valor:'400.00'}
+   nome:'Ensaio teste', valor:'400.00'},
+
+  /* QUANTIDADE ZERO. O marcador continua ligado -- o cliente desceu o seletor ate zero em
+     vez de desmarcar --, e o preco ja somava zero. O que estava errado era o NOME: saia
+     "Album 20x30 x0" no recibo do PayPal, um item cobrado por nada. */
+  {rotulo:'opcional marcado e ZERADO -- some do nome',
+   busca:'?pac=TESTE&data=2027-01-10&hora=10:00',
+   acao: async pg => { await marcar(pg,0); await descerAte(pg,0,0); },
+   nome:'Ensaio teste', valor:'400.00'},
+
+  {rotulo:'um zerado e outro marcado -- so o outro aparece',
+   busca:'?pac=TESTE&data=2027-01-10&hora=10:00',
+   acao: async pg => { await marcar(pg,0); await descerAte(pg,0,0); await marcar(pg,1); },
+   nome:'Ensaio teste + Pen drive', valor:'430.00'},
+
+  /* Voltar de zero para um devolve o item -- a guarda barra o zero, nao o opcional. */
+  {rotulo:'zerado e devolvido a 1 -- volta ao nome',
+   busca:'?pac=TESTE&data=2027-01-10&hora=10:00',
+   acao: async pg => { await marcar(pg,0); await descerAte(pg,0,0);
+     await pg.locator('.fca-ob-op').nth(0).locator('.fca-ob-qtd-b').nth(1).click(); },
+   nome:'Ensaio teste + Album 20x30 x1', valor:'450.00'}
 ];
 
 let porta = 8801;
