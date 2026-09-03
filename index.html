@@ -15458,13 +15458,88 @@ function aFamAdd(){
   $('a-fam-nome').value='';$('a-fam-dica').value='';
   aFamRender();aPacRender();salvarEstado();aPreview();
 }
-/* As duas recusas do CADASTRO (alert, e nao recusa de geracao): apagar a ultima familia
-   deixaria os pacotes sem para onde apontar, e apagar uma familia que ainda tem pacotes
-   moveria dado do dono em silencio. Nada de mover pacotes sozinho -- quem decide e ele. */
+/* ===== duplicar uma familia COM O CONTEUDO DELA (03/09/2026) =====
+   Decidido com o dono, e registrado em docs/specs/2026-09-03-duplicar-familia-design.md. A
+   pergunta dele foi "essa duplicacao vai carregar tudo que tem abaixo da original?", e a razao
+   dele e melhor que o desenho anterior: "duplicar leva o que esta dentro" e uma REGRA -- a
+   duplicacao de pacote ja leva os opcionais --, e familia funcionando diferente seria a
+   incoerencia. O caso real sao as mesmas duracoes em duas familias com precos diferentes.
+
+   ESTA E A UNICA OPERACAO DA FERRAMENTA QUE CRIA VARIOS ITENS SEM CONFIRMAR CADA UM. As outras
+   seis duplicacoes pre-preenchem um formulario, ou acrescentam UM item. A excecao e consciente,
+   e o preco dela e pago em aFamDel, logo abaixo: apagar a familia passou a poder levar os
+   pacotes junto, com confirmacao nominal. Criar barato e desfazer caro e como um cadastro vira
+   bagunca.
+
+   O QUE GANHA MARCA, E O QUE NAO GANHA:
+   - O NOME DA FAMILIA ganha, e nao e escolha: aRecusa barra duas familias com o mesmo nome, e
+     sem a marca a recusa acenderia sozinha logo depois do clique e pareceria defeito.
+   - O CODIGO DE CADA PACOTE ganha, pela mesma mecanica ja publicada (fcDupCod com aCodPix, a
+     normalizacao que decide o identificador do Pix). Sem ele os dois pacotes seriam conciliados
+     como um so.
+   - O NOME DE CADA PACOTE NAO GANHA, e isto e medido, nao esquecido. fcDupNome existe porque
+     duas linhas identicas na MESMA vitrine sao indistinguiveis para o cliente; aqui os pacotes
+     nascem em familias DIFERENTES, e o proprio comentario de fcDupNome ja diz que dois pacotes
+     de familias diferentes podem legitimamente se chamar "Ensaio 1h". Mais: o caso de uso que
+     originou isto e exatamente esse -- as mesmas duracoes, outro preco --, entao marcar o nome
+     obrigaria o dono a desfazer a marca N vezes.
+
+   OS PACOTES ENTRAM NO FIM DE aPacotes, nunca no meio. A lista e desenhada agrupada por
+   familia (aPacRender), entao a posicao plana nao muda nada na tela -- e 'aEditIdx' aponta para
+   um INDICE dessa lista: inserir no meio deslocaria o pacote que esta em edicao sem ninguem
+   perceber, que e a classe de defeito que esta rodada existe para nao criar. */
+function aFamDuplicar(i){
+  var f=aFamilias[i];if(!f)return;
+  /* O id sai ANTES do splice: aFamProxId varre a lista viva. */
+  var id=aFamProxId(),itens=aFamPacotes(f.id),usados=aPacotes.map(function(q){return q.cod;});
+  var k,p,cod;
+  aFamilias.splice(i+1,0,{id:id,nome:fcDupNome(f.nome),dica:f.dica||''});
+  for(k=0;k<itens.length;k++){
+    p=aPacotes[itens[k]];
+    /* 'usados' cresce a cada copia: sem isso, duas copias do mesmo lote receberiam o mesmo
+       '-COPIA' e colidiriam entre si. Codigo estourado volta VAZIO (fcDupCod), e o pacote
+       aparece na lista com o codigo em branco e a geracao recusa -- visivel, em vez de o
+       pacote sumir calado. */
+    cod=fcDupCod(p.cod,usados,aCodPix);
+    usados.push(cod);
+    aPacotes.push({cod:cod,nome:p.nome,dur:p.dur,preco:p.preco,inclui:p.inclui,
+      cal:p.cal,fam:id,
+      /* Chave a chave, como aPacDuplicar: sem isto os dois pacotes apontariam para o MESMO
+         array de opcionais, e mexer num opcional da copia mexeria no original ja gravado. */
+      ops:(p.ops||[]).map(function(o){return {nome:o.nome,preco:o.preco,qtd:!!o.qtd};})});
+  }
+  aFamRender();aPacRender();salvarEstado();aPreview();
+}
+/* A recusa da ULTIMA familia continua: apagar a unica deixaria os pacotes sem para onde
+   apontar.
+   A SEGUNDA RECUSA VIROU CONFIRMACAO NOMINAL (03/09/2026). Ate aqui apagar uma familia com
+   pacotes era PROIBIDO, e a razao era boa: "mover os pacotes sozinho seria mexer no seu
+   cadastro sem voce mandar". Com aFamDuplicar ela cria um desequilibrio -- um clique cria uma
+   familia com quatro pacotes, e desfazer custava nove passos (abrir cada um, trocar a familia,
+   salvar; so entao apagar). Criar barato e desfazer caro e como um cadastro vira bagunca.
+   A CONFIRMACAO LISTA OS PACOTES PELO NOME, e nao so conta. "Vai apagar 4 pacotes" faz o dono
+   CONFIAR no numero; a lista dos nomes deixa ele CONFERIR -- e conferir e o unico jeito de
+   perceber que a familia certa nao era esta. E a mesma razao pela qual o contador do importador,
+   que diz quantos itens nao reconheceu e nao diz quais, esta registrado como divida.
+   O CAMINHO ANTIGO NAO DESAPARECEU: Cancelar devolve tudo, e a mensagem diz como mover os
+   pacotes antes de apagar, que continua sendo o que fazer quando eles nao devem morrer. */
 function aFamDel(i){
   if(aFamilias.length<2){alert('Esta é a única família. Todo pacote precisa pertencer a alguma — renomeie esta em vez de apagá-la.');return;}
-  var usados=aFamPacotes(aFamilias[i].id);
-  if(usados.length){alert('A família "'+aFamilias[i].nome+'" ainda tem '+usados.length+(usados.length>1?' pacotes':' pacote')+'. Abra cada um no lápis, escolha outra família e salve; depois apague esta. Mover os pacotes sozinho seria mexer no seu cadastro sem você mandar.');return;}
+  var f=aFamilias[i],usados=aFamPacotes(f.id),k,j,lista='',perdeuEdicao=false;
+  if(usados.length){
+    for(k=0;k<usados.length;k++)lista+='\n\u2022 '+aPacotes[usados[k]].cod+' \u2014 '+aPacotes[usados[k]].nome;
+    if(!confirm('Apagar a família "'+f.nome+'" apaga junto '+usados.length+(usados.length>1?' pacotes':' pacote')+', com os opcionais deles:\n'+lista+'\n\nConfira a lista acima: nenhum pacote de outra família é tocado, e isto não pode ser desfeito.\n\nSe você quer manter estes pacotes, clique em Cancelar, abra cada um no lápis, escolha outra família e salve — depois apague esta família.'))return;
+    /* DE TRAS PARA A FRENTE: apagar de frente para tras deslocaria os indices ainda por apagar
+       e a lista mediria o pacote errado. E 'aEditIdx' acompanha, pela mesma conta de aPacDel --
+       se o pacote em edicao for um dos que morrem, o formulario e zerado UMA vez, no fim. */
+    for(k=usados.length-1;k>=0;k--){
+      j=usados[k];
+      aPacotes.splice(j,1);
+      if(aEditIdx===j)perdeuEdicao=true;
+      else if(aEditIdx>j)aEditIdx--;
+    }
+    if(perdeuEdicao)aPacLimpar();
+  }
   aFamilias.splice(i,1);
   aFamRender();aPacRender();salvarEstado();aPreview();
 }
@@ -15521,12 +15596,13 @@ function aFamRender(){
     var np=aFamPacotes(f.id).length;
     qt.textContent=np?(np+(np>1?' pacotes nesta família':' pacote nesta família')):'nenhum pacote nesta família';
     info.appendChild(qt);
-    var ctrl=document.createElement('div');ctrl.className='ctrl';
-    [['↑',function(){aFamMove(i,-1);},'Subir',i===0],
+    li.appendChild(info);
+    /* A faixa embaixo do item, como as outras duas listas desta aba. O titulo do duplicar DIZ
+       que ele leva os pacotes: e a unica pista antes do clique, e o clique nao pergunta nada. */
+    fcCtrl(li,[['↑',function(){aFamMove(i,-1);},'Subir',i===0],
      ['↓',function(){aFamMove(i,1);},'Descer',i===aFamilias.length-1],
-     ['✕',function(){aFamDel(i);},'Remover',false]]
-      .forEach(function(b){var bt=document.createElement('button');bt.textContent=b[0];bt.title=b[2];bt.setAttribute('aria-label',b[2]);bt.disabled=!!b[3];bt.addEventListener('click',b[1]);ctrl.appendChild(bt);});
-    li.appendChild(info);li.appendChild(ctrl);
+     ['⧉',function(){aFamDuplicar(i);},'Duplicar esta família com os pacotes dela',false],
+     ['✕',function(){aFamDel(i);},'Remover',false]],true);
     ul.appendChild(li);
   });
   aFamOpcoes();
