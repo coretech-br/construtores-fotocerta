@@ -247,6 +247,21 @@
   .lista-imgs .ctrl button{border:1px solid var(--linha);background:#fff;border-radius:6px;width:28px;height:24px;
     cursor:pointer;font-size:12px;color:var(--tinta);line-height:1}
   .lista-imgs .ctrl button:hover{border-color:var(--verde);color:var(--verde)}
+  /* A FAIXA DE BOTOES EMBAIXO DO ITEM (03/09/2026, pedido do dono na aba Agendamento por
+     pacote). Com o botao de duplicar a coluna da lateral passaria de quatro para CINCO botoes
+     empilhados. MEDIDO, num cartao de 633 px com as duas linhas de resumo: com a coluna na
+     lateral o cartao tinha 123 px de altura (dos quais 105 sao a pilha de QUATRO botoes) e o
+     resumo cabia em 577 px; com o quinto botao a pilha passaria de 130. Embaixo, o mesmo
+     cartao tem 91 px e o resumo ocupa 615 px -- a lista deixa de crescer por causa dos BOTOES
+     em vez do conteudo, e os cinco cabem numa linha so.
+     O <li> e flex EM LINHA e a faixa e o ultimo filho: quem faz a quebra e o flex-wrap do
+     PROPRIO <li>, e por isso a classe vai nos dois -- uma variante so no .ctrl nao teria como
+     mandar o pai quebrar. Regra nova em vez de mexer na existente: as outras nove listas da
+     ferramenta continuam com a coluna na lateral, sem um byte de diferenca. */
+  .lista-imgs li.acoes-abaixo{flex-wrap:wrap}
+  .lista-imgs li.acoes-abaixo .ctrl.abaixo{flex-direction:row;width:100%;justify-content:flex-end;
+    gap:6px;margin-top:8px;padding-top:8px;border-top:1px solid var(--linha)}
+  .lista-imgs .ctrl.abaixo button{width:auto;min-width:34px;padding:0 9px;height:26px;font-size:13px}
   /* Area de rolagem propria da lista (hoje so a do slideshow a usa). Sem ela, 46 fotos
      empurram as secoes 2, 3 e 4 da aba para 5,5 mil pixels abaixo. O teto e de 5 cartoes
      inteiros -- ver o comentario de sListaVer para o porque deste numero. */
@@ -3576,6 +3591,7 @@
         <legend>Cadastrar pacote</legend>
         <p class="ajuda">Os opcionais deste pacote só aparecem para o cliente na <b>página de obrigado</b> — o TidyCal não sabe o que é um opcional, então a vitrine mostra só o preço do pacote.</p>
         <div class="caixa-editor">
+          <p class="ajuda alerta" id="a-pac-copia" style="display:none"></p>
           <div id="a-pfam-campo" style="display:none">
             <label for="a-pfam">Família <small>(o passo 1 da vitrine)</small></label>
             <select id="a-pfam"></select>
@@ -5367,6 +5383,69 @@ function fcOpPendente(idAviso,buf,idx,nomeItem,item,idBotao){
   el.textContent=(idx>=0)
     ? ('Estes opcionais ainda não foram salvos. Você está editando \u201c'+nomeItem+'\u201d — clique em \u201c'+rot+'\u201d para gravar.')
     : ('Estes opcionais ainda não foram salvos em '+item+' nenhum. Termine o cadastro acima e clique em \u201c'+rot+'\u201d.');
+}
+/* ============ duplicar um item de lista cadastrada ============ */
+/* Pedido do dono em 03/09/2026, na aba Agendamento por pacote: "a maioria dos pacotes mudam
+   poucas coisas (duracao, descricao)". As tres funcoes abaixo sao a PECA REAPROVEITAVEL, e
+   nenhuma delas conhece pacote, produto, cupom ou opcional. Uma aba que queira duplicar
+   escreve so o proprio *Duplicar(i): le o item, deriva codigo e nome com fcDupCod/fcDupNome e
+   chama o *Render dela.
+   POR QUE O NOME GANHA MARCA, e nao so o codigo: nome repetido NAO e recusado em lugar nenhum
+   -- e nem poderia ser, porque dois pacotes de familias diferentes podem legitimamente se
+   chamar "Ensaio 1h". Duas linhas identicas na vitrine seriam um defeito INVISIVEL: o cliente
+   veria duas opcoes iguais sem ter como escolher. Com a marca, o esquecimento fica gritante na
+   tela do dono e na do cliente. Trocar defeito invisivel por visivel e a escolha que este
+   projeto ja fez no limiar de urgencia e na correcao a vista dos campos numericos. */
+function fcDupNome(nome){
+  var n=String(nome==null?'':nome),m=n.match(/ \(c\u00f3pia(?: (\d+))?\)$/);
+  if(!n)return '';
+  if(!m)return n+' (c\u00f3pia)';
+  return n.substring(0,m.index)+' (c\u00f3pia '+((parseInt(m[1],10)||1)+1)+')';
+}
+/* O CODIGO DA COPIA NAO COLIDE, e diz de quem ele e copia. 'norm' e a normalizacao da propria
+   aba (na Agendamento por pacote e aCodPix, a MESMA que decide o identificador do Pix), e nao
+   uma comparacao de texto cru: "MINI-1H" e "MINI1H" sao dois codigos na tela e um identificador
+   so no Pix, e e essa a colisao que importa.
+   '-COPIA' em vez de '-2': um "E905-DU-1H-2" salvo por engano passa por codigo legitimo na
+   lista, e so seria descoberto na conciliacao; "E905-DU-1H-COPIA" nao passa por nada -- ele
+   pede troca so de ser lido. O criterio nao e evitar a colisao (a derivacao ja evita), e sim
+   que uma copia esquecida seja impossivel de nao ver. */
+function fcDupCod(cod,usados,norm){
+  var base=String(cod==null?'':cod),vistos={},i,cand,n;
+  if(!base)return '';
+  for(i=0;i<usados.length;i++){n=norm(usados[i]);if(n)vistos[n]=1;}
+  cand=base+'-COPIA';
+  i=2;
+  /* Teto para o laco nao poder ficar preso. Estourado, o campo volta VAZIO e a recusa
+     "Informe o codigo do pacote" pede o codigo -- em vez de a ferramenta travar sem dizer
+     nada. */
+  while(vistos[norm(cand)]){if(i>999)return '';cand=base+'-COPIA-'+i;i++;}
+  return cand;
+}
+/* A FAIXA DE BOTOES de um item de lista. Onze *Render da ferramenta escreviam este mesmo
+   forEach copiado, com a mesma tupla [rotulo, acao, titulo, desabilitado]; aqui ele ganha um
+   dono so, e com ele vem o arranjo 'abaixo' -- a faixa numa linha propria embaixo do item
+   (ver a regra .lista-imgs li.acoes-abaixo). Adotam-no por enquanto as DUAS listas da aba
+   Agendamento por pacote, que sao as que ganharam o botao de duplicar; as outras nove ficam
+   onde estao ate serem pedidas, e a peca existe para que a proxima nao seja uma segunda
+   implementacao.
+   Tupla com valor falso e PULADA: e o que deixa um chamador montar a faixa com um botao
+   condicional sem partir a lista em dois arrays. */
+function fcCtrl(li,botoes,abaixo){
+  var ctrl=document.createElement('div');
+  ctrl.className=abaixo?'ctrl abaixo':'ctrl';
+  botoes.forEach(function(b){
+    if(!b)return;
+    var bt=document.createElement('button');
+    bt.type='button';
+    bt.textContent=b[0];bt.title=b[2];bt.setAttribute('aria-label',b[2]);
+    bt.disabled=!!b[3];
+    bt.addEventListener('click',b[1]);
+    ctrl.appendChild(bt);
+  });
+  if(abaixo)li.className=li.className?(li.className+' acoes-abaixo'):'acoes-abaixo';
+  li.appendChild(ctrl);
+  return ctrl;
 }
 function corValida(v){return /^#[0-9a-fA-F]{6}$/.test(v);}
 /* Rede do gerador: le o campo de texto da cor e devolve o padrao quando o valor nao e um
@@ -12163,10 +12242,13 @@ function uProdEditar(i){
   var p=uProds[i];
   $('u-pnome').value=p.nome;$('u-pdesc').value=p.desc||'';$('u-ppreco').value=p.preco;
   uEditOps=(p.ops||[]).map(function(o){return {nome:o.nome,preco:o.preco,qtd:!!o.qtd};});
-  uEditIdx=i;uOpRender();
+  /* O ROTULO ANTES DO uOpRender: fcOpPendente le o rotulo deste botao -- ver o mesmo
+     apontamento em aPacEditar (Agendamento por pacote), onde o defeito foi medido. */
+  uEditIdx=i;
+  $('u-prod-salvar').textContent='Salvar alterações';
+  uOpRender();
   setRadio('u-opsel',p.opsel);setRadio('u-opnenhum',p.opnenhum);
   setRadio('u-pqtd',p.qtd?'sim':'nao');
-  $('u-prod-salvar').textContent='Salvar alterações';
   $('u-prod-cancelar').style.display='inline-block';
   uToggles();
 }
@@ -15033,10 +15115,17 @@ function aOpRender(){
     cq.addEventListener('change',function(){aEditOps[i].qtd=cq.checked;salvarEstado();});
     lq.appendChild(cq);lq.appendChild(document.createTextNode('vende por quantidade'));
     info.appendChild(lq);
-    var ctrl=document.createElement('div');ctrl.className='ctrl';
-    [['↑',function(){aOpMove(i,-1);},'Subir'],['↓',function(){aOpMove(i,1);},'Descer'],['✕',function(){aOpDel(i);},'Remover']]
-      .forEach(function(b){var bt=document.createElement('button');bt.textContent=b[0];bt.title=b[2];bt.setAttribute('aria-label',b[2]);bt.addEventListener('click',b[1]);ctrl.appendChild(bt);});
-    li.appendChild(info);li.appendChild(ctrl);
+    li.appendChild(info);
+    /* O DUPLICAR DO OPCIONAL ACRESCENTA NA LISTA, e nao carrega um formulario -- ao contrario
+       do pacote. Medido na propria interface: os TRES campos do opcional (nome, preco e
+       "vende por quantidade") sao editaveis NA PROPRIA LINHA, enquanto os sete do pacote so
+       existem no formulario ao lado e a linha dele e um resumo que nao se edita. Levar a copia
+       do opcional para um formulario seria tirar o dono de onde ele ja pode digitar.
+       A copia entra LOGO ABAIXO da original, e nao no fim: numa lista de varios e o que deixa
+       obvio de quem ela e copia, sem precisar de seta nenhuma depois. */
+    fcCtrl(li,[['↑',function(){aOpMove(i,-1);},'Subir'],['↓',function(){aOpMove(i,1);},'Descer'],
+      ['⧉',function(){aOpDuplicar(i);},'Duplicar este opcional'],
+      ['✕',function(){aOpDel(i);},'Remover']],true);
     ul.appendChild(li);
   });
   fcOpPendente('a-op-pendente',aEditOps,aEditIdx,(aEditIdx>=0&&aPacotes[aEditIdx])?aPacotes[aEditIdx].nome:'','pacote','a-pac-salvar');
@@ -15052,6 +15141,11 @@ function aOpAdd(){
 }
 function aOpMove(i,d){var j=i+d;if(j<0||j>=aEditOps.length)return;var t=aEditOps[i];aEditOps[i]=aEditOps[j];aEditOps[j]=t;aOpRender();salvarEstado();}
 function aOpDel(i){aEditOps.splice(i,1);aOpRender();salvarEstado();}
+function aOpDuplicar(i){
+  var o=aEditOps[i];if(!o)return;
+  aEditOps.splice(i+1,0,{nome:fcDupNome(o.nome),preco:o.preco,qtd:!!o.qtd});
+  aOpRender();salvarEstado();
+}
 
 /* ===== cupons de desconto =====
    Copia de uCpCodAjustar/uCpRender/uCpPctErro/uCpAdd/uCpDel (10436+ antes desta tarefa), com o
@@ -15271,10 +15365,17 @@ function aPacLimpar(){
   $('a-pinclui').value='';$('a-ppath').value='';
   /* nunca em branco: sem familia selecionada o pacote nasceria orfao */
   $('a-pfam').value=aFamilias.length?aFamilias[0].id:'';
-  aEditOps=[];aEditIdx=-1;aOpRender();
-  $('a-op-qtd').checked=false;
+  /* OS ROTULOS ANTES DO aOpRender, e nao depois. fcOpPendente LE o rotulo do botao de salvar
+     para montar a frase ("clique em X para gravar"), entao desenhar a lista antes de trocar o
+     rotulo faz o aviso citar o rotulo do modo ANTERIOR. Em aPacLimpar isso nunca aparecia (o
+     buffer fica vazio e o aviso some), mas em aPacEditar aparecia -- ver la. */
+  aEditOps=[];aEditIdx=-1;
   $('a-pac-salvar').textContent='Adicionar pacote';
+  $('a-pac-cancelar').textContent='Cancelar edição';
   $('a-pac-cancelar').style.display='none';
+  aPacCopiaAviso(null);
+  aOpRender();
+  $('a-op-qtd').checked=false;
 }
 /* Corrige o codigo do pacote A VISTA, no proprio campo -- molde de uCpCodAjustar (10527) e da
    regra do projeto (CLAUDE.md: campo que alimenta a saida se corrige na TELA, em 'change'/
@@ -15282,6 +15383,23 @@ function aPacLimpar(){
    letra/numero/hifen, maiuscula) acontecia so DENTRO de aPacSalvar, sem devolver o valor
    corrigido ao campo -- o operador digitava "mini 1h" e so descobria que virou "MINI1H"
    olhando a lista depois de salvar. */
+/* A NORMALIZACAO DO CODIGO, num lugar so: e ela que decide se dois codigos sao o mesmo
+   identificador de conciliacao no Pix, que aceita apenas letras e numeros. aRecusa (na
+   geracao), aPacSalvar (no cadastro) e fcDupCod (na copia) fazem a MESMA pergunta -- escrita
+   tres vezes, uma delas podia ganhar uma regra nova e as outras duas continuarem como estavam,
+   sem nada quebrar e sem ninguem perceber. */
+function aCodPix(cod){return String(cod==null?'':cod).replace(/[^A-Za-z0-9]/g,'').toUpperCase();}
+/* Devolve o codigo JA CADASTRADO que colide com este, ou ''. 'ignorar' e o indice do pacote em
+   edicao: sem ele, salvar um pacote sem mexer no codigo colidiria com ele mesmo. */
+function aCodColide(cod,ignorar){
+  var k=aCodPix(cod),i;
+  if(!k)return '';
+  for(i=0;i<aPacotes.length;i++){
+    if(i===ignorar)continue;
+    if(aCodPix(aPacotes[i].cod)===k)return aPacotes[i].cod;
+  }
+  return '';
+}
 function aPcodAjustar(){
   var el=$('a-pcod');if(!el)return false;
   var cod=String(el.value).trim().replace(/[^A-Za-z0-9-]/g,'').toUpperCase();
@@ -15293,6 +15411,15 @@ function aPacSalvar(){
   aPcodAjustar();aPpathAjustar();
   var cod=String($('a-pcod').value).trim();
   if(!cod){alert('Informe o código do pacote.');return;}
+  /* A COLISAO DE CODIGO PASSA A SER RECUSADA AQUI, e nao so na geracao. Medido em 03/09/2026,
+     antes desta linha: dois pacotes com o mesmo codigo entravam no catalogo sem aviso nenhum, e
+     a recusa so aparecia la embaixo, na previa e no "Gerar" -- longe do formulario, e sem dizer
+     que o pacote ja tinha sido gravado. Com o botao de duplicar isso deixa de ser hipotese: a
+     copia nasce com o codigo derivado, o dono troca o codigo a mao (e o que ele vai fazer
+     sempre) e pode digitar um que ja existe. aRecusa continua igual -- ela tambem protege
+     estado importado e o codigo alterado por outro caminho. */
+  var colide=aCodColide(cod,aEditIdx);
+  if(colide){alert('Já existe um pacote com o código "'+colide+'". Ele e "'+cod+'" viram o mesmo identificador no Pix ('+aCodPix(cod)+'), porque o Pix aceita apenas letras e números — uma cobrança seria conciliada como a do outro pacote. Troque o código antes de salvar.');return;}
   var nome=$('a-pnome').value.trim();
   if(!nome){alert('Informe o nome do pacote.');return;}
   var preco=parseFloat(String($('a-ppreco').value).replace(',','.'));
@@ -15313,13 +15440,68 @@ function aPacEditar(i){
   $('a-ppreco').value=p.preco;$('a-pinclui').value=p.inclui||'';$('a-ppath').value=p.cal||'';
   $('a-pfam').value=(p.fam&&aFamAcha(p.fam))?p.fam:(aFamilias.length?aFamilias[0].id:'');
   aEditOps=(p.ops||[]).map(function(o){return {nome:o.nome,preco:o.preco,qtd:!!o.qtd};});
-  aEditIdx=i;aOpRender();
+  aEditIdx=i;
   /* Acentuado ("alterações"), diferente do molde de uProdEditar/mProdEditar (10620/17003):
      e texto de interface, e a norma de 01/09/2026 (CLAUDE.md, "todo texto que uma pessoa le
      sai acentuado") vale para ele. Nao mexido nos dois originais por estarem fora do arquivo
      desta tarefa -- ver o mesmo apontamento em aPacRender, acima. */
+  /* O ROTULO ANTES DO aOpRender (03/09/2026): fcOpPendente le o rotulo DESTE botao para montar
+     a frase, e ate aqui aOpRender rodava antes da troca. Medido: abrir no lapis um pacote com
+     opcionais, vindo do modo "criar", desenhava o aviso dizendo "clique em Adicionar pacote"
+     enquanto o botao ao lado ja dizia "Salvar alterações" -- o aviso mandava apertar um botao
+     que nao existia mais na tela. O mesmo defeito existia em uProdEditar e mProdEditar, e foi
+     corrigido junto. */
   $('a-pac-salvar').textContent='Salvar alterações';
+  $('a-pac-cancelar').textContent='Cancelar edição';
   $('a-pac-cancelar').style.display='inline-block';
+  aPacCopiaAviso(null);
+  aOpRender();
+}
+/* ===== duplicar um pacote =====
+   DUPLICAR CARREGA UMA COPIA NO FORMULARIO, e nao cria item na lista (decisao do dono): assim
+   nenhum codigo repetido nasce no catalogo, e a copia so passa a existir quando ele salvar.
+   A PRIMEIRA LINHA E O aPacLimpar, e ela e a que importa. O formulario guarda 'aEditIdx', que
+   SOBREVIVE A RECARGA; duplicar a partir de um formulario em modo EDICAO deixaria o botao
+   dizendo "Salvar alterações" apontando para o pacote que estava sendo editado, e o clique
+   seguinte gravaria a copia POR CIMA dele -- o mesmo defeito corrigido em 03/09/2026 no caminho
+   do preset (fcPresetZerarForm), chegando por outra porta.
+   O foco vai para o codigo e o texto ja nasce SELECIONADO: o primeiro campo a trocar e ele, e o
+   dono digita por cima sem precisar apagar o '-COPIA'. */
+function aPacDuplicar(i){
+  var p=aPacotes[i];if(!p)return;
+  aPacLimpar();
+  $('a-pcod').value=fcDupCod(p.cod,aPacotes.map(function(q){return q.cod;}),aCodPix);
+  $('a-pnome').value=fcDupNome(p.nome);
+  $('a-pdur').value=p.dur||'';
+  $('a-ppreco').value=p.preco;
+  $('a-pinclui').value=p.inclui||'';
+  $('a-ppath').value=p.cal||'';
+  $('a-pfam').value=(p.fam&&aFamAcha(p.fam))?p.fam:(aFamilias.length?aFamilias[0].id:'');
+  /* OS OPCIONAIS VAO JUNTO, com a marca "vende por quantidade" de cada um -- foi pedido
+     explicito ("duplicar um pacote (e seus opcionais)"). Copia chave a chave, como aPacEditar:
+     sem isto os dois pacotes apontariam para o MESMO array, e mexer num opcional da copia
+     mexeria no original ja gravado. */
+  aEditOps=(p.ops||[]).map(function(o){return {nome:o.nome,preco:o.preco,qtd:!!o.qtd};});
+  $('a-pac-cancelar').textContent='Descartar cópia';
+  $('a-pac-cancelar').style.display='inline-block';
+  aPacCopiaAviso(p);
+  aOpRender();
+  salvarEstado();
+  var el=$('a-pcod');
+  if(el){try{el.focus();el.select();}catch(e){}}
+}
+/* O AVISO DE COPIA no alto do formulario. Nao e enfeite: o formulario tem dois modos que se
+   parecem (criar e editar), e uma copia carregada nele e um TERCEIRO estado, que so o rotulo
+   "Adicionar pacote" distinguiria do primeiro. O aviso diz de qual pacote a copia veio, que ela
+   ainda nao existe, e que o original nao foi tocado.
+   Ele NAO sobrevive a recarga, e nem teria o que dizer se sobrevivesse: os campos de texto do
+   formulario nunca foram gravados no estado (aColeta guarda so 'edops' e 'editidx'), entao
+   depois de recarregar nao ha copia nenhuma na tela sobre a qual avisar. */
+function aPacCopiaAviso(p){
+  var el=$('a-pac-copia');if(!el)return;
+  if(!p){el.style.display='none';el.textContent='';return;}
+  el.style.display='block';
+  el.textContent='Esta é uma cópia de \u201c'+p.nome+'\u201d (código '+p.cod+'). Ela ainda não existe: confira o código e o nome e clique em \u201cAdicionar pacote\u201d. O pacote original não é alterado.';
 }
 /* O VIZINHO E DA MESMA FAMILIA, e nao o item seguinte da lista plana. Trocando com o vizinho
    de outra familia o 'fam' viaja dentro do objeto -- ninguem muda de familia, e a vitrine nao
@@ -15399,13 +15581,14 @@ function aPacRender(){
     var nq=aQtdItens(p);
     txt.textContent=p.cod+' — '+p.nome+' — '+precoFmt('BRL',parseFloat(p.preco)||0)+qtdops+(nq?(' · '+nq+' com quantidade'):'');
     info.appendChild(txt);
-    var ctrl=document.createElement('div');ctrl.className='ctrl';
-    [['↑',function(){aPacMove(i,-1);},'Subir',aPacVizinho(i,-1)<0],
+    li.appendChild(info);
+    /* CINCO BOTOES, EMBAIXO DO ITEM (pedido do dono, 03/09/2026) -- ver a regra
+       .lista-imgs li.acoes-abaixo. O 'i' continua sendo o INDICE PLANO em aPacotes. */
+    fcCtrl(li,[['↑',function(){aPacMove(i,-1);},'Subir',aPacVizinho(i,-1)<0],
      ['↓',function(){aPacMove(i,1);},'Descer',aPacVizinho(i,1)<0],
+     ['⧉',function(){aPacDuplicar(i);},'Duplicar este pacote',false],
      ['✎',function(){aPacEditar(i);salvarEstado();},'Editar',false],
-     ['✕',function(){aPacDel(i);},'Remover',false]]
-      .forEach(function(b){var bt=document.createElement('button');bt.textContent=b[0];bt.title=b[2];bt.setAttribute('aria-label',b[2]);bt.disabled=!!b[3];bt.addEventListener('click',b[1]);ctrl.appendChild(bt);});
-    li.appendChild(info);li.appendChild(ctrl);
+     ['✕',function(){aPacDel(i);},'Remover',false]],true);
     ul.appendChild(li);
   }
   aFamilias.forEach(function(f){
@@ -15453,7 +15636,7 @@ function aRecusa(cfg){
     p=cfg.pacotes[i];
     if(!p.cod)return 'O pacote "'+(p.nome||('#'+(i+1)))+'" está sem código. O código é o que o TidyCal guarda para identificar o pacote.';
     if(!/^[A-Za-z0-9-]+$/.test(p.cod))return 'O código "'+p.cod+'" tem caractere que não pode ir na URL. Use apenas letras, números e hífen.';
-    limpo=p.cod.replace(/[^A-Za-z0-9]/g,'').toUpperCase();
+    limpo=aCodPix(p.cod);
     if(vistos[limpo])return 'Os códigos "'+vistos[limpo]+'" e "'+p.cod+'" viram o mesmo identificador no Pix ('+limpo+'), porque o Pix aceita apenas letras e números. Troque um dos dois.';
     vistos[limpo]=p.cod;
     if(!p.nome)return 'O pacote "'+p.cod+'" está sem nome.';
@@ -19848,10 +20031,13 @@ function mProdEditar(i){
   $('m-pnome').value=p.nome;$('m-pdesc').value=p.desc||'';$('m-ppreco').value=p.preco;
   $('m-pcat').value=p.cat||'';$('m-pimg').value=p.img||'';
   mEditOps=(p.ops||[]).map(function(o){return {nome:o.nome,preco:o.preco,qtd:!!o.qtd};});
-  mEditIdx=i;mOpRender();
+  /* O ROTULO ANTES DO mOpRender: fcOpPendente le o rotulo deste botao -- ver o mesmo
+     apontamento em aPacEditar (Agendamento por pacote), onde o defeito foi medido. */
+  mEditIdx=i;
+  $('m-prod-salvar').textContent='Salvar alterações';
+  mOpRender();
   setRadio('m-opsel',p.opsel);setRadio('m-opnenhum',p.opnenhum);
   setRadio('m-pqtd',p.qtd?'sim':'nao');
-  $('m-prod-salvar').textContent='Salvar alterações';
   $('m-prod-cancelar').style.display='inline-block';
   mToggles();
 }
