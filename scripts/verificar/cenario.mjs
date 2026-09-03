@@ -83,10 +83,13 @@ export async function conteudo(pg){
      A ABA E NOVA e nao existe na referencia (main) enquanto a rodada nao mescla -- guardado
      com a MESMA checagem que o loop de ABAS ja usa mais abaixo, para a captura da referencia
      nao lancar tentando clicar num botao que ainda nao existe la.
-     A COLUNA p[5] E A URL INTEIRA de proposito (Task 4 do plano v2, 03/09/2026): o campo
-     'a-plink' virou 'a-ppath' e passou a pedir so o caminho, mas aPacSalvar aceita colar a URL
-     inteira tambem -- o prefixo 'https://tidycal.com/' e removido sozinho (fcTidyPathNorm).
-     Manter a URL aqui, sem editar o valor, exercita esse caminho tolerante.
+     A COLUNA p[5] E A URL INTEIRA, e ela NAO MUDA desde 03/09/2026 -- o campo ja passou por
+     tres formas ('a-plink' com a URL, 'a-ppath' so com o caminho, e de novo a URL desde a
+     rodada do dominio proprio) e a mesma linha atravessou as tres. E de proposito: mantida
+     assim, ela prova que uma configuracao em tidycal.com continua gerando o bloco BYTE A BYTE
+     igual depois da rodada que abriu o campo para dominio proprio. O caminho de dominio
+     proprio -- o que muda o bloco -- e exercitado por scripts/verificar/tidycal-origem.mjs,
+     que roda o bloco de verdade; aqui ele nao entra para esta linha nao perder esse papel.
      O CAMPO E ACHADO EM TEMPO DE EXECUCAO (a-ppath ou, na REFERENCIA anterior a Task 4,
      a-plink): a mesma checagem de '#aba-pac' logo abaixo, so que por campo -- sem ela este
      script quebra ao rodar contra uma arvore de referencia anterior a esta rodada.
