@@ -2,4 +2,4 @@
 # com ?v=: <arquivo>  <versao declarada>  <sha256 do conteudo>.
 fc-compartilhado.js  2026-08-23a  a142e3306a401a51825b8dbe0e587e0f913d28a744603776f7eb2231558a8735
 cobrar/manifest.json  2026-08-21a  24f17032ec53dda30e8ac8489beee9d2124db8c617e4700713b2355a3f556dad
-index.html  2026-09-03b  d30b10ee5ac2a7feb661d1f36e5ac9cd43884c3b60ac1bbdf912de60d08b76ad
+index.html  2026-09-03c  ef2fabb76dd066bd6de47a5f3d62a4657320ec2b81c7fe587efa1722893c83ac
