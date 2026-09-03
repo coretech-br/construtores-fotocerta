@@ -11634,8 +11634,13 @@ function uProdRender(){
        dava "2 opcionalis". Corrigido em 02/09/2026 (cc5aaae) com a palavra inteira trocada,
        como aPacRender ja fazia (14622+, aba Agendamento por pacote). */
     var qtd=(p.ops&&p.ops.length)?(' \u00b7 '+p.ops.length+(p.ops.length>1?' opcionais':' opcional')):' \u00b7 sem opcionais';
-    var nq=uQtdItens(p);
-    txt.textContent=p.nome+' — '+uFmt(parseFloat(p.preco)||0)+qtd+(nq?(' \u00b7 '+nq+' com quantidade'):'');
+    /* A conta e dos OPCIONAIS, e o produto em si e dito a parte, com o mesmo '(por quantidade)'
+       que a Mini loja ja usava. Antes ela era uQtdItens INTEIRO -- que conta o produto junto,
+       porque e o gatilho do recurso --, e um produto por quantidade sem nenhum opcional
+       aparecia como "1 com quantidade" ao lado de "sem opcionais": a linha afirmava um opcional
+       que nao existe. Agora a frase quer dizer a MESMA coisa nas tres abas que a mostram. */
+    var nq=uQtdItens(p)-(p.qtd?1:0);
+    txt.textContent=p.nome+' — '+uFmt(parseFloat(p.preco)||0)+(p.qtd?' (por quantidade)':'')+qtd+(nq?(' \u00b7 '+nq+' com quantidade'):'');
     info.appendChild(txt);
     var ctrl=document.createElement('div');ctrl.className='ctrl';
     [['\u2191',function(){uProdMove(i,-1);},'Subir'],['\u2193',function(){uProdMove(i,1);},'Descer'],
@@ -14772,12 +14777,14 @@ function aPacDel(i){
    quantidade propria aqui, so os opcionais dele (aOpRender, o checkbox 'lq'). Sem isto o
    Checkout e a Mini loja escondiam o campo quando nao ha o que ele configure, e esta aba o
    deixava sempre visivel. */
+function aQtdItens(p){
+  var ops=p.ops||[],n=0,i;
+  for(i=0;i<ops.length;i++)if(ops[i].qtd)n++;
+  return n;
+}
 function aQtdLigada(pacotes){
-  var i,j,ops;
-  for(i=0;i<pacotes.length;i++){
-    ops=pacotes[i].ops||[];
-    for(j=0;j<ops.length;j++)if(ops[j].qtd)return true;
-  }
+  var i;
+  for(i=0;i<pacotes.length;i++)if(aQtdItens(pacotes[i]))return true;
   return false;
 }
 /* A lista passa a ser desenhada AGRUPADA POR FAMILIA, com um cabecalho por familia -- mas so
@@ -14806,7 +14813,11 @@ function aPacRender(){
        Palavra INTEIRA trocada no plural. uProdRender (11487+) escrevia '+is' quando este
        comentario foi escrito, e foi corrigido para a mesma forma em 02/09/2026 (cc5aaae). */
     var qtdops=(p.ops&&p.ops.length)?(' · '+p.ops.length+(p.ops.length>1?' opcionais':' opcional')):' · sem opcionais';
-    txt.textContent=p.cod+' — '+p.nome+' — '+precoFmt('BRL',parseFloat(p.preco)||0)+qtdops;
+    /* Quantos opcionais deste pacote vendem por quantidade -- a mesma frase do Checkout e da
+       Mini loja. Aqui nao ha o que somar do proprio pacote: pacote nao tem quantidade, so os
+       opcionais dele (e por isso aQtdItens conta so os opcionais). */
+    var nq=aQtdItens(p);
+    txt.textContent=p.cod+' — '+p.nome+' — '+precoFmt('BRL',parseFloat(p.preco)||0)+qtdops+(nq?(' · '+nq+' com quantidade'):'');
     info.appendChild(txt);
     var ctrl=document.createElement('div');ctrl.className='ctrl';
     [['↑',function(){aPacMove(i,-1);},'Subir',aPacVizinho(i,-1)<0],
@@ -19298,7 +19309,12 @@ function mProdRender(){
     cat.textContent=p.cat?p.cat:'sem categoria';
     if(!p.cat)cat.className='m-cat-selo vazio';
     var ops=document.createElement('div');ops.className='sub';
-    ops.textContent=(p.ops||[]).length?((p.ops.length===1?'1 opcional':p.ops.length+' opcionais')+' ('+(p.opsel==='multiplo'?'vários':'apenas 1')+')'):'sem opcionais';
+    /* A conta entra na linha que JA fala dos opcionais, e conta so eles: o produto em si ja
+       diz '(por quantidade)' na linha do preco, logo acima, e repetir aqui faria o mesmo
+       cartao afirmar duas vezes a mesma coisa. mQtdItens e o gatilho do recurso e conta o
+       produto junto -- por isso ele sai da conta aqui. */
+    var nq=mQtdItens(p)-(p.qtd?1:0);
+    ops.textContent=((p.ops||[]).length?((p.ops.length===1?'1 opcional':p.ops.length+' opcionais')+' ('+(p.opsel==='multiplo'?'vários':'apenas 1')+')'):'sem opcionais')+(nq?(' · '+nq+' com quantidade'):'');
     info.appendChild(t);info.appendChild(url);info.appendChild(cat);info.appendChild(ops);
     var ctrl=document.createElement('div');ctrl.className='ctrl';
     [['\u2191',function(){mProdMove(i,-1);},'Subir'],['\u2193',function(){mProdMove(i,1);},'Descer'],
