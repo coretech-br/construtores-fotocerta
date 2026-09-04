@@ -104,7 +104,8 @@ function instalarRelogioFalso(pg, quando){
    em uso", e esse erro nao teria nada a ver com o que de fato quebrou. */
 export async function comBlocoNaPagina({
   bloco = '', cabeca = '', corpoAntes = '', corpoDepois = '',
-  busca = '', porta = 8790, reducedMotion = false, relogio = null, permitir = [], bloquear = [], medir
+  busca = '', porta = 8790, reducedMotion = false, relogio = null, permitir = [], bloquear = [],
+  retardar = [], medir
 }){
   if(typeof medir !== 'function'){
     throw new Error('comBlocoNaPagina precisa de uma funcao medir(pg) -- e ela quem sabe o que este teste esta verificando.');
@@ -147,8 +148,17 @@ export async function comBlocoNaPagina({
          TidyCal nao carrega" nao serve fechar o host inteiro do CDN deles --
          medido, o proprio calendario tambem e servido de la, e o que se
          mediria seria uma pagina em branco. Cada padrao e um PEDACO de URL. */
-      const liberados = permitir.slice(), barrados = bloquear.slice();
-      await pg.route('**/*', route => {
+      /* `retardar` ATRASA uma requisicao em vez de barra-la, e existe porque ha
+         defeito que so aparece numa ORDEM de chegada -- nao na ausencia de uma
+         das partes. A corrida entre o embed.js do TidyCal e o aperto de mao
+         proprio e esse caso: quem chega primeiro fica com o comando, e esperar a
+         rede decidir sozinha mede a FREQUENCIA do defeito, nunca o defeito. Com
+         um atraso declarado a ordem passa a ser escolhida, e a mesma passagem
+         responde sempre a mesma coisa. Cada entrada e {padrao, ms} -- `padrao` e
+         um PEDACO de URL, como em `bloquear`. `bloquear` continua vencendo:
+         barrar e mais forte que atrasar. */
+      const liberados = permitir.slice(), barrados = bloquear.slice(), atrasos = retardar.slice();
+      await pg.route('**/*', async route => {
         const u = route.request().url();
         for(let i = 0; i < barrados.length; i++)
           if(u.indexOf(barrados[i]) >= 0){ route.abort(); return; }
@@ -157,7 +167,11 @@ export async function comBlocoNaPagina({
           const h = new URL(u).host;
           deixaPassar = (h === origemPropria) || liberados.indexOf(h) >= 0;
         }catch(e){}
-        if(deixaPassar) route.continue(); else route.abort();
+        if(!deixaPassar){ route.abort(); return; }
+        for(let i = 0; i < atrasos.length; i++)
+          if(u.indexOf(atrasos[i].padrao) >= 0)
+            await new Promise(r => setTimeout(r, atrasos[i].ms));
+        try{ await route.continue(); }catch(e){}
       });
 
       if(relogio !== null) await instalarRelogioFalso(pg, relogio);

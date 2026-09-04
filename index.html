@@ -3985,8 +3985,8 @@
    QUEM IMPEDE QUE ELE MINTA: scripts/conferir-versoes.sh, que recusa index.html
    alterado sem a versao mudar junto -- a mesma disciplina do fc-compartilhado.js,
    e pela mesma razao: carimbo que ninguem confere e o defeito de amanha. */
-var FC_VERSAO='2026-09-04c';
-var FC_PUBLICADO='2026-09-04 17:05';   /* America/Sao_Paulo -- escrito pelo carimbador */
+var FC_VERSAO='2026-09-04d';
+var FC_PUBLICADO='2026-09-04 20:56';   /* America/Sao_Paulo -- escrito pelo carimbador */
 (function(){
   var el=document.getElementById('fc-versao');
   if(!el) return;
@@ -11783,7 +11783,41 @@ function fcTidyCalSrc(op){
   c+=i+'var ALTURA_MAXIMA=6000;   /* teto. Altura que vem de dentro do iframe e DADO, nao verdade: uma mensagem malformada nao pode virar uma pagina de 50.000px. Medido, o calendario mais alto deu 1747px -- 6000 e quase quatro vezes isso, entao cabe qualquer calendario de verdade e ainda assim segura o absurdo. */\n';
   if(op.inicial)c+=i+'var ALTURA_INICIAL='+op.inicial+';  /* altura de partida, ate a primeira medida chegar -- e a que fica se ela nunca chegar. Mesmo numero que o embed.js do TidyCal usa. */\n';
   c+=i+"var sizerId='fc'+Math.random().toString(36).slice(2,8);\n";
-  c+=i+'var alturaViva=false, libNoComando=false, manualAtivo=false, libFalhou=false, sizerTimers=[];\n';
+  c+=i+'var alturaViva=false, libFalhou=false, sizerTimers=[];\n';
+  /* ===== QUEM ESTA NO COMANDO MORA NO PROPRIO QUADRO (04/09/2026) =====
+     Ate esta data o comando era descrito por duas bandeiras deste BLOCO ('libNoComando' e
+     'manualAtivo'), e a intencao escrita na fonte -- "nunca os dois juntos" -- era violavel nos
+     dois sentidos. Os dois foram medidos com o calendario de verdade
+     (scripts/verificar/corrida-calendario.mjs, que forca a ordem de chegada em vez de esperar
+     a sorte da rede):
+       - com o embed.js atrasado, o aperto de mao proprio assumia aos 2,5s e a biblioteca deles
+         era aplicada AO MESMO ELEMENTO quando chegava. Ela ficava com o elemento e sem as
+         alturas -- o filho ja tinha aceitado o init do aperto de mao, e o filho aceita um init
+         so --, entao o quadro parava no minHeight de 500px dela enquanto o calendario seguia
+         anunciando a altura certa para um mecanismo recem-calado. Medido: 764 anunciado, 700
+         na tela; na vitrine, 1054 anunciado, 1021 na tela.
+       - e o contrario, sem atraso nenhum, em 1 de 4 passagens: o prazo de 2,5s reabria o aperto
+         de mao por cima de uma biblioteca ja aplicada que ainda nao recebera a primeira altura.
+     POR QUE UMA VARIAVEL DESTE BLOCO NAO RESOLVE, e isto tambem foi medido: 'comecarCalendario'
+     roda de novo a cada 'load' do iframe, e o PRIMEIRO 'load' chega DEPOIS de o aperto de mao
+     ja ter falado com o filho (medido: aperto de mao aos 2509ms, 'load' aos ~4500ms). Zerar a
+     variavel ali fazia a biblioteca, chegando aos 5235ms, se achar livre -- e a corrida voltava
+     inteira. Trocar uma variavel por outra so mudaria o nome do buraco.
+     A MARCA MORA NO ELEMENTO PORQUE E O ELEMENTO QUE OS DOIS DISPUTAM, e ela sobrevive a
+     qualquer reinicio do bloco:
+       data-fc-lib -- a biblioteca de altura do TidyCal foi aplicada a este quadro;
+       data-fc-mao -- o aperto de mao proprio ja mandou o init ao filho deste quadro.
+     As duas se excluem, e quem chega depois LE antes de agir. */
+  c+=i+'/* Quem cuida da altura DESTE quadro. A resposta esta no proprio quadro, e nao numa\n';
+  c+=i+'   variavel: comecarCalendario recomeca a cada "load" do iframe, e uma variavel zerada\n';
+  c+=i+'   ali deixaria a biblioteca ser aplicada por cima de um filho que ja aceitou o init do\n';
+  c+=i+'   aperto de mao -- o filho aceita um init so. */\n';
+  c+=i+'function comandoDe(f){\n';
+  c+=i+"  if(!f)return '';\n";
+  c+=i+"  if(f.getAttribute('data-fc-lib'))return 'lib';\n";
+  c+=i+"  if(f.getAttribute('data-fc-mao'))return 'manual';\n";
+  c+=i+"  return '';\n";
+  c+=i+'}\n';
   /* ===== PRE-CONEXAO (04/09/2026) =====
      Medido na pagina publicada do dono (fotocerta.com.br/estudio-905-locacao): do clique no
      pacote ate o calendario aparecer sao 9115ms na PRIMEIRA vez e 787ms na segunda. Dos ~9s,
@@ -11833,14 +11867,17 @@ function fcTidyCalSrc(op){
   c+=i+'function pedirAltura(){\n';
   c+=i+'  var f=frame(); if(!f||!f.contentWindow)return;\n';
   c+=i+'  var o='+op.origem+'; if(!o)return;\n';
-  c+=i+"  try{ f.contentWindow.postMessage('[iFrameSizer]'+sizerId+SIZER_INIT,o); }catch(e){}\n";
+  c+=i+"  try{\n";
+  c+=i+"    f.contentWindow.postMessage('[iFrameSizer]'+sizerId+SIZER_INIT,o);\n";
+  c+=i+"    f.setAttribute('data-fc-mao','1');   /* o filho deste quadro recebeu o NOSSO init, e aceita um so: a biblioteca deles nao pode mais ser aplicada a ele */\n";
+  c+=i+'  }catch(e){}\n';
   c+=i+'}\n';
   c+=i+'/* O filho anuncia "Ready" quando fica pronto, mas esse anuncio pode chegar antes de este\n';
   c+=i+'   script existir. Por isso o pedido tambem sai sozinho, e repete ate a primeira altura\n';
   c+=i+'   chegar -- depois disso para, para nao ficar reiniciando o filho a toa. */\n';
   c+=i+'function comecarHandshake(){\n';
   c+=i+'  var k, esperas=[400,1200,3000];\n';
-  c+=i+'  manualAtivo=true;\n';
+  c+=i+"  if(comandoDe(frame())==='lib')return;   /* a biblioteca deles ja cuida deste quadro; um segundo init seria ignorado pelo filho e o que sobraria era um segundo dedo no mesmo botao */\n";
   c+=i+'  pedirAltura();\n';
   c+=i+'  for(k=0;k<esperas.length;k++)sizerTimers.push(setTimeout(function(){if(!alturaViva)pedirAltura();},esperas[k]));\n';
   c+=i+'}\n';
@@ -11848,7 +11885,7 @@ function fcTidyCalSrc(op){
   c+=i+'  var n=parseInt(bruto,10), f=frame();\n';
   c+=i+'  if(!f||!(n>0))return;   /* ":0:0:" e o que scrollToOffset e mouseenter mandam -- nao e altura */\n';
   c+=i+'  alturaViva=true;\n';
-  c+=i+'  if(libNoComando)return;   /* quem escreve a altura deste iframe e a biblioteca do TidyCal; dois dedos no mesmo botao brigariam por um pixel a cada sinal */\n';
+  c+=i+"  if(comandoDe(f)==='lib')return;   /* quem escreve a altura deste iframe e a biblioteca do TidyCal; dois dedos no mesmo botao brigariam por um pixel a cada sinal */\n";
   c+=i+'  if(n<ALTURA_MINIMA)n=ALTURA_MINIMA;\n';
   c+=i+'  if(n>ALTURA_MAXIMA)n=ALTURA_MAXIMA;\n';
   c+=i+"  f.style.height=n+'px';\n";
@@ -11860,23 +11897,23 @@ function fcTidyCalSrc(op){
   c+=i+'function aplicarBiblioteca(){\n';
   c+=i+'  var f=frame(), o='+op.origem+';\n';
   c+=i+"  if(!f||!o||!f.src||typeof window.iFrameResize!=='function')return;   /* sem src ainda a biblioteca guardaria a origem errada, e depois recusaria em silencio tudo que viesse do calendario */\n";
-  c+=i+"  if(f.getAttribute('data-fc-lib')){libNoComando=true;return;}\n";
+  c+=i+'  if(comandoDe(f))return;   /* alguem ja cuida deste quadro. "lib" e ela mesma (aplicar duas vezes ao mesmo iframe e ignorado por ela, com aviso no console); "manual" e o aperto de mao proprio, cujo init o filho ja aceitou -- e o filho aceita um init so, entao aplicar a biblioteca por cima a deixaria com o ELEMENTO e sem as ALTURAS, prendendo o quadro no minHeight de 500px dela. Medido em 04/09/2026, com o embed.js atrasado: 764 anunciado, 700 na tela. */\n';
   c+=i+'  try{\n';
   c+=i+'    /* checkOrigin como LISTA, e nao \'true\': com \'true\' a biblioteca deduz a origem do src do\n';
   c+=i+'       iframe no instante da aplicacao, e quem depende de instante depende de sorte. Aqui a\n';
   c+=i+'       origem e a MESMA que o ouvinte de message ja exige -- uma fonte so para as duas guardas. */\n';
   c+=i+"    window.iFrameResize({log:false,checkOrigin:[o],minHeight:ALTURA_MINIMA,heightCalculationMethod:SIZER_METODO},f);\n";
   c+=i+"    f.setAttribute('data-fc-lib','1');\n";
-  c+=i+'    libNoComando=true;\n';
   c+=i+'  }catch(e){}\n';
   c+=i+'}\n';
-  c+=i+'/* Desfaz o vinculo da biblioteca com um iframe que vai embora (troca de dominio na aba\n';
-  c+=i+'   de pacotes). Sem isto ela continuaria com o endereco anterior na conferencia de\n';
-  c+=i+'   origem, e o calendario novo ficaria mudo para ela. */\n';
-  c+=i+'function soltarBiblioteca(f){\n';
-  c+=i+'  libNoComando=false;\n';
-  c+=i+'  try{ if(f&&f.iFrameResizer&&f.iFrameResizer.close)f.iFrameResizer.close(); }catch(e){}\n';
-  c+=i+'}\n';
+  /* 'soltarBiblioteca' SAIU do bloco em 04/09/2026. Ela nasceu na epoca em que havia um
+     iframe so, reapontado a cada troca de pacote: desfazer o vinculo da biblioteca com o
+     endereco anterior fazia sentido ali. Desde os quadros por pacote nenhum src e reapontado
+     -- ha um quadro por endereco --, e um grep no arquivo mostrou que ela nunca foi chamada
+     por ninguem. Ficava viajando dentro de todo bloco colado no site, e o que ela faz e pior
+     que inutil: 'iFrameResizer.close()' REMOVE O IFRAME DO DOCUMENTO, entao o dia em que
+     alguem a chamasse achando que "solta a biblioteca" seria o dia em que o calendario
+     sumiria da pagina. Codigo morto que carrega uma arma nao e neutro. */
   c+=i+'/* Uma tag de script por PAGINA, e nao por bloco: dois blocos destes podem cair na mesma\n';
   c+=i+'   pagina (um calendario simples e uma vitrine de pacotes, por exemplo), e o embed.js\n';
   c+=i+'   nao precisa -- nem deve -- ser baixado duas vezes. O marcador data-fc-tidycal e o que\n';
@@ -11900,18 +11937,22 @@ function fcTidyCalSrc(op){
   c+=i+"  s.addEventListener('error',function(){libFalhou=true;if(!alturaViva)comecarHandshake();});\n";
   c+=i+'}\n';
   c+=i+'/* O comeco, e o unico lugar que decide QUEM cuida da altura. Ordem, e a razao dela: a\n';
-  c+=i+'   biblioteca deles tem a primeira chance; se em 2,5s nenhuma altura tiver chegado --\n';
-  c+=i+'   porque ela nao carregou, ou carregou e ficou calada --, o aperto de mao proprio\n';
-  c+=i+'   assume. Nunca os dois juntos: o filho aceita um init so (medido), e o perdedor ficaria\n';
-  c+=i+'   achando que esta no comando. */\n';
+  c+=i+'   biblioteca deles tem a primeira chance -- e a biblioteca do proprio calendario; se em\n';
+  c+=i+'   2,5s ela nao tiver assumido, porque nao carregou, o aperto de mao proprio assume.\n';
+  c+=i+'   Nunca os dois juntos: o filho aceita um init so (medido), e o perdedor ficaria achando\n';
+  c+=i+'   que esta no comando -- com o elemento na mao e sem altura nenhuma para escrever nele.\n';
+  c+=i+'   BIBLIOTECA JA APLICADA E CALADA NAO E MOTIVO PARA O APERTO DE MAO ENTRAR, e isso\n';
+  c+=i+'   mudou em 04/09/2026: o init dela ja foi dado ao filho, um segundo seria ignorado, e o\n';
+  c+=i+'   unico efeito seria um segundo dedo no mesmo botao. Quem recusa e comandoDe, dentro de\n';
+  c+=i+'   comecarHandshake -- um portao so, que vale tambem para os reinicios por "load" do\n';
+  c+=i+'   iframe. Se nem ela nem ele forem ouvidos, a altura de partida continua valendo, que e\n';
+  c+=i+'   a degradacao prometida. */\n';
   c+=i+'function comecarCalendario(){\n';
   c+=i+'  limparTimers();\n';
   c+=i+'  alturaViva=false;\n';
-  c+=i+'  manualAtivo=false;\n';
   c+=i+'  carregarBiblioteca();\n';
   c+=i+'  sizerTimers.push(setTimeout(function(){\n';
   c+=i+'    if(alturaViva)return;\n';
-  c+=i+'    libNoComando=false;\n';
   c+=i+'    comecarHandshake();\n';
   c+=i+'  },2500));\n';
   c+=i+'}\n';
@@ -11927,7 +11968,7 @@ function fcTidyCalSrc(op){
        (pedirAltura), e responder ao quadro errado faria o nosso init chegar a um calendario
        que nao esta na tela. */
     fonte:j+"if (!doQuadro(e)) return;   /* veio de outro iframe -- ver doQuadro */\n",
-    pronto:j+"if (e.data === '[iFrameResizerChild]Ready') { if (manualAtivo) pedirAltura(); return; }\n",
+    pronto:j+"if (e.data === '[iFrameResizerChild]Ready') { if (comandoDe(frame()) === 'manual') pedirAltura(); return; }\n",
     medida:j+"aplicarAltura(e.data.split(':')[1]);   /* [iFrameSizer]<id>:<altura>:<largura>:<tipo> */\n"
   };
 }
@@ -16901,8 +16942,12 @@ function aBlocoVitrine(cfg){
      chega SE ele ja comecou: o documento dele e o mesmo de antes, o filho aceita um init so
      (medido, ver fcTidyCalSrc) e um segundo init seria ignorado -- deixando o bloco achando
      que esta esperando uma altura que nunca vem. Entao o estado e RECONSTRUIDO a partir do que
-     o proprio quadro carrega: 'data-fc-lib' diz se a biblioteca deles esta no comando dele, e
-     a altura ja esta viva porque ele ja anunciou uma.
+     o proprio quadro carrega.
+     DESDE 04/09/2026 NAO HA MAIS NADA A RECONSTRUIR do lado do comando: quem cuida da altura
+     passou a morar no proprio elemento ('data-fc-lib' e 'data-fc-mao' -- ver comandoDe, em
+     fcTidyCalSrc), entao trocar de quadro ja traz a resposta certa junto com o quadro. O que
+     resta reconstruir e 'alturaViva', que e do BLOCO e nao do elemento: o quadro que chega ja
+     anunciou uma altura, e sem esta linha o prazo de 2,5s reabriria o aperto de mao nele.
      Quadro que nunca comecou faz o caminho de sempre, identico ao de antes desta rodada. */
   c+='function ativar(r){\n';
   c+='  if(quadroAtivo===r.f){\n';
@@ -16914,8 +16959,6 @@ function aBlocoVitrine(cfg){
   c+='  if(r.iniciado){\n';
   c+='    limparTimers();\n';
   c+='    alturaViva=true;\n';
-  c+="    libNoComando=!!r.f.getAttribute('data-fc-lib');\n";
-  c+='    manualAtivo=!libNoComando;\n';
   c+='  }else{\n';
   c+='    r.iniciado=true;\n';
   c+='    comecarCalendario();\n  }\n';
