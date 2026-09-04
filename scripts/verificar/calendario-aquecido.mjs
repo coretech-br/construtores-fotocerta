@@ -31,6 +31,17 @@
         passa pelo filtro de e.origin, e a altura dele seria escrita no
         calendario visivel. Defeito mudo -- nada quebra, o quadro so fica do
         tamanho errado.
+     4. ele carregou COM O TAMANHO CERTO? Esta pergunta faltava na primeira
+        versao deste arquivo, e o dono pagou por isso: em 04/09/2026 ele viu na
+        pagina publicada o calendario abrir e "sumir e voltar com um efeito
+        tipo fade". Nao eram duas cargas -- o src era atribuido uma vez e o
+        elemento era o mesmo. Era o quadro aquecido dentro de um container
+        display:none, ou seja, com LARGURA 0: o TidyCal se desenhava para uma
+        tela de zero pixel (medido: ele anunciava 3800px de altura) e refazia o
+        desenho inteiro ao ser revelado, com a animacao de entrada dele junto.
+        Perguntar "carregou?" nao alcanca isso; a pergunta certa e "carregou do
+        tamanho que vai ter?", e quem responde e a LARGURA durante o
+        aquecimento mais a rajada de sinais depois da revelacao.
 
    AS QUATRO PARTES, e o que cada uma custa:
      1. PRE-CONEXAO ........... rede fechada, segundos
@@ -90,7 +101,7 @@ const errosDoBloco = e => e.filter(x => !RUIDO.some(r => x.indexOf(r) >= 0));
    retangulo vazio. As duas contam a mesma historia por caminhos independentes -- se so uma
    melhorasse, a melhoria seria suspeita. */
 const SONDA = '<scr'+'ipt>(function(){\n'
-  + '  window.__loads=[];window.__alturas=[];window.__srcs=[];window.__marcas={};\n'
+  + '  window.__loads=[];window.__alturas=[];window.__brutos=[];window.__srcs=[];window.__marcas={};\n'
   + '  window.__marca=function(n){window.__marcas[n]=Date.now();};\n'
   + '  function vigiar(f){\n'
   + '    if(f.__fcv)return;f.__fcv=1;\n'
@@ -112,6 +123,10 @@ const SONDA = '<scr'+'ipt>(function(){\n'
   + "  }).observe(document.documentElement,{childList:true,subtree:true,attributes:true,attributeFilter:['src']});\n"
   + "  window.addEventListener('message',function(e){\n"
   + "    if(typeof e.data==='string'&&e.data.indexOf('[iFrameSizer]')===0){\n"
+  /* AS MENSAGENS CRUAS, e nao so a altura extraida delas: o que denuncia o REDESENHO nao e o
+     numero, e a rajada -- e dentro dela o 'animationstart', que e a animacao de entrada do
+     proprio TidyCal rodando de novo. Guardar so a altura apagaria justamente o rastro. */
+  + '      window.__brutos.push({t:Date.now(),d:e.data});\n'
   + "      var h=parseInt(e.data.split(':')[1],10);\n"
   + '      if(h>0)window.__alturas.push({t:Date.now(),h:h});\n'
   + '    }\n'
@@ -119,6 +134,25 @@ const SONDA = '<scr'+'ipt>(function(){\n'
   + '})();</scr'+'ipt>';
 
 const ENCHIMENTO = '<div style="height:1200px;background:#eee"></div>';
+
+/* A PAUSA DE LEITURA, medida em vez de arbitrada. A parte 3 revela o quadro para conferir o
+   que ele ja tinha pronto -- entao ela precisa dar ao aquecimento a mesma chance que a vida
+   real da: os segundos em que o cliente le a lista. Esperar so o 'load' nao basta, e isso deu
+   falso alarme: numa passagem o calendario ainda estava se medindo quando o teste revelou, e a
+   rajada que apareceu depois era a medicao normal dele, nao um redesenho. Aqui se espera o
+   SOSSEGO -- dois segundos sem um unico [iFrameSizer] --, com teto na mesma PAUSA que a parte
+   4 usa. Teto atingido tambem e resposta: quer dizer que ele nao sossegou. */
+async function sossegar(pg, limite){
+  const fim = Date.now() + limite;
+  let n = await pg.evaluate(() => window.__brutos.length), quieto = 0;
+  while(Date.now() < fim){
+    await pg.waitForTimeout(400);
+    const m = await pg.evaluate(() => window.__brutos.length);
+    if(m === n){ quieto += 400; if(quieto >= 2000) return true; }
+    else { n = m; quieto = 0; }
+  }
+  return false;
+}
 
 /* O TEMPO DO CLIQUE ATE O CALENDARIO.
    Tres desfechos, e a diferenca entre os dois ultimos e o que uma versao anterior deste
@@ -212,9 +246,17 @@ const bloco = {
 };
 for(const k of Object.keys(bloco))
   chk('bloco ' + k + ' foi gerado', (bloco[k] || '').length > 500, 'tamanho=' + (bloco[k] || '').length);
-/* Sem isto, todas as comparacoes abaixo poderiam estar medindo o mesmo bloco duas vezes. */
-chk('o bloco novo tem o aquecimento e a referencia nao',
-    bloco.novoFam.indexOf('function aquecer(') >= 0 && bloco.refFam.indexOf('function aquecer(') < 0);
+/* Sem isto, todas as comparacoes abaixo poderiam estar medindo o mesmo bloco duas vezes.
+   A REFERENCIA PODE JA AQUECER, e desde 04/09/2026 a main aquece: o que esta sob prova mudou
+   de "o aquecimento existe?" para "ele aquece do TAMANHO CERTO?". Cravar aqui que a referencia
+   nao aquece transformaria a chegada do aquecimento na main em falha deste arquivo -- e foi
+   exatamente o que aconteceu no dia seguinte. Entao a pergunta e medida, e a parte 4 se ajusta
+   ao que a medida disser. */
+chk('o bloco novo tem o aquecimento', bloco.novoFam.indexOf('function aquecer(') >= 0);
+const refAquece = bloco.refFam.indexOf('function aquecer(') >= 0;
+const refLargura = bloco.refFam.indexOf('fca-aquec') >= 0;
+console.log('a referencia "' + REF + '": ' + (refAquece ? 'JA aquece' : 'nao aquece') +
+            ', e ' + (refLargura ? 'aquece com a largura real' : 'aquece com largura 0 (display:none)'));
 
 /* ================================================================
    1. PRE-CONEXAO -- rede fechada
@@ -346,18 +388,27 @@ const aquec = await comBlocoNaPagina({
     await pg.locator('.fca-fam').first().click({ timeout: 10000 });
     await pg.waitForTimeout(1000);
     r.iframesApos = await pg.evaluate(() => document.querySelectorAll('iframe.fca-tidycal').length);
-    /* ESCONDIDO DE VERDADE? Se o quadro estivesse visivel, esta parte nao mediria a armadilha
-       -- mediria um iframe normal. offsetParent nulo mais display:none no ancestral e o que
-       prova que ele esta na subarvore escondida. */
+    /* ESCONDIDO, MAS COM A LARGURA DE VERDADE -- as duas coisas ao mesmo tempo, que e a
+       correcao de 04/09/2026. Ate entao aqui se media so "esta escondido?" (offsetParent nulo,
+       ancestral display:none), e um quadro de largura 0 passava com louvor. Agora se mede o
+       par: a caixa nao ocupa altura nenhuma (nao ha buraco na pagina) E o iframe tem a largura
+       que vai ter depois. Largura 0 aqui e o defeito voltando. */
     r.escondido = await pg.evaluate(() => {
       const f = document.querySelector('iframe.fca-tidycal');
       if(!f) return null;
-      let n = f.parentElement, achou = '';
-      while(n){
-        if(getComputedStyle(n).display === 'none'){ achou = n.className; break; }
-        n = n.parentElement;
-      }
-      return { offsetParent: f.offsetParent === null, ancestral: achou, rect: f.getBoundingClientRect().height };
+      const cal = f.parentElement, ec = getComputedStyle(cal);
+      return { larg: Math.round(f.getBoundingClientRect().width),
+               alt: Math.round(f.getBoundingClientRect().height),
+               caixaAlt: Math.round(cal.getBoundingClientRect().height),
+               caixaLarg: Math.round(cal.getBoundingClientRect().width),
+               display: ec.display, opacidade: ec.opacity, toque: ec.pointerEvents,
+               /* OVERFLOW E A PROVA MECANICA DE QUE A PAGINA NAO CRESCEU. Caixa de altura zero
+                  que ESCONDE o que transborda nao propaga o tamanho do filho para a area
+                  rolavel do documento: o iframe de 700px fica inteiro dentro dela. Sem o
+                  overflow, ou com o quadro pendurado por position:absolute, nao haveria buraco
+                  visivel -- mas haveria area rolavel vazia no fim da pagina, e o cliente
+                  sentiria isso no dedo sem ver nada. */
+               transbordo: ec.overflow };
     });
     /* CARREGOU? Tres provas independentes, e nenhuma delas e "o codigo diz que sim": sairam
        requisicoes para o dominio do calendario, o documento disparou 'load', e -- depois de
@@ -365,6 +416,12 @@ const aquec = await comBlocoNaPagina({
     const t = await esperarCalendario(pg, 'familia');
     r.load = t.load;
     r.pedidos = pedidos;
+    r.sossegou = await sossegar(pg, PAUSA);
+    /* A IDENTIDADE DO NO, guardada ANTES de revelar. Re-parentear um <iframe> o recarrega do
+       zero; comparar o elemento e o que prova que ninguem o moveu. */
+    await pg.evaluate(() => { window.__oQuadro = document.querySelector('iframe.fca-tidycal'); });
+    /* a ultima altura anunciada ENQUANTO escondido -- a que o cliente vai encontrar pronta */
+    r.alturaAquecida = await pg.evaluate(() => (window.__alturas.slice(-1)[0] || {}).h || 0);
     /* O QUADRO AQUECIDO NAO E UM ZUMBI. Enquanto escondido ele nao anuncia altura -- medido, e
        era de esperar: sem layout, o iframe-resizer de dentro nao tem o que medir. O que
        importa e que, ao ser revelado (o cliente escolhe justamente o pacote aquecido, que e o
@@ -375,9 +432,27 @@ const aquec = await comBlocoNaPagina({
     await pg.waitForTimeout(9000);
     r.recarregou = await pg.evaluate(() => window.__srcs.filter(x => x.t >= window.__marcas.revelar).length);
     r.sinaisAposRevelar = await pg.evaluate(() => window.__alturas.filter(x => x.t >= window.__marcas.revelar).length);
+    /* AS MENSAGENS CRUAS DOS DOIS LADOS DO INSTANTE DA REVELACAO. Sao elas que separam
+       conserto de esperanca: antes do conserto ha uma RAJADA depois de revelar (o redesenho,
+       com 'animationstart' dentro); depois dele a altura ja esta estabelecida antes, e revelar
+       nao produz rajada nenhuma. Ficam impressas cruas de proposito -- numero resumido esconde
+       o 'animationstart', que e o nome proprio do "fade" que o dono viu. */
+    r.brutosAntes = await pg.evaluate(() => window.__brutos
+      .filter(x => x.t < window.__marcas.revelar).map(x => x.d));
+    r.brutosDepois = await pg.evaluate(() => window.__brutos
+      .filter(x => x.t >= window.__marcas.revelar)
+      .map(x => ({ dt: x.t - window.__marcas.revelar, d: x.d })));
+    /* Do clique ate a altura parar de mudar. Zero quer dizer "ja estava estabelecida". */
+    r.ateEstabilizar = r.brutosDepois.filter(x => Number(x.d.split(':')[2]) > 0).slice(-1).map(x => x.dt)[0] || 0;
+    r.recarregouLoad = await pg.evaluate(() => window.__loads.filter(x => x.t >= window.__marcas.revelar).length);
+    r.mesmoElemento = await pg.evaluate(() => window.__oQuadro === document.querySelector('iframe.fca-tidycal'));
     r.alturaVisivel = await pg.evaluate(() => {
       const f = document.querySelector('iframe.fca-tidycal');
       return f ? Math.round(f.getBoundingClientRect().height) : 0;
+    });
+    r.larguraVisivel = await pg.evaluate(() => {
+      const f = document.querySelector('iframe.fca-tidycal');
+      return f ? Math.round(f.getBoundingClientRect().width) : 0;
     });
     return r;
   }
@@ -385,32 +460,132 @@ const aquec = await comBlocoNaPagina({
 console.log('      iframes antes do gatilho=' + aquec.iframesAntes +
             '  depois=' + aquec.iframesApos +
             '  requisicoes ao TidyCal antes de qualquer clique em pacote=' + aquec.pedidos +
-            '  load=' + aquec.load + 'ms' +
-            '  escondido=' + JSON.stringify(aquec.escondido));
+            '  load=' + aquec.load + 'ms');
+console.log('      aquecendo: ' + JSON.stringify(aquec.escondido));
+console.log('      altura anunciada enquanto escondido=' + aquec.alturaAquecida + 'px' +
+            '   sossegou antes da revelacao=' + aquec.sossegou);
+console.log('      -- [iFrameSizer] DURANTE o aquecimento (' + aquec.brutosAntes.length + ') --');
+aquec.brutosAntes.slice(-8).forEach(d => console.log('         ' + d));
+console.log('      -- [iFrameSizer] APOS a revelacao (' + aquec.brutosDepois.length + ') --');
+if(!aquec.brutosDepois.length) console.log('         (nenhuma)');
+aquec.brutosDepois.slice(0, 12).forEach(x => console.log('         +' + String(x.dt).padStart(6) + 'ms  ' + x.d));
 console.log('      ao revelar: trocas de src=' + aquec.recarregou +
+            '  novos load=' + aquec.recarregouLoad +
+            '  mesmo elemento=' + aquec.mesmoElemento +
             '  sinais de altura=' + aquec.sinaisAposRevelar +
-            '  altura na tela=' + aquec.alturaVisivel + 'px');
+            '  ate estabilizar=' + aquec.ateEstabilizar + 'ms' +
+            '  na tela=' + aquec.larguraVisivel + 'x' + aquec.alturaVisivel + 'px');
 chk('quem NAO demonstra intencao nao baixa calendario nenhum', aquec.iframesAntes === 0,
     'iframes=' + aquec.iframesAntes);
 chk('escolher a familia cria o iframe do calendario, antes de qualquer clique em pacote',
     aquec.iframesApos === 1, 'iframes=' + aquec.iframesApos);
-/* O ancestral com display:none e a propria .fca-cal (a regra e '.fca-passo3 .fca-cal'), e nao
-   o passo -- por isso a conferencia nomeia .fca-cal. Se um dia o esconderijo mudar de
-   elemento, esta linha e a que avisa. */
-chk('e ele esta mesmo ESCONDIDO -- a armadilha esta sendo enfrentada, e nao contornada',
-    !!aquec.escondido && aquec.escondido.offsetParent === true &&
-    aquec.escondido.ancestral.indexOf('fca-cal') >= 0 && aquec.escondido.rect === 0,
+/* ===== A CORRECAO DE 04/09/2026: aquecer COM A LARGURA REAL =====
+   As tres linhas abaixo sao um par indivisivel, e e por nao terem sido pedidas juntas que o
+   defeito passou: "escondido" sozinho aceitava largura 0, e largura 0 e o TidyCal se
+   desenhando para uma tela que nao existe. */
+chk('o quadro aquecido tem LARGURA DE VERDADE -- e nao a largura 0 de um display:none',
+    !!aquec.escondido && aquec.escondido.larg > 300, JSON.stringify(aquec.escondido));
+chk('e e exatamente a largura que ele vai ter na tela (nada a redesenhar ao revelar)',
+    !!aquec.escondido && aquec.escondido.larg === aquec.larguraVisivel,
+    'aquecendo=' + (aquec.escondido || {}).larg + ' na tela=' + aquec.larguraVisivel);
+chk('mesmo assim ele nao abre buraco: a caixa do calendario nao ocupa altura nenhuma',
+    !!aquec.escondido && aquec.escondido.caixaAlt === 0, JSON.stringify(aquec.escondido));
+chk('e nada dele aparece: opacidade zero e fora do alcance do toque',
+    !!aquec.escondido && aquec.escondido.opacidade === '0' && aquec.escondido.toque === 'none',
     JSON.stringify(aquec.escondido));
+/* E O TRANSBORDO E O QUE IMPEDE A PAGINA DE CRESCER. Caixa de altura zero sem overflow
+   escondido -- ou quadro pendurado por position:absolute -- nao abriria vao visivel, mas
+   penduraria area rolavel vazia no fim da pagina. O cliente sente isso no dedo sem ver nada. */
+chk('e o que transborda dela fica escondido: a area rolavel da pagina nao cresce',
+    !!aquec.escondido && aquec.escondido.transbordo === 'hidden', JSON.stringify(aquec.escondido));
+/* A ALTURA ANUNCIADA ENQUANTO ESCONDIDO E O TERMOMETRO DO DESENHO. Com largura 0 o TidyCal
+   empilha tudo numa coluna e anuncia um absurdo -- medido em 04/09/2026: 3800px contra os
+   1054px de verdade. Perto da altura final quer dizer que ele se desenhou para a tela certa. */
+/* SE ELE NAO SOSSEGOU, as duas conferencias seguintes nao medem o que dizem medir -- elas
+   mediriam a medicao normal do calendario chegando atrasada. A falha aqui e "nao mediu", e
+   nao "quebrou": e a mesma leitura que as outras partes que falam com a internet ja assumem. */
+chk('o quadro aquecido sossegou antes de ser revelado (senao nao ha o que comparar)',
+    aquec.sossegou === true, 'sossegou=' + aquec.sossegou);
+chk('e a altura que ele anuncia escondido ja e a de verdade (nao a de uma tela de 0px)',
+    aquec.alturaAquecida > 0 && aquec.alturaVisivel > 0 &&
+    Math.abs(aquec.alturaAquecida - aquec.alturaVisivel) < aquec.alturaVisivel * 0.25,
+    'escondido=' + aquec.alturaAquecida + ' na tela=' + aquec.alturaVisivel);
 chk('display:none NAO impediu o carregamento: sairam requisicoes ao dominio do calendario',
     aquec.pedidos > 0, 'requisicoes=' + aquec.pedidos);
 chk('e o documento do calendario terminou de carregar, escondido',
     typeof aquec.load === 'number', 'load=' + aquec.load);
 chk('escolher o pacote AQUECIDO nao recarrega o iframe (era o risco do f.src=mesmo valor)',
     aquec.recarregou === 0, 'trocas de src=' + aquec.recarregou);
+/* AS DUAS OUTRAS FORMAS DE UM RECARREGAMENTO APARECER, e nenhuma delas e o src: um evento
+   'load' novo, e o no do DOM ter sido trocado por outro. Re-parentear um <iframe> recarrega o
+   documento do zero -- por isso revelar e SO tirar uma classe de CSS. */
+chk('nem dispara um novo load -- o documento aquecido e o mesmo que o cliente ve',
+    aquec.recarregouLoad === 0, 'novos load=' + aquec.recarregouLoad);
+chk('e o no do DOM e o MESMO: ninguem moveu o iframe de lugar',
+    aquec.mesmoElemento === true, 'mesmo elemento=' + aquec.mesmoElemento);
+/* A RAJADA E O SINAL DO REDESENHO, e o 'animationstart' e o nome proprio do "fade". Medido em
+   04/09/2026 contra a main: tres sinais depois de revelar (685 animationstart, 718, 1054);
+   com a largura real, um so -- um ajuste de 33px que o TidyCal faz ao voltar a ser pintado. */
+chk('revelar nao dispara a animacao de entrada do TidyCal de novo (era o "fade" do dono)',
+    aquec.brutosDepois.every(x => x.d.indexOf('animationstart') < 0),
+    JSON.stringify(aquec.brutosDepois.map(x => x.d)));
+chk('e a altura ja estava estabelecida: revelar nao produz rajada de sinais',
+    aquec.brutosDepois.length <= 1, JSON.stringify(aquec.brutosDepois.map(x => x.d)));
 chk('e o quadro aquecido nao e um zumbi: revelado, ele anuncia altura',
     aquec.sinaisAposRevelar > 0, 'sinais=' + aquec.sinaisAposRevelar);
 chk('e aparece na tela com altura de verdade',
     aquec.alturaVisivel > 300, 'altura=' + aquec.alturaVisivel);
+
+/* ================================================================
+   3b. O INTERRUPTOR DESLIGADO -- TidyCal real
+   ================================================================
+   O caminho de quem NAO aquece: AQUECER_CALENDARIO=false, no topo do bloco, e o que o dono
+   liga e desliga sem pedir codigo novo. Ele passou a ser medido em 04/09/2026 junto com o
+   conserto da largura, e por um motivo mecanico: o esconderijo do aquecimento e uma classe de
+   CSS posta por aquecer() e tirada por escolher(). Com o interruptor desligado ninguem poe a
+   classe -- e se algum dia alguem a puser fora de aquecer(), ou escolher() deixar de tira-la,
+   o calendario ficaria com altura zero e o cliente veria uma faixa vazia no lugar dele. Nada
+   quebraria, nada apareceria no console: a classe de defeito mudo que esta pasta persegue. */
+console.log('\n===== 3b. com o aquecimento DESLIGADO (TidyCal real) =====');
+const semAquec = bloco.novoFam.replace('var AQUECER_CALENDARIO=true;', 'var AQUECER_CALENDARIO=false;');
+chk('o interruptor foi mesmo desligado no bloco desta parte',
+    semAquec !== bloco.novoFam && semAquec.indexOf('var AQUECER_CALENDARIO=false;') >= 0);
+const desl = await comBlocoNaPagina({
+  bloco: semAquec, porta: 8853, permitir: REDE, corpoAntes: SONDA, corpoDepois: ENCHIMENTO,
+  medir: async pg => {
+    const r = {};
+    await pg.waitForTimeout(1200);
+    await pg.locator('.fca-fam').first().click({ timeout: 10000 });
+    await pg.waitForTimeout(3000);
+    /* NENHUM QUADRO ANTES DO CLIQUE: e o que "desligado" quer dizer. */
+    r.iframesAposFamilia = await pg.evaluate(() => document.querySelectorAll('iframe.fca-tidycal').length);
+    await pg.evaluate(() => window.__marca('clique'));
+    await pg.locator('.fca-card:visible').first().click({ timeout: 10000 });
+    await sossegar(pg, 20000);
+    r.classe = await pg.evaluate(() => (document.querySelector('.fca-cal') || {}).className || '');
+    r.tela = await pg.evaluate(() => {
+      const f = document.querySelector('iframe.fca-tidycal');
+      if(!f) return null;
+      const c = f.parentElement.getBoundingClientRect();
+      return { larg: Math.round(f.getBoundingClientRect().width),
+               alt: Math.round(f.getBoundingClientRect().height),
+               caixaAlt: Math.round(c.height) };
+    });
+    return r;
+  }
+});
+console.log('      iframes apos escolher a familia=' + desl.iframesAposFamilia +
+            '   classe da caixa depois do clique="' + desl.classe + '"' +
+            '   na tela=' + JSON.stringify(desl.tela));
+chk('desligado: escolher a familia NAO cria calendario nenhum',
+    desl.iframesAposFamilia === 0, 'iframes=' + desl.iframesAposFamilia);
+chk('desligado: a caixa do calendario nao fica com a classe do aquecimento',
+    desl.classe.indexOf('fca-aquec') < 0, 'classe="' + desl.classe + '"');
+chk('desligado: clicar no pacote mostra o calendario com largura e altura de verdade',
+    !!desl.tela && desl.tela.larg > 300 && desl.tela.alt > 300 && desl.tela.caixaAlt > 300,
+    JSON.stringify(desl.tela));
+chk('desligado: sem erro de console',
+    errosDoBloco(desl.erros).length === 0, JSON.stringify(errosDoBloco(desl.erros).slice(0, 2)));
 
 /* ================================================================
    4. OS TEMPOS: antes e depois, lado a lado -- TidyCal real
@@ -421,6 +596,7 @@ chk('e aparece na tela com altura de verdade',
 console.log('\n===== 4. do clique ate o calendario: hoje contra agora =====');
 
 async function medirTempos(rot, b, comFam, porta){
+  const r2 = {};
   const r = await comBlocoNaPagina({
     bloco: b, porta, permitir: REDE, corpoAntes: SONDA, corpoDepois: ENCHIMENTO,
     medir: async pg => {
@@ -433,21 +609,37 @@ async function medirTempos(rot, b, comFam, porta){
       await pg.waitForTimeout(PAUSA);
 
       await pg.evaluate(() => window.__marca('primeiro'));
+      /* A LARGURA DO QUADRO AQUECIDO, medida no instante ANTERIOR ao clique -- e o numero que
+         separa "baixou" de "baixou do tamanho certo". -1 quer dizer que nao ha quadro nenhum
+         (referencia sem aquecimento); 0 e o defeito de 04/09/2026. */
+      r2.larguraAquec = await pg.evaluate(() => {
+        const f = document.querySelector('iframe.fca-tidycal');
+        return f ? Math.round(f.getBoundingClientRect().width) : -1;
+      });
       await pg.locator('.fca-card:visible').first().click({ timeout: 10000 });
       const a = await esperarCalendario(pg, 'primeiro');
+
+      /* A RAJADA DA REVELACAO, crua. Ela e o sinal medivel do REDESENHO: quando o TidyCal
+         descobre uma largura que nao e a que ele usou para se desenhar, ele refaz o layout e
+         anuncia altura de novo -- com 'animationstart' junto, que e a animacao de entrada
+         dele, o "fade" que o dono descreveu. Os 2500ms de espera abaixo servem as duas coisas
+         (deixar a rajada chegar, e dar folga antes de trocar de pacote). */
+      await pg.waitForTimeout(2500);
+      r2.rajada = await pg.evaluate(() => window.__brutos
+        .filter(x => x.t >= window.__marcas.primeiro)
+        .map(x => ({ dt: x.t - window.__marcas.primeiro, d: x.d })));
 
       /* a troca: mesmo dominio, documento novo -- e o caminho de 787ms que o dono mediu.
          O SELETOR DO BOTAO PRECISA SER O DO PACOTE, e nao qualquer '.fca-trocar': no ramo de
          tres passos o botao "trocar familia" TAMBEM leva a classe fca-trocar (ele e
          'fca-trocar fca-trocar-fam'), vem antes no documento, e clicar nele voltaria ao passo
          1 em vez de trocar de pacote -- a medicao entao seria de outra coisa. */
-      await pg.waitForTimeout(2500);
       await pg.locator((comFam ? '.fca-resumo-pac .fca-trocar' : '.fca-trocar') + ':visible')
         .first().click({ timeout: 10000 });
       await pg.evaluate(() => window.__marca('troca'));
       await pg.locator('.fca-card:visible').nth(1).click({ timeout: 10000 });
       const t = await esperarCalendario(pg, 'troca');
-      return { a, t };
+      return { a, t, larguraAquec: r2.larguraAquec, rajada: r2.rajada };
     }
   });
   console.log('      ' + rot.padEnd(26) +
@@ -455,6 +647,10 @@ async function medirTempos(rot, b, comFam, porta){
               (r.a.prontoAntes ? ' (ja estava pronto)' : '') +
               '   troca=' + (r.t.load === null ? 'nao carregou' : r.t.load + 'ms') +
               '   erros=' + errosDoBloco(r.erros).length);
+  console.log('        largura do quadro durante o aquecimento=' +
+              (r.larguraAquec < 0 ? 'nao havia quadro' : r.larguraAquec + 'px') +
+              '   sinais depois de escolher o pacote=' + (r.rajada || []).length);
+  (r.rajada || []).forEach(x => console.log('          +' + String(x.dt).padStart(6) + 'ms  ' + x.d));
   return r;
 }
 
@@ -468,12 +664,36 @@ for(const [rot, comFam, novo, ref, porta] of [
   chk(rot + ': as duas passagens mediram (nao e falha de rede)',
       typeof antes.a.load === 'number' && typeof depois.a.load === 'number',
       'hoje=' + antes.a.load + ' agora=' + depois.a.load);
-  /* A ASSERCAO QUE JUSTIFICA A RODADA. Se ela falhar, a mudanca nao se justifica -- e o
-     relatorio tem de dizer isso, em vez de entregar. */
-  chk(rot + ': o PRIMEIRO pacote ficou mais rapido com o aquecimento',
-      typeof antes.a.load === 'number' && typeof depois.a.load === 'number' &&
-      depois.a.load < antes.a.load,
-      'hoje=' + antes.a.load + 'ms  agora=' + depois.a.load + 'ms');
+  /* A ASSERCAO QUE JUSTIFICA A RODADA -- e ela MUDA conforme a referencia.
+     Contra uma referencia SEM aquecimento, o que se cobra e o tempo: o primeiro pacote tem de
+     ficar mais rapido, senao a mudanca nao se justifica.
+     Contra uma referencia que JA aquece (a main desde 04/09/2026), os dois lados chegam em
+     0ms -- o quadro ja esta pronto nos dois -- e cobrar "mais rapido" seria cobrar o
+     impossivel. O que esta sob prova ali e o TAMANHO, e as duas linhas seguintes sao a
+     medicao dele: a largura durante o aquecimento e a rajada depois da revelacao. */
+  if(refAquece){
+    chk(rot + ': o primeiro pacote nao ficou mais lento',
+        typeof antes.a.load === 'number' && typeof depois.a.load === 'number' &&
+        depois.a.load <= antes.a.load + 500,
+        'hoje=' + antes.a.load + 'ms  agora=' + depois.a.load + 'ms');
+  }else{
+    chk(rot + ': o PRIMEIRO pacote ficou mais rapido com o aquecimento',
+        typeof antes.a.load === 'number' && typeof depois.a.load === 'number' &&
+        depois.a.load < antes.a.load,
+        'hoje=' + antes.a.load + 'ms  agora=' + depois.a.load + 'ms');
+  }
+  /* A LARGURA E A RAJADA, lado a lado. Sao elas que dizem se o conserto de 04/09/2026
+     consertou: largura 0 durante o aquecimento e o defeito; rajada com 'animationstart'
+     depois da revelacao e o redesenho que o dono via como "fade". */
+  chk(rot + ': o quadro aquecido tem largura de verdade (a referencia tinha ' +
+      (antes.larguraAquec < 0 ? 'nenhum quadro' : antes.larguraAquec + 'px') + ')',
+      depois.larguraAquec > 300, 'agora=' + depois.larguraAquec + 'px');
+  chk(rot + ': escolher o pacote aquecido nao dispara a animacao de entrada do TidyCal',
+      (depois.rajada || []).every(x => x.d.indexOf('animationstart') < 0),
+      JSON.stringify((depois.rajada || []).map(x => x.d)));
+  chk(rot + ': e produz menos sinais de altura que a referencia (menos redesenho)',
+      (depois.rajada || []).length <= (antes.rajada || []).length,
+      'hoje=' + (antes.rajada || []).length + '  agora=' + (depois.rajada || []).length);
   /* A TROCA nao deveria mudar: ela ja era o caminho rapido, e o aquecimento nao a toca.
      Cobrar que ela nao PIOROU e o que denunciaria o aquecimento atrapalhando o caso que ja
      estava bom. A folga e larga porque este numero depende do servidor do TidyCal. */
