@@ -124,10 +124,23 @@ const ENCHIMENTO = '<div style="height:1200px;background:#eee"></div>';
 /* A ALTURA QUE IMPORTA E A RENDERIZADA, e nao a do atributo style: no caminho de tidycal.com
    de HOJE quem escreve a altura e o embed.js deles, e no caminho novo pode ser a biblioteca
    ou o bloco -- getBoundingClientRect() nao se importa com qual dos tres escreveu. */
-const alturaReal = pg => pg.evaluate(() => {
-  const f = document.querySelector('iframe.tidycal-embed, iframe.fca-tidycal');
+/* O QUADRO QUE ESTA NA TELA, e nao "o primeiro iframe do documento". Desde 04/09/2026 a
+   vitrine de pacotes mantem UM QUADRO POR PACOTE JA VISITADO -- os que nao sao o da vez ficam
+   numa caixa .fca-oculto. Ler "o primeiro" media o quadro do pacote ANTERIOR, e foi assim que
+   a medicao da troca de pacote passou a acusar sozinha (novo=1054, que e a altura do PRIMEIRO
+   calendario, contra atual=949, que era a do segundo). Na aba TidyCal, que tem um quadro so,
+   o segundo seletor continua valendo.
+   E OS DOIS SAO CONSULTADOS EM SEQUENCIA, com '||', e NUNCA como uma lista separada por
+   virgula: querySelector com lista devolve o primeiro elemento em ORDEM DE DOCUMENTO que case
+   com QUALQUER um dos seletores -- e nao o primeiro seletor que case. Escrito como lista, na
+   pagina com dois blocos ele devolvia o iframe da aba TidyCal (que vem antes no documento) em
+   vez do quadro da vitrine, e a medicao era de outro calendario. Medido aqui, em 04/09/2026. */
+const SEL_VIS = '.fca-quadro:not(.fca-oculto) iframe.fca-tidycal';
+const SEL_UM  = 'iframe.tidycal-embed, iframe.fca-tidycal';
+const alturaReal = pg => pg.evaluate(([a, b]) => {
+  const f = document.querySelector(a) || document.querySelector(b);
   return f ? Math.round(f.getBoundingClientRect().height) : null;
-});
+}, [SEL_VIS, SEL_UM]);
 const contarIframes = pg => pg.evaluate(() => document.querySelectorAll('iframe').length);
 
 /* ESPERAR A ALTURA PARAR, e nao esperar um prazo fixo. O calendario nao anuncia a altura de
@@ -147,6 +160,24 @@ async function alturaEstavel(pg, limite = 45000){
   while(gasto < limite){
     await pg.waitForTimeout(1200); gasto += 1200;
     const h = await alturaReal(pg);
+    iguais = (h !== null && h === anterior) ? iguais + 1 : 0;
+    anterior = h;
+    if(iguais >= 3 && gasto >= 10000 && PISO_ESPERA.indexOf(h) < 0) return h;
+  }
+  return anterior;
+}
+
+/* A MESMA ESPERA, mas por SELETOR -- para a pagina com dois blocos, onde ha dois calendarios
+   independentes e cada um precisa da sua. Mesmas regras de alturaEstavel: so vale quando o
+   valor repete tres vezes e nao e nem o piso (500) nem a altura de partida (700). */
+async function esperarAltura(pg, sel, limite = 45000){
+  let anterior = null, iguais = 0, gasto = 0;
+  while(gasto < limite){
+    await pg.waitForTimeout(1200); gasto += 1200;
+    const h = await pg.evaluate(s => {
+      const f = document.querySelector(s);
+      return f ? Math.round(f.getBoundingClientRect().height) : null;
+    }, sel);
     iguais = (h !== null && h === anterior) ? iguais + 1 : 0;
     anterior = h;
     if(iguais >= 3 && gasto >= 10000 && PISO_ESPERA.indexOf(h) < 0) return h;
@@ -217,10 +248,10 @@ async function medirCalendario({ bloco, porta, escolherPacote = false, permitir 
       if(esperaExtra) await pg.waitForTimeout(esperaExtra);
       r.repouso = await alturaEstavel(pg);
       r.iframes = await contarIframes(pg);
-      r.lib = await pg.evaluate(() => {
-        const f = document.querySelector('iframe.tidycal-embed, iframe.fca-tidycal');
+      r.lib = await pg.evaluate(([a, b]) => {
+        const f = document.querySelector(a) || document.querySelector(b);
         return f ? (f.getAttribute('data-fc-lib') || '') : '';
-      });
+      }, [SEL_VIS, SEL_UM]);
       r.falhaClique = await abrirFormulario(pg);
       await pg.waitForTimeout(5000);
       r.comFormulario = await alturaReal(pg);
@@ -412,8 +443,13 @@ chk('por pacote: e a altura depois da troca e a mesma do bloco atual (ate 8px de
     typeof pacNovo.aposTrocar === 'number' && typeof pacAtual.aposTrocar === 'number' &&
     Math.abs(pacNovo.aposTrocar - pacAtual.aposTrocar) <= 8,
     'novo=' + pacNovo.aposTrocar + ' atual=' + pacAtual.aposTrocar);
-chk('por pacote: trocar de pacote nao deixa dois iframes na pagina',
-    pacNovo.iframesAposTrocar === 1, 'iframes=' + pacNovo.iframesAposTrocar);
+/* ATE 04/09/2026 AQUI SE COBRAVA "NAO DEIXA DOIS IFRAMES". A rodada dos quadros por pacote
+   trocou o invariante de proposito, e por um defeito que o dono viu na pagina publicada: com
+   um iframe unico reapontado, trocar de pacote (ou de familia) jogava fora o calendario ja
+   baixado, e voltar custava uma carga nova -- medido, 670ms. Dois pacotes visitados, dois
+   quadros: o que se cobra e que seja UM POR PACOTE, e nao um por CLIQUE. */
+chk('por pacote: trocar de pacote deixa um quadro por pacote visitado (dois, aqui)',
+    pacNovo.iframesAposTrocar === 2, 'iframes=' + pacNovo.iframesAposTrocar);
 
 console.log('\n===== 4. os tres casos de degradacao (so no bloco novo) =====');
 /* a. tudo liberado -- ja medido acima: a marca data-fc-lib diz que a biblioteca assumiu. */
@@ -460,13 +496,18 @@ const dois = await comBlocoNaPagina({
   bloco: bloco.novoTidy, corpoDepois: bloco.novoPac + ENCHIMENTO, porta: 8980, permitir: REDE,
   medir: async pg => {
     await pg.locator('.fca-card').first().click({ timeout: 15000 });
-    await alturaEstavel(pg);
+    /* DOIS CALENDARIOS, DUAS ESPERAS. alturaEstavel devolve a altura de UM quadro, e ate
+       04/09/2026 esta linha esperava so um deles e lia os DOIS -- entao o outro era
+       fotografado no meio do carregamento. Medido: em duas passagens seguidas, com o mesmo
+       codigo dos dois lados, a vitrine deu 1054 numa e 700 na outra. */
+    await esperarAltura(pg, SEL_VIS);
+    await esperarAltura(pg, 'iframe.tidycal-embed');
     return await pg.evaluate(() => ({
       tags: document.querySelectorAll('script[data-fc-tidycal]').length,
       embedjs: Array.from(document.scripts).filter(s => s.src.indexOf('embed.js') >= 0).length,
       iframes: document.querySelectorAll('iframe').length,
       alturaT: Math.round(document.querySelector('iframe.tidycal-embed').getBoundingClientRect().height),
-      alturaP: Math.round(document.querySelector('iframe.fca-tidycal').getBoundingClientRect().height),
+      alturaP: Math.round(document.querySelector('.fca-quadro:not(.fca-oculto) iframe.fca-tidycal').getBoundingClientRect().height),
       divs: document.querySelectorAll('div.tidycal-embed, #tidycal-embed').length
     }));
   }
