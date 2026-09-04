@@ -455,31 +455,42 @@ consertar: comparacao com a versao publicada e o instrumento que separa "defeito
 
 ---
 
-## Divida aberta em 04/09/2026 — a corrida entre o embed.js do TidyCal e o nosso aperto de mao
+## FECHADA em 04/09/2026 — a corrida entre o embed.js do TidyCal e o nosso aperto de mao
 
-Achada ao implementar a pre-carga, e **nao consertada de proposito**.
+Registrada de manha e **consertada na mesma tarde**, em rodada propria autorizada pelo dono
+(ela mexe em `t-out1`, a saida da aba TidyCal, que estava em producao).
 
-**O que acontece**, medido em uma passagem de cada duas: o `embed.js` do TidyCal chega **depois**
-de o nosso aperto de mao proprio ja ter assumido o filho. A biblioteca deles e entao aplicada
-ao elemento por cima e o prende no piso de **500 px** (`minHeight` deles), enquanto o calendario
-continua anunciando a altura certa (1021 escondido, 1054 revelado).
+**O que era:** o `embed.js` do TidyCal chegava **depois** de o aperto de mao proprio ja ter
+assumido o filho. A biblioteca deles era entao aplicada ao elemento **por cima**, ficava com o
+quadro e sem as alturas — porque o filho aceita um `init` so. Resultado: 764 anunciado, 700 na
+tela.
 
-**Onde mora:** em `fcTidyCalSrc`, a **fonte compartilhada** dos calendarios. Vale igual para a
-aba TidyCal e para a vitrine de pacotes.
+**A medicao que o conserto exigiu foi forcar a ordem de chegada**, e nao esperar a rede
+decidir: esperar mede a frequencia, nunca o defeito. Com o `embed.js` atrasado de proposito, a
+biblioteca era aplicada por cima em **9 de 9** passagens.
 
-**E anterior a esta rodada.** O `medirComSegundaChance` de `tidycal-unificado.mjs` foi escrito
-para essa mesma instabilidade, com este mesmo numero — so nao tinha sido nomeada.
+**E ela era a causa de um segundo defeito, ja registrado como outra coisa.** A intermitencia de
+03/09 — a medicao do formulario aplicada em "cerca de uma carga de quatro", que foi o motivo de
+o campo `t-medir`/`a-medir` nascer **desligado** — era esta mesma corrida:
 
-**Por que nao foi consertada agora:** o conserto muda `fcTidyCalSrc`, e portanto muda `t-out1`
-— a saida da aba TidyCal, que esta em producao e que esta rodada exigia **byte a byte
-identica**. Consertar de passagem seria mexer num bloco publicado dentro de uma rodada que
-prometia nao mexer.
+| | aplica a altura anunciada |
+|---|---|
+| antes | **1 de 6** |
+| depois | **6 de 6** |
 
-**O que o arnes passou a fazer enquanto isso:** a parte 3 deixou de confundir esta corrida com
-o defeito da largura. Ela compara as duas alturas **anunciadas pelo proprio calendario** e
-degrada a leitura do elemento para "medicao, nao assercao" quando cai em 500/700 — e a altura
-do elemento continua **cobrada de verdade** nas partes 5 e 6. A distincao importa: sem ela, uma
-corrida de terceiro apareceria como defeito nosso, e o vermelho de sempre esconderia o vermelho
-de verdade.
+**A forma do conserto, e a tentativa que falhou antes dela.** O obvio era trocar as duas
+bandeiras (`libNoComando`, `manualAtivo`) por uma variavel de tres valores. **Medido: nao
+bastava** — `comecarCalendario` reinicia a cada `load` do iframe, e o primeiro `load` chega
+depois de o aperto de mao ja ter falado com o filho; a variavel era zerada ali e a biblioteca
+se achava livre. Trocar uma variavel por outra so mudaria o nome do buraco.
 
-**Precisa de decisao do dono**, porque toca a altura que os blocos publicados aplicam.
+O que ficou: **o comando mora no proprio elemento**, que e o que os dois disputam
+(`data-fc-lib` e `data-fc-mao`, lidas por `comandoDe`). Dois portoes, um por lado. Sobrevive a
+reinicio e a troca de quadro por construcao.
+
+Junto saiu `soltarBiblioteca`, que nunca era chamada e chamava `iFrameResizer.close()` — que
+**remove o iframe do documento**.
+
+**O que isso reabre, e e decisao do dono:** o campo `t-medir`/`a-medir` nasce desligado desde
+03/09, e o unico motivo era a instabilidade que acabou de ser consertada. Com 6 de 6, o padrao
+merece ser reconsiderado — agora com numero, e nao com impressao.
