@@ -410,3 +410,45 @@ foi morta por um `pkill -f "verificar/"` que **eu** emiti para limpar processos 
 
 Duas regras que ficam: limpeza por padrao de nome derruba trabalho legitimo junto com o lixo;
 e essa suite pede a maquina so para ela.
+
+---
+
+## Divida aberta em 03/09/2026 — o limiar de crescimento do calendario envelheceu
+
+`tidycal-unificado.mjs` cobra que, no modo **medindo**, abrir o formulario de reserva faca o
+quadro crescer **pelo menos 300px**. O numero foi calibrado em 03/09 contra uma pagina do
+TidyCal que descansava em **764px** e ia a 1662px.
+
+**Medido hoje, na pagina do TidyCal SOZINHA, sem o nosso bloco:** ela descansa em **1386px** em
+largura cheia e cresce **907px** ao revelar a lista de horarios. Dentro do nosso iframe, na
+largura do teste, o repouso medido foi **958px** (e **1006px** noutra execucao — a
+intermitencia ja registrada), com o formulario levando a **1127px**: crescimento de ~169px,
+abaixo do limiar.
+
+**A pagina do TidyCal mudou de tamanho desde a calibragem.** Se ela ja descansa alta, o modal
+acrescenta pouco, e o limiar cobra um delta que a pagina de hoje nao produz.
+
+**Por que isto NAO bloqueou a publicacao do aquecimento**, e a razao e um encadeamento, nao uma
+impressao:
+
+1. A regressao byte a byte deu exatamente as 6 divergencias esperadas (as 3 saidas de
+   calendario nas 2 passagens) e **nenhuma outra**.
+2. As outras nove suites passam, incluindo a nova (37 verificacoes), que prova que o
+   aquecimento carrega de verdade, que a guarda do `e.source` funciona e que nenhum CSS mudou.
+3. A assercao que falha esta no modo **medindo**, que **nao e o padrao** — e cuja altura, ja
+   medido em 03/09, so e aplicada em cerca de uma carga de quatro.
+4. **A mudanca publicada nao pode afetar a altura da pagina do TidyCal.** Ela acrescenta
+   `preconnect` e cria o iframe mais cedo; nao toca o que a pagina de terceiro renderiza.
+
+**O que ficou por fazer, e e a divida:** nao consegui rodar a suite contra a arvore da `main`
+para a comparacao direta. A suite nova nao dirige a ferramenta antiga (campos que nao existem
+la), e a suite antiga nao roda em arvore extraida por `git archive` (ela usa contexto de git
+que so existe no repositorio). **Isso e uma limitacao do arnes, nao do codigo**, e vale
+consertar: comparacao com a versao publicada e o instrumento que separa "defeito meu" de
+"mudanca de terceiro", e hoje ela nao esta disponivel para esta suite.
+
+**Duas coisas para a proxima rodada que tocar isto:**
+
+- **Recalibrar o limiar** medindo a pagina do TidyCal de hoje, e escrever a data da medicao ao
+  lado do numero — foi a falta dela que fez o limiar envelhecer em silencio.
+- **Fazer o arnes rodar contra uma arvore de referencia** sem depender do contexto de git.
