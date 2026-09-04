@@ -94,13 +94,22 @@ const observador = medir => medir
    Ele e posto por Object.defineProperty, e nao pelo construtor: MessageEventInit.source so
    aceita WindowProxy/MessagePort, e o proprio 'source' do quadro certo e o que precisamos
    carimbar. Definir a propriedade no evento ja construido serve para os dois casos. */
+/* O QUADRO QUE ESTA NA TELA, e nao "o primeiro iframe do documento". Desde 04/09/2026 a
+   vitrine de pacotes mantem UM QUADRO POR PACOTE JA VISITADO -- os que nao sao o da vez ficam
+   numa caixa .fca-oculto, com a largura de verdade e altura zero. Ler "o primeiro" mediria o
+   quadro do pacote ANTERIOR, e foi exatamente isso que aconteceu quando este arquivo rodou sem
+   o seletor novo: a troca de pacote parecia nao devolver a altura de partida, porque a altura
+   lida era a do quadro que tinha ficado para tras. Na aba TidyCal, que tem um quadro so, o
+   segundo seletor continua valendo. */
+const VIS = '.fca-quadro:not(.fca-oculto) iframe.fca-tidycal';
 const sinal = (pg, origem, tipo = 'scrollToOffset') => pg.evaluate(
-  ([o, t]) => {
-    const f = document.querySelector('iframe.tidycal-embed, iframe.fca-tidycal');
+  ([o, t, vis]) => {
+    const f = document.querySelector(vis) ||
+              document.querySelector('iframe.tidycal-embed, iframe.fca-tidycal');
     const ev = new MessageEvent('message', { data: '[iFrameSizer]fc:900:1200:' + t, origin: o });
     Object.defineProperty(ev, 'source', { value: f ? f.contentWindow : null });
     window.dispatchEvent(ev);
-  }, [origem, tipo]);
+  }, [origem, tipo, VIS]);
 
 const soPageError = erros => erros.filter(e => e.indexOf('pageerror:') === 0);
 
@@ -184,14 +193,14 @@ async function abaPacote(porta, medir){
   chk(rot + ': gerou sem recusa', !alertas.length && bloco.length > 5000, alertas.join(' | '));
   chk(rot + ': os DOIS enderecos viajam inteiros no catalogo',
       bloco.indexOf("link:'" + TIDY + "'") >= 0 && bloco.indexOf("link:'" + PROPRIO + "'") >= 0);
-  /* Desde a unificacao do calendario (03/09/2026) a origem do endereco novo e calculada uma
-     vez, em 'nova' -- porque ela e usada DUAS vezes na mesma funcao: para decidir se o iframe
-     precisa ser recriado (dominio diferente) e para virar a origemCal. O que este teste cobra
-     continua sendo o mesmo: que ela venha do endereco, e nao de um literal. */
+  /* Desde os quadros por pacote (04/09/2026) a origem e calculada UMA vez, no instante em que
+     o quadro daquele endereco nasce, e fica guardada no registro dele -- e quem passa a ser o
+     quadro ativo leva a origem dele junto. O que este teste cobra continua sendo o mesmo: que
+     ela venha do endereco, e nao de um literal. */
   chk(rot + ': a origem NAO e um literal no bloco',
       bloco.indexOf("e.origin!=='https://tidycal.com'") < 0 &&
-      bloco.indexOf('nova=origemDe(link)') >= 0 &&
-      bloco.indexOf('origemCal=nova') >= 0);
+      bloco.indexOf('origem:origemDe(link)') >= 0 &&
+      bloco.indexOf('origemCal=r.origem') >= 0);
 
   const r = await comBlocoNaPagina({
     bloco, porta: porta + 1,
@@ -210,20 +219,21 @@ async function abaPacote(porta, medir){
       };
       const medida = async (errada, certa) => {
         await sinal(pg, errada);
-        const naoDeve = await obs.ler(pg, 'iframe.fca-tidycal');
+        const naoDeve = await obs.ler(pg, VIS);
         await sinal(pg, certa);
-        const deve = await obs.ler(pg, 'iframe.fca-tidycal');
+        const deve = await obs.ler(pg, VIS);
         return { naoDeve, deve };
       };
       await cartao(0);
-      const src1 = await pg.$eval('iframe.fca-tidycal', el => el.getAttribute('src') || '');
+      const src1 = await pg.$eval(VIS, el => el.getAttribute('src') || '');
       const p1 = await medida(PROPRIO_ORIG, TIDY_ORIG);
       await trocar();
       await cartao(1);
-      const src2 = await pg.$eval('iframe.fca-tidycal', el => el.getAttribute('src') || '');
+      const src2 = await pg.$eval(VIS, el => el.getAttribute('src') || '');
       const p2 = await medida(TIDY_ORIG, PROPRIO_ORIG);
       const quantos = await pg.$$eval('iframe.fca-tidycal', els => els.length);
-      return { src1, src2, p1, p2, quantos };
+      const ocultos = await pg.$$eval('.fca-quadro.fca-oculto', els => els.length);
+      return { src1, src2, p1, p2, quantos, ocultos };
     }
   });
 
@@ -232,7 +242,16 @@ async function abaPacote(porta, medir){
       r.p1.naoDeve === obs.inicial, r.p1.naoDeve);
   chk(rot + ': com tidycal.com carregado, sinal de tidycal.com e ACEITO -- ' + obs.rot + ' muda',
       r.p1.deve === obs.aceito, r.p1.deve);
-  chk(rot + ': trocar de pacote reaproveita o MESMO iframe (nunca um segundo)', r.quantos === 1, String(r.quantos));
+  /* ATE 04/09/2026 AQUI SE COBRAVA "UM IFRAME SO". A rodada dos quadros por pacote trocou o
+     invariante de proposito, e por um defeito que o dono viu: com um iframe unico reapontado,
+     trocar de familia (ou de pacote) jogava fora o que ja tinha sido baixado. Agora cada
+     endereco visitado tem o seu quadro, e o que se cobra e o novo invariante: UM POR PACOTE
+     VISITADO -- nem um a mais (dois quadros para o mesmo endereco seriam duas cargas) nem um a
+     menos -- e todos os que nao sao o da vez escondidos. */
+  chk(rot + ': trocar de pacote deixa UM quadro por pacote visitado (dois, aqui)',
+      r.quantos === 2, String(r.quantos));
+  chk(rot + ': e o que nao esta na tela fica escondido (um so visivel)',
+      r.ocultos === r.quantos - 1, 'quadros=' + r.quantos + ' ocultos=' + r.ocultos);
   chk(rot + ': o iframe do 2o pacote aponta para o dominio proprio', r.src2 === PROPRIO, r.src2);
   chk(rot + ': NEGATIVO -- com o dominio proprio carregado, sinal de tidycal.com e descartado',
       r.p2.naoDeve === obs.inicial, r.p2.naoDeve);

@@ -3755,6 +3755,18 @@
         <div class="cor-linha"><input type="color" id="a-c3" value="#333333"><input type="text" id="a-c3-t" value="#333333"></div>
       </fieldset>
       <fieldset>
+        <legend>Calendário: quando começar a carregar</legend>
+        <label>Pré-carregar o calendário</label>
+        <div class="radios">
+        <label><input type="radio" name="a-precal" value="nao"><span>Só ao escolher <small>(nada é carregado antes)</small></span></label>
+        <label><input type="radio" name="a-precal" value="um" checked><span>Um na abertura <small>(padrão)</small></span></label>
+        <label><input type="radio" name="a-precal" value="todos"><span>Todos na abertura</span></label>
+        </div>
+        <p class="ajuda"><b>Os números abaixo foram medidos</b> na página publicada, com o calendário real, em 04/09/2026. A <b>primeira</b> carga de um calendário custa <b>9115 ms</b> — é o download dos arquivos do TidyCal, e esse custo existe <b>uma vez só</b>. Depois que <b>qualquer</b> calendário carregou, cada carga seguinte custa <b>600 a 800 ms</b> e cerca de <b>13 KB</b> (22 requisições, quase todas vindas do cache). Os <b>oito</b> calendários de um catálogo carregando juntos: <b>2034 ms</b> e cerca de <b>65 MB</b> de memória.</p>
+        <p class="ajuda"><b>Só ao escolher:</b> nada é carregado antes do clique. Quem entra e sai sem escolher nada não paga nada — e quem escolhe paga os 9115 ms inteiros, esperando na frente do quadro vazio. <b>Um na abertura (padrão):</b> um calendário começa a carregar assim que a página abre, para o custo de primeira vez ser pago enquanto o cliente ainda está lendo a lista de pacotes; depois disso <b>qualquer</b> pacote custa os 600 a 800 ms. <b>Todos na abertura:</b> todos os calendários do catálogo carregam juntos, e aí qualquer pacote já está pronto quando o cliente clica — ao preço medido de 65 MB com oito pacotes.</p>
+        <p class="ajuda"><b>Nas três escolhas, calendário que já carregou continua vivo:</b> cada pacote visitado fica com o quadro dele na página, e trocar de família, voltar e escolher de novo <b>não</b> recarrega nada. Antes disso havia um quadro só, reapontado — trocar de família jogava fora o que já tinha baixado, e a volta custava uma carga nova (medido: 670 ms).</p>
+      </fieldset>
+      <fieldset>
         <legend>Medidas: calendário e cartões</legend>
         <label>Espaço para o formulário de reserva <small>(o que abre quando o cliente clica num horário)</small></label>
         <div class="radios">
@@ -3973,8 +3985,8 @@
    QUEM IMPEDE QUE ELE MINTA: scripts/conferir-versoes.sh, que recusa index.html
    alterado sem a versao mudar junto -- a mesma disciplina do fc-compartilhado.js,
    e pela mesma razao: carimbo que ninguem confere e o defeito de amanha. */
-var FC_VERSAO='2026-09-04b';
-var FC_PUBLICADO='2026-09-04 14:24';   /* America/Sao_Paulo -- escrito pelo carimbador */
+var FC_VERSAO='2026-09-04c';
+var FC_PUBLICADO='2026-09-04 17:05';   /* America/Sao_Paulo -- escrito pelo carimbador */
 (function(){
   var el=document.getElementById('fc-versao');
   if(!el) return;
@@ -11805,8 +11817,11 @@ function fcTidyCalSrc(op){
      altura anunciada POR ELE seria escrita no calendario que esta na tela: nada quebra, nada
      aparece no console, o quadro so fica do tamanho errado. E a classe de defeito mudo que
      este projeto persegue.
-     A guarda vale mesmo com UM iframe so (que e o desenho de hoje): ela protege de qualquer
-     quadro futuro, e custa uma comparacao de identidade por mensagem. */
+     Desde 04/09/2026 ela deixou de ser uma protecao contra o futuro e passou a ser o que
+     separa os quadros do dia a dia: a vitrine de pacotes mantem UM QUADRO POR PACOTE JA
+     VISITADO, e dois pacotes do mesmo dominio tem a MESMA origem. Na aba TidyCal, onde ha um
+     quadro so, ela continua valendo pelo mesmo preco: uma comparacao de identidade por
+     mensagem. */
   c+=i+'function doQuadro(e){\n';
   c+=i+'  var f=frame();\n';
   c+=i+'  return !!(f&&f.contentWindow&&e.source===f.contentWindow);\n';
@@ -16112,6 +16127,11 @@ function aCfg(){
      Assim a ausencia do radio no DOM vale o padrao de fabrica nos dois casos. */
   var medir=(radio('a-medir')!=='nao');
   var sempre=(radio('a-sempre')==='sim');
+  /* O PRE-CARREGAMENTO DO CALENDARIO (04/09/2026). Tres valores, e o padrao de fabrica e 'um'
+     -- entao a pergunta e escrita ao contrario dos dois interruptores acima: qualquer coisa
+     que nao seja 'nao' nem 'todos' cai no padrao. Assim a ausencia do radio no DOM, e o estado
+     gravado por versao anterior (que nao tem a chave), valem 'um'. */
+  var precal=radio('a-precal');if(precal!=='nao'&&precal!=='todos')precal='um';
   var qtdmax=aPreso('a-qtdmax');if(qtdmax==null)qtdmax=10;
   /* PRESO DENTRO DA PROPRIA FUNCAO DE CONFIGURACAO (regra do CLAUDE.md sobre campo numerico que
      alimenta uma @media): prender so a largura da previa deixaria o iframe num valor e o CSS
@@ -16124,7 +16144,7 @@ function aCfg(){
     metodo:m, usaPP:usaPP, usaPix:usaPix, ppcor:radio('a-ppcor')||'gold',
     prazoh:prazoh, descpix:descpix, parcelas:parcelas,
     altdesk:altdesk, altmob:altmob, largmob:largmob, largcards:largcards, qtdmax:qtdmax,
-    medir:medir, sempre:sempre,
+    medir:medir, sempre:sempre, precal:precal,
     c1:corSegura('a-c1','#0F3A30'), c2:corSegura('a-c2','#ffffff'), c3:corSegura('a-c3','#333333'),
     t1:$('a-t1').value, t2:$('a-t2').value, t3:$('a-t3').value, t4:$('a-t4').value, t5:$('a-t5').value,
     ob:aObCfg()
@@ -16162,7 +16182,7 @@ function aColeta(){
     parcelas:aElVal('a-parcelas',1),
     altdesk:aElVal('a-altdesk',2350),altmob:aElVal('a-altmob',2700),largmob:aElVal('a-largmob',700),
     largcards:aElVal('a-largcards',640),
-    medir:radio('a-medir'),sempre:radio('a-sempre'),
+    medir:radio('a-medir'),sempre:radio('a-sempre'),precal:radio('a-precal'),
     qtdmax:aElVal('a-qtdmax',10),
     c1:aElVal('a-c1-t','#0F3A30'),c2:aElVal('a-c2-t','#ffffff'),c3:aElVal('a-c3-t','#333333'),
     t1:aElVal('a-t1','Agende seu ensaio'),
@@ -16254,6 +16274,11 @@ function aRestaura(st){
      calibradas continuam gravadas, so escondidas (ver aToggles). */
   setRadio('a-medir',A.medir==='nao'?'nao':'sim');
   setRadio('a-sempre',A.sempre==='sim'?'sim':'nao');
+  /* O TERCEIRO CAMPO DO CALENDARIO (04/09/2026), com tres valores em vez de dois: o padrao
+     de fabrica e 'um', entao so 'nao' e 'todos' sao aceitos como escritos e tudo o mais cai
+     no padrao -- inclusive a ausencia da chave, que e o que um backup anterior a esta versao
+     tem. Sem alerta: nada foi convertido e nada se perdeu. */
+  setRadio('a-precal',(A.precal==='nao'||A.precal==='todos')?A.precal:'um');
   el=$('a-qtdmax');if(el)el.value=(A.qtdmax!=null&&A.qtdmax!=='')?A.qtdmax:10;
   el=$('a-c1-t');if(el){el.value=A.c1;elc=$('a-c1');if(elc)elc.value=corValida(A.c1)?A.c1:'#0F3A30';}
   el=$('a-c2-t');if(el){el.value=A.c2;elc=$('a-c2');if(elc)elc.value=corValida(A.c2)?A.c2:'#ffffff';}
@@ -16502,8 +16527,8 @@ function aBlocoVitrine(cfg){
   }
   /* O passo que ainda nao chegou comeca apagado -- so "acende" (opacidade plena + conteudo
      visivel) apos a escolha do passo anterior. O calendario fica ESCONDIDO POR CSS, nunca
-     destruido: assim o iframe unico sobrevive a "Trocar pacote" e a proxima escolha so troca o
-     src, sem criar um segundo elemento.
+     destruido: assim os quadros ja carregados sobrevivem a "Trocar pacote" e a troca de
+     familia, e a proxima escolha so muda qual deles esta visivel -- nenhum src e reapontado.
      No ramo de tres passos o calendario mora no passo 3 e o passo 2 guarda os cartoes de
      pacote; no de dois passos, tudo como antes. UMA regra por seletor nos dois ramos. */
   /* ===== O ESCONDERIJO DO AQUECIMENTO (.fca-aquec, 04/09/2026) =====
@@ -16539,6 +16564,19 @@ function aBlocoVitrine(cfg){
     c+='.fca-passo2.on .fca-cal{display:block}\n';
     c+='.fca-passo2 .fca-cal.fca-aquec{display:block;height:0;opacity:0;pointer-events:none}\n';
   }
+  /* ===== UM QUADRO POR PACOTE JA VISITADO (04/09/2026) =====
+     Cada endereco de calendario ganha a sua caixa .fca-quadro dentro de .fca-cal, e so uma
+     delas fica visivel por vez. A escondida NAO sai do fluxo: ela continua com a LARGURA de
+     verdade -- que e o que faz o TidyCal se desenhar para a tela certa desde o primeiro
+     instante -- e perde a ALTURA, com overflow escondido. Altura zero mais overflow escondido
+     e o par que garante as duas coisas ao mesmo tempo: nenhum buraco na pagina, e nenhuma area
+     rolavel vazia pendurada no fim dela (que e o que position:absolute deixaria).
+     E a mesma mecanica que .fca-aquec ja usava para o quadro aquecido, agora por quadro em vez
+     de por caixa -- e pelo mesmo motivo medido: escondido por display:none, o quadro tem
+     largura 0, o TidyCal empilha tudo numa coluna de zero pixel (medido: 3800px anunciados) e
+     refaz o desenho inteiro ao aparecer, com a animacao de entrada dele junto. */
+  c+='.fca-quadro{overflow:hidden}\n';
+  c+='.fca-quadro.fca-oculto{height:0;opacity:0;pointer-events:none}\n';
   c+='.fca-cal iframe{border:none;width:100%;display:block}\n';
   /* ===== O CELULAR: LINHAS COMPACTAS (decisao do dono, 03/09/2026) =====
      A troca de formato e feita por CSS, com UMA linha nova de JavaScript (a classe da caixa de
@@ -16580,7 +16618,7 @@ function aBlocoVitrine(cfg){
   c+='var DESCONTO_PIX='+cfg.descpix+';   /* percentual de desconto no Pix; 0 = sem desconto -- some o selo */\n';
   c+='var PARCELAS='+cfg.parcelas+';   /* numero de parcelas anunciado no cartao; e uma promessa que a operadora decide, nao este codigo */\n';
   c+=ALT.opcoes;
-  c+='var AQUECER_CALENDARIO=true;   /* true = o calendario comeca a baixar ANTES do clique, no instante em que o cliente demonstra intencao (escolher a familia, ou passar o dedo/mouse no primeiro cartao). Medido em 04/09/2026 na pagina publicada: do clique ate o calendario aparecer sao 9115ms na primeira vez e 787ms na segunda -- ou seja, quase tudo e custo de PRIMEIRA VEZ, e adiantar esse custo para um momento em que o cliente ainda esta lendo a lista some com ele. O gatilho nunca e o carregamento da pagina, de proposito: quem entra e sai sem escolher nada nao paga por isso. false = volta ao comportamento anterior, o calendario so comeca a carregar no clique. */\n';
+  c+="var PRECARREGAR='"+cfg.precal+"';   /* quando o calendario comeca a baixar. Tres valores, e os numeros sao medidos com o calendario real: a PRIMEIRA carga custa 9115ms (o download dos arquivos do TidyCal, custo unico) e qualquer carga seguinte custa 600 a 800ms e cerca de 13KB, quase tudo do cache; os oito calendarios de um catalogo em paralelo dao 2034ms e cerca de 65MB. 'nao' = nada e carregado antes do clique: quem entra e sai sem escolher nao paga nada, e quem escolhe paga os 9115ms inteiros. 'um' = um calendario comeca a baixar assim que a pagina abre, para o custo de primeira vez ser pago enquanto o cliente le a lista; depois disso qualquer pacote custa 600 a 800ms. 'todos' = todos os calendarios do catalogo, e ai qualquer pacote ja esta pronto no clique, ao preco dos 65MB. Em qualquer dos tres, calendario ja carregado continua vivo: trocar de familia e voltar nao recarrega nada. */\n";
   c+="var ALTURA_DESKTOP='"+cfg.altdesk+"px';\n";
   c+="var ALTURA_MOBILE='"+cfg.altmob+"px';   /* calibrar no aparelho se o modal cortar */\n";
   c+='var LARGURA_MOBILE='+cfg.largmob+';        /* telas ate este tamanho usam a altura mobile */\n';
@@ -16784,131 +16822,170 @@ function aBlocoVitrine(cfg){
     c+="  elPasso3.className='fca-passo3';\n}\n\n";
   }
 
-  c+='/* ===== o calendario: UM iframe, criado so quando o pacote e escolhido, reaproveitado ao\n';
-  c+='   trocar de pacote. Nao existem N iframes escondidos -- tres embeds do TidyCal carregando\n';
-  c+='   juntos e exatamente o peso que esta aba existe para evitar. */\n';
+  c+='/* ===== o calendario: UM QUADRO POR PACOTE JA VISITADO (04/09/2026) =====\n';
+  c+='   Cada endereco ganha o SEU quadro, criado uma vez e nunca reapontado: o src e atribuido\n';
+  c+='   no instante em que o quadro nasce e nao e tocado nunca mais. Trocar de pacote, ou de\n';
+  c+='   familia, e voltar nao recarrega nada -- so muda qual quadro esta visivel. Antes deste\n';
+  c+='   desenho havia UM iframe reapontado, e trocar de familia jogava fora o que ja tinha sido\n';
+  c+='   baixado: medido, carga nova de 670ms.\n';
+  c+='   O QUE CUSTA, medido com o calendario real: a PRIMEIRA carga sao 9115ms (o download dos\n';
+  c+='   arquivos do TidyCal, custo unico); qualquer carga seguinte, 600 a 800ms e cerca de 13KB,\n';
+  c+='   quase tudo do cache; oito calendarios em paralelo, 2034ms e cerca de 65MB de memoria. E\n';
+  c+='   por isso que PRECARREGAR e uma escolha de tres valores, e nao uma decisao cravada aqui.\n';
+  c+='   QUEM NAO ESTA NA TELA fica numa caixa de altura zero com overflow escondido, e com a\n';
+  c+='   LARGURA de verdade (ver .fca-quadro no CSS). */\n';
   c+='var modalAberto=false, ignorarMutacoesAte=0, ignorarAte=0;\n';
-  /* A ORIGEM DO IFRAME QUE ESTA CARREGADO, e nao um literal. Ha um iframe por vez, mas os
-     pacotes podem apontar para dominios diferentes (um em tidycal.com, outro num dominio
-     proprio do TidyCal) -- entao quem manda e o endereco que acabou de ser carregado, gravado
-     no mesmo instante em que o src e trocado. Antes do primeiro pacote escolhido ela e vazia,
-     e o ouvinte recusa tudo: nao ha iframe para redimensionar. */
+  c+='var quadros=[];        /* um registro por endereco ja visitado: {link,origem,cx,f,iniciado} */\n';
+  c+='var quadroAtivo=null;  /* o quadro NO COMANDO -- e ele, e so ele, que frame() devolve */\n';
+  /* A ORIGEM DO QUADRO ATIVO, e nao um literal. Os pacotes podem apontar para dominios
+     diferentes (um em tidycal.com, outro num dominio proprio do TidyCal), e agora ha varios
+     quadros vivos ao mesmo tempo -- entao quem manda e a origem daquele que esta no comando.
+     Antes do primeiro quadro ativo ela e vazia, e o ouvinte recusa tudo: nao ha o que
+     redimensionar. */
   c+="var origemCal='';\n";
-  /* O ENDERECO EXATO QUE ESTA CARREGADO, ao lado da origem. Ele existe por causa do
-     aquecimento: sem ele, escolher justamente o pacote que foi aquecido cairia em
-     'f.src=link' com o mesmo valor, e atribuir o mesmo src RECARREGA o iframe -- ou seja, o
-     aquecimento seria jogado fora exatamente no caso em que ele mais acertou. */
+  /* O ENDERECO DO QUADRO ATIVO, ao lado da origem. Com um quadro por endereco ele deixou de ser
+     a defesa contra 'f.src=link' com o mesmo valor (esse caminho nao existe mais: nenhum src e
+     reatribuido). Ele continua porque e o que a escolha compara para saber se o quadro que o
+     cliente pediu ja e o que esta no comando. */
   c+="var linkCal='';\n\n";
   c+="function origemDe(u){var m=/^https:\\/\\/[^\\/?#]+/.exec(String(u||''));return m?m[0]:'';}\n";
-  c+="function frame(){return elCal.querySelector('iframe.fca-tidycal');}\n";
+  /* frame() DEVOLVE O QUADRO ATIVO, e nao "o primeiro iframe da caixa". A troca e o coracao
+     desta rodada: com varios quadros vivos, "o primeiro" seria o de outro pacote, e toda a
+     maquinaria de altura (expandir, recolher, aplicarAltura, o aperto de mao, a biblioteca do
+     TidyCal e a guarda de doQuadro) passaria a apontar para o quadro errado. */
+  c+='function frame(){return quadroAtivo;}\n';
+  c+='function acharQuadro(link){var i;for(i=0;i<quadros.length;i++)if(quadros[i].link===link)return quadros[i];return null;}\n';
+  /* CRIAR E DEFINITIVO: o src e atribuido uma vez, aqui, e nunca mais. Por isso trocar de
+     pacote (ou de familia) e voltar nao recarrega nada -- o documento de cada endereco fica
+     vivo na pagina. A caixa nasce ESCONDIDA (altura zero, largura real) e so a escolha a
+     revela; quem revela e mostrarQuadro, nunca a criacao. */
+  c+='function criarQuadro(link){\n';
+  c+='  var r=acharQuadro(link);\n';
+  c+='  if(r)return r;\n';
+  c+="  var cx=document.createElement('div');\n";
+  c+="  cx.className='fca-quadro fca-oculto';\n";
+  c+="  var f=document.createElement('ifr'+'ame');\n";
+  c+="  f.className='fca-tidycal';\n";
+  c+="  f.setAttribute('title','Agenda');\n";
+  c+="  f.setAttribute('scrolling','no');\n";
+  c+="  f.setAttribute('frameborder','0');\n";
+  c+="  f.setAttribute('allow','fullscreen');\n";
+  /* A ALTURA DE PARTIDA E OBRIGATORIA, e nao um enfeite: este quadro e criado por JavaScript e
+     nao tem atributo 'height' nenhum -- sem esta linha o navegador lhe da os 150px de fabrica,
+     e o calendario nasceria esmagado. */
+  c+="  f.style.height=ALTURA_INICIAL+'px';\n";
+  /* O 'load' SO VALE PARA O QUADRO ATIVO. Quadro pre-carregado que termina de carregar nao pode
+     reiniciar o aperto de mao de outro que esta na tela -- o estado do aperto de mao e um so
+     para o bloco, e quem o usa e sempre quem esta no comando. */
+  c+="  f.addEventListener('load',function(){if(quadroAtivo===f)comecarCalendario();});\n";
+  c+='  cx.appendChild(f);\n';
+  c+='  elCal.appendChild(cx);\n';
+  c+='  r={link:link,origem:origemDe(link),cx:cx,f:f,iniciado:false};\n';
+  c+='  quadros.push(r);\n';
+  /* O SRC DEPOIS DE ESTAR NO DOCUMENTO, de proposito: assim o quadro ja tem a largura de
+     verdade no instante em que a navegacao comeca, e o TidyCal se desenha para ela. */
+  c+='  f.src=link;\n';
+  c+='  return r;\n}\n';
+  c+='function mostrarQuadro(r){\n';
+  c+='  var i;\n';
+  c+="  for(i=0;i<quadros.length;i++)quadros[i].cx.className=(quadros[i]===r)?'fca-quadro':'fca-quadro fca-oculto';\n}\n";
   c+='function alturaAlvo(){return (window.innerWidth<=LARGURA_MOBILE)?ALTURA_MOBILE:ALTURA_DESKTOP;}\n';
   c+='/* Com MEDIR_FORMULARIO ligado a altura do formulario vem MEDIDA do calendario, e abrir\n';
   c+='   espaco a mais so criaria vao vazio: as duas protecoes sao alternativas, nao somam. */\n';
   c+="function expandir(){var f=frame();if(!f||MEDIR_FORMULARIO)return;f.style.setProperty('min-height',alturaAlvo(),'important');}\n";
   c+="function recolher(){var f=frame();if(f)f.style.removeProperty('min-height');}\n";
   c+=ALT.topo;
-  c+='function abrirCalendario(link){\n';
-  c+='  var f=frame(), nova=origemDe(link);\n';
-  /* JA E ESTE O ENDERECO CARREGADO -- e o caso do aquecimento que acertou o pacote. Nao ha o
-     que fazer: o documento e o mesmo, o aperto de mao ja esta em curso ou ja terminou, e
-     recomecar (f.src=link com o mesmo valor, mais comecarCalendario()) recarregaria o
-     calendario e mandaria um SEGUNDO init a um filho que aceita um so -- medido, ver
-     fcTidyCalSrc. So a altura forcada e reavaliada, que e o que a escolha muda. */
-  c+='  if(f&&link===linkCal){\n';
+  /* ===== QUEM PASSA A ESTAR NO COMANDO =====
+     O aperto de mao (e a biblioteca de altura do TidyCal) tem UM estado por bloco, e ele
+     pertence sempre ao quadro ativo. Trocar de quadro nao pode recomecar nada no quadro que
+     chega SE ele ja comecou: o documento dele e o mesmo de antes, o filho aceita um init so
+     (medido, ver fcTidyCalSrc) e um segundo init seria ignorado -- deixando o bloco achando
+     que esta esperando uma altura que nunca vem. Entao o estado e RECONSTRUIDO a partir do que
+     o proprio quadro carrega: 'data-fc-lib' diz se a biblioteca deles esta no comando dele, e
+     a altura ja esta viva porque ele ja anunciou uma.
+     Quadro que nunca comecou faz o caminho de sempre, identico ao de antes desta rodada. */
+  c+='function ativar(r){\n';
+  c+='  if(quadroAtivo===r.f){\n';
   c+='    if(ALTURA_SEMPRE)expandir();else recolher();\n';
   c+='    return;\n  }\n';
-  /* TROCAR DE DOMINIO EXIGE IFRAME NOVO, e nao so um src novo: a biblioteca do TidyCal confere
-     a origem das mensagens contra o endereco que o iframe tinha NA HORA em que ela foi
-     aplicada (checkOrigin). Reaproveitar o elemento com um pacote de outro dominio a deixaria
-     descartando em silencio todo sinal do calendario novo -- exatamente o defeito mudo que a
-     linha de origem existe para evitar. Dentro do MESMO dominio o elemento continua sendo
-     reaproveitado: segue existindo um iframe por vez, que e o peso que esta aba evita. */
-  c+='  /* dominio diferente do que esta carregado: iframe novo, senao a conferencia de origem\n';
-  c+='     da biblioteca do TidyCal continuaria presa ao endereco anterior */\n';
-  c+='  if(f&&nova!==origemCal){soltarBiblioteca(f);if(f.parentNode)f.parentNode.removeChild(f);f=null;}\n';
-  c+='  if(!f){\n';
-  c+="    f=document.createElement('ifr'+'ame');\n";
-  c+="    f.className='fca-tidycal';\n";
-  c+="    f.setAttribute('title','Agenda');\n";
-  c+="    f.setAttribute('scrolling','no');\n";
-  c+="    f.setAttribute('frameborder','0');\n";
-  c+="    f.setAttribute('allow','fullscreen');\n";
-  /* A ALTURA DE PARTIDA E OBRIGATORIA AQUI, e nao um enfeite: este iframe e criado por
-     JavaScript e nao tem atributo 'height' nenhum -- sem esta linha o navegador lhe da os
-     150px de fabrica, e o calendario nascia esmagado. */
-  c+="    f.style.height=ALTURA_INICIAL+'px';\n";
-  c+="    f.addEventListener('load',comecarCalendario);\n";
-  c+='    elCal.appendChild(f);\n  }\n';
-  c+='  origemCal=nova;\n';
-  c+='  linkCal=link;\n';
-  c+='  f.src=link;\n';
-  /* Trocar de pacote troca o src, e src novo e DOCUMENTO novo: o aperto de mao anterior morreu
-     junto com o documento anterior. Volta para a altura de partida e recomeca -- senao o
-     calendario do pacote novo ficaria com a altura medida do pacote velho. */
-  c+="  f.style.height=ALTURA_INICIAL+'px';\n";
-  c+='  comecarCalendario();\n';
-  /* O CAMINHO B E UM INTERRUPTOR, E NAO O PADRAO -- corrigido depois de medir o bloco gerado.
-     A primeira versao chamava expandir() aqui, sempre, com o argumento de que a altura
-     calibrada seria "o piso desde a criacao". A medicao desmente o argumento: recolher() so
-     roda quando modalAberto ja era true, e na PRIMEIRA abertura ele e false -- entao o
-     calendario ficava travado em ALTURA_DESKTOP para sempre, com cerca de 1500px de vazio
-     embaixo. E exatamente a pagina poluida que esta aba existe para evitar.
-     O padrao volta a ser o comportamento provado em producao na aba TidyCal: altura natural,
-     e o sinal expande. Quem nao receber sinal nenhum liga ALTURA_SEMPRE no topo do bloco. */
-  c+='  if(ALTURA_SEMPRE)expandir();else recolher();\n}\n\n';
+  c+='  quadroAtivo=r.f;\n';
+  c+='  origemCal=r.origem;\n';
+  c+='  linkCal=r.link;\n';
+  c+='  if(r.iniciado){\n';
+  c+='    limparTimers();\n';
+  c+='    alturaViva=true;\n';
+  c+="    libNoComando=!!r.f.getAttribute('data-fc-lib');\n";
+  c+='    manualAtivo=!libNoComando;\n';
+  c+='  }else{\n';
+  c+='    r.iniciado=true;\n';
+  c+='    comecarCalendario();\n  }\n';
+  c+='  if(ALTURA_SEMPRE)expandir();else recolher();\n}\n';
+  /* ABRIR E: garantir que o quadro daquele endereco existe, mostra-lo, e passar o comando a
+     ele. Nenhuma das tres coisas recarrega documento nenhum quando o quadro ja existia -- que
+     e o caso do pre-carregamento que acertou, e o da volta a um pacote ja visitado. */
+  c+='function abrirCalendario(link){\n';
+  c+='  if(!link)return;\n';
+  c+='  var r=criarQuadro(link);\n';
+  c+='  mostrarQuadro(r);\n';
+  c+='  ativar(r);\n}\n\n';
 
-  /* ===== AQUECER O CALENDARIO (04/09/2026) =====
-     O QUE SE GANHA, medido na pagina publicada do dono: do clique ate o calendario aparecer
-     sao 9115ms na PRIMEIRA vez e 787ms na segunda. A diferenca e o download dos arquivos do
-     TidyCal -- custo que so existe uma vez. Se o navegador ja os tiver quando o cliente
-     clicar, o clique passa a custar os 787ms da segunda vez.
-     O GATILHO E A INTENCAO, E NUNCA O CARREGAMENTO DA PAGINA (decisao do dono): quem entra e
-     sai sem escolher nada nao pode pagar por um calendario que nunca ia ver. Com familias, o
-     momento e a escolha da FAMILIA -- entre ela e o clique num pacote o cliente passa segundos
-     lendo a lista. Sem familias (vitrine de dois passos) esse passo nao existe, e o sinal
-     passa a ser o primeiro dedo/mouse sobre um cartao: 'pointerover' cobre o mouse (segundos
-     de sobra) e o toque (o pointerover do toque chega antes do click), e 'focus' cobre quem
-     navega pelo teclado.
-     E O IFRAME DE VERDADE, e nao um segundo iframe escondido. Duas razoes: um segundo quadro
-     na mesma origem passaria pelo filtro de origem do ouvinte e a altura anunciada por ele
-     seria aplicada ao calendario visivel (por isso doQuadro existe, e por isso ele vale mesmo
-     aqui, onde ha um quadro so); e se o cliente escolher justamente o pacote aquecido, nao ha
-     nada a fazer -- ele ja esta pronto.
-     ESCONDIDO COM A LARGURA REAL, e nao por display:none -- a correcao de 04/09/2026, depois
-     que o dono viu na pagina publicada o calendario aparecer e "sumir e voltar com um efeito
-     tipo fade". Nao eram duas cargas: o src era atribuido uma vez so, e o elemento era o
-     mesmo. Era UM desenho jogado fora. Com display:none o quadro tem largura 0, e o TidyCal
-     se desenha para uma tela de 0px -- medido, ele anunciava 3800px de altura, tudo empilhado
-     numa coluna sem largura. Revelar era a primeira vez que ele via a largura de verdade, e
-     entao ele refazia o layout inteiro, com a animacao de entrada dele junto.
-     O esconderijo virou '.fca-aquec' (ver o CSS acima): largura real, altura zero, overflow
-     escondido, opacity 0. O quadro nao sai do fluxo por position:absolute de proposito --
-     altura zero ja garante que nao ha buraco nenhum, e um bloco absoluto de 700px penduraria
-     area rolavel vazia no fim da pagina quando o bloco fosse a ultima coisa dela.
-     O QUE NAO MUDOU, e nao podia mudar: o <iframe> continua no MESMO no do DOM do comeco ao
-     fim. Re-parentear um iframe o recarrega do zero -- seria jogar fora justamente o que o
-     aquecimento ganhou. O que muda e so CSS do container, que nao recarrega nada.
-     MEDIDO em 04/09/2026 contra o TidyCal real, nos dois ramos da vitrine: largura durante o
-     aquecimento 0 -> 960, altura anunciada enquanto escondido 3800 -> 1021 (a de verdade e
-     1054), e a rajada depois da revelacao de TRES sinais com 'animationstart' dentro para UM
-     so, um ajuste de 33px sem animacao nenhuma. O quadro que o cliente ve ja esta desenhado;
-     o que sobra e o TidyCal se remedindo ao voltar a ser pintado, e isso nao se elimina de
-     fora -- medido, position:absolute com a altura inteira dava exatamente o mesmo sinal.
-     PARA NUNCA ATRAPALHAR: so aquece enquanto NENHUM pacote foi escolhido (atual<0). Depois
-     disso o iframe e o calendario que o cliente esta vendo, e recarrega-lo seria trocar o que
-     ele pediu por outro. */
+  /* ===== PRE-CARREGAR O CALENDARIO (04/09/2026, revisto no mesmo dia) =====
+     O QUE SE GANHA, medido com o calendario real: a PRIMEIRA carga custa 9115ms -- e o
+     download dos arquivos do TidyCal, e ele acontece uma vez so. Depois que QUALQUER
+     calendario carregou, cada carga seguinte custa 600 a 800ms e cerca de 13KB (22
+     requisicoes, quase todas do cache). Oito calendarios em paralelo: 2034ms e cerca de 65MB.
+     POR QUE A ESCOLHA E DO DONO, E TEM TRES VALORES. A primeira versao aquecia UM calendario
+     no instante da INTENCAO (escolher a familia, ou o primeiro dedo/mouse num cartao), e o
+     dono usou e achou os dois limites: ir direto num pacote que nao era o aquecido continuava
+     custando a carga inteira, e trocar de familia jogava fora o aquecimento. O segundo limite
+     e mecanico e esta consertado por construcao -- ha um quadro por endereco, e nenhum src e
+     reapontado. O primeiro e uma TROCA, e por isso virou campo: 'nao' nao carrega nada antes
+     do clique, 'um' paga o custo unico enquanto o cliente le a lista, 'todos' deixa qualquer
+     pacote pronto ao preco dos 65MB. Os numeros estao no proprio campo, e no topo do bloco.
+     OS GATILHOS DE INTENCAO CONTINUAM, e agora SOMAM em vez de substituir: com familias,
+     escolher uma aquece o primeiro pacote DELA; sem familias, o primeiro dedo/mouse num cartao
+     aquece aquele cartao. Antes isso reapontava o unico quadro; agora acrescenta um quadro,
+     que custa os 600 a 800ms e os 13KB medidos. Uma vez so no caminho sem familias
+     ('aqueceuCartao'): um quadro por cartao percorrido pelo mouse seria 'todos' pelas costas.
+     SAO OS QUADROS DE VERDADE, e nao quadros extras escondidos que depois seriam descartados.
+     E por isso que doQuadro existe: varios quadros na mesma origem passam pelo filtro de
+     e.origin, e a altura anunciada por um escondido seria escrita no calendario visivel --
+     defeito mudo, nada quebra e o quadro so fica do tamanho errado.
+     ESCONDIDO COM A LARGURA REAL, e nao por display:none -- a correcao que o dono pediu depois
+     de ver na pagina publicada o calendario "sumir e voltar com um efeito tipo fade". Nao eram
+     duas cargas: era UM desenho jogado fora. Com display:none o quadro tem largura 0, e o
+     TidyCal se desenha para uma tela de 0px (medido: 3800px de altura anunciada, tudo
+     empilhado numa coluna sem largura); revelar era a primeira vez que ele via a largura de
+     verdade, e ele refazia o layout inteiro, com a animacao de entrada dele junto.
+     Sao DOIS esconderijos, e os dois tem largura: '.fca-aquec' na caixa do calendario (enquanto
+     nenhum pacote foi escolhido, ela e que esta em display:none pela regra do passo) e
+     '.fca-oculto' em cada quadro que nao e o da vez. Nenhum dos dois sai do fluxo por
+     position:absolute, de proposito -- altura zero ja garante que nao ha buraco, e um bloco
+     absoluto de 700px penduraria area rolavel vazia no fim da pagina.
+     O QUE NAO MUDOU, e nao podia mudar: cada quadro fica no MESMO no do DOM do comeco ao fim.
+     Re-parentear um iframe o recarrega do zero -- seria jogar fora justamente o que o
+     pre-carregamento ganhou. O que muda e so classe de CSS, que nao recarrega nada.
+     PARA NUNCA ATRAPALHAR: a classe do aquecimento so e posta enquanto NENHUM pacote foi
+     escolhido (atual<0), e o comando so passa ao primeiro quadro aquecido -- os demais nascem
+     calados, e so pedem a propria altura quando o cliente escolhe um deles. */
   c+='function aquecer(link){\n';
-  c+='  if(!AQUECER_CALENDARIO||atual>=0||!link||link===linkCal)return;\n';
-  /* A CLASSE VEM ANTES de abrirCalendario, e nao depois: o iframe e criado la dentro, e se o
-     container ainda estivesse em display:none nesse instante o filho nasceria com largura 0 e
-     comecaria a se desenhar errado -- que e exatamente o defeito que esta linha conserta. */
+  c+="  if(PRECARREGAR==='nao'||atual>=0||!link)return;\n";
+  /* A CLASSE VEM ANTES de criarQuadro, e nao depois: o quadro nasce ali dentro, e se a caixa
+     ainda estivesse em display:none nesse instante o filho nasceria com largura 0 e comecaria
+     a se desenhar errado -- que e exatamente o defeito que esta linha conserta. */
   c+="  elCal.className='fca-cal fca-aquec';\n";
-  c+='  abrirCalendario(link);\n}\n';
+  c+='  var r=criarQuadro(link);\n';
+  /* SO O PRIMEIRO AQUECIDO ASSUME O COMANDO. Os outros baixam e se desenham calados: eles nao
+     mandam aperto de mao e nao recebem a biblioteca de altura, entao nao ha dois donos do
+     mesmo estado. Quando o cliente escolher um deles, ativar() faz o aperto de mao dele ali --
+     o documento ja esta carregado, entao isso custa uma troca de mensagem, e nao uma carga. */
+  c+='  if(!quadroAtivo)ativar(r);\n}\n';
   if(temFam){
     /* O PRIMEIRO PACOTE DA FAMILIA, que e o cartao que o cliente ve no topo da lista -- e,
        portanto, o mais provavel de ser escolhido. Se ele escolher outro, o clique cai no
-       caminho ja medido de 787ms (troca de src no mesmo dominio), que continua sendo muito
-       menos do que os 9115ms de primeira carga. */
+       caminho ja medido de 600 a 800ms (documento novo, arquivos do TidyCal ja em cache), que
+       continua sendo muito menos do que os 9115ms de primeira carga -- e com PRECARREGAR em
+       'todos' nem esse custo existe, porque o quadro dele ja esta pronto. */
     c+='function primeiroDaFamilia(id){\n';
     c+='  var i;\n';
     c+='  for(i=0;i<PACOTES.length;i++)if(PACOTES[i].fam===id)return PACOTES[i].link;\n';
@@ -16925,11 +17002,13 @@ function aBlocoVitrine(cfg){
   c+='function escolher(i){\n';
   c+='  var p=PACOTES[i], trocouLink=(atual!==i);\n';
   c+='  atual=i;\n';
-  /* REVELAR E SO TIRAR A CLASSE. O no do iframe nao se move, o src nao e tocado, e por isso
-     nada recarrega: o navegador so volta a pintar uma caixa que ja estava do tamanho certo.
+  /* REVELAR E SO TIRAR A CLASSE. Nenhum no do DOM se move e nenhum src e tocado, e por isso
+     nada recarrega: o navegador so volta a pintar caixas que ja estavam do tamanho certo.
      Fica ANTES das linhas de classe dos passos porque, com as duas classes ao mesmo tempo, a
      regra do aquecimento venceria o empate de especificidade e o calendario continuaria
-     invisivel. Sem aquecimento esta linha nao faz nada -- a classe nunca foi posta. */
+     invisivel. Com PRECARREGAR='nao' esta linha nao faz nada -- a classe nunca foi posta.
+     Quem escolhe QUAL quadro aparece e mostrarQuadro, chamado por abrirCalendario mais abaixo;
+     esta linha so tira a caixa inteira do esconderijo. */
   c+="  elCal.className='fca-cal';\n";
   c+='  elResumoNome.textContent=p.nome;\n';
   c+='  montarPreco(elResumoPreco,p.preco);\n';
@@ -16943,12 +17022,14 @@ function aBlocoVitrine(cfg){
   c+='       estado do modal e ignora qualquer sinal por 800ms. Sem isso um sinal atrasado do\n';
   c+='       iframe QUE ESTAVA SENDO TROCADO pode ser lido como se fosse do novo, e o cliente\n';
   c+='       veria a pagina crescer 2350px sem ter clicado em nada. */\n';
-  /* A JANELA DE 800ms SO VALE QUANDO O DOCUMENTO VAI MESMO TROCAR. Escolher o pacote que foi
-     aquecido nao troca documento nenhum -- e ignorar 800ms de sinais ali poderia descartar
-     justamente a altura que o calendario aquecido ainda estava para anunciar, deixando o
-     quadro na altura de partida. Nao ha sinal atrasado de iframe anterior para temer: nao
-     houve iframe anterior. */
-  c+='    if(p.link!==linkCal){modalAberto=false;recolher();ignorarAte=Date.now()+800;}\n';
+  /* A JANELA DE 800ms SO VALE PARA QUADRO NOVO -- e "novo" agora quer dizer que este endereco
+     nunca foi visitado. Escolher um pacote cujo quadro ja existe (o pre-carregado, ou um que o
+     cliente ja viu) nao cria documento nenhum, e ignorar 800ms de sinais ali poderia descartar
+     justamente a altura que ele ainda estava para anunciar, deixando o quadro na altura de
+     partida. Com um quadro por endereco a guarda principal contra sinal atrasado passou a ser
+     doQuadro (o e.source), que descarta por identidade em vez de por relogio -- esta janela
+     fica como a segunda camada, no unico caso em que um documento comeca agora. */
+  c+='    if(!acharQuadro(p.link)){modalAberto=false;recolher();ignorarAte=Date.now()+800;}\n';
   c+='    abrirCalendario(p.link);\n  }\n}\n\n';
 
   c+='function trocarPacote(){\n';
@@ -16962,11 +17043,14 @@ function aBlocoVitrine(cfg){
   if(temFam)c+="raiz.querySelector('.fca-trocar-fam').addEventListener('click',trocarFamilia);\n";
   c+='\n';
 
-  c+='/* Ouvinte UNICO em window, nunca no iframe -- assim ele sobrevive a troca de pacote, que\n';
-  c+='   reaproveita o MESMO elemento (so troca o src). O prefixo e as duas mensagens sao os\n';
-  c+='   mesmos que a aba TidyCal ja usa em producao; a ORIGEM e a do endereco CARREGADO AGORA\n';
-  c+='   (origemCal), e nao um literal: pacotes podem estar em dominios diferentes, e um filtro\n';
-  c+='   cravado descartaria em silencio todo sinal de quem nao fosse o cravado. */\n';
+  c+='/* Ouvinte UNICO em window, nunca em cada quadro -- assim ele sobrevive a troca de pacote e\n';
+  c+='   a de familia, que agora so mudam QUAL quadro esta no comando. O prefixo e as duas\n';
+  c+='   mensagens sao os mesmos que a aba TidyCal ja usa em producao; a ORIGEM e a do quadro\n';
+  c+='   ATIVO (origemCal), e nao um literal: pacotes podem estar em dominios diferentes, e um\n';
+  c+='   filtro cravado descartaria em silencio todo sinal de quem nao fosse o cravado.\n';
+  c+='   E COM VARIOS QUADROS VIVOS a origem deixou de bastar: dois pacotes do mesmo dominio tem\n';
+  c+='   a MESMA origem, entao quem separa um do outro e doQuadro, pela identidade do e.source.\n';
+  c+='   Sem ele, a altura anunciada por um quadro escondido seria escrita no que esta na tela. */\n';
   c+="window.addEventListener('message',function(e){\n";
   c+="  if(!origemCal||e.origin!==origemCal)return;\n";
   c+="  if(typeof e.data!=='string')return;\n";
@@ -16989,6 +17073,13 @@ function aBlocoVitrine(cfg){
      repetido, e o normal e haver um dominio so. */
   c+='preConectar(TIDYCAL_CDN);\n';
   c+='for(var iPre=0;iPre<PACOTES.length;iPre++)preConectar(origemDe(PACOTES[iPre].link));\n';
+  /* ===== O PRE-CARREGAMENTO NA ABERTURA DA PAGINA =====
+     Fica DEPOIS da pre-conexao de proposito: o aviso de conexao e barato e vale para todos os
+     enderecos, e emiti-lo antes deixa a conexao sendo aberta enquanto o primeiro quadro e
+     montado. 'nao' nao chega aqui (aquecer volta na primeira linha), e por isso quem escolher
+     "so ao escolher" continua sem baixar nada antes do clique. */
+  c+="if(PRECARREGAR==='todos'){for(var iQ=0;iQ<PACOTES.length;iQ++)aquecer(PACOTES[iQ].link);}\n";
+  c+="else if(PRECARREGAR==='um'&&PACOTES.length)aquecer(PACOTES[0].link);\n";
   c+='})();\n</scr'+'ipt>';
   return c;
 }

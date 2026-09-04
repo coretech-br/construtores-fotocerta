@@ -452,3 +452,34 @@ consertar: comparacao com a versao publicada e o instrumento que separa "defeito
 - **Recalibrar o limiar** medindo a pagina do TidyCal de hoje, e escrever a data da medicao ao
   lado do numero — foi a falta dela que fez o limiar envelhecer em silencio.
 - **Fazer o arnes rodar contra uma arvore de referencia** sem depender do contexto de git.
+
+---
+
+## Divida aberta em 04/09/2026 — a corrida entre o embed.js do TidyCal e o nosso aperto de mao
+
+Achada ao implementar a pre-carga, e **nao consertada de proposito**.
+
+**O que acontece**, medido em uma passagem de cada duas: o `embed.js` do TidyCal chega **depois**
+de o nosso aperto de mao proprio ja ter assumido o filho. A biblioteca deles e entao aplicada
+ao elemento por cima e o prende no piso de **500 px** (`minHeight` deles), enquanto o calendario
+continua anunciando a altura certa (1021 escondido, 1054 revelado).
+
+**Onde mora:** em `fcTidyCalSrc`, a **fonte compartilhada** dos calendarios. Vale igual para a
+aba TidyCal e para a vitrine de pacotes.
+
+**E anterior a esta rodada.** O `medirComSegundaChance` de `tidycal-unificado.mjs` foi escrito
+para essa mesma instabilidade, com este mesmo numero — so nao tinha sido nomeada.
+
+**Por que nao foi consertada agora:** o conserto muda `fcTidyCalSrc`, e portanto muda `t-out1`
+— a saida da aba TidyCal, que esta em producao e que esta rodada exigia **byte a byte
+identica**. Consertar de passagem seria mexer num bloco publicado dentro de uma rodada que
+prometia nao mexer.
+
+**O que o arnes passou a fazer enquanto isso:** a parte 3 deixou de confundir esta corrida com
+o defeito da largura. Ela compara as duas alturas **anunciadas pelo proprio calendario** e
+degrada a leitura do elemento para "medicao, nao assercao" quando cai em 500/700 — e a altura
+do elemento continua **cobrada de verdade** nas partes 5 e 6. A distincao importa: sem ela, uma
+corrida de terceiro apareceria como defeito nosso, e o vermelho de sempre esconderia o vermelho
+de verdade.
+
+**Precisa de decisao do dono**, porque toca a altura que os blocos publicados aplicam.

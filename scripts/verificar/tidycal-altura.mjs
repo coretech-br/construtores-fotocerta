@@ -108,13 +108,22 @@ const ESPIA = '<scr'+'ipt>(function(){\n'
    seria descartado antes de chegar a aplicarAltura, e a bateria mediria a guarda nova em vez
    da faixa de alturas. Vai por Object.defineProperty porque MessageEventInit.source so aceita
    WindowProxy, e aqui a janela e a falsa da espia. */
+/* O QUADRO QUE ESTA NA TELA, e nao "o primeiro iframe do documento". Desde 04/09/2026 a
+   vitrine de pacotes mantem UM QUADRO POR PACOTE JA VISITADO -- os que nao sao o da vez ficam
+   numa caixa .fca-oculto, com a largura de verdade e altura zero. Ler "o primeiro" mediria o
+   quadro do pacote ANTERIOR, e foi exatamente isso que aconteceu quando este arquivo rodou sem
+   o seletor novo: a troca de pacote parecia nao devolver a altura de partida, porque a altura
+   lida era a do quadro que tinha ficado para tras. Na aba TidyCal, que tem um quadro so, o
+   segundo seletor continua valendo. */
+const VIS = '.fca-quadro:not(.fca-oculto) iframe.fca-tidycal';
 const sinal = (pg, origem, texto) => pg.evaluate(
-  ([o, t]) => {
-    const f = document.querySelector('iframe.tidycal-embed, iframe.fca-tidycal');
+  ([o, t, vis]) => {
+    const f = document.querySelector(vis) ||
+              document.querySelector('iframe.tidycal-embed, iframe.fca-tidycal');
     const ev = new MessageEvent('message', { data: t, origin: o });
     Object.defineProperty(ev, 'source', { value: f ? f.contentWindow : null });
     window.dispatchEvent(ev);
-  }, [origem, texto]);
+  }, [origem, texto, VIS]);
 
 const alturaDe = (pg, sel) => pg.$eval(sel, el => el.style.height || '');
 const minAlturaDe = (pg, sel) => pg.$eval(sel, el => el.style.minHeight || '');
@@ -288,7 +297,7 @@ async function abaPacote(porta, medir){
       bloco.indexOf('var ALTURA_INICIAL=700;') >= 0 &&
       bloco.indexOf("f.style.height=ALTURA_INICIAL+'px';") >= 0);
 
-  const sel = 'iframe.fca-tidycal';
+  const sel = VIS;
   const r = await comBlocoNaPagina({
     bloco, corpoAntes: ESPIA, porta: porta + 1,
     medir: async pg => {
@@ -319,7 +328,7 @@ async function abaPacote(porta, medir){
       const velhaIgnorada = await alturaDe(pg, sel);
       await sinal(pg, PROPRIO_ORIG, '[iFrameSizer]fcm:600:1:mutationObserver');
       const novaAceita = await alturaDe(pg, sel);
-      const quantos = await pg.$$eval(sel, els => els.length);
+      const quantos = await pg.$$eval('iframe.fca-tidycal', els => els.length);
       return { nasceu, hs1, antesTroca, depoisTroca, hs2, velhaIgnorada, novaAceita, quantos };
     }
   });
@@ -338,7 +347,12 @@ async function abaPacote(porta, medir){
   chk(rot + ': NEGATIVO -- altura do pacote ANTERIOR nao redimensiona o novo',
       r.velhaIgnorada === PARTIDA, r.velhaIgnorada);
   chk(rot + ': altura da origem carregada AGORA e aceita', r.novaAceita === '600px', r.novaAceita);
-  chk(rot + ': continua existindo UM iframe so', r.quantos === 1, String(r.quantos));
+  /* O INVARIANTE MUDOU EM 04/09/2026, de proposito: era "um iframe so, reapontado", e passou a
+     ser "um quadro por pacote ja visitado". A razao foi um defeito que o dono viu na pagina
+     publicada -- reapontar o src jogava fora o calendario ja baixado, e voltar custava uma
+     carga nova (medido: 670ms). Dois pacotes visitados, dois quadros. */
+  chk(rot + ': um quadro por pacote visitado -- dois aqui, e nenhum a mais',
+      r.quantos === 2, String(r.quantos));
   chk(rot + ': sem erro de script na pagina', soPageError(r.erros).length === 0,
       soPageError(r.erros).join(' | '));
 }
@@ -362,7 +376,7 @@ async function silencioPacote(porta){
       const cs = await pg.$$('.fca-card');
       await cs[0].click();
       await pg.waitForTimeout(3400);
-      return { altura: await alturaDe(pg, 'iframe.fca-tidycal'),
+      return { altura: await alturaDe(pg, VIS),
                tentativas: await pg.evaluate(() => window.FC_HANDSHAKE.length) };
     }
   });
