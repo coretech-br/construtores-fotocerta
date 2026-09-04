@@ -88,18 +88,33 @@ const temHandshake = bloco =>
    que so anota o que passaria. E o mesmo espirito da sonda de `pac-quantidade.mjs`, que
    intercepta o `document.head.appendChild` do bloco: observar o que o bloco MANDA, sem mudar
    uma linha dele. Vai em `corpoAntes` porque precisa estar de pe antes de o bloco rodar. */
+/* A JANELA FALSA E UMA SO POR IFRAME, e isso passou a importar em 04/09/2026: os blocos
+   conferem agora tambem de QUAL QUADRO a mensagem veio (`e.source === frame().contentWindow`).
+   Com um objeto novo a cada leitura do getter, essa igualdade nunca fecharia e a espia
+   derrubaria a bateria inteira -- uma medicao quebrada pela propria ferramenta de medir. O
+   WeakMap guarda uma janela falsa por elemento, que e como o contentWindow de verdade se
+   comporta. */
 const ESPIA = '<scr'+'ipt>(function(){\n'
   + '  window.FC_HANDSHAKE = [];\n'
-  + "  var d = Object.getOwnPropertyDescriptor(HTMLIFrameElement.prototype, 'contentWindow');\n"
+  + '  var janelas = new WeakMap();\n'
   + "  Object.defineProperty(HTMLIFrameElement.prototype, 'contentWindow', { configurable:true, get:function(){\n"
-  + '    return { postMessage: function(m, o){ window.FC_HANDSHAKE.push({ m:String(m), o:String(o) }); } };\n'
+  + '    if(!janelas.has(this)) janelas.set(this, { postMessage: function(m, o){ window.FC_HANDSHAKE.push({ m:String(m), o:String(o) }); } });\n'
+  + '    return janelas.get(this);\n'
   + '  }});\n'
   + '})();</scr'+'ipt>';
 
-/* Um sinal do TidyCal, com a origem escolhida. */
+/* Um sinal do TidyCal, com a origem escolhida -- e com o 'source' do quadro que esta na tela.
+   O 'source' entrou em 04/09/2026 pela guarda doQuadro (ver acima): sem ele o evento sintetico
+   seria descartado antes de chegar a aplicarAltura, e a bateria mediria a guarda nova em vez
+   da faixa de alturas. Vai por Object.defineProperty porque MessageEventInit.source so aceita
+   WindowProxy, e aqui a janela e a falsa da espia. */
 const sinal = (pg, origem, texto) => pg.evaluate(
-  ([o, t]) => window.dispatchEvent(new MessageEvent('message', { data: t, origin: o })),
-  [origem, texto]);
+  ([o, t]) => {
+    const f = document.querySelector('iframe.tidycal-embed, iframe.fca-tidycal');
+    const ev = new MessageEvent('message', { data: t, origin: o });
+    Object.defineProperty(ev, 'source', { value: f ? f.contentWindow : null });
+    window.dispatchEvent(ev);
+  }, [origem, texto]);
 
 const alturaDe = (pg, sel) => pg.$eval(sel, el => el.style.height || '');
 const minAlturaDe = (pg, sel) => pg.$eval(sel, el => el.style.minHeight || '');

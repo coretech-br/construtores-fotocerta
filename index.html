@@ -11762,6 +11762,9 @@ function fcTidyCalSrc(op){
   c+=i+'   bodyPadding, tolerance, inPageLinks, resizeFrom, widthCalculationMethod, mouseEvents.\n';
   c+=i+'   Sao os valores de fabrica -- iguais aos que o TidyCal manda no site deles. */\n';
   c+=i+"var TIDYCAL_LIB='https://asset-tidycal.b-cdn.net/js/embed.js';\n";
+  /* A ORIGEM do CDN sai do proprio endereco da biblioteca, e nunca de um segundo literal:
+     dois literais para o mesmo host divergiriam no dia em que o TidyCal trocasse de CDN. */
+  c+=i+"var TIDYCAL_CDN=(/^https:\\/\\/[^\\/?#]+/.exec(TIDYCAL_LIB)||[''])[0];\n";
   c+=i+"var SIZER_METODO=MEDIR_FORMULARIO?'lowestElement':'bodyOffset';\n";
   c+=i+"var SIZER_INIT=':8:false:false:32:true:true:null:'+SIZER_METODO+':null:null:0:false:parent:scroll:true';\n";
   c+=i+'var ALTURA_MINIMA=500;    /* piso. Mesmo numero que o TidyCal usa no embed.js deles (minHeight:500). Medido: no meio do carregamento o calendario chega a anunciar 38px e 75px -- sem piso ele piscaria achatado na tela do cliente. */\n';
@@ -11769,6 +11772,45 @@ function fcTidyCalSrc(op){
   if(op.inicial)c+=i+'var ALTURA_INICIAL='+op.inicial+';  /* altura de partida, ate a primeira medida chegar -- e a que fica se ela nunca chegar. Mesmo numero que o embed.js do TidyCal usa. */\n';
   c+=i+"var sizerId='fc'+Math.random().toString(36).slice(2,8);\n";
   c+=i+'var alturaViva=false, libNoComando=false, manualAtivo=false, libFalhou=false, sizerTimers=[];\n';
+  /* ===== PRE-CONEXAO (04/09/2026) =====
+     Medido na pagina publicada do dono (fotocerta.com.br/estudio-905-locacao): do clique no
+     pacote ate o calendario aparecer sao 9115ms na PRIMEIRA vez e 787ms na segunda. Dos ~9s,
+     0ms sao do bloco criar o iframe e cerca de 413ms sao a ABERTURA DA CONEXAO com o dominio
+     do calendario (687ms na primeira requisicao contra 274ms na segunda). Medido tambem: a
+     pagina nao emitia preconnect nem dns-prefetch para esse dominio.
+     Por que por JavaScript, e nao por <link> no HTML: o bloco vai para dentro do Prosite,
+     onde nao se edita o <head> da pagina. E o mesmo caminho que a tag do embed.js ja usa.
+     SEM crossorigin, de proposito: o iframe do calendario e uma NAVEGACAO (conexao com
+     credenciais) e o embed.js e script classico sem crossorigin -- um preconnect anonimo
+     abriria uma conexao de outro balde, que nenhum dos dois reaproveitaria.
+     dns-prefetch vai junto porque e o degrau que sobra quando o navegador ignora o
+     preconnect (limite de conexoes especulativas, Data Saver): resolver o nome ja e parte do
+     custo medido.
+     UMA VEZ POR ORIGEM: dois blocos destes podem cair na mesma pagina, e o marcador
+     data-fc-pre e o que impede o segundo de pedir a mesma conexao de novo. */
+  c+=i+'function preConectar(o){\n';
+  c+=i+'  if(!o)return;\n';
+  c+=i+"  if(document.querySelector('link[data-fc-pre=\"'+o+'\"]'))return;\n";
+  c+=i+"  var d=document.head||document.documentElement, k, l, tipos=['preconnect','dns-prefetch'];\n";
+  c+=i+'  for(k=0;k<tipos.length;k++){\n';
+  c+=i+"    l=document.createElement('link');l.rel=tipos[k];l.href=o;\n";
+  c+=i+"    l.setAttribute('data-fc-pre',o);\n";
+  c+=i+'    d.appendChild(l);\n';
+  c+=i+'  }\n';
+  c+=i+'}\n';
+  /* ===== DE QUAL QUADRO VEIO A MENSAGEM (04/09/2026) =====
+     O filtro de origem sozinho deixou de bastar no dia em que a pagina passou a poder ter
+     mais de um iframe apontado para o MESMO dominio do calendario -- e o aquecimento e
+     exatamente essa possibilidade. Um segundo quadro na mesma origem passa pelo e.origin, e a
+     altura anunciada POR ELE seria escrita no calendario que esta na tela: nada quebra, nada
+     aparece no console, o quadro so fica do tamanho errado. E a classe de defeito mudo que
+     este projeto persegue.
+     A guarda vale mesmo com UM iframe so (que e o desenho de hoje): ela protege de qualquer
+     quadro futuro, e custa uma comparacao de identidade por mensagem. */
+  c+=i+'function doQuadro(e){\n';
+  c+=i+'  var f=frame();\n';
+  c+=i+'  return !!(f&&f.contentWindow&&e.source===f.contentWindow);\n';
+  c+=i+'}\n';
   c+=i+'function limparTimers(){\n';
   c+=i+'  for(var k=0;k<sizerTimers.length;k++)clearTimeout(sizerTimers[k]);\n';
   c+=i+'  sizerTimers=[];\n';
@@ -11866,6 +11908,10 @@ function fcTidyCalSrc(op){
        todos os iframes dela). Responder aqui antes de o caminho manual ser escolhido faria o
        nosso init chegar primeiro, e o init da biblioteca -- que viria depois -- seria
        ignorado pelo filho, deixando-a achando que esta no comando sem estar. */
+    /* VEM ANTES de 'pronto' e de 'medida', de proposito: o "Ready" tambem manda responder
+       (pedirAltura), e responder ao quadro errado faria o nosso init chegar a um calendario
+       que nao esta na tela. */
+    fonte:j+"if (!doQuadro(e)) return;   /* veio de outro iframe -- ver doQuadro */\n",
     pronto:j+"if (e.data === '[iFrameResizerChild]Ready') { if (manualAtivo) pedirAltura(); return; }\n",
     medida:j+"aplicarAltura(e.data.split(':')[1]);   /* [iFrameSizer]<id>:<altura>:<largura>:<tipo> */\n"
   };
@@ -12046,6 +12092,7 @@ function tGerar(){
   c+="  window.addEventListener('message', function (e) {\n";
   c+="    if (e.origin !== '"+escJs(origem)+"') return;\n";
   c+="    if (typeof e.data !== 'string') return;\n";
+  c+=ALT.fonte;
   c+=ALT.pronto;
   c+="    if (e.data.indexOf('[iFrameSizer]') !== 0) return;\n\n";
   c+=ALT.medida+'\n';
@@ -12054,7 +12101,17 @@ function tGerar(){
   c+="    if (tipo === 'scrollToOffset') {\n      modalAberto = true;\n      ignorarMutacoesAte = Date.now() + 800;\n      expandir();\n      return;\n    }\n\n";
   c+='    /* MODAL FECHOU (X, cancelar ou agendamento concluido) */\n';
   c+="    if (modalAberto && tipo === 'mutationObserver' && Date.now() > ignorarMutacoesAte) {\n      modalAberto = false;\n      recolher();\n    }\n  });\n";
-  c+="\n  /* comeca assim que a pagina abre, e de novo se o iframe recarregar */\n";
+  c+="\n  /* ===== pre-conexao =====\n";
+  c+='     Aqui o ganho REAL e o do CDN: o embed.js so entra na pagina quando este script pede,\n';
+  c+='     entao avisar antes poupa DNS + TCP + TLS daquele host. O aviso do dominio do\n';
+  c+='     CALENDARIO e, neste bloco, provavelmente redundante: o <iframe> acima vem ANTES deste\n';
+  c+='     script, e o navegador abre a conexao ao ler aquela tag. Ele fica porque\n';
+  c+='     custa um elemento que o navegador ignora quando a conexao ja existe, e porque cobre\n';
+  c+='     o caso de este bloco ser colado com o script antes do iframe. Na vitrine de pacotes,\n';
+  c+='     onde o iframe so nasce depois, ele e o ganho principal. */\n';
+  c+='  preConectar(TIDYCAL_CDN);\n';
+  c+="  preConectar('"+escJs(origem)+"');\n\n";
+  c+='  /* comeca assim que a pagina abre, e de novo se o iframe recarregar */\n';
   c+='  comecarCalendario();\n';
   c+="  (function () {\n    var f = frame(); if (f) f.addEventListener('load', comecarCalendario);\n  })();\n";
   c+='  if (ALTURA_SEMPRE) expandir();\n';
@@ -16503,6 +16560,7 @@ function aBlocoVitrine(cfg){
   c+='var DESCONTO_PIX='+cfg.descpix+';   /* percentual de desconto no Pix; 0 = sem desconto -- some o selo */\n';
   c+='var PARCELAS='+cfg.parcelas+';   /* numero de parcelas anunciado no cartao; e uma promessa que a operadora decide, nao este codigo */\n';
   c+=ALT.opcoes;
+  c+='var AQUECER_CALENDARIO=true;   /* true = o calendario comeca a baixar ANTES do clique, no instante em que o cliente demonstra intencao (escolher a familia, ou passar o dedo/mouse no primeiro cartao). Medido em 04/09/2026 na pagina publicada: do clique ate o calendario aparecer sao 9115ms na primeira vez e 787ms na segunda -- ou seja, quase tudo e custo de PRIMEIRA VEZ, e adiantar esse custo para um momento em que o cliente ainda esta lendo a lista some com ele. O gatilho nunca e o carregamento da pagina, de proposito: quem entra e sai sem escolher nada nao paga por isso. false = volta ao comportamento anterior, o calendario so comeca a carregar no clique. */\n';
   c+="var ALTURA_DESKTOP='"+cfg.altdesk+"px';\n";
   c+="var ALTURA_MOBILE='"+cfg.altmob+"px';   /* calibrar no aparelho se o modal cortar */\n";
   c+='var LARGURA_MOBILE='+cfg.largmob+';        /* telas ate este tamanho usam a altura mobile */\n';
@@ -16636,6 +16694,15 @@ function aBlocoVitrine(cfg){
   c+='  montarPreco(precoBox,p.preco);\n';
   c+='  card.appendChild(precoBox);\n';
   c+="  card.addEventListener('click',function(){escolher(i);});\n";
+  /* O GATILHO DE AQUECIMENTO SEM FAMILIAS. Na vitrine de tres passos quem aquece e a escolha
+     da familia, que da muito mais folga; aqui esse passo nao existe, e o primeiro sinal de
+     intencao que sobra e o dedo/mouse chegando ao cartao. Uma vez so, e no primeiro cartao
+     apontado: reaquecer a cada cartao percorrido recarregaria o iframe a cada movimento do
+     mouse, que e o oposto do que se quer. */
+  if(!temFam){
+    c+="  card.addEventListener('pointerover',function(){aquecerCartao(PACOTES[i].link);});\n";
+    c+="  card.addEventListener('focus',function(){aquecerCartao(PACOTES[i].link);});\n";
+  }
   /* Os cartoes nascem escondidos e sao mostrados por familia; o indice 'i' do forEach continua
      sendo o indice GLOBAL em PACOTES por construcao (§9.6 do desenho) -- filtrar a lista e usar
      o indice do resultado apontaria para o pacote errado em escolher(). */
@@ -16676,6 +16743,12 @@ function aBlocoVitrine(cfg){
     c+='  var i;\n';
     c+='  for(i=0;i<FAMILIAS.length;i++)if(FAMILIAS[i].id===id)elResumoFamNome.textContent=FAMILIAS[i].nome;\n';
     c+='  mostrarFamilia(id);\n';
+    /* AQUI E O MOMENTO. Entre escolher a familia e clicar num pacote o cliente passa segundos
+       lendo a lista -- tempo de sobra para os arquivos do TidyCal chegarem. Fica DEPOIS de
+       mostrarFamilia porque o que se aquece e o primeiro pacote desta familia, e antes das
+       linhas de classe porque nenhuma delas mexe no calendario. Trocar de familia antes de
+       escolher um pacote aquece a nova; depois de escolher, aquecer() nao faz mais nada. */
+    c+='  aquecer(primeiroDaFamilia(id));\n';
     c+="  elFams.style.display='none';\n";
     c+="  elResumoFam.className='fca-resumo fca-resumo-fam on';\n";
     c+="  elPasso2.className='fca-passo2 on';\n";
@@ -16700,7 +16773,12 @@ function aBlocoVitrine(cfg){
      proprio do TidyCal) -- entao quem manda e o endereco que acabou de ser carregado, gravado
      no mesmo instante em que o src e trocado. Antes do primeiro pacote escolhido ela e vazia,
      e o ouvinte recusa tudo: nao ha iframe para redimensionar. */
-  c+="var origemCal='';\n\n";
+  c+="var origemCal='';\n";
+  /* O ENDERECO EXATO QUE ESTA CARREGADO, ao lado da origem. Ele existe por causa do
+     aquecimento: sem ele, escolher justamente o pacote que foi aquecido cairia em
+     'f.src=link' com o mesmo valor, e atribuir o mesmo src RECARREGA o iframe -- ou seja, o
+     aquecimento seria jogado fora exatamente no caso em que ele mais acertou. */
+  c+="var linkCal='';\n\n";
   c+="function origemDe(u){var m=/^https:\\/\\/[^\\/?#]+/.exec(String(u||''));return m?m[0]:'';}\n";
   c+="function frame(){return elCal.querySelector('iframe.fca-tidycal');}\n";
   c+='function alturaAlvo(){return (window.innerWidth<=LARGURA_MOBILE)?ALTURA_MOBILE:ALTURA_DESKTOP;}\n';
@@ -16711,6 +16789,14 @@ function aBlocoVitrine(cfg){
   c+=ALT.topo;
   c+='function abrirCalendario(link){\n';
   c+='  var f=frame(), nova=origemDe(link);\n';
+  /* JA E ESTE O ENDERECO CARREGADO -- e o caso do aquecimento que acertou o pacote. Nao ha o
+     que fazer: o documento e o mesmo, o aperto de mao ja esta em curso ou ja terminou, e
+     recomecar (f.src=link com o mesmo valor, mais comecarCalendario()) recarregaria o
+     calendario e mandaria um SEGUNDO init a um filho que aceita um so -- medido, ver
+     fcTidyCalSrc. So a altura forcada e reavaliada, que e o que a escolha muda. */
+  c+='  if(f&&link===linkCal){\n';
+  c+='    if(ALTURA_SEMPRE)expandir();else recolher();\n';
+  c+='    return;\n  }\n';
   /* TROCAR DE DOMINIO EXIGE IFRAME NOVO, e nao so um src novo: a biblioteca do TidyCal confere
      a origem das mensagens contra o endereco que o iframe tinha NA HORA em que ela foi
      aplicada (checkOrigin). Reaproveitar o elemento com um pacote de outro dominio a deixaria
@@ -16734,6 +16820,7 @@ function aBlocoVitrine(cfg){
   c+="    f.addEventListener('load',comecarCalendario);\n";
   c+='    elCal.appendChild(f);\n  }\n';
   c+='  origemCal=nova;\n';
+  c+='  linkCal=link;\n';
   c+='  f.src=link;\n';
   /* Trocar de pacote troca o src, e src novo e DOCUMENTO novo: o aperto de mao anterior morreu
      junto com o documento anterior. Volta para a altura de partida e recomeca -- senao o
@@ -16750,6 +16837,53 @@ function aBlocoVitrine(cfg){
      e o sinal expande. Quem nao receber sinal nenhum liga ALTURA_SEMPRE no topo do bloco. */
   c+='  if(ALTURA_SEMPRE)expandir();else recolher();\n}\n\n';
 
+  /* ===== AQUECER O CALENDARIO (04/09/2026) =====
+     O QUE SE GANHA, medido na pagina publicada do dono: do clique ate o calendario aparecer
+     sao 9115ms na PRIMEIRA vez e 787ms na segunda. A diferenca e o download dos arquivos do
+     TidyCal -- custo que so existe uma vez. Se o navegador ja os tiver quando o cliente
+     clicar, o clique passa a custar os 787ms da segunda vez.
+     O GATILHO E A INTENCAO, E NUNCA O CARREGAMENTO DA PAGINA (decisao do dono): quem entra e
+     sai sem escolher nada nao pode pagar por um calendario que nunca ia ver. Com familias, o
+     momento e a escolha da FAMILIA -- entre ela e o clique num pacote o cliente passa segundos
+     lendo a lista. Sem familias (vitrine de dois passos) esse passo nao existe, e o sinal
+     passa a ser o primeiro dedo/mouse sobre um cartao: 'pointerover' cobre o mouse (segundos
+     de sobra) e o toque (o pointerover do toque chega antes do click), e 'focus' cobre quem
+     navega pelo teclado.
+     E O IFRAME DE VERDADE, e nao um segundo iframe escondido. Duas razoes: um segundo quadro
+     na mesma origem passaria pelo filtro de origem do ouvinte e a altura anunciada por ele
+     seria aplicada ao calendario visivel (por isso doQuadro existe, e por isso ele vale mesmo
+     aqui, onde ha um quadro so); e se o cliente escolher justamente o pacote aquecido, nao ha
+     nada a fazer -- ele ja esta pronto.
+     ESCONDIDO POR display:none, que e como o calendario ja fica antes da escolha -- ou seja,
+     nenhuma linha de CSS mudou. MEDIDO em 04/09/2026, nos dois motores, contra o TidyCal
+     real: iframe dentro de container display:none baixa a pagina inteira (mesmo numero de
+     requisicoes) e o filho roda e anuncia 'Ready' -- Chromium load=2702ms contra 5095ms do
+     visivel, WebKit (o motor do Safari) 1467ms contra 2163ms. Nao houve despriorizacao. Se
+     tivesse havido, a alternativa medida junto era 'visibility:hidden;height:0;overflow:hidden'.
+     PARA NUNCA ATRAPALHAR: so aquece enquanto NENHUM pacote foi escolhido (atual<0). Depois
+     disso o iframe e o calendario que o cliente esta vendo, e recarrega-lo seria trocar o que
+     ele pediu por outro. */
+  c+='function aquecer(link){\n';
+  c+='  if(!AQUECER_CALENDARIO||atual>=0||!link||link===linkCal)return;\n';
+  c+='  abrirCalendario(link);\n}\n';
+  if(temFam){
+    /* O PRIMEIRO PACOTE DA FAMILIA, que e o cartao que o cliente ve no topo da lista -- e,
+       portanto, o mais provavel de ser escolhido. Se ele escolher outro, o clique cai no
+       caminho ja medido de 787ms (troca de src no mesmo dominio), que continua sendo muito
+       menos do que os 9115ms de primeira carga. */
+    c+='function primeiroDaFamilia(id){\n';
+    c+='  var i;\n';
+    c+='  for(i=0;i<PACOTES.length;i++)if(PACOTES[i].fam===id)return PACOTES[i].link;\n';
+    c+="  return '';\n}\n";
+  }else{
+    c+='var aqueceuCartao=false;\n';
+    c+='function aquecerCartao(link){\n';
+    c+='  if(aqueceuCartao)return;\n';
+    c+='  aqueceuCartao=true;\n';
+    c+='  aquecer(link);\n}\n';
+  }
+  c+='\n';
+
   c+='function escolher(i){\n';
   c+='  var p=PACOTES[i], trocouLink=(atual!==i);\n';
   c+='  atual=i;\n';
@@ -16765,7 +16899,12 @@ function aBlocoVitrine(cfg){
   c+='       estado do modal e ignora qualquer sinal por 800ms. Sem isso um sinal atrasado do\n';
   c+='       iframe QUE ESTAVA SENDO TROCADO pode ser lido como se fosse do novo, e o cliente\n';
   c+='       veria a pagina crescer 2350px sem ter clicado em nada. */\n';
-  c+='    modalAberto=false;recolher();ignorarAte=Date.now()+800;\n';
+  /* A JANELA DE 800ms SO VALE QUANDO O DOCUMENTO VAI MESMO TROCAR. Escolher o pacote que foi
+     aquecido nao troca documento nenhum -- e ignorar 800ms de sinais ali poderia descartar
+     justamente a altura que o calendario aquecido ainda estava para anunciar, deixando o
+     quadro na altura de partida. Nao ha sinal atrasado de iframe anterior para temer: nao
+     houve iframe anterior. */
+  c+='    if(p.link!==linkCal){modalAberto=false;recolher();ignorarAte=Date.now()+800;}\n';
   c+='    abrirCalendario(p.link);\n  }\n}\n\n';
 
   c+='function trocarPacote(){\n';
@@ -16787,6 +16926,7 @@ function aBlocoVitrine(cfg){
   c+="window.addEventListener('message',function(e){\n";
   c+="  if(!origemCal||e.origin!==origemCal)return;\n";
   c+="  if(typeof e.data!=='string')return;\n";
+  c+=ALT.fonte;
   c+=ALT.pronto;
   c+="  if(e.data.indexOf('[iFrameSizer]')!==0)return;\n";
   c+='  if(Date.now()<ignorarAte)return;\n\n';
@@ -16796,7 +16936,15 @@ function aBlocoVitrine(cfg){
   c+="  var tipo=e.data.split(':').pop();\n";
   c+="  if(tipo==='scrollToOffset'){\n    modalAberto=true;ignorarMutacoesAte=Date.now()+800;expandir();return;\n  }\n\n";
   c+="  if(modalAberto&&tipo==='mutationObserver'&&Date.now()>ignorarMutacoesAte){\n    modalAberto=false;recolher();\n  }\n});\n";
-  c+="window.addEventListener('resize',function(){if(modalAberto)expandir();});\n";
+  c+="window.addEventListener('resize',function(){if(modalAberto)expandir();});\n\n";
+  /* ===== pre-conexao, no carregamento da pagina =====
+     Aqui o ganho e o principal dos dois: o iframe do calendario so nasce quando o cliente
+     escolhe, entao, sem este aviso, DNS + TCP + TLS do dominio do TidyCal so comecam naquele
+     instante -- medido na pagina publicada, cerca de 413ms so disso. Os pacotes podem estar
+     em dominios diferentes, entao avisa-se um por endereco configurado; preConectar ignora
+     repetido, e o normal e haver um dominio so. */
+  c+='preConectar(TIDYCAL_CDN);\n';
+  c+='for(var iPre=0;iPre<PACOTES.length;iPre++)preConectar(origemDe(PACOTES[iPre].link));\n';
   c+='})();\n</scr'+'ipt>';
   return c;
 }
