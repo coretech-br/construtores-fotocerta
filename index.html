@@ -3973,8 +3973,8 @@
    QUEM IMPEDE QUE ELE MINTA: scripts/conferir-versoes.sh, que recusa index.html
    alterado sem a versao mudar junto -- a mesma disciplina do fc-compartilhado.js,
    e pela mesma razao: carimbo que ninguem confere e o defeito de amanha. */
-var FC_VERSAO='2026-09-04a';
-var FC_PUBLICADO='2026-09-04 13:15';   /* America/Sao_Paulo -- escrito pelo carimbador */
+var FC_VERSAO='2026-09-04b';
+var FC_PUBLICADO='2026-09-04 14:24';   /* America/Sao_Paulo -- escrito pelo carimbador */
 (function(){
   var el=document.getElementById('fc-versao');
   if(!el) return;
@@ -16506,6 +16506,24 @@ function aBlocoVitrine(cfg){
      src, sem criar um segundo elemento.
      No ramo de tres passos o calendario mora no passo 3 e o passo 2 guarda os cartoes de
      pacote; no de dois passos, tudo como antes. UMA regra por seletor nos dois ramos. */
+  /* ===== O ESCONDERIJO DO AQUECIMENTO (.fca-aquec, 04/09/2026) =====
+     display:none zera as dimensoes, e um iframe de largura 0 nao e um calendario baixando de
+     graca: e o TidyCal se DESENHANDO para uma tela de 0px. Medido na arvore de 04/09/2026, com
+     o TidyCal real e o quadro escondido por display:none: largura 0 e altura anunciada de
+     3800px (tudo empilhado numa coluna de zero pixel). Ao revelar, ele descobre a largura de
+     verdade e refaz o desenho inteiro -- a rajada de sinais medida (685 animationstart, 718,
+     1054) e a animacao de entrada DELE rodando de novo, que e o "fade" que o dono viu. O
+     aquecimento entregava o download e jogava fora o desenho.
+     ENTAO O ESCONDERIJO PASSA A TER LARGURA. A caixa continua no fluxo (nenhum
+     re-parenteamento: mover um <iframe> de lugar no DOM o recarrega do zero, e seria jogar
+     fora exatamente o que o aquecimento ganhou), mas com altura ZERO e overflow escondido: ela
+     ocupa a largura real do lugar onde o calendario vai ficar e NENHUM pixel de altura, entao
+     nao abre buraco nenhum na pagina. O iframe filho, esse, tem largura 100% (a real) e a
+     altura de partida -- e o TidyCal se desenha para a tela certa desde o primeiro instante.
+     opacity:0 e pointer-events:none completam: nada aparece e nada intercepta o dedo.
+     ELA VEM DEPOIS da regra de '.on', de proposito: as duas tem a mesma especificidade, entao
+     quem estiver por ultimo vence um empate. O empate nunca acontece (escolher() tira a classe
+     antes de acender o passo), e mesmo assim a ordem esta escolhida e nao sorteada. */
   if(temFam){
     c+='.fca-passo2{opacity:.45;text-align:left}\n';
     c+='.fca-passo2.on{opacity:1}\n';
@@ -16513,11 +16531,13 @@ function aBlocoVitrine(cfg){
     c+='.fca-passo3 .fca-cal{display:none;border-radius:14px;overflow:hidden}\n';
     c+='.fca-passo3.on{opacity:1}\n';
     c+='.fca-passo3.on .fca-cal{display:block}\n';
+    c+='.fca-passo3 .fca-cal.fca-aquec{display:block;height:0;opacity:0;pointer-events:none}\n';
   }else{
     c+='.fca-passo2{opacity:.45;text-align:left}\n';
     c+='.fca-passo2 .fca-cal{display:none;border-radius:14px;overflow:hidden}\n';
     c+='.fca-passo2.on{opacity:1}\n';
     c+='.fca-passo2.on .fca-cal{display:block}\n';
+    c+='.fca-passo2 .fca-cal.fca-aquec{display:block;height:0;opacity:0;pointer-events:none}\n';
   }
   c+='.fca-cal iframe{border:none;width:100%;display:block}\n';
   /* ===== O CELULAR: LINHAS COMPACTAS (decisao do dono, 03/09/2026) =====
@@ -16854,17 +16874,35 @@ function aBlocoVitrine(cfg){
      seria aplicada ao calendario visivel (por isso doQuadro existe, e por isso ele vale mesmo
      aqui, onde ha um quadro so); e se o cliente escolher justamente o pacote aquecido, nao ha
      nada a fazer -- ele ja esta pronto.
-     ESCONDIDO POR display:none, que e como o calendario ja fica antes da escolha -- ou seja,
-     nenhuma linha de CSS mudou. MEDIDO em 04/09/2026, nos dois motores, contra o TidyCal
-     real: iframe dentro de container display:none baixa a pagina inteira (mesmo numero de
-     requisicoes) e o filho roda e anuncia 'Ready' -- Chromium load=2702ms contra 5095ms do
-     visivel, WebKit (o motor do Safari) 1467ms contra 2163ms. Nao houve despriorizacao. Se
-     tivesse havido, a alternativa medida junto era 'visibility:hidden;height:0;overflow:hidden'.
+     ESCONDIDO COM A LARGURA REAL, e nao por display:none -- a correcao de 04/09/2026, depois
+     que o dono viu na pagina publicada o calendario aparecer e "sumir e voltar com um efeito
+     tipo fade". Nao eram duas cargas: o src era atribuido uma vez so, e o elemento era o
+     mesmo. Era UM desenho jogado fora. Com display:none o quadro tem largura 0, e o TidyCal
+     se desenha para uma tela de 0px -- medido, ele anunciava 3800px de altura, tudo empilhado
+     numa coluna sem largura. Revelar era a primeira vez que ele via a largura de verdade, e
+     entao ele refazia o layout inteiro, com a animacao de entrada dele junto.
+     O esconderijo virou '.fca-aquec' (ver o CSS acima): largura real, altura zero, overflow
+     escondido, opacity 0. O quadro nao sai do fluxo por position:absolute de proposito --
+     altura zero ja garante que nao ha buraco nenhum, e um bloco absoluto de 700px penduraria
+     area rolavel vazia no fim da pagina quando o bloco fosse a ultima coisa dela.
+     O QUE NAO MUDOU, e nao podia mudar: o <iframe> continua no MESMO no do DOM do comeco ao
+     fim. Re-parentear um iframe o recarrega do zero -- seria jogar fora justamente o que o
+     aquecimento ganhou. O que muda e so CSS do container, que nao recarrega nada.
+     MEDIDO em 04/09/2026 contra o TidyCal real, nos dois ramos da vitrine: largura durante o
+     aquecimento 0 -> 960, altura anunciada enquanto escondido 3800 -> 1021 (a de verdade e
+     1054), e a rajada depois da revelacao de TRES sinais com 'animationstart' dentro para UM
+     so, um ajuste de 33px sem animacao nenhuma. O quadro que o cliente ve ja esta desenhado;
+     o que sobra e o TidyCal se remedindo ao voltar a ser pintado, e isso nao se elimina de
+     fora -- medido, position:absolute com a altura inteira dava exatamente o mesmo sinal.
      PARA NUNCA ATRAPALHAR: so aquece enquanto NENHUM pacote foi escolhido (atual<0). Depois
      disso o iframe e o calendario que o cliente esta vendo, e recarrega-lo seria trocar o que
      ele pediu por outro. */
   c+='function aquecer(link){\n';
   c+='  if(!AQUECER_CALENDARIO||atual>=0||!link||link===linkCal)return;\n';
+  /* A CLASSE VEM ANTES de abrirCalendario, e nao depois: o iframe e criado la dentro, e se o
+     container ainda estivesse em display:none nesse instante o filho nasceria com largura 0 e
+     comecaria a se desenhar errado -- que e exatamente o defeito que esta linha conserta. */
+  c+="  elCal.className='fca-cal fca-aquec';\n";
   c+='  abrirCalendario(link);\n}\n';
   if(temFam){
     /* O PRIMEIRO PACOTE DA FAMILIA, que e o cartao que o cliente ve no topo da lista -- e,
@@ -16887,6 +16925,12 @@ function aBlocoVitrine(cfg){
   c+='function escolher(i){\n';
   c+='  var p=PACOTES[i], trocouLink=(atual!==i);\n';
   c+='  atual=i;\n';
+  /* REVELAR E SO TIRAR A CLASSE. O no do iframe nao se move, o src nao e tocado, e por isso
+     nada recarrega: o navegador so volta a pintar uma caixa que ja estava do tamanho certo.
+     Fica ANTES das linhas de classe dos passos porque, com as duas classes ao mesmo tempo, a
+     regra do aquecimento venceria o empate de especificidade e o calendario continuaria
+     invisivel. Sem aquecimento esta linha nao faz nada -- a classe nunca foi posta. */
+  c+="  elCal.className='fca-cal';\n";
   c+='  elResumoNome.textContent=p.nome;\n';
   c+='  montarPreco(elResumoPreco,p.preco);\n';
   c+="  elCards.style.display='none';\n";
