@@ -84,11 +84,23 @@ const observador = medir => medir
       rot: 'o espaco calibrado', rotInicial: 'comeca sem altura forcada' };
 
 /* O sinal, do jeito que o TidyCal manda: prefixo, id, altura, largura e o tipo no fim --
-   'scrollToOffset' e o que abre o formulario de reserva, e o unico que expande. */
+   'scrollToOffset' e o que abre o formulario de reserva, e o unico que expande.
+
+   O 'source' ENTRA NO EVENTO desde 04/09/2026, e nao e detalhe: os blocos passaram a conferir
+   tambem de QUAL QUADRO a mensagem veio (doQuadro), porque o aquecimento do calendario abriu a
+   possibilidade de haver mais de um iframe na mesma origem. Um evento sintetico sem 'source'
+   seria descartado por essa guarda, e este arquivo mediria a guarda nova em vez do filtro de
+   ORIGEM que ele existe para medir -- passaria por acidente, dizendo nada.
+   Ele e posto por Object.defineProperty, e nao pelo construtor: MessageEventInit.source so
+   aceita WindowProxy/MessagePort, e o proprio 'source' do quadro certo e o que precisamos
+   carimbar. Definir a propriedade no evento ja construido serve para os dois casos. */
 const sinal = (pg, origem, tipo = 'scrollToOffset') => pg.evaluate(
-  ([o, t]) => window.dispatchEvent(new MessageEvent('message', {
-    data: '[iFrameSizer]fc:900:1200:' + t, origin: o
-  })), [origem, tipo]);
+  ([o, t]) => {
+    const f = document.querySelector('iframe.tidycal-embed, iframe.fca-tidycal');
+    const ev = new MessageEvent('message', { data: '[iFrameSizer]fc:900:1200:' + t, origin: o });
+    Object.defineProperty(ev, 'source', { value: f ? f.contentWindow : null });
+    window.dispatchEvent(ev);
+  }, [origem, tipo]);
 
 const soPageError = erros => erros.filter(e => e.indexOf('pageerror:') === 0);
 
