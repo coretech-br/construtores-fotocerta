@@ -159,6 +159,16 @@
   legend{font-size:12px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--verde);padding:0 6px}
   label{display:block;font-size:13px;font-weight:600;margin:10px 0 4px}
   label small{font-weight:400;color:var(--tinta-suave)}
+  /* O contador de limite mora DENTRO do rotulo, flutuando a direita: assim ele fica na mesma
+     linha do nome do campo por mais comprido que seja o <small> que explica a regra, e o
+     <small> escorre por baixo dele em vez de empurra-lo para fora da vista. */
+  .fcl-cont{float:right;margin-left:10px;font-weight:400;font-size:11px;line-height:18px;
+    color:var(--tinta-suave);background:var(--papel);border:1px solid var(--linha);
+    border-radius:999px;padding:0 9px;white-space:nowrap}
+  .fcl-cont.fcl-cheio{background:#FFF6DF;border-color:#E3B23C;color:#6B5210}
+  .fcl-cont.fcl-passou{background:#FBE9E7;border-color:#C0553F;color:#8C2F1B}
+  .fcl-corte{margin-top:6px;font-size:12px;line-height:1.5;border-radius:8px;padding:6px 10px;
+    background:#FFF6DF;border:1px solid #E3B23C;color:#6B5210}
   input[type=text],input[type=number],textarea{
     width:100%;border:1px solid var(--linha);border-radius:8px;padding:9px 11px;font-size:14px;
     font-family:inherit;background:#fff;color:var(--tinta)}
@@ -4462,8 +4472,8 @@ function fcPpBotoesSrc(prefixo,ppcor,usaSinal,comentZero,aoAprovarExtra){
   c+='return actions.resolve();\n},\n';
   c+='createOrder:function(data,actions){\n';
   c+='var v='+(usaSinal?'sinalAgora()':'total()')+'.toFixed(2);\n';
-  if(usaSinal)c+="var nm=(nomesSelecionados().join(' + ')+' (sinal - cod: '+CODIGO_PEDIDO+(cupomAtivo?(' cupom:'+cupomAtivo.codigo):'')+')').substring(0,127);\n";
-  else c+="var nm=(nomesSelecionados().join(' + ')+' (cod: '+CODIGO_PEDIDO+(cupomAtivo?(' cupom:'+cupomAtivo.codigo):'')+')').substring(0,127);\n";
+  if(usaSinal)c+="var nm=(nomesSelecionados().join(' + ')+' (sinal - cod: '+CODIGO_PEDIDO+(cupomAtivo?(' cupom:'+cupomAtivo.codigo):'')+')').substring(0,"+FC_LIM_PP+");\n";
+  else c+="var nm=(nomesSelecionados().join(' + ')+' (cod: '+CODIGO_PEDIDO+(cupomAtivo?(' cupom:'+cupomAtivo.codigo):'')+')').substring(0,"+FC_LIM_PP+");\n";
   c+='if(!nm)nm=CODIGO_PEDIDO;   /* name e obrigatorio no item: nunca pode sair vazio */\n';
   c+='var it={name:nm,quantity:"1",unit_amount:{value:v,currency_code:MOEDA}};\n';
   c+='if(CODIGO_PEDIDO)it.sku=CODIGO_PEDIDO;   /* sku vazio nao ajuda ninguem a conciliar */\n';
@@ -5395,6 +5405,11 @@ function salvarEstado(){
      termine em salvarEstado. Try proprio porque gravar e sagrado: um defeito no desenho da
      barra nao pode impedir o salvamento que acabou de acontecer. */
   try{fcgAgendar();}catch(e){}
+  /* Os contadores de limite acordam pelo MESMO ponto, e pelo mesmo motivo da barra acima: nao
+     ha mudanca de valor nesta ferramenta que nao termine aqui -- aplicar um preset e importar
+     um backup mudam campo sem passar por tecla nenhuma, e um contador parado mentiria sobre o
+     que vai no payload. Try proprio: gravar e sagrado. */
+  try{fcLimAtualizarTodos();}catch(e){}
 }
 function restaurarEstado(){
   var raw,st,i,j,a,c;
@@ -5638,6 +5653,199 @@ function fcCorRedesenhar(idBase){
 }
 document.addEventListener('input',salvarEstado);
 document.addEventListener('change',salvarEstado);
+
+/* ============================================================================
+   LIMITES VISIVEIS NOS CAMPOS QUE ALIMENTAM API
+   ============================================================================
+   Pedido do dono em 11/09/2026. Spec: docs/specs/2026-09-11-limites-visiveis-nos-campos-design.md.
+
+   O QUE ELA FAZ, E O QUE ELA NAO FAZ. Nao muda um byte do que os geradores emitem: eles
+   continuam truncando e limpando exatamente como antes. O que muda e o operador VER isso
+   enquanto digita, em vez de descobrir na tela do cliente ou na conciliacao do extrato.
+
+   TRES COISAS POR CAMPO:
+     1. um contador ao lado do rotulo, no formato "N de MAX";
+     2. maxlength com o numero real, para o excesso nao passar;
+     3. filtro em 'input', SO onde o caractere e jogado fora pelo gerador.
+
+   O CONTADOR CONTA O QUE SOBRA (decisao D2). Ele aplica a MESMA funcao que o gerador aplica
+   -- fcPixTexto (semAcento) no nome e na cidade, pTxidLimpo nos identificadores, pixLimpar na
+   chave -- e conta o RESULTADO. Um contador que contasse a tela diria "23 de 25" enquanto o
+   payload leva 21, e isso e pior que nao ter contador nenhum. Quando os dois numeros diferem,
+   o campo diz os dois: "21 de 25 (23 digitados)".
+
+   O FILTRO SO ONDE O CARACTERE E RECUSADO (decisao D3). A regra tem tres lados, e o terceiro
+   foi medido nesta rodada:
+     - o gerador DESCARTA em silencio -> FILTRA. E o identificador curto (p-txid) e o WhatsApp
+       (fci-zapnum): caractere fora de [A-Za-z0-9] nunca chega ao campo 62>05 do BR Code, e
+       nao-digito nunca chega ao endereco do wa.me. Deixar digitar o que nunca vai existir e
+       enganar.
+     - o gerador CONVERTE -> NAO FILTRA. Nome e cidade: a cidade com acento vira "Vitoria" no
+       payload, e a tela tem de continuar aceitando o acento, que e como se escreve o nome.
+     - o gerador RECUSA COM AVISO -> NAO FILTRA. A chave Pix tem frase propria para o espaco e
+       para o caractere invisivel que veio do copiar-e-colar. Filtrar ali apagaria o caractere
+       E o diagnostico junto: trocaria um defeito visivel por um invisivel, que e o oposto do
+       que esta rodada foi pedida para fazer. Mesma razao vale para o codigo da loja e o codigo
+       do pacote, que ja tem recusa propria.
+
+   O CURSOR (decisao D4). Reescrever el.value em 'input' joga o cursor para o fim -- e o teste
+   automatico nao ve isso, porque ele digita do inicio ao fim. A posicao nova e quanto SOBRA do
+   pedaco que estava ANTES do cursor, e por isso ela sai da mesma limpeza, aplicada so aquele
+   pedaco. Quem so digita no fim nunca percebe; quem edita o meio percebe na primeira tecla.
+
+   O CORTE DO COLAR NAO E MUDO. maxlength corta texto colado sem dizer nada, e corte silencioso
+   e exatamente o que esta rodada existe para eliminar. Entao o que ele cortou vira uma linha
+   embaixo do campo, que fica ate o operador mexer no campo de novo.
+
+   A GUARDA CONTRA O PROPRIO DESCUIDO. O filtro e escrito aqui e a limpeza vive em
+   fc-compartilhado.js. Se um mudar e o outro nao, a tela passaria a aceitar caractere que o
+   payload joga fora -- calada. Entao a partida CONFERE os dois, caractere por caractere, e a
+   barra vermelha aparece se eles discordarem.
+   ========================================================================= */
+var FC_LIM_PRONTO=false;
+/* O alfabeto da conferencia: ASCII imprimivel inteiro mais os acentuados do portugues. */
+var FC_LIM_PROVA=(function(){
+  var s='',i;
+  for(i=32;i<127;i++)s+=String.fromCharCode(i);
+  return s+'\u00e0\u00e1\u00e2\u00e3\u00e7\u00e9\u00ea\u00ed\u00f3\u00f4\u00f5\u00fa\u00fc\u00c1\u00c9\u00cd\u00d3\u00da\u00c7';
+})();
+/* O teto do identificador de conciliacao NAO e escrito a mao: ele e MEDIDO na propria funcao
+   que o payload aplica. Numero decorado aqui seria o defeito do dia em que pTxidLimpo mudasse
+   de teto -- a tela continuaria dizendo 25 e o payload levaria outro numero, sem aviso. */
+function fcLimTeto(fn){var s='',i;for(i=0;i<400;i++)s+='A';return String(fn(s)).length;}
+var FC_TXID_MAX=fcLimTeto(pTxidLimpo);
+function fcLimSoDigitos(v){return String(v==null?'':v).replace(/[^0-9]/g,'');}
+/* O SEGUNDO teto da descricao da cobranca. A recusa de P_DESC_MAX e do LINK; o PayPal ve so os
+   FC_LIM_PP primeiros caracteres nos campos name e description do item. Sao dois tetos
+   diferentes no MESMO campo, e o operador precisa de saber dos dois. O numero mora aqui e e
+   daqui que os tres geradores o escrevem -- unifica-se a fonte que escreve, e por isso a saida
+   nao muda um byte. */
+var FC_LIM_PP=127;
+function fcLimNotaPp(v){
+  return (String(v==null?'':v).length>FC_LIM_PP)?('o PayPal recebe só os '+FC_LIM_PP+' primeiros'):'';
+}
+/* A tabela. 'max' ausente quer dizer "o numero ja esta no maxlength do HTML"; 'max' zero quer
+   dizer "este campo nao tem teto, so regra de caractere". */
+var FC_LIM_CAMPOS=[
+  {id:'fci-chave',  max:PIX_CHAVE_MAX, sobra:function(v){return pixLimpar(v);}},
+  {id:'fci-nomer',  max:FC_NOMER_MAX,  sobra:function(v){return fcPixTexto(v,1e9);}},
+  {id:'fci-cidade', max:FC_CIDADE_MAX, sobra:function(v){return fcPixTexto(v,1e9);}},
+  {id:'fci-zapnum', max:0,             sobra:fcLimSoDigitos, filtro:/[^0-9]/g},
+  {id:'u-cod',      max:FC_TXID_MAX,   sobra:function(v){return pTxidLimpo(v);}},
+  {id:'b-selo-txt'},
+  {id:'p-desc',     max:P_DESC_MAX,    nota:fcLimNotaPp},
+  {id:'p-txid',     max:FC_TXID_MAX,   sobra:function(v){return pTxidLimpo(v);}, filtro:/[^A-Za-z0-9]/g}
+];
+function fcLimSobra(c,v){return c.sobra?String(c.sobra(v)):String(v==null?'':v);}
+function fcLimAtualizar(c){
+  var el=$(c.id),sp=$('fcl-'+c.id),tela,n,t,nota;
+  if(!el||!sp)return;
+  tela=String(el.value).length;
+  n=fcLimSobra(c,el.value).length;
+  t=n+' de '+c.max;
+  if(n!==tela)t+=' ('+tela+' digitado'+(tela===1?'':'s')+')';
+  nota=c.nota?c.nota(el.value):'';
+  if(nota)t+=' \u00b7 '+nota;
+  sp.textContent=t;
+  sp.className='fcl-cont'+(n>c.max?' fcl-passou':(n===c.max?' fcl-cheio':''));
+}
+function fcLimAtualizarTodos(){
+  var i;
+  if(!FC_LIM_PRONTO)return;
+  for(i=0;i<FC_LIM_CAMPOS.length;i++)if(FC_LIM_CAMPOS[i].max)fcLimAtualizar(FC_LIM_CAMPOS[i]);
+}
+/* D4, o miolo: a posicao nova do cursor e o tamanho do que SOBRA do pedaco anterior a ele. */
+function fcLimFiltrar(el,re){
+  var antes=String(el.value),depois=antes.replace(re,''),pos;
+  if(depois===antes)return false;
+  pos=el.selectionStart;
+  el.value=depois;
+  if(pos!=null&&el.setSelectionRange){
+    pos=antes.substring(0,pos).replace(re,'').length;
+    try{el.setSelectionRange(pos,pos);}catch(e){}
+  }
+  return true;
+}
+function fcLimCorteEl(c,criar){
+  var id='fcl-corte-'+c.id,el=$(id),campo;
+  if(el||!criar)return el;
+  campo=$(c.id);
+  if(!campo||!campo.parentNode)return null;
+  el=document.createElement('div');
+  el.id=id;el.className='fcl-corte';el.style.display='none';
+  campo.parentNode.insertBefore(el,campo.nextSibling);
+  return el;
+}
+function fcLimCorteLimpar(c){
+  var el=fcLimCorteEl(c,false);
+  if(el){el.textContent='';el.style.display='none';}
+}
+function fcLimCorteAvisar(c,querido){
+  var el=fcLimCorteEl(c,true);
+  if(!el)return;
+  el.textContent='O texto colado tinha '+querido+' caracteres, este campo aceita '+c.max+', e o resto foi cortado. Confira o que ficou antes de gerar.';
+  el.style.display='block';
+}
+/* Filtro e limpeza tem de concordar caractere por caractere -- ver "a guarda contra o proprio
+   descuido", acima. */
+function fcLimConferir(c){
+  var i,ch,passa,fica,ruins=[];
+  for(i=0;i<FC_LIM_PROVA.length;i++){
+    ch=FC_LIM_PROVA.charAt(i);
+    passa=(ch.replace(c.filtro,'')===ch);
+    fica=(String(c.sobra(ch))===ch);
+    if(passa!==fica)ruins.push(ch);
+  }
+  if(ruins.length)throw new Error('no campo '+c.id+' o filtro da tela e a limpeza do gerador discordam nestes caracteres: '+ruins.join(' '));
+}
+function fcLimLigar(c,el){
+  el.addEventListener('input',function(){
+    fcLimCorteLimpar(c);
+    if(c.filtro)fcLimFiltrar(el,c.filtro);
+    fcLimAtualizar(c);
+  });
+  if(!c.max)return;
+  /* O colar e ouvido ANTES do 'input', entao o aviso e agendado para depois dele -- senao o
+     proprio 'input' do colar apagaria o aviso que acabou de nascer. */
+  el.addEventListener('paste',function(ev){
+    var colado='',sel=0,querido;
+    try{if(ev.clipboardData&&ev.clipboardData.getData)colado=String(ev.clipboardData.getData('text')||'');}
+    catch(e){colado='';}
+    if(!colado)return;
+    if(el.selectionEnd!=null&&el.selectionStart!=null)sel=el.selectionEnd-el.selectionStart;
+    querido=String(el.value).length-sel+colado.length;
+    if(querido<=c.max)return;
+    setTimeout(function(){fcLimCorteAvisar(c,querido);},0);
+  });
+}
+function fcLimIniciar(){
+  var i,c,el,lab,sp,dec,faltam=[];
+  for(i=0;i<FC_LIM_CAMPOS.length;i++){
+    c=FC_LIM_CAMPOS[i];
+    el=$(c.id);
+    if(!el){faltam.push(c.id);continue;}
+    dec=el.getAttribute('maxlength');
+    if(c.max==null)c.max=dec?parseInt(dec,10):0;
+    /* Dois lugares dizendo o mesmo teto e a porta por onde eles divergem. Se o HTML ja declara
+       um maxlength, ele tem de ser o MESMO numero da tabela -- e discordar para a partida. */
+    if(dec&&parseInt(dec,10)!==c.max)
+      throw new Error('o campo '+c.id+' declara maxlength="'+dec+'" e a tabela de limites diz '+c.max+'; os dois números têm de ser o mesmo');
+    if(c.filtro&&c.sobra)fcLimConferir(c);
+    if(c.max){
+      el.setAttribute('maxlength',String(c.max));
+      lab=document.querySelector('label[for="'+c.id+'"]');
+      if(!lab)throw new Error('o campo '+c.id+' não tem rótulo, e o contador mora no rótulo');
+      sp=document.createElement('span');
+      sp.id='fcl-'+c.id;
+      sp.className='fcl-cont';
+      lab.insertBefore(sp,lab.firstChild);
+    }
+    fcLimLigar(c,el);
+  }
+  if(faltam.length)throw new Error('a tabela de limites cita campos que não existem na tela: '+faltam.join(', '));
+  FC_LIM_PRONTO=true;
+  fcLimAtualizarTodos();
+}
 
 /* pareia seletor de cor com campo de texto */
 function parearCor(idCor){
@@ -19999,14 +20207,14 @@ function pJs(cfg){
        mesmo identificador fosse cobrado, e essa e uma decisao do dono, nao deste bloco. */
     j+='        createOrder:function(d,actions){\n';
     j+='          var v=valor.toFixed(2);\n';
-    j+="          var ref=(txid&&txid!=='***')?String(txid).substring(0,127):'';\n";
-    j+='          var item={name:String(desc).substring(0,127),quantity:"1",\n';
+    j+="          var ref=(txid&&txid!=='***')?String(txid).substring(0,"+FC_LIM_PP+"):'';\n";
+    j+='          var item={name:String(desc).substring(0,'+FC_LIM_PP+'),quantity:"1",\n';
     j+='            unit_amount:{value:v,currency_code:"BRL"}};\n';
     j+='          if(ref)item.sku=ref;\n';
     j+='          var pu={\n';
     j+='            amount:{value:v,currency_code:"BRL",\n';
     j+='              breakdown:{item_total:{value:v,currency_code:"BRL"}}},\n';
-    j+='            description:String(desc).substring(0,127),\n';
+    j+='            description:String(desc).substring(0,'+FC_LIM_PP+'),\n';
     j+='            items:[item]\n';
     j+='          };\n';
     j+='          if(ref)pu.custom_id=ref;\n';
@@ -23721,6 +23929,11 @@ prep('Textos configuraveis','slide leads tidy uni cnt cob loja pac',function(){
   var d=fcTxtFabricaDiverge();
   if(d.length)throw new Error('o padrao de fabrica destes campos discorda entre o value= do HTML e a tabela da aba: '+d.join(', '));
 },'preparar as seções de texto e conferir os padrões de fábrica');
+/* Os limites visiveis entram DEPOIS das abas serem desenhadas com o estado restaurado e ANTES
+   do preset geral: o contador tem de nascer sobre o valor que o operador vai ler na tela, e nao
+   sobre um campo ainda vazio. Passo proprio, com rotulo proprio -- se ele falhar, a barra
+   vermelha precisa dizer que foram os contadores, e nao o preset geral. */
+prep('Limites visíveis nos campos','uni bor cob',fcLimIniciar,'pôr o contador e o limite nos campos que alimentam API');
 prep('Preset geral','',fcgIniciar,'preparar a barra do preset geral');
 /* Passo proprio, com rotulo proprio: se ligar os botoes de backup falhar, a barra vermelha
    precisa dizer que foi o backup -- e nao o preset geral, que continua funcionando. */
