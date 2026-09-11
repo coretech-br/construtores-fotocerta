@@ -455,6 +455,45 @@
   .fcg-selo.salvo{color:#294B24;background:#EAF3E9;border-color:#7FA97A}
   .fcg-selo.alterado{color:#6B5210;background:#FFF6DF;border-color:#E3B23C}
   .fcg-cresce{flex:1 1 20px;min-width:0}
+
+  /* ===== ACHAR UM TEXTO (11/09/2026) =====
+     SEGUNDA LINHA DA MESMA BARRA GRUDADA NO TOPO, e um campo sempre a vista -- nao um botao
+     que abre um painel. O defeito que ela conserta e de DESCOBERTA: o dono procurou
+     "Sem opcional" na ferramenta, nao achou, e pediu que o texto virasse configuravel --
+     sendo que ele ja era, e funcionava. Busca escondida atras de um botao repetiria o erro
+     que ela veio consertar. Fica na .fcg-fixa porque so ali ela e alcancavel de QUALQUER aba
+     sem rolar a pagina: os campos que ela acha estao, por definicao, em outra aba ou dentro
+     de uma secao recolhida -- as duas coisas que o Ctrl+F do navegador nao alcanca.
+     A lista de resultados e ABSOLUTA, pendurada no campo: se ela empurrasse a pagina, a
+     posicao do que o operador esta lendo mudaria a cada tecla digitada. */
+  .fcs-linha{max-width:var(--larg);margin:0 auto;padding:0 20px 10px;display:flex;
+    align-items:center;gap:10px;flex-wrap:wrap}
+  .fcs-linha label{margin:0;font-size:13px;white-space:nowrap}
+  .fcs-caixa{position:relative;flex:1 1 260px;min-width:0;display:flex;align-items:center;gap:8px}
+  .fcs-caixa input{flex:1 1 auto;min-width:0;padding:7px 10px;font-size:13px}
+  .fcs-conta{font-size:12px;color:var(--tinta-suave);white-space:nowrap}
+  /* Quando o campo existe mas outra opcao da aba o desliga, a contagem da lugar ao recado --
+     e ele PRECISA quebrar linha, senao a frase sai da tela em janela estreita. */
+  .fcs-conta.alerta{color:#6B5210;background:#FFF6DF;border:1px solid #E3B23C;border-radius:8px;
+    padding:5px 9px;white-space:normal;font-weight:700;flex:1 1 240px;min-width:0}
+  .fcs-res{position:absolute;left:0;right:0;top:100%;margin-top:6px;background:#fff;
+    border:1px solid var(--linha);border-radius:10px;box-shadow:0 8px 22px rgba(0,0,0,.16);
+    max-height:60vh;overflow-y:auto;display:none;z-index:60}
+  .fcs-res.aberta{display:block}
+  .fcs-item{display:block;width:100%;text-align:left;background:none;border:none;
+    border-bottom:1px solid var(--linha);padding:9px 12px;cursor:pointer;font:inherit;
+    color:var(--tinta);line-height:1.45}
+  .fcs-item:last-child{border-bottom:none}
+  .fcs-item:hover,.fcs-item.sel{background:#F5F1E6}
+  .fcs-rot{display:block;font-size:13px;font-weight:700;color:var(--verde)}
+  .fcs-val{display:block;font-size:12.5px;margin-top:2px}
+  .fcs-onde{display:block;font-size:11.5px;color:var(--tinta-suave);margin-top:2px}
+  .fcs-vazio{padding:11px 12px;font-size:12.5px;color:var(--tinta-suave);line-height:1.55}
+  /* O destaque de quem chegou. A at-rule fica no <style> do head, como manda a casa -- e
+     nao no CSS Customizado de componente nenhum, que so aceita propriedade solta. */
+  @keyframes fcs-pisca{0%,100%{box-shadow:0 0 0 6px rgba(31,92,77,.30)}
+    50%{box-shadow:0 0 0 2px rgba(31,92,77,.08)}}
+  .fcs-alvo{outline:2px solid var(--verde);outline-offset:2px;animation:fcs-pisca 1.1s ease-in-out 3}
   /* .fcg-painel e a PELE do painel recolhivel da barra do topo, e nao a marca de dono de uma
      fase: ela veste tanto #fcg-painel ("Detalhes", da campanha) quanto #fci-painel
      ("Identidade", da ferramenta). Os dois sao painel recolhivel da mesma barra, com a mesma
@@ -613,6 +652,18 @@
     <button class="botao mini claro" type="button" id="fcg-descartar" title="Descartar as alterações e voltar ao que está guardado neste preset geral">Descartar</button>
     <button class="botao mini claro" type="button" id="fcg-detalhes">Detalhes</button>
     <button class="botao mini claro" type="button" id="fci-botao" title="Chave Pix, recebedor, Client ID, WhatsApp e a paleta — configuração da ferramenta, não da campanha">Identidade</button>
+  </div>
+  <!-- ==================== ACHAR UM TEXTO (11/09/2026) ====================
+       Segunda linha da barra grudada no topo. Procura no DOM de TODAS as abas, abertas ou
+       não, recolhidas ou não — e leva até o campo. -->
+  <div class="fcs-linha">
+    <label for="fcs-q">Achar um texto</label>
+    <div class="fcs-caixa">
+      <input type="text" id="fcs-q" autocomplete="off" spellcheck="false" placeholder="ex.: Sem opcional — procura em todas as abas, inclusive nas seções recolhidas">
+      <button class="botao mini claro" type="button" id="fcs-limpar">Limpar</button>
+      <div class="fcs-res" id="fcs-res" role="listbox" aria-label="Resultados da busca"></div>
+    </div>
+    <span class="fcs-conta" id="fcs-conta"></span>
   </div>
 </div>
 
@@ -787,7 +838,7 @@
       <label for="s-imp-link">Link da galeria ou da página <small>(o endereço da barra do navegador)</small></label>
       <input type="text" id="s-imp-link" placeholder="https://www.fotocerta.com.br/gallery/121894-estudio-tematico">
       <label for="s-imp-fonte">Código-fonte da página <small>(Cmd ⌥ U, Cmd A, Cmd C — cole aqui)</small></label>
-      <textarea id="s-imp-fonte" spellcheck="false" placeholder="Cole aqui o código-fonte inteiro da página."></textarea>
+      <textarea id="s-imp-fonte" data-fcs="nao" spellcheck="false" placeholder="Cole aqui o código-fonte inteiro da página."></textarea>
       <div class="acoes"><button class="botao claro" id="s-imp-conferir">Conferir a página</button></div>
       <p class="ajuda">O código-fonte traz <b>mais fotos que a tela</b>: na galeria de exemplo, o navegador tinha 10 fotos carregadas e o código-fonte trazia 46. As fotos entram <b>na mesma ordem em que aparecem na página</b>, inclusive a de capa, que na página não é a primeira. Só entram endereços dos servidores da Alboom: qualquer outro é descartado com a contagem à vista. <b>Numa página comum</b> a mesma foto aparece em vários tamanhos (medido: 51 endereços para 10 fotos em <i>/albuns</i>) — cada foto entra <b>uma vez só, no maior tamanho que a página trouxe</b>, e só as da conta que aparece em mais fotos, que a conferência mostra. Nada do que você cola aqui é salvo — a ferramenta só lê os endereços das fotos e esquece o resto.</p>
       <p class="ajuda"><b>Depois de conferir</b>, escolha como as fotos entram na lista. O botão <b>Adicionar à lista</b>, no fim desta caixa, só liga depois da conferência.</p>
@@ -2352,16 +2403,26 @@
       <label><input type="radio" name="c-formato" value="compacto" checked><span>Compacto <small>(02d 14h 33m 12s)</small></span></label>
       <label><input type="radio" name="c-formato" value="blocos"><span>Blocos com rótulo</span></label>
       </div>
-      <label for="c-txt-suf-d">Sufixos do formato <b>compacto</b> <small>(colados no número)</small></label>
+      <!-- Um rótulo POR CAMPO. Antes, os quatro sufixos dividiam um <label for="c-txt-suf-d">
+           e três <input> soltos: os três de baixo não tinham rótulo nenhum — nem para o leitor
+           de tela, nem para a busca, nem para o eco do texto atual. -->
+      <label for="c-txt-suf-d">Sufixo dos <b>dias</b>, formato compacto <small>(colado no número)</small></label>
       <input type="text" id="c-txt-suf-d" value="d">
+      <label for="c-txt-suf-h">Sufixo das <b>horas</b>, formato compacto</label>
       <input type="text" id="c-txt-suf-h" value="h">
+      <label for="c-txt-suf-m">Sufixo dos <b>minutos</b>, formato compacto</label>
       <input type="text" id="c-txt-suf-m" value="m">
+      <label for="c-txt-suf-s">Sufixo dos <b>segundos</b>, formato compacto</label>
       <input type="text" id="c-txt-suf-s" value="s">
       <p class="ajuda">Estes quatro valem <b>só no formato Compacto</b> — que é o escolhido aqui em cima por padrão. São as letrinhas coladas em cada número: <code>02d:14h:33m:12s</code>. Por serem coladas, quase sempre uma letra só.</p>
-      <label for="c-rd">Rótulos das unidades, no formato <b>blocos</b> <small>(embaixo do número)</small></label>
+      <!-- Mesmo conserto dos sufixos acima: c-rh, c-rm e c-rs não tinham rótulo próprio. -->
+      <label for="c-rd">Rótulo dos <b>dias</b>, formato blocos <small>(embaixo do número)</small></label>
       <input type="text" id="c-rd" value="dias">
+      <label for="c-rh">Rótulo das <b>horas</b>, formato blocos</label>
       <input type="text" id="c-rh" value="horas">
+      <label for="c-rm">Rótulo dos <b>minutos</b>, formato blocos</label>
       <input type="text" id="c-rm" value="min">
+      <label for="c-rs">Rótulo dos <b>segundos</b>, formato blocos</label>
       <input type="text" id="c-rs" value="seg">
       <p class="ajuda">Estes quatro valem <b>só no formato Blocos com rótulo</b>. São as palavras escritas embaixo de cada número, e por isso vêm por extenso. Mexer aqui <b>não muda</b> o relógio compacto — quem manda nele são os quatro campos acima.</p>
       <label for="c-pad">Espaçamento interno vertical <small>(px)</small></label>
@@ -2941,7 +3002,7 @@
         <label for="m-imp-link">Link da galeria ou da página <small>(o endereço da barra do navegador)</small></label>
         <input type="text" id="m-imp-link" placeholder="https://www.fotocerta.com.br/gallery/121894-estudio-tematico">
         <label for="m-imp-fonte">Código-fonte da página <small>(Cmd ⌥ U, Cmd A, Cmd C — cole aqui)</small></label>
-        <textarea id="m-imp-fonte" spellcheck="false" placeholder="Cole aqui o código-fonte inteiro da página."></textarea>
+        <textarea id="m-imp-fonte" data-fcs="nao" spellcheck="false" placeholder="Cole aqui o código-fonte inteiro da página."></textarea>
         <div class="acoes"><button class="botao claro" id="m-imp-conferir">Conferir a página</button></div>
         <p class="ajuda s-alerta" id="m-imp-resultado" style="display:none"></p>
         <p class="lista-conta" id="m-imp-conta" style="display:none"></p>
@@ -4294,17 +4355,24 @@ function fcTxtRestaura(defs,st){
    Ela nao conserta; ela faz o buraco APARECER (a partida mostra a barra vermelha). Le o
    ATRIBUTO, e nao a propriedade: a propriedade ja foi sobrescrita pela restauracao. */
 function fcTxtFabricaDiverge(){
-  var tabelas=[['Checkout',U_TXT_DEFS],['Mini loja',M_TXT_DEFS],
-               ['Agendamento por pacote',A_TXT_DEFS],['Link de cobrança',P_TXT_DEFS],
-               ['Slideshow',S_TXT_DEFS],['Capta\u00e7\u00e3o de leads',L_TXT_DEFS],
-               ['Agendamento TidyCal',T_TXT_DEFS],['Contagem regressiva',C_TXT_DEFS]],r=[],i,j,el,attr;
+  var tabelas=fcTxtTabelas(),r=[],i,j,el,attr;
   for(i=0;i<tabelas.length;i++)for(j=0;j<tabelas[i][1].length;j++){
     el=$(tabelas[i][1][j][1]);
     if(!el)continue;
     attr=el.getAttribute('value');
-    if(attr!==tabelas[i][1][j][2])r.push(tabelas[i][0]+'/'+tabelas[i][1][j][1]);
+    if(attr!==tabelas[i][1][j][2])r.push(fcAbaNome(tabelas[i][0])+'/'+tabelas[i][1][j][1]);
   }
   return r;
+}
+/* QUAIS SAO AS TABELAS DE TEXTO, escrito UMA vez. Ate 11/09/2026 esta lista existia so dentro
+   de fcTxtFabricaDiverge, com o nome de cada aba digitado ali -- e o eco do texto no rotulo
+   (fcsEcoMontar) precisaria da mesma lista. Duas copias de uma lista de oito tabelas e a
+   forma exata do defeito que este projeto ja pagou para aprender: a nona tabela entraria numa
+   e nao na outra, sem erro nenhum. O nome da aba tambem nao se digita mais aqui: ele sai de
+   ABAS, que e onde ele mora. */
+function fcTxtTabelas(){
+  return [['slide',S_TXT_DEFS],['leads',L_TXT_DEFS],['tidy',T_TXT_DEFS],['uni',U_TXT_DEFS],
+          ['cnt',C_TXT_DEFS],['cob',P_TXT_DEFS],['loja',M_TXT_DEFS],['pac',A_TXT_DEFS]];
 }
 /* ===== SECAO QUE NASCE RECOLHIDA =====
    Uma mecanica so para todas as secoes marcadas com class="secao dobra": o cabecalho aponta,
@@ -4314,20 +4382,442 @@ function fcTxtFabricaDiverge(){
 function fcdLigar(){
   var cabs=document.querySelectorAll('.secao.dobra'),i;
   for(i=0;i<cabs.length;i++)(function(cab){
-    var corpo=$(cab.getAttribute('aria-controls')),seta=cab.querySelector('.secao-dobra-seta');
+    var corpo=$(cab.getAttribute('aria-controls'));
     if(!corpo)return;
-    function alterna(){
-      var aberto=corpo.className.indexOf('fcd-oculto')<0;
-      corpo.className=aberto?(corpo.className+' fcd-oculto'):corpo.className.replace(/\s*fcd-oculto/g,'');
-      cab.setAttribute('aria-expanded',aberto?'false':'true');
-      if(seta)seta.textContent=aberto?'mostrar':'esconder';
-    }
+    function alterna(){fcdEstado(cab,corpo,corpo.className.indexOf('fcd-oculto')>=0);}
     cab.addEventListener('click',alterna);
     cab.addEventListener('keydown',function(e){
       if(e.key==='Enter'||e.key===' '||e.key==='Spacebar'){e.preventDefault();alterna();}
     });
   })(cabs[i]);
 }
+/* Os TRES sinais de "esta secao esta aberta" -- a classe do corpo, o aria-expanded do
+   cabecalho e a palavra da seta -- escritos num lugar so. A busca tambem precisa ABRIR uma
+   secao (levar ate um campo e deixa-lo escondido nao resolve nada), e se ela mexesse so na
+   classe, o cabecalho continuaria dizendo "mostrar" sobre uma secao aberta e o leitor de tela
+   continuaria anunciando aria-expanded="false". */
+function fcdEstado(cab,corpo,abrir){
+  var seta=cab?cab.querySelector('.secao-dobra-seta'):null;
+  if(!corpo)return;
+  if(abrir)corpo.className=corpo.className.replace(/\s*fcd-oculto/g,'');
+  else if(corpo.className.indexOf('fcd-oculto')<0)corpo.className+=' fcd-oculto';
+  if(cab)cab.setAttribute('aria-expanded',abrir?'true':'false');
+  if(seta)seta.textContent=abrir?'esconder':'mostrar';
+}
+/* Abre o corpo de uma secao recolhida achando o cabecalho que o controla. O caminho e o
+   aria-controls, e nao um clique simulado no cabecalho: clique ALTERNA, e alternar uma secao
+   que ja estava aberta a fecharia -- escondendo justamente o campo aonde a busca acabou de
+   levar. */
+function fcdAbrir(corpo){
+  if(!corpo||!corpo.id)return;
+  fcdEstado(document.querySelector('.secao.dobra[aria-controls="'+corpo.id+'"]'),corpo,true);
+}
+/* ============================================================================
+   ACHAR UM TEXTO -- a busca da ferramenta, e o eco do texto atual em cada rotulo
+   ============================================================================
+   POR QUE ISTO EXISTE. Em 11/09/2026 o dono quis mudar o texto "Sem opcional" que o cliente
+   le. Procurou na ferramenta, nao achou, e pediu que o texto virasse configuravel -- sendo
+   que ele JA ERA (u-txt-semopcional, no Checkout) e funcionava. A varredura mediu por que ele
+   nao achou, e sao TRES barreiras, nenhuma resolvida por rotulo melhor:
+     1. o Ctrl+F do navegador NAO le o atributo value= de um <input>: a unica superficie
+        procuravel e o texto renderizado (<label>, <legend>, <p class="ajuda">);
+     2. aba fechada e display:none -- nada de outra aba e procuravel;
+     3. secao recolhida e display:none!important, e ela cobre 116 dos 168 campos das tabelas.
+   display:none esconde do Ctrl+F, mas NAO do JavaScript: o DOM esta la e se le normalmente.
+   E dai que esta busca existe.
+
+   A BUSCA VARRE O DOM, E NAO AS TABELAS *_TXT_DEFS. Medido na mesma varredura: 68 campos de
+   texto que o cliente final le estao FORA das tabelas (os grupos t1..t12 de cada aba, as
+   costuras da mensagem do WhatsApp l-m1..l-m4, os textos de reserva dos marcadores, os
+   rotulos das unidades da contagem, o selo das bordas e os recados de recusa da /pagar).
+   Uma busca apoiada nas tabelas ignoraria os 68 e diria "nao encontrado" sobre coisa que
+   existe -- e NEGATIVA FALSA E PIOR QUE NAO TER BUSCA, porque o operador acredita nela e
+   conclui que a funcionalidade nao existe. Foi exatamente o que aconteceu com o dono, e esta
+   busca nao pode repetir o erro que veio consertar. Varrendo o DOM ela tambem alcanca o que
+   nasce em tempo de execucao -- nome de produto, codigo de cupom, legenda de foto --, que
+   tabela nenhuma teria.
+
+   ELA NAO ALTERA VALOR NENHUM. E navegacao: abre a aba, expande a secao, rola e destaca.
+   ============================================================================ */
+
+/* A normalizacao e a MESMA da casa: fcSemAcento (fonte unica de tirar acento) mais caixa
+   baixa e espacos colapsados. Quem procura "sem opcional" acha "Sem opcional"; quem procura
+   "SEM OPCIONAL" tambem. */
+function fcsNorm(s){
+  return fcSemAcento(String(s==null?'':s)).toLowerCase().replace(/\s+/g,' ').replace(/^ +| +$/g,'');
+}
+/* Chave de CONTENCAO por palavra inteira: alem de normalizar, derruba a pontuacao. Serve para
+   perguntar "este rotulo ja diz o texto todo?" sem que um ponto final no fim da frase
+   ("Cupom invalido.") faca a resposta ser nao. */
+function fcsChave(s){
+  return fcsNorm(s).replace(/[^a-z0-9]+/g,' ').replace(/^ +| +$/g,'');
+}
+function fcsContem(base,parte){
+  if(!parte)return false;
+  return (' '+base+' ').indexOf(' '+parte+' ')>=0;
+}
+
+/* ---------- quais campos a busca enxerga ---------- */
+/* Tipos de campo em que existe TEXTO para procurar. O <textarea> responde 'textarea' em .type,
+   e por isso aparece nesta tabela como qualquer outro. */
+var FCS_TIPOS={text:1,url:1,tel:1,email:1,search:1,number:1,date:1,time:1,textarea:1};
+/* So o que esta dentro de uma ABA (.painel). De fora ficam, de proposito:
+     - o painel Identidade e o de Detalhes, que guardam chave Pix, Client ID e WhatsApp --
+       dado operacional nao entra em lista de resultado, pela mesma regra que o mantem fora do
+       resumo de preset;
+     - todo campo readonly, que e SAIDA (o codigo gerado nas caixas .saida) e nao destino de
+       navegacao: procurar "Sem opcional" traria o bloco inteiro do Checkout junto;
+     - as duas superficies de COLAGEM do importador de galeria (data-fcs="nao"), que recebem
+       centenas de milhares de caracteres de codigo-fonte de outra pagina. */
+function fcsCampos(){
+  var out=[],pais=document.querySelectorAll('.painel'),i,j,els,el,aba,ord=0;
+  for(i=0;i<pais.length;i++){
+    aba=String(pais[i].id||'').replace(/^painel-/,'');
+    els=pais[i].querySelectorAll('input,textarea');
+    for(j=0;j<els.length;j++){
+      el=els[j];
+      if(!FCS_TIPOS[el.type])continue;
+      if(el.readOnly)continue;
+      if(el.getAttribute('data-fcs')==='nao')continue;
+      out.push({el:el,aba:aba,painel:pais[i],rot:fcsRotuloTexto(el),ord:ord++});
+    }
+  }
+  return out;
+}
+/* O <label> de um campo. el.labels resolve o caso normal; a varredura manual e a rede para
+   navegador que nao o implemente. */
+function fcsRotuloDe(el){
+  var i,labs;
+  try{if(el.labels&&el.labels.length)return el.labels[0];}catch(e){}
+  if(!el.id)return null;
+  labs=document.getElementsByTagName('label');
+  for(i=0;i<labs.length;i++)if(labs[i].htmlFor===el.id)return labs[i];
+  return null;
+}
+/* O texto do rotulo SEM o eco (o <small class="fcs-eco"> que mostra o valor atual): o valor
+   ja aparece na propria linha do resultado, e conta-lo aqui o mostraria duas vezes. Sem
+   rotulo proprio -- campo criado em tempo de execucao, como o nome de um produto --, vale o
+   placeholder e depois a legenda do fieldset, nesta ordem. */
+function fcsRotuloTexto(el){
+  var lab=fcsRotuloDe(el),t='',no,i,fs,leg;
+  if(lab){
+    for(i=0;i<lab.childNodes.length;i++){
+      no=lab.childNodes[i];
+      if(no.nodeType===1&&no.className&&String(no.className).indexOf('fcs-eco')>=0)continue;
+      t+=(no.textContent!=null?no.textContent:(no.nodeValue||''));
+    }
+  }
+  t=t.replace(/\s+/g,' ').replace(/^ +| +$/g,'');
+  if(t)return t;
+  if(el.placeholder)return String(el.placeholder);
+  fs=el.closest?el.closest('fieldset'):null;
+  leg=fs?fs.getElementsByTagName('legend')[0]:null;
+  return leg?String(leg.textContent||'').replace(/\s+/g,' '):'';
+}
+/* Em que SECAO da aba o campo esta. O caminho e o mesmo que o olho faz: sobe ate o filho
+   direto do painel e volta pelos irmaos anteriores ate achar um cabecalho .secao. */
+function fcsSecaoDe(el,painel){
+  var no=el,p,c;
+  while(no&&no.parentNode&&no.parentNode!==painel)no=no.parentNode;
+  if(!no||no.parentNode!==painel)return '';
+  p=no.previousSibling;
+  while(p){
+    if(p.nodeType===1&&String(p.className||'').split(' ').indexOf('secao')>=0){
+      c=p.cloneNode(true);
+      fcsTira(c,'secao-n');fcsTira(c,'secao-dobra-seta');
+      return String(c.textContent||'').replace(/\s+/g,' ').replace(/^ +| +$/g,'');
+    }
+    p=p.previousSibling;
+  }
+  return '';
+}
+function fcsTira(raiz,classe){
+  var els=raiz.getElementsByClassName(classe);
+  while(els.length)els[0].parentNode.removeChild(els[0]);
+}
+
+/* ---------- a procura ---------- */
+/* Tres superficies, em ordem de peso: o VALOR do campo (o caso do dono), o rotulo e o id.
+   O id entra porque e como um campo e citado numa conversa sobre a ferramenta -- procurar
+   "u-txt-semopcional" tem de levar ao mesmo lugar que procurar "Sem opcional". */
+function fcsProcurar(q){
+  var campos=fcsCampos(),r=[],i,c,v,pv,pr,pi;
+  for(i=0;i<campos.length;i++){
+    c=campos[i];
+    v=String(c.el.value==null?'':c.el.value);
+    pv=fcsNorm(v).indexOf(q);
+    pr=fcsNorm(c.rot).indexOf(q);
+    pi=String(c.el.id||'').toLowerCase().indexOf(q);
+    if(pv<0&&pr<0&&pi<0)continue;
+    c.val=v;
+    c.peso=(pv>=0)?0:((pr>=0)?1:2);
+    c.pos=(pv>=0)?pv:0;
+    r.push(c);
+  }
+  r.sort(function(a,b){
+    if(a.peso!==b.peso)return a.peso-b.peso;
+    if(a.pos!==b.pos)return a.pos-b.pos;
+    return a.ord-b.ord;
+  });
+  return r;
+}
+/* Um pedaco do valor com o trecho procurado DENTRO dele. Frase longa cortada sempre no comeco
+   esconderia justamente a palavra do meio que o operador digitou. */
+function fcsTrecho(v,q){
+  var t=String(v==null?'':v).replace(/\s+/g,' ').replace(/^ +| +$/g,''),i,ini,fim;
+  if(t.length<=72)return t;
+  i=fcsNorm(t).indexOf(q);
+  if(i<0)return t.substring(0,69)+'\u2026';
+  ini=i-24;if(ini<0)ini=0;
+  fim=ini+72;
+  return (ini>0?'\u2026':'')+t.substring(ini,fim)+(fim<t.length?'\u2026':'');
+}
+
+/* ---------- a lista na tela ---------- */
+var FCS_LISTA=null,FCS_SEL=-1,FCS_TETO=40;
+function fcsFechar(){
+  var res=$('fcs-res');
+  if(res){res.className='fcs-res';res.innerHTML='';}
+  FCS_LISTA=null;FCS_SEL=-1;
+}
+function fcsBuscar(){
+  var campo=$('fcs-q'),res=$('fcs-res'),q,achados,h='',i,c,n;
+  if(!campo||!res)return;
+  q=fcsNorm(campo.value);
+  FCS_SEL=-1;
+  if(q.length<2){fcsFechar();fcsRecado('',false);return;}
+  achados=fcsProcurar(q);
+  FCS_LISTA=achados;
+  n=achados.length;
+  if(!n){
+    /* O numero de abas sai de ABAS.length (fcAbasTxt), nunca da digitacao: a frase que a
+       busca mostra quando nao acha nada e justamente a que precisa ser verdade. */
+    h='<div class="fcs-vazio"><b>Nada com esse texto.</b> A busca leu o <b>valor atual</b> e o '+
+      '<b>rótulo</b> de todos os campos de texto das '+fcAbasTxt()+' abas — abertas ou não, '+
+      'recolhidas ou não. Tente um pedaço menor, ou uma palavra do meio da frase.</div>';
+    fcsRecado('nenhum resultado',false);
+  }else{
+    for(i=0;i<n&&i<FCS_TETO;i++){
+      c=achados[i];
+      c.secao=fcsSecaoDe(c.el,c.painel);
+      /* data-id e para quem LE a lista de fora -- o arnes de verificacao e o console; o
+         clique usa o data-i, que aponta a posicao no resultado da busca. */
+      h+='<button class="fcs-item" type="button" data-i="'+i+'" data-id="'+escAttr(c.el.id||'')+'">'+
+         '<span class="fcs-rot">'+escHtml(c.rot||c.el.id)+'</span>'+
+         '<span class="fcs-val">'+(c.val?'\u201c'+escHtml(fcsTrecho(c.val,q))+'\u201d':'(vazio)')+'</span>'+
+         '<span class="fcs-onde">'+escHtml(fcAbaNome(c.aba)+(c.secao?' \u203a '+c.secao:''))+
+         ' \u00b7 '+escHtml(c.el.id||'')+'</span></button>';
+    }
+    fcsRecado((n>FCS_TETO)?('mostrando '+FCS_TETO+' de '+n):(n===1?'1 resultado':(n+' resultados')),false);
+  }
+  res.innerHTML=h;
+  res.className='fcs-res aberta';
+}
+function fcsMarcar(i){
+  var res=$('fcs-res'),its,k;
+  if(!res)return;
+  its=res.getElementsByClassName('fcs-item');
+  if(!its.length)return;
+  if(i<0)i=its.length-1;
+  if(i>=its.length)i=0;
+  for(k=0;k<its.length;k++)its[k].className='fcs-item'+(k===i?' sel':'');
+  FCS_SEL=i;
+  if(its[i].scrollIntoView)its[i].scrollIntoView({block:'nearest'});
+}
+function fcsTecla(e){
+  var res=$('fcs-res');
+  if(e.key==='Escape'){fcsFechar();return;}
+  if(!res||res.className.indexOf('aberta')<0)return;
+  if(e.key==='ArrowDown'){e.preventDefault();fcsMarcar(FCS_SEL+1);return;}
+  if(e.key==='ArrowUp'){e.preventDefault();fcsMarcar(FCS_SEL-1);return;}
+  if(e.key==='Enter'){
+    e.preventDefault();
+    if(FCS_LISTA&&FCS_LISTA.length)fcsIr(FCS_LISTA[FCS_SEL<0?0:FCS_SEL].el);
+  }
+}
+
+/* ---------- levar ate o campo ---------- */
+/* A troca de aba e o CLIQUE no botao da aba, e nao uma chamada direta a trocarAba: cada aba
+   tem o proprio passo depois da troca (remontar a previa com a largura real da coluna, abrir
+   a loja), e essa lista ja existe num lugar so, na partida. Chamar trocarAba aqui criaria uma
+   segunda lista, que divergiria na aba seguinte. */
+function fcsIr(el){
+  var aba=null,no=el,bt,alvo;
+  while(no&&no!==document.body){
+    if(no.className&&String(no.className).split(' ').indexOf('painel')>=0){aba=String(no.id||'').replace(/^painel-/,'');break;}
+    no=no.parentNode;
+  }
+  if(aba){bt=$('aba-'+aba);if(bt)bt.click();}
+  fcsAbrirSecoes(el);
+  fcsFechar();
+  /* AQUI A ABA JA ESTA ABERTA E A SECAO JA FOI EXPANDIDA. Se o campo AINDA nao aparece, quem o
+     esconde e outra opcao da propria aba (um style.display posto por um cToggles da vida:
+     "Texto do botao" so existe com o botao de acao ligado). Levar o operador ate um campo
+     invisivel e dizer que chegou seria a mesma mentira silenciosa que esta busca veio
+     consertar -- entao ela para no container visivel mais proximo, destaca ELE, e DIZ o que
+     esta acontecendo. So conferimos isto agora, e nao ao montar a lista: com a aba fechada
+     todo campo dela e invisivel, e a pergunta nao teria resposta. */
+  alvo=el;
+  if(el.offsetParent===null){
+    alvo=el.parentNode;
+    while(alvo&&alvo.nodeType===1&&alvo.offsetParent===null&&
+          String(alvo.className||'').split(' ').indexOf('painel')<0)alvo=alvo.parentNode;
+    if(!alvo||alvo.nodeType!==1)alvo=el;
+    fcsRecado('O campo existe, mas outra opção desta aba o está escondendo — ligue essa opção para vê-lo.',true);
+  }
+  /* preventScroll porque quem decide a posicao e fcsRolarAte, que desconta a barra grudada.
+     Campo escondido nao recebe foco: o navegador o recusaria em silencio. */
+  if(alvo===el){try{el.focus({preventScroll:true});}catch(e){try{el.focus();}catch(e2){}}}
+  fcsRolarAte(alvo);
+  fcsDestacar(alvo);
+}
+/* A mesma faixa ao lado do campo diz a contagem OU o recado -- nunca as duas coisas, porque
+   quando ha recado ele e o que importa. */
+function fcsRecado(txt,alerta){
+  var c=$('fcs-conta');
+  if(!c)return;
+  c.textContent=txt;
+  c.className='fcs-conta'+(alerta?' alerta':'');
+}
+function fcsAbrirSecoes(el){
+  var no=el;
+  while(no&&no.nodeType===1){
+    if(String(no.className||'').indexOf('fcd-oculto')>=0)fcdAbrir(no);
+    no=no.parentNode;
+  }
+}
+/* scrollIntoView sozinho poe o campo rente ao topo da janela -- que e exatamente onde esta a
+   barra grudada. O campo chegaria DEBAIXO dela, e a busca teria levado a lugar nenhum. */
+function fcsRolarAte(el){
+  var barra=document.querySelector('.fcg-fixa'),topo;
+  try{
+    topo=el.getBoundingClientRect().top+(window.pageYOffset||document.documentElement.scrollTop||0);
+    topo-=(barra?barra.offsetHeight:0)+90;
+    if(topo<0)topo=0;
+    window.scrollTo(0,topo);
+  }catch(e){if(el.scrollIntoView)el.scrollIntoView(true);}
+}
+/* Um temporizador SO, cancelado antes de reagendar: duas buscas seguidas fariam o timer da
+   primeira apagar o destaque da segunda antes da hora. */
+var fcsAlvoEl=null,fcsAlvoTimer=null;
+function fcsDestacar(el){
+  if(fcsAlvoTimer){clearTimeout(fcsAlvoTimer);fcsAlvoTimer=null;}
+  if(fcsAlvoEl)fcsAlvoEl.classList.remove('fcs-alvo');
+  fcsAlvoEl=el;
+  el.classList.add('fcs-alvo');
+  fcsAlvoTimer=setTimeout(function(){
+    if(fcsAlvoEl)fcsAlvoEl.classList.remove('fcs-alvo');
+    fcsAlvoEl=null;fcsAlvoTimer=null;
+  },6000);
+}
+
+/* ============================================================================
+   O ECO: cada rotulo das tabelas mostra o TEXTO QUE ELE CONTROLA
+   ============================================================================
+   Medido em 11/09/2026: dos 168 campos das oito tabelas, so 29 tinham rotulo que permitisse
+   achar o campo pelo texto -- e quase todos por coincidencia (frases de uma palavra, como
+   "Aplicar"). 84 nao tinham nada em comum com o texto, e "Opcao nenhum opcional" era o
+   rotulo de "Sem opcional".
+   O eco e ESCRITO POR CODIGO, a partir da tabela, e nunca a mao. A mao ele seria uma TERCEIRA
+   copia de 168 frases (hoje ja sao duas: o value= do HTML e a terceira coluna da tabela), e
+   fcTxtFabricaDiverge nao a fiscalizaria. Vindo da tabela, ele mostra o VALOR ATUAL: depois
+   que o dono personalizar um texto, o rotulo passa a exibir o que o cliente realmente le.
+   FORMA. Frase longa no rotulo apaga a hierarquia e transforma a secao num paredao: texto de
+   ate 45 caracteres entra inteiro; acima disso entra so o comeco, cortado na ultima palavra
+   inteira antes de 43, com reticencia. Tudo dentro do <small> que o rotulo JA usa para
+   qualificadores -- nenhum componente novo --, e o qualificador que ja existia continua la,
+   depois do texto. */
+var FCS_ECO_MAX=45,FCS_ECO_CORTE=43,FCS_ECO=null;
+function fcsEcoTexto(v){
+  var t=String(v==null?'':v).replace(/\s+/g,' ').replace(/^ +| +$/g,''),corte,esp;
+  if(!t)return '';
+  /* texto que e so pontuacao ou espaco (", ", ":") nao vira aspas: o rotulo desses campos ja
+     descreve o sinal por extenso, e um eco com a virgula entre aspas nao ajudaria ninguem */
+  if(!/[0-9a-z]/.test(fcsNorm(t)))return '';
+  if(t.length<=FCS_ECO_MAX)return t;
+  corte=t.substring(0,FCS_ECO_CORTE);
+  esp=corte.lastIndexOf(' ');
+  if(esp>12)corte=corte.substring(0,esp);
+  return corte.replace(/[\s,.;:\-]+$/,'')+'\u2026';
+}
+/* Monta a lista uma vez: acha o rotulo de cada campo das tabelas, RECOLHE o qualificador que
+   ele ja tinha (o <small> do fim) e pendura um <small class="fcs-eco"> proprio. O qualificador
+   passa a ser escrito por codigo junto com o texto, para os dois nao virarem dois <small>
+   seguidos. */
+/* Nada alem de espaco depois deste elemento dentro do rotulo. */
+function fcsNadaDepois(el){
+  var no=el.nextSibling,t;
+  while(no){
+    t=(no.textContent!=null)?no.textContent:(no.nodeValue||'');
+    if(String(t).replace(/\s+/g,''))return false;
+    no=no.nextSibling;
+  }
+  return true;
+}
+function fcsEcoMontar(){
+  var tabs=fcTxtTabelas(),lista=[],i,j,id,el,lab,qual,smalls,sm,base;
+  for(i=0;i<tabs.length;i++)for(j=0;j<tabs[i][1].length;j++){
+    id=tabs[i][1][j][1];
+    el=$(id);if(!el)continue;
+    lab=fcsRotuloDe(el);if(!lab)continue;
+    qual='';
+    smalls=lab.getElementsByTagName('small');
+    sm=smalls.length?smalls[smalls.length-1]:null;
+    /* so e qualificador o <small> que FECHA o rotulo: um <small> no meio da frase e parte
+       dela, e arranca-lo mudaria o que o rotulo diz */
+    if(sm&&sm===lab.lastElementChild&&fcsNadaDepois(sm)){
+      qual=String(sm.textContent||'').replace(/^\s*\(/,'').replace(/\)\s*$/,'');
+      sm.parentNode.removeChild(sm);
+    }
+    base=fcsChave(String(lab.textContent||'')+' '+qual);
+    lab.appendChild(document.createTextNode(' '));
+    lista.push({el:el,lab:lab,qual:qual,base:base,eco:lab.appendChild(document.createElement('small')),ult:null});
+    lista[lista.length-1].eco.className='fcs-eco';
+  }
+  return lista;
+}
+function fcsEcoUm(r){
+  var v=String(r.el.value==null?'':r.el.value),txt=fcsEcoTexto(v),novo;
+  /* rotulo que JA diz o texto inteiro nao o repete: um "Cupom invalido" seguido do mesmo
+     "Cupom invalido." entre aspas seria ruido. A comparacao e por palavra inteira, senao o "d" do sufixo dos dias seria dado
+     como ja presente por causa de "dias". */
+  if(txt&&fcsContem(r.base,fcsChave(v)))txt='';
+  if(txt)novo='\u2014 \u201c'+txt+'\u201d'+(r.qual?' \u00b7 '+r.qual:'');
+  else novo=r.qual?'('+r.qual+')':'';
+  if(novo===r.ult)return;
+  r.ult=novo;
+  r.eco.textContent=novo;
+  r.eco.style.display=novo?'':'none';
+}
+function fcsEcoTodos(){
+  var i;
+  if(!FCS_ECO)return;
+  for(i=0;i<FCS_ECO.length;i++)fcsEcoUm(FCS_ECO[i]);
+}
+
+/* ---------- a partida ---------- */
+function fcsIniciar(){
+  var campo=$('fcs-q'),res=$('fcs-res'),caixa;
+  FCS_ECO=fcsEcoMontar();
+  fcsEcoTodos();
+  if(!campo||!res)return;
+  caixa=res.parentNode;
+  campo.addEventListener('input',fcsBuscar);
+  campo.addEventListener('keydown',fcsTecla);
+  campo.addEventListener('focus',function(){if(fcsNorm(campo.value).length>=2)fcsBuscar();});
+  res.addEventListener('click',function(e){
+    var b=e.target,i;
+    while(b&&b!==res&&String(b.className||'').indexOf('fcs-item')<0)b=b.parentNode;
+    if(!b||b===res)return;
+    i=parseInt(b.getAttribute('data-i'),10);
+    if(FCS_LISTA&&FCS_LISTA[i])fcsIr(FCS_LISTA[i].el);
+  });
+  document.addEventListener('click',function(e){
+    if(caixa&&!caixa.contains(e.target))fcsFechar();
+  });
+  liga('fcs-limpar',function(){campo.value='';fcsFechar();fcsRecado('',false);campo.focus();});
+}
+
 /* Compartilhada por Bordas e Captacao de leads: hexadecimal -> "r, g, b", para montar rgba()
    dentro de @keyframes (onde nao da para usar a cor com alfa separado). Nasceu na aba Bordas;
    subiu para ca quando a aba Leads passou a precisar dela -- o halo do efeito "pulsar" trazia
@@ -5064,6 +5554,9 @@ function copiar(idOut,idAviso){
   fcAvisoCopia(av,FC_COPIA_FALHOU,false,6000);
 }
 function fcAbasIds(){var v=[],i;for(i=0;i<ABAS.length;i++)v.push(ABAS[i].id);return v;}
+/* O nome de exibicao de uma aba a partir do id dela. Mesma razao do fcAbasIds: nome de aba
+   digitado numa segunda lista e nome que envelhece sozinho. */
+function fcAbaNome(id){var i;for(i=0;i<ABAS.length;i++)if(ABAS[i].id===id)return ABAS[i].nome;return id;}
 /* Quantas abas existem, POR EXTENSO, para as frases da interface. A ferramenta nasceu com
    seis e a palavra "seis" ficou escrita em catorze mensagens que o operador le -- inclusive
    na que ele le no instante em que cria um preset geral ("as seis abas nasceram FORA desta
@@ -5410,6 +5903,12 @@ function salvarEstado(){
      um backup mudam campo sem passar por tecla nenhuma, e um contador parado mentiria sobre o
      que vai no payload. Try proprio: gravar e sagrado. */
   try{fcLimAtualizarTodos();}catch(e){}
+  /* O eco do texto atual em cada rotulo acorda pelo MESMO ponto, e pelo mesmo motivo dos dois
+     acima: aplicar um preset, importar um backup e restaurar o estado mudam campo sem passar
+     por tecla nenhuma, e um eco parado mostraria no rotulo um texto que o cliente nao le mais.
+     Ele nao reescreve nada quando o texto nao mudou (compara com o ultimo escrito), entao
+     rodar a cada tecla nao custa DOM. Try proprio: gravar e sagrado. */
+  try{fcsEcoTodos();}catch(e){}
 }
 function restaurarEstado(){
   var raw,st,i,j,a,c;
@@ -24019,6 +24518,12 @@ prep('Orçamento do identificador','loja pac',fcIdConferir,'conferir a conta do 
    sobre um campo ainda vazio. Passo proprio, com rotulo proprio -- se ele falhar, a barra
    vermelha precisa dizer que foram os contadores, e nao o preset geral. */
 prep('Limites visíveis nos campos','uni bor cob',fcLimIniciar,'pôr o contador e o limite nos campos que alimentam API');
+/* A busca e o eco entram DEPOIS de as abas serem desenhadas com o estado restaurado: o eco
+   tem de nascer sobre o texto que o operador vai ler na tela, e nao sobre o valor de fabrica.
+   Passo proprio, com rotulo proprio -- se ele falhar, a barra vermelha precisa dizer que foi a
+   busca, e nao o preset geral, que continua funcionando. Sem aba associada: a busca e de
+   todas elas. */
+prep('Achar um texto','',fcsIniciar,'ligar a busca e escrever o texto atual nos rótulos');
 prep('Preset geral','',fcgIniciar,'preparar a barra do preset geral');
 /* Passo proprio, com rotulo proprio: se ligar os botoes de backup falhar, a barra vermelha
    precisa dizer que foi o backup -- e nao o preset geral, que continua funcionando. */
