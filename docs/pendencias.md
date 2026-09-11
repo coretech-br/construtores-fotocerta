@@ -497,35 +497,44 @@ merece ser reconsiderado — agora com numero, e nao com impressao.
 
 ---
 
-## Divida aberta em 11/09/2026 — dois identificadores com ORCAMENTO composto, sem recusa
+## FECHADA em 11/09/2026 — dois identificadores com ORCAMENTO composto
 
-Achados pela varredura dos limites e **nao consertados de proposito**: os dois sao territorio
-de **conciliacao**, e o conserto de verdade e uma **recusa no gerador**, que a regra do projeto
-manda avisar ao dono antes.
+Registrada de manha e **consertada no mesmo dia**, em rodada propria aprovada pelo dono.
 
-### 1. Mini loja — `m-cod` tem teto efetivo de **17**, e nada o diz
+**O que era:** o identificador que chega ao Pix tem 25 caracteres, e em duas abas ele e
+**composto** — o que o operador digita mais o que o gerador acrescenta. O campo nao avisava
+nada.
 
-`novoPedido()` monta `CODIGO_LOJA + '-' + Date.now().toString(36)`. Medido: o base36 tem **8
-caracteres** hoje (e continua com 8 ate 2059). O hifen some na limpeza do txid. Entao o teto
-real de `m-cod` e **25 - 8 = 17**.
+**A colisao, provada na versao publicada:** prefixo `FOTOCERTAESTUDIO` com os pacotes
+`MINIENSAIO1H` e `MINIENSAIO4H` geravam **sem recusa** e produziam **o mesmo txid** —
+`FOTOCERTAESTUDIOMINIENSAI` nos dois. Dois pagamentos indistinguiveis no extrato, sem erro em
+lugar nenhum.
 
-**O que acontece acima de 17:** o identificador do pedido que o cliente ve na tela **difere**
-do txid que chega ao extrato do dono — truncado em silencio. Conciliacao quebrada, sem erro.
+**A truncagem, tambem provada:** `m-cod` com 20 caracteres fazia a tela dizer
+`Pedido LOJAFOTOCERTAVITORIA-MYPV1GG0` e o extrato receber `LOJAFOTOCERTAVITORIAMYPV1`.
 
-### 2. Agendamento por pacote — `a-prefixo` + `a-pcod` tem de caber em **13**
+**O conserto: recusa no gerador, com os limites DERIVADOS.** Nenhum numero foi escrito a mao.
+As funcoes que escrevem a cauda passaram a morar em texto, e a ferramenta **avalia esse mesmo
+texto** para medi-la — o molde de `fcPixApi`:
 
-`limpaId(PREFIXO + pac.cod + diaHora)`, com `diaHora` de ate **12** digitos (8 da data + 4 da
-hora). Sobram 13 para prefixo mais codigo do pacote, somados.
+| Fonte | Medicao | Sobra |
+|---|---|---|
+| `M_PEDIDO_CAUDA_SRC` (o base36 do `novoPedido`) | 8 | `M_COD_MAX` = **17** |
+| `A_DIAHORA_SRC` + `A_SUFALEAT_SRC` | 12 | `A_ID_MAX` = **13** |
 
-**O que acontece acima de 13:** dois pacotes diferentes podem produzir **o mesmo txid** — nao
-e truncagem, e **colisao**. Dois pagamentos indistinguiveis no extrato.
+**A fronteira foi medida um caractere por vez, pela interface** — nao espiando variavel de
+dentro da IIFE, o que mediria a intencao e nao o comportamento. A recusa comeca exatamente um
+caractere depois do ultimo aceito, e o numero que a mensagem **diz** e o mesmo que a ferramenta
+**faz**.
 
-### Por que nao viraram contador nesta rodada
+**O negativo que uma recusa desastrada quebraria:** `LOJA-FOTO_CERTA-VITO` tem 20 digitados e
+17 uteis — hifen e sublinhado somem na limpeza — e **passa**.
 
-Um contador ali teria de **rederivar a forma do identificador** que o gerador monta — a segunda
-implementacao que o projeto proibe, e que divergiria na primeira vez que a montagem mudasse. O
-conserto certo e a **recusa no proprio gerador**, onde a forma ja e conhecida: ele sabe o
-tamanho do `diaHora` e do base36 porque e ele quem os escreve.
+### Por que o contador de ontem NAO foi estendido
 
-**Precisa da palavra do dono** porque toca payload e conciliacao — a classe que a regra de
-03/09/2026 manda avisar antes, com a medicao do alcance, em vez de aparecer pronta.
+`FC_LIM_CAMPOS` instala `maxlength` e compara o **texto digitado**. O orcamento aqui e sobre o
+que **sobrevive a limpeza**: com `max:17` a peca bloquearia a digitacao nos 17 e recusaria
+`MINI-LOJA-CENTRO-SP` (19 digitados, 16 uteis), que e legitimo — trocando estouro silencioso
+por **bloqueio silencioso**. E no Agendamento o orcamento e dividido entre um campo e uma
+**lista** (os pacotes ja cadastrados), sobre a qual um contador por campo ficaria calado
+justamente no caso que causa a colisao. Ficou so na recusa, e a razao esta escrita.

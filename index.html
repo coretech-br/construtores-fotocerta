@@ -3995,8 +3995,8 @@
    QUEM IMPEDE QUE ELE MINTA: scripts/conferir-versoes.sh, que recusa index.html
    alterado sem a versao mudar junto -- a mesma disciplina do fc-compartilhado.js,
    e pela mesma razao: carimbo que ninguem confere e o defeito de amanha. */
-var FC_VERSAO='2026-09-11a';
-var FC_PUBLICADO='2026-09-11 18:05';   /* America/Sao_Paulo -- escrito pelo carimbador */
+var FC_VERSAO='2026-09-11b';
+var FC_PUBLICADO='2026-09-11 18:59';   /* America/Sao_Paulo -- escrito pelo carimbador */
 (function(){
   var el=document.getElementById('fc-versao');
   if(!el) return;
@@ -5714,6 +5714,70 @@ var FC_LIM_PROVA=(function(){
    de teto -- a tela continuaria dizendo 25 e o payload levaria outro numero, sem aviso. */
 function fcLimTeto(fn){var s='',i;for(i=0;i<400;i++)s+='A';return String(fn(s)).length;}
 var FC_TXID_MAX=fcLimTeto(pTxidLimpo);
+/* =========================================================================
+   O ORCAMENTO DO IDENTIFICADOR DE CONCILIACAO
+   -------------------------------------------------------------------------
+   Em duas abas o identificador que chega ao Pix e COMPOSTO: o que o operador digita MAIS um
+   pedaco que o proprio bloco acrescenta. Quem digita nao pode ocupar os FC_TXID_MAX caracteres
+   inteiros -- a cauda tem de caber junto -- e o estouro nao da erro em lugar nenhum:
+
+     Mini loja           -> o identificador que o cliente le na tela DIFERE do txid que chega ao
+                            extrato do dono: truncado em silencio, conciliacao quebrada.
+     Agendamento pacote  -> dois pacotes diferentes podem chegar ao extrato com o MESMO txid.
+                            Nao e truncagem, e COLISAO: dois pagamentos indistinguiveis.
+
+   O TAMANHO DA CAUDA NAO E ESCRITO A MAO AQUI. As funcoes que a produzem moram neste arquivo em
+   TEXTO -- o bloco entregue leva exatamente este texto -- e a ferramenta AVALIA o mesmo texto
+   para medir, no molde de fcLimTeto e de fcPixApi. Numero decorado seria o defeito do dia em que
+   a montagem mudasse: a recusa continuaria citando 17 e o payload levaria outro numero, calada.
+   ========================================================================= */
+/* Mini loja: novoPedido() escreve CODIGO_LOJA + '-' + ISTO. O hifen nao entra na conta -- ele
+   some na limpeza do txid, junto com o sublinhado que o codigo da loja tambem aceita. */
+var M_PEDIDO_CAUDA_SRC="(new Date().getTime()).toString(36).toUpperCase()";
+/* Agendamento por pacote: idConciliacao() escreve PREFIXO + codigo do pacote + UMA destas duas
+   caudas -- o dia e a hora quando o TidyCal os manda na URL, e um sufixo sorteado quando nao
+   manda. Vale a MAIOR das duas, porque na hora de gerar ninguem sabe qual vai acontecer. */
+var A_DIAHORA_SRC=
+  'function diaHoraId(dataCru,horaCru){\n'+
+  '  var d=String(dataCru==null?"":dataCru).replace(/\\D/g,"").substring(0,8);\n'+
+  '  var h=String(horaCru==null?"":horaCru).replace(/\\D/g,"").substring(0,4);\n'+
+  '  return d+h;\n'+
+  '}\n';
+var A_SUFALEAT_SRC='function sufAleatorio(){return Math.random().toString(36).substring(2,10);}\n';
+/* Executa a fonte e mede o que ela devolve. 'vezes' existe por causa do sufixo sorteado: uma
+   unica amostra de Math.random() nao prova o teto, entao mede-se o maior de varias. */
+function fcIdCaudaN(src,nome,arg,vezes){
+  var f=(new Function(src+'return '+nome+';'))(),n=0,i,k;
+  for(i=0;i<vezes;i++){k=String(f(arg,arg)).length;if(k>n)n=k;}
+  return n;
+}
+var FC_ID_DIGITOS=(function(){var s='',i;for(i=0;i<400;i++)s+='7';return s;})();
+var M_CAUDA_N=fcIdCaudaN('function cauda(){return '+M_PEDIDO_CAUDA_SRC+';}\n','cauda',null,1);
+var A_CAUDA_N=Math.max(
+  fcIdCaudaN(A_DIAHORA_SRC,'diaHoraId',FC_ID_DIGITOS,1),
+  fcIdCaudaN(A_SUFALEAT_SRC,'sufAleatorio',null,200)
+);
+/* O que sobra para quem digita, nas duas abas. */
+var M_COD_MAX=FC_TXID_MAX-M_CAUDA_N;
+var A_ID_MAX=FC_TXID_MAX-A_CAUDA_N;
+/* Quantos caracteres deste texto sobrevivem ate o identificador. E a MESMA pergunta que
+   pTxidLimpo faz, sem o corte -- aqui o que interessa e justamente o quanto passou do teto, e
+   um valor ja cortado responderia sempre FC_TXID_MAX. fcIdConferir e a guarda que impede as
+   duas de divergirem. */
+function fcIdLimpo(v){return String(v==null?'':v).replace(/[^A-Za-z0-9]/g,'');}
+function fcIdUteis(v){return fcIdLimpo(v).length;}
+/* A guarda contra o proprio descuido, no molde de fcLimConferir: se fcIdLimpo e pTxidLimpo
+   discordarem em um caractere, a recusa contaria um orcamento que o payload nao usa. Roda na
+   partida, como passo proprio, e a barra vermelha diz qual caractere. */
+function fcIdConferir(){
+  var i,ch,ruins=[];
+  for(i=0;i<FC_LIM_PROVA.length;i++){
+    ch=FC_LIM_PROVA.charAt(i);
+    if(fcIdLimpo(ch)!==String(pTxidLimpo(ch)))ruins.push(ch);
+  }
+  if(ruins.length)throw new Error('a contagem do identificador e a limpeza do payload discordam nestes caracteres: '+ruins.join(' '));
+  if(!(M_COD_MAX>0&&A_ID_MAX>0))throw new Error('a cauda do identificador não cabe nos '+FC_TXID_MAX+' caracteres do txid: mini loja '+M_CAUDA_N+', agendamento '+A_CAUDA_N);
+}
 function fcLimSoDigitos(v){return String(v==null?'':v).replace(/[^0-9]/g,'');}
 /* O SEGUNDO teto da descricao da cobranca. A recusa de P_DESC_MAX e do LINK; o PayPal ve so os
    FC_LIM_PP primeiros caracteres nos campos name e description do item. Sao dois tetos
@@ -16027,7 +16091,7 @@ function aPacLimpar(){
    geracao), aPacSalvar (no cadastro) e fcDupCod (na copia) fazem a MESMA pergunta -- escrita
    tres vezes, uma delas podia ganhar uma regra nova e as outras duas continuarem como estavam,
    sem nada quebrar e sem ninguem perceber. */
-function aCodPix(cod){return String(cod==null?'':cod).replace(/[^A-Za-z0-9]/g,'').toUpperCase();}
+function aCodPix(cod){return fcIdLimpo(cod).toUpperCase();}   /* fcIdLimpo: a MESMA limpeza que o payload aplica, fonte unica */
 /* Devolve o codigo JA CADASTRADO que colide com este, ou ''. 'ignorar' e o indice do pacote em
    edicao: sem ele, salvar um pacote sem mexer no codigo colidiria com ele mesmo. */
 function aCodColide(cod,ignorar){
@@ -16275,7 +16339,10 @@ function aUrlOk(v){
    previa. A recusa de codigo colidido e a mais importante das nove: o Pix descarta hifen, e
    dois pacotes "mini-1h" e "mini1h" gerariam o MESMO identificador de conciliacao. */
 function aRecusa(cfg){
-  var i,p,vistos={},limpo,cp,cpc,cpv,cpe,vistosCp={},f,vistosFam={},fl,pj;
+  var i,p,vistos={},limpo,cp,cpc,cpv,cpe,vistosCp={},f,vistosFam={},fl,pj,pre,cabe;
+  /* o que o prefixo ja gasta do orcamento do identificador -- ver "o orcamento do
+     identificador de conciliacao" */
+  pre=fcIdUteis(cfg.prefixo);
   if(!cfg.pacotes.length)return 'Cadastre ao menos um pacote.';
   /* GUARDA DE INTEGRIDADE, e nao caso comum: aRestaura garante ao menos uma familia e aFamDel
      recusa apagar a ultima, mas um estado importado quebrado nao garante nada -- e aRecusa e o
@@ -16290,6 +16357,13 @@ function aRecusa(cfg){
     limpo=aCodPix(p.cod);
     if(vistos[limpo])return 'Os códigos "'+vistos[limpo]+'" e "'+p.cod+'" viram o mesmo identificador no Pix ('+limpo+'), porque o Pix aceita apenas letras e números. Troque um dos dois.';
     vistos[limpo]=p.cod;
+    /* O ORCAMENTO DO IDENTIFICADOR. O que passa dos FC_TXID_MAX caracteres nao e cortado do fim
+       de um codigo so: e cortado da CONCATENACAO, e por isso dois pacotes diferentes com o mesmo
+       comeco chegam ao extrato com o MESMO txid. Colisao nao da erro em lugar nenhum -- ela
+       aparece como dois pagamentos que ninguem consegue distinguir. O teto e derivado, nao
+       decorado: A_CAUDA_N e medido na propria fonte que escreve a cauda. */
+    cabe=pre+fcIdUteis(p.cod);
+    if(cabe>A_ID_MAX)return 'O prefixo "'+cfg.prefixo+'" e o código "'+p.cod+'" somam '+cabe+' letras e números, e os dois juntos cabem em no máximo '+A_ID_MAX+'. O identificador de conciliação é o prefixo mais o código do pacote mais até '+A_CAUDA_N+' caracteres de dia e hora que a página acrescenta, e o Pix só carrega '+FC_TXID_MAX+': o que passa é cortado, e dois pacotes diferentes passam a chegar ao seu extrato com o MESMO identificador — dois pagamentos que ninguém consegue distinguir. Encurte o prefixo (seção '+fcSecN('a-pagamento')+') ou o código do pacote (seção '+fcSecN('a-pacotes')+'). Hífen não conta: o Pix o descarta.';
     if(!p.nome)return 'O pacote "'+p.cod+'" está sem nome.';
     if(!(parseFloat(p.preco)>0))return 'O pacote "'+p.cod+'" está com o preço vazio ou zerado. Ele seria entregue como uma cobrança de R$ 0,00.';
     if(!p.cal)return 'O pacote "'+p.cod+'" está sem o endereço do TidyCal.';
@@ -17658,8 +17732,10 @@ function aBlocoObrigado(cfg){
   c+='   e um novo sufixo sai a cada carga -- a MESMA degradacao generosa que ja vale para quem\n';
   c+='   abre a reserva noutro aparelho (secao 7.1 da spec): o cliente ganha mais tempo, nunca\n';
   c+='   menos, e o identificador continua servindo para conciliar o pagamento daquela visita. */\n';
-  c+='function limpaId(t){return String(t==null?"":t).replace(/[^A-Za-z0-9]/g,"").substring(0,25);}\n';
-  c+='function sufAleatorio(){return Math.random().toString(36).substring(2,10);}\n';
+  /* o teto sai de FC_TXID_MAX, o mesmo numero que a recusa de aRecusa cita -- dois lugares
+     dizendo 25 e a porta por onde eles divergem */
+  c+='function limpaId(t){return String(t==null?"":t).replace(/[^A-Za-z0-9]/g,"").substring(0,'+FC_TXID_MAX+');}\n';
+  c+=A_SUFALEAT_SRC;
   c+='function reservaChave(cod,quandoCru){return "fcapac:"+cod+(quandoCru?(":"+quandoCru):"");}\n';
   c+='function reservaLer(chave){\n';
   c+='  try{\n';
@@ -17693,11 +17769,9 @@ function aBlocoObrigado(cfg){
      agendamentos assim no mesmo dia compartilhariam o identificador -- o mesmo limite que
      ja vale quando "data" e "hora" nao vem, e pelo mesmo motivo: melhor um codigo que nao
      diz o dia do que um que diz o dia errado. */
-  c+='function diaHoraId(dataCru,horaCru){\n';
-  c+='  var d=String(dataCru==null?"":dataCru).replace(/\\D/g,"").substring(0,8);\n';
-  c+='  var h=String(horaCru==null?"":horaCru).replace(/\\D/g,"").substring(0,4);\n';
-  c+='  return d+h;\n';
-  c+='}\n';
+  /* o texto mora em A_DIAHORA_SRC (ver "o orcamento do identificador"): e daqui que ele sai
+     para o bloco, e e ele que a ferramenta avalia para medir a cauda */
+  c+=A_DIAHORA_SRC;
   c+='/* recebe a RESERVA ja obtida por montar() (uma chamada so de reservaObter por carregamento --\n';
   c+='   ver o comentario acima) em vez de buscar a sua propria: e a mesma que o prazo (3a2) usa,\n';
   c+='   e as duas tem de enxergar o MESMO instante de primeira visita e o MESMO sufixo. */\n';
@@ -21551,9 +21625,15 @@ function mCfg(){
    de ser prova do codigo. Nao mexe no DOM de proposito -- a correcao a vista e de mGerar, que e
    o gesto deliberado do operador; a previa roda a cada tecla. */
 function mRecusa(cfg){
-  var i,cpv,cpc,cpe,tmax,cpvisto,vistosCp={};
+  var i,cpv,cpc,cpe,tmax,cpvisto,vistosCp={},codn;
   if(!cfg.cod)return 'Informe o código da loja. Ele identifica o carrinho no navegador do cliente (e a chave do armazenamento) e vira o começo do identificador do pedido no extrato -- sem ele, duas lojas no mesmo site dividiriam o mesmo carrinho.';
   if(!/^[A-Za-z0-9_-]+$/.test(cfg.cod))return 'O código da loja aceita apenas letras sem acento, números, hífen e sublinhado. Ele vira chave de armazenamento e identificador de pedido: espaço e acento ali produzem um identificador diferente do que você está lendo.';
+  /* O ORCAMENTO DO IDENTIFICADOR. novoPedido() acrescenta uma cauda ao codigo da loja, e o txid
+     so carrega FC_TXID_MAX: acima disso o identificador que o cliente le na tela deixa de ser o
+     que chega ao extrato, sem erro nenhum. O teto e derivado, nao decorado -- M_CAUDA_N e medido
+     na propria fonte que escreve a cauda. */
+  codn=fcIdUteis(cfg.cod);
+  if(codn>M_COD_MAX)return 'O código da loja "'+cfg.cod+'" tem '+codn+' letras e números, e aqui cabem no máximo '+M_COD_MAX+'. O identificador do pedido é este código mais '+M_CAUDA_N+' caracteres que a página acrescenta para diferenciar um pedido do outro, e o Pix só carrega '+FC_TXID_MAX+': acima disso o identificador que o cliente lê na tela fica diferente do que chega ao seu extrato, sem erro e sem aviso. Encurte o código para '+M_COD_MAX+' letras e números — hífen e sublinhado não contam, o Pix os descarta.';
   if(!cfg.prods.length)return 'Cadastre ao menos um produto.';
   for(i=0;i<cfg.prods.length;i++){
     if(!String(cfg.prods[i].img||'').trim())return 'O produto "'+cfg.prods[i].nome+'" está sem foto. A vitrine é feita de imagens: sem foto ele sai como um retângulo vazio no meio da grade.';
@@ -22143,8 +22223,10 @@ function mBlocoRuntime(cfg,usaPP,usaPix,usaQtd,usaSinal,usaResumo,descpix,zap,us
      soltas em cada ponto de limpeza, o proximo estado a nascer seria zerado num lugar e nao no
      outro. */
   c+='function avisosLimpar(){sumidos=0;sumidosOp=0;cestaEstragada=false;cestaDeOutra=false;}\n';
+  /* a cauda sai de M_PEDIDO_CAUDA_SRC (ver "o orcamento do identificador"): e a mesma fonte
+     que a ferramenta avalia para saber quantos caracteres sobram para o codigo da loja */
   c+='function novoPedido(){\n';
-  c+="return CODIGO_LOJA+'-'+(new Date().getTime()).toString(36).toUpperCase();\n}\n";
+  c+="return CODIGO_LOJA+'-'+"+M_PEDIDO_CAUDA_SRC+";\n}\n";
   c+='function cestaGravar(){\n';
   c+='try{localStorage.setItem(CHAVE_CESTA,JSON.stringify({pedido:CODIGO_PEDIDO,cat:ASSINATURA_CATALOGO,itens:CARRINHO}));}catch(e){}\n}\n';
   c+='function cestaLer(){\n';
@@ -23929,6 +24011,9 @@ prep('Textos configuraveis','slide leads tidy uni cnt cob loja pac',function(){
   var d=fcTxtFabricaDiverge();
   if(d.length)throw new Error('o padrao de fabrica destes campos discorda entre o value= do HTML e a tabela da aba: '+d.join(', '));
 },'preparar as seções de texto e conferir os padrões de fábrica');
+/* Passo proprio, e antes dos contadores: se a contagem do identificador divergir da limpeza
+   do payload, as recusas das duas abas compostas passariam a citar um orcamento errado. */
+prep('Orçamento do identificador','loja pac',fcIdConferir,'conferir a conta do identificador de conciliação');
 /* Os limites visiveis entram DEPOIS das abas serem desenhadas com o estado restaurado e ANTES
    do preset geral: o contador tem de nascer sobre o valor que o operador vai ler na tela, e nao
    sobre um campo ainda vazio. Passo proprio, com rotulo proprio -- se ele falhar, a barra
