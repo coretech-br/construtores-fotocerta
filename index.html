@@ -4765,7 +4765,7 @@ function fcsNadaDepois(el){
   return true;
 }
 function fcsEcoMontar(){
-  var tabs=fcTxtTabelas(),lista=[],i,j,id,el,lab,qual,smalls,sm,base;
+  var tabs=fcTxtTabelas(),lista=[],i,j,id,el,lab,qual,smalls,sm,base,eco;
   for(i=0;i<tabs.length;i++)for(j=0;j<tabs[i][1].length;j++){
     id=tabs[i][1][j][1];
     el=$(id);if(!el)continue;
@@ -4779,18 +4779,22 @@ function fcsEcoMontar(){
       qual=String(sm.textContent||'').replace(/^\s*\(/,'').replace(/\)\s*$/,'');
       sm.parentNode.removeChild(sm);
     }
+    /* 'base' e o que o rotulo JA diz, com o qualificador junto -- calculado ANTES de o eco
+       existir, senao ele se leria a si mesmo na volta seguinte. */
     base=fcsChave(String(lab.textContent||'')+' '+qual);
+    eco=document.createElement('small');
+    eco.className='fcs-eco';
     lab.appendChild(document.createTextNode(' '));
-    lista.push({el:el,lab:lab,qual:qual,base:base,eco:lab.appendChild(document.createElement('small')),ult:null});
-    lista[lista.length-1].eco.className='fcs-eco';
+    lab.appendChild(eco);
+    lista.push({el:el,lab:lab,qual:qual,base:base,eco:eco,ult:null});
   }
   return lista;
 }
 function fcsEcoUm(r){
   var v=String(r.el.value==null?'':r.el.value),txt=fcsEcoTexto(v),novo;
   /* rotulo que JA diz o texto inteiro nao o repete: um "Cupom invalido" seguido do mesmo
-     "Cupom invalido." entre aspas seria ruido. A comparacao e por palavra inteira, senao o "d" do sufixo dos dias seria dado
-     como ja presente por causa de "dias". */
+     "Cupom invalido." entre aspas seria ruido. A comparacao e por PALAVRA INTEIRA -- por
+     substring, o "d" do sufixo dos dias seria dado como ja presente por causa de "dias". */
   if(txt&&fcsContem(r.base,fcsChave(v)))txt='';
   if(txt)novo='\u2014 \u201c'+txt+'\u201d'+(r.qual?' \u00b7 '+r.qual:'');
   else novo=r.qual?'('+r.qual+')':'';
