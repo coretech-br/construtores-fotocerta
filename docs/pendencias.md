@@ -494,3 +494,38 @@ Junto saiu `soltarBiblioteca`, que nunca era chamada e chamava `iFrameResizer.cl
 **O que isso reabre, e e decisao do dono:** o campo `t-medir`/`a-medir` nasce desligado desde
 03/09, e o unico motivo era a instabilidade que acabou de ser consertada. Com 6 de 6, o padrao
 merece ser reconsiderado — agora com numero, e nao com impressao.
+
+---
+
+## Divida aberta em 11/09/2026 — dois identificadores com ORCAMENTO composto, sem recusa
+
+Achados pela varredura dos limites e **nao consertados de proposito**: os dois sao territorio
+de **conciliacao**, e o conserto de verdade e uma **recusa no gerador**, que a regra do projeto
+manda avisar ao dono antes.
+
+### 1. Mini loja — `m-cod` tem teto efetivo de **17**, e nada o diz
+
+`novoPedido()` monta `CODIGO_LOJA + '-' + Date.now().toString(36)`. Medido: o base36 tem **8
+caracteres** hoje (e continua com 8 ate 2059). O hifen some na limpeza do txid. Entao o teto
+real de `m-cod` e **25 - 8 = 17**.
+
+**O que acontece acima de 17:** o identificador do pedido que o cliente ve na tela **difere**
+do txid que chega ao extrato do dono — truncado em silencio. Conciliacao quebrada, sem erro.
+
+### 2. Agendamento por pacote — `a-prefixo` + `a-pcod` tem de caber em **13**
+
+`limpaId(PREFIXO + pac.cod + diaHora)`, com `diaHora` de ate **12** digitos (8 da data + 4 da
+hora). Sobram 13 para prefixo mais codigo do pacote, somados.
+
+**O que acontece acima de 13:** dois pacotes diferentes podem produzir **o mesmo txid** — nao
+e truncagem, e **colisao**. Dois pagamentos indistinguiveis no extrato.
+
+### Por que nao viraram contador nesta rodada
+
+Um contador ali teria de **rederivar a forma do identificador** que o gerador monta — a segunda
+implementacao que o projeto proibe, e que divergiria na primeira vez que a montagem mudasse. O
+conserto certo e a **recusa no proprio gerador**, onde a forma ja e conhecida: ele sabe o
+tamanho do `diaHora` e do base36 porque e ele quem os escreve.
+
+**Precisa da palavra do dono** porque toca payload e conciliacao — a classe que a regra de
+03/09/2026 manda avisar antes, com a medicao do alcance, em vez de aparecer pronta.
