@@ -4499,7 +4499,14 @@ function fcsRotuloDe(el){
    rotulo proprio -- campo criado em tempo de execucao, como o nome de um produto --, vale o
    placeholder e depois a legenda do fieldset, nesta ordem. */
 function fcsRotuloTexto(el){
-  var lab=fcsRotuloDe(el),t='',no,i,fs,leg;
+  var lab,t='',no,i,fs,leg;
+  /* GUARDADO NO PROPRIO CAMPO. Medido em 11/09/2026: sem isto, uma tecla na busca custava
+     31 ms (contra 2,5 ms numa tecla de campo comum), e quase tudo era esta funcao rodando
+     437 vezes -- achar o <label>, somar os nos de texto e, quando nao ha rotulo, subir ate o
+     <fieldset>. O rotulo de um campo nao muda: o eco (fcs-eco) e pulado aqui de proposito, e
+     linha de lista redesenhada traz elemento NOVO, sem a marca. */
+  if(el.fcsRot!=null)return el.fcsRot;
+  lab=fcsRotuloDe(el);
   if(lab){
     for(i=0;i<lab.childNodes.length;i++){
       no=lab.childNodes[i];
@@ -4508,11 +4515,14 @@ function fcsRotuloTexto(el){
     }
   }
   t=t.replace(/\s+/g,' ').replace(/^ +| +$/g,'');
-  if(t)return t;
-  if(el.placeholder)return String(el.placeholder);
-  fs=el.closest?el.closest('fieldset'):null;
-  leg=fs?fs.getElementsByTagName('legend')[0]:null;
-  return leg?String(leg.textContent||'').replace(/\s+/g,' '):'';
+  if(!t&&el.placeholder)t=String(el.placeholder);
+  if(!t){
+    fs=el.closest?el.closest('fieldset'):null;
+    leg=fs?fs.getElementsByTagName('legend')[0]:null;
+    t=leg?String(leg.textContent||'').replace(/\s+/g,' ').replace(/^ +| +$/g,''):'';
+  }
+  el.fcsRot=t;
+  return t;
 }
 /* Em que SECAO da aba o campo esta. O caminho e o mesmo que o olho faz: sobe ate o filho
    direto do painel e volta pelos irmaos anteriores ate achar um cabecalho .secao. */

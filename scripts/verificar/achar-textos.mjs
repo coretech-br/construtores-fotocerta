@@ -288,6 +288,25 @@ try{
   chk('Escape fecha a lista sem sair do lugar',
     await pg.evaluate(() => document.getElementById('fcs-res').className.indexOf('aberta') < 0), 'a lista continuou aberta');
 
+  /* Campo que NASCE EM TEMPO DE EXECUCAO: nenhuma tabela o teria, e a busca
+     (que varre o DOM) o alcanca. Serve tambem de rede contra o cache de rotulo
+     guardado em el.fcsRot: linha nova traz elemento novo, sem a marca. */
+  console.log('\n[2b] campo que nasce em tempo de execucao');
+  await clicar(pg, 'aba-uni');
+  await set(pg, 'u-cp-cod', 'GESTANTETEMATICO');
+  await set(pg, 'u-cp-valor', '15');
+  await clicar(pg, 'u-cp-add');
+  await pg.waitForTimeout(200);
+  await clicar(pg, 'aba-slide');
+  const rDin = await procurar(pg, 'GESTANTETEMATICO');
+  chk('a busca acha o codigo de um cupom cadastrado agora (campo criado pelo editor em linha)',
+    rDin.itens.length > 0, 'achou: ' + ids(rDin).join(', ') + ' | conta: ' + rDin.conta);
+  if(rDin.itens.length){
+    chk('  ... e diz que ele esta no Checkout', rDin.itens[0].onde.indexOf('Checkout') === 0, 'onde: ' + rDin.itens[0].onde);
+    chk('  ... e o resultado tem um rotulo, mesmo sem <label for> proprio',
+      !!rDin.itens[0].rot, 'rotulo: ' + JSON.stringify(rDin.itens[0].rot));
+  }
+
   /* =======================================================================
      PROVA 3c -- o campo que outra OPCAO da aba esconde
      -----------------------------------------------------------------------
