@@ -625,3 +625,73 @@ marcador não aparece.
 - **Os nove textos reserva dos marcadores.** Trazê-los para a tabela muda o formato do que fica
   gravado. A conversão automática faria backup antigo continuar abrindo; o risco é o inverso e é
   pequeno — backup feito **depois**, aberto numa versão **antiga** da ferramenta, perderia os nove.
+
+## Entregue em 11/09/2026 — os nove textos reserva, e a migração que os deixou entrar
+
+Fecha a pergunta que ficou aberta na rodada anterior. Os nove textos reserva dos marcadores
+(`t-ob-fb-*`, 5, e `a-ob-fb-*`, 4 — o que a página de obrigado escreve quando o TidyCal **não**
+manda o dado) eram os únicos campos de texto do cliente ainda fora das tabelas. Estavam fora por
+um motivo só: os nove dividiam **uma** chave de estado (`obfb`), com os valores juntados por
+caractere de controle. Trazê-los muda o formato do que fica gravado — classe que exige a palavra
+do dono, dada em 11/09/2026 depois da medição do alcance.
+
+### A migração, e por que ela cobre mais do que o backup
+
+Quatro funções curtas ao lado de `fcTxtLer`/`fcTxtRestaura`: `fcObFbChave`, `fcObFbDefs` (monta as
+linhas da tabela a partir de `T_OB_VARS`/`A_OB_VARS` — nada digitado duas vezes), `fcObFbJuntar`
+(a chave antiga, **projetada** das novas) e `fcObFbMigrar` (reparte `obfb` na ordem do array,
+nunca em ordem de objeto; chave nova vence; devolve **cópia**, porque o fragmento pode ser o de um
+preset em memória).
+
+**Presets entram pelo mesmo caminho, e isso foi medido, não suposto:** `fcPresetAplicar` e
+`fcgAplicarAba` chamam ambos o `a.restaura(frag)` da aba. Um ponto de migração cobre estado,
+preset de aba, preset geral e backup importado. Cuidar só do "Exportar tudo" teria deixado preset
+antigo voltar com os nove vazios.
+
+**`obfb` continua sendo gravado, e o motivo é medido:** o molde da importação é o que o `coleta()`
+devolve *agora*, e `fcxConformar` **descarta** chave fora do molde. Tirar `obfb` do `coleta()`
+faria o backup chegar a `tRestaura`/`aRestaura` já sem os nove textos — a migração rodaria com
+nada na mão. É o defeito que `'link'` custou em 03/09/2026. O custo de manter foi eliminado:
+`obfb` é **projeção** das chaves novas, calculada depois do `fcTxtLer`, não uma segunda leitura do
+DOM — não tem como divergir.
+
+**`vazioVale`:** as duas abas tratavam texto vazio de forma diferente (a TidyCal testava
+`!==undefined`, a de pacote `!=null && !==''`). Uniformizar mudaria em silêncio o bloco que um
+estado já gravado produz. As duas foram preservadas e provadas.
+
+### Achado pelo caminho, resolvido
+
+`aBlocoObrigado` (~18311) escapava o texto reserva com **`escJs` dentro de um literal de aspas
+DUPLAS** — o único assim na ferramenta, entre os ~150 `escJs` do arquivo. Aspa dupla no texto
+fechava o literal e a **página de obrigado inteira não carregava** (`Unexpected identifier 'b'`,
+medido com o bloco rodando). Defeito **anterior**, invisível porque esses quatro campos nunca
+tinham sido exercitados com texto hostil. Passou a `escJsD`. Com os padrões de fábrica a saída é
+byte a byte a mesma — a regressão prova.
+
+Junto: o `guarda:` da aba TidyCal não mencionava a seção 4, embora o preset carregue aqueles
+campos. `T_OB_VARS` ganhou `padrao:` (antes o padrão morava **só** no `value=`, porque `tRestaura`
+nunca repunha texto reserva nenhum), copiado letra por letra do atributo — sem segunda fábrica.
+
+### As provas (`scripts/verificar/textos-reserva.mjs`, 83 verificações)
+
+O estado antigo **não é escrito à mão** — é colhido da própria `main`, servida em porta separada,
+em quatro cenários: valores distintos, todos vazios, hostil, e **com o caractere de controle
+dentro**. Mais: preset antigo salvo pela `main` e aplicado aqui **depois de sujar os nove** (sem
+sujar, "o preset trouxe" seria indistinguível de "nunca mudou"); ida e volta no formato novo; a
+**ordem do endereço** provada com os cinco marcadores ligados ao contrário, endereço idêntico ao
+de `main` caractere por caractere; eco no rótulo e fábrica divergente plantada nos nove; e o texto
+hostil **executando** em `t-out5` e `a-out3`, numa página sem parâmetros — a única circunstância
+em que o texto reserva aparece.
+
+**O caractere de controle: medido, não suposto.** Ele chega ao campo intacto pelos quatro caminhos,
+inclusive colagem de verdade — logo o formato antigo **é** ambíguo. O teste cobra que a árvore se
+comporte, diante de um estado antigo assim, **exatamente como a `main`**: a ambiguidade é herdada
+do formato antigo, não criada aqui. O formato novo acaba com ela.
+
+### Dívida registrada, pequena
+
+**Preset geral salvo antes desta rodada mostra "alterado"** até ser salvo de novo. Medido:
+`fcgCamposDiferentes` usa `fcCanon`, e `fcCanon(undefined)` ≠ `fcCanon('tudo certo')`, então as
+nove chaves novas aparecem como diferentes. Nada na tela mudou; só a forma guardada. Um "Salvar"
+resolve para sempre. Migrar o fragmento na entrada do preset geral seriam dois caminhos novos de
+escrita, cada um com prova própria, fora do núcleo autorizado desta rodada.
