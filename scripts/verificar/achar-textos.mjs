@@ -19,11 +19,16 @@
         visivel, destacado e FORA de baixo da barra grudada no topo. Sem esta
         prova a rodada nao entrega.
 
-     2. A NEGATIVA FALSA, PROVADA QUE NAO ACONTECE. 68 campos de texto que o
-        cliente le estao FORA das tabelas *_TXT_DEFS. Uma busca apoiada nas
+     2. A NEGATIVA FALSA, PROVADA QUE NAO ACONTECE. A busca NAO se apoia nas
+        tabelas *_TXT_DEFS: ela varre os campos da tela. Uma busca apoiada nas
         tabelas diria "nao encontrado" sobre coisa que existe -- e negativa
-        falsa e pior que nao ter busca, porque o operador acredita nela. Esta
-        prova procura texto de varios desses campos.
+        falsa e pior que nao ter busca, porque o operador acredita nela.
+        Quando esta prova nasceu, 68 campos de texto que o cliente le viviam
+        fora das tabelas; a leva 2 (11/09/2026) levou 58 deles para dentro, e
+        os nove textos reserva dos marcadores mais o 'm-cod' continuam fora --
+        de proposito, ver scripts/verificar/textos-migrados.mjs. A lista abaixo
+        guarda os dois casos: campos que HOJE estao na tabela e campos que
+        nunca estiveram. Os dois tem de ser achados do mesmo jeito.
 
      3. ACENTO E CAIXA. "sem opcional", "SEM OPCIONAL" e "Sem Opcional" acham o
         mesmo campo; e texto COM acento no valor e achado por busca SEM acento.
@@ -196,9 +201,12 @@ try{
     'campo: ' + (await ler(pg, 'u-txt-semopcional')));
 
   /* =======================================================================
-     PROVA 2 -- os 68 campos FORA das tabelas
+     PROVA 2 -- a busca nao depende das tabelas
      ======================================================================= */
-  console.log('\n[2] os campos fora das tabelas *_TXT_DEFS (a negativa falsa)');
+  console.log('\n[2] a busca nao depende das tabelas *_TXT_DEFS (a negativa falsa)');
+  /* Os dois ultimos da lista sao os que continuam FORA de toda tabela; os seis primeiros
+     entraram nelas na leva 2 e continuam sendo achados exatamente do mesmo jeito -- o que
+     prova que a busca nunca dependeu da tabela. */
   const fora = [
     ['Restante na entrega', 'u-t9',       'Checkout'],
     ['MAIS ESCOLHIDO',      'b-selo-txt', 'Bordas com efeito'],
@@ -213,7 +221,7 @@ try{
     const r = await procurar(pg, texto);
     const ok = ids(r).includes(id);
     const it = r.itens.find(i => i.id === id);
-    chk('"' + texto + '" acha ' + id + ' (fora das tabelas)', ok, 'achou: ' + ids(r).join(', ') || 'nada');
+    chk('"' + texto + '" acha ' + id, ok, 'achou: ' + ids(r).join(', ') || 'nada');
     if(ok) chk('  ... e diz que ele esta na aba certa', it.onde.indexOf(aba) === 0, 'onde: ' + it.onde);
   }
   /* E o pior caso dos que nao tinham rotulo proprio: agora e achavel pelos dois lados. */
