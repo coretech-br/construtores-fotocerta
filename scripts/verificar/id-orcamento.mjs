@@ -33,7 +33,18 @@
    checkout. Sem o lado "antes", este arquivo provaria que a recusa existe --
    nunca que ela conserta alguma coisa.
 
-   Roda com:  node scripts/verificar/id-orcamento.mjs [ref]      (ref: main)
+   A REFERENCIA NAO E 'main', E NAO PODE SER. Este arquivo nasceu em 11/09/2026
+   comparando a arvore de trabalho com main, porque a recusa ainda nao estava
+   la. No instante em que ela foi mesclada, main passou a ter o conserto -- e o
+   lado "antes" passou a medir a si mesmo: as quatro afirmacoes "o defeito
+   existe" falharam, e a quinta caiu num timeout, porque o bloco da referencia
+   nem chega a ser gerado quando a recusa o barra. Medido em 11/09/2026, ao
+   rodar este arquivo depois da rodada seguinte. Por isso a referencia e o
+   COMMIT ANTERIOR AO CONSERTO, escrito aqui: o "antes" e um estado historico,
+   nao "o que estiver em main hoje".
+
+   Roda com:  node scripts/verificar/id-orcamento.mjs [ref]
+              (sem argumento: o commit anterior ao conserto)
    ============================================================================ */
 import fs from 'node:fs';
 import os from 'node:os';
@@ -44,7 +55,11 @@ import { comBlocoNaPagina, gerarNaFerramenta, chk, resumo } from './pagina.mjs';
 import { set, radio, clicar, ler, zerarAlertas } from './lib.mjs';
 
 const RAIZ = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
-const REF = process.argv[2] || 'main';
+/* 94042b6 -- o ultimo commit ANTES de 8da1696 ("Recusa o identificador de
+   conciliacao que estoura o txid"), que e onde a colisao e a truncagem ainda
+   acontecem. Ver o cabecalho: usar 'main' aqui faria o lado "antes" medir a si
+   mesmo assim que o conserto fosse mesclado -- e foi o que aconteceu. */
+const REF = process.argv[2] || '94042b6';
 
 /* ===================== O LEITOR PROPRIO DO PAYLOAD =====================
    Escrito aqui, e nao importado do projeto, de proposito: o que esta sob teste e

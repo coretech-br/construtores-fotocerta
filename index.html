@@ -455,6 +455,45 @@
   .fcg-selo.salvo{color:#294B24;background:#EAF3E9;border-color:#7FA97A}
   .fcg-selo.alterado{color:#6B5210;background:#FFF6DF;border-color:#E3B23C}
   .fcg-cresce{flex:1 1 20px;min-width:0}
+
+  /* ===== ACHAR UM TEXTO (11/09/2026) =====
+     SEGUNDA LINHA DA MESMA BARRA GRUDADA NO TOPO, e um campo sempre a vista -- nao um botao
+     que abre um painel. O defeito que ela conserta e de DESCOBERTA: o dono procurou
+     "Sem opcional" na ferramenta, nao achou, e pediu que o texto virasse configuravel --
+     sendo que ele ja era, e funcionava. Busca escondida atras de um botao repetiria o erro
+     que ela veio consertar. Fica na .fcg-fixa porque so ali ela e alcancavel de QUALQUER aba
+     sem rolar a pagina: os campos que ela acha estao, por definicao, em outra aba ou dentro
+     de uma secao recolhida -- as duas coisas que o Ctrl+F do navegador nao alcanca.
+     A lista de resultados e ABSOLUTA, pendurada no campo: se ela empurrasse a pagina, a
+     posicao do que o operador esta lendo mudaria a cada tecla digitada. */
+  .fcs-linha{max-width:var(--larg);margin:0 auto;padding:0 20px 10px;display:flex;
+    align-items:center;gap:10px;flex-wrap:wrap}
+  .fcs-linha label{margin:0;font-size:13px;white-space:nowrap}
+  .fcs-caixa{position:relative;flex:1 1 260px;min-width:0;display:flex;align-items:center;gap:8px}
+  .fcs-caixa input{flex:1 1 auto;min-width:0;padding:7px 10px;font-size:13px}
+  .fcs-conta{font-size:12px;color:var(--tinta-suave);white-space:nowrap}
+  /* Quando o campo existe mas outra opcao da aba o desliga, a contagem da lugar ao recado --
+     e ele PRECISA quebrar linha, senao a frase sai da tela em janela estreita. */
+  .fcs-conta.alerta{color:#6B5210;background:#FFF6DF;border:1px solid #E3B23C;border-radius:8px;
+    padding:5px 9px;white-space:normal;font-weight:700;flex:1 1 240px;min-width:0}
+  .fcs-res{position:absolute;left:0;right:0;top:100%;margin-top:6px;background:#fff;
+    border:1px solid var(--linha);border-radius:10px;box-shadow:0 8px 22px rgba(0,0,0,.16);
+    max-height:60vh;overflow-y:auto;display:none;z-index:60}
+  .fcs-res.aberta{display:block}
+  .fcs-item{display:block;width:100%;text-align:left;background:none;border:none;
+    border-bottom:1px solid var(--linha);padding:9px 12px;cursor:pointer;font:inherit;
+    color:var(--tinta);line-height:1.45}
+  .fcs-item:last-child{border-bottom:none}
+  .fcs-item:hover,.fcs-item.sel{background:#F5F1E6}
+  .fcs-rot{display:block;font-size:13px;font-weight:700;color:var(--verde)}
+  .fcs-val{display:block;font-size:12.5px;margin-top:2px}
+  .fcs-onde{display:block;font-size:11.5px;color:var(--tinta-suave);margin-top:2px}
+  .fcs-vazio{padding:11px 12px;font-size:12.5px;color:var(--tinta-suave);line-height:1.55}
+  /* O destaque de quem chegou. A at-rule fica no <style> do head, como manda a casa -- e
+     nao no CSS Customizado de componente nenhum, que so aceita propriedade solta. */
+  @keyframes fcs-pisca{0%,100%{box-shadow:0 0 0 6px rgba(31,92,77,.30)}
+    50%{box-shadow:0 0 0 2px rgba(31,92,77,.08)}}
+  .fcs-alvo{outline:2px solid var(--verde);outline-offset:2px;animation:fcs-pisca 1.1s ease-in-out 3}
   /* .fcg-painel e a PELE do painel recolhivel da barra do topo, e nao a marca de dono de uma
      fase: ela veste tanto #fcg-painel ("Detalhes", da campanha) quanto #fci-painel
      ("Identidade", da ferramenta). Os dois sao painel recolhivel da mesma barra, com a mesma
@@ -613,6 +652,18 @@
     <button class="botao mini claro" type="button" id="fcg-descartar" title="Descartar as alterações e voltar ao que está guardado neste preset geral">Descartar</button>
     <button class="botao mini claro" type="button" id="fcg-detalhes">Detalhes</button>
     <button class="botao mini claro" type="button" id="fci-botao" title="Chave Pix, recebedor, Client ID, WhatsApp e a paleta — configuração da ferramenta, não da campanha">Identidade</button>
+  </div>
+  <!-- ==================== ACHAR UM TEXTO (11/09/2026) ====================
+       Segunda linha da barra grudada no topo. Procura no DOM de TODAS as abas, abertas ou
+       não, recolhidas ou não — e leva até o campo. -->
+  <div class="fcs-linha">
+    <label for="fcs-q">Achar um texto</label>
+    <div class="fcs-caixa">
+      <input type="text" id="fcs-q" autocomplete="off" spellcheck="false" placeholder="ex.: Sem opcional — procura em todas as abas, inclusive nas seções recolhidas">
+      <button class="botao mini claro" type="button" id="fcs-limpar">Limpar</button>
+      <div class="fcs-res" id="fcs-res" role="listbox" aria-label="Resultados da busca"></div>
+    </div>
+    <span class="fcs-conta" id="fcs-conta"></span>
   </div>
 </div>
 
@@ -787,7 +838,7 @@
       <label for="s-imp-link">Link da galeria ou da página <small>(o endereço da barra do navegador)</small></label>
       <input type="text" id="s-imp-link" placeholder="https://www.fotocerta.com.br/gallery/121894-estudio-tematico">
       <label for="s-imp-fonte">Código-fonte da página <small>(Cmd ⌥ U, Cmd A, Cmd C — cole aqui)</small></label>
-      <textarea id="s-imp-fonte" spellcheck="false" placeholder="Cole aqui o código-fonte inteiro da página."></textarea>
+      <textarea id="s-imp-fonte" data-fcs="nao" spellcheck="false" placeholder="Cole aqui o código-fonte inteiro da página."></textarea>
       <div class="acoes"><button class="botao claro" id="s-imp-conferir">Conferir a página</button></div>
       <p class="ajuda">O código-fonte traz <b>mais fotos que a tela</b>: na galeria de exemplo, o navegador tinha 10 fotos carregadas e o código-fonte trazia 46. As fotos entram <b>na mesma ordem em que aparecem na página</b>, inclusive a de capa, que na página não é a primeira. Só entram endereços dos servidores da Alboom: qualquer outro é descartado com a contagem à vista. <b>Numa página comum</b> a mesma foto aparece em vários tamanhos (medido: 51 endereços para 10 fotos em <i>/albuns</i>) — cada foto entra <b>uma vez só, no maior tamanho que a página trouxe</b>, e só as da conta que aparece em mais fotos, que a conferência mostra. Nada do que você cola aqui é salvo — a ferramenta só lê os endereços das fotos e esquece o resto.</p>
       <p class="ajuda"><b>Depois de conferir</b>, escolha como as fotos entram na lista. O botão <b>Adicionar à lista</b>, no fim desta caixa, só liga depois da conferência.</p>
@@ -2352,16 +2403,26 @@
       <label><input type="radio" name="c-formato" value="compacto" checked><span>Compacto <small>(02d 14h 33m 12s)</small></span></label>
       <label><input type="radio" name="c-formato" value="blocos"><span>Blocos com rótulo</span></label>
       </div>
-      <label for="c-txt-suf-d">Sufixos do formato <b>compacto</b> <small>(colados no número)</small></label>
+      <!-- Um rótulo POR CAMPO. Antes, os quatro sufixos dividiam um <label for="c-txt-suf-d">
+           e três <input> soltos: os três de baixo não tinham rótulo nenhum — nem para o leitor
+           de tela, nem para a busca, nem para o eco do texto atual. -->
+      <label for="c-txt-suf-d">Sufixo dos <b>dias</b>, formato compacto <small>(colado no número)</small></label>
       <input type="text" id="c-txt-suf-d" value="d">
+      <label for="c-txt-suf-h">Sufixo das <b>horas</b>, formato compacto</label>
       <input type="text" id="c-txt-suf-h" value="h">
+      <label for="c-txt-suf-m">Sufixo dos <b>minutos</b>, formato compacto</label>
       <input type="text" id="c-txt-suf-m" value="m">
+      <label for="c-txt-suf-s">Sufixo dos <b>segundos</b>, formato compacto</label>
       <input type="text" id="c-txt-suf-s" value="s">
       <p class="ajuda">Estes quatro valem <b>só no formato Compacto</b> — que é o escolhido aqui em cima por padrão. São as letrinhas coladas em cada número: <code>02d:14h:33m:12s</code>. Por serem coladas, quase sempre uma letra só.</p>
-      <label for="c-rd">Rótulos das unidades, no formato <b>blocos</b> <small>(embaixo do número)</small></label>
+      <!-- Mesmo conserto dos sufixos acima: c-rh, c-rm e c-rs não tinham rótulo próprio. -->
+      <label for="c-rd">Rótulo dos <b>dias</b>, formato blocos <small>(embaixo do número)</small></label>
       <input type="text" id="c-rd" value="dias">
+      <label for="c-rh">Rótulo das <b>horas</b>, formato blocos</label>
       <input type="text" id="c-rh" value="horas">
+      <label for="c-rm">Rótulo dos <b>minutos</b>, formato blocos</label>
       <input type="text" id="c-rm" value="min">
+      <label for="c-rs">Rótulo dos <b>segundos</b>, formato blocos</label>
       <input type="text" id="c-rs" value="seg">
       <p class="ajuda">Estes quatro valem <b>só no formato Blocos com rótulo</b>. São as palavras escritas embaixo de cada número, e por isso vêm por extenso. Mexer aqui <b>não muda</b> o relógio compacto — quem manda nele são os quatro campos acima.</p>
       <label for="c-pad">Espaçamento interno vertical <small>(px)</small></label>
@@ -2941,7 +3002,7 @@
         <label for="m-imp-link">Link da galeria ou da página <small>(o endereço da barra do navegador)</small></label>
         <input type="text" id="m-imp-link" placeholder="https://www.fotocerta.com.br/gallery/121894-estudio-tematico">
         <label for="m-imp-fonte">Código-fonte da página <small>(Cmd ⌥ U, Cmd A, Cmd C — cole aqui)</small></label>
-        <textarea id="m-imp-fonte" spellcheck="false" placeholder="Cole aqui o código-fonte inteiro da página."></textarea>
+        <textarea id="m-imp-fonte" data-fcs="nao" spellcheck="false" placeholder="Cole aqui o código-fonte inteiro da página."></textarea>
         <div class="acoes"><button class="botao claro" id="m-imp-conferir">Conferir a página</button></div>
         <p class="ajuda s-alerta" id="m-imp-resultado" style="display:none"></p>
         <p class="lista-conta" id="m-imp-conta" style="display:none"></p>
@@ -4285,6 +4346,22 @@ function fcTxtRestaura(defs,st){
   var i,el;
   for(i=0;i<defs.length;i++){el=$(defs[i][1]);if(el)el.value=(st[defs[i][0]]!=null)?st[defs[i][0]]:defs[i][2];}
 }
+/* "RESTAURAR PADROES" e "LIMPAR TUDO" chamam esta funcao com {} -- nenhuma chave presente,
+   entao cada campo cai no terceiro item da tabela, que e a fabrica. Ate 11/09/2026 os quatro
+   botoes de reposicao da ferramenta (sLimpar, lPadroes, cLimpar, pLimpar) repunham campo a
+   campo, a mao, e nao alcancavam os campos das tabelas: o dono confirmava "devolve a aba
+   inteira aos padroes de fabrica" e a aba voltava pela metade, sem uma palavra. Com a tabela
+   nao ha mais o que esquecer -- campo novo entra na reposicao no mesmo ato em que entra na
+   tabela. */
+/* O PADRAO DE UM CAMPO, achado pela chave. So bCfgPreset precisa dele: ela monta a
+   configuracao a partir do objeto de um preset, SEM passar pelo DOM, e por isso nao pode usar
+   fcTxtLer. Sem ele, o texto de fabrica do selo continuaria escrito ali a mao -- uma copia a
+   mais, fora do alcance de fcTxtFabricaDiverge. */
+function fcTxtPadrao(defs,chave){
+  var i;
+  for(i=0;i<defs.length;i++)if(defs[i][0]===chave)return defs[i][2];
+  return '';
+}
 /* ===== A REDE CONTRA A FABRICA QUE DIVERGE =====
    O padrao de cada campo de texto esta escrito em DOIS lugares: no atributo value= do <input>
    (o que um navegador sem estado guardado mostra) e na terceira coluna da tabela da aba (o que
@@ -4294,17 +4371,29 @@ function fcTxtRestaura(defs,st){
    Ela nao conserta; ela faz o buraco APARECER (a partida mostra a barra vermelha). Le o
    ATRIBUTO, e nao a propriedade: a propriedade ja foi sobrescrita pela restauracao. */
 function fcTxtFabricaDiverge(){
-  var tabelas=[['Checkout',U_TXT_DEFS],['Mini loja',M_TXT_DEFS],
-               ['Agendamento por pacote',A_TXT_DEFS],['Link de cobrança',P_TXT_DEFS],
-               ['Slideshow',S_TXT_DEFS],['Capta\u00e7\u00e3o de leads',L_TXT_DEFS],
-               ['Agendamento TidyCal',T_TXT_DEFS],['Contagem regressiva',C_TXT_DEFS]],r=[],i,j,el,attr;
+  var tabelas=fcTxtTabelas(),r=[],i,j,el,attr;
   for(i=0;i<tabelas.length;i++)for(j=0;j<tabelas[i][1].length;j++){
     el=$(tabelas[i][1][j][1]);
     if(!el)continue;
     attr=el.getAttribute('value');
-    if(attr!==tabelas[i][1][j][2])r.push(tabelas[i][0]+'/'+tabelas[i][1][j][1]);
+    if(attr!==tabelas[i][1][j][2])r.push(fcAbaNome(tabelas[i][0])+'/'+tabelas[i][1][j][1]);
   }
   return r;
+}
+/* QUAIS SAO AS TABELAS DE TEXTO, escrito UMA vez. Ate 11/09/2026 esta lista existia so dentro
+   de fcTxtFabricaDiverge, com o nome de cada aba digitado ali -- e o eco do texto no rotulo
+   (fcsEcoMontar) precisaria da mesma lista. Duas copias desta lista sao a forma exata do
+   defeito que este projeto ja pagou para aprender: a tabela seguinte entraria numa e nao na
+   outra, sem erro nenhum. Foi o que aconteceu na hora certa: a das Bordas nasceu depois, e
+   entrou aqui sozinha. O nome da aba tambem nao se digita mais aqui: ele sai de ABAS, que e
+   onde ele mora.
+   QUANTOS CAMPOS CADA TABELA TEM nao se escreve em frase nenhuma -- e o .length dela. Os
+   comentarios que traziam o numero a mao mentiam em dezesseis lugares em 11/09/2026 (U dizia
+   33 e tinha 36; A dizia 31 e tinha 40; P dizia 11 e tinha 12; M dizia 55 e tinha 58). */
+function fcTxtTabelas(){
+  return [['slide',S_TXT_DEFS],['leads',L_TXT_DEFS],['tidy',T_TXT_DEFS],['uni',U_TXT_DEFS],
+          ['bor',B_TXT_DEFS],['cnt',C_TXT_DEFS],['cob',P_TXT_DEFS],['loja',M_TXT_DEFS],
+          ['pac',A_TXT_DEFS]];
 }
 /* ===== SECAO QUE NASCE RECOLHIDA =====
    Uma mecanica so para todas as secoes marcadas com class="secao dobra": o cabecalho aponta,
@@ -4314,20 +4403,463 @@ function fcTxtFabricaDiverge(){
 function fcdLigar(){
   var cabs=document.querySelectorAll('.secao.dobra'),i;
   for(i=0;i<cabs.length;i++)(function(cab){
-    var corpo=$(cab.getAttribute('aria-controls')),seta=cab.querySelector('.secao-dobra-seta');
+    var corpo=$(cab.getAttribute('aria-controls'));
     if(!corpo)return;
-    function alterna(){
-      var aberto=corpo.className.indexOf('fcd-oculto')<0;
-      corpo.className=aberto?(corpo.className+' fcd-oculto'):corpo.className.replace(/\s*fcd-oculto/g,'');
-      cab.setAttribute('aria-expanded',aberto?'false':'true');
-      if(seta)seta.textContent=aberto?'mostrar':'esconder';
-    }
+    function alterna(){fcdEstado(cab,corpo,corpo.className.indexOf('fcd-oculto')>=0);}
     cab.addEventListener('click',alterna);
     cab.addEventListener('keydown',function(e){
       if(e.key==='Enter'||e.key===' '||e.key==='Spacebar'){e.preventDefault();alterna();}
     });
   })(cabs[i]);
 }
+/* Os TRES sinais de "esta secao esta aberta" -- a classe do corpo, o aria-expanded do
+   cabecalho e a palavra da seta -- escritos num lugar so. A busca tambem precisa ABRIR uma
+   secao (levar ate um campo e deixa-lo escondido nao resolve nada), e se ela mexesse so na
+   classe, o cabecalho continuaria dizendo "mostrar" sobre uma secao aberta e o leitor de tela
+   continuaria anunciando aria-expanded="false". */
+function fcdEstado(cab,corpo,abrir){
+  var seta=cab?cab.querySelector('.secao-dobra-seta'):null;
+  if(!corpo)return;
+  if(abrir)corpo.className=corpo.className.replace(/\s*fcd-oculto/g,'');
+  else if(corpo.className.indexOf('fcd-oculto')<0)corpo.className+=' fcd-oculto';
+  if(cab)cab.setAttribute('aria-expanded',abrir?'true':'false');
+  if(seta)seta.textContent=abrir?'esconder':'mostrar';
+}
+/* Abre o corpo de uma secao recolhida achando o cabecalho que o controla. O caminho e o
+   aria-controls, e nao um clique simulado no cabecalho: clique ALTERNA, e alternar uma secao
+   que ja estava aberta a fecharia -- escondendo justamente o campo aonde a busca acabou de
+   levar. */
+function fcdAbrir(corpo){
+  if(!corpo||!corpo.id)return;
+  fcdEstado(document.querySelector('.secao.dobra[aria-controls="'+corpo.id+'"]'),corpo,true);
+}
+/* ============================================================================
+   ACHAR UM TEXTO -- a busca da ferramenta, e o eco do texto atual em cada rotulo
+   ============================================================================
+   POR QUE ISTO EXISTE. Em 11/09/2026 o dono quis mudar o texto "Sem opcional" que o cliente
+   le. Procurou na ferramenta, nao achou, e pediu que o texto virasse configuravel -- sendo
+   que ele JA ERA (u-txt-semopcional, no Checkout) e funcionava. A varredura mediu por que ele
+   nao achou, e sao TRES barreiras, nenhuma resolvida por rotulo melhor:
+     1. o Ctrl+F do navegador NAO le o atributo value= de um <input>: a unica superficie
+        procuravel e o texto renderizado (<label>, <legend>, <p class="ajuda">);
+     2. aba fechada e display:none -- nada de outra aba e procuravel;
+     3. secao recolhida e display:none!important, e ela cobre a maior parte dos campos das
+        tabelas (116 dos 168 de entao; a leva 2 levou mais 58 para dentro delas).
+   display:none esconde do Ctrl+F, mas NAO do JavaScript: o DOM esta la e se le normalmente.
+   E dai que esta busca existe.
+
+   A BUSCA VARRE O DOM, E NAO AS TABELAS *_TXT_DEFS. Medido na mesma varredura: 68 campos de
+   texto que o cliente final le estavam FORA das tabelas (os grupos t1..t12 de cada aba, as
+   costuras da mensagem do WhatsApp l-m1..l-m4, os textos de reserva dos marcadores, os
+   rotulos das unidades da contagem, o selo das bordas e os recados de recusa da /pagar).
+   A leva 2, no mesmo dia, levou 58 deles para dentro -- e os outros dez continuam fora, de
+   proposito (os nove reserva gravam JUNTOS numa chave so, e o m-cod e identificador com regex
+   e teto, nao frase). O argumento nao envelhece com o numero: uma busca apoiada nas tabelas
+   ignoraria quem esta fora e diria "nao encontrado" sobre coisa que existe -- e
+   NEGATIVA FALSA E PIOR QUE NAO TER BUSCA, porque o operador acredita nela e
+   conclui que a funcionalidade nao existe. Foi exatamente o que aconteceu com o dono, e esta
+   busca nao pode repetir o erro que veio consertar. Varrendo o DOM ela tambem alcanca o que
+   nasce em tempo de execucao -- nome de produto, codigo de cupom, legenda de foto --, que
+   tabela nenhuma teria.
+
+   ELA NAO ALTERA VALOR NENHUM. E navegacao: abre a aba, expande a secao, rola e destaca.
+   ============================================================================ */
+
+/* A normalizacao e a MESMA da casa: fcSemAcento (fonte unica de tirar acento) mais caixa
+   baixa e espacos colapsados. Quem procura "sem opcional" acha "Sem opcional"; quem procura
+   "SEM OPCIONAL" tambem. */
+function fcsNorm(s){
+  return fcSemAcento(String(s==null?'':s)).toLowerCase().replace(/\s+/g,' ').replace(/^ +| +$/g,'');
+}
+/* Chave de CONTENCAO por palavra inteira: alem de normalizar, derruba a pontuacao. Serve para
+   perguntar "este rotulo ja diz o texto todo?" sem que um ponto final no fim da frase
+   ("Cupom invalido.") faca a resposta ser nao. */
+function fcsChave(s){
+  return fcsNorm(s).replace(/[^a-z0-9]+/g,' ').replace(/^ +| +$/g,'');
+}
+function fcsContem(base,parte){
+  if(!parte)return false;
+  return (' '+base+' ').indexOf(' '+parte+' ')>=0;
+}
+
+/* ---------- quais campos a busca enxerga ---------- */
+/* Tipos de campo em que existe TEXTO para procurar. O <textarea> responde 'textarea' em .type,
+   e por isso aparece nesta tabela como qualquer outro. */
+var FCS_TIPOS={text:1,url:1,tel:1,email:1,search:1,number:1,date:1,time:1,textarea:1};
+/* So o que esta dentro de uma ABA (.painel). De fora ficam, de proposito:
+     - o painel Identidade e o de Detalhes, que guardam chave Pix, Client ID e WhatsApp --
+       dado operacional nao entra em lista de resultado, pela mesma regra que o mantem fora do
+       resumo de preset;
+     - todo campo readonly, que e SAIDA (o codigo gerado nas caixas .saida) e nao destino de
+       navegacao: procurar "Sem opcional" traria o bloco inteiro do Checkout junto;
+     - as duas superficies de COLAGEM do importador de galeria (data-fcs="nao"), que recebem
+       centenas de milhares de caracteres de codigo-fonte de outra pagina. */
+function fcsCampos(){
+  var out=[],pais=document.querySelectorAll('.painel'),i,j,els,el,aba,ord=0;
+  for(i=0;i<pais.length;i++){
+    aba=String(pais[i].id||'').replace(/^painel-/,'');
+    els=pais[i].querySelectorAll('input,textarea');
+    for(j=0;j<els.length;j++){
+      el=els[j];
+      if(!FCS_TIPOS[el.type])continue;
+      if(el.readOnly)continue;
+      if(el.getAttribute('data-fcs')==='nao')continue;
+      out.push({el:el,aba:aba,painel:pais[i],rot:fcsRotuloTexto(el),ord:ord++});
+    }
+  }
+  return out;
+}
+/* O <label> de um campo. el.labels resolve o caso normal; a varredura manual e a rede para
+   navegador que nao o implemente. */
+function fcsRotuloDe(el){
+  var i,labs;
+  try{if(el.labels&&el.labels.length)return el.labels[0];}catch(e){}
+  if(!el.id)return null;
+  labs=document.getElementsByTagName('label');
+  for(i=0;i<labs.length;i++)if(labs[i].htmlFor===el.id)return labs[i];
+  return null;
+}
+/* O texto do rotulo SEM o eco (o <small class="fcs-eco"> que mostra o valor atual): o valor
+   ja aparece na propria linha do resultado, e conta-lo aqui o mostraria duas vezes. Sem
+   rotulo proprio -- campo criado em tempo de execucao, como o nome de um produto --, vale o
+   placeholder e depois a legenda do fieldset, nesta ordem. */
+function fcsRotuloTexto(el){
+  var lab,t='',no,i,fs,leg;
+  /* GUARDADO NO PROPRIO CAMPO. Medido em 11/09/2026: sem isto, uma tecla na busca custava
+     31 ms (contra 2,5 ms numa tecla de campo comum), e quase tudo era esta funcao rodando
+     437 vezes -- achar o <label>, somar os nos de texto e, quando nao ha rotulo, subir ate o
+     <fieldset>. O rotulo de um campo nao muda: o eco (fcs-eco) e pulado aqui de proposito, e
+     linha de lista redesenhada traz elemento NOVO, sem a marca. */
+  if(el.fcsRot!=null)return el.fcsRot;
+  lab=fcsRotuloDe(el);
+  if(lab){
+    for(i=0;i<lab.childNodes.length;i++){
+      no=lab.childNodes[i];
+      if(no.nodeType===1&&no.className&&String(no.className).indexOf('fcs-eco')>=0)continue;
+      t+=(no.textContent!=null?no.textContent:(no.nodeValue||''));
+    }
+  }
+  t=t.replace(/\s+/g,' ').replace(/^ +| +$/g,'');
+  if(!t&&el.placeholder)t=String(el.placeholder);
+  if(!t){
+    fs=el.closest?el.closest('fieldset'):null;
+    leg=fs?fs.getElementsByTagName('legend')[0]:null;
+    t=leg?String(leg.textContent||'').replace(/\s+/g,' ').replace(/^ +| +$/g,''):'';
+  }
+  el.fcsRot=t;
+  return t;
+}
+/* Em que SECAO da aba o campo esta. O caminho e o mesmo que o olho faz: sobe ate o filho
+   direto do painel e volta pelos irmaos anteriores ate achar um cabecalho .secao. */
+function fcsSecaoDe(el,painel){
+  var no=el,p,c;
+  while(no&&no.parentNode&&no.parentNode!==painel)no=no.parentNode;
+  if(!no||no.parentNode!==painel)return '';
+  p=no.previousSibling;
+  while(p){
+    if(p.nodeType===1&&String(p.className||'').split(' ').indexOf('secao')>=0){
+      c=p.cloneNode(true);
+      fcsTira(c,'secao-n');fcsTira(c,'secao-dobra-seta');
+      return String(c.textContent||'').replace(/\s+/g,' ').replace(/^ +| +$/g,'');
+    }
+    p=p.previousSibling;
+  }
+  return '';
+}
+function fcsTira(raiz,classe){
+  var els=raiz.getElementsByClassName(classe);
+  while(els.length)els[0].parentNode.removeChild(els[0]);
+}
+
+/* ---------- a procura ---------- */
+/* Tres superficies, em ordem de peso: o VALOR do campo (o caso do dono), o rotulo e o id.
+   O id entra porque e como um campo e citado numa conversa sobre a ferramenta -- procurar
+   "u-txt-semopcional" tem de levar ao mesmo lugar que procurar "Sem opcional". */
+function fcsProcurar(q){
+  var campos=fcsCampos(),r=[],i,c,v,pv,pr,pi;
+  for(i=0;i<campos.length;i++){
+    c=campos[i];
+    v=String(c.el.value==null?'':c.el.value);
+    pv=fcsNorm(v).indexOf(q);
+    pr=fcsNorm(c.rot).indexOf(q);
+    pi=String(c.el.id||'').toLowerCase().indexOf(q);
+    if(pv<0&&pr<0&&pi<0)continue;
+    c.val=v;
+    c.peso=(pv>=0)?0:((pr>=0)?1:2);
+    c.pos=(pv>=0)?pv:0;
+    r.push(c);
+  }
+  r.sort(function(a,b){
+    if(a.peso!==b.peso)return a.peso-b.peso;
+    if(a.pos!==b.pos)return a.pos-b.pos;
+    return a.ord-b.ord;
+  });
+  return r;
+}
+/* Um pedaco do valor com o trecho procurado DENTRO dele. Frase longa cortada sempre no comeco
+   esconderia justamente a palavra do meio que o operador digitou. */
+function fcsTrecho(v,q){
+  var t=String(v==null?'':v).replace(/\s+/g,' ').replace(/^ +| +$/g,''),i,ini,fim;
+  if(t.length<=72)return t;
+  i=fcsNorm(t).indexOf(q);
+  if(i<0)return t.substring(0,69)+'\u2026';
+  ini=i-24;if(ini<0)ini=0;
+  fim=ini+72;
+  return (ini>0?'\u2026':'')+t.substring(ini,fim)+(fim<t.length?'\u2026':'');
+}
+
+/* ---------- a lista na tela ---------- */
+var FCS_LISTA=null,FCS_SEL=-1,FCS_TETO=40;
+function fcsFechar(){
+  var res=$('fcs-res');
+  if(res){res.className='fcs-res';res.innerHTML='';}
+  FCS_LISTA=null;FCS_SEL=-1;
+}
+function fcsBuscar(){
+  var campo=$('fcs-q'),res=$('fcs-res'),q,achados,h='',i,c,n;
+  if(!campo||!res)return;
+  q=fcsNorm(campo.value);
+  FCS_SEL=-1;
+  if(q.length<2){fcsFechar();fcsRecado('',false);return;}
+  achados=fcsProcurar(q);
+  FCS_LISTA=achados;
+  n=achados.length;
+  if(!n){
+    /* O numero de abas sai de ABAS.length (fcAbasTxt), nunca da digitacao: a frase que a
+       busca mostra quando nao acha nada e justamente a que precisa ser verdade. */
+    h='<div class="fcs-vazio"><b>Nada com esse texto.</b> A busca leu o <b>valor atual</b> e o '+
+      '<b>rótulo</b> de todos os campos de texto das '+fcAbasTxt()+' abas — abertas ou não, '+
+      'recolhidas ou não. Tente um pedaço menor, ou uma palavra do meio da frase.</div>';
+    fcsRecado('nenhum resultado',false);
+  }else{
+    for(i=0;i<n&&i<FCS_TETO;i++){
+      c=achados[i];
+      c.secao=fcsSecaoDe(c.el,c.painel);
+      /* data-id e para quem LE a lista de fora -- o arnes de verificacao e o console; o
+         clique usa o data-i, que aponta a posicao no resultado da busca. */
+      h+='<button class="fcs-item" type="button" data-i="'+i+'" data-id="'+escAttr(c.el.id||'')+'">'+
+         '<span class="fcs-rot">'+escHtml(c.rot||c.el.id)+'</span>'+
+         '<span class="fcs-val">'+(c.val?'\u201c'+escHtml(fcsTrecho(c.val,q))+'\u201d':'(vazio)')+'</span>'+
+         '<span class="fcs-onde">'+escHtml(fcAbaNome(c.aba)+(c.secao?' \u203a '+c.secao:''))+
+         ' \u00b7 '+escHtml(c.el.id||'')+'</span></button>';
+    }
+    fcsRecado((n>FCS_TETO)?('mostrando '+FCS_TETO+' de '+n):(n===1?'1 resultado':(n+' resultados')),false);
+  }
+  res.innerHTML=h;
+  res.className='fcs-res aberta';
+}
+function fcsMarcar(i){
+  var res=$('fcs-res'),its,k;
+  if(!res)return;
+  its=res.getElementsByClassName('fcs-item');
+  if(!its.length)return;
+  if(i<0)i=its.length-1;
+  if(i>=its.length)i=0;
+  for(k=0;k<its.length;k++)its[k].className='fcs-item'+(k===i?' sel':'');
+  FCS_SEL=i;
+  if(its[i].scrollIntoView)its[i].scrollIntoView({block:'nearest'});
+}
+function fcsTecla(e){
+  var res=$('fcs-res');
+  if(e.key==='Escape'){fcsFechar();return;}
+  if(!res||res.className.indexOf('aberta')<0)return;
+  if(e.key==='ArrowDown'){e.preventDefault();fcsMarcar(FCS_SEL+1);return;}
+  if(e.key==='ArrowUp'){e.preventDefault();fcsMarcar(FCS_SEL-1);return;}
+  if(e.key==='Enter'){
+    e.preventDefault();
+    if(FCS_LISTA&&FCS_LISTA.length)fcsIr(FCS_LISTA[FCS_SEL<0?0:FCS_SEL].el);
+  }
+}
+
+/* ---------- levar ate o campo ---------- */
+/* A troca de aba e o CLIQUE no botao da aba, e nao uma chamada direta a trocarAba: cada aba
+   tem o proprio passo depois da troca (remontar a previa com a largura real da coluna, abrir
+   a loja), e essa lista ja existe num lugar so, na partida. Chamar trocarAba aqui criaria uma
+   segunda lista, que divergiria na aba seguinte. */
+function fcsIr(el){
+  var aba=null,no=el,bt,alvo;
+  while(no&&no!==document.body){
+    if(no.className&&String(no.className).split(' ').indexOf('painel')>=0){aba=String(no.id||'').replace(/^painel-/,'');break;}
+    no=no.parentNode;
+  }
+  if(aba){bt=$('aba-'+aba);if(bt)bt.click();}
+  fcsAbrirSecoes(el);
+  fcsFechar();
+  /* AQUI A ABA JA ESTA ABERTA E A SECAO JA FOI EXPANDIDA. Se o campo AINDA nao aparece, quem o
+     esconde e outra opcao da propria aba (um style.display posto por um cToggles da vida:
+     "Texto do botao" so existe com o botao de acao ligado). Levar o operador ate um campo
+     invisivel e dizer que chegou seria a mesma mentira silenciosa que esta busca veio
+     consertar -- entao ela para no container visivel mais proximo, destaca ELE, e DIZ o que
+     esta acontecendo. So conferimos isto agora, e nao ao montar a lista: com a aba fechada
+     todo campo dela e invisivel, e a pergunta nao teria resposta. */
+  alvo=el;
+  if(el.offsetParent===null){
+    alvo=el.parentNode;
+    while(alvo&&alvo.nodeType===1&&alvo.offsetParent===null&&
+          String(alvo.className||'').split(' ').indexOf('painel')<0)alvo=alvo.parentNode;
+    if(!alvo||alvo.nodeType!==1)alvo=el;
+    fcsRecado('O campo existe, mas outra opção desta aba o está escondendo — ligue essa opção para vê-lo.',true);
+  }
+  /* preventScroll porque quem decide a posicao e fcsRolarAte, que desconta a barra grudada.
+     Campo escondido nao recebe foco: o navegador o recusaria em silencio. */
+  if(alvo===el){try{el.focus({preventScroll:true});}catch(e){try{el.focus();}catch(e2){}}}
+  fcsRolarAte(alvo);
+  fcsDestacar(alvo);
+}
+/* A mesma faixa ao lado do campo diz a contagem OU o recado -- nunca as duas coisas, porque
+   quando ha recado ele e o que importa. */
+function fcsRecado(txt,alerta){
+  var c=$('fcs-conta');
+  if(!c)return;
+  c.textContent=txt;
+  c.className='fcs-conta'+(alerta?' alerta':'');
+}
+function fcsAbrirSecoes(el){
+  var no=el;
+  while(no&&no.nodeType===1){
+    if(String(no.className||'').indexOf('fcd-oculto')>=0)fcdAbrir(no);
+    no=no.parentNode;
+  }
+}
+/* scrollIntoView sozinho poe o campo rente ao topo da janela -- que e exatamente onde esta a
+   barra grudada. O campo chegaria DEBAIXO dela, e a busca teria levado a lugar nenhum. */
+function fcsRolarAte(el){
+  var barra=document.querySelector('.fcg-fixa'),topo;
+  try{
+    topo=el.getBoundingClientRect().top+(window.pageYOffset||document.documentElement.scrollTop||0);
+    topo-=(barra?barra.offsetHeight:0)+90;
+    if(topo<0)topo=0;
+    window.scrollTo(0,topo);
+  }catch(e){if(el.scrollIntoView)el.scrollIntoView(true);}
+}
+/* Um temporizador SO, cancelado antes de reagendar: duas buscas seguidas fariam o timer da
+   primeira apagar o destaque da segunda antes da hora. */
+var fcsAlvoEl=null,fcsAlvoTimer=null;
+function fcsDestacar(el){
+  if(fcsAlvoTimer){clearTimeout(fcsAlvoTimer);fcsAlvoTimer=null;}
+  if(fcsAlvoEl)fcsAlvoEl.classList.remove('fcs-alvo');
+  fcsAlvoEl=el;
+  el.classList.add('fcs-alvo');
+  fcsAlvoTimer=setTimeout(function(){
+    if(fcsAlvoEl)fcsAlvoEl.classList.remove('fcs-alvo');
+    fcsAlvoEl=null;fcsAlvoTimer=null;
+  },6000);
+}
+
+/* ============================================================================
+   O ECO: cada rotulo das tabelas mostra o TEXTO QUE ELE CONTROLA
+   ============================================================================
+   Medido em 11/09/2026, quando as tabelas somavam 168 campos: so 29 tinham rotulo que
+   permitisse achar o campo pelo texto -- e quase todos por coincidencia (frases de uma
+   palavra, como "Aplicar"). 84 nao tinham nada em comum com o texto, e "Opcao nenhum
+   opcional" era o rotulo de "Sem opcional". (A leva 2, do mesmo dia, trouxe mais 58 campos
+   para as tabelas, e todos eles ganharam o eco no mesmo ato -- que e o ponto: ninguem precisa
+   lembrar de acrescentar o eco.)
+   O eco e ESCRITO POR CODIGO, a partir da tabela, e nunca a mao. A mao ele seria uma TERCEIRA
+   copia de todas essas frases (hoje ja sao duas: o value= do HTML e a terceira coluna da
+   tabela), e
+   fcTxtFabricaDiverge nao a fiscalizaria. Vindo da tabela, ele mostra o VALOR ATUAL: depois
+   que o dono personalizar um texto, o rotulo passa a exibir o que o cliente realmente le.
+   FORMA. Frase longa no rotulo apaga a hierarquia e transforma a secao num paredao: texto de
+   ate 45 caracteres entra inteiro; acima disso entra so o comeco, cortado na ultima palavra
+   inteira antes de 43, com reticencia. Tudo dentro do <small> que o rotulo JA usa para
+   qualificadores -- nenhum componente novo --, e o qualificador que ja existia continua la,
+   depois do texto. */
+var FCS_ECO_MAX=45,FCS_ECO_CORTE=43,FCS_ECO=null;
+function fcsEcoTexto(v){
+  var t=String(v==null?'':v).replace(/\s+/g,' ').replace(/^ +| +$/g,''),corte,esp;
+  if(!t)return '';
+  /* texto que e so pontuacao ou espaco (", ", ":") nao vira aspas: o rotulo desses campos ja
+     descreve o sinal por extenso, e um eco com a virgula entre aspas nao ajudaria ninguem */
+  if(!/[0-9a-z]/.test(fcsNorm(t)))return '';
+  if(t.length<=FCS_ECO_MAX)return t;
+  corte=t.substring(0,FCS_ECO_CORTE);
+  esp=corte.lastIndexOf(' ');
+  if(esp>12)corte=corte.substring(0,esp);
+  return corte.replace(/[\s,.;:\-]+$/,'')+'\u2026';
+}
+/* Monta a lista uma vez: acha o rotulo de cada campo das tabelas, RECOLHE o qualificador que
+   ele ja tinha (o <small> do fim) e pendura um <small class="fcs-eco"> proprio. O qualificador
+   passa a ser escrito por codigo junto com o texto, para os dois nao virarem dois <small>
+   seguidos. */
+/* Nada alem de espaco depois deste elemento dentro do rotulo. */
+function fcsNadaDepois(el){
+  var no=el.nextSibling,t;
+  while(no){
+    t=(no.textContent!=null)?no.textContent:(no.nodeValue||'');
+    if(String(t).replace(/\s+/g,''))return false;
+    no=no.nextSibling;
+  }
+  return true;
+}
+function fcsEcoMontar(){
+  var tabs=fcTxtTabelas(),lista=[],i,j,id,el,lab,qual,smalls,sm,base,eco;
+  for(i=0;i<tabs.length;i++)for(j=0;j<tabs[i][1].length;j++){
+    id=tabs[i][1][j][1];
+    el=$(id);if(!el)continue;
+    lab=fcsRotuloDe(el);if(!lab)continue;
+    qual='';
+    smalls=lab.getElementsByTagName('small');
+    sm=smalls.length?smalls[smalls.length-1]:null;
+    /* so e qualificador o <small> que FECHA o rotulo: um <small> no meio da frase e parte
+       dela, e arranca-lo mudaria o que o rotulo diz */
+    if(sm&&sm===lab.lastElementChild&&fcsNadaDepois(sm)){
+      qual=String(sm.textContent||'').replace(/^\s*\(/,'').replace(/\)\s*$/,'');
+      sm.parentNode.removeChild(sm);
+    }
+    /* 'base' e o que o rotulo JA diz, com o qualificador junto -- calculado ANTES de o eco
+       existir, senao ele se leria a si mesmo na volta seguinte. */
+    base=fcsChave(String(lab.textContent||'')+' '+qual);
+    eco=document.createElement('small');
+    eco.className='fcs-eco';
+    lab.appendChild(document.createTextNode(' '));
+    lab.appendChild(eco);
+    lista.push({el:el,lab:lab,qual:qual,base:base,eco:eco,ult:null});
+  }
+  return lista;
+}
+function fcsEcoUm(r){
+  var v=String(r.el.value==null?'':r.el.value),txt=fcsEcoTexto(v),novo;
+  /* rotulo que JA diz o texto inteiro nao o repete: um "Cupom invalido" seguido do mesmo
+     "Cupom invalido." entre aspas seria ruido. A comparacao e por PALAVRA INTEIRA -- por
+     substring, o "d" do sufixo dos dias seria dado como ja presente por causa de "dias". */
+  if(txt&&fcsContem(r.base,fcsChave(v)))txt='';
+  if(txt)novo='\u2014 \u201c'+txt+'\u201d'+(r.qual?' \u00b7 '+r.qual:'');
+  else novo=r.qual?'('+r.qual+')':'';
+  if(novo===r.ult)return;
+  r.ult=novo;
+  r.eco.textContent=novo;
+  r.eco.style.display=novo?'':'none';
+}
+function fcsEcoTodos(){
+  var i;
+  if(!FCS_ECO)return;
+  for(i=0;i<FCS_ECO.length;i++)fcsEcoUm(FCS_ECO[i]);
+}
+
+/* ---------- a partida ---------- */
+function fcsIniciar(){
+  var campo=$('fcs-q'),res=$('fcs-res'),caixa;
+  FCS_ECO=fcsEcoMontar();
+  fcsEcoTodos();
+  if(!campo||!res)return;
+  caixa=res.parentNode;
+  campo.addEventListener('input',fcsBuscar);
+  campo.addEventListener('keydown',fcsTecla);
+  campo.addEventListener('focus',function(){if(fcsNorm(campo.value).length>=2)fcsBuscar();});
+  res.addEventListener('click',function(e){
+    var b=e.target,i;
+    while(b&&b!==res&&String(b.className||'').indexOf('fcs-item')<0)b=b.parentNode;
+    if(!b||b===res)return;
+    i=parseInt(b.getAttribute('data-i'),10);
+    if(FCS_LISTA&&FCS_LISTA[i])fcsIr(FCS_LISTA[i].el);
+  });
+  document.addEventListener('click',function(e){
+    if(caixa&&!caixa.contains(e.target))fcsFechar();
+  });
+  liga('fcs-limpar',function(){campo.value='';fcsFechar();fcsRecado('',false);campo.focus();});
+}
+
 /* Compartilhada por Bordas e Captacao de leads: hexadecimal -> "r, g, b", para montar rgba()
    dentro de @keyframes (onde nao da para usar a cor com alfa separado). Nasceu na aba Bordas;
    subiu para ca quando a aba Leads passou a precisar dela -- o halo do efeito "pulsar" trazia
@@ -5064,6 +5596,9 @@ function copiar(idOut,idAviso){
   fcAvisoCopia(av,FC_COPIA_FALHOU,false,6000);
 }
 function fcAbasIds(){var v=[],i;for(i=0;i<ABAS.length;i++)v.push(ABAS[i].id);return v;}
+/* O nome de exibicao de uma aba a partir do id dela. Mesma razao do fcAbasIds: nome de aba
+   digitado numa segunda lista e nome que envelhece sozinho. */
+function fcAbaNome(id){var i;for(i=0;i<ABAS.length;i++)if(ABAS[i].id===id)return ABAS[i].nome;return id;}
 /* Quantas abas existem, POR EXTENSO, para as frases da interface. A ferramenta nasceu com
    seis e a palavra "seis" ficou escrita em catorze mensagens que o operador le -- inclusive
    na que ele le no instante em que cria um preset geral ("as seis abas nasceram FORA desta
@@ -5410,6 +5945,12 @@ function salvarEstado(){
      um backup mudam campo sem passar por tecla nenhuma, e um contador parado mentiria sobre o
      que vai no payload. Try proprio: gravar e sagrado. */
   try{fcLimAtualizarTodos();}catch(e){}
+  /* O eco do texto atual em cada rotulo acorda pelo MESMO ponto, e pelo mesmo motivo dos dois
+     acima: aplicar um preset, importar um backup e restaurar o estado mudam campo sem passar
+     por tecla nenhuma, e um eco parado mostraria no rotulo um texto que o cliente nao le mais.
+     Ele nao reescreve nada quando o texto nao mudou (compara com o ultimo escrito), entao
+     rodar a cada tecla nao custa DOM. Try proprio: gravar e sagrado. */
+  try{fcsEcoTodos();}catch(e){}
 }
 function restaurarEstado(){
   var raw,st,i,j,a,c;
@@ -8815,7 +9356,7 @@ function sColeta(){
        pm:radio('s-pm'),mob:$('s-mob').value,ordem:radio('s-ordem'),
        setas:radio('s-setas'),dots:radio('s-dots'),arrastar:radio('s-arrastar'),pausar:radio('s-pausar')}
   };
-  /* Os cinco textos configuraveis (ver S_TXT_DEFS, logo antes de sCfg). */
+  /* Os textos configuraveis (ver S_TXT_DEFS, logo antes de sCfg). */
   fcTxtLer(S_TXT_DEFS,r.s);
   return r;
 }
@@ -8833,7 +9374,7 @@ function sRestaura(st){
     setRadio('s-dots',st.s.dots||'sim');
     setRadio('s-arrastar',st.s.arrastar||'nao');
     setRadio('s-pausar',st.s.pausar||'nao');
-    /* Os cinco textos configuraveis: estado gravado antes desta rodada nao tem nenhuma destas
+    /* Os textos configuraveis: estado gravado antes desta rodada nao tem nenhuma destas
        chaves -- o padrao de cada campo e o terceiro item de S_TXT_DEFS. */
     fcTxtRestaura(S_TXT_DEFS,st.s);
   }
@@ -9891,6 +10432,9 @@ function sLimpar(){
   setRadio('s-impleg','nao');setRadio('s-imptam','orig');
   sImpAchado=null;sImpLegAuto='';sImpToggles();sImpAviso('',false);
   $('s-out').value='';$('s-pv-box').innerHTML='<p class="pv-vazia">A prévia do slideshow aparece aqui.</p>';
+  /* Os textos configuraveis voltam a fabrica JUNTO: sem esta linha o botao prometia limpar
+     tudo e deixava os textos como estavam (ver o comentario de fcTxtRestaura). */
+  fcTxtRestaura(S_TXT_DEFS,{});
   salvarEstado();
 }
 
@@ -9898,7 +10442,7 @@ function sLimpar(){
    presos a faixa declarada. sGerar e a previa leem daqui -- nao existe segundo lugar onde um
    limite seja aplicado, que e como a versao anterior conseguia rodar a previa a 1500 ms e
    entregar um bloco de 100 ms. */
-/* ===== os cinco textos configuraveis desta aba (Rodada de textos configuraveis, Etapa 3) =====
+/* ===== os textos configuraveis desta aba (Rodada de textos configuraveis, Etapa 3) =====
    Mesmo molde de A_TXT_DEFS/U_TXT_DEFS: [chave no cfg/estado, id do campo na aba, texto padrao].
    Quatro deles sao o que o LEITOR DE TELA anuncia -- texto que ninguem percebeu que estava
    cravado porque ninguem o le olhando. O padrao e exatamente o que saia fixo no bloco, com UMA
@@ -9930,7 +10474,7 @@ function sCfg(){
     arrastar:radio('s-arrastar')==='sim',
     pausar:radio('s-pausar')==='sim'
   };
-  /* Os cinco textos configuraveis (ver S_TXT_DEFS): lidos direto do DOM pela tabela unica --
+  /* Os textos configuraveis (ver S_TXT_DEFS): lidos direto do DOM pela tabela unica --
      sCfg() so roda com a aba aberta, entao os campos sempre existem. */
   fcTxtLer(S_TXT_DEFS,r);
   return r;
@@ -10397,21 +10941,17 @@ function lColeta(){
       modo:radio('l-modo'),segauto:$('l-segauto').value,efeito:radio('l-efeito'),segef:$('l-segef').value,
       icone:radio('l-icone'),formato:radio('l-formato'),corbtn:$('l-corbtn-t').value,
       btnlado:radio('l-btnlado'),btnbaixo:$('l-btnbaixo').value,
-      m1:$('l-m1').value,m2:$('l-m2').value,m3:$('l-m3').value,m4:$('l-m4').value,
       corujapos:radio('l-corujapos'),emoji:$('l-emoji').value,
       corujacor:radio('l-corujacor'),corujacorpo:$('l-corujacorpo-t').value,corujadet:$('l-corujadet-t').value,
       mov:radio('l-mov'),vel:$('l-vel').value,
       efpulsar:$('l-ef-pulsar').checked,efbrilho:$('l-ef-brilho').checked,efdegrade:$('l-ef-degrade').checked,
       efpiscar:$('l-ef-piscar').checked,eftremor:$('l-ef-tremor').checked,
       hor:radio('l-hor'),hordias:lHorDias(),horini:$('l-horini').value,horfim:$('l-horfim').value,
-      horaviso:$('l-horaviso').value,horauto:radio('l-hor-auto'),
-      qlabel:$('l-qlabel').value,qdica:$('l-qdica').value,qmsg:$('l-qmsg').value,qops:lQops,
-      t1:$('l-t1').value,t2:$('l-t2').value,t3:$('l-t3').value,t4:$('l-t4').value,
-      t5:$('l-t5').value,t6:$('l-t6').value,t7:$('l-t7').value,
+      horauto:radio('l-hor-auto'),qops:lQops,
       c1:$('l-c1-t').value,c2:$('l-c2-t').value,c3:$('l-c3-t').value,c4:$('l-c4-t').value,
       anc:radio('l-ancora'),ancv:$('l-anc').value,resp:$('l-resp').value}
   };
-  /* Os cinco textos configuraveis (ver L_TXT_DEFS, logo antes de lCfg). */
+  /* Os textos configuraveis (ver L_TXT_DEFS, logo antes de lCfg). */
   fcTxtLer(L_TXT_DEFS,r.l);
   return r;
 }
@@ -10424,7 +10964,6 @@ function lRestaura(st){
   $('l-corbtn-t').value=L.corbtn;$('l-corbtn').value=corValida(L.corbtn)?L.corbtn:'#25D366';
   if(L.btnlado!=null)setRadio('l-btnlado',L.btnlado);
   if(L.btnbaixo!=null&&L.btnbaixo!=='')$('l-btnbaixo').value=L.btnbaixo;
-  $('l-m1').value=L.m1;$('l-m2').value=L.m2;$('l-m3').value=L.m3;$('l-m4').value=L.m4;
   /* O liga/desliga da coruja do cabecalho ('true' | 'false') virou escolha de POSICAO
      ('nao' | 'esq' | 'dir' | 'ambos'). A chave gravada e nova (corujapos) pelo mesmo motivo da
      Contagem regressiva: estado gravado pela versao anterior so traz 'coruja', e ele e traduzido
@@ -10452,22 +10991,24 @@ function lRestaura(st){
   }
   if(L.horini!=null)$('l-horini').value=L.horini;
   if(L.horfim!=null)$('l-horfim').value=L.horfim;
-  if(L.horaviso!=null)$('l-horaviso').value=L.horaviso;
   /* Estado gravado antes desta versao nao traz 'horauto'. O ausente vale NAO ABRIR, que e o
      comportamento pedido -- e nao o antigo: quem tinha horario configurado e pop-up automatico
      estava sendo interrompido fora do expediente sem ter escolhido isso. */
   setRadio('l-hor-auto',L.horauto==='sim'?'sim':'nao');
-  if(L.qlabel!=null)$('l-qlabel').value=L.qlabel;
-  if(L.qdica!=null)$('l-qdica').value=L.qdica;
-  if(L.qmsg!=null)$('l-qmsg').value=L.qmsg;
   if(L.qops&&L.qops.length!=null){lQops=[];for(i=0;i<L.qops.length;i++)lQops.push(String(L.qops[i]));lQRender();}
-  $('l-t1').value=L.t1;$('l-t2').value=L.t2;$('l-t3').value=L.t3;$('l-t4').value=L.t4;
-  $('l-t5').value=L.t5;$('l-t6').value=L.t6;$('l-t7').value=L.t7;
   $('l-c1-t').value=L.c1;$('l-c1').value=corValida(L.c1)?L.c1:'#075E54';
   $('l-c2-t').value=L.c2;$('l-c2').value=corValida(L.c2)?L.c2:'#ffffff';
   $('l-c3-t').value=L.c3;$('l-c3').value=corValida(L.c3)?L.c3:'#25D366';
   $('l-c4-t').value=L.c4;$('l-c4').value=corValida(L.c4)?L.c4:'#333333';
   if(L.anc){setRadio('l-ancora',L.anc);$('l-anc').value=L.ancv;$('l-resp').value=L.resp;}
+  /* Os textos configuraveis (ver L_TXT_DEFS). ESTA CHAMADA FALTAVA ate 11/09/2026 -- medido
+     na leva 2: das oito abas com tabela, a Captacao de leads era a unica cujo restaura nao a
+     chamava, entao os cinco textos criados em 03/09/2026 (o aria-label do botao, o "Fechar",
+     o separador da saudacao, o rotulo do codigo e o nome de reserva da pagina) eram GRAVADOS
+     pelo coleta e nunca voltavam: bastava recarregar a ferramenta para o campo exibir o
+     padrao do HTML de novo, sem erro e sem aviso. A regressao nao a pegava porque ela
+     preenche e gera na MESMA sessao, sem recarregar. */
+  fcTxtRestaura(L_TXT_DEFS,L);
 }
 
 /* ===== O que esta aba poe na biblioteca de presets (ver o bloco compartilhado) =====
@@ -10504,8 +11045,6 @@ function lPadroes(){
   setRadio('l-icone','identidade');setRadio('l-formato','circulo');
   $('l-corbtn').value='#25D366';$('l-corbtn-t').value='#25D366';
   setRadio('l-btnlado','dir');$('l-btnbaixo').value=92;
-  $('l-m1').value='Olá Foto Certa';$('l-m2').value='meu nome é';
-  $('l-m3').value='Estava olhando a página';$('l-m4').value='Tenho um pedido para você';
   setRadio('l-corujapos','esq');$('l-emoji').value='';
   setRadio('l-corujacor','auto');
   $('l-corujacorpo').value='#ffffff';$('l-corujacorpo-t').value='#ffffff';
@@ -10516,15 +11055,13 @@ function lPadroes(){
   [1,2,3,4,5].forEach(function(d){$('l-hor-d'+d).checked=true;});
   [0,6].forEach(function(d){$('l-hor-d'+d).checked=false;});
   $('l-horini').value='09:00';$('l-horfim').value='18:00';
-  $('l-horaviso').value='Estamos fora do horário de atendimento. Deixe seu recado: respondemos assim que voltarmos.';
   setRadio('l-hor-auto','nao');
-  $('l-qlabel').value='Qual ensaio te interessa?';$('l-qdica').value='Escolha uma opção (opcional)';
-  $('l-qmsg').value='Interesse';$('l-qop').value='';
+  $('l-qop').value='';
   lQops=[];lQRender();
-  $('l-t1').value='Fale com a Foto Certa';$('l-t2').value='Seu nome';
-  $('l-t3').value='Como podemos te chamar?';$('l-t4').value='Seu recado';
-  $('l-t5').value='Escreva sua mensagem...';$('l-t6').value='Enviar pelo WhatsApp';
-  $('l-t7').value='Preencha seu nome e o recado para continuar.';
+  /* Os textos configuraveis voltam a fabrica pela TABELA -- nenhum deles e repetido aqui.
+     Ate 11/09/2026 este botao repunha quinze deles a mao e nao tocava nos cinco da tabela:
+     duas fabricas para os mesmos campos, e metade da aba voltando. */
+  fcTxtRestaura(L_TXT_DEFS,{});
   $('l-c1').value='#075E54';$('l-c1-t').value='#075E54';
   $('l-c2').value='#ffffff';$('l-c2-t').value='#ffffff';
   $('l-c3').value='#25D366';$('l-c3-t').value='#25D366';
@@ -10715,7 +11252,7 @@ function lToggles(){
    ancOk carrega o resultado da validacao do seletor em vez de a previa recusar: lGerar recusa
    antes de montar o bloco, entao quando ha codigo gerado ancOk e sempre true e os dois lados
    leem exatamente o mesmo objeto. */
-/* ===== os cinco textos configuraveis desta aba (Rodada de textos configuraveis, Etapa 3) =====
+/* ===== os textos configuraveis desta aba (Rodada de textos configuraveis, Etapa 3) =====
    Mesmo molde de A_TXT_DEFS/U_TXT_DEFS: [chave no cfg/estado, id do campo na aba, texto padrao].
    Os textos que o visitante LE ja eram campo desde antes (l-t1..l-t7, l-m1..l-m4); o que faltava
    era o que ninguem le olhando -- os dois aria-label -- e as duas costuras da mensagem que chega
@@ -10726,7 +11263,29 @@ var L_TXT_DEFS=[
   ['txtAriaFechar','l-txt-aria-fechar','Fechar'],
   ['txtSepSaudacao','l-txt-sep-saudacao',', '],
   ['txtRotuloCodigo','l-txt-rotulo-codigo',' (cod: *{cod}*)'],
-  ['txtPagReserva','l-txt-pag-reserva','seu site']
+  ['txtPagReserva','l-txt-pag-reserva','seu site'],
+  /* ===== os que estavam FORA da tabela ate 11/09/2026 (leva 2) =====
+     A CHAVE de cada um e a mesma que lColeta ja gravava, letra por letra ('horaviso',
+     'qlabel', 'qdica', 'qmsg' continuam PLANAS): estado, preset e backup gravados antes desta
+     rodada sao lidos sem conversao nenhuma, e o que a ferramenta grava hoje sai byte a byte
+     igual ao de ontem. O que mudou de lugar foi o ESCAPE: lCfg aplicava escJs ao LER o campo,
+     e a tabela devolve cru -- entao o escJs desceu para as linhas de emissao, que agora sao
+     todas iguais entre si. */
+  ['m1','l-m1','Olá Foto Certa'],
+  ['m2','l-m2','meu nome é'],
+  ['m3','l-m3','Estava olhando a página'],
+  ['m4','l-m4','Tenho um pedido para você'],
+  ['t1','l-t1','Fale com a Foto Certa'],
+  ['t2','l-t2','Seu nome'],
+  ['t3','l-t3','Como podemos te chamar?'],
+  ['t4','l-t4','Seu recado'],
+  ['t5','l-t5','Escreva sua mensagem...'],
+  ['t6','l-t6','Enviar pelo WhatsApp'],
+  ['t7','l-t7','Preencha seu nome e o recado para continuar.'],
+  ['horaviso','l-horaviso','Estamos fora do horário de atendimento. Deixe seu recado: respondemos assim que voltarmos.'],
+  ['qlabel','l-qlabel','Qual ensaio te interessa?'],
+  ['qdica','l-qdica','Escolha uma opção (opcional)'],
+  ['qmsg','l-qmsg','Interesse']
 ];
 function lCfg(){
   var pos=radio('l-corujapos'),mov=radio('l-mov'),i;
@@ -10752,7 +11311,6 @@ function lCfg(){
     icone:radio('l-icone'),formato:radio('l-formato'),
     corbtn:corSegura('l-corbtn','#25D366'),
     btnLado:radio('l-btnlado'),btnBaixo:lPreso('l-btnbaixo'),
-    m1:escJs($('l-m1').value),m2:escJs($('l-m2').value),m3:escJs($('l-m3').value),m4:escJs($('l-m4').value),
     /* pos e a escolha crua; esq/dir dizem qual ponta recebe o desenho e coruja continua sendo o
        unico portao do POP_USAR_CORUJA_SVG -- com 'nao', o pop-up cai no caminho do emoji, que e
        exatamente o que a versao anterior fazia com "Emoji / nada". */
@@ -10764,21 +11322,19 @@ function lCfg(){
     mov:mov,vel:lPreso('l-vel'),
     ef:{pulsar:$('l-ef-pulsar').checked,brilho:$('l-ef-brilho').checked,degrade:$('l-ef-degrade').checked,
       piscar:$('l-ef-piscar').checked,tremor:$('l-ef-tremor').checked},
-    hor:{ligado:horLigado,ativo:horAtivo,dias:dias,ini:hini,fim:hfim,aviso:escJs($('l-horaviso').value),
+    hor:{ligado:horLigado,ativo:horAtivo,dias:dias,ini:hini,fim:hfim,
       /* So faz sentido com o pop-up automatico: no modo "abre no clique" nao ha abertura
          automatica para segurar. Zerado na origem, como o desconto Pix com sinal ligado. */
       segura:(horAtivo&&radio('l-hor-auto')!=='sim'&&radio('l-modo')==='automatico')},
-    q:{ativo:ops.length>0,label:escJs($('l-qlabel').value),dica:escJs($('l-qdica').value),
-      msg:escJs($('l-qmsg').value),ops:ops},
-    t1:escJs($('l-t1').value),t2:escJs($('l-t2').value),t3:escJs($('l-t3').value),t4:escJs($('l-t4').value),
-    t5:escJs($('l-t5').value),t6:escJs($('l-t6').value),t7:escJs($('l-t7').value),
+    q:{ativo:ops.length>0,ops:ops},
     c1:corSegura('l-c1','#075E54'),c2:corSegura('l-c2','#ffffff'),
     c3:corSegura('l-c3','#25D366'),c4:corSegura('l-c4','#333333'),
     anc:{ativo:comAnc,v:anc,ok:ancOk,resp:resp}
   };
-  /* Os cinco textos configuraveis (ver L_TXT_DEFS): CRUS, ao contrario dos vizinhos desta
-     funcao -- cada um deles vai para um destino diferente (atributo HTML dentro de uma string
-     JS, literal JS solto), e o escape certo e escolhido no ponto de uso. */
+  /* Os textos configuraveis (ver L_TXT_DEFS): TODOS CRUS. Ate 11/09/2026 so os cinco da
+     tabela eram crus e os quinze vizinhos chegavam ja escapados daqui -- duas convencoes na
+     mesma funcao. Agora ha uma so, e o escape e escolhido no ponto de uso: cada texto vai
+     para um destino diferente (atributo HTML dentro de uma string JS, literal JS solto). */
   fcTxtLer(L_TXT_DEFS,r);
   return r;
 }
@@ -10999,20 +11555,20 @@ function lJs(v){
   c+="var FORMATO_BOTAO='"+v.formato+"';          /* 'circulo' | 'quadrado' (cantos arredondados) */\n";
   c+="var COR_BOTAO_FLUTUANTE='"+v.corbtn+"';    /* cor de fundo do botao (a coruja usa nos detalhes) */\n\n";
   c+='/* ===== TRECHOS DA MENSAGEM ENVIADA NO WHATSAPP ===== */\n';
-  c+="var MSG_SAUDACAO='"+v.m1+"';           /* saudacao inicial */\n";
-  c+="var MSG_MEU_NOME='"+v.m2+"';               /* antecede o nome informado */\n";
-  c+="var MSG_PAGINA='"+v.m3+"';    /* antecede o nome da pagina */\n";
-  c+="var MSG_PEDIDO='"+v.m4+"';  /* antecede o (cod: ...) */\n\n";
+  c+="var MSG_SAUDACAO='"+escJs(v.m1)+"';           /* saudacao inicial */\n";
+  c+="var MSG_MEU_NOME='"+escJs(v.m2)+"';               /* antecede o nome informado */\n";
+  c+="var MSG_PAGINA='"+escJs(v.m3)+"';    /* antecede o nome da pagina */\n";
+  c+="var MSG_PEDIDO='"+escJs(v.m4)+"';  /* antecede o (cod: ...) */\n\n";
   c+='/* ===== TEXTOS DO POP-UP ===== */\n';
   c+="var POP_IDENTIDADE='"+v.emoji+"';                             /* emoji antes do titulo (so se coruja SVG = false) */\n";
   c+='var POP_USAR_CORUJA_SVG='+v.coruja+';                      /* true = coruja no titulo | false = emoji acima */\n';
-  c+="var POP_TITULO='"+v.t1+"';            /* titulo do cabecalho */\n";
-  c+="var POP_LABEL_NOME='"+v.t2+"';                     /* rotulo do campo nome */\n";
-  c+="var POP_DICA_NOME='"+v.t3+"';       /* texto dentro do campo nome */\n";
-  c+="var POP_LABEL_RECADO='"+v.t4+"';                 /* rotulo do campo recado */\n";
-  c+="var POP_DICA_RECADO='"+v.t5+"';     /* texto dentro do campo recado */\n";
-  c+="var POP_BOTAO_ENVIAR='"+v.t6+"';       /* texto do botao de envio */\n";
-  c+="var POP_MSG_ERRO='"+v.t7+"';  /* aviso de campos vazios */\n\n";
+  c+="var POP_TITULO='"+escJs(v.t1)+"';            /* titulo do cabecalho */\n";
+  c+="var POP_LABEL_NOME='"+escJs(v.t2)+"';                     /* rotulo do campo nome */\n";
+  c+="var POP_DICA_NOME='"+escJs(v.t3)+"';       /* texto dentro do campo nome */\n";
+  c+="var POP_LABEL_RECADO='"+escJs(v.t4)+"';                 /* rotulo do campo recado */\n";
+  c+="var POP_DICA_RECADO='"+escJs(v.t5)+"';     /* texto dentro do campo recado */\n";
+  c+="var POP_BOTAO_ENVIAR='"+escJs(v.t6)+"';       /* texto do botao de envio */\n";
+  c+="var POP_MSG_ERRO='"+escJs(v.t7)+"';  /* aviso de campos vazios */\n\n";
   c+='/* ===== PALETA DE CORES DO POP-UP ===== */\n';
   c+="var COR_TOPO_POPUP='"+v.c1+"';         /* fundo do cabecalho (a coruja do titulo usa nos detalhes) */\n";
   c+="var COR_FUNDO_POPUP='"+v.c2+"';        /* fundo do card */\n";
@@ -11027,14 +11583,14 @@ function lJs(v){
     c+='var HORARIO_DIAS=['+v.hor.dias.join(',')+'];   /* dias atendidos: 0=domingo, 1=segunda ... 6=sabado */\n';
     c+="var HORARIO_ABRE='"+v.hor.ini+"';               /* hora de abertura, no formato HH:MM */\n";
     c+="var HORARIO_FECHA='"+v.hor.fim+"';              /* fechamento; menor que a abertura = expediente cruza a meia-noite */\n";
-    c+="var HORARIO_AVISO='"+v.hor.aviso+"';\n\n";
+    c+="var HORARIO_AVISO='"+escJs(v.horaviso)+"';\n\n";
   }
   if(v.q.ativo){
     c+='/* ===== PERGUNTA DE QUALIFICACAO ===== */\n';
     c+='/* Lista fechada e resposta OPCIONAL: sem escolha, a linha nao entra na mensagem. */\n';
-    c+="var PERGUNTA_ROTULO='"+v.q.label+"';   /* rotulo da pergunta no pop-up */\n";
-    c+="var PERGUNTA_DICA='"+v.q.dica+"';      /* texto da opcao vazia (a que nao escolhe nada) */\n";
-    c+="var PERGUNTA_MSG='"+v.q.msg+"';        /* antecede a resposta na mensagem do WhatsApp */\n";
+    c+="var PERGUNTA_ROTULO='"+escJs(v.qlabel)+"';   /* rotulo da pergunta no pop-up */\n";
+    c+="var PERGUNTA_DICA='"+escJs(v.qdica)+"';      /* texto da opcao vazia (a que nao escolhe nada) */\n";
+    c+="var PERGUNTA_MSG='"+escJs(v.qmsg)+"';        /* antecede a resposta na mensagem do WhatsApp */\n";
     c+="var PERGUNTA_OPCOES=['"+v.q.ops.join("','")+"'];\n\n";
   }
   c+='/* ============================================================\n   Daqui para baixo nao precisa mexer\n   ============================================================ */\n\n';
@@ -11481,7 +12037,7 @@ function tObMarcar(t){
     if(el)el.checked=(g.indexOf(T_OB_VARS[i].id)>=0);
   }
 }
-/* ===== os quatro textos configuraveis desta aba (Rodada de textos configuraveis, Etapa 3) =====
+/* ===== os textos configuraveis desta aba (Rodada de textos configuraveis, Etapa 3) =====
    Mesmo molde de A_TXT_DEFS/U_TXT_DEFS: [chave no cfg/estado, id do campo na aba, texto padrao].
    Tres sao CONECTORES de data -- " de ", ", ", " as " --, que ninguem percebeu que estavam
    cravados porque sao palavrinhas no meio de um numero. O quarto e o title do iframe do codigo 3.
@@ -11497,7 +12053,7 @@ function tObCfg(){
   for(i=0;i<T_OB_VARS.length;i++)fb[T_OB_VARS[i].id]=$('t-ob-fb-'+T_OB_VARS[i].id).value;
   var r={usar:(radio('t-ob-usar')==='sim'), url:$('t-ob-url').value.trim(),
           vars:tObMarcadas(), fmt:radio('t-ob-fmt'), fb:fb};
-  /* Os quatro textos configuraveis (ver T_TXT_DEFS). O title do iframe nao e usado por
+  /* Os textos configuraveis (ver T_TXT_DEFS). O title do iframe nao e usado por
      tObBloco, mas anda junto: uma tabela so por aba e o que impede um campo ficar orfao. */
   fcTxtLer(T_TXT_DEFS,r);
   return r;
@@ -11667,7 +12223,7 @@ function tColeta(){
       obvars:tObMarcadas().join(','),
       obfb:T_OB_VARS.map(function(v){return $('t-ob-fb-'+v.id).value;}).join('\u0001')}
   };
-  /* Os quatro textos configuraveis (ver T_TXT_DEFS, logo antes de tObCfg). */
+  /* Os textos configuraveis (ver T_TXT_DEFS, logo antes de tObCfg). */
   fcTxtLer(T_TXT_DEFS,r.t);
   return r;
 }
@@ -11727,7 +12283,7 @@ function tRestaura(st){
     for(ifb=0;ifb<T_OB_VARS.length;ifb++)
       if(fb[ifb]!==undefined)$('t-ob-fb-'+T_OB_VARS[ifb].id).value=fb[ifb];
   }
-  /* Os quatro textos configuraveis: estado gravado antes desta rodada nao tem nenhuma destas
+  /* Os textos configuraveis: estado gravado antes desta rodada nao tem nenhuma destas
      chaves -- o padrao de cada campo e o terceiro item de T_TXT_DEFS. */
   fcTxtRestaura(T_TXT_DEFS,st.t);
   /* O AVISO SAI DEPOIS DO LACO, e nao aqui dentro. 'tidy' NAO e a ultima aba de ABAS: um
@@ -12505,12 +13061,10 @@ function uColeta(){
       selprod:radio('u-selprod'),zap:radio('u-zap'),descpix:$('u-descpix').value,
       sinal:radio('u-sinal'),sinaltipo:radio('u-sinaltipo'),sinalpct:$('u-sinalpct').value,sinalfixo:$('u-sinalfixo').value,
       resumo:radio('u-resumo'),
-      t8:$('u-t8').value,t9:$('u-t9').value,t10:$('u-t10').value,
-      t1:$('u-t1').value,t2:$('u-t2').value,t3:$('u-t3').value,t4:$('u-t4').value,t5:$('u-t5').value,t6:$('u-t6').value,t7:$('u-t7').value,
       larg:$('u-largura').value,ppcor:radio('u-ppcor'),qtdmax:$('u-qtdmax').value,
       c1:$('u-c1-t').value,c2:$('u-c2-t').value,c3:$('u-c3-t').value}
   };
-  /* Os 33 textos configuraveis (ver U_TXT_DEFS, logo antes de uCfg). */
+  /* Os textos configuraveis (ver U_TXT_DEFS, logo antes de uCfg). */
   fcTxtLer(U_TXT_DEFS,r.u);
   return r;
 }
@@ -12521,35 +13075,26 @@ function uRestaura(st){
   setRadio('u-metodo',U.metodo);setRadio('u-moeda',U.moeda);setRadio('u-selprod',U.selprod);setRadio('u-zap',U.zap);
   $('u-cod').value=U.cod;
   $('u-descpix').value=(U.descpix!=null&&U.descpix!=='')?U.descpix:10;
-  $('u-t1').value=U.t1;$('u-t2').value=U.t2;$('u-t3').value=U.t3;$('u-t4').value=U.t4;$('u-t5').value=U.t5;$('u-t6').value=U.t6;
-  /* '!=null' e nao "e verdade": t7..t10 sao TEXTO LIVRE, e texto livre vazio e uma escolha,
-     nao um campo ausente. Os quatro nasceram depois do resto da aba, e a guarda existia para
-     que estado gravado por versao anterior (que nao tem a chave) deixasse o padrao do HTML de
-     pe -- isso continua valendo com '!=null'. O que muda e o vazio: uColeta grava '' sempre,
-     e com a guarda de verdade o '' era LIDO e descartado, entao restaurar (ou aplicar um
-     preset) devolvia a aba pela metade, em silencio -- o operador esvaziava "Escolha seu
-     ensaio", aplicava um preset da outra campanha e publicava um checkout com o rotulo
-     errado. Honrar o vazio em vez de corrigi-lo a vista foi a escolha porque o gerador JA
-     aceita o vazio: uGerar le o campo direto e emite TXT_PRODUTOS='' sem nada quebrar. Ou
-     seja, tela e codigo gerado ja concordavam no vazio; era so a restauracao que discordava
-     dos dois. Um clamp para o padrao (o caminho usado nos numeros e nas cores, onde nao ha
-     valor vazio que faca sentido) mudaria o que a aba entrega hoje para quem esvaziou o
-     campo de proposito. */
-  if(U.t7!=null)$('u-t7').value=U.t7;
+  /* t1..t10 saiam daqui, um por linha, ate 11/09/2026 -- agora vem de U_TXT_DEFS, na chamada
+     de fcTxtRestaura no fim desta funcao. A guarda continua sendo '!=null' e nao "e verdade",
+     pelo mesmo motivo que estava registrado aqui: texto livre VAZIO e uma escolha, nao um
+     campo ausente, e com a guarda de verdade o '' era lido e descartado -- o operador
+     esvaziava "Escolha seu ensaio", aplicava um preset da outra campanha e publicava um
+     checkout com o rotulo errado. Duas coisas mudam de comportamento, de proposito: t1..t6
+     nao tinham guarda nenhuma e escreviam a palavra "undefined" no campo quando o estado
+     guardado nao trazia a chave; e chave ausente passa a devolver a FABRICA da tabela em vez
+     do valor que estivesse na tela. */
   $('u-largura').value=U.larg||420;
   $('u-qtdmax').value=(U.qtdmax!=null&&U.qtdmax!=='')?U.qtdmax:10;
   setRadio('u-sinal',U.sinal||'nao');setRadio('u-sinaltipo',U.sinaltipo||'pct');
   $('u-sinalpct').value=(U.sinalpct!=null&&U.sinalpct!=='')?U.sinalpct:30;
   $('u-sinalfixo').value=(U.sinalfixo!=null&&U.sinalfixo!=='')?U.sinalfixo:100;
-  if(U.t8!=null)$('u-t8').value=U.t8;   /* mesma regra do t7, logo acima */
-  if(U.t9!=null)$('u-t9').value=U.t9;
-  if(U.t10!=null)$('u-t10').value=U.t10;
   setRadio('u-resumo',U.resumo||'nao');
   setRadio('u-ppcor',U.ppcor||'gold');
   $('u-c1-t').value=U.c1;$('u-c1').value=corValida(U.c1)?U.c1:'#075E54';
   $('u-c2-t').value=U.c2;$('u-c2').value=corValida(U.c2)?U.c2:'#ffffff';
   $('u-c3-t').value=U.c3;$('u-c3').value=corValida(U.c3)?U.c3:'#333333';
-  /* Os 33 textos configuraveis: estado gravado antes desta rodada nao tem nenhuma destas
+  /* Os textos configuraveis: estado gravado antes desta rodada nao tem nenhuma destas
      chaves -- o padrao de cada campo e o terceiro item de U_TXT_DEFS. */
   fcTxtRestaura(U_TXT_DEFS,U);
   uEditRestaurar(U);
@@ -13154,7 +13699,7 @@ document.addEventListener('change',function(e){
   if(al)uPreview();
 });
 
-/* ===== os 33 textos configuraveis desta aba (Rodada de textos configuraveis, Etapa 2) =====
+/* ===== os textos configuraveis desta aba (Rodada de textos configuraveis, Etapa 2) =====
    Mesmo molde de A_TXT_DEFS/P_TXT_DEFS (Etapa 1): [chave no cfg/estado, id do campo na aba,
    texto padrao]. O padrao e EXATAMENTE o que saia fixo no bloco antes desta rodada -- e o
    que faz a saida nao mudar um byte com a configuracao de fabrica --, e vem da tabela unica
@@ -13198,7 +13743,22 @@ var U_TXT_DEFS=[
   ['txtZapDescPix','u-txt-zap-descpix',FC_TXT_FABRICA.zapDescPix],
   ['txtZapTotal','u-txt-zap-total',FC_TXT_FABRICA.zapTotal],
   ['txtZapSinal','u-txt-zap-sinal',FC_TXT_FABRICA.zapSinal],
-  ['txtZapValor','u-txt-zap-valor',FC_TXT_FABRICA.zapValor]
+  ['txtZapValor','u-txt-zap-valor',FC_TXT_FABRICA.zapValor],
+  /* ===== os que estavam FORA da tabela ate 11/09/2026 (leva 2) =====
+     A CHAVE de cada um e a MESMA que o coleta ja gravava, letra por letra: estado, preset e
+     backup gravados antes desta rodada sao lidos sem conversao nenhuma, e o que a ferramenta
+     grava hoje sai byte a byte igual ao de ontem. O que eles ganham e o eco do texto no
+     rotulo e a vigilancia de fcTxtFabricaDiverge, que ate agora nao os alcancava. */
+  ['t1','u-t1','Resumo do pedido'],
+  ['t2','u-t2','Escolha seu pacote'],
+  ['t3','u-t3','Total'],
+  ['t4','u-t4','Gerar Pix para pagamento'],
+  ['t5','u-t5','Pagamento aprovado! Recebemos seu pedido.'],
+  ['t6','u-t6','Não foi possível concluir o pagamento. Tente novamente.'],
+  ['t7','u-t7','Escolha seu ensaio'],
+  ['t8','u-t8','Sinal agora'],
+  ['t9','u-t9','Restante na entrega'],
+  ['t10','u-t10','Resumo para conferência']
 ];
 /* ===== configuracao da aba =====
    Uma leitura so da interface, ja presa nas faixas. E o que uGerar valida, e e o que uBloco
@@ -13225,7 +13785,6 @@ function uCfg(){
   var r={
     sinal:{ativo:sinalOn,tipo:sinalTipo,valor:(sinalTipo==='fixo')?(Math.round(sinalFixo*100)/100):sinalPct},
     resumo:(radio('u-resumo')==='sim'),
-    t8:$('u-t8').value, t9:$('u-t9').value, t10:$('u-t10').value,
     m:m, usaPP:(m!=='pix'), usaPix:usaPix,
     /* IDENTIDADE: lida do painel global, nao da aba. Os cinco campos abaixo deixaram de
        existir aqui -- nao ha segunda copia, logo nao ha como esta aba ficar com a chave
@@ -13246,11 +13805,9 @@ function uCfg(){
     selprod:radio('u-selprod')||'unico',
     prods:uProds, cps:uCps,
     qtdLigada:uQtdLigada(uProds), qtdmax:uPreso('u-qtdmax')||10,
-    c1:corSegura('u-c1','#075E54'), c2:corSegura('u-c2','#ffffff'), c3:corSegura('u-c3','#333333'),
-    t1:$('u-t1').value, t2:$('u-t2').value, t3:$('u-t3').value, t4:$('u-t4').value,
-    t5:$('u-t5').value, t6:$('u-t6').value, t7:$('u-t7').value
+    c1:corSegura('u-c1','#075E54'), c2:corSegura('u-c2','#ffffff'), c3:corSegura('u-c3','#333333')
   };
-  /* Os 33 textos configuraveis (ver U_TXT_DEFS): lidos direto do DOM pela tabela unica --
+  /* Os textos configuraveis (ver U_TXT_DEFS): lidos direto do DOM pela tabela unica --
      uCfg() so roda com a aba aberta, entao os campos sempre existem, igual a t1..t10. */
   fcTxtLer(U_TXT_DEFS,r);
   return r;
@@ -14014,8 +14571,22 @@ function uBloco(cfg){
 /* Os campos da aba num objeto so. Isto e o que a aba GRAVA e tambem o que um preset GUARDA:
    uma leitura so. Com duas, um campo novo entraria no estado e nao no preset (ou o
    contrario), e aplicar um preset devolveria a aba pela metade, sem nada avisando. */
+/* ===== o texto configuravel desta aba (leva 2, 11/09/2026) =====
+   Mesmo molde das outras: [chave no estado, id do campo, texto padrao]. Ate aqui a aba Bordas
+   nao tinha tabela -- ela gera CSS, e o unico texto que o cliente le e o do selo de destaque.
+   Ele ficava de fora do eco no rotulo e de fcTxtFabricaDiverge, e o padrao 'MAIS ESCOLHIDO'
+   estava escrito em QUATRO lugares (o value=, o placeholder=, bAplicarCampos e bCfgPreset).
+   Sobram dois: o value= -- que a tabela agora fiscaliza -- e o placeholder=, que nao e fabrica
+   de nada, so a sugestao que aparece no campo vazio.
+   ATENCAO ao caminho que NAO passa pelo DOM: bCfgPreset monta a configuracao a partir do
+   objeto de um preset, entao ela nao usa fcTxtLer -- le a chave 'selotxt' do preset e cai em
+   fcTxtPadrao quando ela falta. E o .trim() continua onde sempre esteve, nos dois cfg: a
+   tabela devolve o valor CRU, como o estado sempre guardou. */
+var B_TXT_DEFS=[
+  ['selotxt','b-selo-txt','MAIS ESCOLHIDO']
+];
 function bCampos(){
-  return {efeito:radio('b-efeito'),fundo:radio('b-fundo'),f1:$('b-f1-t').value,f2:$('b-f2-t').value,
+  var o={efeito:radio('b-efeito'),fundo:radio('b-fundo'),f1:$('b-f1-t').value,f2:$('b-f2-t').value,
     fang:$('b-fang').value,fallback:radio('b-fallback'),
     esp:$('b-esp').value,raio:$('b-raio').value,
     c1:$('b-c1-t').value,c2:$('b-c2-t').value,c3:$('b-c3-t').value,
@@ -14028,8 +14599,11 @@ function bCampos(){
     pvfundo:radio('b-pvfundo'),pvcor:$('b-pvcor-t').value,
     ntmotivos:bNatalMarcados().join(','),ntmov:radio('b-nt-mov'),ntpaleta:radio('b-nt-paleta'),
     ntcantos:radio('b-nt-cantos'),nttam:$('b-nt-tam').value,ntgap:$('b-nt-gap').value,
-    selo:radio('b-selo'),selotxt:$('b-selo-txt').value,selof:$('b-selo-f-t').value,
+    selo:radio('b-selo'),selof:$('b-selo-f-t').value,
     seloc:$('b-selo-c-t').value,selotam:$('b-selo-tam').value,seloeleva:radio('b-selo-eleva')};
+  /* O texto do selo (ver B_TXT_DEFS): a chave gravada continua sendo 'selotxt'. */
+  fcTxtLer(B_TXT_DEFS,o);
+  return o;
 }
 /* Os motivos marcados, SEMPRE na ordem de B_NATAL_PECAS. A ordem da lista e a ordem em que
    eles se repetem na moldura, e ela nao pode depender da ordem em que o operador clicou --
@@ -14076,7 +14650,6 @@ function bAplicarCampos(B){
   $('b-nt-tam').value=(B.nttam!=null&&B.nttam!=='')?B.nttam:34;
   $('b-nt-gap').value=(B.ntgap!=null&&B.ntgap!=='')?B.ntgap:18;
   setRadio('b-selo',B.selo||'nao');
-  $('b-selo-txt').value=(B.selotxt==null)?'MAIS ESCOLHIDO':B.selotxt;
   var sf=corValida(B.selof)?B.selof:'#9C5638';$('b-selo-f-t').value=sf;$('b-selo-f').value=sf;
   var sc2=corValida(B.seloc)?B.seloc:'#FFF6D8';$('b-selo-c-t').value=sc2;$('b-selo-c').value=sc2;
   $('b-selo-tam').value=(B.selotam!=null&&B.selotam!=='')?B.selotam:28;
@@ -14084,6 +14657,8 @@ function bAplicarCampos(B){
   setRadio('b-pvfundo',B.pvfundo||'papel');
   var pc=corValida(B.pvcor)?B.pvcor:'#23281F';
   $('b-pvcor-t').value=pc;$('b-pvcor').value=pc;
+  /* O texto do selo (ver B_TXT_DEFS): chave ausente vale o padrao da tabela, como antes. */
+  fcTxtRestaura(B_TXT_DEFS,B);
 }
 function bRestaura(st){
   if(!st.b)return;
@@ -14428,7 +15003,7 @@ function bCfgPreset(C){
     /* Mesma leitura defensiva: preset gravado antes do selo nao traz nenhum destes campos, e
        o ausente vale "nao usar" -- um preset antigo nao pode ganhar um selo que ninguem pediu. */
     selo:(C.selo==='faixa'||C.selo==='selo'||C.selo==='fita')?C.selo:'nao',
-    seloTxt:String(C.selotxt==null?'MAIS ESCOLHIDO':C.selotxt).trim(),
+    seloTxt:String(C.selotxt==null?fcTxtPadrao(B_TXT_DEFS,'selotxt'):C.selotxt).trim(),
     seloF:cor(C.selof,'#9C5638'),seloC:cor(C.seloc,'#FFF6D8'),
     seloTam:bPresoDe('b-selo-tam',C.selotam),seloEleva:(C.seloeleva==='sim'),
     pad:String(C.pad||'').trim()};
@@ -15593,7 +16168,7 @@ var A_OB_VARS=[
   {id:'hora',  tidy:'booking.time',      rot:'horario',               padrao:'o horário combinado'},
   {id:'quando',tidy:'booking.starts_at', rot:'data e horário juntos', padrao:'a data e o horário combinados'}
 ];
-/* ===== os 31 textos configuraveis desta aba (Rodada de textos configuraveis, 02/09/2026) =====
+/* ===== os textos configuraveis desta aba (Rodada de textos configuraveis, 02/09/2026) =====
    Pedido do dono: "quanto mais customizado o que aparece de texto para o cliente, mais
    flexivel para mim". Cada linha e [chave no cfg/estado, id do campo na aba, texto padrao --
    exatamente o que saia FIXO no bloco antes desta rodada, para as saidas nao mudarem um byte
@@ -15662,7 +16237,17 @@ var A_TXT_DEFS=[
   ['txtTrocarFamilia','a-txt-trocar-familia','Trocar'],
   ['txtRotFamilia','a-txt-rot-familia','Tipo de ensaio'],
   ['txtRotPacote','a-txt-rot-pacote','Pacote'],
-  ['txtFamiliaApartir','a-txt-familia-apartir','a partir de {valor}']
+  ['txtFamiliaApartir','a-txt-familia-apartir','a partir de {valor}'],
+  /* ===== os que estavam FORA da tabela ate 11/09/2026 (leva 2) =====
+     A CHAVE de cada um e a MESMA que o coleta ja gravava, letra por letra: estado, preset e
+     backup gravados antes desta rodada sao lidos sem conversao nenhuma, e o que a ferramenta
+     grava hoje sai byte a byte igual ao de ontem. O que eles ganham e o eco do texto no
+     rotulo e a vigilancia de fcTxtFabricaDiverge, que ate agora nao os alcancava. */
+  ['t1','a-t1','Agende seu ensaio'],
+  ['t2','a-t2','Escolha o pacote'],
+  ['t3','a-t3','Escolha o dia e o horário'],
+  ['t4','a-t4','Trocar pacote'],
+  ['t5','a-t5','Tudo certo!']
 ];
 function aObMarcadas(){
   var r=[],i,el;
@@ -16469,10 +17054,9 @@ function aCfg(){
     altdesk:altdesk, altmob:altmob, largmob:largmob, largcards:largcards, qtdmax:qtdmax,
     medir:medir, sempre:sempre, precal:precal,
     c1:corSegura('a-c1','#0F3A30'), c2:corSegura('a-c2','#ffffff'), c3:corSegura('a-c3','#333333'),
-    t1:$('a-t1').value, t2:$('a-t2').value, t3:$('a-t3').value, t4:$('a-t4').value, t5:$('a-t5').value,
     ob:aObCfg()
   };
-  /* ===== os 31 textos configuraveis (Rodada de textos configuraveis, 02/09/2026) =====
+  /* ===== os textos configuraveis (Rodada de textos configuraveis, 02/09/2026) =====
      Lidos direto do DOM pela tabela unica A_TXT_DEFS (ver o comentario dela): aCfg() so roda
      com a aba aberta, entao os campos sempre existem, igual a t1..t5 acima. */
   fcTxtLer(A_TXT_DEFS,r);
@@ -16508,18 +17092,13 @@ function aColeta(){
     medir:radio('a-medir'),sempre:radio('a-sempre'),precal:radio('a-precal'),
     qtdmax:aElVal('a-qtdmax',10),
     c1:aElVal('a-c1-t','#0F3A30'),c2:aElVal('a-c2-t','#ffffff'),c3:aElVal('a-c3-t','#333333'),
-    t1:aElVal('a-t1','Agende seu ensaio'),
-    t2:aElVal('a-t2','Escolha o pacote'),
-    t3:aElVal('a-t3','Escolha o dia e o horário'),
-    t4:aElVal('a-t4','Trocar pacote'),
-    t5:aElVal('a-t5','Tudo certo!'),
     /* Marcadores da pagina de obrigado (Tarefa 4, passo 5). obfb junta os quatro textos
        reserva com um separador que nao aparece em texto digitado por gente (\u0001), no
        mesmo padrao de tColeta/t.obfb (10004+). */
     obvars:aObMarcadas().join(','),
     obfb:A_OB_VARS.map(function(v){return aElVal('a-ob-fb-'+v.id,v.padrao);}).join('\u0001')
   };
-  /* Os 31 textos configuraveis (ver A_TXT_DEFS): mesma leitura defensiva de aElVal, com o
+  /* Os textos configuraveis (ver A_TXT_DEFS): mesma leitura defensiva de aElVal, com o
      padrao de cada um vindo da tabela -- estado gravado por versao anterior desta ferramenta
      nao tem estas chaves. */
   fcTxtLer(A_TXT_DEFS,r);
@@ -16606,11 +17185,6 @@ function aRestaura(st){
   el=$('a-c1-t');if(el){el.value=A.c1;elc=$('a-c1');if(elc)elc.value=corValida(A.c1)?A.c1:'#0F3A30';}
   el=$('a-c2-t');if(el){el.value=A.c2;elc=$('a-c2');if(elc)elc.value=corValida(A.c2)?A.c2:'#ffffff';}
   el=$('a-c3-t');if(el){el.value=A.c3;elc=$('a-c3');if(elc)elc.value=corValida(A.c3)?A.c3:'#333333';}
-  el=$('a-t1');if(el)el.value=(A.t1!=null)?A.t1:'Agende seu ensaio';
-  el=$('a-t2');if(el)el.value=(A.t2!=null)?A.t2:'Escolha o pacote';
-  el=$('a-t3');if(el)el.value=(A.t3!=null)?A.t3:'Escolha o dia e o horário';
-  el=$('a-t4');if(el)el.value=(A.t4!=null)?A.t4:'Trocar pacote';
-  el=$('a-t5');if(el)el.value=(A.t5!=null)?A.t5:'Tudo certo!';
   /* Estado gravado antes desta versao nao tem 'obvars': o padrao e TODOS os quatro ligados
      (spec, secao 4.3: "todos ligados"), para quem ja publicou a pagina continuar vendo os
      mesmos marcadores trocados que ja funcionavam. */
@@ -16620,7 +17194,7 @@ function aRestaura(st){
     el=$('a-ob-fb-'+A_OB_VARS[k].id);
     if(el)el.value=(fbParts[k]!=null&&fbParts[k]!=='')?fbParts[k]:A_OB_VARS[k].padrao;
   }
-  /* Os 31 textos configuraveis (ver A_TXT_DEFS, logo apos A_OB_VARS): estado gravado antes
+  /* Os textos configuraveis (ver A_TXT_DEFS, logo apos A_OB_VARS): estado gravado antes
      desta rodada (02/09/2026) nao tem nenhuma destas chaves -- o padrao de cada campo e o
      terceiro item da propria tabela, o mesmo texto que saia fixo no bloco. */
   fcTxtRestaura(A_TXT_DEFS,A);
@@ -18532,14 +19106,14 @@ function cColeta(){
       alvo:$('c-alvo').value,cod:$('c-cod').value,prazofmt:radio('c-prazofmt'),
       contador:radio('c-contador'),
       und:$('c-un-d').checked,unh:$('c-un-h').checked,unm:$('c-un-m').checked,uns:$('c-un-s').checked,
-      diaszero:radio('c-diaszero'),fim:radio('c-fim'),fimtxt:$('c-fimtxt').value,
+      diaszero:radio('c-diaszero'),fim:radio('c-fim'),
       cfundo:$('c-cfundo-t').value,ctexto:$('c-ctexto-t').value,cdestaque:$('c-cdestaque-t').value,
       fonte:radio('c-fonte'),tam:$('c-tam').value,peso:radio('c-peso'),
-      formato:radio('c-formato'),rd:$('c-rd').value,rh:$('c-rh').value,rm:$('c-rm').value,rs:$('c-rs').value,
+      formato:radio('c-formato'),
       pad:$('c-pad').value,largmax:$('c-largmax').value,alinha:radio('c-alinha'),
       borda:radio('c-borda'),cborda:$('c-cborda-t').value,mob:$('c-mob').value,
       fixa:radio('c-fixa'),empurrar:radio('c-empurrar'),z:$('c-z').value,
-      cta:radio('c-cta'),ctatxt:$('c-ctatxt').value,ctaurl:$('c-ctaurl').value,
+      cta:radio('c-cta'),ctaurl:$('c-ctaurl').value,
       ctafundo:$('c-ctafundo-t').value,ctatexto:$('c-ctatexto-t').value,
       fechar:radio('c-fechar'),prog:radio('c-prog'),cprog:$('c-cprog-t').value,
       corujapos:radio('c-coruja'),corujaalt:$('c-corujaalt').value,gap:$('c-gap').value,
@@ -18551,7 +19125,7 @@ function cColeta(){
       urg:radio('c-urg'),urglim:$('c-urglim').value,curg:$('c-curg-t').value,urgpulsar:radio('c-urgpulsar'),
       dig:radio('c-dig'),entrada:radio('c-entrada'),entradapx:$('c-entradapx').value}
   };
-  /* Os oito textos configuraveis (ver C_TXT_DEFS, logo antes de cPrazoTexto). */
+  /* Os textos configuraveis (ver C_TXT_DEFS, logo antes de cPrazoTexto). */
   fcTxtLer(C_TXT_DEFS,r.c);
   return r;
 }
@@ -18561,7 +19135,7 @@ function cRestaura(st){
   var C=st.c;
   setRadio('c-modo',C.modo);setRadio('c-diaszero',C.diaszero);setRadio('c-fim',C.fim);
   $('c-dias').value=C.dias;$('c-horas').value=C.horas;$('c-mins').value=C.mins;
-  $('c-alvo').value=C.alvo||'';$('c-cod').value=C.cod||'';$('c-fimtxt').value=C.fimtxt;
+  $('c-alvo').value=C.alvo||'';$('c-cod').value=C.cod||'';
   /* Campo criado em 25/08/2026: estado gravado antes nao o traz, e o ausente vale o padrao. */
   var _pf=C.prazofmt;
   setRadio('c-prazofmt',(_pf==='curtoano'||_pf==='extenso'||_pf==='extensohora')?_pf:'curto');
@@ -18603,8 +19177,7 @@ function cRestaura(st){
   setRadio('c-mov',C.mov);setRadio('c-urg',C.urg);setRadio('c-urgpulsar',C.urgpulsar);
   setRadio('c-dig',C.dig);setRadio('c-entrada',C.entrada);
   $('c-tam').value=C.tam;$('c-pad').value=C.pad;$('c-largmax').value=C.largmax;$('c-mob').value=C.mob;
-  $('c-z').value=C.z;$('c-rd').value=C.rd;$('c-rh').value=C.rh;$('c-rm').value=C.rm;$('c-rs').value=C.rs;
-  $('c-ctatxt').value=C.ctatxt;$('c-ctaurl').value=C.ctaurl;
+  $('c-z').value=C.z;$('c-ctaurl').value=C.ctaurl;
   $('c-corujaalt').value=C.corujaalt;
   /* o campo do espacamento saiu da coruja e virou c-gap; estados gravados antes disso
      ainda trazem corujagap */
@@ -18618,7 +19191,7 @@ function cRestaura(st){
    ['c-curg',C.curg,'#8C1D18']].forEach(function(p){
     $(p[0]+'-t').value=p[1];$(p[0]).value=corValida(p[1])?p[1]:p[2];
   });
-  /* Os oito textos configuraveis: estado gravado antes desta rodada nao tem nenhuma destas
+  /* Os textos configuraveis: estado gravado antes desta rodada nao tem nenhuma destas
      chaves -- o padrao de cada campo e o terceiro item de C_TXT_DEFS. */
   fcTxtRestaura(C_TXT_DEFS,C);
 }
@@ -18729,7 +19302,7 @@ function cAlvoIso(){
    na tela. */
 var C_PRAZO_MESES=['janeiro','fevereiro','mar\u00e7o','abril','maio','junho','julho','agosto',
   'setembro','outubro','novembro','dezembro'];
-/* ===== os oito textos configuraveis desta aba (Rodada de textos configuraveis, Etapa 3) =====
+/* ===== os textos configuraveis desta aba (Rodada de textos configuraveis, Etapa 3) =====
    Mesmo molde de A_TXT_DEFS/U_TXT_DEFS: [chave no cfg/estado, id do campo na aba, texto padrao].
    OS SUFIXOS DO RELOGIO COMPACTO SAO CAMPOS PROPRIOS, e nao os rotulos das unidades. A decisao
    D-13 (03/09/2026) mandou o compacto ler c-rd/c-rh/c-rm/c-rs, e foi DESFEITA no mesmo dia: os
@@ -18750,7 +19323,23 @@ var C_TXT_DEFS=[
   ['txtSepRelogio','c-txt-sep-relogio',':'],
   ['txtPrazoConector','c-txt-prazo-conector',' de '],
   ['txtPrazoConectorHora','c-txt-prazo-conector-hora',' \u00e0s '],
-  ['txtAriaFechar','c-txt-aria-fechar','Fechar']
+  ['txtAriaFechar','c-txt-aria-fechar','Fechar'],
+  /* ===== os que estavam FORA da tabela ate 11/09/2026 (leva 2) =====
+     A CHAVE de cada um e a MESMA que o coleta ja gravava, letra por letra: estado, preset e
+     backup gravados antes desta rodada sao lidos sem conversao nenhuma, e o que a ferramenta
+     grava hoje sai byte a byte igual ao de ontem. O que eles ganham e o eco do texto no
+     rotulo e a vigilancia de fcTxtFabricaDiverge, que ate agora nao os alcancava. */
+  /* DOIS destes tinham, no cfg, uma chave ANINHADA que o estado nunca teve: cfg.rotulos.d/h/m/s
+     e cfg.cta.txt, montados a mao em cCfg e lidos assim na emissao. O estado sempre gravou
+     'rd'/'rh'/'rm'/'rs' e 'ctatxt', planas -- medido. Como a tabela usa UMA chave para os dois
+     lados, quem cedeu foi o cfg, que e efemero (nasce e morre dentro de cGerar): achatar la
+     nao toca em backup nenhum, e aninhar aqui teria mudado o formato do que fica gravado. */
+  ['fimtxt','c-fimtxt','Promoção encerrada'],
+  ['rd','c-rd','dias'],
+  ['rh','c-rh','horas'],
+  ['rm','c-rm','min'],
+  ['rs','c-rs','seg'],
+  ['ctatxt','c-ctatxt','Quero garantir']
 ];
 /* con e conh sao os dois conectores configuraveis (C_TXT_DEFS). Sem valor padrao aqui de
    proposito: o padrao mora na tabela, e uma segunda copia dele nesta assinatura seria a
@@ -18829,14 +19418,13 @@ function cCfg(){
     contador:(radio('c-contador')!=='nao'),
     unidades:{d:$('c-un-d').checked,h:$('c-un-h').checked,m:$('c-un-m').checked,s:$('c-un-s').checked},
     diaszero:radio('c-diaszero')==='sim',
-    fim:radio('c-fim'),fimtxt:$('c-fimtxt').value,
+    fim:radio('c-fim'),
     cores:{fundo:corSegura('c-cfundo','#0F3A30'),texto:corSegura('c-ctexto','#FDFBF6'),destaque:corSegura('c-cdestaque','#FFC94A'),
       borda:corSegura('c-cborda','#FFC94A'),urg:corSegura('c-curg','#8C1D18'),
       ctaFundo:corSegura('c-ctafundo','#FFC94A'),ctaTexto:corSegura('c-ctatexto','#23281F'),
       prog:corSegura('c-cprog','#FFC94A'),corujaCorpo:corSegura('c-corujacorpo','#FDFBF6'),corujaDet:corSegura('c-corujadet','#FFC94A')},
     fonte:radio('c-fonte'),tam:cPreso('c-tam',15),peso:radio('c-peso'),
     formato:radio('c-formato'),
-    rotulos:{d:$('c-rd').value,h:$('c-rh').value,m:$('c-rm').value,s:$('c-rs').value},
     pad:cPreso('c-pad',10),largmax:cPreso('c-largmax',1100),alinha:radio('c-alinha'),
     /* O corte do celular sai da faixa declarada em C_NUMS (320 a 1024) AQUI, na fonte da
        configuracao, e nao so na largura do iframe da previa. Prender so a largura da previa
@@ -18846,7 +19434,7 @@ function cCfg(){
        campo, a previa e o codigo leem sempre o mesmo numero. */
     borda:radio('c-borda')==='sim',mob:cPreso('c-mob',640),
     fixa:radio('c-fixa')==='fixa',empurrar:radio('c-empurrar')==='empurrar',z:cPreso('c-z',99980),
-    cta:{ativo:radio('c-cta')==='sim',txt:$('c-ctatxt').value,url:$('c-ctaurl').value},
+    cta:{ativo:radio('c-cta')==='sim',url:$('c-ctaurl').value},
     fechar:radio('c-fechar'),prog:radio('c-prog')==='sim',
     gap:cPreso('c-gap',16),
     /* escondermob, e nao mob: o nome antigo ('mob') dizia so "celular" e ficava a um passo de
@@ -18864,7 +19452,7 @@ function cCfg(){
     dig:radio('c-dig'),entrada:radio('c-entrada'),entradapx:cPreso('c-entradapx',300),
     msgs:cMsgs.length?cMsgs:[{texto:'Oferta por tempo limitado {contador}',curta:''}]
   };
-  /* Os oito textos configuraveis (ver C_TXT_DEFS): lidos direto do DOM pela tabela unica --
+  /* Os textos configuraveis (ver C_TXT_DEFS): lidos direto do DOM pela tabela unica --
      cCfg() so roda com a aba aberta, entao os campos sempre existem. */
   fcTxtLer(C_TXT_DEFS,r);
   return r;
@@ -19219,7 +19807,7 @@ function cJsBase(cfg){
      uma barra: a mensagem, o botao e a coruja seguem onde estavam. */
   if(cfg.contador){
     j+='  var UNIDADES={d:'+cfg.unidades.d+',h:'+cfg.unidades.h+',m:'+cfg.unidades.m+',s:'+cfg.unidades.s+'};  /* true|false: quais unidades aparecem no relogio */\n';
-    j+="  var ROTULOS={d:'"+esc(escHtml(cfg.rotulos.d))+"',h:'"+esc(escHtml(cfg.rotulos.h))+"',m:'"+esc(escHtml(cfg.rotulos.m))+"',s:'"+esc(escHtml(cfg.rotulos.s))+"'};  /* nomes das unidades, embaixo do numero -- so no formato 'blocos' */\n";
+    j+="  var ROTULOS={d:'"+esc(escHtml(cfg.rd))+"',h:'"+esc(escHtml(cfg.rh))+"',m:'"+esc(escHtml(cfg.rm))+"',s:'"+esc(escHtml(cfg.rs))+"'};  /* nomes das unidades, embaixo do numero -- so no formato 'blocos' */\n";
     j+="  var SUFIXOS={d:'"+esc(escHtml(cfg.txtSufD))+"',h:'"+esc(escHtml(cfg.txtSufH))+"',m:'"+esc(escHtml(cfg.txtSufM))+"',s:'"+esc(escHtml(cfg.txtSufS))+"'};  /* letrinhas coladas no numero -- so no formato 'compacto' */\n";
     j+='  var ESCONDE_DIAS_ZERADOS='+cfg.diaszero+';  /* true = o bloco de dias some quando chega a zero */\n';
     j+="  var FORMATO='"+cfg.formato+"';           /* 'compacto' | 'blocos' */\n";
@@ -19334,7 +19922,7 @@ function cJsBase(cfg){
      texto em vez de emoldurar a barra. */
   if(cfg.coruja.esq)interno+='<div class="fcb-coruja fcb-coruja-e"></div>';
   interno+='<div class="fcb-conteudo"></div>';
-  if(cfg.cta.ativo)interno+='<a class="fcb-cta" href="'+escAttr(cfg.cta.url)+'">'+escHtml(cfg.cta.txt)+'</a>';
+  if(cfg.cta.ativo)interno+='<a class="fcb-cta" href="'+escAttr(cfg.cta.url)+'">'+escHtml(cfg.ctatxt)+'</a>';
   if(cfg.coruja.dir)interno+='<div class="fcb-coruja fcb-coruja-d"></div>';
   if(cfg.fechar!=='nao')interno+='<button type="button" class="fcb-fechar" aria-label="'+escAttr(cfg.txtAriaFechar)+'">\u2715</button>';
   interno+='</div>';
@@ -19573,16 +20161,18 @@ function cLimpar(){
   setRadio('c-prog','nao');setRadio('c-coruja','nao');setRadio('c-corujamostrarmob','sim');
   setRadio('c-mov','estatico');setRadio('c-urg','nao');setRadio('c-urgpulsar','sim');
   setRadio('c-dig','nenhuma');setRadio('c-entrada','imediata');
+  /* NENHUM texto entra nesta lista. Ate 11/09/2026 ela carregava onze deles, e quatro
+     ('c-txt-suf-*') eram uma SEGUNDA fabrica dos mesmos campos que C_TXT_DEFS ja declarava:
+     concordavam, mas fcTxtFabricaDiverge compara a tabela com o atributo value=, nunca com
+     esta lista -- divergencia aqui passaria sem aviso. Os outros quatro da tabela nao eram
+     repostos por ninguem, e "Limpar tudo" devolvia metade dos textos da aba. Agora os textos
+     vem todos de fcTxtRestaura, logo abaixo, e esta lista so cuida de numero e endereco. */
   [['c-dias','0'],['c-horas','48'],['c-mins','0'],['c-alvo',''],['c-cod',''],
-   ['c-fimtxt','Promoção encerrada'],['c-tam','15'],['c-rd','dias'],['c-rh','horas'],
-   ['c-rm','min'],['c-rs','seg'],
-   /* Os sufixos do compacto andam com os rotulos dos blocos: sao dois grupos irmaos, lado a
-      lado na mesma tela, e "Limpar" devolver um e deixar o outro seria assimetria visivel. */
-   ['c-txt-suf-d','d'],['c-txt-suf-h','h'],['c-txt-suf-m','m'],['c-txt-suf-s','s'],
-   ['c-pad','10'],['c-largmax','1100'],['c-mob','640'],
-   ['c-z','99980'],['c-ctatxt','Quero garantir'],['c-ctaurl','#reserva'],['c-gap','16'],
+   ['c-tam','15'],['c-pad','10'],['c-largmax','1100'],['c-mob','640'],
+   ['c-z','99980'],['c-ctaurl','#reserva'],['c-gap','16'],
    ['c-corujaalt','26'],['c-vel','18'],['c-alt','5'],['c-urglim','60'],['c-entradapx','300']]
     .forEach(function(p){var el=$(p[0]);if(el)el.value=p[1];});
+  fcTxtRestaura(C_TXT_DEFS,{});
   setRadio('c-contador','sim');
   ['c-un-d','c-un-h','c-un-m','c-un-s'].forEach(function(id){$(id).checked=true;});
   ['c-ef-pulsar','c-ef-brilho','c-ef-degrade','c-ef-piscar','c-ef-tremor'].forEach(function(id){$(id).checked=false;});
@@ -19819,7 +20409,7 @@ function pValDia(){
    Uma leitura so da interface, ja presa nas faixas. E o que pGerar valida, e e o que pBloco
    monta -- e como a previa executa o retorno de pBloco, nao sobra nenhuma segunda
    implementacao da pagina de pagamento para divergir do bloco entregue. */
-/* ===== os 11 textos configuraveis desta aba (Rodada de textos configuraveis, 02/09/2026) =====
+/* ===== os textos configuraveis desta aba (Rodada de textos configuraveis, 02/09/2026) =====
    Mesmo molde de A_TXT_DEFS (aba Agendamento por pacote, logo acima na ferramenta): [chave no
    cfg/estado, id do campo, texto padrao -- o mesmo que saia fixo no bloco antes desta rodada].
    txtZapMsg usa o marcador {desc}/{valor} no mesmo padrao {data} que TXT_PRAZO/TXT_VENCIDO ja
@@ -19849,7 +20439,21 @@ var P_TXT_DEFS=[
   ['txtSucesso','p-txt-sucesso','Pagamento aprovado. Obrigado!'],
   ['txtNota','p-txt-nota',FC_TXT_FABRICA.nota],
   ['txtPixManual','p-txt-pixmanual',FC_TXT_FABRICA.pixManual],
-  ['txtZapMsg','p-txt-zapmsg','Olá! Acabei de pagar: {desc} -- {valor}']
+  ['txtZapMsg','p-txt-zapmsg','Olá! Acabei de pagar: {desc} -- {valor}'],
+  /* ===== os que estavam FORA da tabela ate 11/09/2026 (leva 2) =====
+     A CHAVE de cada um e a MESMA que o coleta ja gravava, letra por letra: estado, preset e
+     backup gravados antes desta rodada sao lidos sem conversao nenhuma, e o que a ferramenta
+     grava hoje sai byte a byte igual ao de ontem. O que eles ganham e o eco do texto no
+     rotulo e a vigilancia de fcTxtFabricaDiverge, que ate agora nao os alcancava. */
+  ['t1','p-t1','Pagamento do seu ensaio'],
+  ['t2','p-t2','Total a pagar'],
+  ['t3','p-t3','Copiar código Pix'],
+  ['t4','p-t4','Já paguei'],
+  ['t5','p-t5','Este endereço não está trazendo nenhuma cobrança. Peça o link de pagamento por WhatsApp que a gente manda na hora.'],
+  ['t6','p-t6','Este link de pagamento não pôde ser conferido: o código da cobrança chegou alterado ou incompleto. Por segurança não vamos exibir nenhum valor. Peça um link novo por WhatsApp.'],
+  ['t7','p-t7','Abra o aplicativo do seu banco, escolha Pix e use o Copia e Cola ou o QR Code.'],
+  ['t8','p-t8','Este link de pagamento vale até {data}.'],
+  ['t9','p-t9','Este link de pagamento venceu em {data} e não mostra mais o pagamento. Fale com a gente pelo WhatsApp que enviamos um link novo.']
 ];
 function pCfg(){
   var cpos=radio('p-coruja')||'esq';
@@ -19872,9 +20476,6 @@ function pCfg(){
     coruja:{pos:cpos,ativo:cpos!=='nao',esq:(cpos==='esq'||cpos==='ambos'),dir:(cpos==='dir'||cpos==='ambos'),
       alt:pPreso('p-corujaalt',30),
       corpo:corSegura('p-corujacorpo','#ffffff'),det:corSegura('p-corujadet','#075E54')},
-    t1:$('p-t1').value, t2:$('p-t2').value, t3:$('p-t3').value, t4:$('p-t4').value,
-    t5:$('p-t5').value, t6:$('p-t6').value, t7:$('p-t7').value,
-    t8:$('p-t8').value, t9:$('p-t9').value,
     /* daqui para baixo: ESTA cobranca -- entra no link, nunca no bloco */
     desc:$('p-desc').value, valor:pValorNum($('p-valor').value), valorBruto:$('p-valor').value,
     /* O percentual entra por fcDescNum, a mesma porta da /cobrar: e ele que faz "sem desconto"
@@ -19884,7 +20485,7 @@ function pCfg(){
     valdia:pValDia(), valbruto:$('p-validade').value,
     ppmodo:(usapp?ppmodo:'nao'), pplink:$('p-pplink').value.trim()
   };
-  /* Os 11 textos configuraveis (ver P_TXT_DEFS): lidos direto do DOM, como t1..t9 acima -- pCfg()
+  /* Os textos configuraveis (ver P_TXT_DEFS): lidos direto do DOM, como t1..t9 acima -- pCfg()
      so roda com a aba aberta. */
   fcTxtLer(P_TXT_DEFS,r);
   return r;
@@ -19998,7 +20599,7 @@ function pJs(cfg){
   j+="  var TXT_VENCIDO='"+escJs(cfg.t9)+"';    /* CADA {data} vira a data do prazo */\n";
   /* ACENTO NOS TEXTOS FIXOS, e a razao registrada para nao ser reaberta. A regra do Manual do
      Prosite (item 10) e "sem acentos em CODIGO colado; textos visiveis com acento OK", e nesta
-     aba os sete textos configuraveis ja nascem acentuados ("Copiar codigo Pix" com o acento,
+     aba os textos configuraveis ja nascem acentuados ("Copiar codigo Pix" com o acento,
      "Ja paguei" com o acento) e viajam assim para dentro do bloco. Deixar ao lado deles quatro
      frases sem acento -- que o CLIENTE le, numa pagina que representa a marca do dono -- era
      inconsistencia visivel, nao economia. Em 01/09/2026 a mensagem do WhatsApp foi junto, a
@@ -20416,15 +21017,9 @@ function pLimpar(){
   $('p-larg').value='420';$('p-qr').value='180';$('p-corujaalt').value='30';
   [['p-c1','#075E54'],['p-c2','#ffffff'],['p-c3','#333333'],['p-corujacorpo','#ffffff'],['p-corujadet','#075E54']]
     .forEach(function(par){$(par[0]).value=par[1];$(par[0]+'-t').value=par[1];});
-  $('p-t1').value='Pagamento do seu ensaio';
-  $('p-t2').value='Total a pagar';
-  $('p-t3').value='Copiar código Pix';
-  $('p-t4').value='Já paguei';
-  $('p-t5').value='Este endereço não está trazendo nenhuma cobrança. Peça o link de pagamento por WhatsApp que a gente manda na hora.';
-  $('p-t6').value='Este link de pagamento não pôde ser conferido: o código da cobrança chegou alterado ou incompleto. Por segurança não vamos exibir nenhum valor. Peça um link novo por WhatsApp.';
-  $('p-t7').value='Abra o aplicativo do seu banco, escolha Pix e use o Copia e Cola ou o QR Code.';
-  $('p-t8').value='Este link de pagamento vale até {data}.';
-  $('p-t9').value='Este link de pagamento venceu em {data} e não mostra mais o pagamento. Fale com a gente pelo WhatsApp que enviamos um link novo.';
+  /* Os textos vem todos da tabela: nove deles estavam repetidos aqui, e os doze que ja
+     viviam em P_TXT_DEFS nao eram repostos por ninguem -- a aba voltava pela metade. */
+  fcTxtRestaura(P_TXT_DEFS,{});
   $('p-desc').value='';$('p-valor').value='';$('p-txid').value='';$('p-pplink').value='';
   $('p-validade').value='';$('p-descpix').value='0';
   $('p-out1').value='';$('p-out2').value='';
@@ -20656,13 +21251,10 @@ function pColeta(){
     c1:$('p-c1-t').value,c2:$('p-c2-t').value,c3:$('p-c3-t').value,
     coruja:radio('p-coruja'),corujaalt:$('p-corujaalt').value,
     corujacorpo:$('p-corujacorpo-t').value,corujadet:$('p-corujadet-t').value,
-    t1:$('p-t1').value,t2:$('p-t2').value,t3:$('p-t3').value,t4:$('p-t4').value,
-    t5:$('p-t5').value,t6:$('p-t6').value,t7:$('p-t7').value,
-    t8:$('p-t8').value,t9:$('p-t9').value,
     desc:$('p-desc').value,valor:$('p-valor').value,txid:$('p-txid').value,
     validade:$('p-validade').value,descpix:$('p-descpix').value,
     ppmodo:radio('p-ppmodo'),pplink:$('p-pplink').value};
-  /* Os 11 textos configuraveis (ver P_TXT_DEFS, logo antes de pCfg). */
+  /* Os textos configuraveis (ver P_TXT_DEFS, logo antes de pCfg). */
   fcTxtLer(P_TXT_DEFS,r);
   return {p:r};
 }
@@ -20681,8 +21273,7 @@ function pRestaura(st){
     });
   if(P.coruja)setRadio('p-coruja',P.coruja);
   if(P.corujaalt!==undefined)$('p-corujaalt').value=P.corujaalt;
-  for(i=1;i<=9;i++)if(P['t'+i]!==undefined)$('p-t'+i).value=P['t'+i];
-  /* Os 11 textos configuraveis: estado gravado antes desta rodada (02/09/2026) nao tem
+  /* Os textos configuraveis: estado gravado antes desta rodada (02/09/2026) nao tem
      nenhuma destas chaves -- o padrao de cada campo e o terceiro item de P_TXT_DEFS. */
   fcTxtRestaura(P_TXT_DEFS,P);
   if(P.desc!==undefined)$('p-desc').value=P.desc;
@@ -20786,11 +21377,8 @@ function mColeta(){
     prop:radio('m-prop'),filtro:radio('m-filtro'),
     sinal:radio('m-sinal'),sinaltipo:radio('m-sinaltipo'),sinalpct:$('m-sinalpct').value,
     sinalfixo:$('m-sinalfixo').value,qtdmax:$('m-qtdmax').value,resumo:radio('m-resumo'),
-    larg:$('m-larg').value,c1:$('m-c1-t').value,c2:$('m-c2-t').value,c3:$('m-c3-t').value,
-    t1:$('m-t1').value,t2:$('m-t2').value,t3:$('m-t3').value,t4:$('m-t4').value,t5:$('m-t5').value,
-    t6:$('m-t6').value,t7:$('m-t7').value,t8:$('m-t8').value,t9:$('m-t9').value,t10:$('m-t10').value,
-    t11:$('m-t11').value,t12:$('m-t12').value}};
-  /* Os 55 textos configuraveis (ver M_TXT_DEFS, logo antes de mCfg). */
+    larg:$('m-larg').value,c1:$('m-c1-t').value,c2:$('m-c2-t').value,c3:$('m-c3-t').value}};
+  /* Os textos configuraveis (ver M_TXT_DEFS, logo antes de mCfg). */
   fcTxtLer(M_TXT_DEFS,r.m);
   return r;
 }
@@ -20824,8 +21412,7 @@ function mRestaura(st){
   if(M.c1!=null){$('m-c1-t').value=M.c1;$('m-c1').value=corValida(M.c1)?M.c1:'#0F3A30';}
   if(M.c2!=null){$('m-c2-t').value=M.c2;$('m-c2').value=corValida(M.c2)?M.c2:'#ffffff';}
   if(M.c3!=null){$('m-c3-t').value=M.c3;$('m-c3').value=corValida(M.c3)?M.c3:'#333333';}
-  var i;for(i=1;i<=12;i++){if(M['t'+i]!=null)$('m-t'+i).value=M['t'+i];}
-  /* Os 55 textos configuraveis: estado gravado antes desta rodada nao tem nenhuma destas
+  /* Os textos configuraveis: estado gravado antes desta rodada nao tem nenhuma destas
      chaves -- o padrao de cada campo e o terceiro item de M_TXT_DEFS. */
   fcTxtRestaura(M_TXT_DEFS,M);
   mEditRestaurar(M);
@@ -21508,7 +22095,7 @@ function mToggles(){
   ver('m-qtdmax-campo',mQtdLigada(mProds));
 }
 
-/* ===== os 55 textos configuraveis desta aba (Rodada de textos configuraveis, Etapa 2) =====
+/* ===== os textos configuraveis desta aba (Rodada de textos configuraveis, Etapa 2) =====
    Mesmo molde de U_TXT_DEFS (aba Checkout, logo acima na ferramenta). Os quatro avisos de
    catalogo ({n} item/itens/opcional/opcionais) ganharam o marcador {n} por decisao do dono
    (D-5): antes o numero era concatenado FORA do texto e ficava sempre no comeco, e nao havia
@@ -21572,7 +22159,24 @@ var M_TXT_DEFS=[
   ['txtLimitePaypal','m-txt-limite-paypal','O PayPal também não tem como avisar esta página: a liberação é manual.'],
   ['txtLimiteCarrinho','m-txt-limite-carrinho','O carrinho fica guardado neste navegador e neste aparelho: montado no celular, no computador ele aparece vazio.'],
   ['txtLimiteEstoque','m-txt-limite-estoque','Não há estoque: todos os itens são sob encomenda e podem ser pedidos quantas vezes for preciso.'],
-  ['txtLimiteCupons','m-txt-limite-cupons','Os cupons ficam dentro do código desta página e não são secretos.']
+  ['txtLimiteCupons','m-txt-limite-cupons','Os cupons ficam dentro do código desta página e não são secretos.'],
+  /* ===== os que estavam FORA da tabela ate 11/09/2026 (leva 2) =====
+     A CHAVE de cada um e a MESMA que o coleta ja gravava, letra por letra: estado, preset e
+     backup gravados antes desta rodada sao lidos sem conversao nenhuma, e o que a ferramenta
+     grava hoje sai byte a byte igual ao de ontem. O que eles ganham e o eco do texto no
+     rotulo e a vigilancia de fcTxtFabricaDiverge, que ate agora nao os alcancava. */
+  ['t1','m-t1','Nossa loja'],
+  ['t2','m-t2','Itens opcionais'],
+  ['t3','m-t3','Total'],
+  ['t4','m-t4','Pagar com Pix'],
+  ['t5','m-t5','Pagamento aprovado! Em breve entramos em contato.'],
+  ['t6','m-t6','Não foi possível concluir o pagamento. Tente novamente.'],
+  ['t7','m-t7','Adicionar ao carrinho'],
+  ['t8','m-t8','Sinal agora'],
+  ['t9','m-t9','Restante na entrega'],
+  ['t10','m-t10','Seu carrinho'],
+  ['t11','m-t11','Voltar para a vitrine'],
+  ['t12','m-t12','Resumo para conferência']
 ];
 /* ===== configuracao da aba =====
    Uma leitura so da interface, ja presa nas faixas. E o que mRecusa valida e o que mBloco
@@ -21610,12 +22214,9 @@ function mCfg(){
     larg:mPreso('m-larg')||1080, cols:mPreso('m-cols')||3, mob:mPreso('m-mob')||760,
     imgvit:mPreso('m-imgvit')||400, imgdet:mPreso('m-imgdet')||1000,
     prop:radio('m-prop')||'1 / 1', filtro:(radio('m-filtro')!=='nao'),
-    c1:corSegura('m-c1','#0F3A30'), c2:corSegura('m-c2','#ffffff'), c3:corSegura('m-c3','#333333'),
-    t1:$('m-t1').value, t2:$('m-t2').value, t3:$('m-t3').value, t4:$('m-t4').value,
-    t5:$('m-t5').value, t6:$('m-t6').value, t7:$('m-t7').value, t8:$('m-t8').value,
-    t9:$('m-t9').value, t10:$('m-t10').value, t11:$('m-t11').value, t12:$('m-t12').value
+    c1:corSegura('m-c1','#0F3A30'), c2:corSegura('m-c2','#ffffff'), c3:corSegura('m-c3','#333333')
   };
-  /* Os 55 textos configuraveis (ver M_TXT_DEFS): lidos direto do DOM pela tabela unica --
+  /* Os textos configuraveis (ver M_TXT_DEFS): lidos direto do DOM pela tabela unica --
      mCfg() so roda com a aba aberta, entao os campos sempre existem, igual a t1..t12. */
   fcTxtLer(M_TXT_DEFS,r);
   return r;
@@ -24003,10 +24604,11 @@ prep('Agendamento por pacote','pac',function(){
    cada campo bate nos dois lugares onde ele esta escrito (ver fcTxtFabricaDiverge).
    Passo proprio, com rotulo proprio: se ele falhar, a barra vermelha precisa dizer que foram os
    textos -- as abas continuam funcionando, so com as secoes abertas.
-   A lista de abas cresceu com a Etapa 3 (03/09/2026): as OITO tabelas de texto passam por aqui,
-   entao a falha alcanca as oito -- deixar 'uni loja' faria a barra apontar duas abas por um
-   defeito que pode estar em qualquer uma das oito. */
-prep('Textos configuraveis','slide leads tidy uni cnt cob loja pac',function(){
+   A lista de abas e a de fcTxtTabelas(): toda aba com tabela de texto passa por aqui, entao a
+   falha alcanca todas elas -- deixar 'uni loja' faria a barra apontar duas abas por um defeito
+   que pode estar em qualquer uma. Cresceu duas vezes: com a Etapa 3 (03/09/2026) e com a leva
+   2 (11/09/2026), quando as Bordas ganharam a propria tabela. */
+prep('Textos configuraveis','slide leads tidy uni bor cnt cob loja pac',function(){
   fcdLigar();
   var d=fcTxtFabricaDiverge();
   if(d.length)throw new Error('o padrao de fabrica destes campos discorda entre o value= do HTML e a tabela da aba: '+d.join(', '));
@@ -24019,6 +24621,12 @@ prep('Orçamento do identificador','loja pac',fcIdConferir,'conferir a conta do 
    sobre um campo ainda vazio. Passo proprio, com rotulo proprio -- se ele falhar, a barra
    vermelha precisa dizer que foram os contadores, e nao o preset geral. */
 prep('Limites visíveis nos campos','uni bor cob',fcLimIniciar,'pôr o contador e o limite nos campos que alimentam API');
+/* A busca e o eco entram DEPOIS de as abas serem desenhadas com o estado restaurado: o eco
+   tem de nascer sobre o texto que o operador vai ler na tela, e nao sobre o valor de fabrica.
+   Passo proprio, com rotulo proprio -- se ele falhar, a barra vermelha precisa dizer que foi a
+   busca, e nao o preset geral, que continua funcionando. Sem aba associada: a busca e de
+   todas elas. */
+prep('Achar um texto','',fcsIniciar,'ligar a busca e escrever o texto atual nos rótulos');
 prep('Preset geral','',fcgIniciar,'preparar a barra do preset geral');
 /* Passo proprio, com rotulo proprio: se ligar os botoes de backup falhar, a barra vermelha
    precisa dizer que foi o backup -- e nao o preset geral, que continua funcionando. */

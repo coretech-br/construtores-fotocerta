@@ -538,3 +538,90 @@ que **sobrevive a limpeza**: com `max:17` a peca bloquearia a digitacao nos 17 e
 por **bloqueio silencioso**. E no Agendamento o orcamento e dividido entre um campo e uma
 **lista** (os pacotes ja cadastrados), sobre a qual um contador por campo ficaria calado
 justamente no caso que causa a colisao. Ficou so na recusa, e a razao esta escrita.
+
+## Entregue em 11/09/2026 — achar um texto, e os 58 que estavam fora da rede
+
+Nasceu de um pedido que era, na verdade, um defeito de descoberta: o dono quis mudar a frase
+`Sem opcional` que o cliente lê, procurou na ferramenta, **não achou**, e pediu que o texto
+virasse configurável. Ele já era (`u-txt-semopcional`, Checkout) e funcionava. A varredura mediu
+por que ele não achou, e foram **três barreiras**, nenhuma resolvida por rótulo melhor:
+
+1. A busca do navegador **não lê o `value` de `<input>`** — só `<label>`, `<legend>` e `.ajuda`.
+2. **Aba fechada é `display:none`.**
+3. **Seção recolhida também** (`.fcd-oculto`), e ela cobria **116 dos 168** campos de texto.
+
+### Leva 1 — a busca e o eco no rótulo
+
+A busca vive na **segunda linha da barra grudada** (`.fcg-fixa`), campo sempre à vista e não botão
+que abre painel: o defeito é de descoberta, e busca escondida repetiria o erro que ela veio
+consertar. Ela varre o **DOM** (437 campos medidos), **não as tabelas** — uma busca sobre as
+tabelas ignoraria os campos de fora e diria "não encontrado" sobre coisa que existe, que é pior
+que não ter busca. Alcança também o que nasce em tempo de execução (código de cupom, nome de
+produto). Ficam de fora, declarados: o código gerado (`readonly` — é resultado, não destino), as
+superfícies de colagem do importador (`data-fcs="nao"`) e os painéis Identidade/Detalhes.
+
+O rótulo passou a mostrar o **valor atual** do campo, gerado a partir da tabela — nunca escrito à
+mão, que criaria uma terceira cópia das frases que nenhuma guarda fiscaliza. `fcTxtTabelas()`
+virou a fonte única da lista das tabelas (antes ela só existia dentro de `fcTxtFabricaDiverge`).
+
+**Achado resolvido na mesma leva:** a busca entregava o operador num campo **invisível** quando
+outra opção da aba o escondia por `style.display` (`c-ctatxt`, dentro de `#c-cta-campos`). Abrir a
+aba e expandir a seção não bastavam. Agora ela para no container visível mais próximo e avisa.
+
+**Achado resolvido:** `id-orcamento.mjs` usava `main` como referência do lado "antes" — e o
+conserto que ele mede já estava em `main`, então o "antes" media a si mesmo. Preso em `94042b6`:
+"antes" é estado histórico, não "o que estiver em main hoje".
+
+### Leva 2 — os 58 que estavam fora das tabelas
+
+Eram 68 campos que o cliente final lê e que viviam fora das `*_TXT_DEFS`, cada um escrito à mão em
+três a seis lugares. **58 entraram**; as tabelas foram de 168 para 226 campos, em nove tabelas
+(`B_TXT_DEFS` é nova, só com o selo das bordas).
+
+**Ficaram fora, com motivo medido:** os nove textos reserva dos marcadores (`t-ob-fb-*`,
+`a-ob-fb-*`), porque dividem **uma** chave de estado juntada por caractere de controle — trazê-los
+muda o formato do que fica gravado, classe que exige a palavra do dono; e `m-cod`, que é
+identificador com regex e teto, não frase.
+
+**A instrução da chave com ponto foi derrubada por medição.** Tinha sido mandado ensinar
+`fcTxtLer`/`fcTxtRestaura` a entender `'rotulos.d'`, para o estado gravado sair idêntico. A medição
+mostrou que **o aninhamento nunca existiu no estado gravado** — ele só existe no `cfg` efêmero do
+gerador. Chave com ponto teria **aninhado o estado**, exatamente o que a instrução existia para
+impedir. Manteve-se a chave plana e achatou-se o `cfg` em 6 pontos de emissão.
+
+### Os cinco achados da leva 2
+
+1. **"Restaurar padrões" não repunha os textos.** `sLimpar` repunha 0 de 5, `lPadroes` 0 de 20,
+   `pLimpar` 0 de 21, `cLimpar` 4 de 14. O botão promete devolver a aba aos padrões de fábrica e
+   voltava pela metade, em silêncio. Consertado nos quatro — e são **quatro**, não oito: as outras
+   seis abas não têm botão de reposição (medido; não se criou botão novo, que seria funcionalidade).
+2. **Segunda fábrica fora da vigilância:** `c-txt-suf-d/h/m/s` tinham o padrão escrito em
+   `C_TXT_DEFS` e de novo dentro de `cLimpar`. `fcTxtFabricaDiverge` compara a tabela com o
+   atributo `value=`, **nunca com `cLimpar`**. Morreu junto com o conserto do item 1.
+3. **`lRestaura` nunca chamava `fcTxtRestaura(L_TXT_DEFS,…)`**: os cinco textos da Captação eram
+   coletados e **perdidos a cada recarga**. A regressão nunca pegou porque ela preenche e gera na
+   mesma sessão, sem recarregar.
+4. **`"undefined"` gravado no campo** quando a chave faltava (`uRestaura`, `cRestaura`,
+   `lRestaura`). Dentro da tabela, chave ausente cai no padrão. Muda comportamento observável em
+   31 campos, e só com estado antigo ou parcial.
+5. **Dezesseis comentários com contagem errada** (U dizia 33 e tinha 36; A 31/40; P 11/12; M
+   55/58). 31 números escritos à mão foram removidos; o número sai de `TABELA.length`.
+
+### A prova que a regressão byte a byte NÃO consegue dar
+
+Na Captação o `escJs` acontecia **na leitura do DOM** e a emissão era crua. `fcTxtLer` devolve cru,
+então o `escJs` desceu para **15 linhas de emissão**. Com valores de fábrica a saída é idêntica dos
+dois jeitos — **a regressão aprovaria um esquecimento**. Conferiu-se a passagem "configurada": os
+valores dela **não contêm apóstrofo**, então ela passava por motivo certo mas insuficiente.
+
+Daí `scripts/verificar/textos-migrados.mjs` (131 verificações): injeta um texto hostil com
+apóstrofo, aspas, barra invertida e `</script` **nos 58 campos**, gera, executa cada bloco numa
+página com marcador de fim, e exige raiz desenhada, zero erro de console e o texto **inteiro**
+chegando à tela, à ficha do produto e à URL do WhatsApp. Um `escJs` esquecido quebra o bloco e o
+marcador não aparece.
+
+### Aberto, esperando decisão do dono
+
+- **Os nove textos reserva dos marcadores.** Trazê-los para a tabela muda o formato do que fica
+  gravado. A conversão automática faria backup antigo continuar abrindo; o risco é o inverso e é
+  pequeno — backup feito **depois**, aberto numa versão **antiga** da ferramenta, perderia os nove.
