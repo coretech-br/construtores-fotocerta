@@ -4362,6 +4362,65 @@ function fcTxtPadrao(defs,chave){
   for(i=0;i<defs.length;i++)if(defs[i][0]===chave)return defs[i][2];
   return '';
 }
+/* ===== OS NOVE TEXTOS RESERVA DOS MARCADORES: uma chave por campo, e a migracao =====
+   Sao os textos que a pagina de obrigado mostra quando o TidyCal NAO manda o dado -- no lugar
+   do nome, da data, do horario. Ate 11/09/2026 os cinco da aba TidyCal e os quatro da aba
+   Agendamento por pacote viajavam COLADOS numa chave so ('obfb'), separados por um caractere
+   de controle. Era o unico motivo de eles estarem fora das tabelas de texto, e ficar de fora
+   custava o eco no rotulo e a vigilancia de fcTxtFabricaDiverge. Agora cada um tem a propria
+   chave, e as tres funcoes abaixo sao o que isso exige.
+
+   A ORDEM E A DE T_OB_VARS/A_OB_VARS, sempre, e nunca a ordem de chave de objeto: o endereco
+   do TidyCal e montado nessa ordem (ver tObEndereco, e o comentario de tObMarcadas -- "a ordem
+   em que o operador clicou nao pode mudar o endereco gerado"), e a chave antiga foi colada
+   nela. Por isso as tres percorrem o ARRAY de marcadores, e nao o objeto do estado.
+
+   'obfb' CONTINUA SENDO GRAVADO, e a razao nao e nostalgia: o molde da importacao de arquivo e
+   o que o coleta() da aba devolve AGORA (ver fcxConformar), e chave que nao esta no molde e
+   DESCARTADA antes de o restaura rodar. Tirar 'obfb' do coleta faria um backup em arquivo,
+   gravado por versao anterior, chegar a tRestaura/aRestaura ja sem os nove textos -- a
+   migracao rodaria com nada na mao, e o operador leria um numero de descartes sem ligacao
+   nenhuma com o que perdeu. E exatamente o defeito que 'link' custou em 03/09/2026, registrado
+   no molde de 'pac' em ABAS. O que se paga por manter e uma copia a mais no que fica gravado;
+   ela nao pode divergir das chaves novas porque nao e uma segunda leitura do DOM, e sim uma
+   PROJECAO delas, calculada depois de fcTxtLer. */
+function fcObFbChave(id){return 'obfb'+id.charAt(0).toUpperCase()+id.substring(1);}
+function fcObFbDefs(vars,pref){
+  var r=[],i;
+  for(i=0;i<vars.length;i++)r.push([fcObFbChave(vars[i].id),pref+'-ob-fb-'+vars[i].id,vars[i].padrao]);
+  return r;
+}
+/* A chave antiga, escrita A PARTIR das chaves novas. Projecao, nunca segunda leitura: duas
+   leituras do mesmo campo sao duas coisas que podem discordar amanha. */
+function fcObFbJuntar(o,vars){
+  var r=[],i,v;
+  for(i=0;i<vars.length;i++){v=o[fcObFbChave(vars[i].id)];r.push(v==null?'':String(v));}
+  return r.join('\u0001');
+}
+/* A MIGRACAO. Devolve uma COPIA do estado da aba com as chaves novas preenchidas a partir da
+   antiga -- copia, e nao o proprio objeto, porque o mesmo fragmento pode ser o de um preset
+   guardado em memoria (fcPresetAplicar passa fcClone(p.valores), fcgAplicarAba tambem), e
+   migrar na entrada nao pode reescrever a biblioteca por efeito colateral. Chave nova que JA
+   veio no estado vence: ela e a de hoje.
+   'vazioVale' repete, campo a campo, o que cada aba ja fazia antes desta rodada, e a diferenca
+   entre as duas foi MEDIDA, nao suposta: o laco da TidyCal testava fb[i]!==undefined (texto
+   reserva vazio gravado era um valor, e ficava vazio na tela), o da Agendamento por pacote
+   testava !=null && !=='' (vazio valia ausente, e o campo voltava ao padrao de fabrica).
+   Uniformizar aqui mudaria, em silencio, o bloco que um estado ja gravado produz. */
+function fcObFbMigrar(st,vars,vazioVale){
+  var r={},k,partes,i,ch;
+  for(k in st)if(Object.prototype.hasOwnProperty.call(st,k))r[k]=st[k];
+  if(typeof st.obfb!=='string'||!st.obfb)return r;
+  partes=st.obfb.split('\u0001');
+  for(i=0;i<vars.length;i++){
+    ch=fcObFbChave(vars[i].id);
+    if(r[ch]!=null)continue;                       /* chave nova presente manda */
+    if(partes[i]===undefined)continue;             /* chave antiga mais curta que a tabela */
+    if(!vazioVale&&partes[i]==='')continue;        /* nesta aba, vazio sempre valeu ausente */
+    r[ch]=partes[i];
+  }
+  return r;
+}
 /* ===== A REDE CONTRA A FABRICA QUE DIVERGE =====
    O padrao de cada campo de texto esta escrito em DOIS lugares: no atributo value= do <input>
    (o que um navegador sem estado guardado mostra) e na terceira coluna da tabela da aba (o que
@@ -5821,7 +5880,7 @@ var ABAS=[
   {id:'tidy', nome:'Agendamento TidyCal', chaves:['t'],         coleta:tColeta,restaura:tRestaura,gerar:tGerar,
    pref:'t',fora:[],resumo:tPresetResumo,redesenhar:tPresetDepois,antesDeSalvar:tPresetAntes,
    exemplo:'ex.: Natal 2026 - ensaio temático',
-   guarda:'tudo o que está configurado nesta aba — o endereço do agendamento no TidyCal, como o quadro abre espaço para o formulário de reserva (medindo ou pela altura calibrada), as duas alturas, a largura de corte, quando abrir o espaço calibrado, o modo (direto ou embutido), o endereço da página intermediária, a altura inicial do iframe e os <b>textos</b> da seção 3.'},
+   guarda:'tudo o que está configurado nesta aba — o endereço do agendamento no TidyCal, como o quadro abre espaço para o formulário de reserva (medindo ou pela altura calibrada), as duas alturas, a largura de corte, quando abrir o espaço calibrado, o modo (direto ou embutido), o endereço da página intermediária, a altura inicial do iframe, os <b>textos</b> da seção 3 e a <b>página de obrigado</b> da seção 4 (se ela é usada, o endereço dela, o formato da data, quais <b>marcadores</b> viajam e o <b>texto reserva</b> de cada um).'},
   /* 'nome' e TEXTO DE INTERFACE: aparece na barra vermelha de falhas, nas perguntas do preset
      geral e no interruptor de cada aba. Por isso vai com acento, como manda a convencao do
      arquivo -- e por isso os prep() desta aba usam exatamente a mesma grafia, senao a barra
@@ -12013,12 +12072,19 @@ document.addEventListener('change',function(e){
    O E-MAIL FICOU DE FORA por decisao: nao e necessario numa pagina de obrigado, e a URL com
    nome e e-mail entra no historico do navegador do cliente, nas estatisticas do site e no
    cabecalho enviado a recursos externos. */
+/* O 'padrao' de cada um e o TEXTO RESERVA DE FABRICA, e ele entrou aqui em 11/09/2026 pelo
+   mesmo motivo que A_OB_VARS ja o tinha: e a terceira coluna que T_TXT_DEFS recebe, la
+   embaixo, via fcObFbDefs. Ate essa data o padrao dos cinco morava SO no atributo value= do
+   <input> -- tRestaura nunca repunha texto reserva nenhum, entao nao havia onde ele estar.
+   Cada um destes cinco textos e, letra por letra, o value= do campo correspondente na secao 4
+   da aba; se um dia os dois discordarem, fcTxtFabricaDiverge acende a barra vermelha, que e
+   para isso que ela existe. */
 var T_OB_VARS=[
-  {id:'nome',  tidy:'contact.name',      rot:'nome de quem agendou'},
-  {id:'tipo',  tidy:'booking_type.title',rot:'tipo de agendamento'},
-  {id:'data',  tidy:'booking.date',      rot:'data'},
-  {id:'hora',  tidy:'booking.time',      rot:'horario'},
-  {id:'quando',tidy:'booking.starts_at', rot:'data e horário juntos'}
+  {id:'nome',  tidy:'contact.name',      rot:'nome de quem agendou',  padrao:'tudo certo'},
+  {id:'tipo',  tidy:'booking_type.title',rot:'tipo de agendamento',   padrao:'seu agendamento'},
+  {id:'data',  tidy:'booking.date',      rot:'data',                  padrao:'a data combinada'},
+  {id:'hora',  tidy:'booking.time',      rot:'horario',               padrao:'o horário combinado'},
+  {id:'quando',tidy:'booking.starts_at', rot:'data e horário juntos', padrao:'a data e o horário combinados'}
 ];
 /* Sempre na ordem de T_OB_VARS, pelo mesmo motivo dos enfeites da guirlanda: a ordem em que o
    operador clicou nao pode mudar o endereco gerado. */
@@ -12047,7 +12113,10 @@ var T_TXT_DEFS=[
   ['txtObSepDiaSemana','t-txt-ob-sep-diasemana',', '],
   ['txtObConectorHora','t-txt-ob-conector-hora',' \u00e0s '],
   ['txtIframeTitulo','t-txt-iframe-titulo','Agenda']
-];
+/* Os CINCO TEXTOS RESERVA dos marcadores entram aqui por fcObFbDefs, e nao digitados: o id e
+   o padrao de cada um ja estao em T_OB_VARS, e digita-los de novo seria a segunda copia de
+   sempre. Concatenados no FIM e na ordem de T_OB_VARS -- a ordem importa (ver fcObFbChave). */
+].concat(fcObFbDefs(T_OB_VARS,'t'));
 function tObCfg(){
   var fb={},i;
   for(i=0;i<T_OB_VARS.length;i++)fb[T_OB_VARS[i].id]=$('t-ob-fb-'+T_OB_VARS[i].id).value;
@@ -12220,11 +12289,17 @@ function tColeta(){
       arq:radio('t-arq'),url:$('t-url').value,alt0:$('t-alt0').value,preset:radio('t-preset'),
       medir:radio('t-medir'),sempre:radio('t-sempre'),
       obusar:radio('t-ob-usar'),oburl:$('t-ob-url').value,obfmt:radio('t-ob-fmt'),
-      obvars:tObMarcadas().join(','),
-      obfb:T_OB_VARS.map(function(v){return $('t-ob-fb-'+v.id).value;}).join('\u0001')}
+      obvars:tObMarcadas().join(',')}
   };
-  /* Os textos configuraveis (ver T_TXT_DEFS, logo antes de tObCfg). */
+  /* Os textos configuraveis (ver T_TXT_DEFS, logo antes de tObCfg). Os cinco textos reserva
+     dos marcadores entraram na tabela em 11/09/2026: cada um grava na propria chave, e nao
+     mais colados em 't.obfb'. */
   fcTxtLer(T_TXT_DEFS,r.t);
+  /* A chave ANTIGA, projetada das cinco novas (ver fcObFbJuntar). Ela continua no que o coleta
+     devolve porque e este objeto que serve de MOLDE a importacao de arquivo -- sem ela no
+     molde, um backup anterior a esta versao perderia os cinco textos antes de a migracao de
+     tRestaura poder ve-los. */
+  r.t.obfb=fcObFbJuntar(r.t,T_OB_VARS);
   return r;
 }
 function tRestaura(st){
@@ -12278,14 +12353,15 @@ function tRestaura(st){
   if(_f==='bonito')_f='curto';
   setRadio('t-ob-fmt',(_f==='curto'||_f==='extenso'||_f==='extensodia')?_f:'comoveio');
   tObMarcar(typeof st.t.obvars==='string'?st.t.obvars:'nome,tipo,data,hora');
-  if(typeof st.t.obfb==='string'&&st.t.obfb){
-    var fb=st.t.obfb.split('\u0001'),ifb;
-    for(ifb=0;ifb<T_OB_VARS.length;ifb++)
-      if(fb[ifb]!==undefined)$('t-ob-fb-'+T_OB_VARS[ifb].id).value=fb[ifb];
-  }
   /* Os textos configuraveis: estado gravado antes desta rodada nao tem nenhuma destas
-     chaves -- o padrao de cada campo e o terceiro item de T_TXT_DEFS. */
-  fcTxtRestaura(T_TXT_DEFS,st.t);
+     chaves -- o padrao de cada campo e o terceiro item de T_TXT_DEFS.
+     OS CINCO TEXTOS RESERVA dos marcadores entraram na tabela em 11/09/2026. Estado, preset de
+     aba, preset geral e backup em arquivo gravados antes disso trazem os cinco colados na
+     chave 'obfb': fcObFbMigrar os reparte pelas cinco chaves novas, na ordem de T_OB_VARS, e
+     os quatro caminhos passam por aqui porque todos eles aplicam pelo restaura() da aba.
+     'true' porque esta aba SEMPRE aceitou texto reserva vazio gravado como valor (o laco que
+     existia aqui testava !==undefined) -- ver o comentario de fcObFbMigrar. */
+  fcTxtRestaura(T_TXT_DEFS,fcObFbMigrar(st.t,T_OB_VARS,true));
   /* O AVISO SAI DEPOIS DO LACO, e nao aqui dentro. 'tidy' NAO e a ultima aba de ABAS: um
      salvarEstado() neste ponto chamaria o coleta() de abas que ainda nao restauraram o proprio
      DOM, e gravaria por cima do que elas tinham -- exatamente o oposto do que a migracao
@@ -16160,8 +16236,11 @@ function aToggles(){
    quem identifica o pacote e o codigo (secao 5 da spec: "renomear um tipo no TidyCal nao
    quebra nada"), e 'pacote'/'duracao'/'valor' NUNCA sao configuraveis porque nao vem do
    TidyCal, vem do catalogo cadastrado nesta mesma aba -- eles sempre viajam, sem interruptor
-   (ver aBlocoObrigado). O 'padrao' de cada um e o texto reserva de fabrica, usado quando o
-   estado gravado nao tem 'obfb' (versao anterior) ou o campo especifico veio vazio. */
+   (ver aBlocoObrigado). O 'padrao' de cada um e o texto reserva de fabrica: desde 11/09/2026
+   ele e a TERCEIRA COLUNA que A_TXT_DEFS recebe, logo abaixo, via fcObFbDefs -- entao ele
+   passou a valer tambem para o campo cujo estado nao traz a chave nova, e nao so para o
+   'obfb' ausente ou vazio da versao anterior. Continua sendo, letra por letra, o value= do
+   <input> correspondente; fcTxtFabricaDiverge acende a barra vermelha se os dois discordarem. */
 var A_OB_VARS=[
   {id:'nome',  tidy:'contact.name',      rot:'nome de quem agendou',  padrao:'tudo certo'},
   {id:'data',  tidy:'booking.date',      rot:'data',                  padrao:'a data combinada'},
@@ -16248,7 +16327,10 @@ var A_TXT_DEFS=[
   ['t3','a-t3','Escolha o dia e o horário'],
   ['t4','a-t4','Trocar pacote'],
   ['t5','a-t5','Tudo certo!']
-];
+/* Os QUATRO TEXTOS RESERVA dos marcadores entram aqui por fcObFbDefs (11/09/2026): o id e o
+   padrao de cada um ja estao em A_OB_VARS, logo acima, e digita-los de novo seria uma segunda
+   fabrica. Na ordem de A_OB_VARS, que e a ordem em que a chave antiga foi colada. */
+].concat(fcObFbDefs(A_OB_VARS,'a'));
 function aObMarcadas(){
   var r=[],i,el;
   for(i=0;i<A_OB_VARS.length;i++){
@@ -17092,16 +17174,18 @@ function aColeta(){
     medir:radio('a-medir'),sempre:radio('a-sempre'),precal:radio('a-precal'),
     qtdmax:aElVal('a-qtdmax',10),
     c1:aElVal('a-c1-t','#0F3A30'),c2:aElVal('a-c2-t','#ffffff'),c3:aElVal('a-c3-t','#333333'),
-    /* Marcadores da pagina de obrigado (Tarefa 4, passo 5). obfb junta os quatro textos
-       reserva com um separador que nao aparece em texto digitado por gente (\u0001), no
-       mesmo padrao de tColeta/t.obfb (10004+). */
-    obvars:aObMarcadas().join(','),
-    obfb:A_OB_VARS.map(function(v){return aElVal('a-ob-fb-'+v.id,v.padrao);}).join('\u0001')
+    /* Marcadores da pagina de obrigado (Tarefa 4, passo 5). O texto reserva de cada um saiu
+       daqui em 11/09/2026: os quatro passaram a gravar cada um na propria chave, pela tabela
+       A_TXT_DEFS, e 'obfb' virou projecao deles (logo abaixo, depois do fcTxtLer). */
+    obvars:aObMarcadas().join(',')
   };
   /* Os textos configuraveis (ver A_TXT_DEFS): mesma leitura defensiva de aElVal, com o
      padrao de cada um vindo da tabela -- estado gravado por versao anterior desta ferramenta
      nao tem estas chaves. */
   fcTxtLer(A_TXT_DEFS,r);
+  /* A chave ANTIGA, projetada das quatro novas (ver fcObFbJuntar). Continua no que o coleta
+     devolve porque e este objeto que serve de MOLDE a importacao de arquivo. */
+  r.obfb=fcObFbJuntar(r,A_OB_VARS);
   return {a:r};
 }
 function aRestaura(st){
@@ -17189,15 +17273,15 @@ function aRestaura(st){
      (spec, secao 4.3: "todos ligados"), para quem ja publicou a pagina continuar vendo os
      mesmos marcadores trocados que ja funcionavam. */
   aObMarcar(A.obvars!=null?A.obvars:'nome,data,hora,quando');
-  var fbParts=String(A.obfb||'').split('\u0001');
-  for(k=0;k<A_OB_VARS.length;k++){
-    el=$('a-ob-fb-'+A_OB_VARS[k].id);
-    if(el)el.value=(fbParts[k]!=null&&fbParts[k]!=='')?fbParts[k]:A_OB_VARS[k].padrao;
-  }
   /* Os textos configuraveis (ver A_TXT_DEFS, logo apos A_OB_VARS): estado gravado antes
      desta rodada (02/09/2026) nao tem nenhuma destas chaves -- o padrao de cada campo e o
-     terceiro item da propria tabela, o mesmo texto que saia fixo no bloco. */
-  fcTxtRestaura(A_TXT_DEFS,A);
+     terceiro item da propria tabela, o mesmo texto que saia fixo no bloco.
+     OS QUATRO TEXTOS RESERVA dos marcadores entraram na tabela em 11/09/2026, e o laco que
+     repartia 'a.obfb' a mao saiu daqui: quem reparte agora e fcObFbMigrar, na ordem de
+     A_OB_VARS. 'false' porque esta aba sempre tratou texto reserva VAZIO como ausente e repos
+     o padrao de fabrica (o laco que existia aqui testava !=null && !=='') -- ver o comentario
+     de fcObFbMigrar. */
+  fcTxtRestaura(A_TXT_DEFS,fcObFbMigrar(A,A_OB_VARS,false));
   aEditRestaurar(A);
   /* A migracao NUNCA fica calada (CLAUDE.md, secao "Em duvida entre descartar e preservar").
      Persistida na hora (salvarEstado()) para o aviso nao repetir na proxima carga: 'pac' e a
@@ -18227,7 +18311,16 @@ function aBlocoObrigado(cfg){
   for(j=0;j<A_OB_VARS.length;j++){
     vv=A_OB_VARS[j];
     if(cfg.ob.vars.indexOf(vv.id)<0)continue;
-    itensOb.push('  {marca:"'+vv.id+'", valor:param("'+vv.id+'")||"'+escJs(cfg.ob.fb[vv.id]||'')+'"}');
+    /* escJsD, e nao escJs: este literal e o UNICO da ferramenta em que um texto configuravel
+       entra entre aspas DUPLAS (medido em 11/09/2026, varrendo todos os escJs do arquivo -- os
+       outros 150 e tantos ficam entre aspas simples). escJs escapa a apostrofa e deixa a aspa
+       dupla passar: com ela no texto reserva, o literal fechava no meio e o bloco inteiro da
+       pagina de obrigado nao carregava -- 'Unexpected identifier', medido com o bloco rodando.
+       Defeito ANTERIOR a esta rodada; ele so apareceu agora porque estes quatro campos nunca
+       tinham sido exercitados com texto hostil (eles estavam fora das tabelas, e por isso fora
+       de textos-migrados.mjs). Com os padroes de fabrica -- que nao tem aspa nenhuma -- a saida
+       e byte a byte a mesma de antes, e a regressao prova isso. */
+    itensOb.push('  {marca:"'+vv.id+'", valor:param("'+vv.id+'")||"'+escJsD(cfg.ob.fb[vv.id]||'')+'"}');
   }
   itensOb.push('  {marca:"pacote",  valor:PAC?PAC.nome:""}');
   itensOb.push('  {marca:"duracao", valor:PAC?PAC.dur:""}');

@@ -204,9 +204,11 @@ try{
      PROVA 2 -- a busca nao depende das tabelas
      ======================================================================= */
   console.log('\n[2] a busca nao depende das tabelas *_TXT_DEFS (a negativa falsa)');
-  /* Os dois ultimos da lista sao os que continuam FORA de toda tabela; os seis primeiros
-     entraram nelas na leva 2 e continuam sendo achados exatamente do mesmo jeito -- o que
-     prova que a busca nunca dependeu da tabela. */
+  /* Oito campos, um por aba. Os dois ultimos ficaram FORA das tabelas ate 11/09/2026 e
+     entraram nelas nessa data (os nove textos reserva dos marcadores, ver textos-reserva.mjs);
+     os outros seis entraram na leva 2. Todos os oito continuam sendo achados exatamente do
+     mesmo jeito, antes e depois -- que e o ponto desta prova: a busca varre os CAMPOS DA TELA
+     e nunca as tabelas, entao entrar ou sair de uma tabela nao muda nada aqui. */
   const fora = [
     ['Restante na entrega', 'u-t9',       'Checkout'],
     ['MAIS ESCOLHIDO',      'b-selo-txt', 'Bordas com efeito'],

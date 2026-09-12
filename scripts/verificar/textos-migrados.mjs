@@ -75,21 +75,28 @@ const MIGRADOS = {
           ['p-t6','t6'],['p-t7','t7'],['p-t8','t8'],['p-t9','t9']],
   loja:  [['m-t1','t1'],['m-t2','t2'],['m-t3','t3'],['m-t4','t4'],['m-t5','t5'],['m-t6','t6'],
           ['m-t7','t7'],['m-t8','t8'],['m-t9','t9'],['m-t10','t10'],['m-t11','t11'],['m-t12','t12']],
-  pac:   [['a-t1','t1'],['a-t2','t2'],['a-t3','t3'],['a-t4','t4'],['a-t5','t5']]
+  pac:   [['a-t1','t1'],['a-t2','t2'],['a-t3','t3'],['a-t4','t4'],['a-t5','t5'],
+          /* os QUATRO textos reserva dos marcadores, migrados em 11/09/2026 -- eles nao estao
+             escritos em A_TXT_DEFS: entram nela por fcObFbDefs(A_OB_VARS,'a'), e e por isso
+             que tabelasDoArquivo sabe expandir o .concat. A migracao do formato gravado (a
+             chave antiga 'obfb', colada) tem prova propria: textos-reserva.mjs. */
+          ['a-ob-fb-nome','obfbNome'],['a-ob-fb-data','obfbData'],
+          ['a-ob-fb-hora','obfbHora'],['a-ob-fb-quando','obfbQuando']],
+  tidy:  [['t-ob-fb-nome','obfbNome'],['t-ob-fb-tipo','obfbTipo'],['t-ob-fb-data','obfbData'],
+          ['t-ob-fb-hora','obfbHora'],['t-ob-fb-quando','obfbQuando']]
 };
 const IDS = Object.keys(MIGRADOS).reduce((a,k)=>a.concat(MIGRADOS[k].map(p=>p[0])),[]);
 
 /* OS QUE FICARAM DE FORA, e o motivo medido. Nao e lista de "ainda nao deu tempo": e
    contrato. Se um deles aparecer numa tabela, esta prova falha e obriga a decisao a ser
-   consciente -- os nove primeiros mudam o FORMATO do que fica gravado (os cinco, e os
-   quatro, viajam JUNTOS numa chave so, colados por um separador de controle), que e a
-   classe que este projeto nao muda sem a palavra do dono. */
+   consciente.
+   ATE 11/09/2026 os NOVE textos reserva dos marcadores estavam aqui, com o motivo "grava
+   junto em obfb" -- eles mudavam o FORMATO do que fica gravado, que e a classe que este
+   projeto nao muda sem a palavra do dono. O dono autorizou, e eles migraram: agora estao em
+   MIGRADOS, e a migracao (backup antigo, preset antigo, a ordem, o caractere de controle)
+   tem prova propria em textos-reserva.mjs. E assim que uma exclusao declarada morre -- por
+   decisao, com a prova que ela exigia, e nao por alguem apagar a linha. */
 const FORA = {
-  't-ob-fb-nome':   'grava junto em t.obfb', 't-ob-fb-tipo':  'grava junto em t.obfb',
-  't-ob-fb-data':   'grava junto em t.obfb', 't-ob-fb-hora':  'grava junto em t.obfb',
-  't-ob-fb-quando': 'grava junto em t.obfb',
-  'a-ob-fb-nome':   'grava junto em a.obfb', 'a-ob-fb-data':  'grava junto em a.obfb',
-  'a-ob-fb-hora':   'grava junto em a.obfb', 'a-ob-fb-quando':'grava junto em a.obfb',
   'm-cod': 'identificador com regex e teto, nao frase que o cliente le'
 };
 
@@ -110,12 +117,25 @@ const soDoBloco = e => e.filter(x => !RUIDO.some(re => re.test(x)));
    <script> do index.html), entao nenhuma funcao dela e alcancavel por pg.evaluate. As tabelas
    sao lidas do PROPRIO ARQUIVO, que e onde elas moram; o resto se mede pelo DOM e pelo
    comportamento, que e o que o operador ve. */
+/* DUAS TABELAS NAO TERMINAM EM '];' desde 11/09/2026: T_TXT_DEFS e A_TXT_DEFS fecham com
+   '].concat(fcObFbDefs(X_OB_VARS,\'p\'))', porque os textos reserva dos marcadores nao sao
+   digitados de novo ali -- o id e o padrao de cada um ja estao em X_OB_VARS. Ler so o que
+   esta escrito entre colchetes daria as duas tabelas por INCOMPLETAS, e a prova 1 acusaria
+   campo migrado como ausente. Entao o parser expande o concat: le X_OB_VARS e monta as
+   mesmas linhas que fcObFbDefs monta. */
 function tabelasDoArquivo(html){
   const m = {};
+  const obVars = nome => {
+    const b = new RegExp('var '+nome+'_OB_VARS=\\[([\\s\\S]*?)\\n\\];').exec(html);
+    return b ? Array.from(b[1].matchAll(/\{id:'([^']+)'/g)).map(x => x[1]) : [];
+  };
   for(const nome of ['S','L','T','U','B','C','P','M','A']){
-    const bloco = new RegExp('var '+nome+'_TXT_DEFS=\\[([\\s\\S]*?)\\n\\];').exec(html);
+    const fim = "(?:;|\\.concat\\(fcObFbDefs\\("+nome+"_OB_VARS,'([a-z])'\\)\\);)";
+    const bloco = new RegExp('var '+nome+'_TXT_DEFS=\\[([\\s\\S]*?)\\n\\]'+fim).exec(html);
     if(!bloco) continue;
     for(const par of bloco[1].matchAll(/\['([^']+)','([^']+)',/g)) m[par[2]] = nome+'/'+par[1];
+    if(bloco[2]) for(const id of obVars(nome))
+      m[bloco[2]+'-ob-fb-'+id] = nome+'/obfb'+id.charAt(0).toUpperCase()+id.substring(1);
   }
   return m;
 }
@@ -274,10 +294,30 @@ console.log('\n--- o formato gravado, contra '+REF+' ---');
       if(Array.isArray(v)) return '['+v.map(canon).join(',')+']';
       return '{'+Object.keys(v).sort().map(k => JSON.stringify(k)+':'+canon(v[k])).join(',')+'}';
     };
+    /* AS NOVE CHAVES NOVAS DE 11/09/2026 sao a UNICA diferenca esperada contra a referencia,
+       e por isso elas saem da comparacao -- depois de terem sido cobradas uma a uma, com o
+       valor que cada campo tinha. Tirar sem cobrar seria varrer a mudanca para baixo do
+       tapete; cobrar e depois tirar e o que permite o resto do objeto continuar sendo exigido
+       IDENTICO. A chave antiga 'obfb' continua nos dois lados e continua na comparacao: ela e
+       projecao das novas, entao tem de sair igual a da referencia caractere por caractere --
+       e e ela que segura o molde da importacao de arquivo (ver textos-reserva.mjs). */
+    const NOVAS = {t:['obfbNome','obfbTipo','obfbData','obfbHora','obfbQuando'],
+                   a:['obfbNome','obfbData','obfbHora','obfbQuando']};
+    const faltando = [];
+    for(const [aba, chaves] of Object.entries(NOVAS))
+      for(const ch of chaves){
+        const id = aba.charAt(0)+'-ob-fb-'+ch.substring(4).toLowerCase();
+        const esperado = 'Zk'+String(IDS.indexOf(id)).padStart(2,'0')+' valor';
+        if((depois[aba]||{})[ch] !== esperado) faltando.push(aba+'.'+ch+'='+JSON.stringify((depois[aba]||{})[ch]));
+        if((antes[aba]||{})[ch] !== undefined) faltando.push(REF+' ja tinha '+aba+'.'+ch);
+        delete depois[aba][ch];
+      }
+    chk('gravado: as nove chaves novas existem aqui, com o texto do seu campo, e NAO existem em '+REF,
+        faltando.length === 0, faltando.join(' | '));
     const divergem = [];
     for(const aba of new Set([...Object.keys(antes), ...Object.keys(depois)]))
       if(canon(antes[aba]) !== canon(depois[aba])) divergem.push(aba);
-    chk('gravado: o objeto inteiro e identico ao de '+REF+', chave por chave',
+    chk('gravado: fora essas nove, o objeto inteiro e identico ao de '+REF+', chave por chave',
         divergem.length === 0, 'divergem: '+divergem.join(', '));
     /* As chaves que a migracao poderia ter ANINHADO sem querer -- no cfg elas eram
        cfg.rotulos.d/h/m/s, cfg.cta.txt, cfg.hor.aviso e cfg.q.label/dica/msg. O que fica
