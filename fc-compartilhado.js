@@ -49,7 +49,7 @@
    ============================================================================ */
 'use strict';
 var FCCOMPART=(function(){
-var FC_COMPART_VERSAO='2026-08-23a';
+var FC_COMPART_VERSAO='2026-09-13a';
 
 /* Limpeza compartilhada pelos DOIS validadores de endereco -- cUrlOk (botao de acao da
    Contagem regressiva) e tUrlOk (pagina intermediaria do TidyCal). Ela faz o que o NAVEGADOR
@@ -525,6 +525,45 @@ function fcDescCorrigido(v){
   return (novo===s)?null:novo;
 }
 
+/* ===== O SINAL DESTA COBRANCA: o normalizador e o corretor a vista =====
+   Mesma familia de fcDescNum/fcDescCorrigido, e pela mesma razao: as DUAS paginas leem estes
+   dois campos (a aba Link de cobranca e a /cobrar), e uma segunda conta de "quanto e o sinal"
+   seria a /cobrar gerando um link que a propria aba nao reproduz -- e o invariante byte a byte
+   do link cairia sem ninguem ver.
+   ZERO SIGNIFICA "NAO INFORMADO", e nao "sem sinal": quem liga e desliga o sinal e o radio,
+   nunca o numero. Campo vazio com o sinal ligado NAO vira o padrao de fabrica por conta
+   propria -- inventar 30% no lugar de um numero que falta e exatamente o que o comentario de
+   P_NUMS recusa para o valor da cobranca. Quem recusa, com nome, e pRecusaCobranca. */
+var P_SINAL_PCT_MIN=1;
+var P_SINAL_PCT_MAX=99;
+function fcSinalPctNum(t){
+  var n=parseFloat(String(t==null?'':t).replace(',','.'));
+  if(!isFinite(n)||n<=0)return 0;
+  if(n<P_SINAL_PCT_MIN)return P_SINAL_PCT_MIN;
+  return n>P_SINAL_PCT_MAX?P_SINAL_PCT_MAX:n;
+}
+function fcSinalFixoNum(t){
+  var n=parseFloat(String(t==null?'':t).replace(',','.'));
+  if(!isFinite(n)||n<=0)return 0;
+  return n>P_VALOR_MAX?P_VALOR_MAX:n;
+}
+/* Campo em branco fica em branco: reescrever o que o operador apagou seria assumir. O que se
+   corrige a vista e o que a normalizacao aparou -- 150 virando 99 --, e so em change/blur. */
+function fcSinalPctCorrigido(v){
+  var s=String(v==null?'':v),novo;
+  if(!s.replace(/\s/g,''))return null;
+  if(!fcSinalPctNum(s))return null;
+  novo=String(fcSinalPctNum(s));
+  return (novo===s)?null:novo;
+}
+function fcSinalFixoCorrigido(v){
+  var s=String(v==null?'':v),novo;
+  if(!s.replace(/\s/g,''))return null;
+  if(!fcSinalFixoNum(s))return null;
+  novo=String(fcSinalFixoNum(s));
+  return (novo===s)?null:novo;
+}
+
 /* ===== nome e cidade do recebedor: o que o BANCO DE QUEM PAGA vai mostrar =====
    Os campos 59 e 60 do BR Code tem teto (25 e 15) e so aceitam ASCII sem acento -- e quem
    aplica isso e semAcento, dentro de montarPayload. Enquanto o teto morava so no maxlength do
@@ -728,11 +767,34 @@ function pPpHostOk(v){
    cobranca e o par t/x do endereco. A propriedade 1 nao dependia da parametrizacao e continua
    valendo: quem decide e o "if" de dentro, nao o texto emitido -- e isso e verificavel byte a
    byte, que e como foi verificado. */
+/* ===== O SINAL ENTRA NA MESMA CONTA, PELA MESMA REGRA (13/09/2026) =====
+   Com sinal o endereco ganha UM parametro -- n, o TOTAL da cobranca --, e ele precisa entrar
+   na conta do selo pelo mesmo motivo que t e x: senao a unica coisa que o sinal acrescentaria
+   ao link seria uma porta nova para editar (o total exibido e o saldo saem dele).
+   POR QUE O n CARREGA O TOTAL, e nao o sinal: o que se COBRA agora mora dentro do codigo Pix,
+   e de lugar nenhum mais -- foi essa decisao que fez tela, Pix e PayPal nao terem como
+   divergir. Com sinal, o campo 54 passa a ser o SINAL; o total deixa de ser cobrado por
+   alguem e vira informacao de tela, e e ele que viaja no endereco. Se fosse ao contrario, o
+   numero cobrado ficaria do lado fraco da conta, protegido so pelo selo.
+   A REGRA E A MESMA: os quatro de sempre contam SEMPRE, t e x depois deles e so em par, e o n
+   por ULTIMO, so quando vem preenchido. Disso saem CINCO propriedades verificaveis:
+     1. link sem desconto e sem sinal sela EXATAMENTE como antes -- byte a byte;
+     2. um bloco com esta conta aceita todos os links antigos (a conta e um superconjunto);
+     3. apagar t, x ou n muda a contagem e derruba o link;
+     4. acrescentar t e x a um link que nao os tinha tambem derruba;
+     5. acrescentar n a um link que nao o tinha tambem derruba -- e e por isso que o bloco JA
+        COLADO na /pagar recusa links novos com sinal ate ser regerado uma vez. Isso e
+        propriedade, nao acidente: um selo que ignorasse o n deixaria editar o total exibido.
+   O n NAO ENTRA EM PAR com ninguem porque ele nao tem par: com t/x, "t sem x" e "x sem t"
+   produziriam a MESMA lista, e por isso os dois entram juntos; um parametro sozinho nao tem
+   como colidir consigo mesmo. E ele nunca convive com t/x -- com sinal o desconto do Pix e
+   zerado na origem (pDescPct), e o bloco recusa um link que traga os dois. */
 function pSeloDeSrc(){
-  return "function seloDe(pc,pd,pp,pv,pt,px){\n"+
-    "  var ps=[pc,pd,pp,pv],t='',i,s,a,b;\n"+
-    "  a=String(pt==null?'':pt);b=String(px==null?'':px);\n"+
+  return "function seloDe(pc,pd,pp,pv,pt,px,pn){\n"+
+    "  var ps=[pc,pd,pp,pv],t='',i,s,a,b,g;\n"+
+    "  a=String(pt==null?'':pt);b=String(px==null?'':px);g=String(pn==null?'':pn);\n"+
     "  if(a!==''||b!==''){ps.push(a);ps.push(b);}\n"+
+    "  if(g!=='')ps.push(g);\n"+
     "  for(i=0;i<ps.length;i++){s=String(ps[i]==null?'':ps[i]);t+=s.length+':'+s+'|';}\n"+
     "  return crc16(seloBytes(t));\n"+
     "}\n";
@@ -845,6 +907,19 @@ function pRecusaCobranca(cfg){
      conferindo a grafia de um numero que esta escrito certo. */
   if(cfg.valor<=0)return 'O valor "'+cfg.valorBruto+'" arredonda para zero. O Pix cobra em centavos, entao o minimo e R$ 0,01. Um codigo Pix com valor zero deixa o pagador digitar o que quiser -- que e exatamente o que esta aba existe para impedir.';
   if(cfg.valor>P_VALOR_MAX)return 'O valor passa de '+precoFmt('BRL',P_VALOR_MAX)+'. Confira se nao sobrou um zero.';
+  /* ===== O SINAL DESTA COBRANCA =====
+     Quatro recusas, e as quatro tem nome proprio. Elas vem DEPOIS das do valor de proposito:
+     o sinal sai do valor, e recusar o sinal antes de saber se o valor existe mandaria o
+     operador conferir o numero errado.
+     CAMPO VAZIO E RECUSADO, nao completado: com o sinal ligado, o percentual e o valor fixo
+     sao o que decide quanto o cliente paga agora, e assumir 30% no lugar de um campo apagado
+     e a mesma classe de defeito que assumir um centavo no lugar do valor que falta.
+     SINAL MAIOR QUE O TOTAL E RECUSADO, nao aparado: aparar cobraria um valor que o operador
+     nao configurou -- a mesma regra do sinalRecusa() das abas com carrinho. */
+  if(pSinalOn(cfg)&&pSinalTipo(cfg)==='pct'&&!pSinalPct(cfg))return 'Informe o percentual do sinal (de '+P_SINAL_PCT_MIN+' a '+P_SINAL_PCT_MAX+'), ou volte a cobrar o valor cheio nesta cobranca.';
+  if(pSinalOn(cfg)&&pSinalTipo(cfg)==='fixo'&&!pSinalFixo(cfg))return 'Informe o valor fixo do sinal (no minimo R$ 0,01), ou volte a cobrar o valor cheio nesta cobranca.';
+  if(pSinalOn(cfg)&&pSinalValor(cfg)<0.01)return 'O sinal desta cobranca arredonda para zero. O Pix cobra em centavos, entao o minimo e R$ 0,01: escolha um sinal maior ou um valor maior.';
+  if(pSinalOn(cfg)&&pSinalValor(cfg)>cfg.valor)return 'O sinal ('+precoFmt('BRL',pSinalValor(cfg))+') e maior que o valor da cobranca ('+precoFmt('BRL',cfg.valor)+'). Um sinal maior que o total nao e aparado: ele cobraria um numero que voce nao configurou. Baixe o sinal ou aumente o valor.';
   /* O DESCONTO NO PIX. Ele e opcional: campo vazio ou zero = link sem desconto, exatamente como
      antes de ele existir. O que se recusa e o desconto que derruba o Pix abaixo de um centavo --
      o Pix cobra em centavos, e um payload de valor zero nem passaria na propria conferencia
@@ -889,13 +964,47 @@ function pRecusaCobranca(cfg){
    payload com os dados do recebedor e exigir igualdade byte a byte.
    Sem desconto, pValorPix devolve cfg.valor arredondado a centavos -- que e o que cfg.valor ja
    e (pValorNum arredonda) --, entao o payload sai identico ao de antes do desconto existir. */
-function pDescPct(cfg){return fcDescNum(cfg&&cfg.descpix);}
-function pValorPix(cfg){return fcPixDesc(cfg.valor,pDescPct(cfg));}
+/* ===== O SINAL, POR COBRANCA (13/09/2026) =====
+   Esta aba nao tem carrinho: o valor e um numero so, digitado pelo operador, e nada muda
+   depois que o link sai. Por isso o sinal aqui NAO e uma formula que o bloco carrega (como
+   FC_CARRINHO_SRC.sinal, que as abas com carrinho levam dentro): ele e calculado UMA vez, na
+   hora de gerar o link, e o resultado vai para dentro do codigo Pix. Levar a formula ao bloco
+   criaria um segundo lugar onde o numero e decidido -- e o numero cobrado tem de morar num
+   lugar so, que e o campo 54.
+   O DESCONTO DO PIX E ZERADO NA ORIGEM, e o zero mora AQUI e nao em quem chama: assim as duas
+   paginas (a aba e a /cobrar) o zeram sem combinar nada, e pTotCod/pDescCod devolvem vazio
+   sozinhos -- o endereco de uma cobranca com sinal nao tem t nem x. A razao e a mesma das
+   abas com carrinho: aplicar o desconto sobre o sinal seria desconto dobrado. */
+function pSinalOn(cfg){return !!(cfg&&cfg.sinal==='sim');}
+function pSinalPct(cfg){return fcSinalPctNum(cfg&&cfg.sinalpct);}
+function pSinalFixo(cfg){return fcSinalFixoNum(cfg&&cfg.sinalfixo);}
+function pSinalTipo(cfg){return (cfg&&cfg.sinaltipo==='fixo')?'fixo':'pct';}
+/* Arredondado a duas casas AQUI, uma vez so -- e este numero que vai para o codigo Pix, para
+   o PayPal, para a tela e para a mensagem do WhatsApp. Mesmo principio do sinalAgora() das
+   abas com carrinho: quatro leituras do MESMO valor, sem recalculo em nenhuma. */
+function pSinalValor(cfg){
+  if(!pSinalOn(cfg))return 0;
+  var v=(pSinalTipo(cfg)==='fixo')?pSinalFixo(cfg):(cfg.valor*pSinalPct(cfg)/100);
+  return Math.round(v*100)/100;
+}
+function pDescPct(cfg){
+  if(pSinalOn(cfg))return 0;
+  return fcDescNum(cfg&&cfg.descpix);
+}
+function pValorPix(cfg){
+  if(pSinalOn(cfg))return pSinalValor(cfg);
+  return fcPixDesc(cfg.valor,pDescPct(cfg));
+}
 /* Os dois parametros novos do endereco, na forma EXATA em que viajam nele -- e a mesma forma
    que entra na conta do selo. Vazios quando nao ha desconto, e e por isso que o link sem
    desconto continua sendo o de antes. */
 function pTotCod(cfg){return pDescPct(cfg)>0?cfg.valor.toFixed(2):'';}
 function pDescCod(cfg){return pDescPct(cfg)>0?String(pDescPct(cfg)):'';}
+/* O parametro do sinal, na forma EXATA em que viaja no endereco -- e a mesma que entra na
+   conta do selo. Ele carrega o TOTAL da cobranca (o sinal ja esta dentro do codigo Pix), no
+   mesmo formato de pTotCod, e sai VAZIO sem sinal: e por isso que o link sem sinal continua
+   sendo, byte a byte, o link de antes desta rodada. */
+function pSinalCod(cfg){return pSinalOn(cfg)?cfg.valor.toFixed(2):'';}
 function pPayload(cfg){
   return fcPixApi().montar(cfg.chave,cfg.nomer,cfg.cidade,cfg.txid)(pValorPix(cfg));
 }
@@ -933,7 +1042,7 @@ function pEncOk(s){
   try{encodeURIComponent(String(s==null?'':s));return true;}catch(e){return false;}
 }
 function pBusca(cfg,codigo){
-  var pp=pPpParam(cfg),v=pValCod(cfg),t=pTotCod(cfg),x=pDescCod(cfg);
+  var pp=pPpParam(cfg),v=pValCod(cfg),t=pTotCod(cfg),x=pDescCod(cfg),n=pSinalCod(cfg);
   var q='?c='+encodeURIComponent(codigo)+'&d='+encodeURIComponent(cfg.desc);
   if(pp)q+='&pp='+encodeURIComponent(pp);
   if(v)q+='&v='+encodeURIComponent(v);
@@ -942,7 +1051,11 @@ function pBusca(cfg,codigo){
      inteiro sai byte a byte igual ao que esta aba gerava antes de o desconto existir. */
   if(t)q+='&t='+encodeURIComponent(t);
   if(x)q+='&x='+encodeURIComponent(x);
-  q+='&s='+pSeloApi().seloDe(codigo,cfg.desc,pp,v,t,x);
+  /* n entra DEPOIS de t e x, e so quando ha sinal -- mesma regra, mesmo motivo. Sem sinal nao
+     ha n, e a conta do selo volta a ser exatamente a de antes desta rodada. t/x e n nunca
+     aparecem juntos: com sinal, pDescPct devolve zero e os dois primeiros saem vazios. */
+  if(n)q+='&n='+encodeURIComponent(n);
+  q+='&s='+pSeloApi().seloDe(codigo,cfg.desc,pp,v,t,x,n);
   return q;
 }
 function pLinkDe(cfg,codigo){
@@ -976,6 +1089,12 @@ return {
   fcTotalPixSrc:fcTotalPixSrc, fcPixDesc:fcPixDesc,
   P_DESC_PCT_MAX:P_DESC_PCT_MAX, fcDescNum:fcDescNum,
   pDescPct:pDescPct, pValorPix:pValorPix, pTotCod:pTotCod, pDescCod:pDescCod,
+  /* Do sinal POR COBRANCA sai daqui SO a correcao a vista dos dois campos -- que e o
+     unico pedaco que as duas paginas chamam. A conta (pSinalValor), as faixas e as
+     recusas sao chamadas DENTRO deste arquivo, e apelido que ninguem chama nao
+     documenta dependencia nenhuma: so parece documentar. Mesma decisao ja tomada com
+     pDescPct, pValorPix, pTotCod e pDescCod. */
+  fcSinalPctCorrigido:fcSinalPctCorrigido, fcSinalFixoCorrigido:fcSinalFixoCorrigido,
   /* nome e cidade do recebedor, como o banco de quem paga vai mostrar */
   FC_NOMER_MAX:FC_NOMER_MAX, FC_CIDADE_MAX:FC_CIDADE_MAX,
   fcPixTexto:fcPixTexto, fcPixTextoCorrigido:fcPixTextoCorrigido,

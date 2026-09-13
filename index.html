@@ -2799,6 +2799,14 @@
       <label for="p-txt-cartaolinha">Linha do valor cheio, com o Pix em destaque</label>
       <input type="text" id="p-txt-cartaolinha" value="ou {valor} no cartão">
       <p class="ajuda">Só aparece quando o <b>Pix</b> é o meio prioritário e a cobrança tem desconto. É ela que mantém o <b>valor cheio à vista</b> — que é o que o PayPal cobra.</p>
+      <label for="p-txt-sinal">Linha do sinal <small>(só aparece quando a cobrança cobra sinal)</small></label>
+      <input type="text" id="p-txt-sinal" value="Sinal agora: {valor}">
+      <label for="p-txt-saldo">Linha do saldo <small>(idem)</small></label>
+      <input type="text" id="p-txt-saldo" value="Saldo a pagar: {valor}">
+      <p class="ajuda">Onde você escrever <code>{valor}</code> entra o número já formatado em reais. As duas linhas ficam <b>logo abaixo do valor em destaque</b> — que continua sendo o <b>total</b> da cobrança, porque é ele que diz quanto o trabalho custa. O que o cliente paga <b>agora</b> é o sinal, e é ele que está dentro do código Pix e é ele que o PayPal cobra.</p>
+      <label for="p-txt-zap-sinal">Trecho do sinal na mensagem do WhatsApp</label>
+      <input type="text" id="p-txt-zap-sinal" value="(sinal de {sinal}; saldo de {saldo})">
+      <p class="ajuda">Entra no fim da mensagem do botão “Já paguei”, e só nas cobranças com sinal. <code>{sinal}</code> é o que ele acabou de pagar e <code>{saldo}</code> é o que ficou para depois — sem este trecho a mensagem citaria só o total, e você leria “paguei R$ 1.200,00” de quem pagou o sinal.</p>
       <label for="p-txt-copiado">Código Pix copiado com sucesso</label>
       <input type="text" id="p-txt-copiado" value="Código copiado! Cole no aplicativo do seu banco.">
       <label for="p-txt-naocopiou">Não foi possível copiar o código Pix</label>
@@ -2867,6 +2875,32 @@
       <input type="date" id="p-validade" value="" max="2099-12-31">
       <label for="p-descpix">Desconto para quem pagar via Pix <small>(opcional; em %, 0 ou vazio = sem desconto)</small></label>
       <input type="number" id="p-descpix" value="0" min="0" max="90" step="0.5">
+      <p class="ajuda alerta" id="p-descpix-aviso"><b>Com o sinal ligado nesta cobrança, este campo não vale.</b> O Pix passa a cobrar o sinal, e o desconto do Pix não se aplica sobre o sinal — seria desconto dobrado. O número acima fica guardado, mas <b>não entra no link</b> enquanto o sinal estiver ligado.</p>
+      <div>
+      <label>Cobrança de sinal <small>(desta cobrança, como o desconto — cada link carrega o seu)</small></label>
+      <div class="radios">
+        <label><input type="radio" name="p-sinal" value="nao" checked><span>Cobrar o valor cheio</span></label>
+        <label><input type="radio" name="p-sinal" value="sim"><span>Cobrar sinal agora, saldo depois</span></label>
+      </div>
+      <div id="p-sinal-campos">
+        <label>Como calcular o sinal</label>
+        <div class="radios">
+          <label><input type="radio" name="p-sinaltipo" value="pct" checked><span>Percentual do valor</span></label>
+          <label><input type="radio" name="p-sinaltipo" value="fixo"><span>Valor fixo</span></label>
+        </div>
+        <div id="p-sinalpct-campo">
+          <label for="p-sinalpct">Percentual do sinal <small>(de 1 a 99; fora da faixa o campo se corrige sozinho)</small></label>
+          <input type="number" id="p-sinalpct" value="30" min="1" max="99" step="0.5">
+        </div>
+        <div id="p-sinalfixo-campo">
+          <label for="p-sinalfixo">Valor fixo do sinal</label>
+          <input type="number" id="p-sinalfixo" value="100" min="0.01" step="0.01">
+        </div>
+      </div>
+      </div>
+      <p class="ajuda"><b>O sinal é desta cobrança, e não da página.</b> Cada link carrega o seu, como já acontece com o desconto no Pix: você pode mandar hoje um link com 30% de sinal e amanhã um link do valor cheio, sem colar nada de novo no site. Com o sinal ligado, o <b>código Pix cobra o sinal</b> e o <b>PayPal cobra o sinal</b> — e o cartão mostra o total, o sinal e o saldo. O <b>desconto no Pix é desligado</b> automaticamente, porque descontar sobre o sinal seria desconto dobrado.</p>
+      <p class="ajuda"><b>No modo “link criado no PayPal”</b>, o valor fica guardado lá dentro: crie o link do PayPal <b>com o valor do sinal</b>, não com o total. A página não tem como conferir o valor de um link do PayPal — ele é do PayPal, não daqui.</p>
+      <p class="ajuda alerta"><b>Falta um passo, e uma vez só.</b> O selo do link passou a contar também o sinal, então um código 1 gerado <i>antes</i> desta versão <b>recusa</b> links com sinal — ele não conhece o parâmetro. Gere o código 1 de novo e cole no site; daí em diante o sinal funciona em qualquer aparelho, sem colar nada. <b>Todos os links que você já enviou continuam funcionando</b>, nos dois códigos: eles não têm o parâmetro do sinal, e a conta deles não mudou.</p>
       <p class="ajuda">Com desconto, a cobrança passa a ter <b>dois valores</b>: o <b>total</b> — que é o valor digitado acima, e é o que o PayPal cobra — e o <b>valor do Pix</b>, que é o total menos o desconto. O cartão mostra os dois. A conta do desconto é <b>a mesma do Checkout e da Mini loja</b>, escrita uma vez só, e a página de pagamento <b>refaz essa conta</b> ao abrir o link: se o valor do Pix não for exatamente o total menos o desconto, ela recusa a cobrança.</p>
       <p class="ajuda alerta"><b>O desconto não mexe mais no código 1.</b> Todo código 1 gerado por esta versão já leva a conta do desconto dentro dele, com ou sem desconto configurado aqui — então ligar, desligar ou trocar o percentual muda só o <b>link</b>, nunca o código da página. <b>Falta um passo, e uma vez só:</b> se a página ainda estiver com um código 1 gerado <i>antes</i> desta versão, ele não sabe conferir a conta e vai <b>recusar</b> links com desconto. Gere o código 1 de novo e cole no site; daí em diante o desconto funciona em qualquer aparelho, sem colar nada. Links <b>sem</b> desconto continuam funcionando nos dois códigos.</p>
       <p class="ajuda"><b>O prazo é um recado, não uma tranca.</b> Até o fim do dia escolhido (23:59:59 no horário de Brasília) o cliente vê o prazo escrito no cartão; passando disso, a página para de mostrar o pagamento e manda falar com você. O que ele <b>não</b> faz: o <b>código Pix não tem validade</b> — quem copiou o “copia e cola” antes do prazo consegue pagar depois, e o mesmo vale para quem atrasar o relógio do próprio aparelho. Quem fecha a conta continua sendo você, conferindo <b>valor e data no extrato</b>.</p>
@@ -2927,7 +2961,8 @@
       <span class="aviso-copiado" id="p-cop1">Copiado!</span>
       </h3>
       <textarea id="p-out1" readonly spellcheck="false" style="height:300px" placeholder="O código da página aparece aqui."></textarea>
-      <p class="ajuda alerta"><b>Trocar este código derruba os links de cobrança já enviados e ainda não pagos.</b> A página passou a exigir o <b>selo</b> em todo link, e os links gerados antes desta versão não têm selo — a página vai recusá-los como se estivessem alterados. Antes de colar o código 1 no site, veja quais cobranças você mandou e ainda não recebeu, e <b>gere um link novo</b> para cada uma. Depois disso, colar o código 1 de novo não derruba mais nada: os links continuam valendo enquanto a chave Pix, o nome e a cidade do recebedor não mudarem.</p>
+      <p class="ajuda alerta"><b>Colar este código de novo NÃO derruba os links que você já mandou.</b> A conta do selo só cresce: um link <b>sem desconto e sem sinal</b> é selado exatamente como sempre foi, e o código novo aceita todos os links que esta ferramenta já gerou — isso é medido link a link a cada versão. <b>O contrário é que não vale, e é por isso que este passo existe:</b> o código que está no seu site hoje foi gerado <i>antes</i> de o sinal existir, então ele <b>recusa</b> os links novos que cobram sinal. Gere o código 1 aqui e cole no site <b>uma vez</b>; depois disso o sinal funciona de qualquer aparelho, sem colar mais nada.</p>
+      <p class="ajuda">A única exceção são os links de <b>antes de o selo existir</b> (agosto de 2026): esses não têm selo nenhum e são recusados pelos dois códigos, o velho e o novo. Se ainda houver alguma cobrança daquela época aberta, gere um link novo para ela. Fora isso, os links continuam valendo enquanto a chave Pix, o nome e a cidade do recebedor não mudarem.</p>
       </div>
       <div class="saida">
       <h3>Código 2 — o link desta cobrança <small>(muda a cada cobrança)</small>
@@ -4123,7 +4158,7 @@
      nova para a outra, e o resultado seriam links que a propria /pagar recusa -- sem
      erro nenhum na tela. Ao mexer no arquivo, troque a versao AQUI, em cobrar/index.html
      e no FC_COMPART_VERSAO de dentro dele. -->
-<script src="fc-compartilhado.js?v=2026-08-23a"></script>
+<script src="fc-compartilhado.js?v=2026-09-13a"></script>
 <script>
 'use strict';
 (function(){
@@ -4172,7 +4207,7 @@ var FC_PUBLICADO='2026-09-13 03:01';   /* America/Sao_Paulo -- escrito pelo cari
    OS APELIDOS ABAIXO NAO SAO COPIA: sao o mesmo objeto, com o nome que o resto
    deste arquivo sempre usou. Trocar os nomes em cem lugares so para dizer
    FCCOMPART.x mudaria muito codigo para nao mudar comportamento nenhum. */
-var FC_COMPART_ESPERADA='2026-08-23a';
+var FC_COMPART_ESPERADA='2026-09-13a';
 if(!window.FCCOMPART||FCCOMPART.versao!==FC_COMPART_ESPERADA){
   fcCompartParar(FC_COMPART_ESPERADA,window.FCCOMPART?FCCOMPART.versao:null);
   return;
@@ -4197,6 +4232,10 @@ var fcChaveCorrigida=C.fcChaveCorrigida, fcDescCorrigido=C.fcDescCorrigido;
    so parece documentar. */
 var fcTotalPixSrc=C.fcTotalPixSrc;
 var P_DESC_PCT_MAX=C.P_DESC_PCT_MAX, fcDescNum=C.fcDescNum;
+/* Do sinal POR COBRANCA, a ferramenta consome so a correcao a vista dos dois campos: a conta
+   (pSinalValor/pSaldoValor) e as recusas sao chamadas DENTRO do arquivo compartilhado, e
+   apelido que ninguem chama nao documenta dependencia -- so parece documentar. */
+var fcSinalPctCorrigido=C.fcSinalPctCorrigido, fcSinalFixoCorrigido=C.fcSinalFixoCorrigido;
 var FC_NOMER_MAX=C.FC_NOMER_MAX, FC_CIDADE_MAX=C.FC_CIDADE_MAX;
 var fcPixTexto=C.fcPixTexto, fcPixTextoCorrigido=C.fcPixTextoCorrigido;
 var P_VAL_NADA=C.P_VAL_NADA, fcValDia=C.fcValDia, pValCod=C.pValCod, pValTexto=C.pValTexto;
@@ -6147,9 +6186,9 @@ var ABAS=[
    guarda:'tudo o que está configurado nesta aba — modo e duração da contagem, o código da campanha, as <b>mensagens cadastradas</b>, aparência, posição, extras, coruja, efeitos, movimento, urgência, entrada e os <b>textos</b> da seção 5.'},
   {id:'cob',  nome:'Link de cobrança',    chaves:['p'],         coleta:pColeta,restaura:pRestaura,gerar:pGerar,
    pref:'p',fora:[],resumo:pPresetResumo,redesenhar:pPresetDepois,antesDeSalvar:pPresetAntes,
-   naoEmite:['url','desc','valor','txid','validade','descpix','ppmodo','pplink'],
+   naoEmite:['url','desc','valor','txid','validade','descpix','sinal','sinaltipo','sinalpct','sinalfixo','ppmodo','pplink'],
    exemplo:'ex.: Foto Certa - página /pagar',
-   guarda:'tudo o que está configurado nesta aba — o endereço da página, o <b>meio prioritário</b>, a aparência, os textos, e também a <b>cobrança que está na tela</b> (descrição, valor, identificador, a data de validade e o desconto no Pix). Aplicar um preset troca também essa cobrança: ele é a fotografia da aba inteira. Os dados de quem recebe <b>não</b> estão aqui: eles saíram desta aba para o painel Identidade, e nenhum preset os toca.'},
+   guarda:'tudo o que está configurado nesta aba — o endereço da página, o <b>meio prioritário</b>, a aparência, os textos, e também a <b>cobrança que está na tela</b> (descrição, valor, identificador, a data de validade, o desconto no Pix e a <b>cobrança de sinal</b>). Aplicar um preset troca também essa cobrança: ele é a fotografia da aba inteira. Os dados de quem recebe <b>não</b> estão aqui: eles saíram desta aba para o painel Identidade, e nenhum preset os toca.'},
   {id:'loja', nome:'Mini loja',           chaves:['m'],         coleta:mColeta,restaura:mRestaura,gerar:mGerar,
    pref:'m',fora:[],formulario:['edops','editidx','form'],resumo:mPresetResumo,redesenhar:mPresetDepois,antesDeSalvar:mPresetAntes,
    listas:[['m.edops',{nome:'',preco:0,qtd:false},'nome'],
@@ -21018,6 +21057,15 @@ function pValorAjustar(){return fcCampoAjustar('p-valor',fcValorCorrigido);}
    um campo que o operador deixou em branco. O que se corrige a vista e o que ficou fora da
    faixa -- 95 virando 90 --, e so em 'change'/'blur'. */
 function pDescAjustar(){return fcCampoAjustar('p-descpix',fcDescCorrigido);}
+/* Os dois campos do sinal, pela mesma regra compartilhada com a /cobrar (fcSinalPctCorrigido,
+   fcSinalFixoCorrigido): 150 vira 99 NA TELA, e nao so por dentro. Prender por dentro
+   consertaria o link e deixaria o dono lendo 150% numa cobranca de 99% -- trocar defeito
+   visivel por invisivel. Campo em branco fica em branco: quem recusa e a geracao, com nome.
+   Eles NAO entram em P_NUMS pelo mesmo motivo do valor e do percentual do desconto: ali o
+   campo vazio seria reescrito com o padrao de fabrica, e o operador leria 30% num campo que
+   ele acabou de apagar. */
+function pSinalPctAjustar(){return fcCampoAjustar('p-sinalpct',fcSinalPctCorrigido);}
+function pSinalFixoAjustar(){return fcCampoAjustar('p-sinalfixo',fcSinalFixoCorrigido);}
 /* FONTE COMPARTILHADA com a pagina /cobrar: pTxidLimpo vive em fc-compartilhado.js. */
 function pTxidAjustar(){return fcCampoAjustar('p-txid',fcTxidCorrigido);}
 
@@ -21088,6 +21136,19 @@ var P_TXT_DEFS=[
   ['txtNota','p-txt-nota',FC_TXT_FABRICA.nota],
   ['txtPixManual','p-txt-pixmanual',FC_TXT_FABRICA.pixManual],
   ['txtZapMsg','p-txt-zapmsg','Olá! Acabei de pagar: {desc} -- {valor}'],
+  /* ===== AS TRES LINHAS DO SINAL (13/09/2026) =====
+     A FRASE INTEIRA e configuravel, com {valor} dentro dela (regra D-2): metade configuravel
+     e armadilha -- o dono trocaria o rotulo e o ': ' continuaria grudado fora do alcance dele.
+     POR QUE OS ROTULOS NAO SAEM DE FC_TXT_FABRICA, e isto e medicao e nao descuido: o rotulo
+     do saldo nomeia QUANDO o saldo e pago, e cada aba nomeia um momento diferente -- o
+     Checkout e a Mini loja dizem "Restante na entrega", a Agendamento por pacote diz
+     "Restante no dia do ensaio". Frase parecida nao e frase unica (ver 4269-4271). Esta aba
+     cobra qualquer coisa, entao a dela nao pode citar entrega nem ensaio.
+     txtZapSinal e o unico com DOIS marcadores, {sinal} e {saldo}, porque a linha responde as
+     duas perguntas que o dono faz ao ler a mensagem: quanto entrou e quanto falta. */
+  ['txtSinal','p-txt-sinal','Sinal agora: {valor}'],
+  ['txtSaldo','p-txt-saldo','Saldo a pagar: {valor}'],
+  ['txtZapSinal','p-txt-zap-sinal','(sinal de {sinal}; saldo de {saldo})'],
   /* ===== os que estavam FORA da tabela ate 11/09/2026 (leva 2) =====
      A CHAVE de cada um e a MESMA que o coleta ja gravava, letra por letra: estado, preset e
      backup gravados antes desta rodada sao lidos sem conversao nenhuma, e o que a ferramenta
@@ -21133,6 +21194,13 @@ function pCfg(){
     /* O percentual entra por fcDescNum, a mesma porta da /cobrar: e ele que faz "sem desconto"
        ser a mesma coisa nos dois lados, e por consequencia o link sair identico. */
     descpix:fcDescNum($('p-descpix').value),
+    /* O SINAL DESTA COBRANCA. Os quatro campos entram CRUS: quem normaliza e quem recusa sao
+       as funcoes compartilhadas (fcSinalPctNum/fcSinalFixoNum, pSinalValor, pRecusaCobranca),
+       exatamente como acontece com o valor e com o percentual do desconto -- assim a /cobrar,
+       que le os mesmos quatro de outra tela, cai nas mesmas contas e no mesmo link. */
+    sinal:(radio('p-sinal')==='sim')?'sim':'nao',
+    sinaltipo:(radio('p-sinaltipo')==='fixo')?'fixo':'pct',
+    sinalpct:$('p-sinalpct').value, sinalfixo:$('p-sinalfixo').value,
     txid:pTxidLimpo($('p-txid').value),
     valdia:pValDia(), valbruto:$('p-validade').value,
     ppmodo:(usapp?ppmodo:'nao'), pplink:$('p-pplink').value.trim()
@@ -21180,6 +21248,12 @@ function pCss(cfg){
      (ver "o desconto nao e mais uma escolha do bloco", em pJs). Quem decide se a linha aparece
      e o par t/x do endereco, em tempo de execucao. */
   s+='.fcpg-pixlinha{font-size:15px;font-weight:700;color:'+cfg.c1+';margin:0 0 4px}\n';
+  /* As duas linhas do sinal entram SEMPRE no CSS, pelo mesmo motivo da linha do desconto:
+     quem decide se elas aparecem e o parametro n do endereco, em tempo de execucao. O sinal
+     leva o peso do destaque (e o numero que sera cobrado agora) e o saldo vem menor, para o
+     cliente ler os dois na ordem em que eles acontecem. */
+  s+='.fcpg-sinal{font-size:16px;font-weight:800;color:'+cfg.c1+';margin:0 0 2px}\n';
+  s+='.fcpg-saldo{font-size:13px;font-weight:700;opacity:.75;margin:0 0 4px}\n';
   /* O prazo fica JUNTO do valor, e nao no rodape: ele muda o comportamento de quem le, e para
      isso precisa ser lido antes de o cliente decidir deixar para depois. */
   s+='.fcpg-prazo{font-size:13px;font-weight:700;color:'+cfg.c1+';margin:0 0 4px}\n';
@@ -21280,6 +21354,15 @@ function pJs(cfg){
      configuravel, decisao do dono na mesma rodada -- e o UNICO destes textos que acrescenta
      bytes ao padrao de fabrica, porque e o unico que nao existia de forma nenhuma antes. */
   j+="  var TXT_NOTA='"+escJs(cfg.txtNota)+"';\n";
+  /* ===== AS TRES FRASES DO SINAL =====
+     Elas entram SEMPRE, com ou sem sinal na cobranca aberta agora -- mesma regra da maquinaria
+     do desconto, e pela mesma razao medida: o bloco nao pode depender do que estava
+     configurado no dia em que foi gerado, senao o dono liga o sinal no computador e o celular
+     gera um link que a pagina nao sabe exibir. Quem decide se as linhas aparecem e o
+     parametro n do endereco, em tempo de execucao. */
+  j+="  var TXT_SINAL='"+escJs(cfg.txtSinal)+"';   /* CADA {valor} vira o sinal */\n";
+  j+="  var TXT_SALDO='"+escJs(cfg.txtSaldo)+"';   /* CADA {valor} vira o saldo */\n";
+  if(cfg.zap)j+="  var TXT_ZAP_SINAL='"+escJs(cfg.txtZapSinal)+"';  /* {sinal} e {saldo} */\n";
   j+='\n  /* ============================================================\n     Daqui para baixo nao precisa mexer\n     ============================================================ */\n\n';
   /* A maquinaria do BR Code vem da FONTE UNICA. Aqui ela e usada ao contrario do Checkout: em
      vez de montar um payload para o carrinho, o bloco LE o payload que chegou no endereco --
@@ -21310,6 +21393,24 @@ function pJs(cfg){
   j+='  var DESCONTO_PIX=0;    /* o percentual de desconto no Pix, lido do parametro x */\n';
   j+='  function total(){return TOTAL_COBRADO;}\n';
   j+=pInd(fcTotalPixSrc(1,true,false));
+  j+='  /* ===== O SINAL DESTA COBRANCA =====\n';
+  j+='     Diferente das abas com carrinho, aqui o sinal NAO e uma formula que este bloco\n';
+  j+='     carrega: ele ja vem calculado, e mora onde todo valor cobrado desta pagina mora --\n';
+  j+='     DENTRO do codigo Pix, no campo 54. Nao ha carrinho que mude depois que o link sai,\n';
+  j+='     entao uma formula aqui seria um segundo lugar onde o numero e decidido.\n';
+  j+='     O que chega pelo endereco e o TOTAL da cobranca (parametro n), e ele serve a duas\n';
+  j+='     linhas de TELA: o total em destaque e o saldo. Ninguem cobra o total numa cobranca\n';
+  j+='     com sinal -- o Pix cobra o sinal e o PayPal cobra o sinal.\n';
+  j+='     totalPix() acima NAO e consultada no caminho do sinal: com sinal, DESCONTO_PIX e\n';
+  j+='     zero por construcao (quem gera o link zera o desconto na origem, e este bloco recusa\n';
+  j+='     um link que traga n junto de t/x). Todo uso de totalPix() aqui esta atras de um\n';
+  j+='     DESCONTO_PIX>0, ou DENTRO do proprio ramo do desconto (a conferencia 4b). */\n';
+  j+='  var SINAL_AGORA=0;     /* o sinal, lido do campo 54 quando o link traz n */\n';
+  j+='  function saldoAgora(){\n';
+  j+='    var d=TOTAL_COBRADO-SINAL_AGORA;\n';
+  j+='    if(d<0)d=0;\n';
+  j+='    return Math.round(d*100)/100;\n';
+  j+='  }\n\n';
   j+=pInd(FC_PARAM_SRC);
   j+='  /* texto sempre por no de texto, nunca por innerHTML: a descricao vem do ENDERECO, que e\n';
   j+='     entrada de fora, e nenhuma marcacao dela pode virar marcacao desta pagina */\n';
@@ -21377,10 +21478,13 @@ function pJs(cfg){
   j+='       impede a EDICAO de um link existente; ele nao e seguranca, e as conferencias 2 e 3\n';
   j+='       abaixo continuam sendo o que impede o dinheiro de ir para outra conta. */\n';
   j+="    var selo=param('s');\n";
-  /* A conta passa os seis, sempre. Ela e um SUPERCONJUNTO da de quatro -- com t e x vazios a
-     lista e a mesma, e o selo sai igual --, e e por isso que este bloco aceita, sem excecao,
-     todos os links sem desconto gerados antes de o desconto existir. */
-  j+="    if(!selo||seloDe(codigo,param('d'),param('pp'),pv,param('t'),param('x'))!==selo){recado(TXT_CODIGO_RUIM);return;}\n";
+  /* A conta passa os SETE, sempre. Ela e um SUPERCONJUNTO da de quatro e da de seis -- com t,
+     x e n vazios a lista e a mesma e o selo sai igual --, e e por isso que este bloco aceita,
+     sem excecao, todos os links gerados antes do desconto E antes do sinal existirem.
+     O contrario NAO vale, e e o preco declarado desta rodada: um bloco gerado ANTES do sinal
+     conta seis e ignora o n, entao ele RECUSA um link novo com sinal. Uma regeracao do codigo
+     1, uma vez so, e o que corrige -- e e o mesmo passo que o desconto ja pediu uma vez. */
+  j+="    if(!selo||seloDe(codigo,param('d'),param('pp'),pv,param('t'),param('x'),param('n'))!==selo){recado(TXT_CODIGO_RUIM);return;}\n";
   j+='    /* 2. forma e verificacao interna (CRC) */\n';
   j+='    var lido=pixLer(codigo);\n';
   j+='    if(!lido.ok){recado(TXT_CODIGO_RUIM);return;}\n';
@@ -21409,6 +21513,31 @@ function pJs(cfg){
   j+='      /* daqui para baixo "valor" e o TOTAL: e ele que a tela mostra em destaque, que o\n';
   j+='         PayPal cobra e que volta na mensagem do WhatsApp. O valor do Pix aparece na sua\n';
   j+='         propria linha, e continua sendo o que esta dentro do codigo copia e cola. */\n';
+  j+='      valor=TOTAL_COBRADO;\n';
+  j+='    }\n';
+  j+='    /* 4c. O SINAL, quando este link traz um -- a SEGUNDA REDE, atras do selo.\n';
+  j+='       O que o cliente paga agora saiu do campo 54, como todo valor desta pagina; o que\n';
+  j+='       chega em n e o TOTAL, que so a tela usa. As conferencias sao tres, e cada uma\n';
+  j+='       responde a uma pergunta diferente do selo:\n';
+  j+='         - n e t/x juntos: estado que nenhum gerador produz (com sinal o desconto do Pix\n';
+  j+='           e zerado na origem). Aceitar seria deixar "valor" ser reatribuido duas vezes.\n';
+  j+='         - a forma de n: mesmo formato do t, e nada mais entra.\n';
+  j+='         - o sinal cabe dentro do total, e nao arredonda para zero. Esta e mais fraca que\n';
+  j+='           a do desconto (que refaz a conta inteira) e a razao esta declarada: o sinal\n';
+  j+='           pode ser percentual OU valor fixo, escolhido por cobranca, e nenhuma formula\n';
+  j+='           viaja no link -- entao nao ha conta para refazer, so faixa para conferir.\n';
+  j+='       SEM n, nada disto acontece: o link e um link sem sinal e segue o caminho de\n';
+  j+='       sempre, com o valor saindo do codigo Pix e de mais lugar nenhum. */\n';
+  j+="    var pn=param('n');\n";
+  j+='    if(pn){\n';
+  j+='      if(pt||px){recado(TXT_CODIGO_RUIM);return;}\n';
+  j+="      if(!/^[0-9]{1,10}(\\.[0-9]{1,2})?$/.test(pn)){recado(TXT_CODIGO_RUIM);return;}\n";
+  j+='      SINAL_AGORA=valor;\n';
+  j+='      TOTAL_COBRADO=parseFloat(pn);\n';
+  j+='      if(!(TOTAL_COBRADO>0)){recado(TXT_CODIGO_RUIM);return;}\n';
+  j+='      if(SINAL_AGORA<0.01||SINAL_AGORA-TOTAL_COBRADO>0.0001){recado(TXT_CODIGO_RUIM);return;}\n';
+  j+='      /* daqui para baixo "valor" e o TOTAL, como no ramo do desconto: e ele que a tela\n';
+  j+='         mostra em destaque. O que as duas pontas cobram continua em SINAL_AGORA. */\n';
   j+='      valor=TOTAL_COBRADO;\n';
   j+='    }\n';
   j+="    var desc=param('d');\n";
@@ -21440,6 +21569,22 @@ function pJs(cfg){
   }else{
     j+="    if(DESCONTO_PIX>0)c.appendChild(novo('div','fcpg-pixlinha',TXT_PIX_ROTULO.replace(/\\{pct\\}/gi,DESCONTO_PIX)+': '+moedaFmt(totalPix())));\n";
   }
+  /* AS DUAS LINHAS DO SINAL, logo abaixo do valor em destaque e ANTES do prazo e dos botoes.
+     O numero grande continua sendo o TOTAL -- e ele que diz quanto o trabalho custa, e e assim
+     que as abas com carrinho tambem fazem (total em cima, sinal e saldo nas linhas de baixo).
+     Elas so existem quando ha sinal: sem n, nao se desenha linha nenhuma, e o cartao sai byte
+     a byte como saia antes desta rodada.
+     E SO EXISTEM QUANDO HA SALDO -- a regra da rodada F (13/09/2026), aplicada ao caso que
+     ESTA aba alcanca. Aqui nao existe "pedido em zero" (nao ha carrinho, e a geracao recusa
+     valor zero), mas existe o espelho dele: sinal FIXO igual ao valor da cobranca. Nesse
+     estado o saldo e R$ 0,00 -- uma linha que informa nada -- e o sinal repetiria, logo
+     abaixo do total, o MESMO numero que esta em destaque. Duas linhas com o mesmo numero e o
+     que a rodada C ja recusou no encontro com o meio prioritario. Entao as duas somem juntas,
+     e o cartao volta a dizer a verdade simples: esta cobranca e do valor cheio. */
+  j+='    if(SINAL_AGORA>0&&saldoAgora()>=0.01){\n';
+  j+="      c.appendChild(novo('div','fcpg-sinal',TXT_SINAL.replace(/\\{valor\\}/g,moedaFmt(SINAL_AGORA))));\n";
+  j+="      c.appendChild(novo('div','fcpg-saldo',TXT_SALDO.replace(/\\{valor\\}/g,moedaFmt(saldoAgora()))));\n";
+  j+='    }\n';
   j+="    if(dia>0)c.appendChild(novo('div','fcpg-prazo',TXT_PRAZO.replace(/\\{data\\}/g,prazoTexto(dia))));\n";
   j+="    if(lido.txid&&lido.txid!=='***')c.appendChild(novo('div','fcpg-ref',TXT_REF+lido.txid));\n";
   /* O "Ja paguei" mora DENTRO da secao do Pix, logo depois da orientacao -- ver pix(). Ele e
@@ -21570,7 +21715,12 @@ function pJs(cfg){
        default". Numa pagina de cobranca isso viraria recusa silenciosa na segunda vez que o
        mesmo identificador fosse cobrado, e essa e uma decisao do dono, nao deste bloco. */
     j+='        createOrder:function(d,actions){\n';
-    j+='          var v=valor.toFixed(2);\n';
+    /* O QUE O PAYPAL COBRA. Com sinal e o SINAL, e nao o total: e o valor que o cartao
+       debita naquele momento, e cobrar o total aqui seria a tela dizer uma coisa e o cartao
+       fazer outra. O numero e calculado UMA vez, na variavel v, e usado nos tres lugares do
+       pedido (amount, item_total, unit_amount) -- a armadilha do breakdown, ja registrada
+       acima, recusa o pedido inteiro se os tres divergirem num centavo. */
+    j+='          var v=(SINAL_AGORA>0?SINAL_AGORA:valor).toFixed(2);\n';
     j+="          var ref=(txid&&txid!=='***')?String(txid).substring(0,"+FC_LIM_PP+"):'';\n";
     j+='          var item={name:String(desc).substring(0,'+FC_LIM_PP+'),quantity:"1",\n';
     j+='            unit_amount:{value:v,currency_code:"BRL"}};\n';
@@ -21605,6 +21755,16 @@ function pJs(cfg){
     /* Com desconto o cliente pode ter pago o total (PayPal) ou o valor com desconto (Pix). A
        mensagem cita os dois: um numero so aqui obrigaria o dono a adivinhar qual chegou. */
     j+="    if(DESCONTO_PIX>0)msg+=' (via Pix: '+moedaFmt(totalPix())+')';\n";
+    /* COM SINAL a mensagem tem de citar o que ENTROU e o que FALTA. Sem esta linha o dono
+       leria "Acabei de pagar: Ensaio -- R$ 1.200,00" de quem pagou R$ 360,00: o {valor} da
+       frase de cima e o total da cobranca, e sozinho ele mente sobre o que foi pago.
+       A FRASE INTEIRA e do dono (TXT_ZAP_SINAL, com {sinal} e {saldo}); o bloco poe so o
+       espaco que a separa da anterior -- meia frase configuravel foi a divida D1, e ela nao
+       nasce de novo aqui. */
+    /* MESMA CONDICAO DA TELA, e nao so "tem sinal": com o saldo em zero o cliente pagou o
+       valor inteiro, e o {valor} da frase de cima ja diz exatamente isso. Acrescentar
+       "saldo de R$ 0,00" seria a mesma linha vazia que a tela deixou de desenhar. */
+    j+="    if(SINAL_AGORA>0&&saldoAgora()>=0.01)msg+=' '+TXT_ZAP_SINAL.replace(/\\{sinal\\}/g,moedaFmt(SINAL_AGORA)).replace(/\\{saldo\\}/g,moedaFmt(saldoAgora()));\n";
     j+="    if(txid&&txid!=='***')msg+=' ('+txid+')';\n";
     j+="    var a=novo('a','fcpg-bt fcpg-bt2',TXT_ZAP);\n";
     j+="    a.setAttribute('href','https://wa.me/'+WHATSAPP+'?text='+encodeURIComponent(msg));\n";
@@ -21641,7 +21801,7 @@ function pInd(t){
    Os tres do recebedor moram no painel Identidade desde que a identidade saiu das abas, e por
    isso aparecem aqui com o prefixo 'fci-': o campo mudou de lugar, o efeito dele sobre o link
    nao mudou nada. */
-var P_LINK_CAMPOS=['fci-chave','fci-nomer','fci-cidade','p-url','p-desc','p-valor','p-txid','p-validade','p-descpix','p-ppmodo','p-pplink'];
+var P_LINK_CAMPOS=['fci-chave','fci-nomer','fci-cidade','p-url','p-desc','p-valor','p-txid','p-validade','p-descpix','p-sinal','p-sinaltipo','p-sinalpct','p-sinalfixo','p-ppmodo','p-pplink'];
 function pSaidaVence(alvo){
   var i,ta=$('p-out2');
   if(!ta||!ta.value)return;
@@ -21688,6 +21848,8 @@ function pGerarLink(){
   if(pValorAjustar())mudou=true;
   if(pTxidAjustar())mudou=true;
   if(pDescAjustar())mudou=true;
+  if(pSinalPctAjustar())mudou=true;
+  if(pSinalFixoAjustar())mudou=true;
   if(mudou)salvarEstado();
   var cfg=pCfg(),r=pRecusaCobranca(cfg);
   if(r){alert(r);fciApontarSe(r);pUrlAvisoRender();return;}
@@ -21716,17 +21878,28 @@ function pLimpar(){
   fcOrdRestaurar('p','');
   $('p-desc').value='';$('p-valor').value='';$('p-txid').value='';$('p-pplink').value='';
   $('p-validade').value='';$('p-descpix').value='0';
+  setRadio('p-sinal','nao');setRadio('p-sinaltipo','pct');
+  $('p-sinalpct').value='30';$('p-sinalfixo').value='100';
   $('p-out1').value='';$('p-out2').value='';
   pToggles();pUrlAvisoRender();pPreview(true);salvarEstado();
 }
 
 /* ===== mostra/esconde conforme as escolhas ===== */
 function pToggles(){
-  var pp=$('p-pp-campos'),cor=$('p-coruja-campos'),lk=$('p-pplink-campo');
+  var pp=$('p-pp-campos'),cor=$('p-coruja-campos'),lk=$('p-pplink-campo'),el;
   fcOrdSo1('p',radio('p-usapp')==='nao');
   if(pp)pp.style.display=(radio('p-usapp')==='nao')?'none':'block';
   if(cor)cor.style.display=(radio('p-coruja')==='nao')?'none':'block';
   if(lk)lk.style.display=(radio('p-ppmodo')==='link')?'block':'none';
+  /* O SINAL DESLIGA O DESCONTO DO PIX, e o campo DIZ isso em vez de mentir em silencio --
+     mesma correcao que a divida D2 fez na Mini loja em 13/09/2026. O numero fica guardado;
+     o que se desabilita e a edicao, e o aviso ambar explica por que. */
+  var sinalOn=(radio('p-sinal')==='sim');
+  el=$('p-sinal-campos');if(el)el.style.display=sinalOn?'block':'none';
+  el=$('p-sinalpct-campo');if(el)el.style.display=(radio('p-sinaltipo')!=='fixo')?'block':'none';
+  el=$('p-sinalfixo-campo');if(el)el.style.display=(radio('p-sinaltipo')==='fixo')?'block':'none';
+  el=$('p-descpix-aviso');if(el)el.style.display=sinalOn?'block':'none';
+  el=$('p-descpix');if(el)el.disabled=sinalOn;
 }
 
 /* ===== previa fiel: o bloco gerado rodando de verdade =====
@@ -21948,6 +22121,8 @@ function pColeta(){
     corujacorpo:$('p-corujacorpo-t').value,corujadet:$('p-corujadet-t').value,
     desc:$('p-desc').value,valor:$('p-valor').value,txid:$('p-txid').value,
     validade:$('p-validade').value,descpix:$('p-descpix').value,
+    sinal:radio('p-sinal'),sinaltipo:radio('p-sinaltipo'),
+    sinalpct:$('p-sinalpct').value,sinalfixo:$('p-sinalfixo').value,
     ppmodo:radio('p-ppmodo'),pplink:$('p-pplink').value};
   /* Os textos configuraveis (ver P_TXT_DEFS, logo antes de pCfg). */
   fcTxtLer(P_TXT_DEFS,r);
@@ -21978,6 +22153,13 @@ function pRestaura(st){
   if(P.txid!==undefined)$('p-txid').value=P.txid;
   if(P.validade!==undefined)$('p-validade').value=P.validade;
   if(P.descpix!==undefined)$('p-descpix').value=P.descpix;
+  /* Estado gravado antes de 13/09/2026 nao tem nenhuma destas quatro chaves, e o padrao delas
+     e o que o HTML ja declara: sinal desligado, percentual, 30% e R$ 100,00. Cobranca antiga
+     restaurada nasce sem sinal -- que e como ela foi enviada. */
+  setRadio('p-sinal',(P.sinal==='sim')?'sim':'nao');
+  setRadio('p-sinaltipo',(P.sinaltipo==='fixo')?'fixo':'pct');
+  $('p-sinalpct').value=(P.sinalpct!=null&&P.sinalpct!=='')?P.sinalpct:30;
+  $('p-sinalfixo').value=(P.sinalfixo!=null&&P.sinalfixo!=='')?P.sinalfixo:100;
   if(P.ppmodo)setRadio('p-ppmodo',P.ppmodo);
   if(P.pplink!==undefined)$('p-pplink').value=P.pplink;
   /* O aviso do endereco e redesenhado aqui porque restaurar escreve nos campos SEM disparar
@@ -21999,6 +22181,8 @@ function pPresetAntes(){
   if(pValorAjustar())mudou=true;
   if(pTxidAjustar())mudou=true;
   if(pDescAjustar())mudou=true;
+  if(pSinalPctAjustar())mudou=true;
+  if(pSinalFixoAjustar())mudou=true;
   if(mudou)salvarEstado();
   return '';
 }

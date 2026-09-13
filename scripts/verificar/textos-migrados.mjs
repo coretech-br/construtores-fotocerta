@@ -339,6 +339,22 @@ console.log('\n--- o formato gravado, contra '+REF+' ---');
          t8:'Sinal agora', t9:'Restante no dia do ensaio',
          txtSinalMaior:'O sinal desta reserva é maior que o total. Remova o cupom ou marque mais itens opcionais.',
          txtSinalZero:'O sinal desta reserva arredonda para zero. Remova o cupom ou marque mais itens opcionais.'
+       })[ch]},
+      /* A COBRANCA DE SINAL CHEGOU AO LINK DE COBRANCA (13/09/2026, rodada D). Sete chaves
+         novas no estado da aba 'p' -- quatro do interruptor e da conta, tres de texto.
+         AQUI O SINAL E POR COBRANCA, e nao da pagina: as quatro primeiras viajam no LINK e
+         nao mudam um byte do bloco (por isso entraram na 'naoEmite' da aba), e as tres de
+         texto sao do bloco, emitidas SEMPRE. Todas gravadas no padrao de fabrica, porque o
+         cenario nao mexe em nenhuma delas.
+         'txtSinalMaior'/'txtSinalZero' NAO aparecem aqui, e a ausencia e deliberada: nesta
+         aba as recusas do sinal acontecem na GERACAO do link, com frase da ferramenta, e nao
+         dentro do bloco -- nao ha carrinho que mude depois que o link sai. */
+      {nome:'o sinal no Link de cobranca (13/09/2026)',
+       chaves:{p:['sinal','sinaltipo','sinalpct','sinalfixo','txtSinal','txtSaldo','txtZapSinal']},
+       esperado:(aba,ch) => ({
+         sinal:'nao', sinaltipo:'pct', sinalpct:'30', sinalfixo:'100',
+         txtSinal:'Sinal agora: {valor}', txtSaldo:'Saldo a pagar: {valor}',
+         txtZapSinal:'(sinal de {sinal}; saldo de {saldo})'
        })[ch]}
     ];
     /* FABRICA TROCADA e outra coisa de CHAVE NOVA, e a diferenca importa: a chave ja existia
