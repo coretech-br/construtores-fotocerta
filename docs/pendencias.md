@@ -1150,3 +1150,69 @@ desenho o que era falta manda procurar no lugar errado, e quem lê confia.**
 4. Duas mecânicas para o mesmo botão: `window.open` em `u`/`m`, âncora `target=_blank` em `p`/`a`.
 5. A Mini loja guarda a linha do cupom com `if(usaCupom)` e o Checkout não.
 6. Só a Mini loja dá retorno visual depois do clique (`TXT_PEDIDO_ENVIADO`) e esvazia a cesta.
+
+## Entregue em 13/09/2026 — unificar as abas de pagamento, leva 2
+
+Pedido do dono: *"Todos os construtores que têm pagamento devem ter as mesmas regras, mesmas
+configurações, etc."* Uma varredura catalogou **41 divergências**; esta leva pegou as que afetam
+dinheiro, recusa ou link, mais as cinco decisões dele.
+
+### Os quatro consertos — e duas premissas MINHAS que a medição derrubou
+
+1. **`aTotalMaximo` criada.** O Agendamento aceitava publicar uma página que ninguém consegue pagar
+   (sinal fixo acima do maior pedido possível). O teto é **o maior pacote, nunca a soma** — a
+   vitrine leva a um pacote só, e somar daria um teto inalcançável. Medido: 400 gera (os opcionais
+   entram), 800 gera (limite exato), 801 recusa; e com dois pacotes sem opcionais, 501 recusa
+   (prova que não soma).
+2. **`u-cod`: a premissa do meu enunciado estava errada.** Eu disse que faltava `maxlength` — ele
+   **tem**, aplicado na partida por `fcLimIniciar`. O que passava calado era o **caractere**:
+   `Pedido No 1 - Natal/2026` chegava ao extrato como `PedidoNo1Natal2026`. Alinhado pela Mini loja:
+   **recusa, não filtro**, que é a regra já escrita na própria tabela de limites.
+3. **O endereço da página de obrigado: a guarda estava errada, não a mensagem.** Medido —
+   `urlobrigado` tem **um** consumidor, a lista que o dono cola dentro do TidyCal, e quem redireciona
+   é o TidyCal, de fora do site. Não há uso legítimo de caminho relativo. Passou a usar `pUrlOk`.
+4. **O segundo laço do WhatsApp removido** no Checkout. Com resumo ligado a saída é byte a byte a
+   mesma — o ramo começava exatamente ali.
+
+**A outra premissa derrubada:** a aba `a` **já estava** em 5% de desconto. Quem muda são `u` e `m` —
+e é por isso que `a-out1`/`a-out3` não divergiram.
+
+### As cinco decisões do dono
+
+Preço zero **recusado** nas quatro (opcional a R$ 0,00 continua válido); resumo copiável **ligado**;
+desconto do Pix **5%** nas três de catálogo; separador **neutro "OU"**; passo do percentual **0,5**.
+
+**`fcSepNeutro` entrou sem ser pedido, e com razão medida:** trocar a fábrica **não chega** a quem já
+usou a ferramenta — o estado dele já tem a frase antiga, e valor gravado vence padrão. Sem migração
+a decisão não aconteceria no único navegador que importa. Só troca o que for, caractere por
+caractere, uma das fábricas anteriores. **Descpix e resumo não ganharam migração** — o número é
+dinheiro e o interruptor pode ter sido desligado de propósito; as decisões dizem "de fábrica".
+
+**Órfãos removidos:** `FC_ORD_PARES.ou`/`.ouDesc` e as linhas `u`/`m` de `FC_ORD_TXT`. **Não
+removidos, e por quê:** os campos `u-txt-ou-desc`/`m-txt-ou-desc` — apagá-los sumiria em silêncio
+com texto que o dono pode ter escrito, e mexeria no inventário do que fica gravado.
+
+### Quatro divergências, todas explicadas
+
+`u-out` e `m-out`, nas duas passagens. **Nenhuma cobrança e nenhum link mudaram.**
+
+### Três asserções que esta leva envelheceu — consertadas, não silenciadas
+
+`meio-prioritario` cobrava que o separador **nomeasse** o meio de baixo; trocou de pergunta (o
+separador de fábrica não nomeia nenhum dos dois, nas duas ordens). `meio-prio-migracao` ganhou o
+destino de hoje — são duas migrações em fila agora. `textos-migrados` passou a aceitar **lista** de
+fábricas trocadas: o separador teve três, e com um valor só o arquivo passaria contra uma referência
+e falharia contra outra.
+
+**Um defeito no próprio teste, achado porque estava lento:** a parte 4 usava opcionais de rádio; a
+marcação falhava calada atrás do marcador desenhado, e quem acabava zerado era um opcional não
+marcado — **passava dizendo menos do que promete.**
+
+### Nove divergências novas, para as levas seguintes
+
+Duas da mesma classe que esta leva consertou: `a-prefixo` **sem regra de caractere nenhuma** (entra
+no txid e consome orçamento errado), e `a` exigindo WhatsApp incondicionalmente. Mais: `aRecusa` lê
+o DOM em vez do `cfg`, contra o que o próprio cabeçalho dela promete; `mTotalMaximo` lê preço sem
+trocar vírgula por ponto; `FC_LIM_CAMPOS` ignora `m-cod`/`a-pcod`/`a-prefixo`; o `max` de
+`sinalfixo` está nas tabelas e em nenhum `<input>`; e **todas as recusas do Link de cobrança saem
+sem acento**, contra a norma registrada.
