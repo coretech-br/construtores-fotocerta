@@ -429,11 +429,31 @@ console.log('\n--- o formato gravado, contra '+REF+' ---');
        os dois sao cobrados -- o antigo na referencia, o novo aqui. Quando a rodada ja chegou a
        referencia, os dois lados trazem o novo, e isso tambem passa. O que NAO passa e um
        terceiro valor aparecer de qualquer um dos lados. */
+    /* A TERCEIRA COLUNA E UMA LISTA desde 13/09/2026, e nao um valor: uma chave pode ter tido
+       MAIS DE UMA fabrica antes desta arvore, e ai o lado da referencia depende de QUAL commit
+       foi passado. Os quatro separadores sao o caso: 'ou pague com Pix' ate 12/09, 'ou pague com
+       cartao' ate 13/09, e 'OU' de agora em diante. Com um valor so, este arquivo passaria
+       contra uma referencia e falharia contra a outra -- sem nenhum defeito por tras. */
     const TROCADAS = [
-      ['u','txtOu',        'ou pague com Pix', 'ou pague com cartão'],
-      ['u','txtOuDesc',    'ou pague com Pix com {pct}% de desconto', 'ou pague com cartão, sem o desconto de {pct}%'],
-      ['m','txtOu',        'ou pague com Pix', 'ou pague com cartão'],
-      ['m','txtOuDesc',    'ou pague com Pix com {pct}% de desconto', 'ou pague com cartão, sem o desconto de {pct}%'],
+      /* O SEPARADOR NEUTRO (13/09/2026, decisao 24 do dono): as quatro abas de pagamento passaram
+         a usar o mesmo 'OU' que o Link de cobranca e a Agendamento por pacote ja usavam. Quem ja
+         tinha a fabrica anterior gravada e levado ate 'OU' por fcSepNeutro -- as duas fabricas
+         antigas estao declaradas abaixo porque as duas existiram, e o que se cobra e que NENHUM
+         terceiro valor apareca. */
+      ['u','txtOu',        ['ou pague com Pix','ou pague com cartão'], 'OU'],
+      ['u','txtOuDesc',    ['ou pague com Pix com {pct}% de desconto','ou pague com cartão, sem o desconto de {pct}%'], 'OU'],
+      ['m','txtOu',        ['ou pague com Pix','ou pague com cartão'], 'OU'],
+      ['m','txtOuDesc',    ['ou pague com Pix com {pct}% de desconto','ou pague com cartão, sem o desconto de {pct}%'], 'OU'],
+      /* O DESCONTO DO PIX DE FABRICA (13/09/2026, decisao 18): 5% nas tres abas de catalogo, que
+         era o numero da Agendamento por pacote. AQUI NAO HA MIGRACAO, e e deliberado: o numero
+         gravado e DINHEIRO -- e o que a loja do dono cobra hoje --, e reescreve-lo em silencio
+         seria mudar preco sem ninguem pedir. Por isso a referencia traz 10 e a arvore de hoje
+         traz 5 numa ferramenta de armazenamento LIMPO, que e como este arquivo mede. */
+      ['u','descpix',      ['10'], '5'],
+      ['m','descpix',      ['10'], '5'],
+      /* O RESUMO COPIAVEL (13/09/2026, decisao 8): nasce LIGADO no Checkout, como ja nascia na
+         Mini loja. Idem: sem migracao -- quem desligou o recurso pode ter desligado de proposito. */
+      ['u','resumo',       ['nao'], 'sim'],
       /* O AVISO DE QUE O PIX NAO CONFIRMA SOZINHO, na aba Agendamento por pacote (13/09/2026).
          Ate esta rodada ele NAO saia de FC_TXT_FABRICA.pixManual, e o motivo estava escrito na
          tabela da aba: "esta pagina nao tem botao Ja paguei". Com o botao passando a existir,
@@ -442,18 +462,19 @@ console.log('\n--- o formato gravado, contra '+REF+' ---');
          A chave ja existia nos dois lados: o que mudou foi o PADRAO, e e por isso que ela entra
          AQUI e nao em RODADAS. */
       ['a','txtPixManual',
-       'O Pix não avisa a gente automaticamente. Assim que você pagar, me avise para eu conferir e confirmar a sua reserva.',
+       ['O Pix não avisa a gente automaticamente. Assim que você pagar, me avise para eu conferir e confirmar a sua reserva.'],
        'O Pix não avisa a gente automaticamente. Assim que você pagar, toque em "Já paguei" para eu conferir e confirmar.']
     ];
     const mau = [];
-    for(const [aba,ch,velho,novoV] of TROCADAS){
+    for(const [aba,ch,velhos,novoV] of TROCADAS){
       const aq=(depois[aba]||{})[ch], re=(antes[aba]||{})[ch];
+      const aceitos = velhos.concat([novoV]);
       if(aq !== novoV) mau.push('aqui '+aba+'.'+ch+'='+JSON.stringify(aq));
-      if(re !== velho && re !== novoV) mau.push(REF+' '+aba+'.'+ch+'='+JSON.stringify(re));
+      if(aceitos.indexOf(re) < 0) mau.push(REF+' '+aba+'.'+ch+'='+JSON.stringify(re));
       if(depois[aba]) delete depois[aba][ch];
       if(antes[aba]) delete antes[aba][ch];
     }
-    chk('gravado: as fabricas trocadas pela rodada do meio prioritario, nos dois lados',
+    chk('gravado: as fabricas TROCADAS por rodada declarada, nos dois lados',
         mau.length === 0, mau.join(' | '));
     for(const rodada of RODADAS){
       const faltando = [];

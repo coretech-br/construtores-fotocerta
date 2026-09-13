@@ -1697,7 +1697,7 @@
       <fieldset id="u-descpix-campo">
         <legend>Desconto para pagamento via Pix</legend>
         <label for="u-descpix">Percentual de desconto no Pix <small>(0 = sem desconto; aplica sobre o total já com cupom)</small></label>
-        <input type="number" id="u-descpix" value="10" min="0" max="90" step="0.5">
+        <input type="number" id="u-descpix" value="5" min="0" max="90" step="0.5">
         <p class="ajuda alerta" id="u-descpix-aviso"><b>Com a cobrança de sinal ligada este campo não vale.</b> O Pix passa a cobrar o sinal, e o desconto do Pix não se aplica sobre o sinal — seria desconto dobrado, porque o sinal já sai de um total que pode ter cupom. O número acima fica guardado, mas <b>não entra no código gerado</b> nem aparece no carrinho enquanto o sinal estiver ligado. Para usar o desconto do Pix, volte a cobrar o valor cheio.</p>
         <p class="ajuda">Com desconto ativo, o carrinho mostra a linha <b>"Pagando via Pix (-10%)"</b> abaixo do total e o Pix é gerado já com o valor reduzido. <b>O PayPal continua cobrando o total sem esse desconto</b> — por isso os dois números ficam à vista. Qual deles aparece maior, e qual meio vem primeiro, é o <b>meio prioritário</b> da seção 1; o separador acompanha a escolha.</p>
       </fieldset>
@@ -1848,8 +1848,8 @@
       <fieldset>
         <legend>Resumo copiável do pedido</legend>
         <div class="radios">
-          <label><input type="radio" name="u-resumo" value="nao" checked><span>Não incluir</span></label>
-          <label><input type="radio" name="u-resumo" value="sim"><span>Incluir resumo copiável</span></label>
+          <label><input type="radio" name="u-resumo" value="sim" checked><span>Incluir resumo copiável</span></label>
+          <label><input type="radio" name="u-resumo" value="nao"><span>Não incluir</span></label>
         </div>
         <div id="u-resumo-campos">
           <label for="u-t10">Rótulo do resumo <small>(sai acentuado, como todo texto que uma pessoa lê)</small></label>
@@ -1921,10 +1921,10 @@
       <fieldset>
         <legend>Pagamento pelo Pix</legend>
         <label for="u-txt-ou">Separador entre os dois meios de pagamento</label>
-        <input type="text" id="u-txt-ou" value="ou pague com cartão">
+        <input type="text" id="u-txt-ou" value="OU">
         <label for="u-txt-ou-desc">Separador quando há desconto no Pix</label>
-        <input type="text" id="u-txt-ou-desc" value="ou pague com cartão, sem o desconto de {pct}%">
-        <p class="ajuda">Os dois separadores apontam para o meio que vem <b>depois</b> deles. Ao trocar o <b>meio prioritário</b> (seção 1), a ferramenta vira os dois — mas só enquanto estiverem no padrão de fábrica; texto que você escreveu fica como está, e aí é você quem ajusta.</p>
+        <input type="text" id="u-txt-ou-desc" value="OU">
+        <p class="ajuda">O separador de fábrica é <b>neutro</b> — o mesmo <code>OU</code> das outras três abas de pagamento —, então ele <b>não muda</b> quando você troca o meio prioritário (seção 1). Se você escrever uma frase que aponta para um lado (“ou pague com cartão”), confira-a ao trocar o meio prioritário: a ferramenta não reescreve texto seu. Onde houver <code>{pct}</code> no segundo campo entra o percentual do desconto.</p>
         <label for="u-txt-pix-instrucao">Instrução de pagamento</label>
         <input type="text" id="u-txt-pix-instrucao" value="Abra o app do seu banco e pague pelo QR Code ou Pix Copia e Cola">
         <label for="u-txt-pixval">Rótulo do valor no Pix <small>(os dois-pontos são acrescentados pelo bloco)</small></label>
@@ -3098,7 +3098,7 @@
       <fieldset id="m-descpix-campo">
         <legend>Desconto para pagamento via Pix</legend>
         <label for="m-descpix">Percentual de desconto no Pix <small>(0 = sem desconto; aplica sobre o total já com cupom)</small></label>
-        <input type="number" id="m-descpix" value="10" min="0" max="90" step="0.5">
+        <input type="number" id="m-descpix" value="5" min="0" max="90" step="0.5">
         <p class="ajuda alerta" id="m-descpix-aviso"><b>Com a cobrança de sinal ligada este campo não vale.</b> O Pix passa a cobrar o sinal, e o desconto do Pix não se aplica sobre o sinal — seria desconto dobrado, porque o sinal já sai de um total que pode ter cupom. O número acima fica guardado, mas <b>não entra no código gerado</b>.</p>
       </fieldset>
       <fieldset id="m-zap-fieldset">
@@ -3245,7 +3245,7 @@
           </div>
           <div id="m-sinalpct-campo">
             <label for="m-sinalpct">Percentual do sinal <small>(de 1 a 99)</small></label>
-            <input type="number" id="m-sinalpct" value="30" min="1" max="99" step="1">
+            <input type="number" id="m-sinalpct" value="30" min="1" max="99" step="0.5">
           </div>
           <div id="m-sinalfixo-campo">
             <label for="m-sinalfixo">Valor fixo do sinal</label>
@@ -3443,10 +3443,10 @@
       <fieldset>
         <legend>Pagamento pelo Pix</legend>
         <label for="m-txt-ou">Separador entre os dois meios de pagamento</label>
-        <input type="text" id="m-txt-ou" value="ou pague com cartão">
+        <input type="text" id="m-txt-ou" value="OU">
         <label for="m-txt-ou-desc">Separador quando há desconto no Pix</label>
-        <input type="text" id="m-txt-ou-desc" value="ou pague com cartão, sem o desconto de {pct}%">
-        <p class="ajuda">Os dois separadores apontam para o meio que vem <b>depois</b> deles. Ao trocar o <b>meio prioritário</b> (seção 1), a ferramenta vira os dois — mas só enquanto estiverem no padrão de fábrica; texto que você escreveu fica como está.</p>
+        <input type="text" id="m-txt-ou-desc" value="OU">
+        <p class="ajuda">O separador de fábrica é <b>neutro</b> — o mesmo <code>OU</code> das outras três abas de pagamento —, então ele <b>não muda</b> quando você troca o meio prioritário (seção 1). Se você escrever uma frase que aponta para um lado (“ou pague com cartão”), confira-a ao trocar o meio prioritário: a ferramenta não reescreve texto seu. Onde houver <code>{pct}</code> no segundo campo entra o percentual do desconto.</p>
         <label for="m-txt-pix-instrucao">Instrução de pagamento</label>
         <input type="text" id="m-txt-pix-instrucao" value="Abra o app do seu banco e pague pelo QR Code ou Pix Copia e Cola">
         <label for="m-txt-pixval">Rótulo do valor no Pix <small>(os dois-pontos são acrescentados pelo bloco)</small></label>
@@ -4518,17 +4518,23 @@ function aTplJs(q,texto,pares,sep){
    "meio prioritario" (Pix ou cartao) que decide, JUNTAS, a ordem em que os dois meios aparecem
    no bloco e qual preco fica em destaque -- um controle so, e nao dois, para nao existir estado
    incoerente (Pix em cima com o preco do cartao grande).
-   Frase que APONTA para o outro meio ("ou pague com Pix", "Use o Pix acima") nao tem um padrao
+   Frase que APONTA para o outro meio ("Use o Pix acima", "ou {valor} no cartao") nao tem um padrao
    de fabrica: tem DOIS, um por ordem. Escrever um so e escolher em qual das duas ordens a
-   ferramenta vai mentir. A terceira coluna das tabelas de texto continua sendo UMA string -- a
+   ferramenta vai mentir. Frase NEUTRA ("OU") nao tem esse problema, e por isso o separador saiu
+   desta tabela em 13/09/2026 -- ver o comentario dentro dela. A terceira coluna das tabelas de texto continua sendo UMA string -- a
    do padrao de fabrica da ordem de fabrica ('pix') --, e por isso fcTxtFabricaDiverge nao muda:
    ela compara o value= do <input> com essa mesma string.
    Quem troca uma pela outra e fcOrdVirar, no momento em que o dono mexe no radio, e SO quando o
    campo ainda esta exatamente na fabrica da ordem anterior. Texto que o dono escreveu nunca e
    tocado -- ver o comentario de fcOrdVirar. */
+/* 'ou' e 'ouDesc' SAIRAM DESTA TABELA em 13/09/2026 (decisao 24 do dono): o separador dos dois
+   meios passou a ser NEUTRO ("OU") nas quatro abas de pagamento, como o Link de cobranca e o
+   Agendamento por pacote ja eram. Frase neutra nao aponta para lado nenhum, logo nao tem duas
+   fabricas e nao vira com o meio prioritario -- e um par de valores para uma frase que nao vira
+   e maquinaria morta, que e o que esta tabela existe justamente para nao ser.
+   O QUE SOBROU aqui continua tendo consumidor: as tres frases abaixo APONTAM ("no cartao", "Use
+   o Pix acima/abaixo"), e por isso continuam com uma fabrica por ordem. */
 var FC_ORD_PARES={
-  ou:{pix:'ou pague com cartão',pp:'ou pague com Pix'},
-  ouDesc:{pix:'ou pague com cartão, sem o desconto de {pct}%',pp:'ou pague com Pix com {pct}% de desconto'},
   cartaoLinha:{pix:'ou {valor} no cartão',pp:'ou {valor} no Pix'},
   erroComPix:{pix:'Não foi possível carregar o pagamento por cartão agora. Use o Pix acima, ou fale com a gente para receber outra forma de pagar.',
               pp:'Não foi possível carregar o pagamento por cartão agora. Use o Pix abaixo, ou fale com a gente para receber outra forma de pagar.'},
@@ -4560,11 +4566,12 @@ var FC_TXT_FABRICA={
   sinalZero:'O sinal deste pedido arredonda para zero. Escolha mais itens ou aumente a quantidade.',
   sinalRecusado:'pedido recusado',
   totalZero:'Escolha ao menos um item: o pedido está em zero.',
-  ou:FC_ORD_PARES.ou.pix,
+  /* NEUTRO nas quatro (decisao 24). Antes era FC_ORD_PARES.ou.pix -- ver a tabela. */
+  ou:'OU',
   /* {pct} minusculo desde 03/09/2026 (decisao D-1): a Etapa 1 adotou {pct}/{valor}/{n}/{data}
      e este era o unico marcador em MAIUSCULAS da ferramenta. A troca no bloco gerado aceita as
      DUAS grafias (regex /i), para configuracao ja gravada com {PCT} continuar funcionando. */
-  ouDesc:FC_ORD_PARES.ouDesc.pix,
+  ouDesc:'OU',
   cartaoLinha:FC_ORD_PARES.cartaoLinha.pix,
   pixVal:'Valor no Pix',
   pixCopiado:'Código copiado!',
@@ -4854,9 +4861,12 @@ function fcTxtTabelas(){
    a chave no estado gravado, o id do campo na tela, e a chave do par em FC_ORD_PARES. Os tres
    usos (virar na tela, migrar o estado, e a prova do arnes) leem daqui -- duas listas seriam
    duas coisas que divergem no dia em que a frase seguinte entrar so numa delas. */
+/* 'u' e 'm' SAIRAM daqui em 13/09/2026, junto com 'ou'/'ouDesc' de FC_ORD_PARES: as duas unicas
+   frases que essas abas viravam eram os separadores, e separador neutro nao vira. Sem linha aqui,
+   fcOrdVirar e fcOrdMigrar viram no-op para elas -- o que e a verdade, e nao uma omissao: o
+   radio do meio prioritario continua existindo nas duas e continua mudando a ORDEM dos blocos e
+   o preco em destaque; o que ele deixou de mexer e no TEXTO. */
 var FC_ORD_TXT={
-  u:[['txtOu','u-txt-ou','ou'],['txtOuDesc','u-txt-ou-desc','ouDesc']],
-  m:[['txtOu','m-txt-ou','ou'],['txtOuDesc','m-txt-ou-desc','ouDesc']],
   a:[['txtCartaoLinha','a-txt-cartaolinha','cartaoLinha'],['txtErroComPix','a-txt-erro-compix','erroComPix']],
   p:[['txtPaypalFora','p-txt-paypalfora','paypalFora'],['txtCartaoLinha','p-txt-cartaolinha','cartaoLinha']]
 };
@@ -4918,6 +4928,33 @@ function fcOrdMigrar(st,pref,ordemAntiga){
   for(i=0;i<defs.length;i++){
     par=FC_ORD_PARES[defs[i][2]];
     if(r[defs[i][0]]===par[ordemAntiga])r[defs[i][0]]=par[FC_ORD_FABRICA];
+  }
+  return r;
+}
+/* ===== A MIGRACAO DO SEPARADOR NEUTRO (13/09/2026, decisao 24) =====
+   Trocar o padrao de fabrica NAO CHEGA a quem ja usou a ferramenta: os campos de texto sao
+   gravados a cada tecla, entao o estado do dono ja contem a frase antiga, e valor gravado vence
+   padrao. Sem esta migracao o Checkout e a Mini loja dele continuariam dizendo "ou pague com
+   cartao" enquanto as outras duas dizem "OU" -- ou seja, a decisao nao teria acontecido no unico
+   navegador que importa. E a mesma licao que fcOrdMigrar carrega escrita, e a mesma regra:
+   SO TROCA O QUE FOR, CARACTERE POR CARACTERE, UMA DAS FABRICAS ANTERIORES. As quatro estao
+   listadas abaixo (as duas ordens x as duas frases). Qualquer outro valor e TEXTO DO DONO e fica
+   intocado -- a ferramenta nunca sobrescreve o que ele escreveu. Idempotente por construcao:
+   depois de migrar o valor e 'OU', que nao esta na lista.
+   POR QUE O DESCONTO DO PIX E O RESUMO NAO GANHAM MIGRACAO IGUAL. O desconto e DINHEIRO: 10%
+   gravado e o que a loja dele cobra hoje, e reescrever isso em silencio seria mudar preco sem
+   ninguem pedir. O resumo e um recurso ligado/desligado que ele pode ter desligado de proposito.
+   As duas decisoes dizem "de fabrica", e de fabrica e o que elas mudam. O separador e o unico dos
+   tres em que existe um valor que prova que o dono nunca escolheu nada ali. */
+var FC_SEP_FABRICAS_ANTIGAS=['ou pague com cartão','ou pague com Pix',
+  'ou pague com cartão, sem o desconto de {pct}%','ou pague com Pix com {pct}% de desconto'];
+function fcSepNeutro(st){
+  if(!st||typeof st!=='object')return st;
+  var r={},k,i;
+  for(k in st)if(Object.prototype.hasOwnProperty.call(st,k))r[k]=st[k];
+  for(i=0;i<FC_SEP_FABRICAS_ANTIGAS.length;i++){
+    if(r.txtOu===FC_SEP_FABRICAS_ANTIGAS[i])r.txtOu=FC_TXT_FABRICA.ou;
+    if(r.txtOuDesc===FC_SEP_FABRICAS_ANTIGAS[i])r.txtOuDesc=FC_TXT_FABRICA.ouDesc;
   }
   return r;
 }
@@ -13806,14 +13843,21 @@ function uColeta(){
 }
 function uRestaura(st){
   if(!st.u)return;
-  /* A MIGRACAO DO MEIO PRIORITARIO (12/09/2026). Esta aba era PayPal-primeiro ate esta rodada,
-     entao a fabrica antiga das duas frases do separador e a do ramo 'pp'. Ver fcOrdMigrar. */
+  /* A MIGRACAO DO MEIO PRIORITARIO (12/09/2026). Esta aba era PayPal-primeiro ate aquela rodada.
+     Desde 13/09/2026 ela e um NO-OP aqui, de proposito: as duas unicas frases que esta aba virava
+     eram os separadores, e separador neutro nao vira (ver FC_ORD_TXT). A chamada fica porque a
+     regra e uma so para as quatro abas, e porque frase nova que APONTE para um meio voltaria a
+     precisar dela. Quem leva o separador antigo ao texto neutro e fcSepNeutro, logo abaixo. */
   var U=fcOrdMigrar(st.u,'u','pp');
+  U=fcSepNeutro(U);
   U=fcZapSaldoMigrar(U,'Restante na entrega');
   uProds=U.prods||[];uProdRender();uCps=U.cps||[];uCpRender();
   setRadio('u-metodo',U.metodo);fcOrdRestaurar('u',U.prio);setRadio('u-moeda',U.moeda);setRadio('u-selprod',U.selprod);setRadio('u-zap',U.zap);
   $('u-cod').value=U.cod;
-  $('u-descpix').value=(U.descpix!=null&&U.descpix!=='')?U.descpix:10;
+  /* 5% de fabrica desde 13/09/2026 (decisao 18): as tres abas de catalogo passam a nascer no
+     mesmo numero, que era o do Agendamento por pacote. O Link de cobranca continua em 0 -- la o
+     desconto e por cobranca, e nao politica da loja. */
+  $('u-descpix').value=(U.descpix!=null&&U.descpix!=='')?U.descpix:5;
   /* O UPSELL (13/09/2026). Estado gravado por versao anterior nao tem as duas chaves --
      endereco vazio e interruptor desligado e a fabrica, e com ela o bloco sai byte a byte
      como sempre saiu. */
@@ -13832,7 +13876,11 @@ function uRestaura(st){
   setRadio('u-sinal',U.sinal||'nao');setRadio('u-sinaltipo',U.sinaltipo||'pct');
   $('u-sinalpct').value=(U.sinalpct!=null&&U.sinalpct!=='')?U.sinalpct:30;
   $('u-sinalfixo').value=(U.sinalfixo!=null&&U.sinalfixo!=='')?U.sinalfixo:100;
-  setRadio('u-resumo',U.resumo||'nao');
+  /* LIGADO de fabrica desde 13/09/2026 (decisao 8 do dono) -- a Mini loja ja nascia assim, e
+     esta nascia desligada. O motivo antigo do 'nao' era de FERRAMENTA e nao de produto: nao fazer
+     a regressao byte a byte divergir quando o recurso entrou. Estado ja gravado traz a escolha do
+     dono e vence este padrao; so a ausencia cai aqui. */
+  setRadio('u-resumo',U.resumo||'sim');
   setRadio('u-ppcor',U.ppcor||'gold');
   $('u-c1-t').value=U.c1;$('u-c1').value=corValida(U.c1)?U.c1:'#075E54';
   $('u-c2-t').value=U.c2;$('u-c2').value=corValida(U.c2)?U.c2:'#ffffff';
@@ -13899,7 +13947,7 @@ function uPresetDepois(){
    entre 0 e 90 na frente do operador. O teto de 2000px da largura so pega erro de digitacao
    (mesmo criterio do s-larg no Slideshow) e esta declarado tambem no HTML. */
 var U_NUMS=[['u-qtdmax',10,2,99,true],['u-sinalpct',30,1,99,false],['u-sinalfixo',100,0.01,999999,false],
-  ['u-descpix',10,0,90,false],['u-largura',420,240,2000,true]];
+  ['u-descpix',5,0,90,false],['u-largura',420,240,2000,true]];
 function uPreso(id){return fcPreso(U_NUMS,id);}
 /* Quantos itens DESTE produto (ele proprio e seus opcionais) foram marcados como vendidos por
    quantidade. Serve a lista da aba e, somado, decide se o recurso inteiro esta ligado. */
@@ -14071,7 +14119,10 @@ function uProdSalvar(){
   var n=$('u-pnome').value.trim();
   if(!n){alert('Informe o nome do produto.');return;}
   var v=parseFloat(String($('u-ppreco').value).replace(',','.'));
-  if(isNaN(v)||v<0){alert('Informe o preço do produto.');return;}
+  /* MAIOR QUE ZERO (decisao 6 do dono, 13/09/2026): as quatro abas de pagamento recusam item de
+     catalogo a preco zero, como o Agendamento por pacote ja fazia. Opcional a zero continua
+     valendo -- e brinde, e a propria aba emite "Sem opcional" a zero. */
+  if(isNaN(v)||v<=0){alert('Informe o preço do produto (maior que zero). Um produto de R$ 0,00 seria entregue como uma cobrança de zero. Opcional grátis continua valendo — esta recusa é do item de catálogo.');return;}
   var p={nome:n,desc:$('u-pdesc').value.trim(),preco:v,
     opsel:radio('u-opsel')||'unico',opnenhum:radio('u-opnenhum')||'nao',
     qtd:radio('u-pqtd')==='sim',
@@ -14528,7 +14579,7 @@ function uCfg(){
   /* Desconto e largura vem presos por U_NUMS, a MESMA linha que corrige o campo na tela --
      antes o clamp morava so aqui e mudava o numero em silencio. O zeramento por forma de
      pagamento e por sinal continua sendo outra coisa: nao e faixa, e regra de negocio. */
-  var descpix=uPreso('u-descpix');if(descpix==null)descpix=10;
+  var descpix=uPreso('u-descpix');if(descpix==null)descpix=5;
   if(m!=='ambos')descpix=0;
   var larg=uPreso('u-largura');if(larg==null)larg=420;
   /* Sinal e desconto Pix nao convivem: o Pix passa a cobrar o sinal, e o desconto do Pix sobre
@@ -14589,8 +14640,42 @@ function uCfg(){
    uGerar, que e o gesto deliberado do operador -- a previa roda a cada tecla e nao pode
    reescrever campo nenhum. */
 function uRecusa(cfg){
-  var i,cpv,cpc,cpe,cpvisto,vistosCp={};
+  var i,cpv,cpc,cpe,cpvisto,vistosCp={},codnU,prc;
+  /* O CODIGO DO PEDIDO, com a MESMA regra da Mini loja -- ate 13/09/2026 esta aba nao conferia
+     NADA aqui, e era a unica das quatro nesse estado.
+     O QUE FOI MEDIDO, e o que NAO era o defeito: 'u-cod' JA tem maxlength 25 -- FC_LIM_CAMPOS o
+     aplica na partida --, entao digitar nunca estoura o orcamento do txid, e o contador vermelho
+     do campo e inalcancavel pelo teclado. O que passava calado era o CARACTERE: 'Pedido No 1 -
+     Natal/2026' ia inteiro para a tela, para o resumo, para o WhatsApp e para o custom_id do
+     PayPal, e chegava ao extrato como 'PedidoNo1Natal2026', porque o Pix so carrega letras e
+     numeros. A Mini loja (codigo da loja) e o Agendamento por pacote (codigo do pacote) ja
+     recusavam exatamente isso.
+     RECUSA, E NAO FILTRO: e a regra ja escrita na tabela de limites -- "o gerador RECUSA COM
+     AVISO -> NAO FILTRA", dita la para o codigo da loja e para o codigo do pacote, que ja tinham
+     recusa propria. Filtrar apagaria o caractere E o diagnostico junto.
+     O TETO TAMBEM E CONFERIDO, porque maxlength nao alcanca valor GRAVADO: estado importado (ou
+     um backup antigo) com um codigo mais longo entra na tela inteiro, e sai cortado no payload
+     sem erro nenhum. Aqui nao ha cauda a descontar -- CODIGO_PEDIDO e o codigo literal --, entao
+     o orcamento e o FC_TXID_MAX inteiro.
+     CODIGO VAZIO CONTINUA VALENDO: o bloco anuncia 'PEDIDO' na propria linha de CODIGO_PEDIDO,
+     que e padrao a vista e nao corte silencioso. A Mini loja EXIGE o dela porque ali o codigo
+     tambem e a chave do carrinho no navegador; aqui nao e. */
+  if(cfg.cod){
+    if(!/^[A-Za-z0-9_-]+$/.test(cfg.cod))return 'O código do pedido aceita apenas letras sem acento, números, hífen e sublinhado. Ele aparece inteiro na tela, no resumo e no WhatsApp, mas o Pix só carrega letras e números: "'+cfg.cod+'" chegaria ao seu extrato como "'+fcIdLimpo(cfg.cod)+'", e o que o cliente lê deixaria de ser o que você concilia.';
+    codnU=fcIdUteis(cfg.cod);
+    if(codnU>FC_TXID_MAX)return 'O código do pedido "'+cfg.cod+'" tem '+codnU+' letras e números, e aqui cabem no máximo '+FC_TXID_MAX+'. O Pix só carrega '+FC_TXID_MAX+' caracteres no identificador: o que passa é cortado, e o código que o cliente lê na tela deixa de ser o que chega ao seu extrato, sem erro e sem aviso. Encurte o código — hífen e sublinhado não contam, o Pix os descarta.';
+  }
   if(!cfg.prods.length)return 'Cadastre ao menos um produto.';
+  /* PRECO ZERO NO ITEM DE CATALOGO (decisao 6 do dono, 13/09/2026): recusado nas quatro abas de
+     pagamento. Ate aqui so o Agendamento por pacote e o Link de cobranca recusavam, e um produto
+     de R$ 0,00 saia como uma cobranca de zero. O OPCIONAL a zero continua valendo -- brinde e
+     "Sem opcional" sao configuracao legitima, e a propria aba ja emite o segundo a preco zero.
+     A recusa e do ITEM DE CATALOGO, que e o que o cliente compra. Conferido AQUI, e nao so no
+     cadastro, pela razao de sempre nesta ferramenta: estado importado nao passa pelo formulario. */
+  for(i=0;i<cfg.prods.length;i++){
+    prc=parseFloat(String(cfg.prods[i].preco).replace(',','.'));
+    if(!(prc>0))return 'O produto "'+(cfg.prods[i].nome||('#'+(i+1)))+'" está com o preço vazio ou zerado. Ele seria entregue como uma cobrança de R$ 0,00. Preencha o preço ou remova o produto — opcional grátis continua valendo, a recusa é do item de catálogo.';
+  }
   if(cfg.usaPP&&!cfg.client)return fciRecusa('Informe o Client ID do PayPal.');
   if(cfg.usaPix){
     var erroChave=pixChaveErro(cfg.chave,cfg.chaveBruta);
@@ -15243,11 +15328,18 @@ function uBloco(cfg){
   c+='else{cupomAtivo=achado;msgCupom(TXT_CUPOM_OK,true);}\n';
   c+='atualizar();\n}\n';
   c+="raiz.querySelector('.fcu-cupom-l button').addEventListener('click',aplicarCupom);\n\n";
-  if(usaResumo){
-    /* Enumeracao UNICA dos itens escolhidos. Ela alimenta o resumo E a mensagem do WhatsApp
-       (ver mais abaixo): sao dois textos com formatos diferentes, mas uma leitura so do que o
-       cliente marcou -- com dois lacos, um poderia esquecer a regra da quantidade zero e as
-       duas listas passariam a discordar sem ninguem perceber. */
+  /* Enumeracao UNICA dos itens escolhidos. Ela alimenta o resumo E a mensagem do WhatsApp
+     (ver mais abaixo): sao dois textos com formatos diferentes, mas uma leitura so do que o
+     cliente marcou -- com dois lacos, um poderia esquecer a regra da quantidade zero e as
+     duas listas passariam a discordar sem ninguem perceber.
+     EMITIDA TAMBEM SEM O RESUMO desde 13/09/2026. Ate aqui ela nascia DENTRO do ramo do resumo, e
+     por isso o "conserto" que a documentacao registra valia num ramo so: com o resumo desligado
+     -- que era a fabrica -- a mensagem do WhatsApp reconstruia a lista num SEGUNDO laco, com
+     regra propria. A Mini loja ja a emitia fora de qualquer ramo (20800+); aqui a condicao e
+     'usaResumo||(usaPix&&zap)' em vez de incondicional para nao deixar funcao sem chamador no
+     bloco entregue -- avisarZap, que e o outro chamador, nasce DENTRO do ramo do Pix (15356).
+     Com o resumo ligado a saida nao muda um byte: o ramo comecava exatamente aqui. */
+  if(usaResumo||(usaPix&&zap)){
     c+='function itensEscolhidos(){\n';
     c+='var lista=[];\n';
     c+='PRODUTOS.forEach(function(p,i){\n';
@@ -15267,7 +15359,8 @@ function uBloco(cfg){
     }
     c+='}\n});\n';
     c+='return lista;\n}\n\n';
-
+  }
+  if(usaResumo){
     c+='function textoResumo(){\n';
     c+='var L=[],li=itensEscolhidos(),z;\n';
     c+="L.push(TXT_RESUMO_PEDIDO+' '+CODIGO_PEDIDO);\n";
@@ -15348,28 +15441,13 @@ function uBloco(cfg){
       if(usaSinal)c+="partes.push('"+escJs(cfg.txtZapAberturaSinal)+"');\n";
       else c+="partes.push('"+escJs(cfg.txtZapAbertura)+"');\n";
       c+="partes.push("+aTplJs("'",cfg.txtZapPedido,[['{cod}','CODIGO_PEDIDO']])+");\n";
-      if(usaResumo){
-      /* uma leitura so do que o cliente marcou, compartilhada com o resumo copiavel */
+      /* UMA leitura so do que o cliente marcou, a mesma que alimenta o resumo copiavel. Ate
+         13/09/2026 havia aqui um SEGUNDO laco, usado quando o resumo estava desligado -- ou seja,
+         no padrao de fabrica de entao. A documentacao ja registrava que o laco duplicado tinha
+         sido removido "porque dois lacos separados poderiam divergir na regra da quantidade zero
+         e as duas listas discordariam caladas"; o conserto so nao tinha alcancado este ramo. */
       c+='var li=itensEscolhidos(),z;\n';
       c+="for(z=0;z<li.length;z++)partes.push(li[z].opcional?('   + '+li[z].rotulo+' '+moedaFmt(li[z].valor)):('- *'+li[z].rotulo+'* '+moedaFmt(li[z].valor)));\n";
-      }else{
-      c+='PRODUTOS.forEach(function(p,i){\n';
-      c+='if(!produtoAtivo(i))return;\n';
-      if(usaQtd)c+="partes.push('- *'+p.nome+'*'+(p.quantidade?(' x'+qtdProd(i)):'')+' '+moedaFmt(p.preco*qtdProd(i)));\n";
-      else c+="partes.push('- *'+p.nome+'* '+moedaFmt(p.preco));\n";
-      c+='var sel=raiz.querySelectorAll(\'input[name="fcu-op-\'+i+\'"]:checked\');\n';
-      c+='for(var k=0;k<sel.length;k++){\n';
-      if(usaQtd){
-        c+='var jz=parseInt(sel[k].value,10);\n';
-        c+='var op=itensProd[i][jz];\n';
-        /* opcional zerado sai da mensagem pelo mesmo motivo que o produto zerado: a quantidade
-           zero equivale a nao ter escolhido o item. */
-        c+="if(op&&!op.nenhum&&qtdOp(i,jz)>0)partes.push('   + '+op.nome+(op.qtd?(' x'+qtdOp(i,jz)):'')+' '+moedaFmt(op.preco*qtdOp(i,jz)));\n}\n});\n";
-      }else{
-        c+='var op=itensProd[i][parseInt(sel[k].value,10)];\n';
-        c+="if(op&&!op.nenhum)partes.push('   + '+op.nome+' '+moedaFmt(op.preco));\n}\n});\n";
-      }
-      }
       c+="if(cupomAtivo)partes.push("+aTplJs("'",cfg.txtZapCupom,[['{codigo}','cupomAtivo.codigo']])+");\n";
       if(descpix>0)c+="if(DESCONTO_PIX>0)partes.push("+aTplJs("'",cfg.txtZapDescPix,[['{pct}','DESCONTO_PIX']])+");\n";
       if(usaSinal){
@@ -16928,7 +17006,7 @@ function ePresetDepois(){
    persistencia (aColeta/aRestaura). Passo 3b da Tarefa 1: os campos de configuracao das secoes
    2 e 3 (pagina de obrigado, pagamento, cores, textos e altura do calendario), com os tres
    avisos de interface que a spec pede por nome. Tarefa 2: o catalogo de pacotes (secao 1) --
-   formulario, lista editavel, aUrlOk e as seis recusas. aGerar ja monta cfg e chama aRecusa;
+   formulario, lista editavel, a conferencia do endereco e as seis recusas. aGerar ja monta cfg e chama aRecusa;
    quem falta preencher (Tarefas 3 a 9) sao as tres saidas (aBlocoVitrine, aEnderecos,
    aBlocoObrigado) e aPreview, que ainda sao esqueletos vazios de proposito. */
 var aPacotes=[];
@@ -17840,17 +17918,49 @@ function aPacRender(){
     for(i=0;i<sobra.length;i++)linha(sobra[i]);
   }
 }
-/* Copia de tUrlOk (9827+ antes desta tarefa). A recusa do endereco protocol-relative nao e
-   detalhe: sem ela, "//evil.com/x" passa como "caminho do proprio site" e o TidyCal
-   redirecionaria o cliente para outro host. */
-function aUrlOk(v){
-  var limpo=urlLimpa(v);
-  if(!limpo)return false;
-  if(/^https?:\/\//i.test(limpo))return true;
-  /* caminho do proprio site: UMA barra. Com duas o endereco e protocol-relative --
-     "//evil.com/x" resolve para OUTRO host, herdando so o esquema da pagina. */
-  if(limpo.charAt(0)==='/'&&limpo.charAt(1)!=='/')return true;
-  return false;
+/* ===== O ENDERECO DA PAGINA DE OBRIGADO: a guarda estava errada, e nao a mensagem =====
+   Ate 13/09/2026 existia aqui um aUrlOk proprio que devolvia TRUE para '/obrigado' -- caminho do
+   proprio site --, enquanto a frase logo abaixo dizia "precisa comecar com https:// e ter o
+   dominio". Duas afirmacoes opostas sobre o mesmo campo, e a que valia era a errada.
+   QUAL DOS DOIS LADOS ESTA CERTO, MEDIDO: 'urlobrigado' tem UM consumidor so, aEnderecos(cfg) --
+   a lista de enderecos de redirecionamento que o dono cola dentro do TidyCal, um por pacote.
+   Quem redireciona o cliente e o TidyCal, de fora do site: '/obrigado' ali nao resolve para a
+   pagina do dono, e o cliente nunca chega a pagina de pagamento. Nao existe uso legitimo do
+   caminho relativo neste campo -- logo, quem muda e a GUARDA.
+   E as outras duas abas que mandam endereco ao mesmo lugar ja diziam isso: tGerar (Agendamento
+   TidyCal) recusa com "o TidyCal redireciona para fora do editor, entao um caminho comecando com
+   barra nao resolve para lugar nenhum", e o Link de cobranca tem pUrlRecusa, com recusa de nome
+   proprio para o caminho relativo. Esta aba era a unica das tres que aceitava.
+   POR ISSO NAO HA MAIS aUrlOk: a pergunta ja tinha dono -- pUrlOk/fcUrlRelativo, em
+   fc-compartilhado.js. Unifica-se a fonte que decide; uma quarta implementacao da mesma pergunta
+   era exatamente o que permitiu as duas divergirem.
+   A RECUSA DO PROTOCOL-RELATIVE NAO SE PERDEU NA TROCA, e ela nao e detalhe: sem ela
+   "//evil.com/x" passaria como caminho do proprio site e o TidyCal mandaria o cliente para
+   OUTRO host. Quem a faz agora e pUrlOk, que exige o esquema http(s) escrito por extenso --
+   medido na parte 3 de scripts/verificar/unificar-pagamento.mjs. */
+/* O MAIOR total alcancavel nesta aba -- o que torna possivel aqui a recusa do sinal fixo que
+   uTotalMaximo/mTotalMaximo ja sustentavam nas duas irmas. Ate 13/09/2026 esta funcao NAO
+   EXISTIA, e o efeito era mudo: sinal fixo de R$ 800 com pacotes de R$ 300 gerava sem uma
+   palavra, e TODA reserva travava na pagina de obrigado dizendo que o sinal e maior que o total.
+   O "carrinho" desta aba e UM pacote mais os opcionais dele -- a vitrine leva a um pacote so --,
+   entao o teto e o MAIOR dos pacotes e nao a soma deles: somar produziria um teto que nenhum
+   cliente alcanca, e a recusa deixaria passar sinal impagavel.
+   A FAMILIA NAO MUDA O TETO: ela so agrupa a vitrine; o pacote mais caro de qualquer familia
+   continua sendo o maior pedido possivel.
+   TODO opcional desta aba e caixa de marcar -- aPacotesSrc nao emite 'opsel' e o subtotal() da
+   pagina de obrigado soma todos os marcados --, entao o teto de um pacote soma TODOS os
+   opcionais dele, cada um no teto da quantidade quando vende por quantidade. O pacote em si nao
+   tem quantidade nenhuma (aQtdLigada so olha os opcionais), e por isso o preco dele entra uma
+   vez. Nao ha 'selprod' a consultar, e por isso a assinatura e mais curta que a de uTotalMaximo. */
+function aTotalMaximo(pacotes,qtdmax){
+  var maior=0,i,j,p,ops,t;
+  for(i=0;i<pacotes.length;i++){
+    p=pacotes[i];ops=p.ops||[];
+    t=parseFloat(String(p.preco).replace(',','.'))||0;
+    for(j=0;j<ops.length;j++)t+=(parseFloat(String(ops[j].preco).replace(',','.'))||0)*(ops[j].qtd?qtdmax:1);
+    if(t>maior)maior=t;
+  }
+  return Math.round(maior*100)/100;
 }
 /* Devolve a PRIMEIRA recusa (ou '') para uma configuracao ja coletada -- mesmo padrao de
    uRecusa/mRecusa: sem efeito colateral, e a mesma funcao serve o gerador e (na Tarefa 4) a
@@ -17868,7 +17978,11 @@ function aRecusa(cfg){
      que roda antes de gerar E antes da previa. */
   if(!cfg.familias.length)return 'Cadastre ao menos uma família de pacotes.';
   if(!cfg.urlobrigado)return 'Informe o endereço da página de obrigado.';
-  if(!aUrlOk(cfg.urlobrigado))return 'O endereço da página de obrigado precisa começar com https:// e ter o domínio.';
+  /* Recusa com NOME PROPRIO para o caminho relativo, no molde de pUrlRecusa: quem tem
+     '/obrigado' guardado nao digitou nada errado -- ele digitou o que esta guarda aceitava ate
+     ontem, e um "nao entendi" o mandaria procurar no lugar errado. */
+  if(fcUrlRelativo(cfg.urlobrigado))return 'O endereço da página de obrigado está escrito como caminho do próprio site ("'+cfg.urlobrigado+'"). Isso funciona dentro do site e NÃO funciona no TidyCal: quem manda o cliente para esta página é o TidyCal, de fora do seu site, e ali "'+cfg.urlobrigado+'" não abre nada — o cliente nunca chega à página de pagamento. Escreva o endereço INTEIRO, com https:// e o domínio (exemplo: '+FC_URL_EXEMPLO+').';
+  if(!pUrlOk(cfg.urlobrigado))return 'O endereço da página de obrigado precisa começar com https:// e ter o domínio.';
   for(i=0;i<cfg.pacotes.length;i++){
     p=cfg.pacotes[i];
     if(!p.cod)return 'O pacote "'+(p.nome||('#'+(i+1)))+'" está sem código. O código é o que o TidyCal guarda para identificar o pacote.';
@@ -17926,6 +18040,16 @@ function aRecusa(cfg){
     limpo=fcCpCod(cpc);
     if(vistosCp[limpo])return 'Os cupons "'+vistosCp[limpo]+'" e "'+cpc+'" têm o mesmo código ("'+limpo+'"). O cliente digitaria um cupom só, e a página não tem como saber qual dos dois cadastros aplicar — troque um dos dois.';
     vistosCp[limpo]=cpc;
+  }
+  /* SINAL FIXO ACIMA DO MAIOR PEDIDO POSSIVEL -- a mesma recusa que uRecusa/mRecusa ja tinham e
+     que faltava aqui (ver aTotalMaximo). A previa chama a MESMA aRecusa, entao ela passa a avisar
+     junto, em vez de desenhar em silencio uma pagina que recusa toda reserva.
+     Sinal fixo acima do pedido MINIMO continua NAO sendo recusado, pelo mesmo motivo escrito em
+     uTotalMaximo: pode ser piso de venda deliberado, e quem avisa nesse caso e a propria pagina,
+     na hora. O que se recusa e o que nao tem combinacao nenhuma que pague. */
+  if(cfg.sinal.ativo&&cfg.sinal.tipo==='fixo'){
+    var tmaxA=aTotalMaximo(cfg.pacotes,cfg.qtdmax);
+    if(cfg.sinal.valor>tmaxA)return 'O sinal fixo de '+precoFmt('BRL',cfg.sinal.valor)+' é maior que o maior pedido que este catálogo consegue montar ('+precoFmt('BRL',tmaxA)+': o pacote mais caro com todos os opcionais dele, cada um no teto da quantidade). Nenhum cliente conseguiria pagar — toda reserva seria recusada na página de obrigado. Reduza o sinal, use sinal percentual ou aumente os preços.';
   }
   /* Mesma guarda de uRecusa/mRecusa (10966/17690): pixChaveErro confere o FORMATO da chave
      (e-mail, telefone, CPF/CNPJ com digito, aleatoria), nao so se o campo esta vazio. Sem
@@ -22891,7 +23015,7 @@ function pPresetDepois(){
 var mProds=[],mCps=[],mEditOps=[],mEditIdx=-1;
 var M_NUMS=[['m-larg',1080,600,1600,true],['m-cols',3,2,5,true],['m-mob',760,320,1024,true],
   ['m-imgvit',400,200,900,true],['m-imgdet',1000,400,1600,true],
-  ['m-descpix',10,0,90,false],['m-sinalpct',30,1,99,false],['m-sinalfixo',100,0.01,999999,false],
+  ['m-descpix',5,0,90,false],['m-sinalpct',30,1,99,false],['m-sinalfixo',100,0.01,999999,false],
   ['m-qtdmax',10,2,99,true]];
 function mPreso(id){return fcPreso(M_NUMS,id);}
 /* Quantos itens DESTE produto (ele proprio e seus opcionais) foram marcados como vendidos por
@@ -22940,8 +23064,9 @@ function mColeta(){
 }
 function mRestaura(st){
   if(!st.m)return;
-  /* Mesma migracao do Checkout, e pelo mesmo motivo: esta aba era PayPal-primeiro. */
+  /* Mesmas duas migracoes do Checkout, e pelos mesmos motivos -- ver uRestaura. */
   var M=fcOrdMigrar(st.m,'m','pp');
+  M=fcSepNeutro(M);
   M=fcZapSaldoMigrar(M,'Restante na entrega');
   if(M.metodo)setRadio('m-metodo',M.metodo);
   fcOrdRestaurar('m',M.prio);
@@ -23136,7 +23261,8 @@ function mProdSalvar(){
   var n=$('m-pnome').value.trim(),img=String($('m-pimg').value).trim();
   if(!n){alert('Informe o nome do produto.');return;}
   var v=parseFloat(String($('m-ppreco').value).replace(',','.'));
-  if(isNaN(v)||v<0){alert('Informe o preço do produto.');return;}
+  /* MAIOR QUE ZERO -- ver uProdSalvar, decisao 6 do dono. */
+  if(isNaN(v)||v<=0){alert('Informe o preço do produto (maior que zero). Um produto de R$ 0,00 seria entregue como uma cobrança de zero. Opcional grátis continua valendo — esta recusa é do item de catálogo.');return;}
   /* Foto e OBRIGATORIA nesta aba, ao contrario do Checkout: a vitrine e feita de imagens, e um
      produto sem foto sairia como um retangulo cinza no meio da grade. A recusa nomeia o campo
      em vez de deixar passar e o defeito aparecer so na pagina publicada. */
@@ -23770,7 +23896,7 @@ var M_TXT_DEFS=[
 function mCfg(){
   var m=radio('m-metodo')||'ambos';
   var usaPix=(m!=='paypal');
-  var descpix=mPreso('m-descpix');if(descpix==null)descpix=10;
+  var descpix=mPreso('m-descpix');if(descpix==null)descpix=5;
   if(m!=='ambos')descpix=0;
   var sinalOn=(radio('m-sinal')==='sim');
   if(sinalOn)descpix=0;
@@ -23815,7 +23941,7 @@ function mCfg(){
    de ser prova do codigo. Nao mexe no DOM de proposito -- a correcao a vista e de mGerar, que e
    o gesto deliberado do operador; a previa roda a cada tecla. */
 function mRecusa(cfg){
-  var i,cpv,cpc,cpe,tmax,cpvisto,vistosCp={},codn;
+  var i,cpv,cpc,cpe,tmax,cpvisto,vistosCp={},codn,prc;
   if(!cfg.cod)return 'Informe o código da loja. Ele identifica o carrinho no navegador do cliente (e a chave do armazenamento) e vira o começo do identificador do pedido no extrato -- sem ele, duas lojas no mesmo site dividiriam o mesmo carrinho.';
   if(!/^[A-Za-z0-9_-]+$/.test(cfg.cod))return 'O código da loja aceita apenas letras sem acento, números, hífen e sublinhado. Ele vira chave de armazenamento e identificador de pedido: espaço e acento ali produzem um identificador diferente do que você está lendo.';
   /* O ORCAMENTO DO IDENTIFICADOR. novoPedido() acrescenta uma cauda ao codigo da loja, e o txid
@@ -23827,6 +23953,10 @@ function mRecusa(cfg){
   if(!cfg.prods.length)return 'Cadastre ao menos um produto.';
   for(i=0;i<cfg.prods.length;i++){
     if(!String(cfg.prods[i].img||'').trim())return 'O produto "'+cfg.prods[i].nome+'" está sem foto. A vitrine é feita de imagens: sem foto ele sai como um retângulo vazio no meio da grade.';
+    /* PRECO ZERO NO ITEM DE CATALOGO (decisao 6 do dono, 13/09/2026) -- ver o comentario gemeo em
+       uRecusa. Opcional a zero continua valendo; a recusa e do item de catalogo. */
+    prc=parseFloat(String(cfg.prods[i].preco).replace(',','.'));
+    if(!(prc>0))return 'O produto "'+(cfg.prods[i].nome||('#'+(i+1)))+'" está com o preço vazio ou zerado. Ele seria entregue como uma cobrança de R$ 0,00. Preencha o preço ou remova o produto — opcional grátis continua valendo, a recusa é do item de catálogo.';
   }
   if(cfg.usaPP&&!cfg.client)return fciRecusa('Informe o Client ID do PayPal.');
   if(cfg.usaPix){

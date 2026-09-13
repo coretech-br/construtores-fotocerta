@@ -237,11 +237,26 @@ for(const caso of CASOS){
         r.pp != null && Math.abs(parseFloat(r.pp) - cheio) < 0.005,
         JSON.stringify({paypal:r.pp, cheio}));
 
-    /* 5. AS FRASES que apontam para o outro meio. */
+    /* 5. AS FRASES que apontam para o outro meio -- e o SEPARADOR, que deixou de apontar.
+       ATE 13/09/2026 esta parte cobrava que o separador do Checkout e da Mini loja nomeasse o
+       meio de BAIXO ("ou pague com cartao"), virando junto com a escolha. A decisao 24 do dono
+       acabou com isso: o separador passou a ser NEUTRO ("OU") nas QUATRO abas, como o Link de
+       cobranca e o Agendamento por pacote ja eram, e frase neutra nao aponta para lado nenhum.
+       Manter a pergunta antiga seria quatro vermelhos todo dia sem nenhum defeito por tras --
+       e vermelho que e sempre vermelho esconde o proximo, que seria de verdade.
+       A PERGUNTA TROCOU, e a nova diz mais: o separador de FABRICA nao nomeia nem o Pix nem o
+       cartao, nas duas ordens. Um separador que nao nomeia meio nenhum nao tem como apontar
+       para o lado errado -- que era exatamente o risco que a pergunta antiga vigiava. Texto que
+       o DONO escreva ali pode voltar a apontar, e a ferramenta avisa na tela em vez de
+       sobrescrever (ver a ajuda dos campos 'u-txt-ou'/'m-txt-ou'); isso e escolha dele, e nao
+       e o que esta bateria mede.
+       O QUE CONTINUA APONTANDO e medido logo abaixo: a linha 2 do Agendamento por pacote nomeia
+       o meio secundario, e ela nao virou neutra. */
     if(r.sepTxt != null){
       const apontaPix = /pix/i.test(r.sepTxt), apontaCartao = /cart/i.test(r.sepTxt);
-      chk('['+prio+'] '+caso.aba+': o separador aponta para o meio de BAIXO ("'+r.sepTxt+'")',
-          (prio === 'pix') ? (apontaCartao && !apontaPix) : (apontaPix && !apontaCartao));
+      chk('['+prio+'] '+caso.aba+': o separador e NEUTRO -- nao nomeia meio nenhum ("'+r.sepTxt+'")',
+          !apontaPix && !apontaCartao,
+          'separador: '+JSON.stringify(r.sepTxt));
     }
     if(r.segundoTxt != null && caso.selSegundo === '.fca-ob-preco-linha2'){
       const apontaPix = /pix/i.test(r.segundoTxt), apontaCartao = /cart/i.test(r.segundoTxt);
