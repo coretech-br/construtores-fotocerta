@@ -1040,3 +1040,66 @@ antigo", ela compara **as duas escolhas da árvore de hoje entre si** e exige qu
 divergentes sejam **poucas** e estejam numa lista declarada. Não envelhece, e diz **onde** pode
 diferir em vez de só "igual ou diferente". O teto de linhas existe porque a lista de marcas sozinha
 é fraca: uma mudança grande e alheia que por acaso contivesse uma das palavras passaria por ela.
+
+## Entregue em 13/09/2026 — upsell depois do pagamento
+
+Spec: `docs/specs/2026-09-13-upsell-apos-pagamento-design.md`. Nas **quatro** abas de pagamento.
+
+### O desenho, e a assimetria que manda nele
+
+**O Pix não avisa a página quando o cliente paga.** Então: no **PayPal** o redirecionamento é
+automático (houve confirmação de verdade); no **Pix** quem leva é o botão **"Já paguei"**, que já
+existia. Redirecionar sozinho no Pix afirmaria uma confirmação que ninguém deu.
+
+**Declarado ao dono, e é decisão de negócio dele:** pelo caminho do "Já paguei", a página de upsell
+recebe gente que ainda **não pagou**.
+
+### A regra de emissão: quem decide é o ENDEREÇO, não o interruptor
+
+| Endereço | Interruptor | O bloco leva |
+|---|---|---|
+| vazio | desligado | **nada** — byte a byte igual a antes |
+| preenchido | ligado | as duas variáveis, `ATIVO=true` |
+| preenchido | **desligado** | **as duas variáveis, `ATIVO=false`** |
+| vazio | ligado | **recusa gerar** |
+
+A terceira linha é o coração do pedido — *"para não ter que ficar regerando código, eu poderia
+editar diretamente o código na página"*. **Desligado não pode significar "não emitir"**, senão não
+existe variável para editar. **A prova que representa o pedido:** trocar `false` por `true` no
+texto já gerado, sem voltar à ferramenta, passa a redirecionar — medido **nas quatro abas**.
+
+A quarta é recusa e não aviso: ligado sem destino **não faz nada e parece que faz**. A frase diz o
+que está errado **e o que fazer**.
+
+### O caminho C foi medido antes de escrito
+
+A dúvida real era se `window.open` (WhatsApp) e a navegação da página conviviam.
+`upsell-janela.mjs`: seis cenários de ordem, duas larguras, três passagens — **a aba do WhatsApp
+nunca é perdida**, zero intermitência. *Alcance declarado: é o Blink do Playwright, não é prova
+sobre o Safari do iPhone.*
+
+- Sem WhatsApp configurado **não existe botão**, logo não existe caminho C — o upsell continua
+  valendo pelo cartão.
+- **No Agendamento por pacote não há "Já paguei" nenhum** — o botão daquela aba só serve à recusa e
+  ao vencido. **O C não se aplica a ela**, medido no texto do bloco, e a ajuda do campo diz isso.
+
+### O que não foi tocado, com o motivo
+
+- **Nenhum link de cobrança muda um byte** (endereço fixo da página, não viaja no link) — e o código
+  1 **muda**, que é o que impede a medida anterior de ser vacuidade.
+- **A `/pagar` continua fora da extração:** compartilha-se `fcUpsellChamada` (o texto que escreve a
+  chamada), não o `onApprove`, que já está registrado como divergente em quase toda linha.
+- **`fc-compartilhado.js` e `cobrar/` intocados** — nada de versão para trocar.
+- Validação do endereço: **reusou** `cUrlOk`/`urlLimpa` da Contagem regressiva. Recusa
+  `javascript:` (inclusive com tabulação no meio), `data:`, barra invertida e protocol-relative.
+
+### Dívida registrada — decisão do dono
+
+**A prévia navega.** Com o upsell ligado, clicar em "Já paguei" **dentro da prévia** leva a prévia
+para a página de upsell, porque a prévia executa o bloco de verdade. Medido que **não dá** para
+neutralizar como o `window.open` já é: `location` é *unforgeable* no Chromium — `defineProperty`
+lança, e atribuir `location.assign` falha **em silêncio**, que é pior. Mexer em qualquer campo
+remonta a prévia. A diferença está declarada nos `<p class="ajuda">` das três prévias que têm o
+botão. Remontar sozinha ao detectar a saída é rodada curta à parte — não foi feita por conta
+própria porque a requisição à página do dono **já aconteceu** quando a detecção seria possível, e
+uma guarda parcial sugeriria proteção que não existe.
