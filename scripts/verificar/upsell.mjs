@@ -28,7 +28,9 @@
         navegacao, lendo o armazenamento na pagina de destino, que e onde o defeito apareceria
         ("o cliente volta com a cesta cheia depois de ter pago").
      6. O CAMINHO C: o botao "Ja paguei", nos dois cenarios (com e sem WhatsApp configurado) e
-        em duas larguras de tela.
+        em duas larguras de tela. Ele existe de DUAS formas, e as duas sao medidas: window.open
+        no Checkout e na Mini loja; ANCORA com target=_blank na /pagar e -- desde 13/09/2026 --
+        na Agendamento por pacote, que ate entao nao tinha o botao.
      7. O LINK de cobranca: nenhum byte muda com o upsell configurado -- e o CODIGO 1 muda, que
         e o outro lado da mesma medida (sem ele, "o link nao mudou" poderia ser "nada mudou").
      8. O endereco INVALIDO escrito a mao no codigo publicado: MEDICAO, nao assercao. O bloco
@@ -492,24 +494,40 @@ for(const ca of C_ABAS){
     }
   }
 }
-/* A /pagar tem o caminho C de OUTRA FORMA: la o "Ja paguei" e uma ANCORA com target=_blank
-   (e nao um window.open), entao o upsell entra num ouvinte de clique. A pergunta que so esta
-   passagem responde e se a navegacao da pagina de tras CANCELA a acao padrao da ancora -- a
-   aba nova. Medida pelo evento 'popup' do proprio Playwright, que e o que a ancora dispara. */
+/* A /pagar e a Agendamento por pacote tem o caminho C de OUTRA FORMA: nelas o "Ja paguei" e
+   uma ANCORA com target=_blank (e nao um window.open), entao o upsell entra num ouvinte de
+   clique. A pergunta que so esta passagem responde e se a navegacao da pagina de tras CANCELA
+   a acao padrao da ancora -- a aba nova. Medida pelo evento 'popup' do proprio Playwright, que
+   e o que a ancora dispara.
+   A PAC ENTROU EM 13/09/2026, e a medicao NAO foi herdada da /pagar: o mecanismo e o mesmo,
+   mas o bloco e outro, o botao nasce dentro de uma area escondida (so aparece depois de
+   "Gerar Pix") e o ouvinte e pendurado noutro lugar do gerador. Herdar a conclusao seria
+   exatamente o tipo de suposicao que este arnes existe para recusar. */
+const C_ANCORA = [
+  {nome:'Link de cobranca', cfg:abaCobranca, saidas:['p-out1','p-out2'], saida:'p-out1',
+   botao:'a.fcpg-bt2', busca:g => buscaDoLink(g.valores['p-out2']||''), abrir:null},
+  {nome:'Agendamento por pacote', cfg:abaPacote, saidas:['a-out3'], saida:'a-out3',
+   botao:'a.fca-ob-zap', busca:() => BUSCA.a,
+   /* O botao so existe visivel depois do Pix gerado -- e o '>' separa o "Gerar Pix" (filho
+      direto do bloco) do "Copiar", que carrega a mesma classe dentro da area. */
+   abrir: async pg => { await pg.locator('.fca-ob-bloco:has(.fca-ob-pixarea) > button.fca-ob-bt').first().click(); }}
+];
+for(const ca of C_ANCORA)
 for(const [rotL,w,h] of LARGURAS){
   const porta = PORTA++;
   const alvo = alvoDe(porta);
-  const g = await gerarNaFerramenta(pg => abaCobranca(pg,{url:alvo,ligado:true}),
-    ['p-out1','p-out2'], {porta: FER++});
-  const bloco = g.valores['p-out1']||'';
-  const busca = buscaDoLink(g.valores['p-out2']||'');
+  const g = await gerarNaFerramenta(pg => ca.cfg(pg,{url:alvo,ligado:true}),
+    ca.saidas, {porta: FER++});
+  const bloco = g.valores[ca.saida]||'';
+  const busca = ca.busca(g);
   const r = await comBlocoNaPagina({
     bloco, cabeca:SONDA, porta, busca,
     medir: async pg => {
       await pg.setViewportSize({width:w,height:h});
       const pops = [];
       pg.on('popup', p => pops.push(p));
-      const bt = pg.locator('a.fcpg-bt2').first();
+      if(ca.abrir) await ca.abrir(pg);
+      const bt = pg.locator(ca.botao).first();
       const existe = await bt.count() > 0;
       if(!existe) return {existe:false};
       const destino = await bt.getAttribute('href');
@@ -528,13 +546,73 @@ for(const [rotL,w,h] of LARGURAS){
       return {existe:true, foi, pops:pops.length, destino, popUrl, url:pg.url()};
     }
   });
-  const tag = 'Link de cobranca / '+rotL+' / COM WhatsApp: ';
+  const tag = ca.nome+' / '+rotL+' / COM WhatsApp: ';
   chk(tag+'o "Ja paguei" existe e e uma ancora para o WhatsApp',
     r.existe===true && /^https:\/\/wa\.me\//.test(r.destino||''), 'href='+r.destino);
   chk(tag+'a ancora abriu a aba nova (a navegacao NAO cancelou a acao padrao)',
     r.pops>=1 && String(r.popUrl).indexOf('foi=whats')>=0, 'popups='+r.pops+' url da aba='+r.popUrl);
   chk(tag+'e a pagina foi levada ao upsell', r.foi===true, 'url='+r.url);
   console.log('    -> '+tag+'popups='+r.pops+' ('+r.popUrl+')  navegou='+r.foi);
+}
+
+/* ===========================================================================
+   OS QUATRO ESTADOS DO UPSELL, MEDIDOS PELO CLIQUE NO "JA PAGUEI" DA aba pac
+   ===========================================================================
+   A parte 4 ja mede os quatro estados nas quatro abas, mas SEMPRE pelo caminho do CARTAO
+   aprovado. Nesta aba o "Ja paguei" nasceu em 13/09/2026 e pendura o proprio ouvinte, num
+   lugar diferente do gerador -- entao "o cartao leva" nao responde por ele. Aqui os mesmos
+   quatro estados sao medidos pelo CLIQUE no botao, inclusive o que representa o pedido do
+   dono: gerar DESLIGADO e trocar false por true no codigo publicado, sem voltar a ferramenta.
+   O estado "vazio + LIGADO" nao entra: ele nao produz bloco nenhum (a ferramenta recusa), e a
+   frase da recusa ja e medida na parte 2. */
+console.log('\n== 6b. Agendamento por pacote: os quatro estados, pelo clique no "Ja paguei" ==');
+{
+  const abrirPix = async pg => {
+    await pg.locator('.fca-ob-bloco:has(.fca-ob-pixarea) > button.fca-ob-bt').first().click();
+  };
+  const ESTADOS_C = [
+    {rot:'vazio + desligado',      url:'',    ligado:false, editar:false, leva:false},
+    {rot:'preenchido + ligado',    url:'ALVO',ligado:true,  editar:false, leva:true},
+    {rot:'preenchido + DESLIGADO', url:'ALVO',ligado:false, editar:false, leva:false},
+    {rot:'DESLIGADO, editado a mao para true', url:'ALVO', ligado:false, editar:true, leva:true}
+  ];
+  for(const e of ESTADOS_C){
+    const porta = PORTA++;
+    const alvo = alvoDe(porta);
+    const g = await gerarNaFerramenta(pg => abaPacote(pg,{url:(e.url?alvo:''), ligado:e.ligado}),
+      ['a-out3'], {porta: FER++});
+    let bloco = g.valores['a-out3']||'';
+    const tag = 'pac / '+e.rot+': ';
+    if(e.editar){
+      const antes = bloco;
+      bloco = bloco.replace('var UPSELL_ATIVO=false;','var UPSELL_ATIVO=true;');
+      chk(tag+'a edicao a mao mudou exatamente um byte-grupo',
+        bloco!==antes && bloco.length===antes.length-1);
+    }
+    const r = await comBlocoNaPagina({
+      bloco, cabeca:SONDA, porta, busca: BUSCA.a,
+      medir: async pg => {
+        await abrirPix(pg);
+        const bt = pg.locator('a.fca-ob-zap').first();
+        if(await bt.count() === 0) return {existe:false};
+        const href = await bt.getAttribute('href');
+        /* Mesmo motivo da troca no laco acima: com o destino real barrado pela guarda de rede
+           a aba nova nao emite evento, e "nao navegou" se confundiria com "a rede barrou". */
+        await bt.evaluate((el,u)=>{el.setAttribute('href',u);}, 'http://127.0.0.1:'+porta+'/pagina?foi=whats');
+        await bt.click().catch(()=>{});
+        /* prazo curto quando a resposta certa e "nada acontece" -- esperar 2,5s por uma
+           navegacao que nao deve vir so faria a bateria demorar. */
+        const foi = await esperarUrl(pg,'foi=upsell', e.leva ? 2500 : 1200);
+        return {existe:true, href, foi, url:pg.url()};
+      }
+    });
+    chk(tag+'o "Ja paguei" existe depois de gerar o Pix', r.existe===true);
+    chk(tag+'e aponta para o WhatsApp', /^https:\/\/wa\.me\//.test(r.href||''), 'href='+String(r.href).slice(0,50));
+    chk(tag+(e.leva?'o clique LEVA ao upsell':'o clique NAO leva a lugar nenhum'),
+      r.foi===e.leva, 'url='+r.url);
+    chk(tag+'sem erro proprio do bloco', errosReais(r.erros||[]).length===0,
+      errosReais(r.erros||[]).join(' | '));
+  }
 }
 
 /* SEM WhatsApp configurado: nao existe botao "Ja paguei", e portanto nao existe caminho C.
@@ -553,15 +631,44 @@ for(const ca of C_ABAS){
   chk(ca.nome+' / SEM WhatsApp: o upsell continua emitido (o caminho do cartao permanece)',
     /var UPSELL_ATIVO=true;/.test(bloco) && /upsellIr\(\);/.test(bloco));
 }
-/* A aba Agendamento por pacote NAO TEM "Ja paguei": o caminho C nao se aplica a ela.
-   Medido no texto do bloco, e nao suposto. */
+/* ATE 13/09/2026 ESTE BLOCO DIZIA O CONTRARIO: "a aba Agendamento por pacote NAO TEM Ja
+   paguei, o caminho C nao se aplica a ela". Era verdade, e era uma FALTA -- a aba mostrava o
+   Pix ao cliente e nao tinha como ele avisar que pagou. Com o botao existindo, o que se cobra
+   e o oposto: DOIS caminhos de upsell, o do cartao aprovado e o do "Ja paguei".
+   E O ESTADO SEM WHATSAPP e medido do jeito que ele existe de verdade nesta aba: a ferramenta
+   RECUSA gerar sem WhatsApp (aRecusa), entao ele so aparece editando o bloco publicado a mao --
+   o mesmo caminho ja medido para UPSELL_ATIVO na parte 4c. */
 {
   const g = await gerarNaFerramenta(pg => abaPacote(pg,{url:URL_TESTE,ligado:true}), ['a-out3'], {porta: FER++});
   const t = g.valores['a-out3']||'';
-  chk('Agendamento por pacote: nao ha botao "Ja paguei" (o caminho C nao se aplica)',
-    t.indexOf('fca-ob-zap')<0 && t.indexOf('ZAP_ATIVO')<0);
-  chk('Agendamento por pacote: o upsell entra so pelo cartao aprovado',
-    (t.match(/upsellIr\(\);/g)||[]).length===1, 'chamadas='+(t.match(/upsellIr\(\);/g)||[]).length);
+  chk('Agendamento por pacote: o botao "Ja paguei" esta no bloco',
+    t.indexOf('fca-ob-zap')>=0 && t.indexOf('function zapMsgPago()')>=0);
+  chk('Agendamento por pacote: o upsell entra pelos DOIS caminhos (cartao e "Ja paguei")',
+    (t.match(/upsellIr\(\);/g)||[]).length===2, 'chamadas='+(t.match(/upsellIr\(\);/g)||[]).length);
+  chk('Agendamento por pacote: o do "Ja paguei" e um ouvinte de clique na ancora',
+    t.indexOf('zapPg.addEventListener("click",function(){upsellIr();});')>=0);
+  /* SEM WHATSAPP, botaoZap devolve null: nao ha botao, e portanto nao ha caminho C aqui --
+     exatamente como nas irmas com o "Ja paguei" desligado. Medido com o bloco RODANDO,
+     porque "o texto continua la" e "o botao nao aparece" sao coisas diferentes. */
+  const semZap = t.replace(/var WHATSAPP='[^']*';/, "var WHATSAPP='';");
+  chk('Agendamento por pacote / SEM WhatsApp: a troca a mao pegou',
+    semZap!==t && semZap.indexOf("var WHATSAPP='';")>=0);
+  const rs = await comBlocoNaPagina({
+    bloco: semZap, cabeca:SONDA, porta: PORTA++, busca: BUSCA.a,
+    medir: async pg => {
+      await pg.locator('.fca-ob-bloco:has(.fca-ob-pixarea) > button.fca-ob-bt').first().click();
+      await new Promise(x=>setTimeout(x,200));
+      return {zaps: await pg.locator('.fca-ob-zap').count(),
+              ancoras: await pg.locator('.fca-ob-pixarea a').count(),
+              area: await pg.locator('.fca-ob-pixarea.on').count()};
+    }
+  });
+  chk('Agendamento por pacote / SEM WhatsApp: nenhum botao "Ja paguei" na pagina',
+    rs.zaps===0 && rs.ancoras===0, 'zaps='+rs.zaps+' ancoras='+rs.ancoras);
+  chk('Agendamento por pacote / SEM WhatsApp: a area do Pix abre do mesmo jeito',
+    rs.area===1, 'areas abertas='+rs.area);
+  chk('Agendamento por pacote / SEM WhatsApp: o upsell do CARTAO continua emitido',
+    /var UPSELL_ATIVO=true;/.test(semZap) && (semZap.match(/upsellIr\(\);/g)||[]).length===2);
 }
 
 /* ============================================================================

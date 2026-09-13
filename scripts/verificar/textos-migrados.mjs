@@ -342,9 +342,11 @@ console.log('\n--- o formato gravado, contra '+REF+' ---');
          de texto --, todas gravadas com o PADRAO DE FABRICA do campo, porque o cenario nao
          mexe em nenhuma delas. Nenhuma chave que ja existia mudou de valor, e e por isso que
          o resto do objeto continua sendo exigido identico logo abaixo.
-         'txtSinalRecusado' e 'txtZapSaldo' NAO aparecem aqui, e a ausencia e deliberada: o
-         primeiro so serve ao resumo copiavel e o segundo a linha de saldo do WhatsApp, e esta
-         aba nao tem nem um nem outro (medido em sinal.mjs, secao "a ausencia declarada"). */
+         'txtSinalRecusado' NAO aparece aqui, e a ausencia e deliberada: ele so serve ao resumo
+         copiavel, e esta aba nao tem um (medido em sinal.mjs, secao "a ausencia declarada").
+         'txtZapSaldo' TAMBEM NAO aparecia, pela mesma razao -- nao havia mensagem de WhatsApp
+         que citasse valor --, e deixou de nao aparecer em 13/09/2026, quando o botao "Ja paguei"
+         chegou a esta aba: ele esta na rodada propria dele, logo abaixo. */
       {nome:'o sinal na aba Agendamento por pacote (13/09/2026)',
        chaves:{a:['sinal','sinaltipo','sinalpct','sinalfixo','t8','t9','txtSinalMaior','txtSinalZero']},
        esperado:(aba,ch) => ({
@@ -362,6 +364,31 @@ console.log('\n--- o formato gravado, contra '+REF+' ---');
          'txtSinalMaior'/'txtSinalZero' NAO aparecem aqui, e a ausencia e deliberada: nesta
          aba as recusas do sinal acontecem na GERACAO do link, com frase da ferramenta, e nao
          dentro do bloco -- nao ha carrinho que mude depois que o link sai. */
+      /* O BOTAO "JA PAGUEI" CHEGOU A ABA AGENDAMENTO POR PACOTE (13/09/2026). Dez chaves novas
+         no estado da aba 'a', todas gravadas com o PADRAO DE FABRICA do campo, porque o cenario
+         nao mexe em nenhuma delas. Ate esta rodada a aba mostrava o Pix ao cliente e nao tinha
+         o botao que as tres irmas tem dentro da area do Pix -- o cliente copiava o codigo,
+         pagava no banco e nao tinha como avisar o dono.
+         NOVE DOS DEZ PADROES SAEM DE FC_TXT_FABRICA, iguais aos do Checkout e da Mini loja.
+         'txtZapSaldo' e o unico que diverge, e por um fato da aba: o padrao das irmas e
+         "Restante na entrega", e aqui nao ha entrega -- ha um ensaio marcado.
+         'txtZapPago' e um campo NOVO, e nao o 'txtZapBotao' que ja existia: aquele rotula os
+         dois recados de recusa desta aba, em que ninguem pagou nada. */
+      {nome:'o botao "Ja paguei" na aba Agendamento por pacote (13/09/2026)',
+       chaves:{a:['txtZapPago','txtZapAbertura','txtZapAberturaSinal','txtZapPedido','txtZapCupom',
+                  'txtZapDescPix','txtZapTotal','txtZapSinal','txtZapSaldo','txtZapValor']},
+       esperado:(aba,ch) => ({
+         txtZapPago:'Já paguei - avisar no WhatsApp',
+         txtZapAbertura:'Olá! Acabei de pagar via Pix.',
+         txtZapAberturaSinal:'Olá! Acabei de pagar o SINAL via Pix.',
+         txtZapPedido:'Pedido cod: *{cod}*',
+         txtZapCupom:'Cupom: {codigo}',
+         txtZapDescPix:'Desconto Pix: -{pct}%',
+         txtZapTotal:'Total do pedido: {valor}',
+         txtZapSinal:'Sinal pago agora: *{valor}*',
+         txtZapSaldo:'Restante no dia do ensaio: *{valor}*',
+         txtZapValor:'Valor pago: *{valor}*'
+       })[ch]},
       {nome:'o sinal no Link de cobranca (13/09/2026)',
        chaves:{p:['sinal','sinaltipo','sinalpct','sinalfixo','txtSinal','txtSaldo','txtZapSinal']},
        esperado:(aba,ch) => ({
@@ -406,7 +433,17 @@ console.log('\n--- o formato gravado, contra '+REF+' ---');
       ['u','txtOu',        'ou pague com Pix', 'ou pague com cartão'],
       ['u','txtOuDesc',    'ou pague com Pix com {pct}% de desconto', 'ou pague com cartão, sem o desconto de {pct}%'],
       ['m','txtOu',        'ou pague com Pix', 'ou pague com cartão'],
-      ['m','txtOuDesc',    'ou pague com Pix com {pct}% de desconto', 'ou pague com cartão, sem o desconto de {pct}%']
+      ['m','txtOuDesc',    'ou pague com Pix com {pct}% de desconto', 'ou pague com cartão, sem o desconto de {pct}%'],
+      /* O AVISO DE QUE O PIX NAO CONFIRMA SOZINHO, na aba Agendamento por pacote (13/09/2026).
+         Ate esta rodada ele NAO saia de FC_TXT_FABRICA.pixManual, e o motivo estava escrito na
+         tabela da aba: "esta pagina nao tem botao Ja paguei". Com o botao passando a existir,
+         mandar "me avise" em vez de mandar tocar nele virou registro descrevendo como desenho
+         o que era falta -- e a fabrica voltou a ser a unica, a mesma das outras tres abas.
+         A chave ja existia nos dois lados: o que mudou foi o PADRAO, e e por isso que ela entra
+         AQUI e nao em RODADAS. */
+      ['a','txtPixManual',
+       'O Pix não avisa a gente automaticamente. Assim que você pagar, me avise para eu conferir e confirmar a sua reserva.',
+       'O Pix não avisa a gente automaticamente. Assim que você pagar, toque em "Já paguei" para eu conferir e confirmar.']
     ];
     const mau = [];
     for(const [aba,ch,velho,novoV] of TROCADAS){
