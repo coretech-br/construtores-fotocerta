@@ -345,6 +345,7 @@ const refTemSinal = fs.readFileSync(path.join(tmp, 'index.html'), 'utf8').indexO
 if(refTemSinal){
   console.log('\nAVISO: a referencia JA tem o sinal nesta aba. As partes 1 e 2 medem a');
   console.log('       travessia de versoes e so significam algo contra uma referencia ANTERIOR.');
+  console.log('       A recusa da parte 2 diz NAO MEDIU em vez de falhar -- ver o comentario la.');
 }
 
 console.log('\ncolhendo da REFERENCIA (os links que o dono ja mandou)...');
@@ -409,9 +410,21 @@ console.log('\n=== PARTE 2 -- o caminho inverso, declarado: link COM sinal e rec
 for(const cen of COM_SINAL.slice(0, 3)){
   const tag = '  [' + cen.n + '] ';
   const q = busca(novo.links[cen.n] || '');
-  const dRef = await rodar(ref.bloco, q);
-  chk(tag + 'o bloco de HOJE recusa o link com sinal', recusou(dRef),
-      'mostrou valor=' + dRef.valor);
+  /* A RECUSA SO SIGNIFICA ALGO CONTRA UMA REFERENCIA ANTERIOR AO SINAL. Desde que a rodada D
+     chegou a 'main', a referencia padrao passou a CONHECER o parametro -- e o bloco dela aceita
+     o link, corretamente. Deixar a assercao rodando produzia tres falhas todo dia sem defeito
+     nenhum por tras, e vermelho que e sempre vermelho esconde o proximo, que seria de verdade.
+     E a QUARTA vez que este padrao aparece no arnes (id-orcamento, textos-reserva,
+     meio-prio-migracao). A regra da casa ja esta escrita: "antes" e estado historico, nao "o
+     que estiver em main hoje". Para medir a travessia de verdade, passe um commit anterior a
+     rodada D: node scripts/verificar/sinal-cobranca.mjs 69e5fa2 */
+  if(refTemSinal){
+    console.log(tag + 'NAO MEDIU a recusa: a referencia ja conhece o sinal.');
+  }else{
+    const dRef = await rodar(ref.bloco, q);
+    chk(tag + 'o bloco de HOJE recusa o link com sinal', recusou(dRef),
+        'mostrou valor=' + dRef.valor);
+  }
   const dNovo = await rodar(novo.bloco, q);
   chk(tag + 'o bloco NOVO aceita o mesmo link', aceitou(dNovo), 'recado=' + String(dNovo.recado).slice(0, 50));
 }

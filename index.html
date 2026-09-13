@@ -1645,6 +1645,14 @@
           <input type="text" id="u-t8" value="Sinal agora">
           <label for="u-t9">Texto do saldo <small>(a linha do que fica para depois)</small></label>
           <input type="text" id="u-t9" value="Restante na entrega">
+          <label for="u-txt-sinal-garante">O que o sinal garante</label>
+          <input type="text" id="u-txt-sinal-garante" value="" placeholder="ex.: O sinal garante o seu horário agendado">
+          <label for="u-txt-sinal-desistir">E se o cliente desistir</label>
+          <input type="text" id="u-txt-sinal-desistir" value="" placeholder="ex.: Cancelamento não há devolução do sinal">
+          <label for="u-txt-sinal-saldo">O que fazer com o saldo</label>
+          <input type="text" id="u-txt-sinal-saldo" value="" placeholder="ex.: O saldo deve ser pago até 1 dia antes do seu ensaio">
+          <p class="ajuda alerta" id="u-sinal-txt-aviso" style="display:none"><b>Os três estão em branco, e o sinal está ligado.</b> Quem está com o carrinho montado vai ler quanto paga agora e quanto fica para depois — e não vai ler o que o sinal garante, o que acontece se ele desistir, nem quando o saldo vence. Preencher é opcional, e o que estiver em branco simplesmente não aparece; em branco é a única configuração em que nenhuma das três perguntas é respondida.</p>
+          <p class="ajuda">As três respostas aparecem <b>na tela do cliente</b>, logo abaixo das linhas de sinal e saldo e <b>antes dos botões de pagamento</b> — é ali que ele decide. Cada uma só aparece se estiver preenchida: as três em branco não desenham nada. Elas <b>não entram na mensagem do WhatsApp</b>, que é confirmação do que já foi pago.</p>
         </div>
         <p class="ajuda">Ligado, o <b>PayPal cobra o sinal</b>, o <b>Pix gera o QR do sinal</b>, a mensagem do WhatsApp declara sinal pago e saldo devido, e o carrinho passa a mostrar três linhas: total, sinal agora e saldo na entrega. A ordem da conta é <b>quantidade multiplica → cupom incide sobre o total → o sinal sai do total já com o cupom</b>. Um <b>sinal maior que o total</b> é recusado: o carrinho avisa e não deixa pagar.</p>
       </fieldset>
@@ -2804,6 +2812,15 @@
       <label for="p-txt-saldo">Linha do saldo <small>(idem)</small></label>
       <input type="text" id="p-txt-saldo" value="Saldo a pagar: {valor}">
       <p class="ajuda">Onde você escrever <code>{valor}</code> entra o número já formatado em reais. As duas linhas ficam <b>logo abaixo do valor em destaque</b> — que continua sendo o <b>total</b> da cobrança, porque é ele que diz quanto o trabalho custa. O que o cliente paga <b>agora</b> é o sinal, e é ele que está dentro do código Pix e é ele que o PayPal cobra.</p>
+      <label for="p-txt-sinal-garante">O que o sinal garante</label>
+      <input type="text" id="p-txt-sinal-garante" value="" placeholder="ex.: O sinal garante o seu horário agendado">
+      <label for="p-txt-sinal-desistir">E se o cliente desistir</label>
+      <input type="text" id="p-txt-sinal-desistir" value="" placeholder="ex.: Cancelamento não há devolução do sinal">
+      <label for="p-txt-sinal-saldo">O que fazer com o saldo</label>
+      <input type="text" id="p-txt-sinal-saldo" value="" placeholder="ex.: O saldo deve ser pago até 1 dia antes do seu ensaio">
+      <p class="ajuda alerta" id="p-sinal-txt-aviso" style="display:none"><b>Os três estão em branco, e o sinal está ligado.</b> Quem abriu o link de cobrança vai ler quanto paga agora e quanto fica para depois — e não vai ler o que o sinal garante, o que acontece se ele desistir, nem quando o saldo vence. Preencher é opcional, e o que estiver em branco simplesmente não aparece; em branco é a única configuração em que nenhuma das três perguntas é respondida.</p>
+      <p class="ajuda">As três respostas aparecem <b>na tela do cliente</b>, logo abaixo das linhas de sinal e saldo e <b>antes dos botões de pagamento</b> — é ali que ele decide. Cada uma só aparece se estiver preenchida: as três em branco não desenham nada. Elas <b>não entram na mensagem do WhatsApp</b>, que é confirmação do que já foi pago.</p>
+      <p class="ajuda"><b>As três são da página, e não de cada cobrança.</b> Diferente do valor e do próprio sinal, que viajam no link, elas ficam <b>dentro do código 1</b>: são política do seu negócio, não desta venda. Mudar uma delas pede gerar o código 1 de novo e colar no site — e <b>não</b> mexe em nenhum link já enviado, porque o selo do link não conta texto nenhum.</p>
       <label for="p-txt-zap-sinal">Trecho do sinal na mensagem do WhatsApp</label>
       <input type="text" id="p-txt-zap-sinal" value="(sinal de {sinal}; saldo de {saldo})">
       <p class="ajuda">Entra no fim da mensagem do botão “Já paguei”, e só nas cobranças com sinal. <code>{sinal}</code> é o que ele acabou de pagar e <code>{saldo}</code> é o que ficou para depois — sem este trecho a mensagem citaria só o total, e você leria “paguei R$ 1.200,00” de quem pagou o sinal.</p>
@@ -3257,6 +3274,14 @@
         <input type="text" id="m-t8" value="Sinal agora">
         <label for="m-t9">Rótulo do saldo</label>
         <input type="text" id="m-t9" value="Restante na entrega">
+        <label for="m-txt-sinal-garante">O que o sinal garante</label>
+        <input type="text" id="m-txt-sinal-garante" value="" placeholder="ex.: O sinal garante o seu horário agendado">
+        <label for="m-txt-sinal-desistir">E se o cliente desistir</label>
+        <input type="text" id="m-txt-sinal-desistir" value="" placeholder="ex.: Cancelamento não há devolução do sinal">
+        <label for="m-txt-sinal-saldo">O que fazer com o saldo</label>
+        <input type="text" id="m-txt-sinal-saldo" value="" placeholder="ex.: O saldo deve ser pago até 1 dia antes do seu ensaio">
+        <p class="ajuda alerta" id="m-sinal-txt-aviso" style="display:none"><b>Os três estão em branco, e o sinal está ligado.</b> Quem está com a cesta montada vai ler quanto paga agora e quanto fica para depois — e não vai ler o que o sinal garante, o que acontece se ele desistir, nem quando o saldo vence. Preencher é opcional, e o que estiver em branco simplesmente não aparece; em branco é a única configuração em que nenhuma das três perguntas é respondida.</p>
+        <p class="ajuda">As três respostas aparecem <b>na tela do cliente</b>, logo abaixo das linhas de sinal e saldo e <b>antes dos botões de pagamento</b> — é ali que ele decide. Cada uma só aparece se estiver preenchida: as três em branco não desenham nada. Elas <b>não entram na mensagem do WhatsApp</b>, que é confirmação do que já foi pago.</p>
         <label for="m-t12">Rótulo do resumo</label>
         <input type="text" id="m-t12" value="Resumo para conferência">
         <label for="m-t5">Mensagem de pagamento aprovado <small>(PayPal)</small></label>
@@ -3721,6 +3746,14 @@
           <input type="text" id="a-t8" value="Sinal agora">
           <label for="a-t9">Texto do saldo <small>(a linha do que fica para depois)</small></label>
           <input type="text" id="a-t9" value="Restante no dia do ensaio">
+          <label for="a-txt-sinal-garante">O que o sinal garante</label>
+          <input type="text" id="a-txt-sinal-garante" value="" placeholder="ex.: O sinal garante o seu horário agendado">
+          <label for="a-txt-sinal-desistir">E se o cliente desistir</label>
+          <input type="text" id="a-txt-sinal-desistir" value="" placeholder="ex.: Cancelamento não há devolução do sinal">
+          <label for="a-txt-sinal-saldo">O que fazer com o saldo</label>
+          <input type="text" id="a-txt-sinal-saldo" value="" placeholder="ex.: O saldo deve ser pago até 1 dia antes do seu ensaio">
+          <p class="ajuda alerta" id="a-sinal-txt-aviso" style="display:none"><b>Os três estão em branco, e o sinal está ligado.</b> Quem está reservando o horário vai ler quanto paga agora e quanto fica para depois — e não vai ler o que o sinal garante, o que acontece se ele desistir, nem quando o saldo vence. Preencher é opcional, e o que estiver em branco simplesmente não aparece; em branco é a única configuração em que nenhuma das três perguntas é respondida.</p>
+          <p class="ajuda">As três respostas aparecem <b>na tela do cliente</b>, logo abaixo das linhas de sinal e saldo e <b>antes dos botões de pagamento</b> — é ali que ele decide. Cada uma só aparece se estiver preenchida: as três em branco não desenham nada. Elas <b>não entram na mensagem do WhatsApp</b>, que é confirmação do que já foi pago.</p>
         </div>
         <p class="ajuda">Ligado, o <b>Pix gera o QR do sinal</b>, o <b>cartão cobra o sinal</b> e o <b>parcelamento passa a ser sobre o sinal</b> — é o valor que a operadora cobra naquele momento, e parcelar um número que ninguém está cobrando confunde. A página de obrigado passa a mostrar três linhas: total, sinal agora e saldo. A ordem da conta é <b>opcionais somam → cupom incide sobre o total → o sinal sai do total já com o cupom</b>. Um <b>sinal maior que o total</b> é recusado: a página avisa e não deixa pagar.</p>
         <p class="ajuda"><b>A vitrine continua anunciando o preço cheio de cada pacote</b> — é o que o cliente vai pagar ao todo. O que ela perde é o selo e a segunda linha de preço, porque com sinal não existe mais desconto no Pix: os dois meios cobram o mesmo sinal.</p>
@@ -4524,6 +4557,95 @@ function fcTxtPadrao(defs,chave){
   for(i=0;i<defs.length;i++)if(defs[i][0]===chave)return defs[i][2];
   return '';
 }
+/* ===== OS TRES TEXTOS QUE EXPLICAM O SINAL (rodada E, 13/09/2026) =====
+   Pedido do dono: "para ficar claro isso ANTES de o cliente fazer o pagamento do sinal", tres
+   textos configuraveis que respondam tres perguntas -- o que o sinal garante, e se ele
+   desistir, o que fazer com o saldo. Eles valem para as QUATRO abas de pagamento, e por isso a
+   tabela e UMA: os doze campos nascem daqui, com o mesmo rotulo, o mesmo exemplo e a mesma
+   chave. Doze campos escritos a mao em quatro lugares e o convite ao erro de digitacao que
+   FC_TXT_FABRICA ja existe para recusar.
+
+   ELES NASCEM VAZIOS, E LINHA VAZIA NAO APARECE -- e isto contraria o padrao da casa DE
+   PROPOSITO. Todo texto deste projeto tem padrao de fabrica porque o padrao e "exatamente o
+   que saia fixo no bloco antes desta rodada"; aqui nao existe "antes", o texto e novo. E, mais
+   forte que isso: os tres sao DECLARACOES DE POLITICA COMERCIAL. Um padrao de fabrica dizendo
+   "Cancelamento nao ha devolucao do sinal" afirmaria, para um cliente prestes a pagar, uma
+   politica que o dono pode nao ter -- e politica inventada numa tela de pagamento e pior que
+   politica nenhuma. Com os tres vazios o bloco sai byte a byte como sairia sem esta rodada,
+   que e tambem o que mantem a regressao honesta.
+
+   A MECANICA JA SUPORTAVA PADRAO VAZIO, e isso foi MEDIDO e nao suposto: 'a-txt-subtitulo' tem
+   terceira coluna '' desde 03/09/2026; fcTxtLer le el.value (vazio e valor, nao ausencia) e
+   fcTxtRestaura guarda com '!=null' e NAO com "e verdade" -- o comentario de uRestaura registra
+   por que, e o defeito que a guarda de verdade ja custou. Nenhum caminho trata '' como ausente. */
+var FC_SINAL_TXT=[
+  ['garante','txtSinalGarante','O que o sinal garante','ex.: O sinal garante o seu horário agendado'],
+  ['desistir','txtSinalDesistir','E se o cliente desistir','ex.: Cancelamento não há devolução do sinal'],
+  ['saldo','txtSinalSaldo','O que fazer com o saldo','ex.: O saldo deve ser pago até 1 dia antes do seu ensaio']
+];
+function fcSinalTxtId(pref,i){return pref+'-txt-sinal-'+FC_SINAL_TXT[i][0];}
+/* As tres linhas da tabela de textos da aba. Entrando em *_TXT_DEFS elas ganham de graca o eco
+   do rotulo, a busca "Achar um texto", a persistencia, o preset e o "restaurar padroes" -- e
+   entram na vigilancia de fcTxtFabricaDiverge, que compara o atributo value= com esta coluna.
+   E por causa dessa comparacao que o <input> da tela precisa trazer value="" escrito: sem o
+   atributo, getAttribute('value') devolve null, null !== '' e a barra vermelha acenderia. */
+function fcSinalTxtDefs(pref){
+  var r=[],i;
+  for(i=0;i<FC_SINAL_TXT.length;i++)r.push([FC_SINAL_TXT[i][1],fcSinalTxtId(pref,i),'']);
+  return r;
+}
+/* AS PREENCHIDAS, na ordem das perguntas. Vazia nao vira linha -- e a decisao de desenho. */
+function fcSinalTxtLista(cfg){
+  var r=[],i,v;
+  for(i=0;i<FC_SINAL_TXT.length;i++){
+    v=cfg[FC_SINAL_TXT[i][1]];
+    v=(v==null)?'':String(v).replace(/^\s+|\s+$/g,'');
+    if(v)r.push(v);
+  }
+  return r;
+}
+/* O JS QUE ESCREVE AS LINHAS dentro do bloco entregue -- fonte unica das quatro abas. O que se
+   unifica e a fonte que ESCREVE, nunca a saida: cada bloco continua autossuficiente e leva a
+   propria copia destas linhas dentro dele. 'pai' e uma expressao do BLOCO (o elemento em que
+   as linhas entram) e 'ind' e a indentacao daquele trecho.
+   textContent, e nunca marcacao: o texto e livre, vem do operador e vai para a tela como texto
+   -- escJs cuida do literal (apostrofa, barra invertida, "</" e "<!--"). */
+function fcSinalTxtSrc(cfg,cls,pai,ind){
+  var t=fcSinalTxtLista(cfg),s='',i;
+  if(!t.length)return '';
+  s+=ind+'var sinTxP='+pai+',sinTxE;\n';
+  for(i=0;i<t.length;i++)
+    s+=ind+"sinTxE=document.createElement('div');sinTxE.className='"+cls+"';sinTxE.textContent='"+escJs(t[i])+"';sinTxP.appendChild(sinTxE);\n";
+  return s;
+}
+/* ===== O AVISO AMBAR: sinal ligado com os tres vazios =====
+   Esse estado e exatamente a confusao que o pedido do dono existe para evitar -- o cliente le
+   quanto paga agora e quanto fica para depois, e nao le o que o sinal garante, o que acontece
+   se ele desistir nem quando o saldo vence. A aba mostra o aviso no mesmo molde do que ja
+   existe para o desconto do Pix com sinal (*-descpix-aviso).
+   AVISO, E NAO TRANCA: o dono pode ter motivo para deixar vazio, e recusar o forcaria a
+   escrever qualquer coisa so para destravar. Ela nao conserta; ela faz o buraco APARECER --
+   mesma familia de fccOrfas e fcTxtFabricaDiverge. */
+function fcSinalTxtVazios(pref){
+  var i,el;
+  for(i=0;i<FC_SINAL_TXT.length;i++){
+    el=$(fcSinalTxtId(pref,i));
+    if(el&&String(el.value).replace(/^\s+|\s+$/g,''))return false;
+  }
+  return true;
+}
+function fcSinalTxtAviso(pref,sinalOn){
+  var el=$(pref+'-sinal-txt-aviso');
+  if(el)el.style.display=(sinalOn&&fcSinalTxtVazios(pref))?'block':'none';
+}
+/* O aviso reage A TECLA, e nao so ao 'change'. Os quatro *Toggles() sao chamados pelo listener
+   de 'change' de cada aba, que decide por e.target.name -- e campo de texto nao tem name. Sem
+   esta linha o aviso so sumiria depois de o operador clicar fora do campo que ele acabou de
+   preencher, que e o momento exato em que ele esta olhando para o aviso. */
+document.addEventListener('input',function(e){
+  var id=String((e.target&&e.target.id)||''),m=id.match(/^([ampu])-txt-sinal-(garante|desistir|saldo)$/);
+  if(m)fcSinalTxtAviso(m[1],radio(m[1]+'-sinal')==='sim');
+});
 /* ===== OS NOVE TEXTOS RESERVA DOS MARCADORES: uma chave por campo, e a migracao =====
    Sao os textos que a pagina de obrigado mostra quando o TidyCal NAO manda o dado -- no lugar
    do nome, da data, do horario. Ate 11/09/2026 os cinco da aba TidyCal e os quatro da aba
@@ -4598,6 +4720,26 @@ function fcTxtFabricaDiverge(){
     if(!el)continue;
     attr=el.getAttribute('value');
     if(attr!==tabelas[i][1][j][2])r.push(fcAbaNome(tabelas[i][0])+'/'+tabelas[i][1][j][1]);
+  }
+  return r;
+}
+/* ===== A SEGUNDA COPIA DOS DOZE: rotulo e exemplo escritos tambem no HTML =====
+   O id, a chave e o padrao dos tres textos do sinal saem de FC_SINAL_TXT, mas o <label> e o
+   placeholder do <input> estao escritos a mao nas quatro abas -- doze pares. Se um deles
+   divergir da tabela, duas abas passam a fazer PERGUNTAS DIFERENTES sobre a mesma coisa, e nada
+   na tela diz isso. Mesma familia de fcTxtFabricaDiverge, e por isso corre no mesmo passo da
+   partida: ela nao conserta, ela faz o buraco aparecer.
+   Le o ATRIBUTO do placeholder e o texto do <label> ANTES de fcsEcoMontar mexer neles -- o passo
+   'Achar um texto' vem depois deste na partida, de proposito. */
+function fcSinalTxtDiverge(){
+  var r=[],p,i,id,el,lab,abas=['u','a','p','m'];
+  for(p=0;p<abas.length;p++)for(i=0;i<FC_SINAL_TXT.length;i++){
+    id=fcSinalTxtId(abas[p],i);el=$(id);
+    if(!el){r.push(id+' (campo não existe)');continue;}
+    if(el.getAttribute('placeholder')!==FC_SINAL_TXT[i][3])r.push(id+' (exemplo)');
+    lab=fcsRotuloDe(el);
+    if(!lab||String(lab.textContent||'').replace(/\s+/g,' ').replace(/^ +| +$/g,'')!==FC_SINAL_TXT[i][2])
+      r.push(id+' (rótulo)');
   }
   return r;
 }
@@ -13910,6 +14052,7 @@ function uToggles(){
      este projeto ja recusou. */
   el=$('u-descpix-aviso');if(el)el.style.display=sinalOn?'block':'none';
   el=$('u-descpix');if(el)el.disabled=sinalOn;
+  fcSinalTxtAviso('u',sinalOn);
   el=$('u-resumo-campos');if(el)el.style.display=(radio('u-resumo')==='sim')?'block':'none';
   fcOrdSo1('u',m!=='ambos');
 }
@@ -14117,7 +14260,9 @@ var U_TXT_DEFS=[
   ['t8','u-t8','Sinal agora'],
   ['t9','u-t9','Restante na entrega'],
   ['t10','u-t10','Resumo para conferência']
-];
+/* Os tres textos que explicam o sinal (rodada E): a MESMA fonte nas quatro abas de pagamento.
+   Padrao vazio -- ver FC_SINAL_TXT para o porque. */
+].concat(fcSinalTxtDefs('u'));
 /* ===== configuracao da aba =====
    Uma leitura so da interface, ja presa nas faixas. E o que uGerar valida, e e o que uBloco
    monta -- e como a previa passou a executar o retorno de uBloco, nao sobrou nenhuma segunda
@@ -14327,6 +14472,12 @@ function uBloco(cfg){
     c+='.fcuni .fcu-saldo{display:flex;justify-content:space-between;gap:10px;padding:4px 0 0;font-size:13px;color:#777}\n';
     c+='.fcuni .fcu-sinal-aviso{display:none;font-size:12px;font-weight:600;color:#c0392b;padding:7px 0 0;text-align:left}\n';
     c+='.fcuni .fcu-sinal-aviso.on{display:block}\n';
+    /* AS TRES RESPOSTAS SOBRE O SINAL (rodada E). So entram quando ha alguma preenchida: os tres
+       vazios sao a fabrica, e nesse estado nem a regra de CSS, nem a div, nem uma linha de JS
+       aparecem -- o bloco sai byte a byte como saia antes desta rodada. Mesma escolha de
+       'a-txt-subtitulo', e e o que mantem a regressao honesta. */
+    if(fcSinalTxtLista(cfg).length)
+      c+='.fcuni .fcu-sinal-txt-l{font-size:12px;line-height:1.45;color:#777;padding:4px 0 0;text-align:left}\n';
   }
   if(descpix>0){
     /* UMA regra so para o seletor, com os valores trocados -- e nunca uma segunda regra por
@@ -14527,6 +14678,10 @@ function uBloco(cfg){
   if(usaSinal){
     c+="h+='<div class=\"fcu-sinal\"><span class=\"fcu-sinal-t\"></span><span class=\"fcu-sinal-v\"></span></div>';\n";
     c+="h+='<div class=\"fcu-saldo\"><span class=\"fcu-saldo-t\"></span><span class=\"fcu-saldo-v\"></span></div>';\n";
+    /* O lugar das tres respostas: DEPOIS do sinal e do saldo, ANTES dos botoes de pagamento --
+       "para ficar claro isso antes do cliente fazer o pagamento". A linha vermelha da recusa
+       fica por ultimo, colada nos botoes que ela trava. */
+    if(fcSinalTxtLista(cfg).length)c+="h+='<div class=\"fcu-sinal-txt\"></div>';\n";
     c+="h+='<div class=\"fcu-sinal-aviso\"></div>';\n";
   }
   if(descpix>0)c+="h+='<div class=\"fcu-pixlinha\"><span class=\"fcu-pixlinha-t\"></span><span class=\"fcu-pixlinha-v\"></span></div>';\n";
@@ -14566,6 +14721,7 @@ function uBloco(cfg){
     if(cfg.sinal.tipo==='pct')c+="raiz.querySelector('.fcu-sinal-t').textContent=TXT_SINAL+' ('+SINAL_VALOR+'%)';\n";
     else c+="raiz.querySelector('.fcu-sinal-t').textContent=TXT_SINAL;\n";
     c+="raiz.querySelector('.fcu-saldo-t').textContent=TXT_SALDO;\n";
+    c+=fcSinalTxtSrc(cfg,'fcu-sinal-txt-l',"raiz.querySelector('.fcu-sinal-txt')",'');
   }
   if(usaPix){
     c+="raiz.querySelector('.fcu-gerar').textContent=TXT_BOTAO_PIX;\n";
@@ -14762,6 +14918,10 @@ function uBloco(cfg){
     c+='var haPagar=total()>=0.01;\n';
     c+="raiz.querySelector('.fcu-sinal').style.display=haPagar?'':'none';\n";
     c+="raiz.querySelector('.fcu-saldo').style.display=haPagar?'':'none';\n";
+    /* As respostas somem junto (rodada F): elas explicam um sinal que, com o pedido em zero,
+       nao esta na tela -- explicacao sem o que explicar. O grupo se comporta como um so. */
+    if(fcSinalTxtLista(cfg).length)
+      c+="raiz.querySelector('.fcu-sinal-txt').style.display=haPagar?'':'none';\n";
     c+="raiz.querySelector('.fcu-sinal-v').textContent=moedaFmt(sinalAgora());\n";
     c+="raiz.querySelector('.fcu-saldo-v').textContent=moedaFmt(saldoDepois());\n";
     c+='var rec=sinalRecusa();\n';
@@ -16550,6 +16710,7 @@ function aToggles(){
   ver('a-sinalfixo-campo',sinalOn&&radio('a-sinaltipo')==='fixo');
   ver('a-descpix-aviso',sinalOn);
   var elDp=$('a-descpix');if(elDp)elDp.disabled=sinalOn;
+  fcSinalTxtAviso('a',sinalOn);
   /* As alturas calibradas do calendario -- e o interruptor de quando abri-las -- so aparecem
      quando SAO USADAS, mesmo criterio das quatro linhas acima: campo que o bloco gerado nao vai
      ler nao fica na tela pedindo calibragem. Medido: com MEDIR_FORMULARIO ligado, expandir()
@@ -16681,8 +16842,10 @@ var A_TXT_DEFS=[
   ['txtSinalZero','a-txt-sinal-zero','O sinal desta reserva arredonda para zero. Remova o cupom ou marque mais itens opcionais.'],
 /* Os QUATRO TEXTOS RESERVA dos marcadores entram aqui por fcObFbDefs (11/09/2026): o id e o
    padrao de cada um ja estao em A_OB_VARS, logo acima, e digita-los de novo seria uma segunda
-   fabrica. Na ordem de A_OB_VARS, que e a ordem em que a chave antiga foi colada. */
-].concat(fcObFbDefs(A_OB_VARS,'a'));
+   fabrica. Na ordem de A_OB_VARS, que e a ordem em que a chave antiga foi colada.
+   E os TRES TEXTOS QUE EXPLICAM O SINAL entram pelo segundo concat (rodada E, 13/09/2026), da
+   mesma tabela unica que serve as quatro abas de pagamento -- ver FC_SINAL_TXT. */
+].concat(fcObFbDefs(A_OB_VARS,'a')).concat(fcSinalTxtDefs('a'));
 function aObMarcadas(){
   var r=[],i,el;
   for(i=0;i<A_OB_VARS.length;i++){
@@ -18660,6 +18823,12 @@ function aBlocoObrigado(cfg){
     c+='.fca-ob-saldo{display:flex;justify-content:space-between;gap:10px;padding:4px 0 0;margin:0 0 14px;font-size:13px;color:#777}\n';
     c+='.fca-ob-sinal-aviso{display:none;font-size:12px;font-weight:600;color:#c0392b;padding:7px 0 0;text-align:left}\n';
     c+='.fca-ob-sinal-aviso.on{display:block}\n';
+    /* AS TRES RESPOSTAS SOBRE O SINAL (rodada E). So entram quando ha alguma preenchida: os tres
+       vazios sao a fabrica, e nesse estado nem a regra de CSS, nem a div, nem uma linha de JS
+       aparecem -- o bloco sai byte a byte como saia antes desta rodada. Mesma escolha de
+       'a-txt-subtitulo', e e o que mantem a regressao honesta. */
+    if(fcSinalTxtLista(cfg).length)
+      c+='.fca-ob-sinal-txt-l{font-size:12px;line-height:1.45;color:#777;margin-top:4px;text-align:left}\n';
   }
   /* So com Pix na pagina: em "somente cartao" a funcao pix() nem e emitida, e uma regra para
      uma classe que nunca aparece seria peso e ruido no bloco entregue. */
@@ -19024,7 +19193,7 @@ function aBlocoObrigado(cfg){
     c+='var qtdsOp=[];\n';
     c+='function qtdOp(j){var q=qtdsOp[j];return (q==null)?1:q;}\n';
   }
-  c+='var elValor,elLinha2,elParcela,elDescLinha,elDescTxt,elDescVal,elDescP'+(usaSinal?',elSinal,elSaldo,elSinalV,elSaldoV,elSinalAviso':'')+(temMin?',elCupomMsg':'')+';\n';
+  c+='var elValor,elLinha2,elParcela,elDescLinha,elDescTxt,elDescVal,elDescP'+(usaSinal?',elSinal,elSaldo,elSinalV,elSaldoV,elSinalAviso,elSinalTxt':'')+(temMin?',elCupomMsg':'')+';\n';
   c+='var pixEsconder=null;\n\n';
   c+=FC_CARRINHO_SRC.descontoAtual;
   c+=FC_CARRINHO_SRC.total;
@@ -19186,6 +19355,13 @@ function aBlocoObrigado(cfg){
     c+='  var sdt=document.createElement("span");sdt.textContent=TXT_SALDO;sd.appendChild(sdt);\n';
     c+='  var sdv=document.createElement("span");sd.appendChild(sdv);\n';
     c+='  cartao.appendChild(sd);\n';
+    /* AS TRES RESPOSTAS, entre o saldo e a linha vermelha -- e, portanto, antes dos meios de
+       pagamento, que montar() poe depois deste cartao. */
+    if(fcSinalTxtLista(cfg).length){
+      c+='  var stw=document.createElement("div");stw.className="fca-ob-sinal-txt";cartao.appendChild(stw);\n';
+      c+=fcSinalTxtSrc(cfg,'fca-ob-sinal-txt-l','stw','  ');
+      c+='  elSinalTxt=stw;\n';
+    }
     c+='  var sav=document.createElement("div");sav.className="fca-ob-sinal-aviso";cartao.appendChild(sav);\n';
     c+='  elSinal=sl;elSaldo=sd;elSinalV=slv;elSaldoV=sdv;elSinalAviso=sav;\n';
   }
@@ -19237,6 +19413,9 @@ function aBlocoObrigado(cfg){
     c+='  var haPagar=total()>=0.01;\n';
     c+='  if(elSinal)elSinal.style.display=haPagar?\'\':\'none\';\n';
     c+='  if(elSaldo)elSaldo.style.display=haPagar?\'\':\'none\';\n';
+    /* As respostas somem junto (rodada F) -- ver o mesmo ponto nas duas irmas. */
+    if(fcSinalTxtLista(cfg).length)
+      c+='  if(elSinalTxt)elSinalTxt.style.display=haPagar?\'\':\'none\';\n';
     c+='  if(elSinalV)elSinalV.textContent=moedaFmt(sinalAgora());\n';
     c+='  if(elSaldoV)elSaldoV.textContent=moedaFmt(saldoDepois());\n';
     c+='  if(elSinalAviso){\n';
@@ -21163,7 +21342,12 @@ var P_TXT_DEFS=[
   ['t7','p-t7','Abra o aplicativo do seu banco, escolha Pix e use o Copia e Cola ou o QR Code.'],
   ['t8','p-t8','Este link de pagamento vale até {data}.'],
   ['t9','p-t9','Este link de pagamento venceu em {data} e não mostra mais o pagamento. Fale com a gente pelo WhatsApp que enviamos um link novo.']
-];
+/* Os tres textos que explicam o sinal (rodada E). DA PAGINA, e nao de cada cobranca -- medido:
+   nesta aba tudo o que e TXT_* ja mora no bloco e nada disso viaja no link (ver o comentario
+   das tres frases do sinal em pJs). Eles sao politica do negocio, nao desta venda; poe-los no
+   link os faria entrar no SELO, que e a classe mais perigosa deste projeto, e derrubaria todo
+   link novo em qualquer /pagar com codigo 1 antigo -- por um texto. */
+].concat(fcSinalTxtDefs('p'));
 function pCfg(){
   var cpos=radio('p-coruja')||'esq';
   var usapp=(radio('p-usapp')!=='nao');
@@ -21254,6 +21438,12 @@ function pCss(cfg){
      cliente ler os dois na ordem em que eles acontecem. */
   s+='.fcpg-sinal{font-size:16px;font-weight:800;color:'+cfg.c1+';margin:0 0 2px}\n';
   s+='.fcpg-saldo{font-size:13px;font-weight:700;opacity:.75;margin:0 0 4px}\n';
+  /* AS TRES RESPOSTAS SOBRE O SINAL (rodada E). Diferente das duas linhas acima, a regra delas
+     NAO entra sempre: ela depende de haver texto escrito, e nao da cobranca aberta agora. Com
+     os tres campos vazios -- a fabrica -- nem a regra nem as linhas existem, e o bloco sai byte
+     a byte como saia antes desta rodada. */
+  if(fcSinalTxtLista(cfg).length)
+    s+='.fcpg-sinal-txt-l{font-size:12px;line-height:1.45;opacity:.75;margin:0 0 3px}\n';
   /* O prazo fica JUNTO do valor, e nao no rodape: ele muda o comportamento de quem le, e para
      isso precisa ser lido antes de o cliente decidir deixar para depois. */
   s+='.fcpg-prazo{font-size:13px;font-weight:700;color:'+cfg.c1+';margin:0 0 4px}\n';
@@ -21584,6 +21774,14 @@ function pJs(cfg){
   j+='    if(SINAL_AGORA>0&&saldoAgora()>=0.01){\n';
   j+="      c.appendChild(novo('div','fcpg-sinal',TXT_SINAL.replace(/\\{valor\\}/g,moedaFmt(SINAL_AGORA))));\n";
   j+="      c.appendChild(novo('div','fcpg-saldo',TXT_SALDO.replace(/\\{valor\\}/g,moedaFmt(saldoAgora()))));\n";
+  /* AS TRES RESPOSTAS, dentro do MESMO if: elas so existem quando ha sinal a explicar, e ficam
+     logo abaixo das duas linhas dele -- antes do prazo e dos dois meios de pagamento.
+     ELAS SAO DA PAGINA, e nao desta cobranca. Medido: nesta aba todo TXT_* ja mora no bloco e
+     nenhum deles viaja no endereco; o que viaja e valor (t, x, n). Sao politica do negocio, e
+     nao desta venda -- duas cobrancas da mesma pagina nao teriam por que responder diferente
+     "e se eu desistir?". E poe-las no link as faria entrar no SELO (seloDe), o que derrubaria
+     todo link novo em qualquer /pagar ainda com codigo 1 antigo -- por um texto. */
+  j+=fcSinalTxtSrc(cfg,'fcpg-sinal-txt-l','c','      ');
   j+='    }\n';
   j+="    if(dia>0)c.appendChild(novo('div','fcpg-prazo',TXT_PRAZO.replace(/\\{data\\}/g,prazoTexto(dia))));\n";
   j+="    if(lido.txid&&lido.txid!=='***')c.appendChild(novo('div','fcpg-ref',TXT_REF+lido.txid));\n";
@@ -21900,6 +22098,7 @@ function pToggles(){
   el=$('p-sinalfixo-campo');if(el)el.style.display=(radio('p-sinaltipo')==='fixo')?'block':'none';
   el=$('p-descpix-aviso');if(el)el.style.display=sinalOn?'block':'none';
   el=$('p-descpix');if(el)el.disabled=sinalOn;
+  fcSinalTxtAviso('p',sinalOn);
 }
 
 /* ===== previa fiel: o bloco gerado rodando de verdade =====
@@ -22981,6 +23180,7 @@ function mToggles(){
      esconder um campo que continua guardando 10% trocaria defeito visivel por invisivel. */
   ver('m-descpix-aviso',sinalOn);
   var elDp=$('m-descpix');if(elDp)elDp.disabled=sinalOn;
+  fcSinalTxtAviso('m',sinalOn);
   ver('m-zap-fieldset',usaPix);
   ver('m-zap-campo',usaPix&&radio('m-zap')==='sim');
   ver('m-sinal-campos',sinalOn);
@@ -23073,7 +23273,7 @@ var M_TXT_DEFS=[
   ['t10','m-t10','Seu carrinho'],
   ['t11','m-t11','Voltar para a vitrine'],
   ['t12','m-t12','Resumo para conferência']
-];
+].concat(fcSinalTxtDefs('m'));
 /* ===== configuracao da aba =====
    Uma leitura so da interface, ja presa nas faixas. E o que mRecusa valida e o que mBloco
    monta -- e como a previa executa o retorno de mBloco, nao existe segunda implementacao da
@@ -23323,6 +23523,12 @@ function mBloco(cfg){
     c+='.fcmloja .fcm-saldo{color:#777}\n';
     c+='.fcmloja .fcm-sinal-aviso{display:none;font-size:12px;color:#8C1D18;background:#FDF2F1;border-radius:8px;padding:7px 9px;margin-top:8px;text-align:left}\n';
     c+='.fcmloja .fcm-sinal-aviso.on{display:block}\n';
+    /* AS TRES RESPOSTAS SOBRE O SINAL (rodada E). So entram quando ha alguma preenchida: os tres
+       vazios sao a fabrica, e nesse estado nem a regra de CSS, nem a div, nem uma linha de JS
+       aparecem -- o bloco sai byte a byte como saia antes desta rodada. Mesma escolha de
+       'a-txt-subtitulo', e e o que mantem a regressao honesta. */
+    if(fcSinalTxtLista(cfg).length)
+      c+='.fcmloja .fcm-sinal-txt-l{font-size:12px;line-height:1.45;color:#777;margin-top:4px;text-align:left}\n';
   }
   if(descpix>0){
     /* UMA regra so, com os valores trocados -- ver o mesmo ponto no Checkout. */
@@ -23648,6 +23854,8 @@ function mBlocoRuntime(cfg,usaPP,usaPix,usaQtd,usaSinal,usaResumo,descpix,zap,us
   if(usaSinal){
     c+="h+='<div class=\"fcm-sinal\"><span class=\"fcm-sinal-t\"></span><span class=\"fcm-sinal-v\"></span></div>';\n";
     c+="h+='<div class=\"fcm-saldo\"><span class=\"fcm-saldo-t\"></span><span class=\"fcm-saldo-v\"></span></div>';\n";
+    /* Mesma posicao do Checkout: depois do sinal e do saldo, antes dos botoes. */
+    if(fcSinalTxtLista(cfg).length)c+="h+='<div class=\"fcm-sinal-txt\"></div>';\n";
     c+="h+='<div class=\"fcm-sinal-aviso\"></div>';\n";
   }
   if(descpix>0)c+="h+='<div class=\"fcm-pixlinha\"><span class=\"fcm-pixlinha-t\"></span><span class=\"fcm-pixlinha-v\"></span></div>';\n";
@@ -23684,6 +23892,7 @@ function mBlocoRuntime(cfg,usaPP,usaPix,usaQtd,usaSinal,usaResumo,descpix,zap,us
     if(cfg.sinal.tipo==='pct')c+="raiz.querySelector('.fcm-sinal-t').textContent=TXT_SINAL+' ('+SINAL_VALOR+'%)';\n";
     else c+="raiz.querySelector('.fcm-sinal-t').textContent=TXT_SINAL;\n";
     c+="raiz.querySelector('.fcm-saldo-t').textContent=TXT_SALDO;\n";
+    c+=fcSinalTxtSrc(cfg,'fcm-sinal-txt-l',"raiz.querySelector('.fcm-sinal-txt')",'');
   }
   if(usaPix){
     c+="raiz.querySelector('.fcm-gerar').textContent=TXT_BOTAO_PIX;\n";
@@ -24100,6 +24309,8 @@ function mBlocoPagar(cfg,usaPP,usaPix,usaQtd,usaSinal,usaResumo,descpix,zap,usaC
     c+='var haPagar=total()>=0.01;\n';
     c+="raiz.querySelector('.fcm-sinal').style.display=haPagar?'':'none';\n";
     c+="raiz.querySelector('.fcm-saldo').style.display=haPagar?'':'none';\n";
+    if(fcSinalTxtLista(cfg).length)
+      c+="raiz.querySelector('.fcm-sinal-txt').style.display=haPagar?'':'none';\n";
     c+="raiz.querySelector('.fcm-sinal-v').textContent=moedaFmt(sinalAgora());\n";
     c+="raiz.querySelector('.fcm-saldo-v').textContent=moedaFmt(saldoDepois());\n";
     c+='var rec=sinalRecusa();\n';
@@ -25533,6 +25744,8 @@ prep('Textos configuraveis','slide leads tidy uni bor cnt cob loja pac',function
   fcdLigar();
   var d=fcTxtFabricaDiverge();
   if(d.length)throw new Error('o padrao de fabrica destes campos discorda entre o value= do HTML e a tabela da aba: '+d.join(', '));
+  var ds=fcSinalTxtDiverge();
+  if(ds.length)throw new Error('o rótulo ou o exemplo destes campos discorda entre o HTML e FC_SINAL_TXT: '+ds.join(', '));
 },'preparar as seções de texto e conferir os padrões de fábrica');
 /* Passo proprio, e antes dos contadores: se a contagem do identificador divergir da limpeza
    do payload, as recusas das duas abas compostas passariam a citar um orcamento errado. */

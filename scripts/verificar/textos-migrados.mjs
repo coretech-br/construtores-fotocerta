@@ -117,12 +117,22 @@ const soDoBloco = e => e.filter(x => !RUIDO.some(re => re.test(x)));
    <script> do index.html), entao nenhuma funcao dela e alcancavel por pg.evaluate. As tabelas
    sao lidas do PROPRIO ARQUIVO, que e onde elas moram; o resto se mede pelo DOM e pelo
    comportamento, que e o que o operador ve. */
-/* DUAS TABELAS NAO TERMINAM EM '];' desde 11/09/2026: T_TXT_DEFS e A_TXT_DEFS fecham com
-   '].concat(fcObFbDefs(X_OB_VARS,\'p\'))', porque os textos reserva dos marcadores nao sao
-   digitados de novo ali -- o id e o padrao de cada um ja estao em X_OB_VARS. Ler so o que
-   esta escrito entre colchetes daria as duas tabelas por INCOMPLETAS, e a prova 1 acusaria
-   campo migrado como ausente. Entao o parser expande o concat: le X_OB_VARS e monta as
-   mesmas linhas que fcObFbDefs monta. */
+/* AS TABELAS NEM SEMPRE TERMINAM EM '];', e o parser tem de conhecer cada final.
+   Desde 11/09/2026 T_TXT_DEFS e A_TXT_DEFS fecham com
+   '].concat(fcObFbDefs(X_OB_VARS,'p'))', porque os textos reserva dos marcadores nao sao
+   digitados de novo ali -- o id e o padrao de cada um ja estao em X_OB_VARS. E desde
+   13/09/2026 (rodada E) as QUATRO tabelas das abas de pagamento fecham tambem com
+   '.concat(fcSinalTxtDefs('x'))': os tres textos que explicam o sinal saem de FC_SINAL_TXT,
+   uma tabela so para as quatro abas.
+
+   LER SO O QUE ESTA ENTRE COLCHETES NAO BASTA, e o preco de nao saber disso foi medido: com
+   o final novo desconhecido, o '[\s\S]*?' nao parava no ']' daquela tabela -- ia ate o
+   proximo '];' do arquivo e ENGOLIA as tabelas seguintes, e a prova 1 passou a dizer que
+   'c-fimtxt' pertencia a aba A. Trinta e dois campos acusados de estarem na aba errada por
+   uma tabela ter ganhado um sufixo. Entao os dois concats sao OPCIONAIS na expressao e os
+   dois sao EXPANDIDOS, cada um montando as mesmas linhas que a funcao dele monta. */
+const SINAL_TXT = [['garante','txtSinalGarante'],['desistir','txtSinalDesistir'],
+                   ['saldo','txtSinalSaldo']];
 function tabelasDoArquivo(html){
   const m = {};
   const obVars = nome => {
@@ -130,12 +140,15 @@ function tabelasDoArquivo(html){
     return b ? Array.from(b[1].matchAll(/\{id:'([^']+)'/g)).map(x => x[1]) : [];
   };
   for(const nome of ['S','L','T','U','B','C','P','M','A']){
-    const fim = "(?:;|\\.concat\\(fcObFbDefs\\("+nome+"_OB_VARS,'([a-z])'\\)\\);)";
+    const fim = "(?:\\.concat\\(fcObFbDefs\\("+nome+"_OB_VARS,'([a-z])'\\)\\))?"
+              + "(?:\\.concat\\(fcSinalTxtDefs\\('([a-z])'\\)\\))?;";
     const bloco = new RegExp('var '+nome+'_TXT_DEFS=\\[([\\s\\S]*?)\\n\\]'+fim).exec(html);
     if(!bloco) continue;
     for(const par of bloco[1].matchAll(/\['([^']+)','([^']+)',/g)) m[par[2]] = nome+'/'+par[1];
     if(bloco[2]) for(const id of obVars(nome))
       m[bloco[2]+'-ob-fb-'+id] = nome+'/obfb'+id.charAt(0).toUpperCase()+id.substring(1);
+    if(bloco[3]) for(const [id, chave] of SINAL_TXT)
+      m[bloco[3]+'-txt-sinal-'+id] = nome+'/'+chave;
   }
   return m;
 }
@@ -355,7 +368,24 @@ console.log('\n--- o formato gravado, contra '+REF+' ---');
          sinal:'nao', sinaltipo:'pct', sinalpct:'30', sinalfixo:'100',
          txtSinal:'Sinal agora: {valor}', txtSaldo:'Saldo a pagar: {valor}',
          txtZapSinal:'(sinal de {sinal}; saldo de {saldo})'
-       })[ch]}
+       })[ch]},
+      /* OS TRES TEXTOS QUE EXPLICAM O SINAL (13/09/2026, rodada E). Doze chaves novas -- tres
+         em cada aba de pagamento --, e o valor esperado de TODAS e a STRING VAZIA. Nao e
+         descuido de quem escreveu o teste: e o contrato da rodada. Os tres sao declaracoes de
+         POLITICA COMERCIAL ("o que o sinal garante", "e se eu desistir", "o que fazer com o
+         saldo"), e um padrao de fabrica afirmaria, para um cliente prestes a pagar, uma
+         politica que o dono pode nao ter.
+         E POR ISSO QUE ESTA LINHA IMPORTA MAIS QUE AS OUTRAS DAQUI: ela e o unico lugar do
+         arnes que cobra que o VAZIO CHEGA AO ESTADO GRAVADO. Se algum caminho passar a tratar
+         '' como "campo ausente" -- a guarda de fcTxtRestaura e '!=null' e nao "e verdade", e o
+         comentario de uRestaura registra o defeito que a outra forma ja custou --, a chave
+         some do objeto e esta comparacao cai. */
+      {nome:'os tres textos que explicam o sinal (13/09/2026)',
+       chaves:{u:['txtSinalGarante','txtSinalDesistir','txtSinalSaldo'],
+               m:['txtSinalGarante','txtSinalDesistir','txtSinalSaldo'],
+               a:['txtSinalGarante','txtSinalDesistir','txtSinalSaldo'],
+               p:['txtSinalGarante','txtSinalDesistir','txtSinalSaldo']},
+       esperado:() => ''}
     ];
     /* FABRICA TROCADA e outra coisa de CHAVE NOVA, e a diferenca importa: a chave ja existia
        nos dois lados e o que mudou foi o PADRAO dela. Entao os dois valores sao declarados, e
