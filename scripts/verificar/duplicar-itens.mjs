@@ -63,6 +63,15 @@
     14. DUPLICAR MENSAGEM E OPCAO DE QUALIFICACAO -- os dois textos da mensagem ganham a
         marca, e a opcao deriva ate ficar unica (a lista tem recusa de texto repetido).
 
+   O QUE ELE PASSOU A COBRIR EM 13/09/2026 (a DESCRICAO de cada item opcional):
+    15. A DESCRICAO ATRAVESSA TODA DUPLICACAO -- duplicar o pacote, duplicar o produto nas
+        duas abas, duplicar o opcional sozinho e duplicar a familia inteira. Ela entrou
+        DENTRO de `opTupla`, a tupla que os seis comparadores "o original foi tocado?" ja
+        usavam: assim o campo novo passou a ser cobrado em todos eles de uma vez, em vez de
+        depender de alguem lembrar de somar uma linha em cada caso -- que e exatamente como
+        um campo novo se perde. O segundo opcional de cada cenario fica SEM descricao, de
+        proposito: o vazio tambem tem de atravessar.
+
    NAO E CODIGO DO SITE. Utilitario de linha de comando, roda em Node.
    Uso:  node scripts/verificar/duplicar-itens.mjs  [raiz]
    (a raiz aponta outra arvore -- por exemplo um `git worktree` da `main` -- para ver os
@@ -113,12 +122,19 @@ const gravadoProd = (pg, chave) => pg.evaluate(chave => {
   };
 }, chave);
 
+/* A TUPLA DE UM OPCIONAL, num lugar so. Ela entrou aqui em 13/09/2026, junto com a
+   DESCRICAO de cada opcional: a comparacao "o original foi tocado?" estava escrita seis
+   vezes, e um campo novo em cinco delas e a mesma armadilha que este arquivo existe para
+   fechar. Com a descricao DENTRO da tupla, todo caso que ja comparava original contra copia
+   passou a cobrar o campo novo sem ganhar uma linha. */
+const opTupla = o => [o.nome, o.desc || '', o.preco, !!o.qtd];
+
 /* Um produto comparado campo a campo, inclusive os opcionais, a foto e a categoria. E o
    que responde "o original foi tocado?" sem depender de olhar a tela. */
 const fotoProd = p => JSON.stringify({
   nome: p.nome, desc: p.desc, preco: p.preco, cat: p.cat, img: p.img, larg: p.larg,
   opsel: p.opsel, opnenhum: p.opnenhum, qtd: !!p.qtd,
-  ops: (p.ops || []).map(o => [o.nome, o.preco, !!o.qtd])
+  ops: (p.ops || []).map(opTupla)
 });
 
 /* O que a lista de familias mostra, com a contagem de pacotes que ela propria escreve. */
@@ -180,10 +196,15 @@ const tela = pg => pg.evaluate(() => {
 const opsNaTela = pg => pg.evaluate(() => {
   const lis = document.querySelectorAll('#a-op-lista li');
   return Array.prototype.map.call(lis, li => {
-    const t = li.querySelector('input[type=text]');
+    /* DOIS campos de texto por linha desde 13/09/2026: [0] nome, [1] descricao. Por
+       posicao e nao por id: a linha e montada em tempo de execucao e os inputs nao tem id.
+       Numa arvore anterior a esta rodada o segundo simplesmente nao existe, e a descricao
+       volta null -- o caso ACUSA em vez de derrubar o roteiro. */
+    const ts = li.querySelectorAll('input[type=text]');
     const n = li.querySelector('input[type=number]');
     const c = li.querySelector('input[type=checkbox]');
-    return { nome: t ? t.value : null, preco: n ? n.value : null, qtd: !!(c && c.checked) };
+    return { nome: ts[0] ? ts[0].value : null, desc: ts[1] ? ts[1].value : null,
+             preco: n ? n.value : null, qtd: !!(c && c.checked) };
   });
 });
 
@@ -202,10 +223,14 @@ const botaoDaLinha = (pg, lista, titulo, i) => pg.evaluate(([lista, titulo, i]) 
 const foto = p => JSON.stringify({
   cod: p.cod, nome: p.nome, dur: p.dur, preco: p.preco, inclui: p.inclui,
   cal: p.cal, fam: p.fam,
-  ops: (p.ops || []).map(o => [o.nome, o.preco, !!o.qtd])
+  ops: (p.ops || []).map(opTupla)
 });
 
 const URLOK = 'https://www.fotocerta.com.br/obrigado';
+/* A descricao do primeiro opcional de todos os cenarios. Uma frase so, sem acento e sem
+   aspas: o texto HOSTIL tem arnes proprio (descricao-opcionais.mjs) -- aqui o que se mede
+   e se o campo ATRAVESSA a duplicacao, e um valor simples deixa a falha legivel. */
+const DESC_OP = 'Sessao de ate 45 minutos (apenas reserva, nao inclui fotos)';
 
 async function novoPacote(pg, cod, nome, preco) {
   await set(pg, 'a-pcod', cod);
@@ -216,9 +241,13 @@ async function novoPacote(pg, cod, nome, preco) {
   await set(pg, 'a-ppath', 'fotocerta/' + cod.toLowerCase());
   await clicar(pg, 'a-pac-salvar');
 }
-async function novoOpcional(pg, nome, preco, qtd) {
+async function novoOpcional(pg, nome, preco, qtd, desc) {
   await set(pg, 'a-op-nome', nome);
   await set(pg, 'a-op-preco', preco);
+  /* O campo so existe a partir de 13/09/2026: numa arvore de referencia anterior ele nao
+     esta la, e set() lancaria. Guardado, o cenario monta igual nas duas e a diferenca
+     aparece onde deve -- na assercao. */
+  if (desc && await pg.$('#a-op-desc')) await set(pg, 'a-op-desc', desc);
   await pg.evaluate(q => {
     const el = document.getElementById('a-op-qtd');
     el.checked = !!q;
@@ -233,7 +262,9 @@ async function cenario(pg) {
   for (const [k, v] of Object.entries(IDENT)) await set(pg, 'fci-' + k, v);
   await clicar(pg, 'aba-pac');
   await set(pg, 'a-urlobrigado', URLOK);
-  await novoOpcional(pg, 'Album impresso', '300', true);
+  /* O PRIMEIRO com descricao e o SEGUNDO sem, de proposito: os dois caminhos na mesma
+     passagem, e a copia tem de levar o que cada um tem -- inclusive o vazio. */
+  await novoOpcional(pg, 'Album impresso', '300', true, DESC_OP);
   await novoOpcional(pg, 'Making of', '150', false);
   await novoPacote(pg, 'E905-DU-1H', 'Ensaio 1 hora', '420');
   await novoPacote(pg, 'E905-DU-2H', 'Ensaio 2 horas', '760');
@@ -285,6 +316,10 @@ try {
     ops[0] && ops[0].nome === 'Album impresso' && String(ops[0].preco) === '300' && ops[0].qtd === true, JSON.stringify(ops[0]));
   chk('o segundo opcional manteve nome, preco e a AUSENCIA de quantidade',
     ops[1] && ops[1].nome === 'Making of' && String(ops[1].preco) === '150' && ops[1].qtd === false, JSON.stringify(ops[1]));
+  chk('a DESCRICAO do primeiro opcional veio para o formulario da copia',
+    ops[0] && ops[0].desc === DESC_OP, JSON.stringify(ops[0]));
+  chk('o segundo opcional continua SEM descricao (o vazio tambem atravessa)',
+    ops[1] && ops[1].desc === '', JSON.stringify(ops[1]));
   chk('o buffer gravado tem os dois opcionais da copia', g.edops.length === 2, JSON.stringify(g.edops));
 
   /* salvar: e aqui que a main sobrescreveria, se o modo fosse "editar" */
@@ -297,8 +332,8 @@ try {
   chk('o segundo pacote do cenario continua intacto', dep.pacotes[1].cod === 'E905-DU-2H', dep.pacotes[1].cod);
   chk('a copia entrou com o codigo derivado', dep.pacotes[2].cod === 'E905-DU-1H-COPIA', dep.pacotes[2].cod);
   chk('a copia levou os dois opcionais, com a marca de quantidade',
-    JSON.stringify((dep.pacotes[2].ops || []).map(o => [o.nome, o.preco, !!o.qtd])) ===
-    JSON.stringify((dep.pacotes[0].ops || []).map(o => [o.nome, o.preco, !!o.qtd])),
+    JSON.stringify((dep.pacotes[2].ops || []).map(opTupla)) ===
+    JSON.stringify((dep.pacotes[0].ops || []).map(opTupla)),
     JSON.stringify(dep.pacotes[2].ops));
   chk('o formulario voltou a zero depois de salvar', (await tela(pg)).cod === '', (await tela(pg)).cod);
   chk('o aviso de copia sumiu depois de salvar', !(await tela(pg)).copiaVisivel);
@@ -428,6 +463,7 @@ try {
   chk('a copia entrou LOGO ABAIXO da original', ops[1] && ops[1].nome === 'Album impresso (cópia)', JSON.stringify(ops[1]));
   chk('a copia manteve o preco', ops[1] && String(ops[1].preco) === '300', ops[1] && ops[1].preco);
   chk('a copia manteve "vende por quantidade"', ops[1] && ops[1].qtd === true, ops[1] && ops[1].qtd);
+  chk('a copia do opcional manteve a DESCRICAO', ops[1] && ops[1].desc === DESC_OP, JSON.stringify(ops[1]));
   chk('a original ficou onde estava, sem marca', ops[0] && ops[0].nome === 'Album impresso', JSON.stringify(ops[0]));
   chk('o opcional que vinha depois nao se moveu para o lugar errado',
     ops[2] && ops[2].nome === 'Making of', JSON.stringify(ops[2]));
@@ -441,6 +477,8 @@ try {
   chk('a copia gravada tem preco e quantidade iguais aos da original',
     g.pacotes[0].ops[1].preco === g.pacotes[0].ops[0].preco && g.pacotes[0].ops[1].qtd === true,
     JSON.stringify(g.pacotes[0].ops[1]));
+  chk('a copia GRAVADA tem a mesma descricao da original',
+    (g.pacotes[0].ops[1].desc || '') === DESC_OP, JSON.stringify(g.pacotes[0].ops[1]));
 
   /* duplicar a COPIA numera, em vez de empilhar "(cópia) (cópia)" */
   await botaoDaLinha(pg, 'a-pac-lista', 'Editar', 0);
@@ -625,10 +663,15 @@ try {
 const opsDaLista = (pg, lista) => pg.evaluate(lista => {
   const lis = document.querySelectorAll('#' + lista + ' li');
   return Array.prototype.map.call(lis, li => {
-    const t = li.querySelector('input[type=text]');
+    /* DOIS campos de texto por linha desde 13/09/2026: [0] nome, [1] descricao. Por
+       posicao e nao por id: a linha e montada em tempo de execucao e os inputs nao tem id.
+       Numa arvore anterior a esta rodada o segundo simplesmente nao existe, e a descricao
+       volta null -- o caso ACUSA em vez de derrubar o roteiro. */
+    const ts = li.querySelectorAll('input[type=text]');
     const n = li.querySelector('input[type=number]');
     const c = li.querySelector('input[type=checkbox]');
-    return { nome: t ? t.value : null, preco: n ? n.value : null, qtd: !!(c && c.checked) };
+    return { nome: ts[0] ? ts[0].value : null, desc: ts[1] ? ts[1].value : null,
+             preco: n ? n.value : null, qtd: !!(c && c.checked) };
   });
 }, lista);
 
@@ -650,9 +693,10 @@ const telaProd = (pg, pref) => pg.evaluate(pref => {
   };
 }, pref);
 
-async function novoOpcionalEm(pg, pref, nome, preco, qtd) {
+async function novoOpcionalEm(pg, pref, nome, preco, qtd, desc) {
   await set(pg, pref + '-op-nome', nome);
   await set(pg, pref + '-op-preco', preco);
+  if (desc && await pg.$('#' + pref + '-op-desc')) await set(pg, pref + '-op-desc', desc);
   await marcar(pg, pref + '-op-qtd', !!qtd);
   await clicar(pg, pref + '-op-add');
 }
@@ -661,7 +705,7 @@ async function novoOpcionalEm(pg, pref, nome, preco, qtd) {
 async function cenarioU(pg) {
   for (const [k, v] of Object.entries(IDENT)) await set(pg, 'fci-' + k, v);
   await clicar(pg, 'aba-uni');
-  await novoOpcionalEm(pg, 'u', 'Album impresso', '300', true);
+  await novoOpcionalEm(pg, 'u', 'Album impresso', '300', true, DESC_OP);
   await novoOpcionalEm(pg, 'u', 'Making of', '150', false);
   await set(pg, 'u-pnome', 'Ensaio de Natal');
   await set(pg, 'u-pdesc', 'Sessao em estudio com cenario');
@@ -678,7 +722,7 @@ async function cenarioU(pg) {
 async function cenarioM(pg) {
   for (const [k, v] of Object.entries(IDENT)) await set(pg, 'fci-' + k, v);
   await clicar(pg, 'aba-loja');
-  await novoOpcionalEm(pg, 'm', 'Moldura', '90', true);
+  await novoOpcionalEm(pg, 'm', 'Moldura', '90', true, DESC_OP);
   await novoOpcionalEm(pg, 'm', 'Caixa presente', '40', false);
   await set(pg, 'm-pnome', 'Album 20x30');
   await set(pg, 'm-pdesc', 'Capa dura, 30 paginas');
@@ -738,8 +782,8 @@ try {
   chk('o segundo produto do cenario continua intacto',
     fotoProd(dep.prods[1]) === fotoProd(antes.prods[1]));
   chk('a copia levou os dois opcionais',
-    JSON.stringify((dep.prods[2].ops || []).map(o => [o.nome, o.preco, !!o.qtd])) ===
-    JSON.stringify((dep.prods[0].ops || []).map(o => [o.nome, o.preco, !!o.qtd])),
+    JSON.stringify((dep.prods[2].ops || []).map(opTupla)) ===
+    JSON.stringify((dep.prods[0].ops || []).map(opTupla)),
     JSON.stringify(dep.prods[2].ops));
   chk('o aviso de copia sumiu depois de salvar', !(await telaProd(pg, 'u')).copiaVisivel);
   chk('e o rotulo do cancelar voltou ao normal',
@@ -882,6 +926,8 @@ for (const cfg of [
     chk('a copia entrou LOGO ABAIXO da original', ops[1].nome === cfg.alvo + ' (cópia)', JSON.stringify(ops[1]));
     chk('a copia manteve preco e "vende por quantidade"',
       ops[1].preco === ops[0].preco && ops[1].qtd === ops[0].qtd, JSON.stringify(ops[1]));
+    chk('a copia manteve a DESCRICAO', ops[1].desc === DESC_OP && ops[0].desc === DESC_OP,
+      JSON.stringify([ops[0].desc, ops[1].desc]));
     chk('a original ficou onde estava, sem marca', ops[0].nome === cfg.alvo, JSON.stringify(ops[0]));
 
     await clicar(pg, cfg.pref + '-prod-salvar');
@@ -889,6 +935,8 @@ for (const cfg of [
     const dep = await gravadoProd(pg, cfg.pref);
     chk('salvar gravou os tres opcionais no produto', (dep.prods[0].ops || []).length === 3,
       JSON.stringify(dep.prods[0].ops));
+    chk('a copia GRAVADA do opcional tem a descricao da original',
+      (dep.prods[0].ops[1].desc || '') === DESC_OP, JSON.stringify(dep.prods[0].ops[1]));
     chk('e nao criou produto nenhum', dep.prods.length === 2, dep.prods.length);
     chk('o SEGUNDO produto nao foi tocado', fotoProd(dep.prods[1]) === fotoProd(antes.prods[1]));
 

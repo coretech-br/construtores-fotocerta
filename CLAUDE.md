@@ -96,6 +96,35 @@ O que **não** se corta: a regressão byte a byte (`scripts/verificar/regressao.
 
 7. **Delegar contra contrato que existe, nunca contra um que será recriado.** Um subagente que escreve arnês precisa poder LER a biblioteca que vai usar. Em 22/08/2026 um deles escreveu 400 linhas contra uma API suposta, porque a pasta temporária tinha sido limpa — reescrever custou menos que remendar. Foi por isso que o arnês saiu de `/tmp` e entrou em `scripts/verificar/`.
 
+## Prova que compara com uma referência: prenda o commit e DETECTE o envelhecimento
+
+Regra escrita em 13/09/2026, depois de o mesmo defeito aparecer **seis vezes** em duas semanas
+(`id-orcamento`, `textos-reserva`, `meio-prio-migracao` duas vezes, `sinal-cobranca`,
+`linha-de-dinheiro`) — e de eu, duas vezes, escrever o tropeço **depois** de já ter consertado os
+outros.
+
+**O defeito:** uma suíte compara a árvore de trabalho com `main` para provar que uma rodada mudou
+(ou não mudou) alguma coisa. No dia em que essa rodada é mesclada, o lado "antes" passa a **medir a
+si mesmo**, e o arquivo acusa falhas sem nenhum defeito por trás. Um vermelho que é sempre vermelho
+**esconde o próximo**, que seria de verdade — e o custo real já foi medido: uma suíte ficou nove
+falhas por dia, outra três, e ninguém olhava mais para elas.
+
+**As três obrigações, para toda prova que use referência:**
+
+1. **"Antes" é estado histórico, não "o que estiver em `main` hoje".** Prenda a referência a um
+   commit (`node scripts/verificar/x.mjs 4c66719`) e escreva no arquivo qual é e por quê.
+2. **Detecte que a referência deixou de servir** — lendo do próprio arquivo dela o sinal da
+   mudança (um id novo, o nome de uma função) — e diga **`NÃO MEDIU`**, com a linha de comando que
+   mediria de verdade. Nunca falhe por envelhecimento.
+3. **Prefira medir a PROPRIEDADE, não a igualdade com um congelado.** Igualdade byte a byte com um
+   commit antigo morre na primeira rodada legítima que toque aquela saída. Quando a propriedade for
+   "trocar X muda só Y", compare **as duas formas da árvore de hoje entre si** e exija que as
+   linhas divergentes sejam poucas e estejam numa lista declarada: não envelhece, e diz **onde**
+   pode diferir, em vez de só "igual ou diferente".
+
+Isto **não** enfraquece a regressão byte a byte de `regressao.sh`: lá a referência é escolhida a
+cada execução e o invariante é "esta mudança não alterou as saídas", que é outra pergunta.
+
 ## Fluxo de manutenção (importante)
 
 0. **`git push` só quando o dono pedir, sempre — sem exceção para arquivo "inerte".** Combinado em 23/08/2026, depois de um componente de teste (fora dos construtores) ser enviado por iniciativa própria com o argumento de que não mudava a ferramenta. O argumento não vale: **enviar é publicar**, e quem decide o que fica no repositório público é o dono. Vale também para material que ele peça "fora do projeto": entrega-se o arquivo, não se versiona sem pedir.

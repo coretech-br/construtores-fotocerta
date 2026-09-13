@@ -225,30 +225,38 @@ async function saidasCom(raiz, porta, prio){
 const daRef  = await saidasCom(dirRef, 8898, null);
 const comPP  = await saidasCom(RAIZ,   8899, 'pp');
 const comPix = await saidasCom(RAIZ,   8900, 'pix');
-if(refAnterior){
-  chk('Checkout com o CARTAO prioritario == referencia, byte a byte',
-      comPP['u-out'] === daRef['u-out'],
-      'tamanhos '+comPP['u-out'].length+' x '+daRef['u-out'].length);
-  chk('Mini loja com o CARTAO prioritario == referencia, byte a byte',
-      comPP['m-out'] === daRef['m-out'],
-      'tamanhos '+comPP['m-out'].length+' x '+daRef['m-out'].length);
-  /* E a prova do contrario: se a escolha NAO mudasse nada, tudo isto seria vacuo. */
-  chk('e a outra escolha REALMENTE muda o Checkout', comPix['u-out'] !== daRef['u-out']);
-  chk('e a outra escolha REALMENTE muda a Mini loja', comPix['m-out'] !== daRef['m-out']);
-}else{
-  /* A referencia ja tem a rodada: a pergunta que ela consegue responder e a outra --
-     a escolha de FABRICA tem de sair identica a dela, e a outra escolha tem de mudar. */
-  chk('[ref ja tem a rodada] Checkout com o PIX (fabrica) == referencia, byte a byte',
-      comPix['u-out'] === daRef['u-out'],
-      'tamanhos '+comPix['u-out'].length+' x '+daRef['u-out'].length);
-  chk('[ref ja tem a rodada] Mini loja com o PIX (fabrica) == referencia, byte a byte',
-      comPix['m-out'] === daRef['m-out'],
-      'tamanhos '+comPix['m-out'].length+' x '+daRef['m-out'].length);
-  chk('[ref ja tem a rodada] e a escolha do CARTAO REALMENTE muda o Checkout',
-      comPP['u-out'] !== daRef['u-out']);
-  chk('[ref ja tem a rodada] e a escolha do CARTAO REALMENTE muda a Mini loja',
-      comPP['m-out'] !== daRef['m-out']);
+/* ===== O QUE ESTA PARTE MEDE, DEPOIS DE 13/09/2026 =====
+   Ate esta data ela cobrava IGUALDADE BYTE A BYTE com um commit congelado: "com o cartao
+   prioritario, u-out e identico ao da referencia anterior a rodada". Essa forma tem prazo de
+   validade por construcao -- ela morre na primeira vez que QUALQUER outra rodada legitima toque
+   aquelas saidas. E morreu: a rodada do numero de dinheiro (13/09) acrescentou duas regras de
+   CSS a u-out e m-out, e a partir dali a assercao falhava contra 4c66719 mesmo numa arvore de
+   'main' intocada -- medido, 2 falhas de 51, com os bytes 25808x25621 e 46392x46197.
+   E a QUINTA vez que o arnes tropeca em referencia datada (id-orcamento, textos-reserva,
+   meio-prio-migracao, sinal-cobranca, e agora esta).
+
+   A PROPRIEDADE DE VERDADE nao precisa de referencia nenhuma: trocar a escolha muda SO a ordem
+   e o destaque, e mais nada. Isso se mede comparando as DUAS escolhas da arvore de HOJE entre
+   si e exigindo que toda linha divergente caia numa lista declarada. Nao envelhece, e diz mais:
+   a forma antiga so sabia dizer "igual ou diferente"; esta diz ONDE pode diferir. */
+const MARCAS = ['pixlinha','-gerar{','-gerar ','fcu-botoes','fcm-botoes','-sep','TXT_OU','margin-top'];
+function linhasQueMudam(a,b){
+  const A=a.split('\n'), B=b.split('\n'), setB=new Set(B), setA=new Set(A);
+  return A.filter(l=>!setB.has(l)).concat(B.filter(l=>!setA.has(l)));
 }
+for(const [nome,saida] of [['Checkout','u-out'],['Mini loja','m-out']]){
+  const dif = linhasQueMudam(comPix[saida], comPP[saida]);
+  chk(nome+': trocar a escolha REALMENTE muda a saida', dif.length > 0);
+  const fora = dif.filter(l => !MARCAS.some(m => l.indexOf(m) >= 0));
+  chk(nome+': e muda SO a ordem e o destaque -- nada mais',
+      fora.length === 0, fora.slice(0,3).map(l=>l.trim().slice(0,90)).join(' | '));
+  /* O TETO existe porque a lista de marcas sozinha e fraca: uma mudanca grande e alheia que por
+     acaso contivesse uma das palavras passaria por ela. Poucas linhas divergentes e a assinatura
+     de "so a ordem mudou"; muitas sao outra coisa, e ai o teste fala mesmo sem saber o que e. */
+  chk(nome+': e sao POUCAS linhas -- a assinatura de uma troca de ordem',
+      dif.length <= 12, dif.length+' linhas divergentes');
+}
+
 chk('vitrine da Agendamento por pacote com o PIX prioritario == referencia, byte a byte',
     comPix['a-out1'] === daRef['a-out1'],
     'tamanhos '+comPix['a-out1'].length+' x '+daRef['a-out1'].length);
