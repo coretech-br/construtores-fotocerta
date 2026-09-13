@@ -3652,6 +3652,7 @@
         <div id="a-descpix-campo">
           <label for="a-descpix">Desconto no Pix <small>(percentual; 0 = sem desconto)</small></label>
           <input type="number" id="a-descpix" value="5" min="0" max="90" step="0.5">
+          <p class="ajuda alerta" id="a-descpix-aviso"><b>Com a cobrança de sinal ligada este campo não vale.</b> O Pix passa a cobrar o sinal, e o desconto do Pix não se aplica sobre o sinal — seria desconto dobrado, porque o sinal já sai de um total que pode ter cupom. O número acima fica guardado, mas <b>não entra no código gerado</b> — nem na página de obrigado, nem na vitrine, que deixa de anunciar o selo para não prometer um desconto que a página de pagamento não dá mais. Para usar o desconto do Pix, volte a cobrar o valor cheio.</p>
           <p class="ajuda">Só faz sentido havendo as duas formas: sem uma delas não existe outro preço para descontar contra, então este campo some com "somente Pix" ou "somente PayPal".</p>
         </div>
         <div id="a-parcelas-campo">
@@ -3661,6 +3662,35 @@
           <p class="ajuda">Os dois botões de cartão são desenhados pelo PayPal, e o texto e a marca deles são do PayPal — isso não dá para mudar. Em todo o resto da página, o cliente lê apenas "no cartão".</p>
         </div>
       </fieldset>
+      <fieldset>
+        <legend>Cobrança de sinal</legend>
+        <div class="radios">
+          <label><input type="radio" name="a-sinal" value="nao" checked><span>Cobrar o valor cheio</span></label>
+          <label><input type="radio" name="a-sinal" value="sim"><span>Cobrar sinal agora, saldo depois</span></label>
+        </div>
+        <div id="a-sinal-campos">
+          <label>Como calcular o sinal</label>
+          <div class="radios">
+            <label><input type="radio" name="a-sinaltipo" value="pct" checked><span>Percentual do total</span></label>
+            <label><input type="radio" name="a-sinaltipo" value="fixo"><span>Valor fixo</span></label>
+          </div>
+          <div id="a-sinalpct-campo">
+            <label for="a-sinalpct">Percentual do sinal <small>(de 1 a 99; fora da faixa o campo se corrige sozinho)</small></label>
+            <input type="number" id="a-sinalpct" value="30" min="1" max="99" step="0.5">
+          </div>
+          <div id="a-sinalfixo-campo">
+            <label for="a-sinalfixo">Valor fixo do sinal</label>
+            <input type="number" id="a-sinalfixo" value="100" min="0.01" step="0.01">
+          </div>
+          <label for="a-t8">Rótulo do sinal <small>(a linha do que se paga agora)</small></label>
+          <input type="text" id="a-t8" value="Sinal agora">
+          <label for="a-t9">Texto do saldo <small>(a linha do que fica para depois)</small></label>
+          <input type="text" id="a-t9" value="Restante no dia do ensaio">
+        </div>
+        <p class="ajuda">Ligado, o <b>Pix gera o QR do sinal</b>, o <b>cartão cobra o sinal</b> e o <b>parcelamento passa a ser sobre o sinal</b> — é o valor que a operadora cobra naquele momento, e parcelar um número que ninguém está cobrando confunde. A página de obrigado passa a mostrar três linhas: total, sinal agora e saldo. A ordem da conta é <b>opcionais somam → cupom incide sobre o total → o sinal sai do total já com o cupom</b>. Um <b>sinal maior que o total</b> é recusado: a página avisa e não deixa pagar.</p>
+        <p class="ajuda"><b>A vitrine continua anunciando o preço cheio de cada pacote</b> — é o que o cliente vai pagar ao todo. O que ela perde é o selo e a segunda linha de preço, porque com sinal não existe mais desconto no Pix: os dois meios cobram o mesmo sinal.</p>
+      </fieldset>
+
       <fieldset>
         <legend>Identificação do agendamento</legend>
         <label for="a-prefixo">Prefixo do identificador de conciliação <small>(aparece no txid do Pix e no extrato)</small></label>
@@ -3935,6 +3965,11 @@
         <input type="text" id="a-txt-opcionais" value="Itens opcionais">
         <label for="a-txt-totalzero">Quando o cupom zera o pedido</label>
         <input type="text" id="a-txt-totalzero" value="O cupom aplicado zera o valor deste pedido.">
+        <label for="a-txt-sinal-maior">Sinal maior que o total</label>
+        <input type="text" id="a-txt-sinal-maior" value="O sinal desta reserva é maior que o total. Remova o cupom ou marque mais itens opcionais.">
+        <label for="a-txt-sinal-zero">Sinal arredonda para zero</label>
+        <input type="text" id="a-txt-sinal-zero" value="O sinal desta reserva arredonda para zero. Remova o cupom ou marque mais itens opcionais.">
+        <p class="ajuda">As duas frases acima só aparecem com a <b>cobrança de sinal</b> ligada (seção <span class="sec-ref" data-sec="a-pagamento"></span>). Elas explicam por que o pagamento está travado: reescrevê-las é livre, mas quem as lê está sem conseguir pagar — diga o que fazer. O pacote aqui é <b>fixo</b>, então a saída é o cupom ou os opcionais, e não "escolher mais itens".</p>
         <label for="a-txt-cupom-rotulo">Rótulo do campo de cupom</label>
         <input type="text" id="a-txt-cupom-rotulo" value="Cupom de desconto">
         <label for="a-txt-cupom-botao">Botão de aplicar o cupom</label>
@@ -6150,7 +6185,7 @@ var ABAS=[
            ['a.pacotes.ops',{nome:'',preco:0,qtd:false},'nome'],
            ['a.cps',{codigo:'',tipo:'pct_total',valor:0,validade:'',minimo:''},'codigo']],
    exemplo:'ex.: Ensaios 2026 - pacotes',
-   guarda:'tudo o que está configurado nesta aba — a <b>forma de pagamento</b>, o <b>meio prioritário</b> e a cor dos botões do PayPal, as <b>famílias de pacotes</b> e a família de cada pacote, os pacotes (código, nome, duração, preço, o que inclui, o endereço do TidyCal e os <b>itens opcionais</b> de cada um), os <b>cupons</b>, o endereço da página de obrigado, o prefixo do identificador, o prazo da reserva, o desconto no Pix, as parcelas, quais <b>marcadores da página de obrigado</b> viajam e o texto reserva de cada um, como o quadro abre espaço para o formulário de reserva (medindo ou pela altura calibrada), as alturas do calendário, quando abrir o espaço calibrado, a largura das linhas compactas, textos e cores. Aplicar um preset <b>substitui as famílias que estão na tela</b> e <b>esvazia o formulário de cadastro</b>: ele é a fotografia da aba inteira.'}
+   guarda:'tudo o que está configurado nesta aba — a <b>forma de pagamento</b>, o <b>meio prioritário</b> e a cor dos botões do PayPal, as <b>famílias de pacotes</b> e a família de cada pacote, os pacotes (código, nome, duração, preço, o que inclui, o endereço do TidyCal e os <b>itens opcionais</b> de cada um), os <b>cupons</b>, o endereço da página de obrigado, o prefixo do identificador, o prazo da reserva, o desconto no Pix, as parcelas, a <b>cobrança de sinal</b> (se cobra, como calcula e o rótulo das duas linhas), quais <b>marcadores da página de obrigado</b> viajam e o texto reserva de cada um, como o quadro abre espaço para o formulário de reserva (medindo ou pela altura calibrada), as alturas do calendário, quando abrir o espaço calibrado, a largura das linhas compactas, textos e cores. Aplicar um preset <b>substitui as famílias que estão na tela</b> e <b>esvazia o formulário de cadastro</b>: ele é a fotografia da aba inteira.'}
 ];
 var fcFrag={};       /* ultimo pedaco bom de cada aba, para nao apagar o que a aba quebrada tinha */
 var fcSoLeitura={};  /* abas que falharam ao restaurar: param de coletar do DOM ate recarregar */
@@ -14676,6 +14711,18 @@ function uBloco(cfg){
   c+='});\n';
   c+="raiz.querySelector('.fcu-total-v').textContent=moedaFmt(total());\n";
   if(usaSinal){
+    /* PEDIDO EM ZERO (13/09/2026): as linhas do sinal e do saldo so existem quando ha o que
+       pagar. Com o total em zero a primeira guarda de sinalRecusa() devolve VAZIO de proposito --
+       quem avisa ali e a guarda de total zero, e dois avisos ao mesmo tempo se esconderiam --, mas
+       as duas linhas continuavam desenhadas, e o cliente lia tres numeros que nao fecham
+       (Total 0,00 / Sinal 100,00 / Saldo 0,00, com sinal em valor FIXO). Ninguem chega a pagar
+       esse numero: as duas pontas recusam pela recusa de total zero. Era defeito de LEITURA.
+       O conserto e de TELA e nao mexe na conta: sinalAgora/saldoDepois/sinalRecusa sao fonte unica
+       consumida por varios lugares, e trocar risco de dinheiro por um caso de tela seria mau
+       negocio. O que some e informacao FALSA, nao um aviso. */
+    c+='var haPagar=total()>=0.01;\n';
+    c+="raiz.querySelector('.fcu-sinal').style.display=haPagar?'':'none';\n";
+    c+="raiz.querySelector('.fcu-saldo').style.display=haPagar?'':'none';\n";
     c+="raiz.querySelector('.fcu-sinal-v').textContent=moedaFmt(sinalAgora());\n";
     c+="raiz.querySelector('.fcu-saldo-v').textContent=moedaFmt(saldoDepois());\n";
     c+='var rec=sinalRecusa();\n';
@@ -14746,8 +14793,11 @@ function uBloco(cfg){
     if(usaSinal){
       /* pedido que as duas pontas de pagamento recusam nao pode sair do resumo como pedido
          valido: era o unico elemento visivel que nao respeitava a recusa. */
+      /* O resumo segue a mesma regra da tela (13/09/2026): com o total em zero ele nao imprime
+         sinal nem saldo -- antes repetia os tres numeros que nao fecham. */
       c+='var recR=sinalRecusa();\n';
-      c+='if(recR){\n';
+      c+='if(total()<0.01){\n';
+      c+='}else if(recR){\n';
       c+="L.push(TXT_SINAL_RECUSADO.toUpperCase()+': '+recR);\n";
       c+='}else{\n';
       c+="L.push(TXT_SINAL+': '+moedaFmt(sinalAgora()));\n";
@@ -16421,6 +16471,9 @@ var aEditIdx=-1;
 /* Faixa declarada dos campos numericos desta aba, no formato de U_NUMS/E_NUMS: [id, padrao,
    min, max, inteiro]. */
 var A_NUMS=[['a-prazoh',24,1,720,true],['a-descpix',5,0,90,false],['a-parcelas',1,1,12,true],
+  /* A faixa do sinal e a MESMA das duas abas irmas (U_NUMS/M_NUMS): 1 a 99 no percentual --
+     100% nao e sinal, e o total --, e um centavo de piso no valor fixo. */
+  ['a-sinalpct',30,1,99,false],['a-sinalfixo',100,0.01,999999,false],
   ['a-altdesk',2350,800,6000,true],['a-altmob',2700,800,6000,true],['a-largmob',700,320,1024,true],
   ['a-qtdmax',10,2,99,true],
   /* A largura de corte das LINHAS COMPACTAS do celular (03/09/2026). Ela e lida em CSS (a
@@ -16446,6 +16499,18 @@ function aToggles(){
   ver('a-pix-campos',usaPix);
   ver('a-descpix-campo',m==='ambos');
   ver('a-parcelas-campo',usaPP);
+  /* ===== COBRANCA DE SINAL (13/09/2026) =====
+     Mesmo molde de uToggles/mToggles. O desconto do Pix NAO some da tela quando o sinal liga:
+     fica a vista, DESABILITADO, com o aviso ambar dizendo por que nao vale -- esconder um campo
+     que continua guardando 5% troca defeito visivel por invisivel, e este projeto ja recusou
+     isso uma vez. A regra do aviso e SO o sinal (divida D3, resolvida na rodada anterior nas
+     duas irmas): quem o esconde fora de "os dois" e o PAI, 'a-descpix-campo', que ja somia. */
+  var sinalOn=(radio('a-sinal')==='sim');
+  ver('a-sinal-campos',sinalOn);
+  ver('a-sinalpct-campo',sinalOn&&radio('a-sinaltipo')!=='fixo');
+  ver('a-sinalfixo-campo',sinalOn&&radio('a-sinaltipo')==='fixo');
+  ver('a-descpix-aviso',sinalOn);
+  var elDp=$('a-descpix');if(elDp)elDp.disabled=sinalOn;
   /* As alturas calibradas do calendario -- e o interruptor de quando abri-las -- so aparecem
      quando SAO USADAS, mesmo criterio das quatro linhas acima: campo que o bloco gerado nao vai
      ler nao fica na tela pedindo calibragem. Medido: com MEDIR_FORMULARIO ligado, expandir()
@@ -16554,7 +16619,27 @@ var A_TXT_DEFS=[
   ['t2','a-t2','Escolha o pacote'],
   ['t3','a-t3','Escolha o dia e o horário'],
   ['t4','a-t4','Trocar pacote'],
-  ['t5','a-t5','Tudo certo!']
+  ['t5','a-t5','Tudo certo!'],
+  /* ===== OS QUATRO TEXTOS DO SINAL (13/09/2026) =====
+     A PALAVRA DESTA ABA E "RESERVA", e isso nao e enfeite: no Checkout a frase diz "carrinho",
+     na Mini loja diz "pedido", e o comentario de 4269-4271 registra por que frase parecida nao
+     e frase unica. Aqui nao ha carrinho nem pedido -- ha uma reserva de horario.
+     O REMEDIO TAMBEM MUDA. As duas irmas mandam "escolher mais itens ou aumentar a quantidade";
+     aqui o pacote e FIXO (spec 7.0), e o cliente nao tem item nenhum para escolher a mais --
+     so opcionais e o cupom. Mandar fazer o que a tela nao permite e texto de fabrica mentindo,
+     o mesmo motivo que ja fez 'txtTotalZero' e 'txtPixManual' desta aba divergirem das irmas.
+     NAO NASCE 'txtSinalRecusado' AQUI, e a ausencia e medida: nas duas irmas ele e o rotulo da
+     recusa dentro do RESUMO COPIAVEL, e esta pagina nao tem resumo copiavel nenhum (montarResumo
+     desenha nome e duracao do pacote, nao um <textarea>). Campo de texto sem consumidor e pior
+     que campo faltando: o operador o preenche e nada acontece.
+     NAO NASCE 'txtZapSaldo' AQUI, pelo mesmo criterio: as duas unicas mensagens de WhatsApp
+     desta aba (txtZapRecusa, txtZapVencido) sao recados fixos e NAO citam valor nenhum -- medido
+     em botaoZap(), que recebe a frase pronta. Acrescentar linha de saldo a elas seria inventar
+     comportamento que ninguem pediu. */
+  ['t8','a-t8','Sinal agora'],
+  ['t9','a-t9','Restante no dia do ensaio'],
+  ['txtSinalMaior','a-txt-sinal-maior','O sinal desta reserva é maior que o total. Remova o cupom ou marque mais itens opcionais.'],
+  ['txtSinalZero','a-txt-sinal-zero','O sinal desta reserva arredonda para zero. Remova o cupom ou marque mais itens opcionais.'],
 /* Os QUATRO TEXTOS RESERVA dos marcadores entram aqui por fcObFbDefs (11/09/2026): o id e o
    padrao de cada um ja estao em A_OB_VARS, logo acima, e digita-los de novo seria uma segunda
    fabrica. Na ordem de A_OB_VARS, que e a ordem em que a chave antiga foi colada. */
@@ -17338,6 +17423,20 @@ function aCfg(){
   var prio=radio('a-prio')||FC_ORD_FABRICA;
   var descpix=aPreso('a-descpix');if(descpix==null)descpix=5;
   if(m!=='ambos')descpix=0;
+  /* ===== COBRANCA DE SINAL (13/09/2026) =====
+     Sinal e desconto do Pix nao convivem -- a mesma regra que uCfg/mCfg ja aplicam, e pelo mesmo
+     motivo: o Pix passa a cobrar o SINAL, e um desconto sobre o sinal seria desconto dobrado,
+     porque o sinal ja sai de um total que pode ter cupom. Zerado NA ORIGEM, pelo mesmo mecanismo
+     que ja zerava fora de "os dois".
+     ZERAR AQUI, e nao dentro do gerador da pagina de obrigado, e deliberado: 'descpix' e lido
+     TAMBEM pela VITRINE, e uma vitrine anunciando "-5% no Pix" enquanto a pagina de pagamento
+     cobra o sinal sem desconto nenhum seria a ferramenta mentindo para o cliente antes mesmo de
+     ele agendar. Uma fonte, os dois blocos. */
+  var sinalOn=(radio('a-sinal')==='sim');
+  if(sinalOn)descpix=0;
+  var sinalTipo=radio('a-sinaltipo')||'pct';
+  var sinalPct=aPreso('a-sinalpct');if(sinalPct==null)sinalPct=30;
+  var sinalFixo=aPreso('a-sinalfixo');if(sinalFixo==null)sinalFixo=100;
   var parcelas=aPreso('a-parcelas');if(parcelas==null)parcelas=1;
   var altdesk=aPreso('a-altdesk');if(altdesk==null)altdesk=2350;
   var altmob=aPreso('a-altmob');if(altmob==null)altmob=2700;
@@ -17364,6 +17463,7 @@ function aCfg(){
     prefixo:$('a-prefixo').value.trim(),
     metodo:m, usaPP:usaPP, usaPix:usaPix, prio:prio, ppcor:radio('a-ppcor')||'gold',
     prazoh:prazoh, descpix:descpix, parcelas:parcelas,
+    sinal:{ativo:sinalOn,tipo:sinalTipo,valor:(sinalTipo==='fixo')?(Math.round(sinalFixo*100)/100):sinalPct},
     altdesk:altdesk, altmob:altmob, largmob:largmob, largcards:largcards, qtdmax:qtdmax,
     medir:medir, sempre:sempre, precal:precal,
     c1:corSegura('a-c1','#0F3A30'), c2:corSegura('a-c2','#ffffff'), c3:corSegura('a-c3','#333333'),
@@ -17401,6 +17501,11 @@ function aColeta(){
     prazoh:aElVal('a-prazoh',24),
     descpix:aElVal('a-descpix',5),
     parcelas:aElVal('a-parcelas',1),
+    /* O sinal grava CRU, como todo o resto do coleta: o que esta na tela ainda por corrigir --
+       prender aqui reescreveria em silencio um numero que o operador esta digitando. Quem prende
+       e aCfg (ao gerar) e fcLigarFaixa (a vista, no change/blur). */
+    sinal:radio('a-sinal'),sinaltipo:radio('a-sinaltipo'),
+    sinalpct:aElVal('a-sinalpct',30),sinalfixo:aElVal('a-sinalfixo',100),
     altdesk:aElVal('a-altdesk',2350),altmob:aElVal('a-altmob',2700),largmob:aElVal('a-largmob',700),
     largcards:aElVal('a-largcards',640),
     medir:radio('a-medir'),sempre:radio('a-sempre'),precal:radio('a-precal'),
@@ -17486,6 +17591,13 @@ function aRestaura(st){
   el=$('a-prazoh');if(el)el.value=(A.prazoh!=null&&A.prazoh!=='')?A.prazoh:24;
   el=$('a-descpix');if(el)el.value=(A.descpix!=null&&A.descpix!=='')?A.descpix:5;
   el=$('a-parcelas');if(el)el.value=(A.parcelas!=null&&A.parcelas!=='')?A.parcelas:1;
+  /* O SINAL (13/09/2026). Estado gravado por versao anterior NAO tem nenhuma das quatro chaves,
+     e o ausente cai no padrao de fabrica de cada uma -- 'nao' e 'pct', que e o mesmo que a aba
+     mostrava antes desta rodada. Sem alerta: nada foi convertido e nada se perdeu. */
+  setRadio('a-sinal',A.sinal==='sim'?'sim':'nao');
+  setRadio('a-sinaltipo',A.sinaltipo==='fixo'?'fixo':'pct');
+  el=$('a-sinalpct');if(el)el.value=(A.sinalpct!=null&&A.sinalpct!=='')?A.sinalpct:30;
+  el=$('a-sinalfixo');if(el)el.value=(A.sinalfixo!=null&&A.sinalfixo!=='')?A.sinalfixo:100;
   el=$('a-altdesk');if(el)el.value=(A.altdesk!=null&&A.altdesk!=='')?A.altdesk:2350;
   el=$('a-altmob');if(el)el.value=(A.altmob!=null&&A.altmob!=='')?A.altmob:2700;
   el=$('a-largmob');if(el)el.value=(A.largmob!=null&&A.largmob!=='')?A.largmob:700;
@@ -17699,6 +17811,17 @@ function fcaTextoCartaoSrc(q,txtCartaoLinha,txtParcela,prio){
 
 function aBlocoVitrine(cfg){
   var c='';
+  /* ===== A SEGUNDA LINHA DE PRECO SO EXISTE QUANDO HA UM SEGUNDO NUMERO (13/09/2026) =====
+     Ela e a linha "ou {valor} no cartao" (ou "no Pix", com o cartao prioritario), e o que a
+     justifica e a DIFERENCA entre os dois meios -- que e o desconto do Pix. Com o desconto em
+     zero os dois numeros sao o mesmo, e a linha passa a repetir, menor e mais apagado, o numero
+     que ja esta em cima; com o SINAL ligado o desconto e zerado na origem (aCfg), entao este e
+     o caminho por onde o sinal chega aqui.
+     Duas linhas com o mesmo numero nao podem chegar ao cliente -- e o Checkout ja nao deixava
+     (la a linha do Pix e emitida so com descpix>0, uBloco). Esta aba nao tinha a guarda: medido
+     em 13/09/2026, com "os dois" e desconto 0 a vitrine e a pagina de obrigado ja emitiam a
+     linha repetida, antes e independentemente do sinal. A mesma regra fecha os dois casos. */
+  var doisNumeros=(cfg.usaPix&&cfg.usaPP&&cfg.descpix>0);
   /* ===== FAMILIAS: UM ramo, ou o OUTRO -- nunca os dois somados (03/09/2026) =====
      Com UMA familia so nada de familia e emitido: nem a variavel FAMILIAS, nem o campo 'fam'
      dentro de PACOTES, nem o passo 1 da familia, nem a linha de resumo dela, nem as regras de
@@ -17892,7 +18015,9 @@ function aBlocoVitrine(cfg){
   c+='   cima (116,67) o cliente NUNCA paga por mes mais do que estava escrito. Mesma licao do\n';
   c+='   centavo do Pix, ago/2026. */\n';
   c+=fcaPrecoParcelaSrc();
-  if(cfg.usaPix&&cfg.usaPP)c+=fcaTextoCartaoSrc("'",cfg.txtCartaoLinha,cfg.txtParcela,aPrioEfetivo(cfg));
+  /* Emitida so quando a segunda linha existe: a funcao que ela escreve (textoCartao/textoPix)
+     nao tem outro chamador neste bloco, e emiti-la sozinha seria codigo morto no bloco colado. */
+  if(doisNumeros)c+=fcaTextoCartaoSrc("'",cfg.txtCartaoLinha,cfg.txtParcela,aPrioEfetivo(cfg));
   /* Uma funcao so desenha o preco do cartao e o do resumo (Tarefa 3, passo 5): nao existe
      segunda formatacao para o mesmo numero em lugar nenhum deste bloco. A LINHA MOSTRA SO O QUE
      EXISTE (Tarefa do seletor de forma de pagamento): "somente Pix" nao anuncia "ou no cartao";
@@ -17909,7 +18034,7 @@ function aBlocoVitrine(cfg){
     c+='    l1.appendChild(selo);\n  }\n';
   }
   c+='  box.appendChild(l1);\n';
-  if(cfg.usaPix&&cfg.usaPP&&cfg.prio==='pp'){
+  if(doisNumeros&&cfg.prio==='pp'){
     /* A linha do Pix vem PRIMEIRO (e a alternativa ao numero grande) e leva o selo; o trecho do
        parcelamento, que descreve o cartao, ganha a sua propria linha logo abaixo -- exatamente o
        mesmo texto que o ramo "somente cartao" ja emitia. */
@@ -17923,10 +18048,14 @@ function aBlocoVitrine(cfg){
       c+="  var l3=document.createElement('div');l3.className='fca-preco-linha2';l3.textContent="+aTplJs("'",aParcelaSolta(cfg.txtParcela,false),[['{n}','PARCELAS'],['{valor}','moedaFmt(parcelaDe(preco))']])+";\n";
       c+='  box.appendChild(l3);\n';
     }
-  }else if(cfg.usaPix&&cfg.usaPP){
+  }else if(doisNumeros){
     c+="  var l2=document.createElement('div');l2.className='fca-preco-linha2';l2.textContent=textoCartao(preco);\n";
     c+='  box.appendChild(l2);\n';
-  }else if(!cfg.usaPix&&cfg.usaPP&&cfg.parcelas>1){
+  /* SEM o segundo numero, o que ainda vale dizer e o PARCELAMENTO -- ele nao repete nada da
+     linha de cima. E exatamente a linha que o ramo "somente cartao" ja emitia; a condicao
+     deixou de exigir a ausencia do Pix, porque com desconto zero (ou sinal) o caso e o mesmo.
+     Com uma parcela so nao sobra nada a dizer, e a segunda linha some. */
+  }else if(cfg.usaPP&&cfg.parcelas>1){
     c+="  var l2=document.createElement('div');l2.className='fca-preco-linha2';l2.textContent="+aTplJs("'",aParcelaSolta(cfg.txtParcela,false),[['{n}','PARCELAS'],['{valor}','moedaFmt(parcelaDe(preco))']])+";\n";
     c+='  box.appendChild(l2);\n';
   }
@@ -18394,6 +18523,15 @@ function aEnderecos(cfg){
    pagamento aparece do mesmo jeito. */
 function aBlocoObrigado(cfg){
   var c='';
+  /* ===== COBRANCA DE SINAL (13/09/2026, rodada C) =====
+     A CONTA NAO E REESCRITA AQUI: ela mora em FC_CARRINHO_SRC.sinal, a mesma fonte que o
+     Checkout e a Mini loja emitem, e esta pagina ja consumia .descontoAtual e .total de la.
+     O que muda neste gerador e so o que CONSOME sinalAgora()/saldoDepois()/sinalRecusa().
+     'segundaLinha' e a mesma regra da vitrine (ver o comentario de aBlocoVitrine): a linha
+     "ou {valor} no cartao" so existe havendo um segundo NUMERO, e com sinal nao ha -- aCfg
+     zera o desconto do Pix, e as duas pontas passam a cobrar o mesmo sinal. */
+  var usaSinal=cfg.sinal.ativo;
+  var segundaLinha=(cfg.usaPix&&cfg.usaPP&&cfg.descpix>0);
   /* usaQtd e do CATALOGO INTEIRO, nao so do pacote que a URL vai identificar em tempo de
      execucao -- este bloco e gerado UMA vez para todos os pacotes cadastrados, e qualquer um
      deles pode ser o PAC em tempo real (Tarefa 5c, decisao 14 do diario). Sem isto ligado, o
@@ -18425,10 +18563,13 @@ function aBlocoObrigado(cfg){
   c+='.fca-ob-titulo{font-size:18px;font-weight:700;color:var(--fca-ob-destaque,#0F3A30);margin:0 0 12px;text-align:left}\n';
   c+='.fca-ob-resumo-nome{font-size:15px;font-weight:700;margin:0 0 2px;text-align:left}\n';
   c+='.fca-ob-resumo-dur{font-size:12px;color:#777;margin:0 0 12px;text-align:left}\n';
-  c+='.fca-ob-preco-linha1{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin:0 0 4px;text-align:left}\n';
+  /* A margem de baixo do preco muda de dono conforme QUEM vem logo abaixo: com a segunda linha
+     ou com as linhas do sinal, o respiro de 14px fica na ULTIMA delas e aqui ficam 4px; sozinha,
+     a linha do preco carrega os 14px que a de baixo carregaria. Uma regra so por seletor. */
+  c+='.fca-ob-preco-linha1{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin:0 0 '+((segundaLinha||usaSinal)?'4':'14')+'px;text-align:left}\n';
   c+='.fca-ob-preco-valor{font-size:26px;font-weight:800;color:var(--fca-ob-destaque,#0F3A30)}\n';
   c+='.fca-ob-selo{font-size:11px;font-weight:700;color:#1e7e34;background:#e6f4ea;border-radius:999px;padding:2px 8px}\n';
-  c+='.fca-ob-preco-linha2{'+((cfg.usaPix&&cfg.usaPP&&cfg.prio==='pp')?'display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;':'')+'font-size:13px;color:#777;margin:0 0 14px;text-align:left}\n';
+  if(segundaLinha)c+='.fca-ob-preco-linha2{'+((cfg.prio==='pp')?'display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;':'')+'font-size:13px;color:#777;margin:0 0 14px;text-align:left}\n';
   c+='.fca-ob-prazo{font-size:13px;font-weight:700;color:var(--fca-ob-destaque,#0F3A30);margin:0 0 4px;text-align:left}\n';
   c+='.fca-ob-bloco{border-top:1px solid rgba(0,0,0,.10);padding-top:14px;margin-top:14px}\n';
   c+='.fca-ob-rot{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--fca-ob-destaque,#0F3A30);margin:0 0 8px;text-align:left}\n';
@@ -18470,6 +18611,17 @@ function aBlocoObrigado(cfg){
   c+='.fca-ob-msg{display:none;text-align:center;font-size:14px;font-weight:600;padding:12px;border-radius:8px;margin-top:10px}\n';
   c+='.fca-ob-msg.ok{display:block;background:#e6f4ea;color:#1e7e34}\n';
   c+='.fca-ob-msg.erro{display:block;background:#fdeaea;color:#c0392b}\n';
+  /* AS TRES LINHAS DO SINAL, no mesmo desenho das duas abas irmas (fcu-sinal/fcu-saldo/
+     fcu-sinal-aviso): o sinal em destaque, o saldo apagado logo abaixo e a linha vermelha da
+     recusa, que nasce escondida e so acende quando sinalRecusa() devolve motivo. O respiro de
+     14px fica na linha do SALDO, que aqui e a ultima antes do prazo e dos meios de pagamento
+     (ver a margem da linha 1, acima). */
+  if(usaSinal){
+    c+='.fca-ob-sinal{display:flex;justify-content:space-between;gap:10px;padding:6px 0 0;font-size:16px;font-weight:700;color:var(--fca-ob-destaque,#0F3A30)}\n';
+    c+='.fca-ob-saldo{display:flex;justify-content:space-between;gap:10px;padding:4px 0 0;margin:0 0 14px;font-size:13px;color:#777}\n';
+    c+='.fca-ob-sinal-aviso{display:none;font-size:12px;font-weight:600;color:#c0392b;padding:7px 0 0;text-align:left}\n';
+    c+='.fca-ob-sinal-aviso.on{display:block}\n';
+  }
   /* So com Pix na pagina: em "somente cartao" a funcao pix() nem e emitida, e uma regra para
      uma classe que nunca aparece seria peso e ruido no bloco entregue. */
   if(cfg.usaPix)c+='.fca-ob-pixmanual{font-size:12px;line-height:1.45;background:rgba(0,0,0,.05);border-radius:8px;padding:9px 10px;margin:10px 0 0;text-align:left}\n';
@@ -18490,6 +18642,15 @@ function aBlocoObrigado(cfg){
   c+="var PREFIXO='"+escJs(cfg.prefixo)+"';   /* comeca o identificador de conciliacao */\n";
   c+='var DESCONTO_PIX='+cfg.descpix+';\n';
   c+='var PARCELAS='+cfg.parcelas+';\n';
+  if(usaSinal){
+    c+='/* ===== COBRANCA DE SINAL (o saldo fica para depois) ===== */\n';
+    c+="var SINAL_TIPO='"+cfg.sinal.tipo+"';   /* 'pct' = percentual do total | 'fixo' = valor fixo */\n";
+    c+='var SINAL_VALOR='+cfg.sinal.valor+';   /* percentual do total (1 a 99) ou valor fixo, conforme SINAL_TIPO */\n';
+    c+='/* Ordem da conta: os opcionais somam, o cupom incide sobre o total, e o sinal sai do\n';
+    c+='   total JA com o cupom. O desconto do Pix nao entra nesta conta: com sinal ligado ele\n';
+    c+='   nao e emitido, porque aplica-lo sobre o sinal seria desconto dobrado. O PARCELAMENTO\n';
+    c+='   passa a ser sobre o SINAL -- e o valor que o cartao cobra neste momento. */\n';
+  }
   c+='var PRAZOH='+cfg.prazoh+';   /* horas de reserva, a partir da primeira visita a esta pagina */\n';
   if(usaQtd)c+='var QUANTIDADE_MAXIMA='+cfg.qtdmax+';   /* teto do seletor de quantidade; o seletor vai de 0 ate ele, e 0 = item nao escolhido */\n';
   c+="var MOEDA='BRL';                     /* o Pix so existe em BRL, e o cartao segue o mesmo pedido */\n";
@@ -18513,6 +18674,12 @@ function aBlocoObrigado(cfg){
      fixo e nao ha itens para 'escolher mais' -- a UNICA forma do pedido zerar e um cupom de
      100%, entao o recado precisa dizer isso, nao mandar escolher algo que ja esta escolhido. */
   c+="var TXT_TOTAL_ZERO='"+escJs(cfg.txtTotalZero)+"';\n";
+  if(usaSinal){
+    c+="var TXT_SINAL='"+escJs(cfg.t8)+"';\n";
+    c+="var TXT_SALDO='"+escJs(cfg.t9)+"';\n";
+    c+="var TXT_SINAL_MAIOR='"+escJs(cfg.txtSinalMaior)+"';\n";
+    c+="var TXT_SINAL_ZERO='"+escJs(cfg.txtSinalZero)+"';\n";
+  }
   c+="var TXT_SUCESSO='"+escJs(cfg.txtSucesso)+"';\n";
   /* "Use o Pix acima" so faz sentido HAVENDO Pix na pagina (Tarefa do seletor de forma de
      pagamento): em "somente cartao" nao ha secao de Pix nenhuma acima para apontar -- por isso
@@ -18771,16 +18938,38 @@ function aBlocoObrigado(cfg){
   c+='   texto que o Checkout e a Mini loja usam, nao reescrito aqui. O contrato e por NOME:\n';
   c+='   somaProdutos() devolve SO o pacote (e o que um cupom pct_produto desconta); subtotal()\n';
   c+='   soma o pacote com os opcionais marcados; cupomAtivo e o cupom em vigor, ou null.\n';
+  if(usaSinal){
+  c+='   COM SINAL_TIPO/SINAL_VALOR e as tres funcoes de sinal (sinalAgora/saldoDepois/\n';
+  c+='   sinalRecusa), tambem da fonte unica: o Pix gera o QR do sinal, o cartao cobra o sinal,\n';
+  c+='   o parcelamento e sobre o sinal, e o saldo fica para depois.\n';
+  }else{
+  /* O TEXTO DESTE RAMO E O ORIGINAL, CARACTERE POR CARACTERE -- inclusive a citacao "(spec
+     7.0)", que hoje descreve so o PADRAO DE FABRICA da aba e nao mais um impedimento. Reescreve-lo
+     mudaria o bloco de quem NAO liga o sinal, e o contrato da rodada C e que o interruptor
+     desligado nao mude um byte. A correcao da citacao mora aqui, no gerador, que e o lugar em que
+     ela nao custa uma divergencia. */
   c+='   SEM SINAL_TIPO/SINAL_VALOR nem as tres funcoes de sinal (sinalAgora/saldoDepois/\n';
   c+='   sinalRecusa): esta pagina nao cobra sinal (spec 7.0), e emiti-las sem interruptor\n';
   c+='   seria carregar codigo morto no bloco do cliente.\n';
+  }
   c+='   O IDENTIFICADOR DE CONCILIACAO (3a, acima) NUNCA depende do que se marca aqui -- ele ja\n';
   c+='   foi calculado a partir so do pacote e do horario, ANTES deste carrinho existir. Um\n';
   c+='   cliente que marca um opcional depois de ja ter visto o Pix continua com o MESMO\n';
   c+='   identificador -- e a mesma familia do defeito mais caro desta rodada (extrato cheio de\n';
+  /* O paragrafo do sinal so entra COM sinal: com ele desligado este bloco tem de sair byte a
+     byte como saia antes da rodada C, e um comentario a mais ja quebraria isso. */
+  if(usaSinal){
+  c+='   cobrancas diferentes para uma reserva so).\n';
+  c+='   O SINAL FICA FORA DELE PELO MESMO MOTIVO (13/09/2026): ligar ou desligar a cobranca de\n';
+  c+='   sinal, ou mudar o percentual, nao muda um caractere do identificador. Se mudasse, uma\n';
+  c+='   reserva paga pela metade e depois quitada apareceria no extrato como duas cobrancas sem\n';
+  c+='   parentesco -- que e exatamente o defeito que esta independencia corrigiu. */\n';
+  }else{
   c+='   cobrancas diferentes para uma reserva so). */\n';
+  }
   c+=fcaPrecoParcelaSrc();
-  if(cfg.usaPix&&cfg.usaPP)c+=fcaTextoCartaoSrc('"',cfg.txtCartaoLinha,cfg.txtParcela,aPrioEfetivo(cfg));
+  /* So quando a segunda linha existe: sem ela, textoCartao/textoPix nao tem chamador nenhum. */
+  if(segundaLinha)c+=fcaTextoCartaoSrc('"',cfg.txtCartaoLinha,cfg.txtParcela,aPrioEfetivo(cfg));
   c+='function somaProdutos(){return PAC.preco;}\n';
   c+='function subtotal(){\n';
   c+='  var t=somaProdutos();\n';
@@ -18796,10 +18985,14 @@ function aBlocoObrigado(cfg){
     c+='var qtdsOp=[];\n';
     c+='function qtdOp(j){var q=qtdsOp[j];return (q==null)?1:q;}\n';
   }
-  c+='var elValor,elLinha2,elParcela,elDescLinha,elDescTxt,elDescVal,elDescP'+(temMin?',elCupomMsg':'')+';\n';
+  c+='var elValor,elLinha2,elParcela,elDescLinha,elDescTxt,elDescVal,elDescP'+(usaSinal?',elSinal,elSaldo,elSinalV,elSaldoV,elSinalAviso':'')+(temMin?',elCupomMsg':'')+';\n';
   c+='var pixEsconder=null;\n\n';
   c+=FC_CARRINHO_SRC.descontoAtual;
   c+=FC_CARRINHO_SRC.total;
+  /* A MESMA fonte que as duas abas irmas emitem -- sinalAgora/saldoDepois/sinalRecusa, com UM
+     Math.round na origem e tres leitores (tela, Pix, cartao) formatando o resultado. Reescrever
+     a conta aqui seria a terceira copia, e e onde o centavo diverge. */
+  if(usaSinal)c+=FC_CARRINHO_SRC.sinal;
   c+=FC_CARRINHO_SRC.cupomVigente;
   c+=FC_CARRINHO_SRC.validadeBr;
   if(temMin)c+=FC_CARRINHO_SRC.cupomMinimo;
@@ -18920,7 +19113,7 @@ function aBlocoObrigado(cfg){
     c+='  }\n';
   }
   c+='  cartao.appendChild(l1);\n';
-  if(cfg.usaPix&&cfg.usaPP&&cfg.prio==='pp'){
+  if(segundaLinha&&cfg.prio==='pp'){
     /* Com o cartao prioritario o numero grande e o cheio e o SELO desce para a linha do Pix --
        ele anuncia o desconto, e desconto se anuncia ao lado do numero descontado.
        'elLinha2' aponta para o SPAN do texto, nunca para a linha: atualizar() escreve por
@@ -18933,11 +19126,29 @@ function aBlocoObrigado(cfg){
     c+='  }\n';
     c+='  cartao.appendChild(l2);\n';
     c+='  elValor=v;elLinha2=l2t;\n';
-  }else if(cfg.usaPix&&cfg.usaPP){
+  }else if(segundaLinha){
     c+='  var l2=document.createElement("div");l2.className="fca-ob-preco-linha2";cartao.appendChild(l2);\n';
     c+='  elValor=v;elLinha2=l2;\n';
   }else{
     c+='  elValor=v;\n';
+  }
+  /* ===== AS TRES LINHAS DO SINAL, logo abaixo do preco e ANTES dos meios de pagamento =====
+     A ordem de montar() poe montarPreco entre o cupom e a barra do prazo, entao elas caem no
+     unico lugar em que fazem sentido: depois do total, antes de qualquer botao de pagar. O
+     rotulo do sinal carrega o percentual quando o tipo e percentual -- decidido na GERACAO, como
+     nas duas irmas, porque com valor fixo nao ha percentual nenhum a mostrar.
+     A linha vermelha nasce vazia e apagada; quem a acende e sinalRecusa(), em atualizar(). */
+  if(usaSinal){
+    c+='  var sl=document.createElement("div");sl.className="fca-ob-sinal";\n';
+    c+='  var slt=document.createElement("span");slt.textContent=TXT_SINAL'+(cfg.sinal.tipo==='pct'?'+" ("+SINAL_VALOR+"%)"':'')+';sl.appendChild(slt);\n';
+    c+='  var slv=document.createElement("span");sl.appendChild(slv);\n';
+    c+='  cartao.appendChild(sl);\n';
+    c+='  var sd=document.createElement("div");sd.className="fca-ob-saldo";\n';
+    c+='  var sdt=document.createElement("span");sdt.textContent=TXT_SALDO;sd.appendChild(sdt);\n';
+    c+='  var sdv=document.createElement("span");sd.appendChild(sdv);\n';
+    c+='  cartao.appendChild(sd);\n';
+    c+='  var sav=document.createElement("div");sav.className="fca-ob-sinal-aviso";cartao.appendChild(sav);\n';
+    c+='  elSinal=sl;elSaldo=sd;elSinalV=slv;elSaldoV=sdv;elSinalAviso=sav;\n';
   }
   c+='}\n\n';
 
@@ -18967,11 +19178,37 @@ function aBlocoObrigado(cfg){
      disso seria depender de uma coincidencia. */
   if(temMin)c+='  if(cupomAtivo&&!cupomMinimoOk(cupomAtivo)){var cpFora=cupomAtivo;cupomAtivo=null;if(elCupomMsg){elCupomMsg.textContent=TXT_CUPOM_MINIMO_QUEDA.replace(/\\{valor\\}/g,moedaFmt(cpFora.minimo));elCupomMsg.className="fca-ob-cupom-msg erro";}}\n';
   c+='  linhaDesconto();\n';
-  c+='  if(elValor)elValor.textContent=moedaFmt('+((cfg.usaPix&&aPrioEfetivo(cfg)==='pix')?'precoPix(total())':'total()')+');\n';
-  if(cfg.usaPix&&cfg.usaPP){
+  /* Com sinal o numero grande e o TOTAL, e nao precoPix(total()): nao ha desconto de Pix a
+     aplicar (aCfg o zerou), e escrever precoPix aqui seria uma conta que nao muda nada dizendo
+     que muda. As duas linhas novas trazem o que se paga agora e o que fica para depois. */
+  c+='  if(elValor)elValor.textContent=moedaFmt('+((!usaSinal&&cfg.usaPix&&aPrioEfetivo(cfg)==='pix')?'precoPix(total())':'total()')+');\n';
+  if(segundaLinha){
     c+='  if(elLinha2)elLinha2.textContent='+fcaFnSegundo(aPrioEfetivo(cfg))+'(total());\n';
   }
-  c+='  if(elParcela)elParcela.textContent='+aTplJs('"',aParcelaSolta(cfg.txtParcela,true),[['{n}','PARCELAS'],['{valor}','moedaFmt(parcelaDe(total()))']])+';\n';
+  if(usaSinal){
+    /* PEDIDO EM ZERO (13/09/2026): as linhas do sinal e do saldo so existem quando ha o que
+       pagar. Com o total em zero a primeira guarda de sinalRecusa() devolve VAZIO de proposito --
+       quem avisa ali e a guarda de total zero, e dois avisos ao mesmo tempo se esconderiam --, mas
+       as duas linhas continuavam desenhadas, e o cliente lia tres numeros que nao fecham
+       (Total 0,00 / Sinal 100,00 / Saldo 0,00, com sinal em valor FIXO). Ninguem chega a pagar
+       esse numero: as duas pontas recusam pela recusa de total zero. Era defeito de LEITURA.
+       O conserto e de TELA e nao mexe na conta: sinalAgora/saldoDepois/sinalRecusa sao fonte unica
+       consumida por varios lugares, e trocar risco de dinheiro por um caso de tela seria mau
+       negocio. O que some e informacao FALSA, nao um aviso. */
+    c+='  var haPagar=total()>=0.01;\n';
+    c+='  if(elSinal)elSinal.style.display=haPagar?\'\':\'none\';\n';
+    c+='  if(elSaldo)elSaldo.style.display=haPagar?\'\':\'none\';\n';
+    c+='  if(elSinalV)elSinalV.textContent=moedaFmt(sinalAgora());\n';
+    c+='  if(elSaldoV)elSaldoV.textContent=moedaFmt(saldoDepois());\n';
+    c+='  if(elSinalAviso){\n';
+    c+='    var rec=sinalRecusa();\n';
+    c+='    elSinalAviso.textContent=rec;\n';
+    c+='    elSinalAviso.className="fca-ob-sinal-aviso"+(rec?" on":"");\n';
+    c+='  }\n';
+  }
+  /* O PARCELAMENTO E SOBRE O SINAL (decisao do dono, 12/09/2026): e o valor que o cartao cobra
+     naquele momento, e parcelar um numero que ninguem esta cobrando confunde. */
+  c+='  if(elParcela)elParcela.textContent='+aTplJs('"',aParcelaSolta(cfg.txtParcela,true),[['{n}','PARCELAS'],['{valor}','moedaFmt(parcelaDe('+(usaSinal?'sinalAgora()':'total()')+'))']])+';\n';
   c+='  if(pixEsconder)pixEsconder();\n';
   c+='}\n\n';
 
@@ -18991,7 +19228,9 @@ function aBlocoObrigado(cfg){
   c+=FC_PIX_SRC.tlv;
   c+=FC_PIX_SRC.crc16;
   c+=FC_PIX_SRC.montarPayload;
-  c+=fcTotalPixSrc(cfg.descpix,true,false);
+  /* Com sinal, o ramo do meio de fcTotalPixSrc entra e totalPix() PASSA A SER sinalAgora():
+     nao existe caminho em que o desconto do Pix e o sinal convivam. */
+  c+=fcTotalPixSrc(cfg.descpix,true,usaSinal);
   c+='function pix(cartao){\n';
   /* ... e aqui quando o PIX e a segunda secao (cartao prioritario). Espelho de secaoCartao. */
   var pixSegundo=(cfg.usaPP&&cfg.prio==='pp');
@@ -19015,7 +19254,11 @@ function aBlocoObrigado(cfg){
   c+='  cartao.appendChild(b);\n';
   c+='  var payloadAtual="";\n';
   c+='  function gerarPix(){\n';
+  /* Quem manda na recusa e o TOTAL, e nao o valor a cobrar: um sinal FIXO continuaria acima de
+     um centavo com o pedido zerado. Mesma ordem das duas irmas -- primeiro o pedido em zero,
+     depois a recusa do sinal --, para os dois avisos nunca se esconderem um atras do outro. */
   c+='    if(total()<0.01){alert(TXT_TOTAL_ZERO);return;}\n';
+  if(usaSinal)c+='    var rec=sinalRecusa();\n    if(rec){alert(rec);return;}\n';
   c+='    payloadAtual=montarPayload(totalPix());\n';
   c+='    ta.value=payloadAtual;\n';
   c+='    qr.innerHTML="";\n';
@@ -19050,9 +19293,16 @@ function aBlocoObrigado(cfg){
   c+='   desta rodada. Antes era a quarta copia manuscrita do mesmo actions.order.create; com o\n';
   c+='   carrinho de volta (pacote + opcionais + cupom) este bloco passou a ter a forma que a\n';
   c+='   fonte compartilhada espera -- total(), nomesSelecionados(), cupomAtivo, CODIGO_PEDIDO,\n';
+  if(usaSinal){
+  c+='   MOEDA, PAYPAL_CLIENT_ID, TXT_TOTAL_ZERO/TXT_SUCESSO/TXT_ERRO, e msg() abaixo. COM sinal\n';
+  c+='   (o pedido ao SDK cobra sinalAgora(), e o clique recusa pelo mesmo sinalRecusa() que a\n';
+  c+='   linha vermelha le) e SEM invoice_id: ele e unico por conta no provedor, e a segunda\n';
+  c+='   cobranca com o mesmo seria recusada.\n';
+  }else{
   c+='   MOEDA, PAYPAL_CLIENT_ID, TXT_TOTAL_ZERO/TXT_SUCESSO/TXT_ERRO, e msg() abaixo. SEM sinal\n';
   c+='   (o parametro usaSinal e false) e SEM invoice_id: ele e unico por conta no provedor, e a\n';
   c+='   segunda cobranca com o mesmo seria recusada.\n';
+  }
   c+='   NENHUM TEXTO NOSSO NOMEIA O PROVEDOR (regra 10 do plano): o rotulo da secao e as\n';
   c+='   mensagens dizem so "cartao" -- quem desenha os botoes com a marca deles e o proprio SDK,\n';
   c+='   e isso nao da para mudar. */\n';
@@ -19072,7 +19322,7 @@ function aBlocoObrigado(cfg){
   c+='  var m=document.createElement("div");m.className="fca-ob-msg";b.appendChild(m);\n';
   c+='  cartao.appendChild(b);\n';
   c+='  function msg(txt,ok){m.textContent=txt;m.className="fca-ob-msg "+(ok?"ok":"erro");}\n';
-  c+=fcPpBotoesSrc('fca-ob',cfg.ppcor,false,true,'');
+  c+=fcPpBotoesSrc('fca-ob',cfg.ppcor,usaSinal,true,'');
   c+='}\n\n';
   }
 
@@ -23654,6 +23904,18 @@ function mBlocoPagar(cfg,usaPP,usaPix,usaQtd,usaSinal,usaResumo,descpix,zap,usaC
   if(temMin)c+='if(cupomAtivo&&!cupomMinimoOk(cupomAtivo)){var cpFora=cupomAtivo;cupomAtivo=null;msgCupom(TXT_CUPOM_MINIMO_QUEDA.replace(/\\{valor\\}/g,moedaFmt(cpFora.minimo)),false);}\n';
   c+="raiz.querySelector('.fcm-total-v').textContent=moedaFmt(total());\n";
   if(usaSinal){
+    /* PEDIDO EM ZERO (13/09/2026): as linhas do sinal e do saldo so existem quando ha o que
+       pagar. Com o total em zero a primeira guarda de sinalRecusa() devolve VAZIO de proposito --
+       quem avisa ali e a guarda de total zero, e dois avisos ao mesmo tempo se esconderiam --, mas
+       as duas linhas continuavam desenhadas, e o cliente lia tres numeros que nao fecham
+       (Total 0,00 / Sinal 100,00 / Saldo 0,00, com sinal em valor FIXO). Ninguem chega a pagar
+       esse numero: as duas pontas recusam pela recusa de total zero. Era defeito de LEITURA.
+       O conserto e de TELA e nao mexe na conta: sinalAgora/saldoDepois/sinalRecusa sao fonte unica
+       consumida por varios lugares, e trocar risco de dinheiro por um caso de tela seria mau
+       negocio. O que some e informacao FALSA, nao um aviso. */
+    c+='var haPagar=total()>=0.01;\n';
+    c+="raiz.querySelector('.fcm-sinal').style.display=haPagar?'':'none';\n";
+    c+="raiz.querySelector('.fcm-saldo').style.display=haPagar?'':'none';\n";
     c+="raiz.querySelector('.fcm-sinal-v').textContent=moedaFmt(sinalAgora());\n";
     c+="raiz.querySelector('.fcm-saldo-v').textContent=moedaFmt(saldoDepois());\n";
     c+='var rec=sinalRecusa();\n';
@@ -23717,8 +23979,11 @@ function mBlocoPagar(cfg,usaPP,usaPix,usaQtd,usaSinal,usaResumo,descpix,zap,usaC
     }
     c+="L.push(TXT_TOTAL+': '+moedaFmt(total()));\n";
     if(usaSinal){
+      /* O resumo segue a mesma regra da tela (13/09/2026): com o total em zero ele nao imprime
+         sinal nem saldo -- antes repetia os tres numeros que nao fecham. */
       c+='var recR=sinalRecusa();\n';
-      c+='if(recR){\n';
+      c+='if(total()<0.01){\n';
+      c+='}else if(recR){\n';
       c+="L.push(TXT_SINAL_RECUSADO.toUpperCase()+': '+recR);\n";
       c+='}else{\n';
       c+="L.push(TXT_SINAL+': '+moedaFmt(sinalAgora()));\n";
