@@ -848,3 +848,55 @@ O achado que `sinal.mjs` imprimia a cada passagem **virou asserção** — 868 v
 então não existe valor entre zero e um centavo, e `>0` e `>=0.01` são indistinguíveis na prática. Um
 teste ali não provaria nada que o carrinho vazio e o caso de R$ 0,49 já não provem. **Teste que não
 distingue duas implementações é verde de enfeite.**
+
+## Entregue em 13/09/2026 — sinal por cobrança no Link de cobrança
+
+Spec: `docs/specs/2026-09-12-sinal-nos-quatro-construtores-design.md`, Rodada D. A única da fila que
+mexe no **selo do link** e no arquivo que a `/pagar` publicada executa.
+
+### O desenho: o que viaja no link é o TOTAL; o campo 54 carrega o SINAL
+
+Parece invertido e é o contrário. A regra fundadora desta aba é que **o que se cobra mora dentro do
+código Pix e em lugar nenhum mais** — protegido por três redes (CRC, remontagem com a chave do dono,
+selo). Com sinal, quem é cobrado é o **sinal**, então é ele que fica no lugar protegido. O total,
+que ninguém cobra, é informação de tela e viaja no endereço, como `n`.
+
+**O sinal não é fórmula que o bloco carrega.** Não há carrinho aqui: o valor é digitado e nada muda
+depois que o link sai. A conta acontece **uma vez, na geração**. Levar `FC_CARRINHO_SRC.sinal` ao
+bloco criaria um segundo lugar onde o número é decidido — e a segunda rede daqui é declaradamente
+mais fraca que a do desconto: não há fórmula viajando, só faixa a conferir (`0,01 ≤ sinal ≤ total`).
+
+### O selo, e a prova que manda
+
+`seloDe` ganhou o sétimo parâmetro com o **mesmo padrão condicional** do par `t`/`x`: os quatro de
+sempre contam sempre, `t`/`x` depois e só em par, `n` por último e **só quando vem preenchido**.
+
+- **`regressao.sh main`: os NOVE links byte a byte idênticos.** A regressão compara link e bloco
+  separadamente, e nenhuma divergência de link apareceu. As 11 divergências são todas `p-out1`, o
+  bloco, contado por passagem e por cobrança.
+- **`sinal-cobranca.mjs` (368 verificações):** os **oito formatos** de link gerados pela `main` (com
+  e sem `t`/`x`, com e sem PayPal, com e sem prazo, com acentos) são aceitos pelo bloco novo **e**
+  pelo de `main`, lado a lado, com o mesmo valor e o mesmo campo 54. **O controle importa:** sem
+  ele, "o bloco novo aceita" poderia significar "ele aceita qualquer coisa".
+- **O caminho inverso, medido:** link com sinal é **recusado** pelo bloco de `main`. É daí que sai o
+  aviso ao dono — verdade medida, não suposição.
+
+### O que o dono precisa fazer, uma vez
+
+Regerar o **Código 1** da aba Link de cobrança e recolá-lo no componente HTML da página `/pagar`,
+publicando em seguida. Sem isso ela recusa os links **novos** com sinal. Precedente idêntico
+registrado no texto de ajuda da `/cobrar`. **Nenhum link já enviado para de funcionar** — exceto os
+de antes de agosto/2026, de quando o link ainda não tinha selo, que já eram recusados antes.
+
+### Três achados
+
+1. **A disciplina de versão tem QUATRO lugares, não três.** O `index.html` também declara
+   `FC_COMPART_ESPERADA`. Esquecê-lo fez a ferramenta **parar inteira, em silêncio** — a guarda
+   funcionou, mas 30 verificações da suíte ficaram verdes **sem medir nada**. A `CLAUDE.md` e a
+   documentação dizem "três lugares" e estão desatualizadas.
+2. **Um aviso obsoleto ao lado do Código 1** dizia que recolar derruba os links já enviados. Deixou
+   de ser verdade quando o selo virou superconjunto — e o dono leria isso exatamente no passo que
+   precisa executar. Corrigido.
+3. **Pedido em zero (rodada F) não existe aqui** — a geração recusa valor zero. Mas existe o
+   espelho: sinal fixo igual ao valor. As duas linhas somem quando o saldo é zero, para não repetir
+   o número do destaque.
