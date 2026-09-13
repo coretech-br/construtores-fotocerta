@@ -1000,3 +1000,43 @@ A lista de classes passou a seguir **as linhas que realmente existem**: seletor 
 bloco nunca emite é regra morta viajando para o site — e fez duas suítes acharem a palavra
 `pixlinha` num bloco sem linha de Pix, derrubando a garantia de que, com sinal ligado, ela não
 existe. **As suítes estavam certas.**
+
+## Entregue em 13/09/2026 — descrição em cada item opcional
+
+Pedido do dono: *"Nos opcionais dos produtos, hoje eu cadastro o nome e o valor. Eu gostaria também
+de poder cadastrar uma descrição de cada item opcional e que ela aparecesse sem destaque, como na
+descrição curta do produto."* Decisões dele: aparece **só na hora de escolher**, não no carrinho; e
+texto longo **quebra em várias linhas**, não corta.
+
+**Três abas têm opcionais** — Checkout, Mini loja e Agendamento por pacote, confirmado no registro
+`ABAS` (são as únicas que declaram `formulario:['edops','editidx','form']`).
+
+**Zero divergência na regressão:** com o campo vazio, nem a regra de CSS nem a linha de JS são
+emitidas. Contrapartida declarada: o ramo *com* descrição não está na fotografia byte a byte — ele é
+medido com o bloco **rodando**, em `descricao-opcionais.mjs` (118 verificações, a 375 px).
+
+### Duas unificações que vieram antes do campo
+
+- **`fcOpCopia`** — a expressão que copia um opcional (`{nome, preco, qtd}`) estava escrita
+  **catorze** vezes. O campo novo é levado pela duplicação **por construção**, não por alguém
+  lembrar de catorze lugares.
+- **`fcApoioCss`** — a regra do cinza da descrição curta do produto passou a sair de uma fonte
+  única, e as três novas saem dela. Byte a byte idêntica, provado pela regressão. Fica de fora,
+  medido, `.fcm-det-d`: é outro papel (texto principal de um cartão aberto), e forçá-la mudaria a
+  página de quem já usa a loja sem ninguém pedir.
+
+### A sexta prova com referência datada — e a regra que passou a existir
+
+`linha-de-dinheiro.mjs`, escrita na véspera, usava `main` como o lado "antes"; mesclada a rodada, o
+"antes" passou a medir a si mesmo. E `meio-prio-migracao.mjs` parte 4 quebrou porque a rodada do
+número de dinheiro tocou `u-out`/`m-out` legitimamente.
+
+**Seis ocorrências em duas semanas**, duas delas escritas por mim **depois** de já ter consertado as
+outras. Virou seção da `CLAUDE.md`, com três obrigações: prender o commit; **detectar** e dizer
+`NÃO MEDIU` em vez de falhar; e **preferir medir a propriedade** a comparar com um congelado.
+
+A parte 4 de `meio-prio-migracao` foi reescrita nesse espírito: em vez de "igual a um commit
+antigo", ela compara **as duas escolhas da árvore de hoje entre si** e exige que as linhas
+divergentes sejam **poucas** e estejam numa lista declarada. Não envelhece, e diz **onde** pode
+diferir em vez de só "igual ou diferente". O teto de linhas existe porque a lista de marcas sozinha
+é fraca: uma mudança grande e alheia que por acaso contivesse uma das palavras passaria por ela.
