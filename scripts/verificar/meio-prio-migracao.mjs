@@ -63,9 +63,19 @@ const FABRICA_ANTIGA = {
   'u-txt-ou':'ou pague com Pix', 'u-txt-ou-desc':'ou pague com Pix com {pct}% de desconto',
   'm-txt-ou':'ou pague com Pix', 'm-txt-ou-desc':'ou pague com Pix com {pct}% de desconto'
 };
-const FABRICA_NOVA = {
-  'u-txt-ou':'ou pague com cartão', 'u-txt-ou-desc':'ou pague com cartão, sem o desconto de {pct}%',
-  'm-txt-ou':'ou pague com cartão', 'm-txt-ou-desc':'ou pague com cartão, sem o desconto de {pct}%'
+/* ONDE UM ESTADO ANTIGO VAI PARAR NA ARVORE DE HOJE.
+   Ate 13/09/2026 isto era "a fabrica da ordem nova" -- 'ou pague com cartao' --, porque a unica
+   migracao no caminho era fcOrdMigrar. Com a decisao 24 do dono o separador virou NEUTRO nas
+   quatro abas, e agora sao DUAS migracoes em fila dentro de uRestaura/mRestaura: fcOrdMigrar
+   leva a fabrica antiga da ordem ('ou pague com Pix') a fabrica da ordem nova, e fcSepNeutro
+   leva essa ao texto neutro. O destino final e 'OU' -- e a afirmacao ficou mais forte, nao mais
+   fraca: venha de QUAL for a fabrica antiga, um separador que o dono nunca escreveu termina
+   neutro, junto com as duas abas que ja eram.
+   O nome mudou junto: chamar isto de "fabrica nova" era descrever o caminho do meio como se
+   fosse o fim, e nome que descreve o estado de ontem manda procurar no lugar errado. */
+const DESTINO_HOJE = {
+  'u-txt-ou':'OU', 'u-txt-ou-desc':'OU',
+  'm-txt-ou':'OU', 'm-txt-ou-desc':'OU'
 };
 const MEU = 'Prefiro que voce pague no Pix, por favor';
 
@@ -149,9 +159,9 @@ if(refAnterior){
         JSON.stringify(colhido.naRef[id]));
   }
   const migrado = await restaurarAqui(colhido.estado);
-  for(const id of Object.keys(FABRICA_NOVA)){
-    chk('MIGROU para a fabrica da ordem nova: '+id, migrado[id] === FABRICA_NOVA[id],
-        JSON.stringify(migrado[id]));
+  for(const id of Object.keys(DESTINO_HOJE)){
+    chk('MIGROU ate o separador NEUTRO de hoje (duas migracoes em fila): '+id,
+        migrado[id] === DESTINO_HOJE[id], JSON.stringify(migrado[id]));
   }
   chk('o meio prioritario caiu no padrao de fabrica (Pix) no Checkout', migrado.__prioU === 'pix', migrado.__prioU);
   chk('o meio prioritario caiu no padrao de fabrica (Pix) na Mini loja', migrado.__prioM === 'pix', migrado.__prioM);
@@ -169,7 +179,7 @@ if(refAnterior){
   const apos = await restaurarAqui(meu.estado);
   chk('o texto do dono ficou INTOCADO', apos['u-txt-ou'] === MEU, JSON.stringify(apos['u-txt-ou']));
   chk('e o campo ao lado, que estava na fabrica antiga, migrou do mesmo jeito',
-      apos['u-txt-ou-desc'] === FABRICA_NOVA['u-txt-ou-desc'], JSON.stringify(apos['u-txt-ou-desc']));
+      apos['u-txt-ou-desc'] === DESTINO_HOJE['u-txt-ou-desc'], JSON.stringify(apos['u-txt-ou-desc']));
 }else{
   console.log('  ..    NAO MEDIU -- mesma razao da parte 1.');
 }

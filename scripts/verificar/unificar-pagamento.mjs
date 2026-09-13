@@ -217,12 +217,13 @@ for(const [valor, deveGerar, porque] of [['500',true,'o maior pacote passa'],
    ============================================================================ */
 console.log('\n== 2. Checkout: o codigo do pedido, na tela e no extrato ==');
 
-async function abaCheckout(pg, {cod, prods=[{nome:'Ensaio de Natal', preco:'420'}], resumo=null, zap='sim', ops=[]}){
+async function abaCheckout(pg, {cod, prods=[{nome:'Ensaio de Natal', preco:'420'}], resumo=null, zap='sim'}){
   await ident(pg);
   await clicar(pg,'aba-uni');
   for(const p of prods){
     await set(pg,'u-pnome',p.nome); await set(pg,'u-ppreco',p.preco);
     if(p.qtd) await radio(pg,'u-pqtd','sim');
+    if(p.opsel) await radio(pg,'u-opsel',p.opsel);
     for(const [nome,preco,porQtd] of (p.ops||[])){
       await set(pg,'u-op-nome',nome); await set(pg,'u-op-preco',preco);
       await marcar(pg,'u-op-qtd',!!porQtd);
@@ -355,8 +356,16 @@ const SONDA_OPEN = '<scr'+'ipt>(function(){\n'
 /* Um produto vendido por quantidade, com DOIS opcionais tambem por quantidade. No carrinho
    um deles fica marcado com quantidade ZERO -- que e exatamente onde os dois lacos poderiam
    discordar, e o que a documentacao registra como o motivo de haver um so. */
-const PRODS_Q = [{nome:'Ensaio de Natal', preco:'420', qtd:true,
+/* 'multiplo' de proposito: com 'unico' os opcionais sao RADIOS, o primeiro ja nasce marcado e
+   marcar o segundo desmarca o primeiro -- nao daria para ter um opcional marcado COM quantidade
+   zero ao lado de outro marcado com quantidade um, que e justamente o quadro onde os dois lacos
+   podiam discordar. Medido: na primeira passagem desta parte o cenario era 'unico', a marcacao
+   falhava calada (a caixa nativa fica atras do <span class="fcu-mark"> desenhado -- armadilha 2
+   do molde) e quem acabava zerado era um opcional que nao estava marcado. O teste passava
+   dizendo menos do que promete. */
+const PRODS_Q = [{nome:'Ensaio de Natal', preco:'420', qtd:true, opsel:'multiplo',
                   ops:[['Foto extra','35',true], ['Album 20x30','150',true]]}];
+const OP_FICA = 'Foto extra', OP_ZERADO = 'Album 20x30';
 
 async function msgDoZap(usaResumo){
   const g = await gerarNaFerramenta(pg => abaCheckout(pg,{cod:'NATAL26', prods:PRODS_Q, resumo:usaResumo}),
@@ -365,28 +374,32 @@ async function msgDoZap(usaResumo){
   const r = await comBlocoNaPagina({
     bloco, cabeca: SONDA_OPEN, porta: PORTA++,
     medir: async pg => {
-      /* marca os DOIS opcionais (radio: sao 'unico', entao marca-se um; com dois produtos
-         seria outra medida -- aqui o que interessa e o opcional de quantidade zero). */
-      const caixas = pg.locator('.fcu-ops input');
-      const n = await caixas.count();
-      for(let i=0;i<n;i++) await caixas.nth(i).check().catch(()=>{});
-      /* zera a quantidade do ULTIMO seletor visivel: e o do opcional marcado */
-      const menos = pg.locator('.fcu-qtd .fcu-qtd-b:first-child');
-      const q = await menos.count();
-      if(q>1) await menos.nth(q-1).click();
+      /* ARMADILHA 2 do molde: a marcacao e DESENHADA, a caixa nativa fica atras dela, e clicar
+         na caixa e interceptado. O caminho do dedo e o ROTULO -- e sem '.catch()', para uma
+         marcacao que nao pegue FALHAR a passagem em vez de passar calada. */
+      const rotulos = pg.locator('.fcu-ops .fcu-op label');
+      const n = await rotulos.count();
+      for(let i=0;i<n;i++) await rotulos.nth(i).click();
+      const marcados = await pg.evaluate(()=>Array.from(document.querySelectorAll('.fcu-ops input:checked'))
+        .map(e=>e.closest('.fcu-op').textContent.trim()));
+      /* ZERA A QUANTIDADE DO SEGUNDO OPCIONAL, pelo seu proprio seletor -- achado pela LINHA
+         dele, nunca por indice global: a linha do produto tambem tem um seletor, e contar do
+         fim ja mediu a linha errada uma vez. */
+      const menos = pg.locator('.fcu-op', {hasText: OP_ZERADO}).locator('.fcu-qtd-b').first();
+      await menos.click();
       const vistos = await pg.evaluate(()=>Array.from(document.querySelectorAll('.fcu-qtd-v')).map(e=>e.textContent));
       await pg.locator('.fcu-gerar').first().click();
       await pg.evaluate(()=>{try{localStorage.removeItem('__abriu');}catch(e){}});
       await pg.locator('.fcu-zap').first().click().catch(()=>{});
       await new Promise(x=>setTimeout(x,250));
       const reg = await pg.evaluate(()=>{try{return JSON.parse(localStorage.getItem('__abriu')||'[]');}catch(e){return [];}});
-      return {vistos, url: reg[0]||null,
+      return {vistos, marcados, url: reg[0]||null,
         temItens: await pg.evaluate(()=>!!document.querySelector('.fcu-resumo'))};
     }
   });
   const u = r.url||'';
   const texto = u.indexOf('?text=')>=0 ? decodeURIComponent(u.split('?text=')[1]) : null;
-  return {texto, vistos:r.vistos, temResumo:r.temItens, erros:r.erros, bloco};
+  return {texto, vistos:r.vistos, temResumo:r.temItens, erros:r.erros, bloco, marcados:r.marcados};
 }
 
 const comR = await msgDoZap('sim');
@@ -395,14 +408,24 @@ chk('COM resumo: o bloco tem a caixa do resumo', comR.temResumo===true);
 chk('SEM resumo: o bloco NAO tem a caixa do resumo', semR.temResumo===false);
 chk('COM resumo: o WhatsApp foi pedido', !!comR.texto, 'url='+String(comR.texto).slice(0,60));
 chk('SEM resumo: o WhatsApp foi pedido', !!semR.texto, 'url='+String(semR.texto).slice(0,60));
-chk('um opcional ficou com quantidade ZERO nos dois',
+chk('os DOIS opcionais ficaram marcados nos dois blocos',
+  (comR.marcados||[]).length===2 && (semR.marcados||[]).length===2,
+  'com='+JSON.stringify(comR.marcados)+' sem='+JSON.stringify(semR.marcados));
+chk('e um deles ficou com quantidade ZERO nos dois',
   (comR.vistos||[]).indexOf('0')>=0 && (semR.vistos||[]).indexOf('0')>=0,
   'com='+JSON.stringify(comR.vistos)+' sem='+JSON.stringify(semR.vistos));
 chk('A MENSAGEM E IDENTICA, caractere por caractere', comR.texto===semR.texto,
   '\n      com resumo: '+JSON.stringify(comR.texto)+'\n      sem resumo: '+JSON.stringify(semR.texto));
-chk('e o opcional de quantidade zero nao aparece em nenhuma das duas',
-  String(comR.texto).indexOf('x0')<0 && String(semR.texto).indexOf('x0')<0,
-  JSON.stringify(comR.texto));
+/* A PROVA PELO NOME, e nao por 'x0': o opcional MARCADO com quantidade zero tem de sumir da
+   mensagem nas duas, e o outro tem de continuar la. Cobrar so a ausencia de 'x0' passaria se a
+   lista inteira tivesse sumido. */
+for(const [rot,m] of [['com resumo',comR],['sem resumo',semR]]){
+  chk(rot+': o opcional marcado COM quantidade zero nao entra na mensagem',
+    String(m.texto).indexOf(OP_ZERADO)<0, JSON.stringify(m.texto));
+  chk(rot+': e o outro opcional continua la',
+    String(m.texto).indexOf(OP_FICA)>=0, JSON.stringify(m.texto));
+  chk(rot+': e nenhum item sai com "x0"', String(m.texto).indexOf('x0')<0, JSON.stringify(m.texto));
+}
 chk('o segundo laco sumiu do TEXTO gerado sem resumo (so resta itensEscolhidos)',
   semR.bloco.indexOf('function itensEscolhidos()')>=0 &&
   semR.bloco.indexOf("partes.push('- *'+p.nome+'*")<0,
