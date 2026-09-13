@@ -800,3 +800,51 @@ estado a cada passagem, para a rodada seguinte decidir.
 `main` (medido: as mesmas 9 de 52 numa árvore limpa). É a **terceira** vez que este padrão aparece.
 Agora ele detecta a situação, diz "NAO MEDIU" e troca de pergunta. Contra `4c66719`, volta a medir
 de verdade: 51 verificações.
+
+## Entregue em 13/09/2026 — sinal no Agendamento por pacote, e o pedido em zero
+
+Spec: `docs/specs/2026-09-12-sinal-nos-quatro-construtores-design.md`, Rodadas C e F.
+
+### C — o sinal na aba `pac`
+
+Mesma mecânica do Checkout, com a conta vinda de `FC_CARRINHO_SRC.sinal` — **fonte única, não
+reescrita**. O parcelamento passa a ser **sobre o sinal** (decisão do dono): parcelar um número que
+ninguém está cobrando confunde. **Regressão: zero divergências** — com o interruptor desligado o
+bloco é byte a byte o de `main`, que é o que um interruptor novo tem de provar.
+
+**A palavra da aba é "reserva", e não é só o substantivo:** o remédio muda junto. As irmãs mandam
+"escolher mais itens ou aumentar a quantidade"; aqui o pacote é fixo e o cliente só tem opcionais e
+cupom. Mandar fazer o que a tela não permite é fábrica mentindo. `t9` virou `Restante no dia do
+ensaio` — "entrega" nomeia um momento que numa reserva não existe.
+
+**Dois textos da spec NÃO nasceram, e a ausência é medida:** `txtSinalRecusado` (o único consumidor
+dele nas irmãs é o resumo copiável, e esta página não tem um — são **três** consumidores de
+`sinalRecusa()` aqui, não quatro) e `txtZapSaldo` (as mensagens desta aba são recados fixos e não
+citam valor). **Campo de texto sem consumidor é pior que campo faltando.**
+
+**O identificador de conciliação continua imune ao sinal** — idêntico nas quatro combinações, depois
+de recarregar e de mexer no carrinho, lido do `custom_id` do pedido ao SDK e não de variável
+interna. Sinal que entrasse nele reabriria o defeito mais caro daquela rodada.
+
+**Achado anterior à rodada, corrigido junto:** a segunda linha de preço (`ou {valor} no cartão`) não
+tinha guarda de desconto, então com desconto 0 ela repetia o número de cima — na vitrine e na página
+de obrigado, independentemente do sinal.
+
+### F — o pedido em zero (autorizada pelo dono)
+
+Com o total em zero, a primeira guarda de `sinalRecusa()` devolve vazio **de propósito** — quem
+avisa ali é a recusa de total zero, e dois avisos ao mesmo tempo se esconderiam. Mas as duas linhas
+continuavam desenhadas: o cliente lia `Total R$ 0,00 / Sinal R$ 100,00 / Saldo R$ 0,00`. Nas **três**
+abas com sinal, e no resumo copiável do Checkout.
+
+**Nunca foi defeito de cobrança** — as duas pontas recusam, e a suíte verifica isso. Era de
+**leitura**. O conserto é de tela e **não toca a conta**: `sinalAgora`/`saldoDepois`/`sinalRecusa`
+são fonte única consumida por vários lugares, e trocar risco de dinheiro por um caso de tela seria
+mau negócio. O que some é informação **falsa**, não um aviso.
+
+O achado que `sinal.mjs` imprimia a cada passagem **virou asserção** — 868 verificações.
+
+**A prova da fronteira não existe, e a ausência é medida:** `total()` já vem arredondado em centavos,
+então não existe valor entre zero e um centavo, e `>0` e `>=0.01` são indistinguíveis na prática. Um
+teste ali não provaria nada que o carrinho vazio e o caso de R$ 0,49 já não provem. **Teste que não
+distingue duas implementações é verde de enfeite.**

@@ -193,3 +193,61 @@ achaveis pela busca — sem trabalho extra.
 rodada); um preenchido emite só ele; os três preenchidos emitem os três, na ordem, **antes** dos
 botões de pagamento, conferido pela posição no DOM e não pela aparência. Mais o texto hostil
 (apóstrofo, aspas, barra, `</script`) nos doze, com o bloco executando.
+## Rodada F — o pedido em zero com sinal fixo (autorizada pelo dono em 13/09/2026)
+
+**O defeito, medido pela suíte `sinal.mjs` da rodada B.** Com o carrinho vazio e o sinal em **valor
+fixo**, a tela mostra três números que não fecham:
+
+```
+Total:                R$ 0,00
+Sinal agora:          R$ 100,00
+Restante na entrega:  R$ 0,00
+```
+
+E no **Checkout** o resumo copiável repete isso: `["Total: R$ 0,00","<t8>: R$ 100,00","<t9>: R$ 0,00"]`.
+Na Mini loja o resumo sai vazio com a cesta vazia — mais uma divergência entre as duas gêmeas.
+
+**De onde vem.** A primeira guarda de `sinalRecusa()` devolve **string vazia** de propósito quando
+`total() < 0.01`: nesse estado quem avisa é a guarda de total zero, e dois avisos ao mesmo tempo se
+esconderiam. A decisão está certa; o que falta é que as linhas de sinal e saldo **continuam sendo
+desenhadas** num estado em que não significam nada.
+
+**Não é defeito de cobrança.** As duas pontas recusam pela recusa de total zero — o campo 54 não é
+montado e o `createOrder` não abre. A prova da rodada B verifica isso. É defeito de **leitura**: o
+cliente lê um número que não será cobrado, ao lado de um total que o contradiz.
+
+### O conserto
+
+**As linhas de sinal e saldo só existem quando há o que pagar** (`total() >= 0.01`). O total
+continua aparecendo, e a guarda de total zero continua sendo a **única** voz naquele estado.
+
+Três razões para esta forma, e não outra:
+
+1. **Não mexe na conta.** `sinalAgora()`, `saldoDepois()` e `sinalRecusa()` ficam como estão — e
+   elas são fonte única (`FC_CARRINHO_SRC.sinal`), consumidas por quatro lugares em cada aba. Mexer
+   ali para consertar um caso de tela seria pagar com risco de dinheiro um problema de leitura.
+2. **Não cria um segundo aviso.** Fazer `sinalRecusa()` falar no total zero produziria dois avisos
+   simultâneos — exatamente o que o comentário do código diz ter evitado de propósito.
+3. **Não esconde defeito visível.** Não é o caso de "trocar defeito visível por invisível" que este
+   projeto recusa: aqui o que some é uma informação **falsa**, não um aviso.
+
+**Vale para os quatro consumidores**, não só para a tela: a linha do carrinho, o resumo copiável, e
+o que mais desenhe sinal/saldo. O resumo do Checkout é o que hoje repete o absurdo.
+
+**A divergência entre as gêmeas some junto:** as duas abas passam a se comportar igual com o
+carrinho vazio.
+
+### Provas
+
+1. **`regressao.sh main`**: o cenário da regressão não esvazia o carrinho, então o esperado é
+   **zero divergência**. Se der zero, dizer que deu zero **e por quê** — zero aqui significa "o
+   cenário não alcança o estado", que é o mesmo buraco que a rodada B tapou para o sinal.
+2. **O caso do defeito, nas duas abas:** carrinho vazio + sinal fixo → a tela mostra o total e a
+   mensagem de total zero, e **não existem** as linhas de sinal e saldo (conferido pelo DOM, não
+   pela aparência); o resumo copiável **não as imprime**.
+3. **O caminho normal não mudou:** com carrinho cheio, as três linhas continuam lá, com os mesmos
+   números que a suíte da rodada B já fixa.
+4. **A fronteira:** um carrinho que some exatamente `R$ 0,01` ainda mostra as três linhas. O corte é
+   em `total() < 0.01`, e um teste que só olhasse "vazio" e "cheio" não provaria onde ele está.
+5. **As outras duas recusas continuam funcionando** e continuam sendo a única voz nos seus estados:
+   sinal maior que o total, e sinal que arredonda para zero.
