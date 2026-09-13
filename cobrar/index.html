@@ -206,6 +206,33 @@
       <label class="rot" for="cb-descpix">Desconto no Pix <span class="opc">— opcional, em %</span></label>
       <input type="number" id="cb-descpix" value="0" min="0" max="90" step="0.5" inputmode="decimal">
       <p class="dica">Com desconto, a cobrança tem <b>dois valores</b>: o total acima (que o PayPal cobra) e o valor do Pix, que é o total menos o desconto. Zero ou em branco = sem desconto. Se a página de pagamento ainda estiver com um código 1 gerado <b>antes</b> desta versão, ela recusa links com desconto — gere e cole o código 1 novo na ferramenta completa, uma vez só.</p>
+      <p class="dica" id="cb-descpix-aviso" style="display:none"><b>Com o sinal ligado nesta cobrança este campo não vale.</b> O Pix passa a cobrar o sinal, e descontar sobre o sinal seria desconto dobrado.</p>
+    </div>
+
+    <!-- O SINAL É DESTA COBRANÇA, como o desconto: cada link carrega o seu. Os quatro campos
+         são os mesmos da aba, lidos pelas mesmas funções compartilhadas — é isso que faz o
+         link sair byte a byte igual ao que a ferramenta completa geraria. -->
+    <div class="campo" id="cb-sinal-campo">
+      <label class="rot">Cobrança de sinal</label>
+      <div class="escolhas">
+        <label><input type="radio" name="cb-sinal" value="nao" checked><span>Cobrar o valor cheio</span></label>
+        <label><input type="radio" name="cb-sinal" value="sim"><span>Cobrar sinal agora <span class="opc">— o Pix e o PayPal cobram o sinal; o saldo fica para depois</span></span></label>
+      </div>
+      <div id="cb-sinal-campos" style="display:none">
+        <div class="escolhas">
+          <label><input type="radio" name="cb-sinaltipo" value="pct" checked><span>Percentual do valor</span></label>
+          <label><input type="radio" name="cb-sinaltipo" value="fixo"><span>Valor fixo</span></label>
+        </div>
+        <div id="cb-sinalpct-campo">
+          <label class="rot" for="cb-sinalpct">Percentual do sinal <span class="opc">— de 1 a 99</span></label>
+          <input type="number" id="cb-sinalpct" value="30" min="1" max="99" step="0.5" inputmode="decimal">
+        </div>
+        <div id="cb-sinalfixo-campo" style="display:none">
+          <label class="rot" for="cb-sinalfixo">Valor fixo do sinal</label>
+          <input type="number" id="cb-sinalfixo" value="100" min="0.01" step="0.01" inputmode="decimal">
+        </div>
+      </div>
+      <p class="dica">O cartão mostra o <b>total</b> em destaque e, abaixo, o <b>sinal</b> e o <b>saldo</b>. Se a página de pagamento ainda estiver com um código 1 gerado <b>antes</b> desta versão, ela recusa links com sinal — gere e cole o código 1 novo na ferramenta completa, uma vez só. Os links que você já mandou continuam valendo.</p>
     </div>
 
     <div class="campo">
@@ -272,7 +299,7 @@
      construção, porque quem declara a versão é o próprio arquivo cuja atualidade está em
      dúvida. Quem confere é scripts/conferir-versoes.sh, que compara o CONTEÚDO com a versão
      declarada e falha quando o arquivo mudou sem o troco. -->
-<script src="../fc-compartilhado.js?v=2026-08-23a"></script>
+<script src="../fc-compartilhado.js?v=2026-09-13a"></script>
 <script>
 'use strict';
 (function(){
@@ -319,7 +346,7 @@
    pior: esta página selaria o link com uma conta e a /pagar conferiria com
    outra, sem um sinal na tela. Então ou a versão pedida chegou, ou a página diz
    o que houve e não faz mais nada. */
-var FC_COMPART_ESPERADA='2026-08-23a';
+var FC_COMPART_ESPERADA='2026-09-13a';
 if(!window.FCCOMPART||FCCOMPART.versao!==FC_COMPART_ESPERADA){
   cbParar(FC_COMPART_ESPERADA,window.FCCOMPART?FCCOMPART.versao:null);
   return;
@@ -413,6 +440,14 @@ function cbBloco(){
        mesma da ferramenta (C.fcDescNum), senão "sem desconto" poderia significar uma coisa
        aqui e outra lá. */
     descpix:C.fcDescNum(p.descpix),
+    /* O SINAL guardado na aba serve para o campo desta página NASCER preenchido, do mesmo
+       jeito que o percentual do desconto — é o sinal de sempre do dono, e ele muda por
+       cobrança quando quiser. Chave ausente (estado gravado antes de 13/09/2026) = sem sinal,
+       que é como as cobranças de antes foram enviadas. */
+    sinal:(p.sinal==='sim')?'sim':'nao',
+    sinaltipo:(p.sinaltipo==='fixo')?'fixo':'pct',
+    sinalpct:(p.sinalpct!=null&&p.sinalpct!=='')?String(p.sinalpct):'',
+    sinalfixo:(p.sinalfixo!=null&&p.sinalfixo!=='')?String(p.sinalfixo):'',
     /* AS TRÊS ESCOLHAS DA ABA, e não duas. A aba tem 'sdk', 'link' e 'nao'; enquanto esta
        linha era (p.ppmodo==='link')?'link':'sdk', um 'nao' guardado virava 'sdk' calado. */
     ppmodo:(p.ppmodo==='link'||p.ppmodo==='nao')?p.ppmodo:'sdk'
@@ -487,6 +522,12 @@ function cbCfg(){
        mesma coisa dentro de C.fcDescNum, e aí o link sai byte a byte igual ao de uma cobrança
        sem desconto. */
     descpix:C.fcDescNum($('cb-descpix').value),
+    /* Os quatro campos do sinal, crus, exatamente como pCfg os entrega: quem normaliza e quem
+       recusa são as funções compartilhadas. Uma normalização escrita aqui seria a segunda
+       conta de "quanto é o sinal", e o link desta página deixaria de ser byte a byte o da aba. */
+    sinal:(radio('cb-sinal')==='sim')?'sim':'nao',
+    sinaltipo:(radio('cb-sinaltipo')==='fixo')?'fixo':'pct',
+    sinalpct:$('cb-sinalpct').value, sinalfixo:$('cb-sinalfixo').value,
     txid:C.pTxidLimpo($('cb-txid').value),
     valdia:C.fcValDia($('cb-validade').value), valbruto:$('cb-validade').value,
     ppmodo:(usapp?ppmodo:'nao'), pplink:cbTrim($('cb-pplink').value)
@@ -515,6 +556,11 @@ function cbTxidAjustar(){return cbCampoAjustar('cb-txid',C.fcTxidCorrigido);}
    não só por dentro. Prender por dentro consertaria o link e deixaria o dono lendo 95 numa
    cobrança de 90 — trocar defeito visível por invisível. */
 function cbDescAjustar(){return cbCampoAjustar('cb-descpix',C.fcDescCorrigido);}
+/* Os dois campos do sinal, pela MESMA regra da aba (C.fcSinalPctCorrigido /
+   C.fcSinalFixoCorrigido): 150 vira 99 na tela, e campo em branco fica em branco — quem
+   recusa, com nome, é a geração. */
+function cbSinalPctAjustar(){return cbCampoAjustar('cb-sinalpct',C.fcSinalPctCorrigido);}
+function cbSinalFixoAjustar(){return cbCampoAjustar('cb-sinalfixo',C.fcSinalFixoCorrigido);}
 function cbChaveAjustar(){return cbCampoAjustar('cb-chave',C.fcChaveCorrigida);}
 /* Nome e cidade do recebedor: o maxlength do campo barra o que se DIGITA, e estas duas barram
    o que CHEGA de outro lugar (do armazenamento, da migração, do backup, da outra página). Sem
@@ -701,6 +747,18 @@ function cbToggles(){
   lk.style.display=(radio('cb-ppmodo')==='link')?'block':'none';
 }
 
+/* O SINAL DESLIGA O DESCONTO DO PIX, e o campo diz isso em vez de mentir em silêncio — a
+   mesma regra da aba. Desabilitar e avisar, nunca apagar: o número fica guardado para quando
+   o dono voltar a cobrar o valor cheio. */
+function cbSinalToggles(){
+  var on=(radio('cb-sinal')==='sim'),fixo=(radio('cb-sinaltipo')==='fixo'),el;
+  el=$('cb-sinal-campos');if(el)el.style.display=on?'block':'none';
+  el=$('cb-sinalpct-campo');if(el)el.style.display=fixo?'none':'block';
+  el=$('cb-sinalfixo-campo');if(el)el.style.display=fixo?'block':'none';
+  el=$('cb-descpix-aviso');if(el)el.style.display=on?'block':'none';
+  el=$('cb-descpix');if(el)el.disabled=on;
+}
+
 /* ---- gerar: o MESMO caminho de pGerarLink ---- */
 function cbGerarLink(){
   cbLimparRecusa();
@@ -727,6 +785,9 @@ function cbGerarLink(){
   cbValorAjustar();
   cbTxidAjustar();
   cbDescAjustar();
+  cbSinalPctAjustar();
+  cbSinalFixoAjustar();
+  cbSinalToggles();
   cbChaveGravadaAjustar();
   cbUrlAvisoRender();
   if(erroGravar){cbRecusar(erroGravar);return;}
@@ -784,6 +845,7 @@ function cbCopiarPlanoB(ta){
    identidade vigente é a que está na tela, mexer na chave, no nome, na cidade ou no endereço
    muda o link — e um link antigo parado na caixa seria um link com a identidade anterior. */
 var CB_VENCEM=['cb-desc','cb-valor','cb-txid','cb-validade','cb-descpix','cb-pplink',
+               'cb-sinalpct','cb-sinalfixo',
                'cb-chave','cb-nomer','cb-cidade','cb-client','cb-zapnum','cb-url'];
 var CB_PAINEL=['cb-chave','cb-nomer','cb-cidade','cb-client','cb-zapnum','cb-url'];
 /* "O operador mexeu no painel desde que ele foi enchido?" — a única coisa que separa um painel
@@ -796,6 +858,9 @@ function cbMexeu(e){
   if(cbEhDoPainel(nome))cbPainelMexido=true;
   if(nome==='cb-url')cbUrlAvisoRender();
   if(nome==='cb-ppmodo'){cbToggles();cbVencer();return;}
+  /* Os dois radios do sinal mudam o LINK, e mudam o que está à vista: como o 'cb-ppmodo',
+     eles redesenham e vencem a caixa no mesmo gesto. */
+  if(nome==='cb-sinal'||nome==='cb-sinaltipo'){cbSinalToggles();cbVencer();return;}
   for(i=0;i<CB_VENCEM.length;i++)if(nome===CB_VENCEM[i]){cbVencer();return;}
 }
 document.addEventListener('input',cbMexeu);
@@ -816,7 +881,7 @@ window.addEventListener('storage',function(e){
   if(k&&k!==C.FCI_CHAVE&&k!=='fcConstrutores')return;   /* chave nula = localStorage.clear() */
   cbZerarFalha();
   if(cbPainelAberto()&&!cbPainelMexido)cbConfigEncher();
-  cbQuemRender();cbToggles();cbVencer();
+  cbQuemRender();cbToggles();cbSinalToggles();cbVencer();
 });
 
 function cbAjuste(id,fn){
@@ -832,6 +897,8 @@ liga('cb-copiar',cbCopiar);
 cbAjuste('cb-valor',cbValorAjustar);
 cbAjuste('cb-txid',cbTxidAjustar);
 cbAjuste('cb-descpix',cbDescAjustar);
+cbAjuste('cb-sinalpct',cbSinalPctAjustar);
+cbAjuste('cb-sinalfixo',cbSinalFixoAjustar);
 cbAjuste('cb-chave',cbChaveAjustar);
 /* Nome e cidade se corrigem à vista pela mesma mecânica, e por isso o corte deixou de ser
    invisível: o campo passa a mostrar o texto exato que vai nos campos 59 e 60 do BR Code. */
@@ -853,6 +920,16 @@ cbAjuste('cb-cidade',function(){if(cbCidadeAjustar())cbQuemRender();});
      e ele muda por cobrança quando quiser. Sem nada configurado, nasce em zero — que é o campo
      como o HTML já o declara. */
   if(blo.descpix>0&&$('cb-descpix'))$('cb-descpix').value=String(blo.descpix);
+  /* O SINAL nasce como a ferramenta o deixou, pelo mesmo critério do desconto. Ele fica À
+     VISTA na tela (o radio marcado e o número no campo), então nunca é uma escolha silenciosa:
+     o dono lê o que vai no link antes de apertar o botão. */
+  alvo=document.querySelector('input[name="cb-sinal"][value="'+blo.sinal+'"]');
+  if(alvo)alvo.checked=true;
+  alvo=document.querySelector('input[name="cb-sinaltipo"][value="'+blo.sinaltipo+'"]');
+  if(alvo)alvo.checked=true;
+  if(blo.sinalpct&&$('cb-sinalpct'))$('cb-sinalpct').value=blo.sinalpct;
+  if(blo.sinalfixo&&$('cb-sinalfixo'))$('cb-sinalfixo').value=blo.sinalfixo;
+  cbSinalToggles();
   cbToggles();
   cbQuemRender();
   cbUrlAvisoRender();
