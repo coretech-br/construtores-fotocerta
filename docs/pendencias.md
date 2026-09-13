@@ -695,3 +695,44 @@ do formato antigo, não criada aqui. O formato novo acaba com ela.
 nove chaves novas aparecem como diferentes. Nada na tela mudou; só a forma guardada. Um "Salvar"
 resolve para sempre. Migrar o fragmento na entrada do preset geral seriam dois caminhos novos de
 escrita, cada um com prova própria, fora do núcleo autorizado desta rodada.
+
+## Entregue em 12/09/2026 — o meio de pagamento prioritário
+
+Spec: `docs/specs/2026-09-12-meio-prioritario-design.md`. Um radio `*-prio` (`pix` | `pp`) nas
+quatro abas de pagamento, padrão **Pix**, decidindo **ordem e preço em destaque juntos**.
+
+**A premissa do pedido estava parcialmente errada e a medição corrigiu:** o Link de cobrança já
+mostrava o Pix primeiro; o que ele tinha de diferente era o destaque. São dois eixos, e só a `pac`
+tinha os dois apontando para o Pix.
+
+**17 divergências na regressão, todas intencionais e explicadas uma a uma** (ver a spec). 21 das 25
+saídas idênticas, **os nove links de cobrança idênticos** — só o bloco mudou. `a-out3` divergiu
+**só num comentário**: o código gerado da `pac` é byte a byte idêntico ao de `main`, o que prova que
+o padrão de fábrica reproduz o que está no ar. Prova do outro lado feita: com o campo em cartão,
+`u-out` e `m-out` voltam a ser idênticos aos de `main`.
+
+**A prova que não existia:** nada no arnês fixava a ordem dos meios (grep devolvia zero).
+`meio-prioritario.mjs`, 104 verificações, mede a ordem **pelo índice dos filhos no DOM**, nas quatro
+abas e nas duas escolhas, mais o destaque por `getComputedStyle`, o valor que o PayPal cobra, e as
+frases. `meio-prio-migracao.mjs`, 52 verificações, cobre a migração do texto.
+
+### Duas suítes com referência datada, corrigidas no caminho
+
+Mesmo defeito de `id-orcamento` em 11/09: asserção que usa `main` como lado "antes" passa a medir a
+si mesma quando a rodada que ela mede entra em `main`.
+
+- `textos-reserva.mjs` acusava sete falsas falhas — referência presa em `77d9db2`.
+- `textos-migrados.mjs` comparava o estado gravado exigindo identidade fora de uma lista fixa;
+  passou a declarar **chave nova por rodada** e **fábrica trocada** com os dois valores, em vez de
+  afirmar "não existe em main" como verdade eterna.
+
+**A lição, que já apareceu três vezes:** *"antes" é estado histórico, não "o que estiver em `main`
+hoje".* Toda suíte que compare com uma referência precisa prendê-la a um commit.
+
+### Um defeito meu, corrigido por medição
+
+Instruí o executor a tratar o caso "sinal ligado + Pix prioritário", supondo que a tela mostraria
+duas linhas com o mesmo número e um selo de `-0%`. **O gerador já o impedia:** a linha do Pix só é
+emitida com `descpix>0`, e o sinal zera o desconto antes disso. Em vez de tratamento para um estado
+impossível, o comportamento foi **fixado em teste** (+32 verificações) — que passa a falar no dia em
+que o sinal chegar às outras abas.
