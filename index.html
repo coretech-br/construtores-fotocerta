@@ -5408,6 +5408,34 @@ function precoJsTexto(t){
   });
 }
 /* Lado do bloco entregue: a MESMA tabela, escrita como codigo dentro do bloco. */
+/* ===== A LINHA DE DINHEIRO NAO QUEBRA O NUMERO (13/09/2026) =====
+   Toda linha "rotulo a esquerda, valor a direita" destes blocos e um flex com dois <span>. Sem
+   regra nenhuma, o flex encolhe os DOIS quando falta largura -- e o que o dono viu foi o pior
+   dos casos: o valor partido em "R$" numa linha e "332,50" na outra, um numero de dinheiro
+   quebrado ao meio. Encurtar o rotulo NAO resolve, e ele testou: quem quebrava era o valor.
+
+   A regra e a de sempre em tabela de preco: o VALOR nunca quebra e nunca encolhe; o ROTULO
+   encolhe e, se precisar, quebra em duas linhas. Um rotulo em duas linhas e legivel; um numero
+   partido nao e.
+
+   O 'min-width:0' no rotulo nao e enfeite: item de flex tem min-width:auto por padrao, o que o
+   impede de encolher abaixo do proprio conteudo -- sem isso o rotulo empurra o valor para fora
+   em vez de ceder. E o 'flex:none' no valor o protege do encolhimento que sobraria para ele.
+
+   POR QUE UMA FUNCAO E NAO QUATRO COPIAS: sao quatro geradores com o mesmo desenho de linha.
+   Escrito quatro vezes, a quinta linha de dinheiro que alguem criar em uma das abas vai nascer
+   sem a regra, e o defeito volta em silencio -- exatamente como este nasceu. Unifica-se a FONTE
+   que escreve; o bloco entregue continua levando o proprio CSS dentro dele.
+
+   Recebe o escopo (o seletor raiz do bloco, ou '' quando nao ha) e as classes das linhas. */
+function fcLinhaValorCss(escopo,classes){
+  var pre=escopo?escopo+' ':'',i,a=[],b=[];
+  for(i=0;i<classes.length;i++){
+    a.push(pre+'.'+classes[i]+'>span:first-child');
+    b.push(pre+'.'+classes[i]+'>span:last-child');
+  }
+  return a.join(',')+'{min-width:0}\n'+b.join(',')+'{white-space:nowrap;flex:none}\n';
+}
 function fcMoedaFmtGer(soReal){
   var c='',i;
   c+='function moedaFmt(v){\n';
@@ -14488,6 +14516,19 @@ function uBloco(cfg){
     c+='.fcuni .fcu-pixlinha{display:none;justify-content:space-between;gap:10px;'+((prio==='pix')?'padding:8px 0 0;font-size:20px;color:var(--fcu-destaque,#075E54);font-weight:800':'padding:4px 0 0;font-size:14px;color:#1e7e34;font-weight:700')+'}\n';
     c+='.fcuni .fcu-pixlinha.on{display:flex}\n';
   }
+  /* FORA de qualquer 'if': estas quatro linhas existem em combinacoes diferentes (a do Pix so
+     com desconto, as do sinal so com sinal ligado), e o defeito estava justamente em ter
+     nascido DENTRO do if do desconto -- com sinal ligado o desconto e zerado, e a regra que
+     impede o numero de quebrar nao sairia. Seletor para classe ausente nao custa nada; regra
+     que falta custa um numero partido ao meio na tela do cliente. */
+  /* A LISTA SEGUE AS LINHAS QUE REALMENTE EXISTEM. Seletor para classe que o bloco nunca
+     emite e regra morta viajando para o site do dono -- e, pior, faz o arnes achar a
+     palavra 'pixlinha' num bloco que nao tem linha de Pix, o que derrubou duas suites que
+     garantem exatamente essa ausencia quando o sinal esta ligado. Elas estavam certas. */
+  var uLin=['fcu-total'];
+  if(usaSinal)uLin.push('fcu-sinal','fcu-saldo');
+  if(descpix>0)uLin.push('fcu-pixlinha');
+  c+=fcLinhaValorCss('.fcuni',uLin);
   if(usaPP){
     c+='.fcuni .fcu-botoes{margin-top:14px}\n';
     c+='.fcuni .fcu-msg{display:none;text-align:center;font-size:14px;font-weight:600;padding:12px;border-radius:8px;margin-top:10px}\n';
@@ -18821,6 +18862,7 @@ function aBlocoObrigado(cfg){
   if(usaSinal){
     c+='.fca-ob-sinal{display:flex;justify-content:space-between;gap:10px;padding:6px 0 0;font-size:16px;font-weight:700;color:var(--fca-ob-destaque,#0F3A30)}\n';
     c+='.fca-ob-saldo{display:flex;justify-content:space-between;gap:10px;padding:4px 0 0;margin:0 0 14px;font-size:13px;color:#777}\n';
+    c+=fcLinhaValorCss('',['fca-ob-sinal','fca-ob-saldo']);
     c+='.fca-ob-sinal-aviso{display:none;font-size:12px;font-weight:600;color:#c0392b;padding:7px 0 0;text-align:left}\n';
     c+='.fca-ob-sinal-aviso.on{display:block}\n';
     /* AS TRES RESPOSTAS SOBRE O SINAL (rodada E). So entram quando ha alguma preenchida: os tres
@@ -21426,7 +21468,12 @@ function pCss(cfg){
   s+='.fcpg-titulo{font-size:17px;font-weight:700;line-height:1.3;color:'+cfg.c1+';flex:1 1 auto;min-width:0}\n';
   s+='.fcpg-desc{font-size:14px;line-height:1.5;margin:0 0 14px;word-wrap:break-word;overflow-wrap:break-word}\n';
   s+='.fcpg-valor-rot{font-size:12px;letter-spacing:.06em;text-transform:uppercase;opacity:.7;margin:0 0 2px}\n';
-  s+='.fcpg-valor{font-size:30px;font-weight:800;line-height:1.1;color:'+cfg.c1+';margin:0 0 4px}\n';
+  /* 'white-space:nowrap' pela mesma razao de fcLinhaValorCss (13/09/2026): aqui o valor e o
+     CONTEUDO da pagina, sozinho em 30px -- "R$" numa linha e o numero na outra e o defeito
+     que o dono viu no Checkout, e num aparelho estreito esta div chega perto do mesmo fim.
+     Vai DENTRO da regra que ja existe, e nao numa segunda: duas regras para o mesmo seletor
+     com a mesma especificidade sao o defeito que o manual do Prosite proibe. */
+  s+='.fcpg-valor{font-size:30px;font-weight:800;line-height:1.1;white-space:nowrap;color:'+cfg.c1+';margin:0 0 4px}\n';
   /* A regra da linha do desconto entra SEMPRE, como todo o resto da maquinaria do desconto:
      o bloco nao pode depender do desconto que estava configurado no dia em que foi gerado
      (ver "o desconto nao e mais uma escolha do bloco", em pJs). Quem decide se a linha aparece
@@ -23535,6 +23582,19 @@ function mBloco(cfg){
     c+='.fcmloja .fcm-pixlinha{display:none;justify-content:space-between;'+((prio==='pix')?'font-size:19px;color:var(--fcm-destaque,#0F3A30);margin-top:8px;font-weight:800':'font-size:13px;color:#1e7e34;margin-top:6px;font-weight:600')+'}\n';
     c+='.fcmloja .fcm-pixlinha.on{display:flex}\n';
   }
+  /* FORA de qualquer 'if': estas quatro linhas existem em combinacoes diferentes (a do Pix so
+     com desconto, as do sinal so com sinal ligado), e o defeito estava justamente em ter
+     nascido DENTRO do if do desconto -- com sinal ligado o desconto e zerado, e a regra que
+     impede o numero de quebrar nao sairia. Seletor para classe ausente nao custa nada; regra
+     que falta custa um numero partido ao meio na tela do cliente. */
+  /* A LISTA SEGUE AS LINHAS QUE REALMENTE EXISTEM. Seletor para classe que o bloco nunca
+     emite e regra morta viajando para o site do dono -- e, pior, faz o arnes achar a
+     palavra 'pixlinha' num bloco que nao tem linha de Pix, o que derrubou duas suites que
+     garantem exatamente essa ausencia quando o sinal esta ligado. Elas estavam certas. */
+  var mLin=['fcm-total'];
+  if(usaSinal)mLin.push('fcm-sinal','fcm-saldo');
+  if(descpix>0)mLin.push('fcm-pixlinha');
+  c+=fcLinhaValorCss('.fcmloja',mLin);
   if(usaPP){
     c+='.fcmloja .fcm-botoes{margin-top:12px;min-height:44px}\n';
     c+='.fcmloja .fcm-msg{font-size:12px;margin-top:6px;text-align:left}\n';
