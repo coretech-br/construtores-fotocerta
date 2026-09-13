@@ -14711,6 +14711,18 @@ function uBloco(cfg){
   c+='});\n';
   c+="raiz.querySelector('.fcu-total-v').textContent=moedaFmt(total());\n";
   if(usaSinal){
+    /* PEDIDO EM ZERO (13/09/2026): as linhas do sinal e do saldo so existem quando ha o que
+       pagar. Com o total em zero a primeira guarda de sinalRecusa() devolve VAZIO de proposito --
+       quem avisa ali e a guarda de total zero, e dois avisos ao mesmo tempo se esconderiam --, mas
+       as duas linhas continuavam desenhadas, e o cliente lia tres numeros que nao fecham
+       (Total 0,00 / Sinal 100,00 / Saldo 0,00, com sinal em valor FIXO). Ninguem chega a pagar
+       esse numero: as duas pontas recusam pela recusa de total zero. Era defeito de LEITURA.
+       O conserto e de TELA e nao mexe na conta: sinalAgora/saldoDepois/sinalRecusa sao fonte unica
+       consumida por varios lugares, e trocar risco de dinheiro por um caso de tela seria mau
+       negocio. O que some e informacao FALSA, nao um aviso. */
+    c+='var haPagar=total()>=0.01;\n';
+    c+="raiz.querySelector('.fcu-sinal').style.display=haPagar?'':'none';\n";
+    c+="raiz.querySelector('.fcu-saldo').style.display=haPagar?'':'none';\n";
     c+="raiz.querySelector('.fcu-sinal-v').textContent=moedaFmt(sinalAgora());\n";
     c+="raiz.querySelector('.fcu-saldo-v').textContent=moedaFmt(saldoDepois());\n";
     c+='var rec=sinalRecusa();\n';
@@ -14781,8 +14793,11 @@ function uBloco(cfg){
     if(usaSinal){
       /* pedido que as duas pontas de pagamento recusam nao pode sair do resumo como pedido
          valido: era o unico elemento visivel que nao respeitava a recusa. */
+      /* O resumo segue a mesma regra da tela (13/09/2026): com o total em zero ele nao imprime
+         sinal nem saldo -- antes repetia os tres numeros que nao fecham. */
       c+='var recR=sinalRecusa();\n';
-      c+='if(recR){\n';
+      c+='if(total()<0.01){\n';
+      c+='}else if(recR){\n';
       c+="L.push(TXT_SINAL_RECUSADO.toUpperCase()+': '+recR);\n";
       c+='}else{\n';
       c+="L.push(TXT_SINAL+': '+moedaFmt(sinalAgora()));\n";
@@ -18970,7 +18985,7 @@ function aBlocoObrigado(cfg){
     c+='var qtdsOp=[];\n';
     c+='function qtdOp(j){var q=qtdsOp[j];return (q==null)?1:q;}\n';
   }
-  c+='var elValor,elLinha2,elParcela,elDescLinha,elDescTxt,elDescVal,elDescP'+(usaSinal?',elSinalV,elSaldoV,elSinalAviso':'')+(temMin?',elCupomMsg':'')+';\n';
+  c+='var elValor,elLinha2,elParcela,elDescLinha,elDescTxt,elDescVal,elDescP'+(usaSinal?',elSinal,elSaldo,elSinalV,elSaldoV,elSinalAviso':'')+(temMin?',elCupomMsg':'')+';\n';
   c+='var pixEsconder=null;\n\n';
   c+=FC_CARRINHO_SRC.descontoAtual;
   c+=FC_CARRINHO_SRC.total;
@@ -19133,7 +19148,7 @@ function aBlocoObrigado(cfg){
     c+='  var sdv=document.createElement("span");sd.appendChild(sdv);\n';
     c+='  cartao.appendChild(sd);\n';
     c+='  var sav=document.createElement("div");sav.className="fca-ob-sinal-aviso";cartao.appendChild(sav);\n';
-    c+='  elSinalV=slv;elSaldoV=sdv;elSinalAviso=sav;\n';
+    c+='  elSinal=sl;elSaldo=sd;elSinalV=slv;elSaldoV=sdv;elSinalAviso=sav;\n';
   }
   c+='}\n\n';
 
@@ -19171,6 +19186,18 @@ function aBlocoObrigado(cfg){
     c+='  if(elLinha2)elLinha2.textContent='+fcaFnSegundo(aPrioEfetivo(cfg))+'(total());\n';
   }
   if(usaSinal){
+    /* PEDIDO EM ZERO (13/09/2026): as linhas do sinal e do saldo so existem quando ha o que
+       pagar. Com o total em zero a primeira guarda de sinalRecusa() devolve VAZIO de proposito --
+       quem avisa ali e a guarda de total zero, e dois avisos ao mesmo tempo se esconderiam --, mas
+       as duas linhas continuavam desenhadas, e o cliente lia tres numeros que nao fecham
+       (Total 0,00 / Sinal 100,00 / Saldo 0,00, com sinal em valor FIXO). Ninguem chega a pagar
+       esse numero: as duas pontas recusam pela recusa de total zero. Era defeito de LEITURA.
+       O conserto e de TELA e nao mexe na conta: sinalAgora/saldoDepois/sinalRecusa sao fonte unica
+       consumida por varios lugares, e trocar risco de dinheiro por um caso de tela seria mau
+       negocio. O que some e informacao FALSA, nao um aviso. */
+    c+='  var haPagar=total()>=0.01;\n';
+    c+='  if(elSinal)elSinal.style.display=haPagar?\'\':\'none\';\n';
+    c+='  if(elSaldo)elSaldo.style.display=haPagar?\'\':\'none\';\n';
     c+='  if(elSinalV)elSinalV.textContent=moedaFmt(sinalAgora());\n';
     c+='  if(elSaldoV)elSaldoV.textContent=moedaFmt(saldoDepois());\n';
     c+='  if(elSinalAviso){\n';
@@ -23877,6 +23904,18 @@ function mBlocoPagar(cfg,usaPP,usaPix,usaQtd,usaSinal,usaResumo,descpix,zap,usaC
   if(temMin)c+='if(cupomAtivo&&!cupomMinimoOk(cupomAtivo)){var cpFora=cupomAtivo;cupomAtivo=null;msgCupom(TXT_CUPOM_MINIMO_QUEDA.replace(/\\{valor\\}/g,moedaFmt(cpFora.minimo)),false);}\n';
   c+="raiz.querySelector('.fcm-total-v').textContent=moedaFmt(total());\n";
   if(usaSinal){
+    /* PEDIDO EM ZERO (13/09/2026): as linhas do sinal e do saldo so existem quando ha o que
+       pagar. Com o total em zero a primeira guarda de sinalRecusa() devolve VAZIO de proposito --
+       quem avisa ali e a guarda de total zero, e dois avisos ao mesmo tempo se esconderiam --, mas
+       as duas linhas continuavam desenhadas, e o cliente lia tres numeros que nao fecham
+       (Total 0,00 / Sinal 100,00 / Saldo 0,00, com sinal em valor FIXO). Ninguem chega a pagar
+       esse numero: as duas pontas recusam pela recusa de total zero. Era defeito de LEITURA.
+       O conserto e de TELA e nao mexe na conta: sinalAgora/saldoDepois/sinalRecusa sao fonte unica
+       consumida por varios lugares, e trocar risco de dinheiro por um caso de tela seria mau
+       negocio. O que some e informacao FALSA, nao um aviso. */
+    c+='var haPagar=total()>=0.01;\n';
+    c+="raiz.querySelector('.fcm-sinal').style.display=haPagar?'':'none';\n";
+    c+="raiz.querySelector('.fcm-saldo').style.display=haPagar?'':'none';\n";
     c+="raiz.querySelector('.fcm-sinal-v').textContent=moedaFmt(sinalAgora());\n";
     c+="raiz.querySelector('.fcm-saldo-v').textContent=moedaFmt(saldoDepois());\n";
     c+='var rec=sinalRecusa();\n';
@@ -23940,8 +23979,11 @@ function mBlocoPagar(cfg,usaPP,usaPix,usaQtd,usaSinal,usaResumo,descpix,zap,usaC
     }
     c+="L.push(TXT_TOTAL+': '+moedaFmt(total()));\n";
     if(usaSinal){
+      /* O resumo segue a mesma regra da tela (13/09/2026): com o total em zero ele nao imprime
+         sinal nem saldo -- antes repetia os tres numeros que nao fecham. */
       c+='var recR=sinalRecusa();\n';
-      c+='if(recR){\n';
+      c+='if(total()<0.01){\n';
+      c+='}else if(recR){\n';
       c+="L.push(TXT_SINAL_RECUSADO.toUpperCase()+': '+recR);\n";
       c+='}else{\n';
       c+="L.push(TXT_SINAL+': '+moedaFmt(sinalAgora()));\n";

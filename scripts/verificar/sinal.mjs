@@ -297,6 +297,7 @@ async function gerar(cfg){
 const lerTudo = pref => pg => pg.evaluate(pref => {
   const q = s => document.querySelector('.'+pref+'-'+s);
   const txt = s => { const e=q(s); return e ? e.textContent.trim() : null; };
+  const vis = el => !!(el && (el.offsetWidth || el.offsetHeight || el.getClientRects().length));
   function ppClique(){
     if(!window.__pp || !window.__pp.onClick) return null;
     try{ return window.__pp.onClick(null,{reject:()=>'REJEITADO', resolve:()=>'SEGUIU'}); }
@@ -320,6 +321,11 @@ const lerTudo = pref => pg => pg.evaluate(pref => {
     sinalTxt: txt('sinal-v'),
     saldoRot: txt('saldo-t'),
     saldoTxt: txt('saldo-v'),
+    /* VISIVEL e medido pela caixa (offsetParent + altura), e nao por getComputedStyle: o
+       display computado de um elemento dentro de um ancestral display:none continua sendo o
+       DELE, e mediria errado exatamente no caso em que quem esconde e outro. */
+    sinalVis: vis(q('sinal')),
+    saldoVis: vis(q('saldo')),
     aviso:    txt('sinal-aviso'),
     avisoOn:  !!(q('sinal-aviso') && /\bon\b/.test(q('sinal-aviso').className)),
     resumo:   res ? res.value : null,
@@ -487,19 +493,23 @@ for(const cfg of CONFIGS){
           chk(tag+'4. o clique do PayPal e REJEITADO', d.ppClique==='REJEITADO', String(d.ppClique));
           chk(tag+'4. a linha vermelha do sinal fica APAGADA (decisao registrada na fonte)',
               d.avisoOn===false, 'aviso="'+d.aviso+'"');
-          /* ===== O QUE A TELA MOSTRA NESSE ESTADO -- impresso, NAO congelado em assercao =====
-             Com o pedido em zero e sinal FIXO, sinalRecusa() devolve vazio (primeira guarda),
-             entao a linha do sinal continua imprimindo o valor fixo e o resumo copiavel o
-             repete: o cliente le "Total R$ 0,00 / sinal R$ 100,00 / saldo R$ 0,00", tres
-             numeros que nao fecham entre si, e sem nenhum aviso. As DUAS pontas de pagamento
-             recusam (pela recusa de total zero, verificada logo acima), entao ninguem chega a
-             pagar esse numero -- o defeito, se for um, e de LEITURA e nao de cobranca.
-             Nao vira assercao de proposito: congelar o comportamento de hoje faria a correcao
-             futura falhar como se fosse regressao, e mexer na recusa e da classe que precisa
-             de uma palavra do dono antes. Fica impresso, para a rodada seguinte decidir. */
-          console.log('  ..    ACHADO '+tag+'pedido em zero: total='+d.totalTxt+
-                      '  '+d.sinalRot+'='+d.sinalTxt+'  '+d.saldoRot+'='+d.saldoTxt+
-                      '  | fim do resumo: '+JSON.stringify((d.resumo||'').split('\n').slice(-3)));
+          /* ===== O PEDIDO EM ZERO, AGORA COM REGRA ===== (13/09/2026)
+             Ate esta data o estado era apenas IMPRESSO: com o pedido em zero sinalRecusa() devolve
+             vazio (primeira guarda, de proposito -- quem avisa e a recusa de total zero, e dois
+             avisos se esconderiam), e as linhas continuavam desenhadas. O cliente lia tres numeros
+             que nao fecham, sem aviso. Nunca foi defeito de cobranca -- as duas pontas recusam, o
+             que as assercoes acima verificam -- e sim de LEITURA. O dono autorizou a correcao: as
+             linhas do sinal e do saldo so existem quando ha o que pagar. Conserto de TELA, que nao
+             toca a conta. */
+          chk(tag+'5. a linha do SINAL nao aparece com o pedido em zero',
+              d.sinalVis===false, 'sinal="'+d.sinalTxt+'" visivel='+d.sinalVis);
+          chk(tag+'5. a linha do SALDO nao aparece com o pedido em zero',
+              d.saldoVis===false, 'saldo="'+d.saldoTxt+'" visivel='+d.saldoVis);
+          chk(tag+'5. o TOTAL continua aparecendo -- o que some e o numero falso, nao o aviso',
+              /0,00/.test(String(d.totalTxt)), String(d.totalTxt));
+          chk(tag+'5. o resumo copiavel nao imprime sinal nem saldo',
+              !d.resumo || (d.resumo.indexOf(TXT.sinal)<0 && d.resumo.indexOf(TXT.saldo)<0),
+              JSON.stringify((d.resumo||'').split('\n').slice(-3)));
         }else{
           chk(tag+'4. a linha vermelha do carrinho acende com a frase certa',
               d.avisoOn===true && d.aviso===frase, 'aviso="'+d.aviso+'" on='+d.avisoOn);
@@ -861,6 +871,7 @@ async function gerarPac(cfg){
 const lerPac = pg => pg.evaluate(() => {
   const q = s => document.querySelector(s);
   const txt = s => { const e=q(s); return e ? e.textContent.trim() : null; };
+  const vis = el => !!(el && (el.offsetWidth || el.offsetHeight || el.getClientRects().length));
   const filho = (s,i) => { const e=q(s); return (e && e.children[i]) ? e.children[i].textContent.trim() : null; };
   function ppClique(){
     if(!window.__pp || !window.__pp.onClick) return null;
@@ -886,6 +897,7 @@ const lerPac = pg => pg.evaluate(() => {
     sinalRot: filho('.fca-ob-sinal',0), sinalTxt: filho('.fca-ob-sinal',1),
     saldoRot: filho('.fca-ob-saldo',0), saldoTxt: filho('.fca-ob-saldo',1),
     temSinal: !!q('.fca-ob-sinal'), temSaldo: !!q('.fca-ob-saldo'),
+    sinalVis: vis(q('.fca-ob-sinal')), saldoVis: vis(q('.fca-ob-saldo')),
     aviso:    av ? av.textContent.trim() : null,
     avisoOn:  !!(av && /\bon\b/.test(av.className)),
     /* A LINHA DA PARCELA e o irmao seguinte da caixa dos botoes do cartao -- e assim
@@ -1057,8 +1069,26 @@ for(const rod of A_RODADAS){
         chk(tag+'4. o clique do cartao e REJEITADO', d.ppClique==='REJEITADO', String(d.ppClique));
         chk(tag+'4. a linha vermelha do sinal fica APAGADA (decisao registrada na fonte)',
             d.avisoOn===false, 'aviso="'+d.aviso+'"');
-        console.log('  ..    ACHADO '+tag+'pedido em zero: total='+d.totalTxt+
-                    '  '+d.sinalRot+'='+d.sinalTxt+'  '+d.saldoRot+'='+d.saldoTxt);
+        /* ===== O PEDIDO EM ZERO, AGORA COM REGRA ===== (13/09/2026)
+           Ate esta data o estado era apenas IMPRESSO: com o pedido em zero sinalRecusa() devolve
+           vazio (primeira guarda, de proposito -- quem avisa e a recusa de total zero, e dois
+           avisos se esconderiam), e as linhas continuavam desenhadas. O cliente lia tres numeros
+           que nao fecham, sem aviso. Nunca foi defeito de cobranca -- as duas pontas recusam, o
+           que as assercoes acima verificam -- e sim de LEITURA. O dono autorizou a correcao: as
+           linhas do sinal e do saldo so existem quando ha o que pagar. Conserto de TELA, que nao
+           toca a conta. */
+        /* A FRONTEIRA (total() >= 0.01) NAO TEM TESTE PROPRIO, e a ausencia e medida, nao
+           esquecimento: total() ja vem arredondado em centavos (Math.round(x*100)/100), entao
+           nao existe valor entre zero e um centavo, e '>0' e '>=0.01' sao indistinguiveis na
+           pratica. Um teste na fronteira nao provaria nada que estes dois casos nao provem --
+           o carrinho VAZIO (total exatamente 0) esconde, e o caso de R$ 0,49 mostra, o que ja
+           derruba qualquer limiar acima de um centavo. */
+        chk(tag+'5. a linha do SINAL nao aparece com o pedido em zero',
+            d.sinalVis===false, 'sinal="'+d.sinalTxt+'" visivel='+d.sinalVis);
+        chk(tag+'5. a linha do SALDO nao aparece com o pedido em zero',
+            d.saldoVis===false, 'saldo="'+d.saldoTxt+'" visivel='+d.saldoVis);
+        chk(tag+'5. o TOTAL continua aparecendo',
+            /0,00/.test(String(d.totalTxt)), String(d.totalTxt));
       }else{
         chk(tag+'4. a linha vermelha acende com a frase certa',
             d.avisoOn===true && d.aviso===frase, 'aviso="'+d.aviso+'" on='+d.avisoOn);
