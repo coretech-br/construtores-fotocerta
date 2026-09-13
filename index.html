@@ -183,6 +183,9 @@
   select:focus{outline:none;border-color:var(--verde)}
 
   .radios{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+  /* MEIO PRIORITARIO COM UM MEIO SO: visivel e desligado, nunca escondido -- ver fcOrdSo1. */
+  .fcord-off{opacity:.55}
+  .fcord-off label{cursor:not-allowed}
   .radios input{position:absolute;opacity:0;pointer-events:none}
   .radios span{display:inline-block;border:1px solid var(--linha);border-radius:999px;padding:6px 14px;
     font-size:13px;cursor:pointer;background:#fff;color:var(--tinta-suave)}
@@ -1606,6 +1609,16 @@
           <label><input type="radio" name="u-metodo" value="pix"><span>Somente Pix</span></label>
         </div>
         <p class="ajuda">O código gerado carrega apenas o necessário para as formas escolhidas. Com Pix ativo, a moeda é fixa em reais (o Pix só existe em BRL); somente com PayPal, você pode escolher a moeda.</p>
+        <div id="u-prio-campo">
+          <label>Meio de pagamento prioritário</label>
+          <div class="radios">
+            <label><input type="radio" name="u-prio" value="pix" checked><span>Pix primeiro</span></label>
+            <label><input type="radio" name="u-prio" value="pp"><span>PayPal primeiro</span></label>
+          </div>
+          <p class="ajuda">Decide <b>as duas coisas juntas</b>: a ordem em que os meios aparecem no bloco <b>e</b> qual preço fica em destaque. É um campo só de propósito — separados, dava para publicar um Pix em cima com o preço do cartão grande. <b>O outro preço continua à vista</b>, na linha menor, para o cliente nunca ser surpreendido na hora de pagar.</p>
+          <p class="ajuda" id="u-prio-so1" style="display:none"><b>Com um meio só não há ordem a escolher.</b> A opção volta a valer quando você escolher os dois meios. O que você marcou aqui fica guardado.</p>
+          <p class="ajuda alerta" id="u-prio-manual" style="display:none"></p>
+        </div>
       </fieldset>
 
       <fieldset>
@@ -1678,7 +1691,7 @@
         <label for="u-descpix">Percentual de desconto no Pix <small>(0 = sem desconto; aplica sobre o total já com cupom)</small></label>
         <input type="number" id="u-descpix" value="10" min="0" max="90" step="0.5">
         <p class="ajuda alerta" id="u-descpix-aviso"><b>Com a cobrança de sinal ligada este campo não vale.</b> O Pix passa a cobrar o sinal, e o desconto do Pix não se aplica sobre o sinal — seria desconto dobrado, porque o sinal já sai de um total que pode ter cupom. O número acima fica guardado, mas <b>não entra no código gerado</b> nem aparece no carrinho enquanto o sinal estiver ligado. Para usar o desconto do Pix, volte a cobrar o valor cheio.</p>
-        <p class="ajuda">Com desconto ativo, o carrinho mostra a linha verde <b>"Pagando via Pix (-10%)"</b> abaixo do total, o separador vira <b>"ou pague com Pix com 10% de desconto"</b> e o Pix é gerado já com o valor reduzido. O PayPal continua cobrando o total sem esse desconto.</p>
+        <p class="ajuda">Com desconto ativo, o carrinho mostra a linha <b>"Pagando via Pix (-10%)"</b> abaixo do total e o Pix é gerado já com o valor reduzido. <b>O PayPal continua cobrando o total sem esse desconto</b> — por isso os dois números ficam à vista. Qual deles aparece maior, e qual meio vem primeiro, é o <b>meio prioritário</b> da seção 1; o separador acompanha a escolha.</p>
       </fieldset>
 
       <fieldset id="u-zap-fieldset">
@@ -1884,10 +1897,11 @@
     <div>
       <fieldset>
         <legend>Pagamento pelo Pix</legend>
-        <label for="u-txt-ou">Separador entre PayPal e Pix</label>
-        <input type="text" id="u-txt-ou" value="ou pague com Pix">
+        <label for="u-txt-ou">Separador entre os dois meios de pagamento</label>
+        <input type="text" id="u-txt-ou" value="ou pague com cartão">
         <label for="u-txt-ou-desc">Separador quando há desconto no Pix</label>
-        <input type="text" id="u-txt-ou-desc" value="ou pague com Pix com {pct}% de desconto">
+        <input type="text" id="u-txt-ou-desc" value="ou pague com cartão, sem o desconto de {pct}%">
+        <p class="ajuda">Os dois separadores apontam para o meio que vem <b>depois</b> deles. Ao trocar o <b>meio prioritário</b> (seção 1), a ferramenta vira os dois — mas só enquanto estiverem no padrão de fábrica; texto que você escreveu fica como está, e aí é você quem ajusta.</p>
         <label for="u-txt-pix-instrucao">Instrução de pagamento</label>
         <input type="text" id="u-txt-pix-instrucao" value="Abra o app do seu banco e pague pelo QR Code ou Pix Copia e Cola">
         <label for="u-txt-pixval">Rótulo do valor no Pix <small>(os dois-pontos são acrescentados pelo bloco)</small></label>
@@ -2695,6 +2709,16 @@
       <label><input type="radio" name="p-usapp" value="sim" checked><span>Sim</span></label>
       <label><input type="radio" name="p-usapp" value="nao"><span>Não — só Pix</span></label>
       </div>
+      <div id="p-prio-campo">
+        <label>Meio de pagamento prioritário</label>
+        <div class="radios">
+          <label><input type="radio" name="p-prio" value="pix" checked><span>Pix primeiro</span></label>
+          <label><input type="radio" name="p-prio" value="pp"><span>PayPal primeiro</span></label>
+        </div>
+        <p class="ajuda">Decide <b>as duas coisas juntas</b>: a ordem em que os meios aparecem no bloco <b>e</b> qual preço fica em destaque. É um campo só de propósito — separados, dava para publicar um Pix em cima com o preço do cartão grande. <b>O outro preço continua à vista</b>, na linha menor, para o cliente nunca ser surpreendido na hora de pagar.</p>
+        <p class="ajuda" id="p-prio-so1" style="display:none"><b>Com um meio só não há ordem a escolher.</b> A opção volta a valer quando você escolher os dois meios. O que você marcou aqui fica guardado.</p>
+        <p class="ajuda alerta" id="p-prio-manual" style="display:none"></p>
+      </div>
       <div id="p-pp-campos">
       <p class="ajuda"><b>O Client ID saiu desta aba</b> e está no painel <b>Identidade</b>, no topo da página. <span class="acoes"><button type="button" class="botao mini claro fci-ir">Abrir Identidade</button></span></p>
       <label>Cor do botão PayPal</label>
@@ -2706,7 +2730,7 @@
       <label><input type="radio" name="p-ppcor" value="black"><span>Preto</span></label>
       </div>
       <p class="ajuda alerta"><b>O botão do PayPal no site é adulterável de um jeito que o Pix não é.</b> No Pix, o valor que a tela mostra é lido de dentro do mesmo código que o aplicativo do banco vai ler: os dois não têm como discordar. No botão do PayPal o valor é calculado no navegador do cliente e a tela pode dizer uma coisa enquanto a ordem leva outra. No botão do PayPal o valor é calculado no navegador do cliente: quem souber mexer paga o que quiser. Para valor alto, use o segundo modo — <b>colar um link de cobrança criado no próprio PayPal</b>, na seção 3: ali o valor fica guardado no PayPal e o cliente não alcança. A escolha é por cobrança.</p>
-      <label for="p-txt-ou">Separador entre Pix e PayPal</label>
+      <label for="p-txt-ou">Separador entre os dois meios de pagamento</label>
       <input type="text" id="p-txt-ou" value="OU">
       <label for="p-txt-secao-paypal">Rótulo da seção do PayPal</label>
       <input type="text" id="p-txt-secao-paypal" value="PayPal, cartão de crédito ou débito">
@@ -2769,6 +2793,10 @@
       <input type="text" id="p-txt-ref" value="Identificador da cobrança: ">
       <label for="p-txt-pixrotulo">Linha do valor com desconto no Pix</label>
       <input type="text" id="p-txt-pixrotulo" value="Pagando via Pix (-{pct}%)">
+      <p class="ajuda">Com o <b>cartão</b> como meio prioritário, esta é a linha menor abaixo do total. Com o <b>Pix</b> como prioritário, ela vira o <b>rótulo do valor em destaque</b> — e o total aparece na linha de baixo, pelo campo seguinte.</p>
+      <label for="p-txt-cartaolinha">Linha do valor cheio, com o Pix em destaque</label>
+      <input type="text" id="p-txt-cartaolinha" value="ou {valor} no cartão">
+      <p class="ajuda">Só aparece quando o <b>Pix</b> é o meio prioritário e a cobrança tem desconto. É ela que mantém o <b>valor cheio à vista</b> — que é o que o PayPal cobra.</p>
       <label for="p-txt-copiado">Código Pix copiado com sucesso</label>
       <input type="text" id="p-txt-copiado" value="Código copiado! Cole no aplicativo do seu banco.">
       <label for="p-txt-naocopiou">Não foi possível copiar o código Pix</label>
@@ -2915,7 +2943,7 @@
   <h3>Instrução de uso do código gerado</h3>
   <p class="ajuda"><b>Uma vez só:</b> crie no Prosite uma página fixa (sugestão: <code>/pagar</code>), ponha nela um <b>componente HTML</b> e cole ali o <b>código 1</b>. Publique. Não há nada para colar na Tag Head nem na Tag Body.</p>
   <p class="ajuda"><b>O endereço da página, inteiro.</b> Na seção 2, escreva o endereço <b>completo</b> onde você colou o código 1 — com <code>https://</code> e o domínio. O link vai colado numa conversa de WhatsApp, fora do site, e ali um caminho como <code>/pagar</code> não abre nada. A ferramenta recusa o caminho solto; e se você já tinha <code>/pagar</code> guardado, ela <b>avisa e não troca sozinha</b> — ela não tem como saber qual é o seu domínio.</p>
-  <p class="ajuda"><b>Desconto no Pix, quando você quiser dar um.</b> Com desconto a cobrança passa a ter dois valores: o <b>total</b> (que é o que o PayPal cobra e o que aparece em destaque no cartão) e o <b>valor do Pix</b> (total menos o desconto, e é ele que está dentro do código copia e cola). O link carrega o total num parâmetro próprio, <b>coberto pelo selo</b>, e a página <b>refaz a conta</b>: se o valor do Pix não for exatamente o total menos o desconto — pela mesma regra de arredondamento da ferramenta —, ela recusa a cobrança. São duas redes, não uma: o selo pega o parâmetro editado, e a conferência da conta pega o que passar pelo selo. <b>Antes do primeiro link com desconto, cole o código 1 novo:</b> um código 1 gerado antes desta versão não sabe conferir essa conta e vai recusar. É uma vez só — o código 1 desta versão já leva a conta dentro dele, tenha ou não desconto configurado, então depois disso trocar o percentual não pede nada de você. Links sem desconto continuam funcionando nos dois.</p>
+  <p class="ajuda"><b>Desconto no Pix, quando você quiser dar um.</b> Com desconto a cobrança passa a ter dois valores: o <b>total</b> (que é o que o PayPal cobra) e o <b>valor do Pix</b> (total menos o desconto, e é ele que está dentro do código copia e cola). O link carrega o total num parâmetro próprio, <b>coberto pelo selo</b>, e a página <b>refaz a conta</b>: se o valor do Pix não for exatamente o total menos o desconto — pela mesma regra de arredondamento da ferramenta —, ela recusa a cobrança. São duas redes, não uma: o selo pega o parâmetro editado, e a conferência da conta pega o que passar pelo selo. <b>Antes do primeiro link com desconto, cole o código 1 novo:</b> um código 1 gerado antes desta versão não sabe conferir essa conta e vai recusar. É uma vez só — o código 1 desta versão já leva a conta dentro dele, tenha ou não desconto configurado, então depois disso trocar o percentual não pede nada de você. Links sem desconto continuam funcionando nos dois.</p>
   <p class="ajuda"><b>A cada cobrança:</b> preencha a seção 3 (descrição, valor e, se quiser, um identificador, uma data de validade e um desconto no Pix), clique em <b>Gerar link desta cobrança</b> e mande o <b>código 2</b> ao cliente. Você pode ter <b>quantas cobranças quiser abertas ao mesmo tempo</b>: a página não guarda nada, lê tudo do endereço.</p>
   <p class="ajuda"><b>O que a página garante, dito sem exagero.</b> O link carrega o código Pix já pronto, com o valor dentro dele, e um <b>selo</b> calculado sobre todos os parâmetros do endereço. A página confere o selo, confere a verificação interna do código, remonta o código a partir dos <b>seus</b> dados de recebedor e só exibe a cobrança se tudo fechar. Aí ela lê o valor <b>de dentro do código</b> e usa esse mesmo valor na tela e no botão do PayPal. Disso saem quatro garantias e um limite:</p>
   <p class="ajuda">1. <b>Tela, Pix e PayPal não podem divergir</b>, porque leem o mesmo lugar — não existe um segundo parâmetro de valor para ficar desatualizado.<br>2. <b>Link editado é recusado:</b> mudar um caractere da descrição, um dígito da data, o código Pix ou o link do PayPal quebra o selo. <b>Apagar</b> qualquer um deles, ou apagar o próprio selo, também.<br>3. <b>Link com a chave de outra pessoa é recusado:</b> a remontagem não fecha, então ninguém usa a sua página de pagamento para receber na conta dele.<br>4. <b>O link do PayPal não pode ser trocado no caminho.</b> Antes do selo, esse parâmetro só precisava continuar sendo um endereço do PayPal — o que aceitava a cobrança de <b>outra conta</b>. Era a única porta do link que levava dinheiro para fora, e o selo a fechou.</p>
@@ -2942,6 +2970,16 @@
           <label><input type="radio" name="m-metodo" value="ambos" checked><span>PayPal <b>e</b> Pix</span></label>
           <label><input type="radio" name="m-metodo" value="paypal"><span>Somente PayPal</span></label>
           <label><input type="radio" name="m-metodo" value="pix"><span>Somente Pix</span></label>
+        </div>
+        <div id="m-prio-campo">
+          <label>Meio de pagamento prioritário</label>
+          <div class="radios">
+            <label><input type="radio" name="m-prio" value="pix" checked><span>Pix primeiro</span></label>
+            <label><input type="radio" name="m-prio" value="pp"><span>PayPal primeiro</span></label>
+          </div>
+          <p class="ajuda">Decide <b>as duas coisas juntas</b>: a ordem em que os meios aparecem no bloco <b>e</b> qual preço fica em destaque. É um campo só de propósito — separados, dava para publicar um Pix em cima com o preço do cartão grande. <b>O outro preço continua à vista</b>, na linha menor, para o cliente nunca ser surpreendido na hora de pagar.</p>
+          <p class="ajuda" id="m-prio-so1" style="display:none"><b>Com um meio só não há ordem a escolher.</b> A opção volta a valer quando você escolher os dois meios. O que você marcou aqui fica guardado.</p>
+          <p class="ajuda alerta" id="m-prio-manual" style="display:none"></p>
         </div>
         <label for="m-cod">Código desta loja <small>(letras sem acento, números, hífen e sublinhado)</small></label>
         <input type="text" id="m-cod" value="LOJA" placeholder="LOJAFOTOS">
@@ -3298,10 +3336,11 @@
       </fieldset>
       <fieldset>
         <legend>Pagamento pelo Pix</legend>
-        <label for="m-txt-ou">Separador entre PayPal e Pix</label>
-        <input type="text" id="m-txt-ou" value="ou pague com Pix">
+        <label for="m-txt-ou">Separador entre os dois meios de pagamento</label>
+        <input type="text" id="m-txt-ou" value="ou pague com cartão">
         <label for="m-txt-ou-desc">Separador quando há desconto no Pix</label>
-        <input type="text" id="m-txt-ou-desc" value="ou pague com Pix com {pct}% de desconto">
+        <input type="text" id="m-txt-ou-desc" value="ou pague com cartão, sem o desconto de {pct}%">
+        <p class="ajuda">Os dois separadores apontam para o meio que vem <b>depois</b> deles. Ao trocar o <b>meio prioritário</b> (seção 1), a ferramenta vira os dois — mas só enquanto estiverem no padrão de fábrica; texto que você escreveu fica como está.</p>
         <label for="m-txt-pix-instrucao">Instrução de pagamento</label>
         <input type="text" id="m-txt-pix-instrucao" value="Abra o app do seu banco e pague pelo QR Code ou Pix Copia e Cola">
         <label for="m-txt-pixval">Rótulo do valor no Pix <small>(os dois-pontos são acrescentados pelo bloco)</small></label>
@@ -3593,6 +3632,16 @@
           <label><input type="radio" name="a-metodo" value="pix"><span>Somente Pix</span></label>
         </div>
         <p class="ajuda">O código gerado carrega apenas o necessário para a forma escolhida: com "somente Pix" o bloco não pede Client ID nem carrega o SDK do cartão; com "somente PayPal" ele não pede chave Pix nem carrega a maquinaria do Pix.</p>
+        <div id="a-prio-campo">
+          <label>Meio de pagamento prioritário</label>
+          <div class="radios">
+            <label><input type="radio" name="a-prio" value="pix" checked><span>Pix primeiro</span></label>
+            <label><input type="radio" name="a-prio" value="pp"><span>Cartão primeiro</span></label>
+          </div>
+          <p class="ajuda">Decide <b>as duas coisas juntas</b>: a ordem em que os meios aparecem no bloco <b>e</b> qual preço fica em destaque. É um campo só de propósito — separados, dava para publicar um Pix em cima com o preço do cartão grande. <b>O outro preço continua à vista</b>, na linha menor, para o cliente nunca ser surpreendido na hora de pagar.</p>
+          <p class="ajuda" id="a-prio-so1" style="display:none"><b>Com um meio só não há ordem a escolher.</b> A opção volta a valer quando você escolher os dois meios. O que você marcou aqui fica guardado.</p>
+          <p class="ajuda alerta" id="a-prio-manual" style="display:none"></p>
+        </div>
       </fieldset>
       <fieldset>
         <legend>Pagamento</legend>
@@ -3944,7 +3993,7 @@
         <input type="text" id="a-txt-pix-copiado" value="Código copiado! Cole no aplicativo do seu banco.">
         <label for="a-txt-pix-naocopiou">Não foi possível copiar</label>
         <input type="text" id="a-txt-pix-naocopiou" value="Não consegui copiar. Selecione o código acima e copie na mão.">
-        <label for="a-txt-ou">Separador entre Pix e cartão</label>
+        <label for="a-txt-ou">Separador entre os dois meios de pagamento</label>
         <input type="text" id="a-txt-ou" value="OU">
         <label for="a-txt-cartao-rotulo">Rótulo da seção do cartão</label>
         <input type="text" id="a-txt-cartao-rotulo" value="Cartão de crédito ou débito">
@@ -4269,6 +4318,32 @@ function aTplJs(q,texto,pares,sep){
    O que NAO entra aqui e o que so parece igual: 'Desconto' sai sem o codigo do cupom na aba
    pac e com ele nas duas abas grandes (decisao D-3), e o aviso de sinal maior que o total fala
    em "carrinho" no Checkout e em "pedido" na Mini loja. Frase parecida nao e frase unica. */
+/* ===== OS PARES DE FABRICA QUE DEPENDEM DA ORDEM DOS MEIOS DE PAGAMENTO =====
+   Rodada do meio prioritario (12/09/2026). As quatro abas de pagamento passaram a ter UM campo
+   "meio prioritario" (Pix ou cartao) que decide, JUNTAS, a ordem em que os dois meios aparecem
+   no bloco e qual preco fica em destaque -- um controle so, e nao dois, para nao existir estado
+   incoerente (Pix em cima com o preco do cartao grande).
+   Frase que APONTA para o outro meio ("ou pague com Pix", "Use o Pix acima") nao tem um padrao
+   de fabrica: tem DOIS, um por ordem. Escrever um so e escolher em qual das duas ordens a
+   ferramenta vai mentir. A terceira coluna das tabelas de texto continua sendo UMA string -- a
+   do padrao de fabrica da ordem de fabrica ('pix') --, e por isso fcTxtFabricaDiverge nao muda:
+   ela compara o value= do <input> com essa mesma string.
+   Quem troca uma pela outra e fcOrdVirar, no momento em que o dono mexe no radio, e SO quando o
+   campo ainda esta exatamente na fabrica da ordem anterior. Texto que o dono escreveu nunca e
+   tocado -- ver o comentario de fcOrdVirar. */
+var FC_ORD_PARES={
+  ou:{pix:'ou pague com cartão',pp:'ou pague com Pix'},
+  ouDesc:{pix:'ou pague com cartão, sem o desconto de {pct}%',pp:'ou pague com Pix com {pct}% de desconto'},
+  cartaoLinha:{pix:'ou {valor} no cartão',pp:'ou {valor} no Pix'},
+  erroComPix:{pix:'Não foi possível carregar o pagamento por cartão agora. Use o Pix acima, ou fale com a gente para receber outra forma de pagar.',
+              pp:'Não foi possível carregar o pagamento por cartão agora. Use o Pix abaixo, ou fale com a gente para receber outra forma de pagar.'},
+  paypalFora:{pix:'Não foi possível carregar o PayPal agora. Use o Pix acima, ou fale com a gente para receber outro link.',
+              pp:'Não foi possível carregar o PayPal agora. Use o Pix abaixo, ou fale com a gente para receber outro link.'}
+};
+/* A ORDEM DE FABRICA, escrita UMA vez. Decisao do dono (12/09/2026): Pix. Configuracao ja
+   gravada que nao tenha o campo cai aqui -- e por isso um bloco antigo, ao ser REGERADO, sai na
+   ordem nova. E o efeito pretendido, nao um acidente. */
+var FC_ORD_FABRICA='pix';
 var FC_TXT_FABRICA={
   cupomRotulo:'Cupom de desconto',
   cupomBotao:'Aplicar',
@@ -4290,11 +4365,12 @@ var FC_TXT_FABRICA={
   sinalZero:'O sinal deste pedido arredonda para zero. Escolha mais itens ou aumente a quantidade.',
   sinalRecusado:'pedido recusado',
   totalZero:'Escolha ao menos um item: o pedido está em zero.',
-  ou:'ou pague com Pix',
+  ou:FC_ORD_PARES.ou.pix,
   /* {pct} minusculo desde 03/09/2026 (decisao D-1): a Etapa 1 adotou {pct}/{valor}/{n}/{data}
      e este era o unico marcador em MAIUSCULAS da ferramenta. A troca no bloco gerado aceita as
      DUAS grafias (regex /i), para configuracao ja gravada com {PCT} continuar funcionando. */
-  ouDesc:'ou pague com Pix com {pct}% de desconto',
+  ouDesc:FC_ORD_PARES.ouDesc.pix,
+  cartaoLinha:FC_ORD_PARES.cartaoLinha.pix,
   pixVal:'Valor no Pix',
   pixCopiado:'Código copiado!',
   zapBotao:'Já paguei - avisar no WhatsApp',
@@ -4453,6 +4529,102 @@ function fcTxtTabelas(){
   return [['slide',S_TXT_DEFS],['leads',L_TXT_DEFS],['tidy',T_TXT_DEFS],['uni',U_TXT_DEFS],
           ['bor',B_TXT_DEFS],['cnt',C_TXT_DEFS],['cob',P_TXT_DEFS],['loja',M_TXT_DEFS],
           ['pac',A_TXT_DEFS]];
+}
+
+/* ===== O MEIO PRIORITARIO: um controle por aba, e as frases que ele vira =====
+   Decisao do dono (12/09/2026): UM campo, nao dois. Ele decide a ORDEM dos meios no bloco e
+   QUAL PRECO fica em destaque, juntos -- com dois campos existiria "Pix em cima com o preco do
+   cartao grande", que e exatamente o estado incoerente que ninguem quer publicar sem perceber.
+   Padrao de fabrica: Pix (FC_ORD_FABRICA). Configuracao gravada antes desta rodada nao tem a
+   chave, cai no padrao, e por isso um bloco antigo REGERADO sai na ordem nova -- pretendido.
+
+   ESTA TABELA e o unico lugar onde mora "que frase depende da ordem, em que aba". Tres colunas:
+   a chave no estado gravado, o id do campo na tela, e a chave do par em FC_ORD_PARES. Os tres
+   usos (virar na tela, migrar o estado, e a prova do arnes) leem daqui -- duas listas seriam
+   duas coisas que divergem no dia em que a frase seguinte entrar so numa delas. */
+var FC_ORD_TXT={
+  u:[['txtOu','u-txt-ou','ou'],['txtOuDesc','u-txt-ou-desc','ouDesc']],
+  m:[['txtOu','m-txt-ou','ou'],['txtOuDesc','m-txt-ou-desc','ouDesc']],
+  a:[['txtCartaoLinha','a-txt-cartaolinha','cartaoLinha'],['txtErroComPix','a-txt-erro-compix','erroComPix']],
+  p:[['txtPaypalFora','p-txt-paypalfora','paypalFora'],['txtCartaoLinha','p-txt-cartaolinha','cartaoLinha']]
+};
+/* A ORDEM QUE OS CAMPOS DA TELA REFLETEM AGORA. Nao se le do radio: no instante em que o
+   change dispara o radio JA esta no valor novo, e virar de "novo" para "novo" nao viraria
+   nada. Guardar a anterior aqui e o que torna a virada possivel. */
+var fcOrdAtual={u:FC_ORD_FABRICA,m:FC_ORD_FABRICA,a:FC_ORD_FABRICA,p:FC_ORD_FABRICA};
+
+/* VIRA AS FRASES DE UMA ORDEM PARA A OUTRA -- e SO as que ainda estao exatamente no padrao de
+   fabrica de uma das duas ordens. Valor igual a fabrica anterior: o dono nunca escreveu ali, e
+   mover e seguro. Qualquer outro valor e TEXTO DELE, e nao se toca -- devolvido em 'mantidos'
+   para a aba avisar na tela, porque uma frase escrita a mao pode ter ficado apontando para o
+   lado errado e sobrescrever seria pior que avisar. */
+function fcOrdVirar(pref,de,para){
+  var defs=FC_ORD_TXT[pref]||[],i,el,par,virados=0,mantidos=[];
+  if(de===para)return {virados:0,mantidos:[]};
+  for(i=0;i<defs.length;i++){
+    el=$(defs[i][1]);if(!el)continue;
+    par=FC_ORD_PARES[defs[i][2]];
+    if(el.value===par[de]){el.value=par[para];virados++;}
+    else if(el.value!==par[para])mantidos.push(defs[i][1]);
+  }
+  fcOrdAtual[pref]=para;
+  return {virados:virados,mantidos:mantidos};
+}
+/* A MIGRACAO DE UMA VEZ SO. Devolve uma COPIA do fragmento da aba (copia, e nao o proprio
+   objeto, pelo mesmo motivo de fcObFbMigrar: o fragmento pode ser o de um preset guardado em
+   memoria, e migrar na entrada nao pode reescrever a biblioteca por efeito colateral).
+   Roda SO quando 'prio' esta ausente -- estado gravado por versao anterior a esta rodada. E
+   troca SO o valor que for, caractere por caractere, a fabrica da ordem que aquela aba tinha
+   ANTES: nesse caso o dono nunca personalizou. Qualquer outro valor fica intocado.
+   Sem isto, trocar o padrao de fabrica nao chegaria a ele: os campos de texto sao gravados a
+   cada tecla, entao o estado dele ja contem a frase antiga, e o valor gravado vence o padrao.
+   'ordemAntiga' e 'pp' no Checkout e na Mini loja (eram PayPal-primeiro) e 'pix' na Agendamento
+   por pacote e no Link de cobranca (ja eram Pix-primeiro) -- nessas duas o laco e um no-op por
+   construcao, e esta escrito assim de proposito, para a regra ser uma so. */
+function fcOrdMigrar(st,pref,ordemAntiga){
+  var r={},k,defs=FC_ORD_TXT[pref]||[],i,par;
+  for(k in st)if(Object.prototype.hasOwnProperty.call(st,k))r[k]=st[k];
+  if(r.prio!=null)return r;
+  for(i=0;i<defs.length;i++){
+    par=FC_ORD_PARES[defs[i][2]];
+    if(r[defs[i][0]]===par[ordemAntiga])r[defs[i][0]]=par[FC_ORD_FABRICA];
+  }
+  return r;
+}
+/* Poe o radio no valor gravado (ou no de fabrica) e deixa fcOrdAtual concordando com a tela.
+   setRadio ignora valor desconhecido, e ignorar deixaria o radio no que a restauracao ANTERIOR
+   escolheu -- por isso o valor e conferido aqui, e nao la. */
+function fcOrdRestaurar(pref,v){
+  var ok=(v==='pix'||v==='pp')?v:FC_ORD_FABRICA;
+  setRadio(pref+'-prio',ok);
+  fcOrdAtual[pref]=ok;
+}
+/* O QUE A ABA CHAMA QUANDO O RADIO MUDA. Devolve true se algo virou, para a aba decidir se
+   precisa redesenhar a previa. */
+function fcOrdMudou(pref){
+  var novo=radio(pref+'-prio')||FC_ORD_FABRICA;
+  var r=fcOrdVirar(pref,fcOrdAtual[pref],novo),el=$(pref+'-prio-manual');
+  if(r.virados)salvarEstado();
+  if(el){
+    if(r.mantidos.length){
+      el.innerHTML=(r.mantidos.length===1
+          ? '<b>Um texto ficou como você escreveu.</b> A ferramenta não sobrescreve texto seu — confira se ele ainda lê certo nesta ordem: '
+          : '<b>'+r.mantidos.length+' textos ficaram como você escreveu.</b> A ferramenta não sobrescreve texto seu — confira se eles ainda leem certo nesta ordem: ')
+        +r.mantidos.join(', ')+'.';
+      el.style.display='block';
+    }else el.style.display='none';
+  }
+  return r.virados>0;
+}
+/* UM MEIO SO = ORDEM NAO SIGNIFICA NADA. O campo fica VISIVEL e DESLIGADO, com o porque ao
+   lado -- esconder faria o dono procurar uma opcao que ele viu ontem, e ignorar em silencio e
+   o que este projeto ja recusou em outros lugares. O valor gravado nao e alterado: voltando
+   aos dois meios, a escolha dele esta onde estava. */
+function fcOrdSo1(pref,umSo){
+  var els=document.getElementsByName(pref+'-prio'),i,el;
+  for(i=0;i<els.length;i++)els[i].disabled=!!umSo;
+  el=$(pref+'-prio-campo');if(el)el.className=umSo?'fcord-off':'';
+  el=$(pref+'-prio-so1');if(el)el.style.display=umSo?'block':'none';
 }
 /* ===== SECAO QUE NASCE RECOLHIDA =====
    Uma mecanica so para todas as secoes marcadas com class="secao dobra": o cabecalho aponta,
@@ -5897,7 +6069,7 @@ var ABAS=[
            ['u.prods.ops',{nome:'',preco:0,qtd:false},'nome'],
            ['u.cps',{codigo:'',tipo:'pct_total',valor:0,validade:'',minimo:''},'codigo']],
    exemplo:'ex.: Natal 2026 - pacotes',
-   guarda:'tudo o que está configurado nesta aba — formas de pagamento, moeda, <b>produtos com os opcionais de cada um</b>, cupons, código do pedido, sinal, desconto Pix, textos, largura e cores. Não guarda o <b>formulário de cadastro</b> pela metade, e aplicar um preset <b>esvazia</b> esse formulário: ele descreve um produto que ainda não existe no catálogo que está chegando.'},
+   guarda:'tudo o que está configurado nesta aba — formas de pagamento, o <b>meio prioritário</b>, moeda, <b>produtos com os opcionais de cada um</b>, cupons, código do pedido, sinal, desconto Pix, textos, largura e cores. Não guarda o <b>formulário de cadastro</b> pela metade, e aplicar um preset <b>esvazia</b> esse formulário: ele descreve um produto que ainda não existe no catálogo que está chegando.'},
   {id:'bor',  nome:'Bordas com efeito',   chaves:['b'],         coleta:bColeta,restaura:bRestaura,gerar:bGerar,
    pref:'b',fora:['consol'],resumo:bPresetResumo,redesenhar:bPresetDepois,antesDeSalvar:bPresetAntes,
    presetOk:bPresetOk,aposPresets:bConsolRender,
@@ -5912,7 +6084,7 @@ var ABAS=[
    pref:'p',fora:[],resumo:pPresetResumo,redesenhar:pPresetDepois,antesDeSalvar:pPresetAntes,
    naoEmite:['url','desc','valor','txid','validade','descpix','ppmodo','pplink'],
    exemplo:'ex.: Foto Certa - página /pagar',
-   guarda:'tudo o que está configurado nesta aba — o endereço da página, a aparência, os textos, e também a <b>cobrança que está na tela</b> (descrição, valor, identificador, a data de validade e o desconto no Pix). Aplicar um preset troca também essa cobrança: ele é a fotografia da aba inteira. Os dados de quem recebe <b>não</b> estão aqui: eles saíram desta aba para o painel Identidade, e nenhum preset os toca.'},
+   guarda:'tudo o que está configurado nesta aba — o endereço da página, o <b>meio prioritário</b>, a aparência, os textos, e também a <b>cobrança que está na tela</b> (descrição, valor, identificador, a data de validade e o desconto no Pix). Aplicar um preset troca também essa cobrança: ele é a fotografia da aba inteira. Os dados de quem recebe <b>não</b> estão aqui: eles saíram desta aba para o painel Identidade, e nenhum preset os toca.'},
   {id:'loja', nome:'Mini loja',           chaves:['m'],         coleta:mColeta,restaura:mRestaura,gerar:mGerar,
    pref:'m',fora:[],formulario:['edops','editidx','form'],resumo:mPresetResumo,redesenhar:mPresetDepois,antesDeSalvar:mPresetAntes,
    listas:[['m.edops',{nome:'',preco:0,qtd:false},'nome'],
@@ -5921,7 +6093,7 @@ var ABAS=[
            ['m.cps',{codigo:'',tipo:'pct_total',valor:0,validade:'',minimo:''},'codigo']],
    importar:mImportarLimpar,
    exemplo:'ex.: Foto Certa - loja de álbuns',
-   guarda:'tudo o que está configurado nesta aba — formas de pagamento, moeda, <b>o catálogo inteiro</b> (nome, descrição, preço, categoria, foto e os opcionais de cada produto), cupons, sinal, desconto Pix, a grade da vitrine, o tamanho pedido das fotos, textos e cores. Não guarda o que está no importador de galeria, que não é configuração e sim uma colagem de trabalho, nem o <b>formulário de cadastro</b> pela metade — aplicar um preset <b>esvazia</b> esse formulário.'},
+   guarda:'tudo o que está configurado nesta aba — formas de pagamento, o <b>meio prioritário</b>, moeda, <b>o catálogo inteiro</b> (nome, descrição, preço, categoria, foto e os opcionais de cada produto), cupons, sinal, desconto Pix, a grade da vitrine, o tamanho pedido das fotos, textos e cores. Não guarda o que está no importador de galeria, que não é configuração e sim uma colagem de trabalho, nem o <b>formulário de cadastro</b> pela metade — aplicar um preset <b>esvazia</b> esse formulário.'},
   {id:'efe',  nome:'Efeitos de página',   chaves:['e'],         coleta:eColeta,restaura:eRestaura,gerar:eGerar,
    pref:'e',fora:[],resumo:ePresetResumo,redesenhar:ePresetDepois,antesDeSalvar:ePresetAntes,
    presetOk:ePresetOk,
@@ -5948,7 +6120,7 @@ var ABAS=[
            ['a.pacotes.ops',{nome:'',preco:0,qtd:false},'nome'],
            ['a.cps',{codigo:'',tipo:'pct_total',valor:0,validade:'',minimo:''},'codigo']],
    exemplo:'ex.: Ensaios 2026 - pacotes',
-   guarda:'tudo o que está configurado nesta aba — a <b>forma de pagamento</b> e a cor dos botões do PayPal, as <b>famílias de pacotes</b> e a família de cada pacote, os pacotes (código, nome, duração, preço, o que inclui, o endereço do TidyCal e os <b>itens opcionais</b> de cada um), os <b>cupons</b>, o endereço da página de obrigado, o prefixo do identificador, o prazo da reserva, o desconto no Pix, as parcelas, quais <b>marcadores da página de obrigado</b> viajam e o texto reserva de cada um, como o quadro abre espaço para o formulário de reserva (medindo ou pela altura calibrada), as alturas do calendário, quando abrir o espaço calibrado, a largura das linhas compactas, textos e cores. Aplicar um preset <b>substitui as famílias que estão na tela</b> e <b>esvazia o formulário de cadastro</b>: ele é a fotografia da aba inteira.'}
+   guarda:'tudo o que está configurado nesta aba — a <b>forma de pagamento</b>, o <b>meio prioritário</b> e a cor dos botões do PayPal, as <b>famílias de pacotes</b> e a família de cada pacote, os pacotes (código, nome, duração, preço, o que inclui, o endereço do TidyCal e os <b>itens opcionais</b> de cada um), os <b>cupons</b>, o endereço da página de obrigado, o prefixo do identificador, o prazo da reserva, o desconto no Pix, as parcelas, quais <b>marcadores da página de obrigado</b> viajam e o texto reserva de cada um, como o quadro abre espaço para o formulário de reserva (medindo ou pela altura calibrada), as alturas do calendário, quando abrir o espaço calibrado, a largura das linhas compactas, textos e cores. Aplicar um preset <b>substitui as famílias que estão na tela</b> e <b>esvazia o formulário de cadastro</b>: ele é a fotografia da aba inteira.'}
 ];
 var fcFrag={};       /* ultimo pedaco bom de cada aba, para nao apagar o que a aba quebrada tinha */
 var fcSoLeitura={};  /* abas que falharam ao restaurar: param de coletar do DOM ate recarregar */
@@ -13123,7 +13295,7 @@ function uColeta(){
     /* Sem client, chave, nomer, cidade e zapnum: a identidade saiu desta aba e mora em
        'fcConstrutoresIdentidade'. Tirar as chaves daqui e o que impede uma segunda copia de
        nascer de novo -- o preset desta aba e uma fotografia deste coleta(). */
-    u:{prods:uProds,cps:uCps,metodo:radio('u-metodo'),moeda:radio('u-moeda'),
+    u:{prods:uProds,cps:uCps,metodo:radio('u-metodo'),prio:radio('u-prio'),moeda:radio('u-moeda'),
       cod:$('u-cod').value,
       /* O FORMULARIO INACABADO viaja junto (03/09/2026): os opcionais digitados ('edops'), o
          indice do item em edicao ('editidx') e os campos de texto ('form', acrescentado no
@@ -13146,9 +13318,11 @@ function uColeta(){
 }
 function uRestaura(st){
   if(!st.u)return;
-  var U=st.u;
+  /* A MIGRACAO DO MEIO PRIORITARIO (12/09/2026). Esta aba era PayPal-primeiro ate esta rodada,
+     entao a fabrica antiga das duas frases do separador e a do ramo 'pp'. Ver fcOrdMigrar. */
+  var U=fcOrdMigrar(st.u,'u','pp');
   uProds=U.prods||[];uProdRender();uCps=U.cps||[];uCpRender();
-  setRadio('u-metodo',U.metodo);setRadio('u-moeda',U.moeda);setRadio('u-selprod',U.selprod);setRadio('u-zap',U.zap);
+  setRadio('u-metodo',U.metodo);fcOrdRestaurar('u',U.prio);setRadio('u-moeda',U.moeda);setRadio('u-selprod',U.selprod);setRadio('u-zap',U.zap);
   $('u-cod').value=U.cod;
   $('u-descpix').value=(U.descpix!=null&&U.descpix!=='')?U.descpix:10;
   /* t1..t10 saiam daqui, um por linha, ate 11/09/2026 -- agora vem de U_TXT_DEFS, na chamada
@@ -13632,8 +13806,10 @@ function uToggles(){
   el=$('u-descpix-aviso');if(el)el.style.display=sinalOn?'block':'none';
   el=$('u-descpix');if(el)el.disabled=sinalOn;
   el=$('u-resumo-campos');if(el)el.style.display=(radio('u-resumo')==='sim')?'block':'none';
+  fcOrdSo1('u',m!=='ambos');
 }
 document.addEventListener('change',function(e){
+  if(e.target.name==='u-prio')fcOrdMudou('u');
   if(e.target.name&&e.target.name.indexOf('u-')===0)uToggles();
 });
 
@@ -13862,6 +14038,11 @@ function uCfg(){
     sinal:{ativo:sinalOn,tipo:sinalTipo,valor:(sinalTipo==='fixo')?(Math.round(sinalFixo*100)/100):sinalPct},
     resumo:(radio('u-resumo')==='sim'),
     m:m, usaPP:(m!=='pix'), usaPix:usaPix,
+    /* O MEIO PRIORITARIO (12/09/2026). Vai ao gerador como o dono deixou, e NAO forcado ao
+       padrao quando ha um meio so: com um meio so os dois ramos do gerador produzem a mesma
+       saida por construcao (um dos blocos e vazio e o separador nao existe), e a regressao
+       cobra isso. Forcar aqui esconderia o defeito em vez de impedi-lo. */
+    prio:(radio('u-prio')||FC_ORD_FABRICA),
     /* IDENTIDADE: lida do painel global, nao da aba. Os cinco campos abaixo deixaram de
        existir aqui -- nao ha segunda copia, logo nao ha como esta aba ficar com a chave
        antiga depois de uma troca. */
@@ -13963,7 +14144,7 @@ function uGerar(){
    dentro do iframe da previa. Nao existe segunda formatacao em lugar nenhum -- e por isso que
    a previa nao tem como divergir do que o operador vai colar. */
 function uBloco(cfg){
-  var m=cfg.m,usaPP=cfg.usaPP,usaPix=cfg.usaPix;
+  var m=cfg.m,usaPP=cfg.usaPP,usaPix=cfg.usaPix,prio=cfg.prio||FC_ORD_FABRICA;
   var client=escJs(cfg.client||'COLE_AQUI_SEU_CLIENT_ID');
   var moeda=cfg.moeda,chave=cfg.chave,nomer=cfg.nomer,cidade=cfg.cidade;
   var cod=escJs(cfg.cod||'PEDIDO');
@@ -14042,7 +14223,12 @@ function uBloco(cfg){
     c+='.fcuni .fcu-sinal-aviso.on{display:block}\n';
   }
   if(descpix>0){
-    c+='.fcuni .fcu-pixlinha{display:none;justify-content:space-between;gap:10px;padding:4px 0 0;font-size:14px;color:#1e7e34;font-weight:700}\n';
+    /* UMA regra so para o seletor, com os valores trocados -- e nunca uma segunda regra por
+       cima: shorthand nao se funde entre duas regras de mesma especificidade (regra da casa).
+       Com o Pix prioritario, o valor do Pix e o numero grande do carrinho; o TOTAL continua
+       logo acima, no tamanho de sempre. Os dois numeros a vista e o desenho da pagina de
+       obrigado da aba Agendamento por pacote, que e a referencia desta rodada. */
+    c+='.fcuni .fcu-pixlinha{display:none;justify-content:space-between;gap:10px;'+((prio==='pix')?'padding:8px 0 0;font-size:20px;color:var(--fcu-destaque,#075E54);font-weight:800':'padding:4px 0 0;font-size:14px;color:#1e7e34;font-weight:700')+'}\n';
     c+='.fcuni .fcu-pixlinha.on{display:flex}\n';
   }
   if(usaPP){
@@ -14056,7 +14242,9 @@ function uBloco(cfg){
       c+='.fcuni .fcu-sep{display:flex;align-items:center;gap:10px;margin:14px 0 10px;font-size:12px;color:#999}\n';
       c+='.fcuni .fcu-sep:before,.fcuni .fcu-sep:after{content:"";flex:1;height:1px;background:#e0e0e0}\n';
     }
-    c+='.fcuni .fcu-gerar{display:block;width:100%;box-sizing:border-box;'+(usaPP?'':'margin-top:14px;')+'border:none;border-radius:8px;background:var(--fcu-destaque,#075E54);color:#fff;font-size:15px;font-weight:700;padding:13px;cursor:pointer;text-align:center;font-family:inherit}\n';
+    /* Com o Pix prioritario o botao passa a ser o PRIMEIRO dos dois e precisa da mesma margem
+       que .fcu-botoes tem: sem ela ele encostaria na linha do preco. */
+    c+='.fcuni .fcu-gerar{display:block;width:100%;box-sizing:border-box;'+((usaPP&&prio==='pp')?'':'margin-top:14px;')+'border:none;border-radius:8px;background:var(--fcu-destaque,#075E54);color:#fff;font-size:15px;font-weight:700;padding:13px;cursor:pointer;text-align:center;font-family:inherit}\n';
     c+='.fcuni .fcu-gerar:hover{filter:brightness(.92)}\n';
     c+='.fcuni .fcu-pixarea{display:none;margin-top:16px;text-align:center}\n';
     c+='.fcuni .fcu-pixarea.on{display:block}\n';
@@ -14236,16 +14424,23 @@ function uBloco(cfg){
     c+="h+='<div class=\"fcu-sinal-aviso\"></div>';\n";
   }
   if(descpix>0)c+="h+='<div class=\"fcu-pixlinha\"><span class=\"fcu-pixlinha-t\"></span><span class=\"fcu-pixlinha-v\"></span></div>';\n";
-  if(usaPP)c+="h+='<div class=\"fcu-botoes\"></div><div class=\"fcu-msg\"></div>';\n";
+  /* ===== A ORDEM DOS DOIS MEIOS (12/09/2026) =====
+     Os dois blocos sao montados em VARIAVEIS e so depois concatenados: quem decide qual vem
+     primeiro e uma linha, e nao um if espalhado por seis. O separador e o terceiro pedaco, e
+     so existe havendo os dois meios -- com um meio so, um dos blocos e vazio e a concatenacao
+     sai identica nas duas escolhas (a regressao cobra isso). */
+  var htmPP='',htmPix='',htmSep='';
+  if(usaPP)htmPP="h+='<div class=\"fcu-botoes\"></div><div class=\"fcu-msg\"></div>';\n";
   if(usaPix){
-    if(usaPP)c+="h+='<div class=\"fcu-sep\"><span class=\"fcu-sep-t\"></span></div>';\n";
-    c+="h+='<button type=\"button\" class=\"fcu-gerar\"></button>';\n";
-    c+="h+='<div class=\"fcu-pixarea\"><p class=\"fcu-instrucao\"></p><div class=\"fcu-pixval\"><span class=\"fcu-pixval-t\"></span> <span class=\"fcu-pixval-v\"></span></div><div class=\"fcu-qr\"></div>';\n";
-    c+="h+='<textarea class=\"fcu-cola\" readonly></textarea>';\n";
-    c+="h+='<button type=\"button\" class=\"fcu-copiar\"></button><div class=\"fcu-copiado\"></div>';\n";
-    if(zap)c+="h+='<div class=\"fcu-pixmanual\"></div><button type=\"button\" class=\"fcu-zap\"></button>';\n";
-    c+="h+='<div class=\"fcu-nota\"></div></div>';\n";
+    htmPix+="h+='<button type=\"button\" class=\"fcu-gerar\"></button>';\n";
+    htmPix+="h+='<div class=\"fcu-pixarea\"><p class=\"fcu-instrucao\"></p><div class=\"fcu-pixval\"><span class=\"fcu-pixval-t\"></span> <span class=\"fcu-pixval-v\"></span></div><div class=\"fcu-qr\"></div>';\n";
+    htmPix+="h+='<textarea class=\"fcu-cola\" readonly></textarea>';\n";
+    htmPix+="h+='<button type=\"button\" class=\"fcu-copiar\"></button><div class=\"fcu-copiado\"></div>';\n";
+    if(zap)htmPix+="h+='<div class=\"fcu-pixmanual\"></div><button type=\"button\" class=\"fcu-zap\"></button>';\n";
+    htmPix+="h+='<div class=\"fcu-nota\"></div></div>';\n";
   }
+  if(usaPP&&usaPix)htmSep="h+='<div class=\"fcu-sep\"><span class=\"fcu-sep-t\"></span></div>';\n";
+  c+=(prio==='pix')?(htmPix+htmSep+htmPP):(htmPP+htmSep+htmPix);
   if(usaResumo){
     c+="h+='<div class=\"fcu-resumo-c\"><p class=\"fcu-rotulo fcu-resumo-t\"></p><textarea class=\"fcu-resumo\" readonly></textarea>';\n";
     c+="h+='<button type=\"button\" class=\"fcu-resumo-b\"></button><div class=\"fcu-resumo-ok\"></div></div>';\n";
@@ -16214,6 +16409,7 @@ function aPreso(id){return fcPreso(A_NUMS,id);}
 function aToggles(){
   var m=radio('a-metodo')||'ambos',usaPP=(m!=='pix'),usaPix=(m!=='paypal');
   function ver(id,b){var el=$(id);if(el)el.style.display=b?'block':'none';}
+  fcOrdSo1('a',m!=='ambos');
   ver('a-pp-campos',usaPP);
   ver('a-pix-campos',usaPix);
   ver('a-descpix-campo',m==='ambos');
@@ -16267,7 +16463,7 @@ var A_TXT_DEFS=[
      aviso -- o mesmo motivo que fez o selo do Pix nascer com marcador. */
   ['txtSubtitulo','a-txt-subtitulo',''],
   ['txtSeloPix','a-txt-selopix','-{pct}% no Pix'],
-  ['txtCartaoLinha','a-txt-cartaolinha','ou {valor} no cartão'],
+  ['txtCartaoLinha','a-txt-cartaolinha',FC_ORD_PARES.cartaoLinha.pix],
   ['txtParcela','a-txt-parcela',', em até {n}x de {valor}'],
   ['txtRecusa','a-txt-recusa','Não encontramos seu agendamento nesta página. Se você acabou de agendar, use o link que aparece no e-mail de confirmação — ou fale com a gente que resolvemos na hora.'],
   ['txtOpcionais','a-txt-opcionais','Itens opcionais'],
@@ -16284,7 +16480,7 @@ var A_TXT_DEFS=[
   ['txtDesconto','a-txt-desconto',FC_TXT_FABRICA.desconto],
   ['txtCupomValidade','a-txt-cupom-validade',FC_TXT_FABRICA.cupomValidade],
   ['txtSucesso','a-txt-sucesso','Pagamento aprovado. Obrigado!'],
-  ['txtErroComPix','a-txt-erro-compix','Não foi possível carregar o pagamento por cartão agora. Use o Pix acima, ou fale com a gente para receber outra forma de pagar.'],
+  ['txtErroComPix','a-txt-erro-compix',FC_ORD_PARES.erroComPix.pix],
   ['txtErroSemPix','a-txt-erro-sempix','Não foi possível carregar o pagamento por cartão agora. Fale com a gente para receber outra forma de pagar.'],
   ['txtPixRotulo','a-txt-pix-rotulo',FC_TXT_FABRICA.secaoPix],
   ['txtPixGerar','a-txt-pix-gerar','Gerar Pix'],
@@ -17105,6 +17301,9 @@ function aCfg(){
      'ambos', no mesmo padrao que uCfg ja usa (10916, 'if(m!=='+"'"+'ambos'+"'"+')descpix=0;'). */
   var m=radio('a-metodo')||'ambos';
   var usaPP=(m!=='pix'),usaPix=(m!=='paypal');
+  /* O MEIO PRIORITARIO (12/09/2026) -- ver o comentario em uCfg. Esta aba ja nascia com o Pix
+     em cima e o preco do Pix em destaque: com 'pix' (a fabrica) ela sai byte a byte como saia. */
+  var prio=radio('a-prio')||FC_ORD_FABRICA;
   var descpix=aPreso('a-descpix');if(descpix==null)descpix=5;
   if(m!=='ambos')descpix=0;
   var parcelas=aPreso('a-parcelas');if(parcelas==null)parcelas=1;
@@ -17131,7 +17330,7 @@ function aCfg(){
     pacotes:aPacotes, familias:aFamilias, cps:aCps,
     urlobrigado:$('a-urlobrigado').value.trim(),
     prefixo:$('a-prefixo').value.trim(),
-    metodo:m, usaPP:usaPP, usaPix:usaPix, ppcor:radio('a-ppcor')||'gold',
+    metodo:m, usaPP:usaPP, usaPix:usaPix, prio:prio, ppcor:radio('a-ppcor')||'gold',
     prazoh:prazoh, descpix:descpix, parcelas:parcelas,
     altdesk:altdesk, altmob:altmob, largmob:largmob, largcards:largcards, qtdmax:qtdmax,
     medir:medir, sempre:sempre, precal:precal,
@@ -17165,6 +17364,7 @@ function aColeta(){
     urlobrigado:aElVal('a-urlobrigado',''),
     prefixo:aElVal('a-prefixo',''),
     metodo:radio('a-metodo'),
+    prio:radio('a-prio'),
     ppcor:radio('a-ppcor'),
     prazoh:aElVal('a-prazoh',24),
     descpix:aElVal('a-descpix',5),
@@ -17190,7 +17390,10 @@ function aColeta(){
 }
 function aRestaura(st){
   if(!st.a)return;
-  var A=st.a,el,elc,k,i,migrouCal=false,movidos=0,reparouOrfao=0,reparouNome=0,partes;
+  /* Esta aba JA era Pix-primeiro: a fabrica antiga das duas frases e a do ramo 'pix', que e a
+     mesma da ordem de fabrica de hoje -- o laco de fcOrdMigrar e um no-op aqui, de proposito
+     (a regra e uma so para as quatro abas). */
+  var A=fcOrdMigrar(st.a,'a','pix'),el,elc,k,i,migrouCal=false,movidos=0,reparouOrfao=0,reparouNome=0,partes;
   var tinhaFamilias=(A.familias!=null);
   /* ===== migracao v2 -> v3: as FAMILIAS de pacotes (03/09/2026) =====
      Mesmo molde da migracao link->path logo abaixo: converter na hora do restaura, com a mesma
@@ -17246,6 +17449,7 @@ function aRestaura(st){
   el=$('a-urlobrigado');if(el)el.value=A.urlobrigado||'';
   el=$('a-prefixo');if(el)el.value=A.prefixo||'';
   setRadio('a-metodo',A.metodo);
+  fcOrdRestaurar('a',A.prio);
   setRadio('a-ppcor',A.ppcor);
   el=$('a-prazoh');if(el)el.value=(A.prazoh!=null&&A.prazoh!=='')?A.prazoh:24;
   el=$('a-descpix');if(el)el.value=(A.descpix!=null&&A.descpix!=='')?A.descpix:5;
@@ -17435,7 +17639,26 @@ function aParcelaSolta(txt,maiuscula){
   var s=String(txt).replace(/^[\s,;.:\u2013\u2014-]+/,'');
   return maiuscula?(s.charAt(0).toUpperCase()+s.slice(1)):s;
 }
-function fcaTextoCartaoSrc(q,txtCartaoLinha,txtParcela){
+/* A LINHA DO MEIO SECUNDARIO, nos DOIS sentidos (12/09/2026).
+   Com o Pix prioritario (fabrica) a linha de baixo e a do CARTAO -- o valor cheio, que e o que
+   o PayPal cobra --, e o trecho do parcelamento vem colado nela, como sempre veio. A funcao se
+   chama textoCartao e sai byte a byte como saia antes desta rodada.
+   Com o CARTAO prioritario o numero grande ja e o cheio, e a linha de baixo passa a ser a do
+   PIX: outro nome (textoPix, porque um nome que mente dentro do bloco entregue e pior que um
+   nome a mais) e SEM o trecho do parcelamento, que descreve o cartao e agora esta em cima.
+   fcaFnSegundo diz qual dos dois nomes aquele bloco tem -- escrito num lugar so. */
+function fcaFnSegundo(prio){return (prio==='pp')?'textoPix':'textoCartao';}
+/* O MEIO PRIORITARIO EFETIVO. Com um meio so nao existe priorizacao -- nao ha segundo meio
+   para vir depois, nem segundo preco para ficar menor --, e a aba sai exatamente como saia
+   antes desta rodada: o preco do Pix em destaque quando ha Pix, o cheio quando so ha cartao.
+   Uma funcao, e nao a mesma expressao repetida em seis pontos de emissao; e por ser uma so,
+   a saida com um meio so e IDENTICA nas duas escolhas -- provado em meio-prio-migracao.mjs. */
+function aPrioEfetivo(cfg){return (cfg.usaPix&&cfg.usaPP)?(cfg.prio||FC_ORD_FABRICA):FC_ORD_FABRICA;}
+function fcaTextoCartaoSrc(q,txtCartaoLinha,txtParcela,prio){
+  if(prio==='pp'){
+    return 'function textoPix(preco){\n'+
+      '  return '+aTplJs(q,txtCartaoLinha,[['{valor}','moedaFmt(precoPix(preco))']])+';\n}\n';
+  }
   return 'function textoCartao(preco){\n'+
     '  var t='+aTplJs(q,txtCartaoLinha,[['{valor}','moedaFmt(preco)']])+';\n'+
     '  if(PARCELAS>1)t+='+aTplJs(q,txtParcela,[['{n}','PARCELAS'],['{valor}','moedaFmt(parcelaDe(preco))']])+';\n'+
@@ -17493,6 +17716,9 @@ function aBlocoVitrine(cfg){
   c+='.fca-preco-valor{font-size:18px;font-weight:700;color:var(--fca-destaque,#0F3A30)}\n';
   c+='.fca-selo{font-size:11px;font-weight:700;color:#1e7e34;background:#e6f4ea;border-radius:999px;padding:2px 8px}\n';
   c+='.fca-preco-linha2{font-size:12px;color:#777;margin-top:4px;text-align:left}\n';
+  /* Com o CARTAO prioritario a linha do Pix leva o selo do desconto ao lado -- o selo segue o
+     NUMERO do Pix, e nao a linha 1, senao ele anunciaria desconto sobre o preco cheio. */
+  if(cfg.usaPix&&cfg.usaPP&&cfg.prio==='pp')c+='.fca-preco-linhapix{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;font-size:12px;color:#777;margin-top:4px;text-align:left}\n';
   c+='.fca-resumo{display:none;align-items:center;justify-content:space-between;gap:14px;border:1px solid #e5dfd0;border-radius:14px;background:var(--fca-fundo,#fff);padding:14px 16px;margin:0 0 18px;text-align:left}\n';
   c+='.fca-resumo.on{display:flex}\n';
   c+='.fca-resumo-nome{font-size:14px;font-weight:700;margin:0 0 2px;text-align:left}\n';
@@ -17634,7 +17860,7 @@ function aBlocoVitrine(cfg){
   c+='   cima (116,67) o cliente NUNCA paga por mes mais do que estava escrito. Mesma licao do\n';
   c+='   centavo do Pix, ago/2026. */\n';
   c+=fcaPrecoParcelaSrc();
-  c+=fcaTextoCartaoSrc("'",cfg.txtCartaoLinha,cfg.txtParcela);
+  if(cfg.usaPix&&cfg.usaPP)c+=fcaTextoCartaoSrc("'",cfg.txtCartaoLinha,cfg.txtParcela,aPrioEfetivo(cfg));
   /* Uma funcao so desenha o preco do cartao e o do resumo (Tarefa 3, passo 5): nao existe
      segunda formatacao para o mesmo numero em lugar nenhum deste bloco. A LINHA MOSTRA SO O QUE
      EXISTE (Tarefa do seletor de forma de pagamento): "somente Pix" nao anuncia "ou no cartao";
@@ -17643,15 +17869,29 @@ function aBlocoVitrine(cfg){
   c+='function montarPreco(box,preco){\n';
   c+="  box.innerHTML='';\n";
   c+="  var l1=document.createElement('div');l1.className='fca-preco-linha1';\n";
-  c+="  var v=document.createElement('span');v.className='fca-preco-valor';v.textContent=moedaFmt("+(cfg.usaPix?'precoPix(preco)':'preco')+");\n";
+  c+="  var v=document.createElement('span');v.className='fca-preco-valor';v.textContent=moedaFmt("+((cfg.usaPix&&aPrioEfetivo(cfg)==='pix')?'precoPix(preco)':'preco')+");\n";
   c+='  l1.appendChild(v);\n';
-  if(cfg.usaPix){
+  if(cfg.usaPix&&aPrioEfetivo(cfg)==='pix'){
     c+='  if(DESCONTO_PIX>0){\n';
     c+="    var selo=document.createElement('span');selo.className='fca-selo';selo.textContent="+aTplJs("'",cfg.txtSeloPix,[['{pct}','DESCONTO_PIX']])+";\n";
     c+='    l1.appendChild(selo);\n  }\n';
   }
   c+='  box.appendChild(l1);\n';
-  if(cfg.usaPix&&cfg.usaPP){
+  if(cfg.usaPix&&cfg.usaPP&&cfg.prio==='pp'){
+    /* A linha do Pix vem PRIMEIRO (e a alternativa ao numero grande) e leva o selo; o trecho do
+       parcelamento, que descreve o cartao, ganha a sua propria linha logo abaixo -- exatamente o
+       mesmo texto que o ramo "somente cartao" ja emitia. */
+    c+="  var l2=document.createElement('div');l2.className='fca-preco-linhapix';\n";
+    c+="  var l2t=document.createElement('span');l2t.textContent=textoPix(preco);l2.appendChild(l2t);\n";
+    c+='  if(DESCONTO_PIX>0){\n';
+    c+="    var selo=document.createElement('span');selo.className='fca-selo';selo.textContent="+aTplJs("'",cfg.txtSeloPix,[['{pct}','DESCONTO_PIX']])+";\n";
+    c+='    l2.appendChild(selo);\n  }\n';
+    c+='  box.appendChild(l2);\n';
+    if(cfg.parcelas>1){
+      c+="  var l3=document.createElement('div');l3.className='fca-preco-linha2';l3.textContent="+aTplJs("'",aParcelaSolta(cfg.txtParcela,false),[['{n}','PARCELAS'],['{valor}','moedaFmt(parcelaDe(preco))']])+";\n";
+      c+='  box.appendChild(l3);\n';
+    }
+  }else if(cfg.usaPix&&cfg.usaPP){
     c+="  var l2=document.createElement('div');l2.className='fca-preco-linha2';l2.textContent=textoCartao(preco);\n";
     c+='  box.appendChild(l2);\n';
   }else if(!cfg.usaPix&&cfg.usaPP&&cfg.parcelas>1){
@@ -17773,7 +18013,7 @@ function aBlocoVitrine(cfg){
     if(cfg.txtFamiliaApartir){
       c+='  var ap=precoMinimo(f.id);\n';
       c+='  if(ap!==null){\n';
-      c+="    var apv=document.createElement('div');apv.className='fca-fam-preco';apv.textContent="+aTplJs("'",cfg.txtFamiliaApartir,[['{valor}','moedaFmt('+(cfg.usaPix?'precoPix(ap)':'ap')+')']])+";\n";
+      c+="    var apv=document.createElement('div');apv.className='fca-fam-preco';apv.textContent="+aTplJs("'",cfg.txtFamiliaApartir,[['{valor}','moedaFmt('+((cfg.usaPix&&aPrioEfetivo(cfg)==='pix')?'precoPix(ap)':'ap')+')']])+";\n";
       c+='    card.appendChild(apv);\n  }\n';
     }
     c+="  card.addEventListener('click',function(){escolherFamilia(f.id);});\n";
@@ -18156,7 +18396,7 @@ function aBlocoObrigado(cfg){
   c+='.fca-ob-preco-linha1{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin:0 0 4px;text-align:left}\n';
   c+='.fca-ob-preco-valor{font-size:26px;font-weight:800;color:var(--fca-ob-destaque,#0F3A30)}\n';
   c+='.fca-ob-selo{font-size:11px;font-weight:700;color:#1e7e34;background:#e6f4ea;border-radius:999px;padding:2px 8px}\n';
-  c+='.fca-ob-preco-linha2{font-size:13px;color:#777;margin:0 0 14px;text-align:left}\n';
+  c+='.fca-ob-preco-linha2{'+((cfg.usaPix&&cfg.usaPP&&cfg.prio==='pp')?'display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;':'')+'font-size:13px;color:#777;margin:0 0 14px;text-align:left}\n';
   c+='.fca-ob-prazo{font-size:13px;font-weight:700;color:var(--fca-ob-destaque,#0F3A30);margin:0 0 4px;text-align:left}\n';
   c+='.fca-ob-bloco{border-top:1px solid rgba(0,0,0,.10);padding-top:14px;margin-top:14px}\n';
   c+='.fca-ob-rot{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--fca-ob-destaque,#0F3A30);margin:0 0 8px;text-align:left}\n';
@@ -18245,7 +18485,7 @@ function aBlocoObrigado(cfg){
   /* "Use o Pix acima" so faz sentido HAVENDO Pix na pagina (Tarefa do seletor de forma de
      pagamento): em "somente cartao" nao ha secao de Pix nenhuma acima para apontar -- por isso
      sao DOIS campos na aba (txtErroComPix/txtErroSemPix), nao um so com texto condicional. */
-  c+="var TXT_ERRO='"+(cfg.usaPix?escJs(cfg.txtErroComPix):escJs(cfg.txtErroSemPix))+"';\n";
+  if(cfg.usaPP)c+="var TXT_ERRO='"+(cfg.usaPix?escJs(cfg.txtErroComPix):escJs(cfg.txtErroSemPix))+"';\n";
   c+="var TXT_CUPOM_ROTULO='"+escJs(cfg.txtCupomRotulo)+"';\n";
   c+="var TXT_CUPOM_BOTAO='"+escJs(cfg.txtCupomBotao)+"';\n";
   c+="var TXT_CUPOM_OK='"+escJs(cfg.txtCupomOk)+"';\n";
@@ -18508,7 +18748,7 @@ function aBlocoObrigado(cfg){
   c+='   identificador -- e a mesma familia do defeito mais caro desta rodada (extrato cheio de\n';
   c+='   cobrancas diferentes para uma reserva so). */\n';
   c+=fcaPrecoParcelaSrc();
-  c+=fcaTextoCartaoSrc('"',cfg.txtCartaoLinha,cfg.txtParcela);
+  if(cfg.usaPix&&cfg.usaPP)c+=fcaTextoCartaoSrc('"',cfg.txtCartaoLinha,cfg.txtParcela,aPrioEfetivo(cfg));
   c+='function somaProdutos(){return PAC.preco;}\n';
   c+='function subtotal(){\n';
   c+='  var t=somaProdutos();\n';
@@ -18634,20 +18874,34 @@ function aBlocoObrigado(cfg){
 
   c+='/* O preco final, a partir de total(), que agora inclui os opcionais marcados e o cupom, em\n';
   c+='   vez do preco fixo do pacote. A LINHA MOSTRA SO O QUE EXISTE (Tarefa do seletor de forma\n';
-  c+='   de pagamento): com "somente Pix" nao ha "ou no cartao" nenhum para prometer, e com\n';
+  c+='   de pagamento): com "somente Pix" nao ha linha do cartao nenhuma para prometer, e com\n';
   c+='   "somente cartao" nao ha selo de desconto Pix nenhum para anunciar -- as duas formas de\n';
-  c+='   promessa que a pagina nao cumpriria. */\n';
+  c+='   promessa que a pagina nao cumpriria. O numero grande e o do meio PRIORITARIO, e o do\n';
+  c+='   outro meio fica na linha de baixo: os dois sempre a vista. */\n';
   c+='function montarPreco(cartao){\n';
   c+='  var l1=document.createElement("div");l1.className="fca-ob-preco-linha1";\n';
   c+='  var v=document.createElement("span");v.className="fca-ob-preco-valor";l1.appendChild(v);\n';
-  if(cfg.usaPix){
+  if(cfg.usaPix&&aPrioEfetivo(cfg)==='pix'){
     c+='  if(DESCONTO_PIX>0){\n';
     c+='    var selo=document.createElement("span");selo.className="fca-ob-selo";selo.textContent='+aTplJs('"',cfg.txtSeloPix,[['{pct}','DESCONTO_PIX']])+';\n';
     c+='    l1.appendChild(selo);\n';
     c+='  }\n';
   }
   c+='  cartao.appendChild(l1);\n';
-  if(cfg.usaPix&&cfg.usaPP){
+  if(cfg.usaPix&&cfg.usaPP&&cfg.prio==='pp'){
+    /* Com o cartao prioritario o numero grande e o cheio e o SELO desce para a linha do Pix --
+       ele anuncia o desconto, e desconto se anuncia ao lado do numero descontado.
+       'elLinha2' aponta para o SPAN do texto, nunca para a linha: atualizar() escreve por
+       textContent, e textContent na linha apagaria o selo junto. */
+    c+='  var l2=document.createElement("div");l2.className="fca-ob-preco-linha2";\n';
+    c+='  var l2t=document.createElement("span");l2.appendChild(l2t);\n';
+    c+='  if(DESCONTO_PIX>0){\n';
+    c+='    var selo=document.createElement("span");selo.className="fca-ob-selo";selo.textContent='+aTplJs('"',cfg.txtSeloPix,[['{pct}','DESCONTO_PIX']])+';\n';
+    c+='    l2.appendChild(selo);\n';
+    c+='  }\n';
+    c+='  cartao.appendChild(l2);\n';
+    c+='  elValor=v;elLinha2=l2t;\n';
+  }else if(cfg.usaPix&&cfg.usaPP){
     c+='  var l2=document.createElement("div");l2.className="fca-ob-preco-linha2";cartao.appendChild(l2);\n';
     c+='  elValor=v;elLinha2=l2;\n';
   }else{
@@ -18681,9 +18935,9 @@ function aBlocoObrigado(cfg){
      disso seria depender de uma coincidencia. */
   if(temMin)c+='  if(cupomAtivo&&!cupomMinimoOk(cupomAtivo)){var cpFora=cupomAtivo;cupomAtivo=null;if(elCupomMsg){elCupomMsg.textContent=TXT_CUPOM_MINIMO_QUEDA.replace(/\\{valor\\}/g,moedaFmt(cpFora.minimo));elCupomMsg.className="fca-ob-cupom-msg erro";}}\n';
   c+='  linhaDesconto();\n';
-  c+='  if(elValor)elValor.textContent=moedaFmt('+(cfg.usaPix?'precoPix(total())':'total()')+');\n';
+  c+='  if(elValor)elValor.textContent=moedaFmt('+((cfg.usaPix&&aPrioEfetivo(cfg)==='pix')?'precoPix(total())':'total()')+');\n';
   if(cfg.usaPix&&cfg.usaPP){
-    c+='  if(elLinha2)elLinha2.textContent=textoCartao(total());\n';
+    c+='  if(elLinha2)elLinha2.textContent='+fcaFnSegundo(aPrioEfetivo(cfg))+'(total());\n';
   }
   c+='  if(elParcela)elParcela.textContent='+aTplJs('"',aParcelaSolta(cfg.txtParcela,true),[['{n}','PARCELAS'],['{valor}','moedaFmt(parcelaDe(total()))']])+';\n';
   c+='  if(pixEsconder)pixEsconder();\n';
@@ -18707,7 +18961,12 @@ function aBlocoObrigado(cfg){
   c+=FC_PIX_SRC.montarPayload;
   c+=fcTotalPixSrc(cfg.descpix,true,false);
   c+='function pix(cartao){\n';
-  c+='  var b=document.createElement("div");b.className="fca-ob-bloco";\n';
+  /* ... e aqui quando o PIX e a segunda secao (cartao prioritario). Espelho de secaoCartao. */
+  var pixSegundo=(cfg.usaPP&&cfg.prio==='pp');
+  if(pixSegundo){
+  c+='  var sep=document.createElement("div");sep.className="fca-ob-sep";sep.textContent="'+escJsD(cfg.txtOu)+'";cartao.appendChild(sep);\n';
+  }
+  c+='  var b=document.createElement("div");b.className="fca-ob-bloco'+(pixSegundo?' fca-ob-semtopo':'')+'";\n';
   c+='  var r=document.createElement("div");r.className="fca-ob-rot";r.textContent="'+escJsD(cfg.txtPixRotulo)+'";b.appendChild(r);\n';
   c+='  var gerar=document.createElement("button");gerar.type="button";gerar.className="fca-ob-bt";gerar.textContent="'+escJsD(cfg.txtPixGerar)+'";b.appendChild(gerar);\n';
   c+='  var area=document.createElement("div");area.className="fca-ob-pixarea";\n';
@@ -18766,10 +19025,12 @@ function aBlocoObrigado(cfg){
   c+='   mensagens dizem so "cartao" -- quem desenha os botoes com a marca deles e o proprio SDK,\n';
   c+='   e isso nao da para mudar. */\n';
   c+='function secaoCartao(cartao){\n';
-  if(cfg.usaPix){
+  /* O separador so entra aqui quando o CARTAO e a segunda secao (Pix prioritario). */
+  var cartaoSegundo=(cfg.usaPix&&aPrioEfetivo(cfg)==='pix');
+  if(cartaoSegundo){
   c+='  var sep=document.createElement("div");sep.className="fca-ob-sep";sep.textContent="'+escJsD(cfg.txtOu)+'";cartao.appendChild(sep);\n';
   }
-  c+='  var b=document.createElement("div");b.className="fca-ob-bloco'+(cfg.usaPix?' fca-ob-semtopo':'')+'";\n';
+  c+='  var b=document.createElement("div");b.className="fca-ob-bloco'+(cartaoSegundo?' fca-ob-semtopo':'')+'";\n';
   c+='  var r=document.createElement("div");r.className="fca-ob-rot";r.textContent="'+escJsD(cfg.txtCartaoRotulo)+'";b.appendChild(r);\n';
   c+='  var alvo=document.createElement("div");alvo.className="fca-ob-botoes";b.appendChild(alvo);\n';
   c+='  if(PARCELAS>1){\n';
@@ -18806,8 +19067,15 @@ function aBlocoObrigado(cfg){
   c+='    montarCupom(cartao);\n';
   c+='    montarPreco(cartao);\n';
   c+='    prazoBarra(cartao,fim);\n';
-  if(cfg.usaPix)c+='    pix(cartao);\n';
-  if(cfg.usaPP)c+='    secaoCartao(cartao);\n';
+  /* A ORDEM DOS DOIS MEIOS (12/09/2026). O separador "OU" mora dentro da secao que vem por
+     SEGUNDO -- ver secaoCartao e pix(), que o emitem sob a condicao espelhada. */
+  if(cfg.prio==='pp'){
+    if(cfg.usaPP)c+='    secaoCartao(cartao);\n';
+    if(cfg.usaPix)c+='    pix(cartao);\n';
+  }else{
+    if(cfg.usaPix)c+='    pix(cartao);\n';
+    if(cfg.usaPP)c+='    secaoCartao(cartao);\n';
+  }
   c+='  }\n';
   c+='  raiz.appendChild(cartao);\n';
   c+='  atualizar();\n';
@@ -19106,6 +19374,7 @@ document.addEventListener('input',function(e){
 });
 document.addEventListener('change',function(e){
   var al=(e.target.id&&e.target.id.indexOf('a-')===0)||(e.target.name&&e.target.name.indexOf('a-')===0);
+  if(e.target.name==='a-prio')fcOrdMudou('a');
   if(al){aToggles();aPreview();}
 });
 
@@ -20528,7 +20797,11 @@ var P_TXT_DEFS=[
      duas numa fabrica so mudaria o texto de uma das duas paginas. */
   ['txtSecaoPix','p-txt-secao-pix',FC_TXT_FABRICA.secaoPix],
   ['txtSecaoPaypal','p-txt-secao-paypal','PayPal, cartão de crédito ou débito'],
-  ['txtPaypalFora','p-txt-paypalfora','Não foi possível carregar o PayPal agora. Use o Pix acima, ou fale com a gente para receber outro link.'],
+  ['txtPaypalFora','p-txt-paypalfora',FC_ORD_PARES.paypalFora.pix],
+  /* A linha do OUTRO preco, quando o Pix e o meio prioritario: o valor cheio, que e o que o
+     PayPal cobra, fica a vista logo abaixo do valor do Pix em destaque. Mesma frase da aba
+     Agendamento por pacote, e por isso a mesma fabrica. */
+  ['txtCartaoLinha','p-txt-cartaolinha',FC_ORD_PARES.cartaoLinha.pix],
   ['txtSucesso','p-txt-sucesso','Pagamento aprovado. Obrigado!'],
   ['txtNota','p-txt-nota',FC_TXT_FABRICA.nota],
   ['txtPixManual','p-txt-pixmanual',FC_TXT_FABRICA.pixManual],
@@ -20559,6 +20832,10 @@ function pCfg(){
     nomer:fciVal('nomer'),
     cidade:fciVal('cidade'),
     usapp:usapp,
+    /* O MEIO PRIORITARIO (12/09/2026) -- ver o comentario em uCfg. Esta pagina ja mostrava o
+       Pix em cima, mas o preco em DESTAQUE era o do PayPal; com 'pix' (a fabrica) os dois
+       passam a concordar, que e o pedido do dono. */
+    prio:usapp?(radio('p-prio')||FC_ORD_FABRICA):'pp',
     client:fciVal('client'),
     ppcor:radio('p-ppcor')||'gold',
     zap:(radio('p-zap')!=='nao'),
@@ -20642,9 +20919,10 @@ function pCss(cfg){
   /* O "OU" entre o Pix e o PayPal: o mesmo desenho que o Checkout e a Mini loja ja usam entre
      as duas formas de pagamento (.fcu-sep / .fcm-sep), e pelo mesmo motivo -- sem ele as duas
      secoes parecem ETAPAS de um caminho, e nao caminhos alternativos.
-     A ORDEM DESTAS DUAS REGRAS IMPORTA: .fcpg-semtopo desliga a linha de cima do .fcpg-bloco do
-     PayPal, e as duas tem a mesma especificidade -- quem vier depois vence. Sem isso o cliente
-     veria duas linhas horizontais coladas, a do separador e a do bloco.
+     A ORDEM DESTAS DUAS REGRAS IMPORTA: .fcpg-semtopo desliga a linha de cima do .fcpg-bloco que
+     vem DEPOIS do separador -- o do PayPal ou o do Pix, conforme o meio prioritario --, e as
+     duas tem a mesma especificidade, entao quem vier depois vence. Sem isso o cliente veria
+     duas linhas horizontais coladas, a do separador e a do bloco.
      AS TRES SO SAEM COM PAYPAL. Sem ele nao existe separador nem segunda secao na pagina, e as
      regras eram CSS morto dentro do bloco colado. O '.fcpg-pp' saia solto pelo mesmo descuido
      desde antes do separador -- os tres estao juntos agora porque a condicao e a mesma. */
@@ -20708,6 +20986,9 @@ function pJs(cfg){
   /* O mesmo rotulo que o carrinho do Checkout escreve, pela mesma razao de sempre: o cliente
      que ja viu a loja le a mesma frase na pagina de cobranca. */
   j+="  var TXT_PIX_ROTULO='"+escJs(cfg.txtPixRotulo)+"';\n";
+  /* A linha do valor cheio so existe com o Pix prioritario; sem ela o bloco nao carregaria
+     texto que nunca usa. */
+  if(cfg.prio==='pix')j+="  var TXT_CARTAO_LINHA='"+escJs(cfg.txtCartaoLinha)+"';\n";
   j+="  var TXT_SECAO_PIX='"+escJs(cfg.txtSecaoPix)+"';\n";
   if(cfg.zap)j+="  var TXT_PIX_MANUAL='"+escJs(cfg.txtPixManual)+"';\n";
   if(cfg.usapp)j+="  var TXT_OU='"+escJs(cfg.txtOu)+"';\n";
@@ -20857,24 +21138,51 @@ function pJs(cfg){
   j+='    if(dia>0&&(new Date()).getTime()>prazoFim(dia)){vencido(desc,valor,lido.txid,dia);return;}\n';
   j+='    var c=cartao();\n';
   j+="    if(desc)c.appendChild(novo('div','fcpg-desc',desc));\n";
-  j+="    c.appendChild(novo('div','fcpg-valor-rot',TXT_VALOR));\n";
-  j+="    c.appendChild(novo('div','fcpg-valor',moedaFmt(valor)));\n";
+  /* ===== QUAL DOS DOIS NUMEROS FICA GRANDE (12/09/2026) =====
+     Com o Pix prioritario o numero em destaque e o do Pix, e o rotulo passa a ser o do Pix --
+     que ja carrega o percentual. O VALOR CHEIO nao some: ele desce para a linha de baixo, pelo
+     TXT_CARTAO_LINHA. Os dois numeros a vista e obrigatorio, porque o cheio e o que o PayPal
+     cobra: mostrar so o do Pix em destaque surpreenderia o cliente no cartao.
+     Sem desconto os dois ramos sao iguais -- e o mesmo numero, com o mesmo rotulo. */
+  if(cfg.prio==='pix'){
+    j+="    c.appendChild(novo('div','fcpg-valor-rot',DESCONTO_PIX>0?TXT_PIX_ROTULO.replace(/\\{pct\\}/gi,DESCONTO_PIX):TXT_VALOR));\n";
+    j+="    c.appendChild(novo('div','fcpg-valor',moedaFmt(DESCONTO_PIX>0?totalPix():valor)));\n";
+  }else{
+    j+="    c.appendChild(novo('div','fcpg-valor-rot',TXT_VALOR));\n";
+    j+="    c.appendChild(novo('div','fcpg-valor',moedaFmt(valor)));\n";
+  }
   /* D-1: as DUAS grafias do marcador ({pct} e {PCT}), como no Checkout e na Mini loja --
      trocar a convencao nao pode quebrar o bloco de quem ja configurou. */
-  j+="    if(DESCONTO_PIX>0)c.appendChild(novo('div','fcpg-pixlinha',TXT_PIX_ROTULO.replace(/\\{pct\\}/gi,DESCONTO_PIX)+': '+moedaFmt(totalPix())));\n";
+  if(cfg.prio==='pix'){
+    j+="    if(DESCONTO_PIX>0)c.appendChild(novo('div','fcpg-pixlinha',TXT_CARTAO_LINHA.replace(/\\{valor\\}/g,moedaFmt(valor))));\n";
+  }else{
+    j+="    if(DESCONTO_PIX>0)c.appendChild(novo('div','fcpg-pixlinha',TXT_PIX_ROTULO.replace(/\\{pct\\}/gi,DESCONTO_PIX)+': '+moedaFmt(totalPix())));\n";
+  }
   j+="    if(dia>0)c.appendChild(novo('div','fcpg-prazo',TXT_PRAZO.replace(/\\{data\\}/g,prazoTexto(dia))));\n";
   j+="    if(lido.txid&&lido.txid!=='***')c.appendChild(novo('div','fcpg-ref',TXT_REF+lido.txid));\n";
   /* O "Ja paguei" mora DENTRO da secao do Pix, logo depois da orientacao -- ver pix(). Ele e
      um botao exclusivo do Pix: quem paga por PayPal recebe notificacao e recibo do proprio
      PayPal, e nao precisa avisar ninguem. No fim da pagina, depois do PayPal, ele parecia o
      ultimo passo de um caminho unico. */
-  j+='    pix(c,codigo'+(cfg.zap?',valor,desc,lido.txid':'')+');\n';
-  if(cfg.usapp)j+='    paypal(c,valor,desc,lido.txid);\n';
+  /* A ORDEM DOS DOIS MEIOS (12/09/2026). Diferente das outras tres abas, aqui a presenca do
+     PayPal e decidida em TEMPO DE EXECUCAO (o parametro 'pp' do proprio link), e nao na
+     geracao: por isso, com o cartao prioritario, o separador so pode ser posto depois de
+     paypal() dizer se desenhou alguma coisa -- e por isso ela devolve um booleano. */
+  if(cfg.usapp&&cfg.prio==='pp'){
+    j+="    if(paypal(c,valor,desc,lido.txid))c.appendChild(novo('div','fcpg-sep',TXT_OU));\n";
+    j+='    pix(c,codigo'+(cfg.zap?',valor,desc,lido.txid':'')+');\n';
+  }else{
+    j+='    pix(c,codigo'+(cfg.zap?',valor,desc,lido.txid':'')+');\n';
+    if(cfg.usapp)j+='    paypal(c,valor,desc,lido.txid);\n';
+  }
   j+='  }\n';
   /* Sem WhatsApp no bloco a secao do Pix nao precisa dos tres: o bloco entregue continua
      carregando so a maquinaria escolhida, como no resto da ferramenta. */
   j+='  function pix(c,codigo'+(cfg.zap?',valor,desc,txid':'')+'){\n';
-  j+="    var b=novo('div','fcpg-bloco');\n";
+  /* Com o cartao prioritario o Pix e a segunda secao e vem logo abaixo do separador: mesma
+     regra do bloco do PayPal quando as posicoes eram as inversas (.fcpg-semtopo). Ela so entra
+     quando o separador PODE existir -- fora disso sobrariam duas linhas horizontais coladas. */
+  j+="    var b=novo('div','fcpg-bloco"+((cfg.usapp&&cfg.prio==='pp')?' fcpg-semtopo':'')+"');\n";
   j+="    b.appendChild(novo('div','fcpg-rot',TXT_SECAO_PIX));\n";
   j+="    var ta=document.createElement('textarea');\n";
   j+="    ta.className='fcpg-cod';\n";
@@ -20909,21 +21217,27 @@ function pJs(cfg){
   if(cfg.usapp){
     j+='  function paypal(c,valor,desc,txid){\n';
     j+="    var modo=param('pp');\n";
-    j+="    if(modo==='nao')return;\n";
+    /* DEVOLVE SE DESENHOU. 'false' aqui e o que impede o separador de aparecer sozinho numa
+       cobranca sem PayPal -- ver o comentario da ordem, acima. */
+    j+="    if(modo==='nao')return false;\n";
+    if(cfg.prio!=='pp'){
     /* O separador entra DEPOIS da recusa acima: numa cobranca sem PayPal nao existe segunda
-       forma de pagamento, e um "OU" solto embaixo do Pix prometeria uma que nao vem. */
+       forma de pagamento, e um "OU" solto embaixo do Pix prometeria uma que nao vem.
+       Com o CARTAO prioritario o separador nao mora aqui: ele vai entre esta secao e a do Pix,
+       e quem o poe e o chamador, de posse do booleano. */
     j+="    c.appendChild(novo('div','fcpg-sep',TXT_OU));\n";
-    j+="    var b=novo('div','fcpg-bloco fcpg-semtopo');\n";
+    }
+    j+="    var b=novo('div','fcpg-bloco"+((cfg.prio==='pp')?'':' fcpg-semtopo')+"');\n";
     j+="    b.appendChild(novo('div','fcpg-rot',TXT_SECAO_PAYPAL));\n";
     j+='    if(modo){\n';
-    j+='      if(!paypalLinkOk(modo)){c.appendChild(b);return;}\n';
+    j+='      if(!paypalLinkOk(modo)){c.appendChild(b);return true;}\n';
     j+="      var a=novo('a','fcpg-bt','Pagar no PayPal');\n";
     j+="      a.setAttribute('href',modo);\n";
     j+="      a.setAttribute('target','_blank');\n";
     j+="      a.setAttribute('rel','noopener noreferrer');\n";
     j+='      b.appendChild(a);\n';
     j+='      c.appendChild(b);\n';
-    j+='      return;\n';
+    j+='      return true;\n';
     j+='    }\n';
     j+="    var alvo=novo('div','fcpg-pp');\n";
     j+="    alvo.id='fcpg-pp';\n";
@@ -20996,6 +21310,7 @@ function pJs(cfg){
     j+="      }).render('#fcpg-pp');\n";
     j+='    };\n';
     j+='    document.head.appendChild(s);\n';
+    j+='    return true;\n';
     j+='  }\n';
   }
   if(cfg.zap){
@@ -21062,6 +21377,7 @@ function pMexeu(e){
   if(!/^p-/.test(alvo))return;
   pSaidaVence(alvo);
   if(alvo==='p-url')pUrlAvisoRender();
+  if(alvo==='p-prio')fcOrdMudou('p');
   pToggles();
   pPreview();
 }
@@ -21113,6 +21429,9 @@ function pLimpar(){
   /* Os textos vem todos da tabela: nove deles estavam repetidos aqui, e os doze que ja
      viviam em P_TXT_DEFS nao eram repostos por ninguem -- a aba voltava pela metade. */
   fcTxtRestaura(P_TXT_DEFS,{});
+  /* "Restaurar padroes" devolve tambem o meio prioritario: sem esta linha o radio ficaria onde
+     o dono o deixou enquanto as duas frases do separador voltavam a fabrica da OUTRA ordem. */
+  fcOrdRestaurar('p','');
   $('p-desc').value='';$('p-valor').value='';$('p-txid').value='';$('p-pplink').value='';
   $('p-validade').value='';$('p-descpix').value='0';
   $('p-out1').value='';$('p-out2').value='';
@@ -21122,6 +21441,7 @@ function pLimpar(){
 /* ===== mostra/esconde conforme as escolhas ===== */
 function pToggles(){
   var pp=$('p-pp-campos'),cor=$('p-coruja-campos'),lk=$('p-pplink-campo');
+  fcOrdSo1('p',radio('p-usapp')==='nao');
   if(pp)pp.style.display=(radio('p-usapp')==='nao')?'none':'block';
   if(cor)cor.style.display=(radio('p-coruja')==='nao')?'none':'block';
   if(lk)lk.style.display=(radio('p-ppmodo')==='link')?'block':'none';
@@ -21338,7 +21658,7 @@ function pPvModoSet(m){pPvModo=m;pPvBotoes();pPreview(true);}
 function pColeta(){
   /* Sem chave, nomer, cidade, client e zapnum: a identidade saiu desta aba (ver uColeta). */
   var r={
-    usapp:radio('p-usapp'),ppcor:radio('p-ppcor'),
+    usapp:radio('p-usapp'),prio:radio('p-prio'),ppcor:radio('p-ppcor'),
     zap:radio('p-zap'),url:$('p-url').value,
     larg:$('p-larg').value,qr:$('p-qr').value,
     c1:$('p-c1-t').value,c2:$('p-c2-t').value,c3:$('p-c3-t').value,
@@ -21352,8 +21672,10 @@ function pColeta(){
   return {p:r};
 }
 function pRestaura(st){
-  var P=st.p||{},i;
+  /* Esta aba JA era Pix-primeiro na tela -- ver o comentario de aRestaura. */
+  var P=fcOrdMigrar(st.p||{},'p','pix'),i;
   if(P.usapp)setRadio('p-usapp',P.usapp);
+  fcOrdRestaurar('p',P.prio);
   if(P.ppcor)setRadio('p-ppcor',P.ppcor);
   if(P.zap)setRadio('p-zap',P.zap);
   if(P.url!==undefined)$('p-url').value=P.url;
@@ -21461,7 +21783,7 @@ var M_FORM=[['c','m-pnome',''],['c','m-pdesc',''],['c','m-ppreco',''],['c','m-pc
 /* ===== salvamento e restauracao (registradas em ABAS) ===== */
 function mColeta(){
   /* Sem client, chave, nomer, cidade e zapnum: a identidade saiu desta aba (ver uColeta). */
-  var r={m:{metodo:radio('m-metodo'),moeda:radio('m-moeda'),ppcor:radio('m-ppcor'),
+  var r={m:{metodo:radio('m-metodo'),prio:radio('m-prio'),moeda:radio('m-moeda'),ppcor:radio('m-ppcor'),
     descpix:$('m-descpix').value,zap:radio('m-zap'),cod:$('m-cod').value,
     prods:mProds,cps:mCps,
     /* O FORMULARIO INACABADO viaja junto -- ver uColeta, a primeira das tres. */
@@ -21476,8 +21798,11 @@ function mColeta(){
   return r;
 }
 function mRestaura(st){
-  var M=st.m;if(!M)return;
+  if(!st.m)return;
+  /* Mesma migracao do Checkout, e pelo mesmo motivo: esta aba era PayPal-primeiro. */
+  var M=fcOrdMigrar(st.m,'m','pp');
   if(M.metodo)setRadio('m-metodo',M.metodo);
+  fcOrdRestaurar('m',M.prio);
   if(M.moeda)setRadio('m-moeda',M.moeda);
   if(M.ppcor)setRadio('m-ppcor',M.ppcor);
   if(M.descpix!=null)$('m-descpix').value=M.descpix;
@@ -22174,6 +22499,7 @@ function mImpRender(){
 function mToggles(){
   var m=radio('m-metodo')||'ambos',usaPP=(m!=='pix'),usaPix=(m!=='paypal'),sinalOn=(radio('m-sinal')==='sim');
   function ver(id,b){var el=$(id);if(el)el.style.display=b?'block':'none';}
+  fcOrdSo1('m',m!=='ambos');
   ver('m-pp-campos',usaPP);
   ver('m-pix-campos',usaPix);
   ver('m-moeda-campo',usaPP&&!usaPix);
@@ -22287,6 +22613,8 @@ function mCfg(){
   var sinalFixo=mPreso('m-sinalfixo');if(sinalFixo==null)sinalFixo=100;
   var r={
     m:m, usaPP:(m!=='pix'), usaPix:usaPix,
+    /* O MEIO PRIORITARIO (12/09/2026) -- ver o comentario em uCfg: vai como o dono deixou. */
+    prio:(radio('m-prio')||FC_ORD_FABRICA),
     /* IDENTIDADE: lida do painel global (ver o bloco "identidade e paleta"). */
     client:fciVal('client'),
     moeda:usaPix?'BRL':(radio('m-moeda')||'BRL'),
@@ -22401,6 +22729,7 @@ function mGerar(){
    do iframe da previa. Nao existe segunda formatacao em lugar nenhum -- e por isso que a previa
    nao tem como divergir do que o operador vai colar. */
 function mBloco(cfg){
+  var prio=cfg.prio||FC_ORD_FABRICA;
   var usaPP=cfg.usaPP,usaPix=cfg.usaPix,usaQtd=cfg.qtdLigada,usaSinal=cfg.sinal.ativo;
   var usaResumo=cfg.resumo,descpix=cfg.descpix,zap=cfg.zap;
   var usaCupom=cfg.cps.length>0,usaFiltro=cfg.filtro&&cfg.cats.length>0;
@@ -22519,7 +22848,8 @@ function mBloco(cfg){
     c+='.fcmloja .fcm-sinal-aviso.on{display:block}\n';
   }
   if(descpix>0){
-    c+='.fcmloja .fcm-pixlinha{display:none;justify-content:space-between;font-size:13px;color:#1e7e34;margin-top:6px;font-weight:600}\n';
+    /* UMA regra so, com os valores trocados -- ver o mesmo ponto no Checkout. */
+    c+='.fcmloja .fcm-pixlinha{display:none;justify-content:space-between;'+((prio==='pix')?'font-size:19px;color:var(--fcm-destaque,#0F3A30);margin-top:8px;font-weight:800':'font-size:13px;color:#1e7e34;margin-top:6px;font-weight:600')+'}\n';
     c+='.fcmloja .fcm-pixlinha.on{display:flex}\n';
   }
   if(usaPP){
@@ -22530,7 +22860,8 @@ function mBloco(cfg){
   }
   if(usaPix){
     if(usaPP)c+='.fcmloja .fcm-sep{display:flex;align-items:center;gap:8px;margin:14px 0 10px;font-size:12px;color:#8a8375}\n';
-    c+='.fcmloja .fcm-gerar{width:100%;border:0;border-radius:10px;background:var(--fcm-destaque,#0F3A30);color:#fff;padding:12px;font:700 14px/1.2 inherit;cursor:pointer}\n';
+    /* Com o Pix prioritario o botao e o PRIMEIRO dos dois: a mesma margem de .fcm-botoes. */
+    c+='.fcmloja .fcm-gerar{width:100%;'+((usaPP&&prio==='pix')?'margin-top:12px;':'')+'border:0;border-radius:10px;background:var(--fcm-destaque,#0F3A30);color:#fff;padding:12px;font:700 14px/1.2 inherit;cursor:pointer}\n';
     c+='.fcmloja .fcm-pixarea{display:none;margin-top:12px;text-align:left}\n';
     c+='.fcmloja .fcm-pixarea.on{display:block}\n';
     c+='.fcmloja .fcm-instrucao{font-size:12px;color:#666;margin:0 0 8px;text-align:left}\n';
@@ -22814,6 +23145,7 @@ function mLimitesTexto(cfg){
    apenas para nenhuma funcao desta aba passar de uma tela de leitura -- as duas escrevem o
    MESMO texto, na ordem em que sao chamadas. */
 function mBlocoRuntime(cfg,usaPP,usaPix,usaQtd,usaSinal,usaResumo,descpix,zap,usaCupom,usaFiltro){
+  var prio=cfg.prio||FC_ORD_FABRICA;
   var c='';
   c+='function montar(){\n';
   c+="var raiz=document.getElementById('fcmloja');\nif(!raiz)return;\n";
@@ -22842,16 +23174,19 @@ function mBlocoRuntime(cfg,usaPP,usaPix,usaQtd,usaSinal,usaResumo,descpix,zap,us
     c+="h+='<div class=\"fcm-sinal-aviso\"></div>';\n";
   }
   if(descpix>0)c+="h+='<div class=\"fcm-pixlinha\"><span class=\"fcm-pixlinha-t\"></span><span class=\"fcm-pixlinha-v\"></span></div>';\n";
-  if(usaPP)c+="h+='<div class=\"fcm-botoes\"></div><div class=\"fcm-msg\"></div>';\n";
+  /* A ORDEM DOS DOIS MEIOS (12/09/2026) -- mesmo molde do Checkout, ver uBloco. */
+  var htmPP='',htmPix='',htmSep='';
+  if(usaPP)htmPP="h+='<div class=\"fcm-botoes\"></div><div class=\"fcm-msg\"></div>';\n";
   if(usaPix){
-    if(usaPP)c+="h+='<div class=\"fcm-sep\"><span class=\"fcm-sep-t\"></span></div>';\n";
-    c+="h+='<button type=\"button\" class=\"fcm-gerar\"></button>';\n";
-    c+="h+='<div class=\"fcm-pixarea\"><p class=\"fcm-instrucao\"></p><div class=\"fcm-pixval\"><span class=\"fcm-pixval-t\"></span> <span class=\"fcm-pixval-v\"></span></div><div class=\"fcm-qr\"></div>';\n";
-    c+="h+='<textarea class=\"fcm-cola\" readonly></textarea>';\n";
-    c+="h+='<button type=\"button\" class=\"fcm-copiar\"></button><div class=\"fcm-copiado\"></div>';\n";
-    if(zap)c+="h+='<div class=\"fcm-pixmanual\"></div><button type=\"button\" class=\"fcm-zap\"></button>';\n";
-    c+="h+='<div class=\"fcm-nota\"></div></div>';\n";
+    htmPix+="h+='<button type=\"button\" class=\"fcm-gerar\"></button>';\n";
+    htmPix+="h+='<div class=\"fcm-pixarea\"><p class=\"fcm-instrucao\"></p><div class=\"fcm-pixval\"><span class=\"fcm-pixval-t\"></span> <span class=\"fcm-pixval-v\"></span></div><div class=\"fcm-qr\"></div>';\n";
+    htmPix+="h+='<textarea class=\"fcm-cola\" readonly></textarea>';\n";
+    htmPix+="h+='<button type=\"button\" class=\"fcm-copiar\"></button><div class=\"fcm-copiado\"></div>';\n";
+    if(zap)htmPix+="h+='<div class=\"fcm-pixmanual\"></div><button type=\"button\" class=\"fcm-zap\"></button>';\n";
+    htmPix+="h+='<div class=\"fcm-nota\"></div></div>';\n";
   }
+  if(usaPP&&usaPix)htmSep="h+='<div class=\"fcm-sep\"><span class=\"fcm-sep-t\"></span></div>';\n";
+  c+=(prio==='pix')?(htmPix+htmSep+htmPP):(htmPP+htmSep+htmPix);
   if(usaResumo){
     c+="h+='<div class=\"fcm-resumo-c\"><p class=\"fcm-rotulo fcm-resumo-t\"></p><textarea class=\"fcm-resumo\" readonly></textarea>';\n";
     c+="h+='<button type=\"button\" class=\"fcm-resumo-b\"></button><div class=\"fcm-resumo-ok\"></div></div>';\n";
@@ -23572,6 +23907,7 @@ document.addEventListener('input',function(e){
 document.addEventListener('change',function(e){
   var id=e.target.id||'',nome=e.target.name||'';
   if(id.indexOf('m-imp-')===0)return;
+  if(nome==='m-prio')fcOrdMudou('m');
   if(id.indexOf('m-')===0||nome.indexOf('m-')===0){mToggles();mPesoRender();mPreview();}
 });
 
