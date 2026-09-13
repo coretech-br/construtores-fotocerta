@@ -315,7 +315,15 @@ console.log('\n--- o formato gravado, contra '+REF+' ---');
        esperado:(aba,ch) => 'Zk'+String(IDS.indexOf(aba.charAt(0)+'-ob-fb-'+ch.substring(4).toLowerCase())).padStart(2,'0')+' valor'},
       {nome:'o meio prioritario (12/09/2026)',
        chaves:{u:['prio'], m:['prio'], p:['prio','txtCartaoLinha'], a:['prio']},
-       esperado:(aba,ch) => ch === 'prio' ? 'pix' : 'ou {valor} no cartão'}
+       esperado:(aba,ch) => ch === 'prio' ? 'pix' : 'ou {valor} no cartão'},
+      /* A linha do SALDO na mensagem de WhatsApp era o unico texto do conjunto do sinal que
+         nao era campo: o gerador emitia TXT_SALDO mais um ': *...*' cravado. Virou campo em
+         13/09/2026 ('*-txt-zap-saldo'), e por isso o estado ganhou a chave nos dois lados.
+         O campo NAO esta em IDS (a lista dos migrados da leva 2), entao o que fica gravado e
+         o padrao de fabrica dele -- que repete letra por letra o que o bloco ja emitia. */
+      {nome:'a linha do saldo no WhatsApp virou campo (13/09/2026)',
+       chaves:{u:['txtZapSaldo'], m:['txtZapSaldo']},
+       esperado:() => 'Restante na entrega: *{valor}*'}
     ];
     /* FABRICA TROCADA e outra coisa de CHAVE NOVA, e a diferenca importa: a chave ja existia
        nos dois lados e o que mudou foi o PADRAO dela. Entao os dois valores sao declarados, e

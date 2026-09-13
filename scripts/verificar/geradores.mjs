@@ -76,7 +76,7 @@ const SAIDAS = ['s-out','l-out','t-out1','t-out2','t-out3','t-out4','t-out5','u-
    03/09/2026, porque o teste que EXECUTA os blocos com os textos de escape
    (textos-escape.mjs) precisa exatamente do mesmo. Cenario escrito duas vezes e a mesma
    armadilha do codigo escrito duas vezes: as copias concordam hoje e divergem amanha. */
-import { TEXTOS, preparar, conteudo, configurarTextos, cobranca, gerarTodas } from './cenario.mjs';
+import { TEXTOS, preparar, conteudo, configurarTextos, ramoSinal, cobranca, gerarTodas } from './cenario.mjs';
 
 /* As cobrancas cobrem o que muda o LINK: com e sem desconto, com e sem prazo, os tres
    modos de PayPal, acentos e simbolos, e os extremos do valor. */
@@ -99,13 +99,18 @@ const r = {arvore:ARV, geradores:{}, configurado:{}, cobrancas:{}, erros:[]};
 
 /* UMA PASSAGEM: o cenario inteiro numa aba do navegador com armazenamento limpo, terminando
    com o texto de cada saida. 'comTextos' liga a segunda passagem (ver o cabecalho). O corpo
-   e o MESMO nas duas de proposito: se a passagem configurada seguisse outro roteiro, a
+   e o MESMO nas duas ATE ramoSinal: se a passagem configurada seguisse outro roteiro, a
    diferenca entre as duas fotografias deixaria de ser "o texto do dono" e passaria a ser
-   "o texto do dono mais tudo que os dois roteiros nao tem em comum". */
+   "o texto do dono mais tudo que os dois roteiros nao tem em comum".
+   A UNICA DIVERGENCIA DELIBERADA DE ROTEIRO e ramoSinal(), e ela existe porque havia um ramo
+   inteiro -- o do SINAL -- que NENHUMA das duas passagens alcancava (o motivo completo esta
+   em cenario.mjs, na propria funcao). A passagem de fabrica continua intocada: e ela quem
+   prova o invariante, e sinal ligado nao e configuracao de fabrica. */
 async function passagem(comTextos, pasta){
   const pg = await abrir(br, base);
   await preparar(pg); await conteudo(pg); await cobranca(pg,{});
   const ausentes = comTextos ? await configurarTextos(pg) : [];
+  if(comTextos) await ramoSinal(pg);
   const pulou = await gerarTodas(pg);
   /* t-out2 e t-out3 so existem no modo "pagina intermediaria embutida": sem esta segunda
      passagem, duas das doze saidas ficariam vazias e a regressao nao as cobriria. */

@@ -26,6 +26,14 @@
         E, com 'Pix' (a fabrica), a VITRINE da aba Agendamento por pacote tambem e
         byte a byte identica -- aquela aba ja era Pix-primeiro.
 
+   AS PARTES 1, 2 e 4 PRECISAM DE UMA REFERENCIA ANTERIOR A 12/09/2026. Desde que a
+   rodada chegou a 'main', o padrao deixou de servir para elas -- e o arquivo passou a
+   acusar nove falhas todo dia, sem defeito nenhum por tras (medido em 13/09/2026, iguais
+   numa arvore limpa de 'main'). Um vermelho que e sempre vermelho esconde o proximo, que
+   seria de verdade. Agora ele DETECTA a situacao e diz "nao mediu", em vez de falhar; e a
+   parte 4 troca de pergunta, cobrando que a escolha de FABRICA saia byte a byte igual a da
+   referencia. Para medir a MIGRACAO de verdade, passe um commit anterior a rodada.
+
    Uso:  node scripts/verificar/meio-prio-migracao.mjs [ref]     (padrao: main)
    ============================================================================ */
 import fs from 'node:fs';
@@ -107,30 +115,64 @@ async function restaurarAqui(estado){
   return globalThis.__agora;
 }
 
+/* ============================================================================
+   A REFERENCIA E ANTERIOR A RODADA? -- decidido UMA vez, antes de qualquer prova
+   ============================================================================
+   AS PARTES 1, 2 e 4 so significam alguma coisa contra uma referencia ANTERIOR a
+   rodada do meio prioritario (12/09/2026): migrar so tem sentido a partir da
+   fabrica velha, e "com o cartao prioritario o bloco volta a ser o da referencia"
+   so tem sentido se a referencia for a de quando o cartao vinha primeiro.
+
+   Desde que a rodada chegou a 'main', a referencia PADRAO deixou de ser anterior
+   -- e este arquivo passou a acusar NOVE falhas todo dia, sem nenhum defeito por
+   tras. Medido em 13/09/2026: 9 falhas de 52, iguais numa arvore limpa de 'main'.
+   Isso e pior que nao ter o teste: um vermelho que e sempre vermelho esconde o
+   vermelho seguinte, que seria de verdade.
+
+   E a mesma licao que textos-migrados.mjs ja carrega escrita ("assercao com prazo
+   de validade e defeito adiado"), e a mesma forma de regressao.sh, que declara a
+   passagem configurada NAO COMPARAVEL contra referencia velha em vez de acusar
+   divergencias que so dizem "a referencia e mais nova".
+
+   Entao: contra referencia anterior, as tres partes rodam como sempre. Contra uma
+   que ja tem a rodada, elas viram "nao mediu" -- com o motivo na tela e com o
+   comando para medir de verdade --, e a parte 4 troca de pergunta: o que se cobra
+   ali passa a ser que a escolha de FABRICA (Pix) sai byte a byte igual a da
+   referencia, e que a outra escolha realmente muda. Isso continua sendo uma rede,
+   e e uma que a referencia atual consegue sustentar. */
 console.log('\n== 1. estado de fabrica colhido da referencia ==');
 const colhido = await colherDaRef(false);
-for(const id of Object.keys(FABRICA_ANTIGA)){
-  chk('a referencia gravou a fabrica ANTIGA em '+id, colhido.naRef[id] === FABRICA_ANTIGA[id],
-      JSON.stringify(colhido.naRef[id]));
+const refAnterior = !/"prio"/.test(colhido.estado);
+if(refAnterior){
+  for(const id of Object.keys(FABRICA_ANTIGA)){
+    chk('a referencia gravou a fabrica ANTIGA em '+id, colhido.naRef[id] === FABRICA_ANTIGA[id],
+        JSON.stringify(colhido.naRef[id]));
+  }
+  const migrado = await restaurarAqui(colhido.estado);
+  for(const id of Object.keys(FABRICA_NOVA)){
+    chk('MIGROU para a fabrica da ordem nova: '+id, migrado[id] === FABRICA_NOVA[id],
+        JSON.stringify(migrado[id]));
+  }
+  chk('o meio prioritario caiu no padrao de fabrica (Pix) no Checkout', migrado.__prioU === 'pix', migrado.__prioU);
+  chk('o meio prioritario caiu no padrao de fabrica (Pix) na Mini loja', migrado.__prioM === 'pix', migrado.__prioM);
+}else{
+  console.log('  ..    NAO MEDIU -- a referencia "'+REF+'" JA TEM a rodada do meio prioritario');
+  console.log('  ..    (o estado colhido dela ja traz a chave "prio"). Migrar so tem sentido a');
+  console.log('  ..    partir da fabrica ANTERIOR. Para medir de verdade, passe um commit de');
+  console.log('  ..    antes de 12/09/2026:  node scripts/verificar/meio-prio-migracao.mjs <commit>');
 }
-chk('o estado colhido NAO tem a chave do meio prioritario',
-    !/"prio"/.test(colhido.estado), 'ele ja tem -- a referencia nao e anterior a rodada');
-
-const migrado = await restaurarAqui(colhido.estado);
-for(const id of Object.keys(FABRICA_NOVA)){
-  chk('MIGROU para a fabrica da ordem nova: '+id, migrado[id] === FABRICA_NOVA[id],
-      JSON.stringify(migrado[id]));
-}
-chk('o meio prioritario caiu no padrao de fabrica (Pix) no Checkout', migrado.__prioU === 'pix', migrado.__prioU);
-chk('o meio prioritario caiu no padrao de fabrica (Pix) na Mini loja', migrado.__prioM === 'pix', migrado.__prioM);
 
 console.log('\n== 2. estado com texto do DONO, colhido da referencia ==');
-const meu = await colherDaRef(true);
-chk('a referencia gravou o texto do dono', meu.naRef['u-txt-ou'] === MEU, JSON.stringify(meu.naRef['u-txt-ou']));
-const apos = await restaurarAqui(meu.estado);
-chk('o texto do dono ficou INTOCADO', apos['u-txt-ou'] === MEU, JSON.stringify(apos['u-txt-ou']));
-chk('e o campo ao lado, que estava na fabrica antiga, migrou do mesmo jeito',
-    apos['u-txt-ou-desc'] === FABRICA_NOVA['u-txt-ou-desc'], JSON.stringify(apos['u-txt-ou-desc']));
+if(refAnterior){
+  const meu = await colherDaRef(true);
+  chk('a referencia gravou o texto do dono', meu.naRef['u-txt-ou'] === MEU, JSON.stringify(meu.naRef['u-txt-ou']));
+  const apos = await restaurarAqui(meu.estado);
+  chk('o texto do dono ficou INTOCADO', apos['u-txt-ou'] === MEU, JSON.stringify(apos['u-txt-ou']));
+  chk('e o campo ao lado, que estava na fabrica antiga, migrou do mesmo jeito',
+      apos['u-txt-ou-desc'] === FABRICA_NOVA['u-txt-ou-desc'], JSON.stringify(apos['u-txt-ou-desc']));
+}else{
+  console.log('  ..    NAO MEDIU -- mesma razao da parte 1.');
+}
 
 /* ===== 3. a fabrica divergente numa ferramenta recem-aberta =====
    fcTxtFabricaDiverge vive dentro da IIFE da ferramenta e nao e alcancavel de fora -- e nao
@@ -183,18 +225,33 @@ async function saidasCom(raiz, porta, prio){
 const daRef  = await saidasCom(dirRef, 8898, null);
 const comPP  = await saidasCom(RAIZ,   8899, 'pp');
 const comPix = await saidasCom(RAIZ,   8900, 'pix');
-chk('Checkout com o CARTAO prioritario == referencia, byte a byte',
-    comPP['u-out'] === daRef['u-out'],
-    'tamanhos '+comPP['u-out'].length+' x '+daRef['u-out'].length);
-chk('Mini loja com o CARTAO prioritario == referencia, byte a byte',
-    comPP['m-out'] === daRef['m-out'],
-    'tamanhos '+comPP['m-out'].length+' x '+daRef['m-out'].length);
+if(refAnterior){
+  chk('Checkout com o CARTAO prioritario == referencia, byte a byte',
+      comPP['u-out'] === daRef['u-out'],
+      'tamanhos '+comPP['u-out'].length+' x '+daRef['u-out'].length);
+  chk('Mini loja com o CARTAO prioritario == referencia, byte a byte',
+      comPP['m-out'] === daRef['m-out'],
+      'tamanhos '+comPP['m-out'].length+' x '+daRef['m-out'].length);
+  /* E a prova do contrario: se a escolha NAO mudasse nada, tudo isto seria vacuo. */
+  chk('e a outra escolha REALMENTE muda o Checkout', comPix['u-out'] !== daRef['u-out']);
+  chk('e a outra escolha REALMENTE muda a Mini loja', comPix['m-out'] !== daRef['m-out']);
+}else{
+  /* A referencia ja tem a rodada: a pergunta que ela consegue responder e a outra --
+     a escolha de FABRICA tem de sair identica a dela, e a outra escolha tem de mudar. */
+  chk('[ref ja tem a rodada] Checkout com o PIX (fabrica) == referencia, byte a byte',
+      comPix['u-out'] === daRef['u-out'],
+      'tamanhos '+comPix['u-out'].length+' x '+daRef['u-out'].length);
+  chk('[ref ja tem a rodada] Mini loja com o PIX (fabrica) == referencia, byte a byte',
+      comPix['m-out'] === daRef['m-out'],
+      'tamanhos '+comPix['m-out'].length+' x '+daRef['m-out'].length);
+  chk('[ref ja tem a rodada] e a escolha do CARTAO REALMENTE muda o Checkout',
+      comPP['u-out'] !== daRef['u-out']);
+  chk('[ref ja tem a rodada] e a escolha do CARTAO REALMENTE muda a Mini loja',
+      comPP['m-out'] !== daRef['m-out']);
+}
 chk('vitrine da Agendamento por pacote com o PIX prioritario == referencia, byte a byte',
     comPix['a-out1'] === daRef['a-out1'],
     'tamanhos '+comPix['a-out1'].length+' x '+daRef['a-out1'].length);
-/* E a prova do contrario: se a escolha NAO mudasse nada, tudo isto seria vacuo. */
-chk('e a outra escolha REALMENTE muda o Checkout', comPix['u-out'] !== daRef['u-out']);
-chk('e a outra escolha REALMENTE muda a Mini loja', comPix['m-out'] !== daRef['m-out']);
 
 /* ===== 5. COM UM MEIO SO, a escolha nao muda um byte =====
    A ferramenta desliga o campo nesse caso (fcOrdSo1), mas o valor gravado continua indo ao
