@@ -1,5 +1,6 @@
 /* ============================================================================
-   A COBRANCA DE SINAL, COM OS BLOCOS RODANDO -- Checkout e Mini loja
+   A COBRANCA DE SINAL, COM OS BLOCOS RODANDO
+   Checkout, Mini loja e Agendamento por pacote
    ============================================================================
    POR QUE ESTE ARQUIVO EXISTE. Ate 13/09/2026 o caminho do sinal tinha ZERO
    verificacao em todo o arnes. Medido: um grep por
@@ -38,6 +39,16 @@
         desconto do Pix e o sinal convivam.
      6. AS TRES LINHAS NA TELA (total, sinal, saldo) e AS TRES DO WHATSAPP, com
         a URL capturada do proprio window.open do bloco.
+
+   A ABA AGENDAMENTO POR PACOTE entrou em 13/09/2026 (rodada C) e tem uma secao
+   propria, no fim deste arquivo -- as seis provas acima mais tres que so existem
+   la: o IDENTIFICADOR DE CONCILIACAO imune ao sinal, o ENCONTRO COM O MEIO
+   PRIORITARIO (nenhuma segunda linha repetindo o numero de cima, nenhum selo
+   dizendo -0%) e o PARCELAMENTO SOBRE O SINAL. O porque de cada uma esta escrito
+   no cabecalho daquela secao. Ela REUSA daqui a segunda opiniao da conta
+   (esperado), o leitor TLV independente e o catalogo do meio centavo: repeti-los
+   noutro arquivo criaria a terceira implementacao de cada um, que e justamente o
+   que este arnes existe para impedir.
 
    ---------------------------------------------------------------------------
    O LEITOR TLV E ESCRITO AQUI DENTRO, DE PROPOSITO
@@ -689,6 +700,589 @@ console.log('\n== D2 e D3: o campo do desconto do Pix nas duas abas ==');
     await br.close();
     srv.close();
   }
+}
+
+/* ============================================================================
+   A ABA AGENDAMENTO POR PACOTE (rodada C, 13/09/2026)
+   ============================================================================
+   POR QUE ELA ENTRA AQUI, e nao num arquivo proprio. A CONTA e a mesma fonte
+   (FC_CARRINHO_SRC.sinal) e o criterio dos casos de arredondamento e o mesmo
+   catalogo medido para as duas irmas -- repetir a segunda opiniao da conta e o
+   leitor TLV noutro arquivo seria criar uma terceira implementacao de cada um,
+   que e exatamente o que este arnes existe para impedir. O que muda e so como
+   se monta o carrinho e onde se le a tela, e isso mora nas funcoes abaixo.
+
+   O QUE ESTA ABA TEM QUE AS IRMAS NAO TEM, e por isso ganha prova propria:
+
+     a) O IDENTIFICADOR DE CONCILIACAO. Ele e calculado a partir SO do pacote e
+        do horario, antes de o carrinho existir, e essa independencia e a
+        correcao do defeito mais caro daquela rodada (um extrato com varias
+        cobrancas diferentes para uma reserva so). Sinal que entrasse nele
+        reabriria o defeito. Aqui ele e lido de onde o cliente de fato o manda
+        -- o custom_id/sku do pedido ao SDK do cartao -- e comparado com sinal
+        LIGADO e DESLIGADO, depois de recarregar a pagina e depois de mexer no
+        carrinho.
+
+     b) O ENCONTRO COM O MEIO PRIORITARIO. Com sinal o desconto do Pix e zerado
+        na origem, entao "preco do Pix" e "preco cheio" viram o mesmo numero.
+        Esta aba tem duas pecas que as irmas nao tem -- a SEGUNDA LINHA
+        ("ou {valor} no cartao") e o SELO "-{pct}% no Pix" --, e duas linhas com
+        o mesmo numero, ou um selo dizendo -0%, nao podem chegar ao cliente. As
+        quatro combinacoes de (meio prioritario x sinal) sao medidas no DOM.
+
+     c) O PARCELAMENTO E SOBRE O SINAL (decisao do dono): a parcela mostrada tem
+        de ser sinalAgora()/PARCELAS, e nao total()/PARCELAS.
+
+   O QUE ELA NAO TEM, e a ausencia e MEDIDA e nao suposta:
+
+     - NAO HA RESUMO COPIAVEL. As irmas tem quatro consumidores de sinalRecusa()
+       (linha vermelha, clique do cartao, botao do Pix e resumo); aqui sao TRES,
+       porque montarResumo() desta pagina desenha o nome e a duracao do pacote,
+       nao um <textarea>. Por isso 'txtSinalRecusado' nao nasce nesta aba: campo
+       de texto sem consumidor e pior que campo faltando.
+     - A MENSAGEM DE WHATSAPP NAO CITA VALOR. As duas unicas desta pagina
+       (recusa e prazo vencido) sao recados fixos, entao nao ha linha de saldo
+       para migrar e 'txtZapSaldo' tambem nao nasce aqui.
+     Os dois testes abaixo ('a ausencia declarada') medem isso no TEXTO do bloco,
+     para a ausencia deixar de ser uma frase e passar a ser uma medida.
+
+   O CARRINHO DESTA ABA: o pacote e FIXO (nao desmarcavel) e os opcionais sao os
+   que somam. Por isso todo subconjunto medido aqui contem o pacote -- e por isso
+   os quatro casos do meio centavo foram RE-ESCOLHIDOS entre os que o contem
+   (varredura de 13/09/2026: dos oito subconjuntos com o pacote, SEIS caem na
+   familia com cupom de 10% e sinal de 50%; quatro entram na medicao).
+   ============================================================================ */
+console.log('\n\n========== AGENDAMENTO POR PACOTE ==========');
+
+/* O catalogo desta aba: um pacote com tres opcionais (os mesmos valores de CAT,
+   para a segunda opiniao da conta continuar valendo) e dois pacotes curtos, que
+   existem so para alcancar as duas recusas -- um total ABAIXO do sinal fixo, e um
+   total tao pequeno que 1% dele arredonda para zero. */
+const A_PAC_ENS   = {cod:'ENS',   nome:'Ensaio A',  dur:'2 horas', preco:CAT[0].preco};
+const A_PAC_CURTO = {cod:'CURTO', nome:'Ensaio B',  dur:'1 hora',  preco:CAT[1].preco};
+const A_PAC_MINI  = {cod:'MINI',  nome:'Ensaio E',  dur:'15 min',  preco:CAT[4].preco};
+/* Os opcionais de ENS sao CAT[1..3], na ordem -- o indice do opcional na tela e
+   o indice em CAT menos um, e e assim que 'itens' abaixo se le. */
+const A_OPS = [CAT[1], CAT[2], CAT[3]];
+/* O cupom de 100% e a UNICA forma de zerar o pedido nesta aba (o pacote e fixo,
+   e o proprio texto de fabrica da aba diz isso: "O cupom aplicado zera o valor
+   deste pedido"). E o espelho do "carrinho VAZIO" das irmas. */
+const A_CUPOM_ZERA = 'ZERA';
+const A_PARCELAS = 6;
+
+/* O endereco da reserva. 'quando' tem de estar no FUTURO: prazoFim() limita o prazo
+   ao inicio do ensaio, e um horario passado cairia no cartao de "prazo vencido",
+   que nao tem secao de pagamento nenhuma -- o teste mediria uma tela que nao e a
+   que ele quer medir. 'data' e 'hora' sao as strings que o TidyCal mostra ao dono,
+   e sao elas que entram no identificador. */
+const A_QUANDO = '2030-05-10T14:00:00Z';
+const A_DATA = '10/05/2030';
+const A_HORA = '14:00';
+const buscaDe = cod => '?pac='+cod+'&data='+encodeURIComponent(A_DATA)
+  +'&hora='+encodeURIComponent(A_HORA)+'&quando='+encodeURIComponent(A_QUANDO);
+
+/* OS QUATRO CAMPOS NOVOS COM TEXTO HOSTIL. Eles nao estao (ainda) na tabela TEXTOS de
+   cenario.mjs -- nao existem em 'main', e poe-los la faria a passagem configurada deixar de
+   ser comparavel contra a referencia (ver o README). Entao o escape deles e medido AQUI, com
+   o bloco rodando: apostrofa (o literal do bloco e de aspas simples), barra invertida, aspas
+   duplas, acento e a sequencia '</script', que o Manual do Prosite manda blindar -- se um
+   deles escapar, o literal fecha no meio e o bloco inteiro nao carrega. */
+const A_HOSTIL = {
+  t8:   'Sinal \'agora\' "já" \\ </script> & <b>',
+  t9:   'Saldo — \'depois\' "no dia" \\ </script>',
+  maior:'O sinal desta \'reserva\' é maior \\ que o total "todo" </script>',
+  zero: 'O sinal \'arredonda\' para zero \\ "mesmo" </script>'
+};
+
+/* ===========================================================================
+   A PASSAGEM PELA FERRAMENTA -- uma configuracao, uma saida (a-out3)
+   =========================================================================== */
+async function gerarPac(cfg){
+  console.log('\ngerando a pagina de obrigado  ['+cfg.id+'] ...');
+  const r = await gerarNaFerramenta(async pg => {
+    for(const [k,v] of Object.entries(IDENT)) await set(pg,'fci-'+k,v);
+    await clicar(pg,'aba-pac');
+    await set(pg,'a-urlobrigado','https://www.fotocerta.com.br/obrigado');
+    await set(pg,'a-prefixo','FC');
+    await radio(pg,'a-metodo','ambos');
+    await radio(pg,'a-prio',cfg.prio);
+    await set(pg,'a-parcelas',String(A_PARCELAS));
+    /* Desconto do Pix em 5 (a fabrica) DE PROPOSITO, inclusive nas configuracoes com
+       sinal: e assim que se prova que quem o zera e o sinal, e nao o teste. */
+    await set(pg,'a-descpix','5');
+
+    await set(pg,'a-pcod',A_PAC_ENS.cod); await set(pg,'a-pnome',A_PAC_ENS.nome);
+    await set(pg,'a-pdur',A_PAC_ENS.dur); await set(pg,'a-ppreco',A_PAC_ENS.preco);
+    await set(pg,'a-pinclui','20 fotos'); await set(pg,'a-ppath','fotocerta/ens');
+    for(const op of A_OPS){
+      await set(pg,'a-op-nome',op.nome); await set(pg,'a-op-preco',op.preco);
+      await clicar(pg,'a-op-add');
+    }
+    await clicar(pg,'a-pac-salvar');
+    for(const p of [A_PAC_CURTO, A_PAC_MINI]){
+      await set(pg,'a-pcod',p.cod); await set(pg,'a-pnome',p.nome);
+      await set(pg,'a-pdur',p.dur); await set(pg,'a-ppreco',p.preco);
+      await set(pg,'a-pinclui','10 fotos'); await set(pg,'a-ppath','fotocerta/'+p.cod.toLowerCase());
+      await clicar(pg,'a-pac-salvar');
+    }
+    await set(pg,'a-cp-cod',CUPOM.cod);
+    await radio(pg,'a-cp-tipo','pct_total');
+    await set(pg,'a-cp-valor',String(CUPOM.pct));
+    await clicar(pg,'a-cp-add');
+    await set(pg,'a-cp-cod',A_CUPOM_ZERA);
+    await radio(pg,'a-cp-tipo','pct_total');
+    await set(pg,'a-cp-valor','100');
+    await clicar(pg,'a-cp-add');
+
+    await radio(pg,'a-sinal',cfg.sinal?'sim':'nao');
+    if(cfg.sinal){
+      await radio(pg,'a-sinaltipo',cfg.tipo);
+      await set(pg, cfg.tipo==='fixo'?'a-sinalfixo':'a-sinalpct', String(cfg.valor));
+      const T = cfg.hostil ? A_HOSTIL : TXT;
+      await set(pg,'a-t8',T.t8); await set(pg,'a-t9',T.t9);
+      await set(pg,'a-txt-sinal-maior',T.maior);
+      await set(pg,'a-txt-sinal-zero',T.zero);
+    }
+    await clicar(pg,'a-gerar');
+  }, ['a-out3'], {porta: cfg.porta});
+
+  chk('['+cfg.id+'] a ferramenta gerou sem alerta', r.alertas.length===0, JSON.stringify(r.alertas));
+  chk('['+cfg.id+'] a ferramenta gerou sem erro de console', r.erros.length===0, r.erros.slice(0,2).join(' | '));
+  const t = r.valores['a-out3']||'';
+  chk('['+cfg.id+'] a-out3 saiu', t.length>1000);
+  chk('['+cfg.id+'] o motor de sinal esta '+(cfg.sinal?'DENTRO':'FORA')+' do bloco',
+      (t.indexOf('function sinalAgora()')>=0)===!!cfg.sinal);
+  return t;
+}
+
+/* ===========================================================================
+   O QUE SE MEDE DENTRO DA PAGINA DE OBRIGADO
+   =========================================================================== */
+const lerPac = pg => pg.evaluate(() => {
+  const q = s => document.querySelector(s);
+  const txt = s => { const e=q(s); return e ? e.textContent.trim() : null; };
+  const filho = (s,i) => { const e=q(s); return (e && e.children[i]) ? e.children[i].textContent.trim() : null; };
+  function ppClique(){
+    if(!window.__pp || !window.__pp.onClick) return null;
+    try{ return window.__pp.onClick(null,{reject:()=>'REJEITADO', resolve:()=>'SEGUIU'}); }
+    catch(e){ return 'ERRO: '+(e && e.message || e); }
+  }
+  function ppPedido(){
+    if(!window.__pp || !window.__pp.createOrder) return null;
+    try{
+      const u = window.__pp.createOrder(null,{order:{create:x=>x}}).purchase_units[0];
+      return {valor:u.amount.value, custom:u.custom_id, sku:u.items[0].sku, nome:u.items[0].name};
+    }catch(e){ return {erro:'ERRO: '+(e && e.message || e)}; }
+  }
+  /* O CLIQUE ANTES da mensagem que ele escreve: num literal de objeto as propriedades
+     sao avaliadas na ordem escrita, e ler 'msg' antes mediria o caso ANTERIOR. */
+  const clique = ppClique();
+  const cola = q('.fca-ob-cod'), bot = q('.fca-ob-botoes'), av = q('.fca-ob-sinal-aviso');
+  return {
+    totalTxt: txt('.fca-ob-preco-valor'),
+    linha2:   txt('.fca-ob-preco-linha2'),
+    temLinha2: !!q('.fca-ob-preco-linha2'),
+    nSelos:   document.querySelectorAll('.fca-ob-selo').length,
+    sinalRot: filho('.fca-ob-sinal',0), sinalTxt: filho('.fca-ob-sinal',1),
+    saldoRot: filho('.fca-ob-saldo',0), saldoTxt: filho('.fca-ob-saldo',1),
+    temSinal: !!q('.fca-ob-sinal'), temSaldo: !!q('.fca-ob-saldo'),
+    aviso:    av ? av.textContent.trim() : null,
+    avisoOn:  !!(av && /\bon\b/.test(av.className)),
+    /* A LINHA DA PARCELA e o irmao seguinte da caixa dos botoes do cartao -- e assim
+       que secaoCartao a monta. Procura-la por classe pegaria qualquer '.fca-ob-ajuda'
+       da pagina (a do prazo, a do Pix), e o teste mediria outra linha. */
+    parcela:  (bot && bot.nextElementSibling) ? bot.nextElementSibling.textContent.trim() : null,
+    payload:  cola ? cola.value : '',
+    pixArea:  !!(q('.fca-ob-pixarea') && /\bon\b/.test(q('.fca-ob-pixarea').className)),
+    msgPP:    txt('.fca-ob-msg'),
+    ppClique: clique,
+    pedido:   ppPedido(),
+    alertas:  window.__alertas.slice()
+  };
+});
+
+/* O botao "Gerar Pix" e o filho DIRETO do bloco do Pix; o "Copiar" carrega a mesma
+   classe mas mora dentro da area, entao o '>' e o que separa os dois sem depender
+   do texto configurado. */
+const A_BT_PIX = '.fca-ob-bloco:has(.fca-ob-pixarea) > button.fca-ob-bt';
+
+async function carrinhoPac(pg, opcionaisQueridos){
+  const estados = await pg.$$eval('.fca-ob-op input[type="checkbox"]', els => els.map(e => e.checked));
+  for(let j=0;j<estados.length;j++){
+    const quer = opcionaisQueridos.indexOf(j) >= 0;
+    /* Clica no LABEL: o marcador e DESENHADO (Manual do Prosite) e o input nativo por
+       baixo pode nem estar no caminho do dedo do operador. */
+    if(estados[j] !== quer) await pg.locator('.fca-ob-op').nth(j).locator('label').click();
+  }
+}
+
+async function umCasoPac(pg, caso){
+  await pg.evaluate(()=>{window.__alertas.length=0;});
+  await carrinhoPac(pg, caso.ops||[]);
+  await pg.waitForTimeout(60);
+  await aplicarCupom(pg,'fca-ob', caso.cupom||'');
+  await pg.click(A_BT_PIX);
+  await pg.waitForTimeout(150);
+  return await lerPac(pg);
+}
+
+/* ===========================================================================
+   AS CONFIGURACOES E OS CASOS
+   ===========================================================================
+   'itens' e a lista de indices de CAT que estao no carrinho -- o pacote sempre,
+   os opcionais marcados por cima --, e e o que a segunda opiniao da conta recebe.
+   'ops' e a mesma coisa escrita como indice de opcional na tela (itens menos um).
+   =========================================================================== */
+const A_CFGS = {
+  'pct50':   {id:'pac/pct50',   sinal:true,  tipo:'pct',  valor:50,  prio:'pix', porta:8951},
+  'fixo100': {id:'pac/fixo100', sinal:true,  tipo:'fixo', valor:100, prio:'pix', porta:8952},
+  'pct1':    {id:'pac/pct1',    sinal:true,  tipo:'pct',  valor:1,   prio:'pix', porta:8953},
+  'pct50pp': {id:'pac/pct50pp', sinal:true,  tipo:'pct',  valor:50,  prio:'pp',  porta:8954},
+  'offpix':  {id:'pac/sem-pix', sinal:false, tipo:'pct',  valor:50,  prio:'pix', porta:8955},
+  'offpp':   {id:'pac/sem-pp',  sinal:false, tipo:'pct',  valor:50,  prio:'pp',  porta:8956},
+  /* DUAS configuracoes hostis, e nao uma, porque as duas recusas nao cabem na mesma: 'maior'
+     so e alcancavel com sinal FIXO acima do total, e 'zero' so com PERCENTUAL sobre um total
+     minusculo. Uma configuracao so deixaria um dos dois textos emitido e nunca lido. */
+  'hostilM': {id:'pac/hostil-maior', sinal:true, tipo:'fixo', valor:100, prio:'pix', porta:8957, hostil:true},
+  'hostilZ': {id:'pac/hostil-zero',  sinal:true, tipo:'pct',  valor:1,   prio:'pix', porta:8958, hostil:true}
+};
+
+/* Os quatro do meio centavo saem da varredura de 13/09/2026 sobre os OITO subconjuntos
+   que contem o pacote; a prova 3 confere, caso a caso, que ele esta mesmo na familia --
+   entao um erro de escolha aqui aparece como falha, nunca como cobertura fantasma. */
+const A_RODADAS = [
+  {cfg:'pct50', pac:'ENS', porta:8961, casos:[
+    {n:'so o pacote (meio centavo)',       itens:[0],       ops:[],      cupom:CUPOM.cod},
+    {n:'pacote+B (meio centavo)',          itens:[0,1],     ops:[0],     cupom:CUPOM.cod},
+    {n:'pacote+D (meio centavo)',          itens:[0,3],     ops:[2],     cupom:CUPOM.cod},
+    {n:'pacote+B+C+D (meio centavo)',      itens:[0,1,2,3], ops:[0,1,2], cupom:CUPOM.cod},
+    {n:'pacote+B SEM cupom',               itens:[0,1],     ops:[0],     cupom:''},
+    {n:'pacote+C (controle, fora da familia)', itens:[0,2], ops:[1],     cupom:CUPOM.cod}
+  ]},
+  {cfg:'fixo100', pac:'ENS', porta:8962, casos:[
+    {n:'pacote+C com cupom',               itens:[0,2],     ops:[1],     cupom:CUPOM.cod},
+    {n:'cupom de 100% (pedido em ZERO)',   itens:[0],       ops:[],      cupom:A_CUPOM_ZERA, recusa:'vazio'}
+  ]},
+  {cfg:'fixo100', pac:'CURTO', porta:8963, casos:[
+    {n:'pacote curto (sinal MAIOR que o total)', itens:[1], ops:[],      cupom:CUPOM.cod, recusa:'maior'}
+  ]},
+  {cfg:'pct1', pac:'MINI', porta:8964, casos:[
+    {n:'pacote minimo (sinal arredonda para ZERO)', itens:[4], ops:[],   cupom:'', recusa:'zero'}
+  ]},
+  {cfg:'pct1', pac:'ENS', porta:8965, casos:[
+    {n:'pacote+C com 1% (sem arredondar para zero)', itens:[0,2], ops:[1], cupom:CUPOM.cod}
+  ]}
+];
+
+/* ============================ os blocos ============================ */
+const aBlocos = {};
+for(const k of Object.keys(A_CFGS)) aBlocos[k] = await gerarPac(A_CFGS[k]);
+
+/* ===========================================================================
+   A AUSENCIA DECLARADA -- medida no TEXTO do bloco entregue
+   ===========================================================================
+   As duas irmas tem QUATRO consumidores de sinalRecusa(); esta tem TRES, porque
+   nao ha resumo copiavel. Se um dia aparecer um resumo aqui, ele nasce sem
+   respeitar a recusa (foi o que aconteceu nas irmas, e foi corrigido uma vez) --
+   entao a ausencia fica escrita como medida, e nao como comentario.
+   =========================================================================== */
+{
+  const t = aBlocos['pct50'];
+  chk('pac/ausencia. o bloco NAO tem resumo copiavel (nenhum TXT_SINAL_RECUSADO)',
+      t.indexOf('TXT_SINAL_RECUSADO') < 0);
+  chk('pac/ausencia. e nenhum <textarea> de resumo (so o do Copia e Cola do Pix)',
+      (t.split('createElement("textarea")').length-1) === 1);
+  chk('pac/ausencia. a mensagem de WhatsApp nao cita valor nenhum (nenhum moedaFmt dentro de botaoZap)',
+      /function botaoZap\(msg\)\{[\s\S]*?\n\}/.test(t) &&
+      t.match(/function botaoZap\(msg\)\{[\s\S]*?\n\}/)[0].indexOf('moedaFmt') < 0);
+  /* Conta as CHAMADAS, e nao as ocorrencias do nome: a declaracao da funcao e os
+     comentarios do bloco tambem trazem "sinalRecusa()" e fariam o numero mentir. Toda
+     chamada deste projeto guarda o motivo numa variavel, entao '=sinalRecusa();' e
+     exatamente o conjunto dos consumidores. */
+  chk('pac/ausencia. os TRES consumidores de sinalRecusa() estao la, e sao TRES',
+      (t.split('=sinalRecusa();').length-1) === 3,
+      'contei '+(t.split('=sinalRecusa();').length-1));
+  chk('pac/ausencia. o quarto consumidor das irmas (o do resumo) nao existe aqui',
+      t.indexOf('recR=sinalRecusa();') < 0);
+}
+
+/* ============================ os casos ============================ */
+for(const rod of A_RODADAS){
+  const cfg = A_CFGS[rod.cfg], rot = '['+cfg.id+'/'+rod.pac+'] ';
+  console.log('\n== '+rot.trim()+' ==');
+  const r = await comBlocoNaPagina({
+    bloco: aBlocos[rod.cfg], cabeca: CABECA, porta: rod.porta, busca: buscaDe(rod.pac),
+    corpoDepois: '<div id="fim-do-documento">fim</div>',
+    medir: async pg => {
+      await pg.waitForTimeout(300);
+      const fora = {};
+      for(const caso of rod.casos) fora[caso.n] = await umCasoPac(pg, caso);
+      return {fora, fim: await pg.$('#fim-do-documento') !== null};
+    }
+  });
+  chk(rot+'o documento nao foi engolido pelo bloco', r.fim);
+  chk(rot+'sem erro de console proprio do bloco',
+      errosReais(r.erros||[]).length===0, (r.erros||[]).slice(0,2).join(' | '));
+
+  /* ===== 5. O DESCONTO DO PIX ZERADO, no TEXTO do bloco ===== */
+  const txt = aBlocos[rod.cfg];
+  chk(rot+'5. totalPix() devolve o SINAL (ramo do meio de fcTotalPixSrc)',
+      txt.indexOf('function totalPix(){return sinalAgora();}') >= 0);
+  chk(rot+'5. nenhuma outra forma de totalPix foi emitida',
+      (txt.split('function totalPix(').length-1) === 1);
+  chk(rot+'5. DESCONTO_PIX foi zerado na ORIGEM, mesmo com 5 digitado na aba',
+      txt.indexOf('var DESCONTO_PIX=0;') >= 0,
+      (txt.match(/var DESCONTO_PIX=[^;]*/)||[''])[0]);
+
+  for(const caso of rod.casos){
+    const d = r.fora[caso.n], tag = rot+caso.n+': ';
+
+    /* ===== 2b (encontro com o meio prioritario): nunca duas linhas iguais, nunca selo ===== */
+    chk(tag+'a SEGUNDA LINHA de preco nao existe (os dois meios cobram o mesmo sinal)',
+        d.temLinha2===false, 'linha2="'+d.linha2+'"');
+    chk(tag+'nenhum SELO de desconto no Pix na tela', d.nSelos===0, 'selos='+d.nSelos);
+    chk(tag+'as duas linhas do sinal existem', d.temSinal && d.temSaldo);
+
+    /* ---------- os casos de RECUSA ---------- */
+    if(caso.recusa){
+      const frase = caso.recusa==='maior' ? TXT.maior : (caso.recusa==='zero' ? TXT.zero : null);
+      if(caso.recusa === 'vazio'){
+        /* PEDIDO ZERADO: sinalRecusa() devolve VAZIO de proposito (primeira guarda) --
+           quem avisa e a recusa de total zero, e dois avisos ao mesmo tempo se
+           esconderiam. Nesta aba o caminho ate aqui e o CUPOM DE 100%, o unico que
+           existe: o pacote e fixo e nao ha o que desmarcar. */
+        chk(tag+'4. o botao do Pix recusa (alerta de pedido zerado)',
+            d.alertas.length===1 && /zera/i.test(d.alertas[0]), JSON.stringify(d.alertas));
+        chk(tag+'4. a area do Pix fica FECHADA', d.pixArea===false);
+        chk(tag+'4. o clique do cartao e REJEITADO', d.ppClique==='REJEITADO', String(d.ppClique));
+        chk(tag+'4. a linha vermelha do sinal fica APAGADA (decisao registrada na fonte)',
+            d.avisoOn===false, 'aviso="'+d.aviso+'"');
+        console.log('  ..    ACHADO '+tag+'pedido em zero: total='+d.totalTxt+
+                    '  '+d.sinalRot+'='+d.sinalTxt+'  '+d.saldoRot+'='+d.saldoTxt);
+      }else{
+        chk(tag+'4. a linha vermelha acende com a frase certa',
+            d.avisoOn===true && d.aviso===frase, 'aviso="'+d.aviso+'" on='+d.avisoOn);
+        chk(tag+'4. o botao do Pix recusa com a MESMA frase',
+            d.alertas.length===1 && d.alertas[0]===frase, JSON.stringify(d.alertas));
+        chk(tag+'4. a area do Pix fica FECHADA', d.pixArea===false);
+        chk(tag+'4. o clique do cartao e REJEITADO', d.ppClique==='REJEITADO', String(d.ppClique));
+        chk(tag+'4. o cartao mostra a MESMA frase', d.msgPP===frase, 'msg="'+d.msgPP+'"');
+      }
+      continue;
+    }
+
+    /* ---------- os casos que PASSAM ---------- */
+    const e = esperado(caso.itens, caso.cupom===CUPOM.cod, cfg.tipo, cfg.valor);
+    const tela = {total:moeda(d.totalTxt), sinal:moeda(d.sinalTxt), saldo:moeda(d.saldoTxt)};
+
+    /* 1. A CONTA, sobre o total ja com cupom. */
+    chk(tag+'1. o TOTAL na tela e o subtotal ja com cupom  ('+e.total.toFixed(2)+')',
+        tela.total===e.total, 'leu '+d.totalTxt);
+    chk(tag+'1. o SINAL na tela sai do total com cupom  ('+e.sinal.toFixed(2)+')',
+        tela.sinal===e.sinal, 'leu '+d.sinalTxt);
+    chk(tag+'1. o SALDO na tela e total menos sinal  ('+e.saldo.toFixed(2)+')',
+        tela.saldo===e.saldo, 'leu '+d.saldoTxt);
+    chk(tag+'1. sinal + saldo fecham com o total',
+        r2(tela.sinal+tela.saldo)===tela.total, JSON.stringify(tela));
+
+    /* 6. AS LINHAS NA TELA e os rotulos configurados na aba. */
+    chk(tag+'6. o rotulo do sinal e o campo da aba'+(cfg.tipo==='pct'?' com o percentual':''),
+        cfg.tipo==='pct' ? d.sinalRot===TXT.t8+' ('+cfg.valor+'%)' : d.sinalRot===TXT.t8,
+        'leu "'+d.sinalRot+'"');
+    chk(tag+'6. o rotulo do saldo e o campo da aba', d.saldoRot===TXT.t9, 'leu "'+d.saldoRot+'"');
+    chk(tag+'4. sem recusa, a linha vermelha fica apagada e vazia',
+        d.avisoOn===false && (d.aviso===''||d.aviso==null), 'aviso="'+d.aviso+'"');
+
+    /* 2. O NUMERO QUE O CLIENTE LE E O QUE AS DUAS PONTAS COBRAM. */
+    chk(tag+'2. o Pix foi gerado', d.pixArea===true && d.payload.length>40);
+    const pix = lerPayload(d.payload);
+    chk(tag+'2. o payload Pix fecha como TLV (leitor independente)', !pix.erro, pix.erro||'');
+    if(!pix.erro){
+      chk(tag+'2. o CRC do payload confere (recalculado aqui)', pix.crcOk===true);
+      chk(tag+'2. CAMPO 54 = o sinal  ('+e.sinal.toFixed(2)+')',
+          pix.valor===e.sinal.toFixed(2), 'campo 54 = '+pix.valor);
+      chk(tag+'2. campo 54 = o numero na TELA', parseFloat(pix.valor)===tela.sinal);
+    }
+    chk(tag+'2. amount.value do createOrder = o sinal  ('+e.sinal.toFixed(2)+')',
+        d.pedido && d.pedido.valor===e.sinal.toFixed(2), 'cartao = '+JSON.stringify(d.pedido));
+    chk(tag+'2. Pix e cartao cobram o MESMO numero',
+        !pix.erro && d.pedido && pix.valor===d.pedido.valor,
+        'pix='+(pix.valor||pix.erro)+' cartao='+(d.pedido&&d.pedido.valor));
+    chk(tag+'4. sem recusa, o clique do cartao SEGUE', d.ppClique==='SEGUIU', String(d.ppClique));
+
+    /* 3. O ARREDONDAMENTO: o numero cobrado e o do Math.round, e nao o do toFixed. */
+    if(caso.n.indexOf('meio centavo') >= 0){
+      const bruto = e.total*cfg.valor/100;
+      const porFixed = Number(bruto.toFixed(2));
+      chk(tag+'3. este caso ESTA mesmo na familia do meio centavo (round '+e.sinal.toFixed(2)+
+          ' != toFixed '+porFixed.toFixed(2)+')', e.sinal !== porFixed);
+      chk(tag+'3. as tres leituras ficaram com o valor do Math.round',
+          tela.sinal===e.sinal && d.pedido.valor===e.sinal.toFixed(2) &&
+          (!pix.erro && pix.valor===e.sinal.toFixed(2)));
+    }
+
+    /* ===== 3b. O PARCELAMENTO E SOBRE O SINAL (decisao do dono) ===== */
+    const parcelaEsperada = Math.ceil(e.sinal/A_PARCELAS*100)/100;
+    const parcelaDoTotal  = Math.ceil(e.total/A_PARCELAS*100)/100;
+    chk(tag+'3b. a linha da parcela existe (PARCELAS='+A_PARCELAS+')', d.parcela!=null && d.parcela!=='');
+    chk(tag+'3b. a parcela e o SINAL dividido  ('+parcelaEsperada.toFixed(2)+')',
+        moeda(d.parcela)===parcelaEsperada, 'leu "'+d.parcela+'"');
+    chk(tag+'3b. e NAO o total dividido  ('+parcelaDoTotal.toFixed(2)+')',
+        parcelaEsperada===parcelaDoTotal || moeda(d.parcela)!==parcelaDoTotal,
+        'leu "'+d.parcela+'"');
+  }
+}
+
+/* ===========================================================================
+   O ENCONTRO COM O MEIO PRIORITARIO, e o IDENTIFICADOR IMUNE AO SINAL
+   ===========================================================================
+   As QUATRO combinacoes de (meio prioritario x sinal), medidas no DOM da mesma
+   reserva -- mesmo pacote, mesmo horario, mesmo endereco.
+
+   O QUE SE MEDE, e por que cada coisa:
+
+     - SEM sinal: existem DOIS numeros a vista (o do Pix e o cheio) e UM selo, e
+       os dois numeros sao DIFERENTES. E o estado que a rodada do meio prioritario
+       entregou, e ele nao pode ter sido desfeito por esta.
+     - COM sinal: existe UM numero so, NENHUM selo e NENHUMA segunda linha. Duas
+       linhas com o mesmo numero, ou um selo dizendo -0%, nao podem chegar ao
+       cliente -- e com o desconto zerado as duas pecas passariam a dizer
+       exatamente isso.
+     - O IDENTIFICADOR DE CONCILIACAO e o MESMO nas quatro, e continua o mesmo
+       depois de RECARREGAR a pagina e depois de MEXER no carrinho. Ele e lido de
+       onde o cliente de fato o manda (custom_id e sku do pedido ao SDK), e nao de
+       uma variavel interna do bloco -- a variavel poderia estar certa e o pedido
+       sair errado.
+   =========================================================================== */
+console.log('\n== pac: meio prioritario x sinal, e o identificador ==');
+
+/* O identificador esperado, escrito por extenso: PREFIXO + codigo do pacote +
+   os digitos de 'data' e 'hora' como chegaram na URL (diaHoraId). Escrito a mao
+   de proposito -- se ele passar a sair de uma funcao do projeto, o teste deixa de
+   ter opiniao propria sobre ele. */
+const A_ID_ESPERADO = 'FC' + A_PAC_ENS.cod + A_DATA.replace(/\D/g,'') + A_HORA.replace(/\D/g,'');
+
+const A_MATRIZ = [
+  {k:'offpix',  rot:'Pix primeiro / SEM sinal',   sinal:false, prio:'pix', porta:8971},
+  {k:'pct50',   rot:'Pix primeiro / COM sinal',   sinal:true,  prio:'pix', porta:8972},
+  {k:'offpp',   rot:'cartao primeiro / SEM sinal',sinal:false, prio:'pp',  porta:8973},
+  {k:'pct50pp', rot:'cartao primeiro / COM sinal',sinal:true,  prio:'pp',  porta:8974}
+];
+
+const idsDaMatriz = [];
+for(const m of A_MATRIZ){
+  const tag = 'pac['+m.rot+'] ';
+  const r = await comBlocoNaPagina({
+    bloco: aBlocos[m.k], cabeca: CABECA, porta: m.porta, busca: buscaDe(A_PAC_ENS.cod),
+    medir: async pg => {
+      await pg.waitForTimeout(300);
+      const inicial = await lerPac(pg);
+      /* RECARREGAR: o identificador nao pode depender de quantas vezes a pagina abriu.
+         Foi o defeito mais caro daquela rodada -- um sufixo sorteado por carregamento
+         enchia o extrato de cobrancas fantasma. */
+      await pg.reload({waitUntil:'load'});
+      await pg.waitForTimeout(300);
+      const recarregado = await lerPac(pg);
+      /* MEXER NO CARRINHO: marcar um opcional e aplicar cupom muda o dinheiro, e nao
+         pode mudar o identificador -- ele foi calculado antes de o carrinho existir. */
+      await carrinhoPac(pg,[0]);
+      await pg.waitForTimeout(60);
+      await aplicarCupom(pg,'fca-ob',CUPOM.cod);
+      await pg.waitForTimeout(100);
+      const mexido = await lerPac(pg);
+      return {inicial, recarregado, mexido};
+    }
+  });
+  chk(tag+'sem erro de console proprio do bloco',
+      errosReais(r.erros||[]).length===0, (r.erros||[]).slice(0,2).join(' | '));
+
+  const d = r.inicial;
+  if(m.sinal){
+    chk(tag+'2b. NENHUMA segunda linha de preco', d.temLinha2===false, 'linha2="'+d.linha2+'"');
+    chk(tag+'2b. NENHUM selo de desconto no Pix', d.nSelos===0, 'selos='+d.nSelos);
+    chk(tag+'2b. as duas linhas do sinal estao la', d.temSinal===true && d.temSaldo===true);
+    chk(tag+'2b. o numero grande e o TOTAL (nao ha preco de Pix separado)',
+        moeda(d.totalTxt)===CAT[0].v, 'leu '+d.totalTxt);
+  }else{
+    chk(tag+'2b. a segunda linha de preco existe', d.temLinha2===true);
+    chk(tag+'2b. UM selo de desconto no Pix', d.nSelos===1, 'selos='+d.nSelos);
+    chk(tag+'2b. os DOIS numeros estao a vista, e sao diferentes',
+        moeda(d.totalTxt)!=null && moeda(d.linha2)!=null && moeda(d.totalTxt)!==moeda(d.linha2),
+        'linha1='+d.totalTxt+'  linha2="'+d.linha2+'"');
+    chk(tag+'2b. nenhuma linha do sinal', d.temSinal===false && d.temSaldo===false);
+    chk(tag+'2b. o selo nao diz "-0%"', String(d.linha2||'').indexOf('-0%')<0 &&
+        String(d.totalTxt||'').indexOf('-0%')<0);
+  }
+
+  /* ===== 4. O IDENTIFICADOR ===== */
+  chk(tag+'ID. o pedido ao cartao leva o identificador esperado ('+A_ID_ESPERADO+')',
+      d.pedido && d.pedido.custom===A_ID_ESPERADO, 'custom_id='+(d.pedido&&d.pedido.custom));
+  chk(tag+'ID. o sku leva o MESMO identificador', d.pedido && d.pedido.sku===d.pedido.custom);
+  chk(tag+'ID. RECARREGAR a pagina nao muda o identificador',
+      r.recarregado.pedido && r.recarregado.pedido.custom===A_ID_ESPERADO,
+      'depois da recarga: '+(r.recarregado.pedido&&r.recarregado.pedido.custom));
+  chk(tag+'ID. mexer no carrinho (opcional + cupom) nao muda o identificador',
+      r.mexido.pedido && r.mexido.pedido.custom===A_ID_ESPERADO,
+      'depois de mexer: '+(r.mexido.pedido&&r.mexido.pedido.custom));
+  chk(tag+'ID. e o dinheiro MUDOU nessa mesma passagem (senao a prova acima nao mediu nada)',
+      r.mexido.pedido && d.pedido && r.mexido.pedido.valor!==d.pedido.valor,
+      'antes='+(d.pedido&&d.pedido.valor)+'  depois='+(r.mexido.pedido&&r.mexido.pedido.valor));
+  idsDaMatriz.push(d.pedido && d.pedido.custom);
+
+  /* O identificador nao pode sequer CONTER o sinal: nem o valor, nem a marca. */
+  const txt = aBlocos[m.k];
+  chk(tag+'ID. idConciliacao nao le nada do carrinho nem do sinal',
+      /function idConciliacao\(pac,dataCru,horaCru,reserva\)\{[\s\S]*?\n\}/.test(txt) &&
+      (function(){
+        const corpo = txt.match(/function idConciliacao\(pac,dataCru,horaCru,reserva\)\{[\s\S]*?\n\}/)[0];
+        return corpo.indexOf('sinal')<0 && corpo.indexOf('total')<0 && corpo.indexOf('cupom')<0;
+      })());
+}
+chk('pac/ID. as QUATRO combinacoes (meio prioritario x sinal) dao o MESMO identificador',
+    idsDaMatriz.length===4 && idsDaMatriz.every(x => x===A_ID_ESPERADO),
+    JSON.stringify(idsDaMatriz));
+
+/* ===========================================================================
+   O TEXTO HOSTIL nos quatro campos novos, com o bloco RODANDO
+   ===========================================================================
+   A regressao byte a byte nao alcanca isto: com os padroes de fabrica -- que nao tem
+   apostrofa, barra invertida nem '</script' -- a saida e identica com ou sem o escape.
+   So um valor hostil denuncia um escJs esquecido, e a denuncia e barulhenta: o literal
+   fecha no meio e o bloco inteiro deixa de carregar (o 'fim-do-documento' some junto).
+   =========================================================================== */
+console.log('\n== pac: texto hostil nos quatro campos do sinal ==');
+for(const h of [{k:'hostilM', pac:A_PAC_CURTO.cod, recusa:'maior', porta:8975},
+                {k:'hostilZ', pac:A_PAC_MINI.cod,  recusa:'zero',  porta:8976}]){
+  const cfg = A_CFGS[h.k], tag = '['+cfg.id+'] ';
+  const frase = h.recusa==='maior' ? A_HOSTIL.maior : A_HOSTIL.zero;
+  const r = await comBlocoNaPagina({
+    bloco: aBlocos[h.k], cabeca: CABECA, porta: h.porta, busca: buscaDe(h.pac),
+    corpoDepois: '<div id="fim-do-documento">fim</div>',
+    medir: async pg => {
+      await pg.waitForTimeout(300);
+      await pg.click(A_BT_PIX);
+      await pg.waitForTimeout(150);
+      return {d: await lerPac(pg), fim: await pg.$('#fim-do-documento') !== null};
+    }
+  });
+  /* O DOCUMENTO INTEIRO e a medida do '</script': se ele nao foi blindado, a marcacao
+     fecha o <script> do bloco no meio e o que vem depois vira texto solto. */
+  chk(tag+'o documento nao foi cortado pelo "</script" dentro do texto', r.fim);
+  chk(tag+'o bloco carregou sem erro de console', errosReais(r.erros||[]).length===0,
+      (r.erros||[]).slice(0,2).join(' | '));
+  const d = r.d;
+  chk(tag+'o rotulo do sinal chega INTEIRO a tela',
+      d.sinalRot === A_HOSTIL.t8 + (cfg.tipo==='pct' ? ' ('+cfg.valor+'%)' : ''),
+      'leu "'+d.sinalRot+'"');
+  chk(tag+'o rotulo do saldo chega INTEIRO a tela', d.saldoRot === A_HOSTIL.t9,
+      'leu "'+d.saldoRot+'"');
+  chk(tag+'a linha vermelha traz a frase hostil INTEIRA',
+      d.avisoOn===true && d.aviso===frase, 'leu "'+d.aviso+'"');
+  chk(tag+'o botao do Pix recusa com a MESMA frase hostil',
+      d.alertas.length===1 && d.alertas[0]===frase, JSON.stringify(d.alertas));
+  chk(tag+'o cartao mostra a MESMA frase hostil', d.msgPP===frase, 'msg="'+d.msgPP+'"');
+  chk(tag+'e o pagamento fica travado nas duas pontas',
+      d.pixArea===false && d.ppClique==='REJEITADO', String(d.ppClique));
 }
 
 process.exit(resumo());

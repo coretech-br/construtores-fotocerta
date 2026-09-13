@@ -323,7 +323,23 @@ console.log('\n--- o formato gravado, contra '+REF+' ---');
          o padrao de fabrica dele -- que repete letra por letra o que o bloco ja emitia. */
       {nome:'a linha do saldo no WhatsApp virou campo (13/09/2026)',
        chaves:{u:['txtZapSaldo'], m:['txtZapSaldo']},
-       esperado:() => 'Restante na entrega: *{valor}*'}
+       esperado:() => 'Restante na entrega: *{valor}*'},
+      /* A COBRANCA DE SINAL CHEGOU A ABA AGENDAMENTO POR PACOTE (13/09/2026, rodada C).
+         Oito chaves novas no estado da aba 'a' -- quatro do interruptor e da conta, quatro
+         de texto --, todas gravadas com o PADRAO DE FABRICA do campo, porque o cenario nao
+         mexe em nenhuma delas. Nenhuma chave que ja existia mudou de valor, e e por isso que
+         o resto do objeto continua sendo exigido identico logo abaixo.
+         'txtSinalRecusado' e 'txtZapSaldo' NAO aparecem aqui, e a ausencia e deliberada: o
+         primeiro so serve ao resumo copiavel e o segundo a linha de saldo do WhatsApp, e esta
+         aba nao tem nem um nem outro (medido em sinal.mjs, secao "a ausencia declarada"). */
+      {nome:'o sinal na aba Agendamento por pacote (13/09/2026)',
+       chaves:{a:['sinal','sinaltipo','sinalpct','sinalfixo','t8','t9','txtSinalMaior','txtSinalZero']},
+       esperado:(aba,ch) => ({
+         sinal:'nao', sinaltipo:'pct', sinalpct:'30', sinalfixo:'100',
+         t8:'Sinal agora', t9:'Restante no dia do ensaio',
+         txtSinalMaior:'O sinal desta reserva é maior que o total. Remova o cupom ou marque mais itens opcionais.',
+         txtSinalZero:'O sinal desta reserva arredonda para zero. Remova o cupom ou marque mais itens opcionais.'
+       })[ch]}
     ];
     /* FABRICA TROCADA e outra coisa de CHAVE NOVA, e a diferenca importa: a chave ja existia
        nos dois lados e o que mudou foi o PADRAO dela. Entao os dois valores sao declarados, e
