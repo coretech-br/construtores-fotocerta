@@ -958,3 +958,45 @@ a frase aparecia.
 `textos-migrados.mjs` quebrava com o final novo das tabelas: o leitor só conhecia `];` e um
 `.concat`, e com o segundo `.concat` o padrão não parava e **engolia as tabelas seguintes** — 32
 campos acusados de estarem na aba errada. Os dois concats agora são opcionais e ambos expandidos.
+
+## Entregue em 13/09/2026 — o número de dinheiro não quebra ao meio
+
+Relatado pelo dono com dois prints: no carrinho do Checkout, a linha do Pix saía com o rótulo em
+duas linhas **e o valor partido** — `R$` numa linha, `332,50` na outra. Ele encurtou o texto de
+fábrica por conta própria e **não resolveu**, o que já dizia onde estava a causa: quem quebrava era
+o **valor**, e rótulo menor não muda isso. Depois esclareceu: *"Isso acontece na tela de celular."*
+
+**A causa:** as linhas "rótulo à esquerda, valor à direita" são flex com dois `<span>` e **nenhuma
+regra dizendo quem cede**. Item de flex tem `min-width:auto`, então os dois disputam a largura até
+os dois quebrarem. O corpo maior que a rodada do meio prioritário trouxe (20px/800) foi o empurrão.
+
+**A regra (`fcLinhaValorCss`):** o valor nunca quebra e nunca encolhe (`white-space:nowrap` +
+`flex:none`); o rótulo encolhe (`min-width:0`) e, se precisar, usa duas linhas. **Rótulo em duas
+linhas é legível; número partido não é.** Escrita **uma vez** para os quatro geradores — copiada
+quatro vezes, a próxima linha de dinheiro nasceria sem a regra, que é como este defeito nasceu.
+
+**15 divergências, todas o CSS novo:** duas regras por carrinho e uma propriedade em `.fcpg-valor`.
+Nada de carona — conferido lendo o texto das três saídas.
+
+### A prova, e os dois erros que ela pegou no caminho
+
+`linha-de-dinheiro.mjs` mede a **375 CSS px**, a largura do iPhone do dono, e conta **fragmentos de
+linha** do texto (um `Range` sobre o conteúdo devolve um retângulo por linha).
+
+1. **A primeira versão media a ALTURA DA CAIXA e mentia.** Item de flex estica por padrão, então a
+   caixa do valor fica com a altura da linha inteira quando o rótulo quebra — ela acusava quebra
+   onde não havia.
+2. **A regra tinha caído DENTRO do `if` do desconto do Pix** no Checkout e na Mini loja. Com sinal
+   ligado o desconto é zerado, então ela não sairia e o total continuaria quebrando. **Quem
+   denunciou foi a lista de divergências não bater com o esperado** — a Mini loja divergia na
+   passagem de fábrica e não na configurada, o que não fazia sentido.
+
+**A prova do contrário:** o arquivo aponta para a versão publicada e **exige que ela falhe**,
+reproduzindo o defeito do print. Sem isso, os "ok" não valeriam nada.
+
+### E uma correção que as suítes existentes impuseram
+
+A lista de classes passou a seguir **as linhas que realmente existem**: seletor para classe que o
+bloco nunca emite é regra morta viajando para o site — e fez duas suítes acharem a palavra
+`pixlinha` num bloco sem linha de Pix, derrubando a garantia de que, com sinal ligado, ela não
+existe. **As suítes estavam certas.**
