@@ -900,3 +900,61 @@ de antes de agosto/2026, de quando o link ainda não tinha selo, que já eram re
 3. **Pedido em zero (rodada F) não existe aqui** — a geração recusa valor zero. Mas existe o
    espelho: sinal fixo igual ao valor. As duas linhas somem quando o saldo é zero, para não repetir
    o número do destaque.
+
+## Entregue em 13/09/2026 — os três textos que explicam o sinal
+
+Spec: `docs/specs/2026-09-12-sinal-nos-quatro-construtores-design.md`, Rodada E. Pedido do dono:
+três textos configuráveis que respondam, **antes** de o cliente pagar, *o que o sinal garante*, *e
+se eu desistir* e *o que fazer com o saldo*. Doze campos, nas quatro abas de pagamento.
+
+### A decisão que governa a rodada: nascem VAZIOS
+
+Todo campo de texto deste projeto tem padrão de fábrica, porque o padrão é *"exatamente o que saía
+fixo no bloco antes"*. Aqui não existe "antes". E, mais importante: os três são **declarações de
+política comercial**. Um padrão dizendo `Cancelamento não há devolução do sinal` afirmaria, para um
+cliente prestes a pagar, uma política que o dono pode não ter — **política inventada numa tela de
+pagamento é pior que nenhuma**.
+
+`value=""`, exemplos no `placeholder`, e **cada linha só é emitida quando preenchida**. Três vazios
+= nenhuma linha, e o bloco sai exatamente como sairia sem a rodada. **Regressão: zero divergência**,
+e o zero é honesto: vazio não emite nem regra de CSS, nem `div`, nem uma linha de JS.
+
+Um estado que sinal ligado + três vazios cria é justamente a confusão que o pedido veio evitar — daí
+o **aviso âmbar** na aba. Ela não conserta; faz o buraco **aparecer**. Aviso e não tranca: o dono
+pode ter motivo para deixar vazio, e recusar o forçaria a escrever algo só para destravar.
+
+### A medição do Link de cobrança: da PÁGINA, não da cobrança
+
+Não foi assumido. Naquela aba **todo `TXT_*` já mora no bloco** e nada disso viaja no endereço; o
+que viaja é valor (`t`, `x`, `n`). Os três são política do negócio, não desta venda — duas cobranças
+da mesma página não teriam por que responder diferente "e se eu desistir?". Pô-los no link os faria
+entrar no **selo**, derrubando todo link novo em qualquer `/pagar` com código 1 antigo — **por um
+texto**. Duas provas fixam a decisão: o link sai **idêntico** com um e com três preenchidos, e o
+bloco (ao contrário) muda.
+
+### Uma armadilha real, evitada
+
+Sem `value=""` **escrito no HTML**, `getAttribute('value')` devolve `null`, `null !== ''`, e
+`fcTxtFabricaDiverge` acenderia a barra vermelha na partida. Os doze trazem o atributo, com prova.
+
+### A quarta suíte com referência datada
+
+`sinal-cobranca.mjs` acusava **três falhas todo dia** desde que a rodada D chegou à `main`: a parte
+2 afirma que "o bloco de hoje recusa o link com sinal", e o bloco de hoje passou a conhecê-lo. É a
+**quarta** vez (depois de `id-orcamento`, `textos-reserva` e `meio-prio-migracao`). Passa a dizer
+**NÃO MEDIU**. Contra `69e5fa2` (o anterior à rodada D), volta a medir: 368 verificações.
+
+### A documentação estava errada, e o erro tinha custo
+
+`CLAUDE.md` e a `documentacao-fotocerta.md` diziam que a versão do arquivo compartilhado se troca em
+**três** lugares. **São quatro** — faltava o `FC_COMPART_ESPERADA` do próprio `index.html`.
+Esquecê-lo faz a ferramenta **parar inteira, em silêncio**: a guarda funciona, mas quem estiver
+medindo vê a suíte ficar verde **sem medir nada**, porque a página nem chega a carregar. Medido
+nesse dia, com 30 verificações passando sobre uma ferramenta parada. Corrigido nos três lugares onde
+a frase aparecia.
+
+### Achado resolvido no caminho
+
+`textos-migrados.mjs` quebrava com o final novo das tabelas: o leitor só conhecia `];` e um
+`.concat`, e com o segundo `.concat` o padrão não parava e **engolia as tabelas seguintes** — 32
+campos acusados de estarem na aba errada. Os dois concats agora são opcionais e ambos expandidos.
