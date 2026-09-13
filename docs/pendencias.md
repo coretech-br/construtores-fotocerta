@@ -1103,3 +1103,50 @@ remonta a prévia. A diferença está declarada nos `<p class="ajuda">` das trê
 botão. Remontar sozinha ao detectar a saída é rodada curta à parte — não foi feita por conta
 própria porque a requisição à página do dono **já aconteceu** quando a detecção seria possível, e
 uma guarda parcial sugeriria proteção que não existe.
+
+## Entregue em 13/09/2026 — "Já paguei" no Agendamento por pacote
+
+O dono perguntou por que aquela aba tinha upsell pelo cartão e não pelo Pix. A resposta que eu tinha
+dado — *"o caminho C não se aplica a esta aba"* — **descrevia o defeito como se fosse o desenho**.
+
+Medido: a maquinaria existia (`botaoZap`), mas só era chamada em **dois** lugares — o recado de link
+adulterado e o de prazo vencido. **Nunca depois de gerar o Pix.** A aba foi espelhada no Checkout em
+setembro e a peça ficou para trás. Nenhuma linha do código justificava a ausência; o que havia de
+comentário justificava o *texto* diferente **dado que** o botão não existia.
+
+**Duas divergências, só `a-out3`**, nas duas passagens (+1.440 bytes). As outras 24 saídas e as 9
+cobranças, bloco e link, byte a byte idênticas.
+
+### O efeito colateral que veio junto
+
+`aRecusa` exigia o WhatsApp **sempre**, enquanto `u`/`m`/`p` só o exigem quando o botão está ligado.
+Quem configurasse aquela aba em "somente cartão" não conseguia gerar sem preencher um número que o
+bloco nem usava.
+
+### A mensagem: nada inventado
+
+Nove dos dez padrões saem de `FC_TXT_FABRICA`. Com sinal, abertura própria e as três linhas
+(total/sinal/saldo); sem sinal, abertura, desconto do Pix e valor pago. Duas divergências
+deliberadas e declaradas: `txtZapPago` é campo **novo** (o `txtZapBotao` que já existia rotula os
+recados de recusa, onde ninguém pagou nada), e o saldo diz *"Restante no dia do ensaio"* — "entrega"
+nomeia um momento que numa reserva não existe.
+
+`txtPixManual` **voltou para a fábrica única**: ele só divergia porque o botão não existia. Quem já
+tinha a frase antiga gravada não a perde.
+
+### Os registros que mentiam, corrigidos
+
+Dois textos de ajuda e três comentários diziam ao dono que ali o upsell só funciona pelo cartão —
+verdade enquanto o botão não existia, mentira a partir de agora. **Registro que descreve como
+desenho o que era falta manda procurar no lugar errado, e quem lê confia.**
+
+### Seis divergências novas, para as levas seguintes
+
+1. A `/pagar` tem outro modelo de mensagem (uma frase só contra nove linhas configuráveis).
+2. A tabela dos textos do WhatsApp é escrita à mão **três vezes** — há molde pronto (`fcSinalTxtDefs`,
+   `fcObFbDefs`) para um `fcZapTxtDefs(pref)`.
+3. A `a` não tem interruptor de "Já paguei" (as outras três têm) — consequência: o `pixManual` sai
+   sempre nela e só com o botão ligado nas irmãs.
+4. Duas mecânicas para o mesmo botão: `window.open` em `u`/`m`, âncora `target=_blank` em `p`/`a`.
+5. A Mini loja guarda a linha do cupom com `if(usaCupom)` e o Checkout não.
+6. Só a Mini loja dá retorno visual depois do clique (`TXT_PEDIDO_ENVIADO`) e esvazia a cesta.
