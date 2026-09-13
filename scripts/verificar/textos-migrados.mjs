@@ -294,30 +294,70 @@ console.log('\n--- o formato gravado, contra '+REF+' ---');
       if(Array.isArray(v)) return '['+v.map(canon).join(',')+']';
       return '{'+Object.keys(v).sort().map(k => JSON.stringify(k)+':'+canon(v[k])).join(',')+'}';
     };
-    /* AS NOVE CHAVES NOVAS DE 11/09/2026 sao a UNICA diferenca esperada contra a referencia,
-       e por isso elas saem da comparacao -- depois de terem sido cobradas uma a uma, com o
-       valor que cada campo tinha. Tirar sem cobrar seria varrer a mudanca para baixo do
-       tapete; cobrar e depois tirar e o que permite o resto do objeto continuar sendo exigido
-       IDENTICO. A chave antiga 'obfb' continua nos dois lados e continua na comparacao: ela e
-       projecao das novas, entao tem de sair igual a da referencia caractere por caractere --
-       e e ela que segura o molde da importacao de arquivo (ver textos-reserva.mjs). */
-    const NOVAS = {t:['obfbNome','obfbTipo','obfbData','obfbHora','obfbQuando'],
-                   a:['obfbNome','obfbData','obfbHora','obfbQuando']};
-    const faltando = [];
-    for(const [aba, chaves] of Object.entries(NOVAS))
-      for(const ch of chaves){
-        const id = aba.charAt(0)+'-ob-fb-'+ch.substring(4).toLowerCase();
-        const esperado = 'Zk'+String(IDS.indexOf(id)).padStart(2,'0')+' valor';
-        if((depois[aba]||{})[ch] !== esperado) faltando.push(aba+'.'+ch+'='+JSON.stringify((depois[aba]||{})[ch]));
-        if((antes[aba]||{})[ch] !== undefined) faltando.push(REF+' ja tinha '+aba+'.'+ch);
-        delete depois[aba][ch];
-      }
-    chk('gravado: as nove chaves novas existem aqui, com o texto do seu campo, e NAO existem em '+REF,
-        faltando.length === 0, faltando.join(' | '));
+    /* CHAVE NOVA DE UMA RODADA e a unica diferenca esperada contra a referencia, e sai da
+       comparacao DEPOIS de ser cobrada aqui, uma a uma, com o valor que cada campo tinha.
+       Tirar sem cobrar seria varrer a mudanca para baixo do tapete; cobrar e depois tirar e
+       o que permite o resto do objeto continuar sendo exigido IDENTICO.
+
+       QUANDO A RODADA JA CHEGOU A REFERENCIA, a chave deixa de ser diferenca: ela passa a
+       ser exigida IGUAL dos dois lados. Escrever "esta chave nao existe na referencia" como
+       verdade eterna foi o que fez este teste falhar em 12/09/2026 sem nenhum defeito por
+       tras -- a rodada dos nove textos reserva tinha entrado na main, e o teste continuava
+       afirmando que main nao a tinha. Assercao com prazo de validade e defeito adiado.
+
+       A chave antiga 'obfb' continua nos dois lados e continua na comparacao: ela e projecao
+       das novas, entao tem de sair igual a da referencia caractere por caractere -- e e ela
+       que segura o molde da importacao de arquivo (ver textos-reserva.mjs). */
+    const RODADAS = [
+      {nome:'os nove textos reserva dos marcadores (11/09/2026)',
+       chaves:{t:['obfbNome','obfbTipo','obfbData','obfbHora','obfbQuando'],
+               a:['obfbNome','obfbData','obfbHora','obfbQuando']},
+       esperado:(aba,ch) => 'Zk'+String(IDS.indexOf(aba.charAt(0)+'-ob-fb-'+ch.substring(4).toLowerCase())).padStart(2,'0')+' valor'},
+      {nome:'o meio prioritario (12/09/2026)',
+       chaves:{u:['prio'], m:['prio'], p:['prio','txtCartaoLinha'], a:['prio']},
+       esperado:(aba,ch) => ch === 'prio' ? 'pix' : 'ou {valor} no cartão'}
+    ];
+    /* FABRICA TROCADA e outra coisa de CHAVE NOVA, e a diferenca importa: a chave ja existia
+       nos dois lados e o que mudou foi o PADRAO dela. Entao os dois valores sao declarados, e
+       os dois sao cobrados -- o antigo na referencia, o novo aqui. Quando a rodada ja chegou a
+       referencia, os dois lados trazem o novo, e isso tambem passa. O que NAO passa e um
+       terceiro valor aparecer de qualquer um dos lados. */
+    const TROCADAS = [
+      ['u','txtOu',        'ou pague com Pix', 'ou pague com cartão'],
+      ['u','txtOuDesc',    'ou pague com Pix com {pct}% de desconto', 'ou pague com cartão, sem o desconto de {pct}%'],
+      ['m','txtOu',        'ou pague com Pix', 'ou pague com cartão'],
+      ['m','txtOuDesc',    'ou pague com Pix com {pct}% de desconto', 'ou pague com cartão, sem o desconto de {pct}%']
+    ];
+    const mau = [];
+    for(const [aba,ch,velho,novoV] of TROCADAS){
+      const aq=(depois[aba]||{})[ch], re=(antes[aba]||{})[ch];
+      if(aq !== novoV) mau.push('aqui '+aba+'.'+ch+'='+JSON.stringify(aq));
+      if(re !== velho && re !== novoV) mau.push(REF+' '+aba+'.'+ch+'='+JSON.stringify(re));
+      if(depois[aba]) delete depois[aba][ch];
+      if(antes[aba]) delete antes[aba][ch];
+    }
+    chk('gravado: as fabricas trocadas pela rodada do meio prioritario, nos dois lados',
+        mau.length === 0, mau.join(' | '));
+    for(const rodada of RODADAS){
+      const faltando = [];
+      for(const [aba, chaves] of Object.entries(rodada.chaves))
+        for(const ch of chaves){
+          const esperado = rodada.esperado(aba, ch);
+          if((depois[aba]||{})[ch] !== esperado)
+            faltando.push(aba+'.'+ch+'='+JSON.stringify((depois[aba]||{})[ch])+' (esperava '+JSON.stringify(esperado)+')');
+          /* A referencia ja tem a chave? Entao ela nao e diferenca -- e igualdade exigida. */
+          if((antes[aba]||{})[ch] !== undefined && (antes[aba]||{})[ch] !== (depois[aba]||{})[ch])
+            faltando.push(REF+' tem '+aba+'.'+ch+'='+JSON.stringify(antes[aba][ch])+', diferente daqui');
+          if(depois[aba]) delete depois[aba][ch];
+          if(antes[aba]) delete antes[aba][ch];
+        }
+      chk('gravado: as chaves de "'+rodada.nome+'" existem aqui com o texto do seu campo'+
+          ' (e batem com '+REF+', se ele ja as tiver)', faltando.length === 0, faltando.join(' | '));
+    }
     const divergem = [];
     for(const aba of new Set([...Object.keys(antes), ...Object.keys(depois)]))
       if(canon(antes[aba]) !== canon(depois[aba])) divergem.push(aba);
-    chk('gravado: fora essas nove, o objeto inteiro e identico ao de '+REF+', chave por chave',
+    chk('gravado: fora as chaves das rodadas declaradas, o objeto inteiro e identico ao de '+REF+', chave por chave',
         divergem.length === 0, 'divergem: '+divergem.join(', '));
     /* As chaves que a migracao poderia ter ANINHADO sem querer -- no cfg elas eram
        cfg.rotulos.d/h/m/s, cfg.cta.txt, cfg.hor.aviso e cfg.q.label/dica/msg. O que fica

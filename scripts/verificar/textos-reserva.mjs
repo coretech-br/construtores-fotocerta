@@ -46,7 +46,14 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const RAIZ = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
-const REF = process.argv[2] || 'main';
+/* A REFERENCIA NAO PODE SER 'main' -- e a mesma armadilha que id-orcamento.mjs ja registra.
+   Este arquivo prova uma MIGRACAO: ele colhe na referencia um estado no FORMATO ANTIGO (os
+   nove textos reserva colados numa chave so) e confere que a arvore de hoje o le inteiro.
+   Desde que a rodada dos nove textos entrou na main (11/09/2026), a main JA GRAVA no formato
+   novo -- o lado "antes" passaria a medir a si mesmo, e o teste acusava sete falhas que nao
+   eram defeito nenhum, so uma assercao com prazo de validade vencido. Medido em 12/09/2026.
+   77d9db2 e o commit ANTERIOR ao da rodada. */
+const REF = process.argv[2] || '77d9db2';
 const HTML = fs.readFileSync(path.join(RAIZ, 'index.html'), 'utf8');
 
 /* O separador da chave ANTIGA, escrito por codigo e nunca colado no arquivo: um caractere de
