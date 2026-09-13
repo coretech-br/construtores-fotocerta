@@ -1740,6 +1740,7 @@
             <input type="text" id="u-op-nome" placeholder="Pacote com 10 fotos">
             <input type="number" id="u-op-preco" placeholder="300" min="0" step="0.01">
           </div>
+          <input type="text" id="u-op-desc" placeholder="Descrição deste opcional (opcional) — ex.: 10 fotos extras, tratadas e em alta resolução">
           <div class="radios">
             <label><input type="checkbox" id="u-op-qtd"><span>Este opcional vende por quantidade</span></label>
           </div>
@@ -1747,6 +1748,7 @@
           <ul class="lista-imgs" id="u-op-lista"></ul>
           <p class="vazio" id="u-op-vazio">Nenhum opcional neste produto.</p>
           <p class="ajuda alerta" id="u-op-pendente" style="display:none"></p>
+          <p class="ajuda">A <b>descrição</b> de cada opcional é opcional e aparece <b>só na hora de escolher</b>, em cinza e menor, embaixo do nome — como a descrição curta do produto. No <b>carrinho</b> continuam só o nome e o valor, para o cliente conferir a conta sem texto repetido pelo meio. Texto longo <b>quebra em mais linhas</b> e nunca é cortado: quem controla o tamanho é você, escrevendo menos.</p>
           <label>Seleção dos opcionais</label>
           <div class="radios">
             <label><input type="radio" name="u-opsel" value="unico" checked><span>Apenas 1</span></label>
@@ -3127,6 +3129,7 @@
             <input type="text" id="m-op-nome" placeholder="Caixa de presente">
             <input type="number" id="m-op-preco" placeholder="80" min="0" step="0.01">
           </div>
+          <input type="text" id="m-op-desc" placeholder="Descrição deste opcional (opcional) — ex.: caixa rígida com laço de cetim">
           <div class="radios">
             <label><input type="checkbox" id="m-op-qtd"><span>Este opcional vende por quantidade</span></label>
           </div>
@@ -3134,6 +3137,7 @@
           <ul class="lista-imgs" id="m-op-lista"></ul>
           <p class="vazio" id="m-op-vazio">Nenhum opcional neste produto.</p>
           <p class="ajuda alerta" id="m-op-pendente" style="display:none"></p>
+          <p class="ajuda">A <b>descrição</b> de cada opcional é opcional e aparece <b>só na hora de escolher</b>, em cinza e menor, embaixo do nome — como a descrição curta do produto. No <b>carrinho</b> continuam só o nome e o valor, para o cliente conferir a conta sem texto repetido pelo meio. Texto longo <b>quebra em mais linhas</b> e nunca é cortado: quem controla o tamanho é você, escrevendo menos.</p>
           <label>Seleção dos opcionais</label>
           <div class="radios">
             <label><input type="radio" name="m-opsel" value="unico" checked><span>Apenas 1</span></label>
@@ -3840,6 +3844,7 @@
             <input type="text" id="a-op-nome" placeholder="Álbum impresso">
             <input type="number" id="a-op-preco" placeholder="300" min="0" step="0.01">
           </div>
+          <input type="text" id="a-op-desc" placeholder="Descrição deste opcional (opcional) — ex.: 20 páginas, capa dura, entregue em 15 dias">
           <div class="radios">
             <label><input type="checkbox" id="a-op-qtd"><span>Este opcional vende por quantidade</span></label>
           </div>
@@ -3847,6 +3852,7 @@
           <ul class="lista-imgs" id="a-op-lista"></ul>
           <p class="vazio" id="a-op-vazio">Nenhum opcional neste pacote.</p>
           <p class="ajuda alerta" id="a-op-pendente" style="display:none"></p>
+          <p class="ajuda">A <b>descrição</b> de cada opcional é opcional e aparece <b>só na página de obrigado, na hora de escolher</b>, em cinza e menor, embaixo do nome — como a descrição curta de um produto. Ela não entra no <b>resumo do pagamento</b>, que fica só com nome e valor. Texto longo <b>quebra em mais linhas</b> e nunca é cortado: quem controla o tamanho é você, escrevendo menos.</p>
 
           <div class="acoes">
             <button class="botao" id="a-pac-salvar">Adicionar pacote</button>
@@ -6338,9 +6344,9 @@ var ABAS=[
    guarda:'tudo o que está configurado nesta aba — modo de exibição, ícone, formato, cores e posição do botão, os quatro trechos da mensagem, os textos do pop-up, o cabeçalho (coruja, movimento e efeitos), o horário de atendimento, a pergunta de qualificação com as opções cadastradas, a âncora e os <b>textos</b> da seção 8.'},
   {id:'uni',  nome:'Checkout',            chaves:['u'],         coleta:uColeta,restaura:uRestaura,gerar:uGerar,
    pref:'u',fora:[],formulario:['edops','editidx','form'],resumo:uPresetResumo,redesenhar:uPresetDepois,antesDeSalvar:uPresetAntes,
-   listas:[['u.edops',{nome:'',preco:0,qtd:false},'nome'],
-           ['u.prods',{nome:'',desc:'',preco:0,opsel:'unico',opnenhum:'nao',qtd:false,ops:[{nome:'',preco:0,qtd:false}]},'nome'],
-           ['u.prods.ops',{nome:'',preco:0,qtd:false},'nome'],
+   listas:[['u.edops',{nome:'',desc:'',preco:0,qtd:false},'nome'],
+           ['u.prods',{nome:'',desc:'',preco:0,opsel:'unico',opnenhum:'nao',qtd:false,ops:[{nome:'',desc:'',preco:0,qtd:false}]},'nome'],
+           ['u.prods.ops',{nome:'',desc:'',preco:0,qtd:false},'nome'],
            ['u.cps',{codigo:'',tipo:'pct_total',valor:0,validade:'',minimo:''},'codigo']],
    exemplo:'ex.: Natal 2026 - pacotes',
    guarda:'tudo o que está configurado nesta aba — formas de pagamento, o <b>meio prioritário</b>, moeda, <b>produtos com os opcionais de cada um</b>, cupons, código do pedido, sinal, desconto Pix, textos, largura e cores. Não guarda o <b>formulário de cadastro</b> pela metade, e aplicar um preset <b>esvazia</b> esse formulário: ele descreve um produto que ainda não existe no catálogo que está chegando.'},
@@ -6361,9 +6367,9 @@ var ABAS=[
    guarda:'tudo o que está configurado nesta aba — o endereço da página, o <b>meio prioritário</b>, a aparência, os textos, e também a <b>cobrança que está na tela</b> (descrição, valor, identificador, a data de validade, o desconto no Pix e a <b>cobrança de sinal</b>). Aplicar um preset troca também essa cobrança: ele é a fotografia da aba inteira. Os dados de quem recebe <b>não</b> estão aqui: eles saíram desta aba para o painel Identidade, e nenhum preset os toca.'},
   {id:'loja', nome:'Mini loja',           chaves:['m'],         coleta:mColeta,restaura:mRestaura,gerar:mGerar,
    pref:'m',fora:[],formulario:['edops','editidx','form'],resumo:mPresetResumo,redesenhar:mPresetDepois,antesDeSalvar:mPresetAntes,
-   listas:[['m.edops',{nome:'',preco:0,qtd:false},'nome'],
-           ['m.prods',{nome:'',desc:'',preco:0,cat:'',img:'',opsel:'unico',opnenhum:'nao',qtd:false,ops:[{nome:'',preco:0,qtd:false}]},'nome'],
-           ['m.prods.ops',{nome:'',preco:0,qtd:false},'nome'],
+   listas:[['m.edops',{nome:'',desc:'',preco:0,qtd:false},'nome'],
+           ['m.prods',{nome:'',desc:'',preco:0,cat:'',img:'',opsel:'unico',opnenhum:'nao',qtd:false,ops:[{nome:'',desc:'',preco:0,qtd:false}]},'nome'],
+           ['m.prods.ops',{nome:'',desc:'',preco:0,qtd:false},'nome'],
            ['m.cps',{codigo:'',tipo:'pct_total',valor:0,validade:'',minimo:''},'codigo']],
    importar:mImportarLimpar,
    exemplo:'ex.: Foto Certa - loja de álbuns',
@@ -6388,10 +6394,10 @@ var ABAS=[
       ausente, 'path' virava '' -- e o alerta afirmava "Nada foi perdido", que naquele caminho
       era FALSO. O dono so descobriria ao tentar gerar, pela recusa "esta sem o caminho do
       TidyCal", sem ligacao nenhuma com a importacao. */
-   listas:[['a.edops',{nome:'',preco:0,qtd:false},'nome'],
+   listas:[['a.edops',{nome:'',desc:'',preco:0,qtd:false},'nome'],
            ['a.familias',{id:'',nome:'',dica:''},'id'],
-           ['a.pacotes',{cod:'',nome:'',dur:'',preco:0,inclui:'',cal:'',path:'',link:'',fam:'',ops:[{nome:'',preco:0,qtd:false}]},'cod'],
-           ['a.pacotes.ops',{nome:'',preco:0,qtd:false},'nome'],
+           ['a.pacotes',{cod:'',nome:'',dur:'',preco:0,inclui:'',cal:'',path:'',link:'',fam:'',ops:[{nome:'',desc:'',preco:0,qtd:false}]},'cod'],
+           ['a.pacotes.ops',{nome:'',desc:'',preco:0,qtd:false},'nome'],
            ['a.cps',{codigo:'',tipo:'pct_total',valor:0,validade:'',minimo:''},'codigo']],
    exemplo:'ex.: Ensaios 2026 - pacotes',
    guarda:'tudo o que está configurado nesta aba — a <b>forma de pagamento</b>, o <b>meio prioritário</b> e a cor dos botões do PayPal, as <b>famílias de pacotes</b> e a família de cada pacote, os pacotes (código, nome, duração, preço, o que inclui, o endereço do TidyCal e os <b>itens opcionais</b> de cada um), os <b>cupons</b>, o endereço da página de obrigado, o prefixo do identificador, o prazo da reserva, o desconto no Pix, as parcelas, a <b>cobrança de sinal</b> (se cobra, como calcula e o rótulo das duas linhas), quais <b>marcadores da página de obrigado</b> viajam e o texto reserva de cada um, como o quadro abre espaço para o formulário de reserva (medindo ou pela altura calibrada), as alturas do calendário, quando abrir o espaço calibrado, a largura das linhas compactas, textos e cores. Aplicar um preset <b>substitui as famílias que estão na tela</b> e <b>esvazia o formulário de cadastro</b>: ele é a fotografia da aba inteira.'}
@@ -6501,6 +6507,64 @@ function restaurarEstado(){
    produto" ou "Salvar alterações" conforme o modo. Assim o aviso nao tem como discordar do
    botao que ele manda apertar. Uma funcao so para as tres abas -- o que muda entre elas cabe
    em tres argumentos. */
+/* ============ a COPIA de um item opcional, num lugar so ============ */
+/* 13/09/2026. Esta mesma expressao -- copiar um opcional chave a chave -- estava escrita
+   CATORZE vezes, nas tres abas que cadastram opcionais: salvar o item, abri-lo no lapis,
+   duplicar o item, duplicar a familia inteira, restaurar o formulario e restaurar o estado
+   guardado. Enquanto o opcional teve TRES campos isso foi duplicacao inofensiva. No dia em
+   que ele ganhou a DESCRICAO virou a classe de defeito que esta ferramenta ja nomeou: um
+   campo novo que treze pontos levam e um esquece, sem erro e sem aviso -- e o dono so
+   descobre ao duplicar um produto e ver a descricao sumir.
+   A COPIA E RASA de proposito: o opcional nao tem nada aninhado, e copiar chave a chave e
+   justamente o que garante que os dois arrays deixem de apontar para o mesmo objeto.
+   'desc' sai com ||'' pela mesma razao que 'qtd' sai com !!: estado gravado antes desta
+   rodada nao tem a chave, e um undefined viajando por dentro da ferramenta viraria a palavra
+   "undefined" dentro do campo da tela. */
+function fcOpCopia(o){
+  return {nome:o.nome,desc:o.desc||'',preco:o.preco,qtd:!!o.qtd};
+}
+/* O pedaco 'desc' de um opcional dentro do array do BLOCO ENTREGUE -- fonte unica das tres
+   abas. Sai VAZIO quando nao ha descricao: com o campo em branco (a fabrica) o array continua
+   byte a byte o de antes desta rodada, e e isso que a regressao cobra. Se ela divergir com o
+   campo vazio, quem esta errado e esta emissao, nao o teste. */
+function fcOpDescSrc(o){
+  var d=(o.desc==null)?'':String(o.desc);
+  return d?(", desc:'"+escJs(d)+"'"):"";
+}
+/* Ha pelo menos um opcional com descricao entre estes itens (produtos ou pacotes)? E o que
+   decide a emissao da REGRA DE CSS e das linhas de JS que desenham a descricao. Sem nenhuma
+   descricao cadastrada nada disto entra no bloco -- mesma disciplina de 'temMin' (cupom com
+   minimo) e de 'usaQtd'. */
+function fcTemOpDesc(itens){
+  var i,j,ops;
+  for(i=0;i<(itens||[]).length;i++){
+    ops=(itens[i]&&itens[i].ops)||[];
+    for(j=0;j<ops.length;j++)if(ops[j].desc!=null&&String(ops[j].desc)!=='')return true;
+  }
+  return false;
+}
+/* ============ o TEXTO DE APOIO EM CINZA dos blocos entregues ============ */
+/* A descricao curta do produto ja saia assim no Checkout; em 13/09/2026 o dono pediu a
+   descricao do item opcional "sem destaque, como na descricao curta do produto". Escrever os
+   mesmos quatro valores de novo em cada gerador seria a duplicacao que concorda hoje e diverge
+   amanha -- unifica-se A FONTE QUE ESCREVE, e o bloco entregue continua levando a regra dentro
+   dele, como o Prosite exige.
+   A MARGEM E PARAMETRO porque e a unica coisa que muda de papel para papel: a descricao do
+   produto encosta no nome (margin-top:2px); a do opcional recua 26px, que e a largura do
+   marcador desenhado (18px) mais o vao do rotulo (8px) -- assim ela comeca debaixo do NOME da
+   opcao, e nao debaixo da bolinha. O mesmo 26px que o Checkout ja usa para recuar a descricao
+   do produto quando ha seletor de produto.
+   NAO MUDA UM BYTE do que ja existia: '.fcu-desc' passou a sair daqui na mesma rodada, e a
+   regressao byte a byte e o que prova que passou igual.
+   FICA DE FORA, medido e declarado: '.fcm-det-d', a descricao do produto no cartao de detalhe
+   da Mini loja (13px, #666). Ela e outro papel -- texto principal de um cartao aberto, nao
+   apoio de uma linha de lista -- e forca-la para ca mudaria a pagina publicada de quem ja usa
+   a loja, sem ninguem pedir. */
+function fcApoioCss(sel,margem){
+  return sel+'{font-size:12px;color:#777;font-weight:400;'+(margem||'margin-top:2px')+';text-align:left}\n';
+}
+/* O recuo da descricao do opcional, escrito uma vez: 18px do marcador + 8px do vao. */
+var FC_OPDESC_MARGEM='margin:0 0 6px 26px';
 function fcOpPendente(idAviso,buf,idx,nomeItem,item,idBotao){
   var el=document.getElementById(idAviso);if(!el)return;
   if(!buf||!buf.length){el.style.display='none';el.textContent='';return;}
@@ -13633,7 +13697,7 @@ function uRestaura(st){
    (rotulo do botao, "Cancelar edição" e campos); so os OPCIONAIS sao os do formulario, e nao
    os do produto salvo -- e essa a diferenca que estava se perdendo. */
 function uEditRestaurar(U){
-  var buf=(U.edops||[]).map(function(o){return {nome:o.nome,preco:o.preco,qtd:!!o.qtd};});
+  var buf=(U.edops||[]).map(fcOpCopia);
   var i=(typeof U.editidx==='number')?U.editidx:-1;
   if(i>=0&&i<uProds.length)uProdEditar(i);
   else uProdLimpar();
@@ -13787,6 +13851,15 @@ function uOpRender(){
     pr.addEventListener('change',function(){uOpPrecoAjustar(pr,i);});
     pr.addEventListener('blur',function(){uOpPrecoAjustar(pr,i);});
     info.appendChild(n);info.appendChild(pr);
+    /* A DESCRICAO NA PROPRIA LINHA, como o nome e o preco -- e nao num formulario a parte.
+       Mesma medicao que ja decidiu o duplicar do opcional acrescentar na lista em vez de
+       carregar um formulario: os campos do opcional se editam ONDE ele esta.
+       So no 'input', sem correcao no change/blur: descricao VAZIA e configuracao legitima
+       (a maioria dos opcionais nao tem nenhuma), ao contrario do nome, que nao pode ficar
+       em branco e por isso volta sozinho ali em cima. */
+    var ds=document.createElement('input');ds.type='text';ds.value=op.desc||'';ds.placeholder='Descrição (opcional)';
+    ds.addEventListener('input',function(){uEditOps[i].desc=ds.value;salvarEstado();});
+    info.appendChild(ds);
     /* R2: cada opcional declara se aceita quantidade. Um "album impresso" vende varios; uma
        "hora extra de estudio" tambem; "revelacao em papel fine art" nao. Fica no proprio item
        porque a decisao e do item, nao do carrinho. */
@@ -13814,15 +13887,15 @@ function uOpAdd(){
   if(!n){alert('Informe o nome do opcional.');return;}
   var v=parseFloat(String($('u-op-preco').value).replace(',','.'));
   if(isNaN(v)||v<0)v=0;
-  uEditOps.push({nome:n,preco:v,qtd:!!$('u-op-qtd').checked});
-  $('u-op-nome').value='';$('u-op-preco').value='';$('u-op-qtd').checked=false;
+  uEditOps.push({nome:n,desc:$('u-op-desc').value.trim(),preco:v,qtd:!!$('u-op-qtd').checked});
+  $('u-op-nome').value='';$('u-op-preco').value='';$('u-op-desc').value='';$('u-op-qtd').checked=false;
   uOpRender();salvarEstado();
 }
 function uOpMove(i,d){var j=i+d;if(j<0||j>=uEditOps.length)return;var t=uEditOps[i];uEditOps[i]=uEditOps[j];uEditOps[j]=t;uOpRender();salvarEstado();}
 function uOpDel(i){uEditOps.splice(i,1);uOpRender();salvarEstado();}
 function uOpDuplicar(i){
   var o=uEditOps[i];if(!o)return;
-  uEditOps.splice(i+1,0,{nome:fcDupNome(o.nome),preco:o.preco,qtd:!!o.qtd});
+  uEditOps.splice(i+1,0,{nome:fcDupNome(o.nome),desc:o.desc||'',preco:o.preco,qtd:!!o.qtd});
   uOpRender();salvarEstado();
 }
 
@@ -13848,14 +13921,14 @@ function uProdSalvar(){
   var p={nome:n,desc:$('u-pdesc').value.trim(),preco:v,
     opsel:radio('u-opsel')||'unico',opnenhum:radio('u-opnenhum')||'nao',
     qtd:radio('u-pqtd')==='sim',
-    ops:uEditOps.map(function(o){return {nome:o.nome,preco:o.preco,qtd:!!o.qtd};})};
+    ops:uEditOps.map(fcOpCopia)};
   if(uEditIdx>=0)uProds[uEditIdx]=p;else uProds.push(p);
   uProdLimpar();uProdRender();salvarEstado();uPreview();
 }
 function uProdEditar(i){
   var p=uProds[i];
   $('u-pnome').value=p.nome;$('u-pdesc').value=p.desc||'';$('u-ppreco').value=p.preco;
-  uEditOps=(p.ops||[]).map(function(o){return {nome:o.nome,preco:o.preco,qtd:!!o.qtd};});
+  uEditOps=(p.ops||[]).map(fcOpCopia);
   /* O ROTULO ANTES DO uOpRender: fcOpPendente le o rotulo deste botao -- ver o mesmo
      apontamento em aPacEditar (Agendamento por pacote), onde o defeito foi medido. */
   uEditIdx=i;
@@ -13889,7 +13962,7 @@ function uProdDuplicar(i){
   /* OS OPCIONAIS VAO JUNTO, copiados chave a chave como em uProdEditar: sem isto os dois
      produtos apontariam para o MESMO array, e mexer num opcional da copia mexeria no original
      ja gravado. */
-  uEditOps=(p.ops||[]).map(function(o){return {nome:o.nome,preco:o.preco,qtd:!!o.qtd};});
+  uEditOps=(p.ops||[]).map(fcOpCopia);
   $('u-prod-cancelar').textContent='Descartar cópia';
   $('u-prod-cancelar').style.display='inline-block';
   uProdCopiaAviso(p);
@@ -14432,6 +14505,9 @@ function uBloco(cfg){
   var usaQtd=cfg.qtdLigada;
   var usaSinal=cfg.sinal.ativo;
   var usaResumo=cfg.resumo;
+  /* Ha alguma descricao de opcional cadastrada? Nenhuma -> nem a regra de CSS nem as
+     linhas que a desenham entram no bloco, e a saida continua byte a byte a de antes. */
+  var temOpDesc=fcTemOpDesc(cfg.prods);
 
   /* Nome, descricao, opcional, cupom e validade sao texto livre e viram strings JS do array
      PRODUTOS/CUPONS: escJs. Uma descricao colada de um e-mail com comentario HTML fazia o
@@ -14440,7 +14516,7 @@ function uBloco(cfg){
   var prods=cfg.prods.map(function(p){
     var ops=(p.ops||[]).map(function(o){
       var v=parseFloat(String(o.preco).replace(',','.'))||0;
-      return "{nome:'"+escJs(o.nome)+"', preco:"+v.toFixed(2)+(o.qtd?", qtd:true":"")+"}";
+      return "{nome:'"+escJs(o.nome)+"'"+fcOpDescSrc(o)+", preco:"+v.toFixed(2)+(o.qtd?", qtd:true":"")+"}";
     }).join(', ');
     return "  {nome:'"+escJs(p.nome)+"', descricao:'"+escJs(p.desc||'')+"', preco:"+(parseFloat(p.preco)||0).toFixed(2)+",\n"+
            "   selecaoOpcionais:'"+p.opsel+"', permitirNenhum:"+(p.opnenhum==='sim'?'true':'false')+(p.qtd?", quantidade:true":"")+",\n"+
@@ -14460,11 +14536,12 @@ function uBloco(cfg){
   c+='.fcuni .fcu-prod{padding:9px 0;border-bottom:1px solid #eee}\n';
   c+='.fcuni .fcu-prod-l{display:flex;align-items:center;justify-content:space-between;gap:10px;font-weight:600}\n';
   c+='.fcuni .fcu-prod-l label{display:flex;align-items:center;gap:8px;cursor:pointer;margin:0;position:relative;text-align:left;font-weight:600}\n';
-  c+='.fcuni .fcu-desc{font-size:12px;color:#777;font-weight:400;margin-top:2px;text-align:left}\n';
+  c+=fcApoioCss('.fcuni .fcu-desc');
   c+='.fcuni .fcu-ops{margin:6px 0 2px}\n';
   c+='.fcuni .fcu-ops-t{font-size:12px;font-weight:600;margin:0 0 2px;text-align:left}\n';
   c+='.fcuni .fcu-op{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:4px 0;font-size:13px}\n';
   c+='.fcuni .fcu-op label{display:flex;align-items:center;gap:8px;cursor:pointer;margin:0;font-weight:400;position:relative;text-align:left}\n';
+  if(temOpDesc)c+=fcApoioCss('.fcuni .fcu-opdesc',FC_OPDESC_MARGEM);
   c+='.fcuni input[type="radio"],.fcuni input[type="checkbox"]{position:absolute;opacity:0;width:1px;height:1px;pointer-events:none}\n';
   c+='.fcuni .fcu-mark{width:18px;height:18px;min-width:18px;display:inline-block;position:relative;background:#fff;border:2px solid #b9b3a4;box-sizing:border-box}\n';
   c+='.fcuni .fcu-mark.rd{border-radius:50%}\n';
@@ -14863,7 +14940,15 @@ function uBloco(cfg){
   c+="var pr2=document.createElement('span');pr2.textContent=op.nenhum?'':('+ '+moedaFmt(op.preco));\n";
   if(usaQtd)c+='if(op.qtd&&!op.nenhum){precosOp[i]=precosOp[i]||[];precosOp[i][j]=pr2;}\n';
   c+='row.appendChild(lab2);row.appendChild(pr2);\n';
-  c+='caixa.appendChild(row);\n});\n}\n';
+  c+='caixa.appendChild(row);\n';
+  /* A DESCRICAO VAI DEPOIS DA LINHA, e nao dentro dela: a linha e um flex de "rotulo a
+     esquerda, valor a direita", e o que o dono pediu fica ABAIXO dos dois. Irma da linha,
+     dentro da mesma caixa -- assim a posicao no DOM e a posicao na tela sao a mesma coisa,
+     e o teste confere uma so.
+     textContent, nunca innerHTML: e texto do dono, e pode trazer '<'. */
+  if(temOpDesc)
+    c+="if(op.desc){var dd=document.createElement('div');dd.className='fcu-opdesc';dd.textContent=op.desc;caixa.appendChild(dd);}\n";
+  c+='});\n}\n';
   c+='bloco.appendChild(caixa);\n';
   c+='blocos.push(bloco);\n';
   c+='listaProds.appendChild(bloco);\n});\n\n';
@@ -16945,6 +17030,15 @@ function aOpRender(){
     pr.addEventListener('change',function(){aOpPrecoAjustar(pr,i);});
     pr.addEventListener('blur',function(){aOpPrecoAjustar(pr,i);});
     info.appendChild(n);info.appendChild(pr);
+    /* A DESCRICAO NA PROPRIA LINHA, como o nome e o preco -- e nao num formulario a parte.
+       Mesma medicao que ja decidiu o duplicar do opcional acrescentar na lista em vez de
+       carregar um formulario: os campos do opcional se editam ONDE ele esta.
+       So no 'input', sem correcao no change/blur: descricao VAZIA e configuracao legitima
+       (a maioria dos opcionais nao tem nenhuma), ao contrario do nome, que nao pode ficar
+       em branco e por isso volta sozinho ali em cima. */
+    var ds=document.createElement('input');ds.type='text';ds.value=op.desc||'';ds.placeholder='Descrição (opcional)';
+    ds.addEventListener('input',function(){aEditOps[i].desc=ds.value;salvarEstado();});
+    info.appendChild(ds);
     var lq=document.createElement('label');
     lq.style.cssText='display:flex;align-items:center;gap:6px;margin:5px 0 0;font-size:12px;font-weight:400;color:var(--tinta-suave)';
     var cq=document.createElement('input');cq.type='checkbox';cq.checked=!!op.qtd;
@@ -16971,15 +17065,15 @@ function aOpAdd(){
   if(!n){alert('Informe o nome do opcional.');return;}
   var v=parseFloat(String($('a-op-preco').value).replace(',','.'));
   if(isNaN(v)||v<0)v=0;
-  aEditOps.push({nome:n,preco:v,qtd:!!$('a-op-qtd').checked});
-  $('a-op-nome').value='';$('a-op-preco').value='';$('a-op-qtd').checked=false;
+  aEditOps.push({nome:n,desc:$('a-op-desc').value.trim(),preco:v,qtd:!!$('a-op-qtd').checked});
+  $('a-op-nome').value='';$('a-op-preco').value='';$('a-op-desc').value='';$('a-op-qtd').checked=false;
   aOpRender();salvarEstado();
 }
 function aOpMove(i,d){var j=i+d;if(j<0||j>=aEditOps.length)return;var t=aEditOps[i];aEditOps[i]=aEditOps[j];aEditOps[j]=t;aOpRender();salvarEstado();}
 function aOpDel(i){aEditOps.splice(i,1);aOpRender();salvarEstado();}
 function aOpDuplicar(i){
   var o=aEditOps[i];if(!o)return;
-  aEditOps.splice(i+1,0,{nome:fcDupNome(o.nome),preco:o.preco,qtd:!!o.qtd});
+  aEditOps.splice(i+1,0,{nome:fcDupNome(o.nome),desc:o.desc||'',preco:o.preco,qtd:!!o.qtd});
   aOpRender();salvarEstado();
 }
 
@@ -17168,7 +17262,7 @@ function aFamDuplicar(i){
       cal:p.cal,fam:id,
       /* Chave a chave, como aPacDuplicar: sem isto os dois pacotes apontariam para o MESMO
          array de opcionais, e mexer num opcional da copia mexeria no original ja gravado. */
-      ops:(p.ops||[]).map(function(o){return {nome:o.nome,preco:o.preco,qtd:!!o.qtd};})});
+      ops:(p.ops||[]).map(fcOpCopia)});
   }
   aFamRender();aPacRender();salvarEstado();aPreview();
 }
@@ -17356,7 +17450,7 @@ function aPacSalvar(){
        e a lista de familias nunca fica vazia (aRestaura cria uma, aFamDel recusa apagar a
        ultima). O '||' e a rede para o caso de o estado chegar quebrado por outro caminho. */
     fam:$('a-pfam').value||(aFamilias.length?aFamilias[0].id:''),
-    ops:aEditOps.map(function(o){return {nome:o.nome,preco:o.preco,qtd:!!o.qtd};})};
+    ops:aEditOps.map(fcOpCopia)};
   if(aEditIdx>=0)aPacotes[aEditIdx]=p;else aPacotes.push(p);
   aPacLimpar();aPacRender();salvarEstado();aPreview();
 }
@@ -17365,7 +17459,7 @@ function aPacEditar(i){
   $('a-pcod').value=p.cod;$('a-pnome').value=p.nome;$('a-pdur').value=p.dur||'';
   $('a-ppreco').value=p.preco;$('a-pinclui').value=p.inclui||'';$('a-ppath').value=p.cal||'';
   $('a-pfam').value=(p.fam&&aFamAcha(p.fam))?p.fam:(aFamilias.length?aFamilias[0].id:'');
-  aEditOps=(p.ops||[]).map(function(o){return {nome:o.nome,preco:o.preco,qtd:!!o.qtd};});
+  aEditOps=(p.ops||[]).map(fcOpCopia);
   aEditIdx=i;
   /* Acentuado ("alterações"), diferente do molde de uProdEditar/mProdEditar (10620/17003):
      e texto de interface, e a norma de 01/09/2026 (CLAUDE.md, "todo texto que uma pessoa le
@@ -17407,7 +17501,7 @@ function aPacDuplicar(i){
      explicito ("duplicar um pacote (e seus opcionais)"). Copia chave a chave, como aPacEditar:
      sem isto os dois pacotes apontariam para o MESMO array, e mexer num opcional da copia
      mexeria no original ja gravado. */
-  aEditOps=(p.ops||[]).map(function(o){return {nome:o.nome,preco:o.preco,qtd:!!o.qtd};});
+  aEditOps=(p.ops||[]).map(fcOpCopia);
   $('a-pac-cancelar').textContent='Descartar cópia';
   $('a-pac-cancelar').style.display='inline-block';
   aPacCopiaAviso(p);
@@ -17463,7 +17557,7 @@ function aPacDel(i){
    deixava sempre visivel. */
 /* Molde de uEditRestaurar (Checkout), com aPacEditar/aPacLimpar no lugar. */
 function aEditRestaurar(A){
-  var buf=(A.edops||[]).map(function(o){return {nome:o.nome,preco:o.preco,qtd:!!o.qtd};});
+  var buf=(A.edops||[]).map(fcOpCopia);
   var i=(typeof A.editidx==='number')?A.editidx:-1,sel;
   if(i>=0&&i<aPacotes.length)aPacEditar(i);
   else aPacLimpar();
@@ -17802,7 +17896,7 @@ function aRestaura(st){
       else if(p.link!=null&&String(p.link).trim()!==''){cal=fcTidyUrl(p.link);migrouCal=true;}
     }
     return {cod:p.cod,nome:p.nome,dur:p.dur,preco:p.preco,inclui:p.inclui,cal:cal,fam:(p.fam||''),
-      ops:(p.ops||[]).map(function(o){return {nome:o.nome,preco:o.preco,qtd:!!o.qtd};})};
+      ops:(p.ops||[]).map(fcOpCopia)};
   });
   /* SEMPRE existe pelo menos uma familia. O nome "Pacotes" e escolhido para ser obvio e para
      pedir troca: ele nao aparece em lugar nenhum enquanto houver UMA familia so (a vitrine
@@ -17991,7 +18085,7 @@ function aPacotesSrc(pacotes,comFam){
     var preco=parseFloat(String(p.preco).replace(',','.'))||0;
     var ops=(p.ops||[]).map(function(o){
       var v=parseFloat(String(o.preco).replace(',','.'))||0;
-      return "{nome:'"+escJs(o.nome)+"', preco:"+v.toFixed(2)+(o.qtd?", qtd:true":"")+"}";
+      return "{nome:'"+escJs(o.nome)+"'"+fcOpDescSrc(o)+", preco:"+v.toFixed(2)+(o.qtd?", qtd:true":"")+"}";
     }).join(', ');
     return "  {cod:'"+escJs(p.cod)+"', nome:'"+escJs(p.nome)+"', dur:'"+escJs(p.dur)+"', preco:"+preco.toFixed(2)+",\n"+
       "   inclui:'"+escJs(p.inclui)+"', link:'"+escJs(p.cal)+"',\n"+
@@ -18785,6 +18879,9 @@ function aBlocoObrigado(cfg){
     uqOps=cfg.pacotes[uqI].ops||[];
     for(uqJ=0;uqJ<uqOps.length;uqJ++)if(uqOps[uqJ].qtd)usaQtd=true;
   }
+  /* Pelo MESMO motivo de usaQtd, e do catalogo inteiro: este bloco e gerado uma vez para
+     todos os pacotes, e qualquer um deles pode ser o PAC em tempo de execucao. */
+  var temOpDesc=fcTemOpDesc(cfg.pacotes);
   c+='<!-- ============================================================\n';
   c+='     FOTO CERTA - PAGINA DE OBRIGADO DO AGENDAMENTO POR PACOTE\n';
   c+='     ONDE COLAR: componente HTML da pagina de obrigado do TidyCal\n';
@@ -18834,6 +18931,7 @@ function aBlocoObrigado(cfg){
   c+='.fca-ob-bloco.fca-ob-ops{padding-top:10px;margin-top:10px}\n';
   c+='.fca-ob-op{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 0;font-size:13px}\n';
   c+='.fca-ob-op label{display:flex;align-items:center;gap:8px;cursor:pointer;margin:0;font-weight:400;position:relative;text-align:left}\n';
+  if(temOpDesc)c+=fcApoioCss('.fca-ob-opdesc',FC_OPDESC_MARGEM);
   c+='.fca-ob-raiz input[type="checkbox"]{position:absolute;opacity:0;width:1px;height:1px;pointer-events:none}\n';
   c+='.fca-ob-mark{width:18px;height:18px;min-width:18px;display:inline-block;position:relative;background:#fff;border:2px solid #b9b3a4;box-sizing:border-box;border-radius:5px}\n';
   c+='.fca-ob-raiz input:checked+.fca-ob-mark{border-color:var(--fca-ob-destaque,#0F3A30);background:var(--fca-ob-destaque,#0F3A30)}\n';
@@ -19303,6 +19401,10 @@ function aBlocoObrigado(cfg){
   c+='    row.appendChild(pr);\n';
   c+='    opChecks[j]=inp;\n';
   c+='    b.appendChild(row);\n';
+  /* Ver o Checkout: irma da linha, dentro do mesmo bloco. Nao entra no RESUMO do pagamento,
+     pela mesma decisao do dono que a mantem fora do carrinho das outras duas abas. */
+  if(temOpDesc)
+    c+='    if(op.desc){var dd=document.createElement("div");dd.className="fca-ob-opdesc";dd.textContent=op.desc;b.appendChild(dd);}\n';
   c+='  });\n';
   c+='  cartao.appendChild(b);\n';
   c+='}\n\n';
@@ -22550,7 +22652,7 @@ function mRestaura(st){
 }
 /* Molde de uEditRestaurar (Checkout), com mProdEditar/mProdLimpar no lugar. */
 function mEditRestaurar(M){
-  var buf=(M.edops||[]).map(function(o){return {nome:o.nome,preco:o.preco,qtd:!!o.qtd};});
+  var buf=(M.edops||[]).map(fcOpCopia);
   var i=(typeof M.editidx==='number')?M.editidx:-1;
   if(i>=0&&i<mProds.length)mProdEditar(i);
   else mProdLimpar();
@@ -22644,6 +22746,15 @@ function mOpRender(){
     pr.addEventListener('change',function(){mOpPrecoAjustar(pr,i);});
     pr.addEventListener('blur',function(){mOpPrecoAjustar(pr,i);});
     info.appendChild(n);info.appendChild(pr);
+    /* A DESCRICAO NA PROPRIA LINHA, como o nome e o preco -- e nao num formulario a parte.
+       Mesma medicao que ja decidiu o duplicar do opcional acrescentar na lista em vez de
+       carregar um formulario: os campos do opcional se editam ONDE ele esta.
+       So no 'input', sem correcao no change/blur: descricao VAZIA e configuracao legitima
+       (a maioria dos opcionais nao tem nenhuma), ao contrario do nome, que nao pode ficar
+       em branco e por isso volta sozinho ali em cima. */
+    var ds=document.createElement('input');ds.type='text';ds.value=op.desc||'';ds.placeholder='Descrição (opcional)';
+    ds.addEventListener('input',function(){mEditOps[i].desc=ds.value;salvarEstado();});
+    info.appendChild(ds);
     var lq=document.createElement('label');
     lq.style.cssText='display:flex;align-items:center;gap:6px;margin:5px 0 0;font-size:12px;font-weight:400;color:var(--tinta-suave)';
     var cq=document.createElement('input');cq.type='checkbox';cq.checked=!!op.qtd;
@@ -22664,15 +22775,15 @@ function mOpAdd(){
   if(!n){alert('Informe o nome do opcional.');return;}
   var v=parseFloat(String($('m-op-preco').value).replace(',','.'));
   if(isNaN(v)||v<0)v=0;
-  mEditOps.push({nome:n,preco:v,qtd:!!$('m-op-qtd').checked});
-  $('m-op-nome').value='';$('m-op-preco').value='';$('m-op-qtd').checked=false;
+  mEditOps.push({nome:n,desc:$('m-op-desc').value.trim(),preco:v,qtd:!!$('m-op-qtd').checked});
+  $('m-op-nome').value='';$('m-op-preco').value='';$('m-op-desc').value='';$('m-op-qtd').checked=false;
   mOpRender();salvarEstado();
 }
 function mOpMove(i,d){var j=i+d;if(j<0||j>=mEditOps.length)return;var t=mEditOps[i];mEditOps[i]=mEditOps[j];mEditOps[j]=t;mOpRender();salvarEstado();}
 function mOpDel(i){mEditOps.splice(i,1);mOpRender();salvarEstado();}
 function mOpDuplicar(i){
   var o=mEditOps[i];if(!o)return;
-  mEditOps.splice(i+1,0,{nome:fcDupNome(o.nome),preco:o.preco,qtd:!!o.qtd});
+  mEditOps.splice(i+1,0,{nome:fcDupNome(o.nome),desc:o.desc||'',preco:o.preco,qtd:!!o.qtd});
   mOpRender();salvarEstado();
 }
 
@@ -22712,7 +22823,7 @@ function mProdSalvar(){
     larg:sLargSabida(img),
     opsel:radio('m-opsel')||'unico',opnenhum:radio('m-opnenhum')||'nao',
     qtd:radio('m-pqtd')==='sim',
-    ops:mEditOps.map(function(o){return {nome:o.nome,preco:o.preco,qtd:!!o.qtd};})};
+    ops:mEditOps.map(fcOpCopia)};
   if(mEditIdx>=0)mProds[mEditIdx]=p;else mProds.push(p);
   mProdLimpar();mProdRender();mCatsRender();salvarEstado();mPreview();
   /* A largura da FONTE desta foto, quando a escada do CDN nao sabe de graca. Enquanto a medicao
@@ -22724,7 +22835,7 @@ function mProdEditar(i){
   var p=mProds[i];
   $('m-pnome').value=p.nome;$('m-pdesc').value=p.desc||'';$('m-ppreco').value=p.preco;
   $('m-pcat').value=p.cat||'';$('m-pimg').value=p.img||'';
-  mEditOps=(p.ops||[]).map(function(o){return {nome:o.nome,preco:o.preco,qtd:!!o.qtd};});
+  mEditOps=(p.ops||[]).map(fcOpCopia);
   /* O ROTULO ANTES DO mOpRender: fcOpPendente le o rotulo deste botao -- ver o mesmo
      apontamento em aPacEditar (Agendamento por pacote), onde o defeito foi medido. */
   mEditIdx=i;
@@ -22765,7 +22876,7 @@ function mProdDuplicar(i){
   $('m-pimg').value=p.img||'';
   setRadio('m-opsel',p.opsel);setRadio('m-opnenhum',p.opnenhum);
   setRadio('m-pqtd',p.qtd?'sim':'nao');
-  mEditOps=(p.ops||[]).map(function(o){return {nome:o.nome,preco:o.preco,qtd:!!o.qtd};});
+  mEditOps=(p.ops||[]).map(fcOpCopia);
   $('m-prod-cancelar').textContent='Descartar cópia';
   $('m-prod-cancelar').style.display='inline-block';
   mProdCopiaAviso(p);
@@ -23457,6 +23568,7 @@ function mBloco(cfg){
   var usaPP=cfg.usaPP,usaPix=cfg.usaPix,usaQtd=cfg.qtdLigada,usaSinal=cfg.sinal.ativo;
   var usaResumo=cfg.resumo,descpix=cfg.descpix,zap=cfg.zap;
   var usaCupom=cfg.cps.length>0,usaFiltro=cfg.filtro&&cfg.cats.length>0;
+  var temOpDesc=fcTemOpDesc(cfg.prods);   /* ver o mesmo no Checkout */
   var client=escJs(cfg.client||'COLE_AQUI_SEU_CLIENT_ID');
   var cod=escJs(cfg.cod||'LOJA');
   /* Nome, descricao, categoria, opcional, cupom e validade sao texto livre e viram strings JS
@@ -23467,7 +23579,7 @@ function mBloco(cfg){
   var prods=cfg.prods.map(function(p){
     var ops=(p.ops||[]).map(function(o){
       var v=parseFloat(String(o.preco).replace(',','.'))||0;
-      return "{nome:'"+escJs(o.nome)+"', preco:"+v.toFixed(2)+(o.qtd?", qtd:true":"")+"}";
+      return "{nome:'"+escJs(o.nome)+"'"+fcOpDescSrc(o)+", preco:"+v.toFixed(2)+(o.qtd?", qtd:true":"")+"}";
     }).join(', ');
     /* larguraFonte so sai quando e SABIDA. Emitir 0 seria pior do que nao emitir: o bloco teria
        de tratar 0 como "sem teto" e o numero na tela pareceria uma medida. Sem o campo, a foto
@@ -23532,6 +23644,7 @@ function mBloco(cfg){
   c+='.fcmloja .fcm-ops-t{font-size:12px;font-weight:600;margin:0 0 4px;text-align:left}\n';
   c+='.fcmloja .fcm-op{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:4px 0;font-size:13px}\n';
   c+='.fcmloja .fcm-op label{display:flex;align-items:center;gap:8px;cursor:pointer;margin:0;font-weight:400;position:relative;text-align:left}\n';
+  if(temOpDesc)c+=fcApoioCss('.fcmloja .fcm-opdesc',FC_OPDESC_MARGEM);
   c+='.fcmloja input[type="radio"],.fcmloja input[type="checkbox"]{position:absolute;opacity:0;width:1px;height:1px;pointer-events:none}\n';
   c+='.fcmloja .fcm-mark{width:18px;height:18px;min-width:18px;display:inline-block;position:relative;background:#fff;border:2px solid #b9b3a4;box-sizing:border-box}\n';
   c+='.fcmloja .fcm-mark.rd{border-radius:50%}\n';
@@ -24070,7 +24183,7 @@ function mBlocoRuntime(cfg,usaPP,usaPix,usaQtd,usaSinal,usaResumo,descpix,zap,us
 
 /* A vitrine, o filtro, o cartao de detalhe e o desenho do carrinho. */
 function mBlocoVitrine(cfg,usaPP,usaPix,usaQtd,usaSinal,usaResumo,descpix,zap,usaCupom,usaFiltro){
-  var c='';
+  var c='',temOpDesc=fcTemOpDesc(cfg.prods);   /* ver o mesmo no Checkout */
   c+='/* ===== vitrine =====\n';
   c+='   A miniatura pede IMG_VITRINE px ao redimensionador da Alboom; a foto grande so e pedida\n';
   c+='   quando o cartao de detalhe abre. As fotos alem da primeira linha entram com\n';
@@ -24211,7 +24324,13 @@ function mBlocoVitrine(cfg,usaPP,usaPix,usaQtd,usaSinal,usaResumo,descpix,zap,us
   c+="if(tipoOp==='radio'){escolha.sel=[];if(!op.nenhum)marcarOpcional(escolha,real,true);}\n";
   c+='else marcarOpcional(escolha,real,inp.checked);\n';
   c+='linhaValor();\n});\n';
-  c+='caixa.appendChild(row);\n});\n';
+  c+='caixa.appendChild(row);\n';
+  /* Ver o Checkout: irma da linha, dentro da mesma caixa. NO CARRINHO ela nao entra -- decisao
+     do dono, 13/09/2026: o carrinho existe para ser conferido contra o total, e texto cinza
+     repetido ali o afasta da vista. */
+  if(temOpDesc)
+    c+="if(op.desc){var dd=document.createElement('div');dd.className='fcm-opdesc';dd.textContent=op.desc;caixa.appendChild(dd);}\n";
+  c+='});\n';
   c+='lado.appendChild(caixa);\n}\n';
   c+="var val=document.createElement('div');val.className='fcm-linha-p';\n";
   c+="var valt=document.createElement('span');valt.textContent='"+escJs(cfg.txtEsteItem)+"';\n";

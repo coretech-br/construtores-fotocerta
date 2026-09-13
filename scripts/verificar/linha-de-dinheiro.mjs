@@ -132,12 +132,14 @@ for(const alvo of [
    nao havia). A unica forma de saber que ele tem dentes e aponta-lo para a
    versao que TEM o defeito -- a que o dono fotografou -- e exigir que falhe.
    =========================================================================== */
-console.log('\n=== a prova do contrario: a versao publicada QUEBRA o numero ===');
+console.log('\n=== a prova do contrario: a versao SEM o conserto QUEBRA o numero ===');
 const RAIZ = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'fc-linha-'));
 process.on('exit', () => { try{ fs.rmSync(tmp, {recursive:true, force:true}); }catch(e){} });
+const REF = process.argv[2] || 'main';
+console.log('referencia (o lado "antes"): ' + REF);
 execFileSync('/bin/sh', ['-c',
-  'git -C ' + JSON.stringify(RAIZ) + ' archive main | tar -x -C ' + JSON.stringify(tmp)]);
+  'git -C ' + JSON.stringify(RAIZ) + ' archive ' + JSON.stringify(REF) + ' | tar -x -C ' + JSON.stringify(tmp)]);
 
 const antes = await gerarNaFerramenta(async pg => {
   await preparar(pg); await conteudo(pg);
@@ -146,10 +148,25 @@ const antes = await gerarNaFerramenta(async pg => {
   return await gerarTodas(pg);
 }, ['u-out'], {porta: 8985, raiz: tmp}).then(r => r.valores);
 
-const mAntes = await medir(antes['u-out'], '.fcuni', ['fcu-pixlinha'], 8986);
-const dA = mAntes['fcu-pixlinha'];
-chk('a versao publicada parte o numero em duas linhas (o defeito do print)',
-    !!dA && dA.fragmentos > 1,
-    dA ? ('fragmentos='+dA.fragmentos+' texto="'+dA.texto+'"') : 'nao achei a linha');
+/* A REFERENCIA JA TEM O CONSERTO? Decidido antes de medir.
+   Este arquivo nasceu em 13/09/2026 com 'main' como o lado "antes" -- e no MESMO dia a rodada foi
+   mesclada, entao o "antes" passou a medir a si mesmo e a prova do contrario falhava sem defeito
+   nenhum por tras. E a SEXTA vez que o arnes tropeca nisto (id-orcamento, textos-reserva,
+   meio-prio-migracao, sinal-cobranca, a parte 4 de meio-prio-migracao, e esta) -- e a segunda que
+   eu mesmo escrevo o tropeco depois de ja ter consertado os outros.
+   A regra da casa, escrita mais uma vez para quem vier: "antes" e estado historico, nao "o que
+   estiver em main hoje". Toda comparacao com referencia se prende a um commit E detecta quando a
+   referencia deixou de servir, dizendo NAO MEDIU em vez de falhar. */
+const refTemConserto = fs.readFileSync(path.join(tmp,'index.html'),'utf8').indexOf('fcLinhaValorCss') >= 0;
+if(refTemConserto){
+  console.log('  -- NAO MEDIU: a referencia ja tem o conserto.');
+  console.log('     Para medir de verdade: node scripts/verificar/linha-de-dinheiro.mjs 6e0a3e8');
+}else{
+  const mAntes = await medir(antes['u-out'], '.fcuni', ['fcu-pixlinha'], 8986);
+  const dA = mAntes['fcu-pixlinha'];
+  chk('a versao SEM o conserto parte o numero em duas linhas (o defeito do print)',
+      !!dA && dA.fragmentos > 1,
+      dA ? ('fragmentos='+dA.fragmentos+' texto="'+dA.texto+'"') : 'nao achei a linha');
+}
 
 resumo();
