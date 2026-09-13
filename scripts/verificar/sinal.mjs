@@ -129,6 +129,17 @@ const TXT = {
   zapTotal:'ZAPTOTAL: {valor}',
   zapSinal:'ZAPSINAL: *{valor}*',
   zapSaldo:'ZAPSALDO: *{valor}*',
+  /* Os sete campos que SO a aba Agendamento por pacote ganhou em 13/09/2026, junto do botao
+     "Ja paguei" (ate entao ela mostrava o Pix e nao tinha como o cliente avisar). Distintos
+     como os de cima e pelo mesmo motivo: cada assercao aponta para UM campo, e um texto que
+     vazasse do lugar errado apareceria com o rotulo do outro. */
+  zapPago:'ZAPBOTAO ja paguei',
+  zapAbertura:'ZAPABRE sem sinal',
+  zapAberturaSinal:'ZAPABRESINAL com sinal',
+  zapPedido:'ZAPPEDIDO: *{cod}*',
+  zapCupom:'ZAPCUPOM: {codigo}',
+  zapDescPix:'ZAPDESC: -{pct}%',
+  zapValor:'ZAPVALOR: *{valor}*',
   maior:'MAIOR o sinal passou do total',
   zero:'ZERO o sinal arredonda para zero',
   recusado:'recusado'
@@ -209,7 +220,17 @@ function lerPayload(p){
   const c54 = itens.filter(x => x[0]==='54');
   if(c54.length !== 1) return {erro:'campo 54 aparece '+c54.length+' vez(es)'};
   if(!/^[0-9]+\.[0-9]{2}$/.test(c54[0][1])) return {erro:'campo 54 fora do formato: '+c54[0][1]};
-  return {valor: c54[0][1], crcOk};
+  /* O TXID mora no campo 62, sub-campo 05 -- lido pelo MESMO leitor escrito aqui, e nunca
+     pelo do projeto (ver o cabecalho). Acrescentado em 13/09/2026: a mensagem do "Ja paguei"
+     da aba pac cita o identificador de conciliacao, e a pergunta "e o MESMO que foi cobrado?"
+     so se responde lendo o identificador de dentro do proprio payload. */
+  const c62 = itens.filter(x => x[0]==='62');
+  let txid = null;
+  if(c62.length === 1){
+    const dentro = tlvRaiz(c62[0][1]);
+    if(dentro){ const c05 = dentro.filter(x => x[0]==='05'); if(c05.length===1) txid = c05[0][1]; }
+  }
+  return {valor: c54[0][1], crcOk, txid};
 }
 
 /* "R$ 1.234,56" -> 1234.56 */
@@ -774,6 +795,9 @@ const A_PAC_MINI  = {cod:'MINI',  nome:'Ensaio E',  dur:'15 min',  preco:CAT[4].
 /* Os opcionais de ENS sao CAT[1..3], na ordem -- o indice do opcional na tela e
    o indice em CAT menos um, e e assim que 'itens' abaixo se le. */
 const A_OPS = [CAT[1], CAT[2], CAT[3]];
+/* Achar o pacote pelo codigo que a URL leva -- a lista de itens da mensagem do "Ja paguei"
+   comeca por ele, e comparar contra "algum dos tres" seria assercao que passa por acidente. */
+const A_PACS = {ENS:A_PAC_ENS, CURTO:A_PAC_CURTO, MINI:A_PAC_MINI};
 /* O cupom de 100% e a UNICA forma de zerar o pedido nesta aba (o pacote e fixo,
    e o proprio texto de fabrica da aba diz isso: "O cupom aplicado zera o valor
    deste pedido"). E o espelho do "carrinho VAZIO" das irmas. */
@@ -790,6 +814,16 @@ const A_DATA = '10/05/2030';
 const A_HORA = '14:00';
 const buscaDe = cod => '?pac='+cod+'&data='+encodeURIComponent(A_DATA)
   +'&hora='+encodeURIComponent(A_HORA)+'&quando='+encodeURIComponent(A_QUANDO);
+/* O identificador esperado de UM pacote, escrito por extenso: PREFIXO + codigo + os digitos de
+   'data' e 'hora' como chegaram na URL (diaHoraId). Escrito a mao de proposito -- se ele passar
+   a sair de uma funcao do projeto, o teste deixa de ter opiniao propria sobre ele.
+   Mora AQUI, e nao mais junto da matriz do meio prioritario, porque desde 13/09/2026 ele tambem
+   e cobrado dentro da mensagem do "Ja paguei", que e medida bem antes daquela secao. */
+const idDe = cod => 'FC' + cod + A_DATA.replace(/\D/g,'') + A_HORA.replace(/\D/g,'');
+/* A mensagem que o "Ja paguei" carrega, lida da URL do wa.me exatamente como o WhatsApp a
+   receberia. Decodificar aqui, e nao comparar a URL crua, e o que faz a assercao falar da
+   MENSAGEM em vez de falar do escape de URL. */
+const zapMsg = href => href ? decodeURIComponent(String(href).split('?text=')[1] || '') : '';
 
 /* OS QUATRO CAMPOS NOVOS COM TEXTO HOSTIL. Eles nao estao (ainda) na tabela TEXTOS de
    cenario.mjs -- nao existem em 'main', e poe-los la faria a passagem configurada deixar de
@@ -801,7 +835,18 @@ const A_HOSTIL = {
   t8:   'Sinal \'agora\' "já" \\ </script> & <b>',
   t9:   'Saldo — \'depois\' "no dia" \\ </script>',
   maior:'O sinal desta \'reserva\' é maior \\ que o total "todo" </script>',
-  zero: 'O sinal \'arredonda\' para zero \\ "mesmo" </script>'
+  zero: 'O sinal \'arredonda\' para zero \\ "mesmo" </script>',
+  /* OS SETE DO "JA PAGUEI" (13/09/2026). O rotulo do botao e a abertura passam por escJsD
+     direto; as outras cinco passam por aTplJs, que parte o texto nos marcadores e escapa cada
+     pedaco -- dois caminhos diferentes, e por isso os dois precisam de texto hostil. Se um
+     escape faltar, o literal de aspas DUPLAS do bloco fecha no meio e nada carrega. */
+  zapPago:  'Já \'paguei\' — "avisar" \\ </script>',
+  zapAbre:  'Olá! \'Paguei\' "mesmo" \\ </script> & <b>',
+  zapAbreS: 'Olá! Paguei o \'SINAL\' "todo" \\ </script>',
+  zapPedido:'Reserva \'cod\' "n" \\ </script>: *{cod}*',
+  zapCupom: 'Cupom \'aplicado\' "ok" \\ </script>: {codigo}',
+  zapSaldo: 'Resta \'pagar\' "depois" \\ </script>: *{valor}*',
+  zapValor: 'Paguei \'agora\' "tudo" \\ </script>: *{valor}*'
 };
 
 /* ===========================================================================
@@ -853,6 +898,23 @@ async function gerarPac(cfg){
       await set(pg,'a-txt-sinal-maior',T.maior);
       await set(pg,'a-txt-sinal-zero',T.zero);
     }
+    /* OS CAMPOS DO "JA PAGUEI" (13/09/2026) ENTRAM SEMPRE, com sinal ou sem -- a mensagem tem
+       DOIS ramos (as tres linhas do sinal, ou a linha unica do valor pago) e so as duas
+       passagens juntas alcancam os dois. Escrever so no ramo do sinal deixaria 'zapValor'
+       emitido e nunca lido, que e a cobertura fantasma que este arnes existe para recusar. */
+    {
+      const Z = cfg.hostil ? A_HOSTIL : TXT;
+      await set(pg,'a-txt-zap-pago',           cfg.hostil ? Z.zapPago   : TXT.zapPago);
+      await set(pg,'a-txt-zap-abertura',       cfg.hostil ? Z.zapAbre   : TXT.zapAbertura);
+      await set(pg,'a-txt-zap-abertura-sinal', cfg.hostil ? Z.zapAbreS  : TXT.zapAberturaSinal);
+      await set(pg,'a-txt-zap-pedido',         cfg.hostil ? Z.zapPedido : TXT.zapPedido);
+      await set(pg,'a-txt-zap-cupom',          cfg.hostil ? Z.zapCupom  : TXT.zapCupom);
+      await set(pg,'a-txt-zap-descpix',        TXT.zapDescPix);
+      await set(pg,'a-txt-zap-total',          TXT.zapTotal);
+      await set(pg,'a-txt-zap-sinal',          TXT.zapSinal);
+      await set(pg,'a-txt-zap-saldo',          cfg.hostil ? Z.zapSaldo  : TXT.zapSaldo);
+      await set(pg,'a-txt-zap-valor',          cfg.hostil ? Z.zapValor  : TXT.zapValor);
+    }
     await clicar(pg,'a-gerar');
   }, ['a-out3'], {porta: cfg.porta});
 
@@ -889,7 +951,23 @@ const lerPac = pg => pg.evaluate(() => {
      sao avaliadas na ordem escrita, e ler 'msg' antes mediria o caso ANTERIOR. */
   const clique = ppClique();
   const cola = q('.fca-ob-cod'), bot = q('.fca-ob-botoes'), av = q('.fca-ob-sinal-aviso');
+  /* O "JA PAGUEI" (13/09/2026). Tudo o que se quer saber dele sai daqui: se existe, o que
+     diz, PARA ONDE aponta, se esta DENTRO da area do Pix e se esta VISIVEL. A posicao no DOM
+     e medida, e nao deduzida da folha de estilo: "dentro da area" e uma afirmacao sobre o
+     parentesco dos elementos, e e assim que ela tem de ser lida. */
+  const zp = q('.fca-ob-zap');
+  const anteriorZp = zp && zp.previousElementSibling;
   return {
+    zapTem:    !!zp,
+    zapTexto:  zp ? zp.textContent : null,
+    zapHref:   zp ? zp.getAttribute('href') : null,
+    zapAlvo:   zp ? zp.getAttribute('target') : null,
+    zapTag:    zp ? zp.tagName : null,
+    zapNaArea: !!(zp && zp.parentElement && /fca-ob-pixarea/.test(zp.parentElement.className)),
+    zapDepoisDoAviso: !!(anteriorZp && /fca-ob-pixmanual/.test(anteriorZp.className)),
+    zapVis:    vis(zp),
+    /* Quantos elementos carregam a classe: o estado "sem WhatsApp" tem de dar ZERO. */
+    zapQuantos: document.querySelectorAll('.fca-ob-zap').length,
     totalTxt: txt('.fca-ob-preco-valor'),
     linha2:   txt('.fca-ob-preco-linha2'),
     temLinha2: !!q('.fca-ob-preco-linha2'),
@@ -1004,9 +1082,26 @@ for(const k of Object.keys(A_CFGS)) aBlocos[k] = await gerarPac(A_CFGS[k]);
       t.indexOf('TXT_SINAL_RECUSADO') < 0);
   chk('pac/ausencia. e nenhum <textarea> de resumo (so o do Copia e Cola do Pix)',
       (t.split('createElement("textarea")').length-1) === 1);
-  chk('pac/ausencia. a mensagem de WhatsApp nao cita valor nenhum (nenhum moedaFmt dentro de botaoZap)',
-      /function botaoZap\(msg\)\{[\s\S]*?\n\}/.test(t) &&
-      t.match(/function botaoZap\(msg\)\{[\s\S]*?\n\}/)[0].indexOf('moedaFmt') < 0);
+  /* ATE 13/09/2026 ESTA LINHA DIZIA O CONTRARIO. Ela afirmava que "a mensagem de WhatsApp nao
+     cita valor nenhum", e isso era verdade porque o botao "Ja paguei" nao existia nesta aba:
+     as duas unicas mensagens eram recados de recusa. Com o botao existindo, o que se cobra e o
+     oposto -- a mensagem dele CITA valor e identificador, como nas tres irmas.
+     O QUE CONTINUA VALENDO E botaoZap NAO SABER DE DINHEIRO: ela recebe a frase PRONTA, e quem
+     a monta e zapMsgPago. Se um moedaFmt aparecer dentro dela, a montagem da mensagem passou a
+     ter dois donos -- que e o defeito que esta linha vigia desde sempre, so que agora com o
+     alvo certo. */
+  chk('pac/ausencia. botaoZap continua sem saber de dinheiro (recebe a frase pronta)',
+      /function botaoZap\(msg,rot\)\{[\s\S]*?\n\}/.test(t) &&
+      t.match(/function botaoZap\(msg,rot\)\{[\s\S]*?\n\}/)[0].indexOf('moedaFmt') < 0);
+  chk('pac/ausencia. e a mensagem do "Ja paguei" MONTA os valores num lugar so (zapMsgPago)',
+      (t.split('function zapMsgPago(').length-1) === 1 &&
+      (t.split('zapMsgPago()').length-1) === 3,
+      'declaracoes='+(t.split('function zapMsgPago(').length-1)+
+      ' ocorrencias de chamada+declaracao='+(t.split('zapMsgPago()').length-1));
+  chk('pac/ausencia. a URL do WhatsApp e montada num lugar so (zapHref)',
+      (t.split('function zapHref(').length-1) === 1 &&
+      (t.split('https://wa.me/').length-1) === 1,
+      'ocorrencias de wa.me no bloco: '+(t.split('https://wa.me/').length-1));
   /* Conta as CHAMADAS, e nao as ocorrencias do nome: a declaracao da funcao e os
      comentarios do bloco tambem trazem "sinalRecusa()" e fariam o numero mentir. Toda
      chamada deste projeto guarda o motivo numa variavel, entao '=sinalRecusa();' e
@@ -1098,6 +1193,12 @@ for(const rod of A_RODADAS){
         chk(tag+'4. o clique do cartao e REJEITADO', d.ppClique==='REJEITADO', String(d.ppClique));
         chk(tag+'4. o cartao mostra a MESMA frase', d.msgPP===frase, 'msg="'+d.msgPP+'"');
       }
+      /* O "JA PAGUEI" ESTA NO DOM, mas ESCONDIDO: a area do Pix nao abriu, e o botao mora
+         dentro dela. Sem isto, um cliente com o pagamento recusado teria como avisar que
+         pagou um codigo que nunca chegou a existir. */
+      chk(tag+'C. o "Ja paguei" existe mas fica ESCONDIDO junto com a area do Pix',
+          d.zapTem===true && d.zapNaArea===true && d.zapVis===false,
+          'tem='+d.zapTem+' naArea='+d.zapNaArea+' visivel='+d.zapVis);
       continue;
     }
 
@@ -1160,6 +1261,57 @@ for(const rod of A_RODADAS){
     chk(tag+'3b. e NAO o total dividido  ('+parcelaDoTotal.toFixed(2)+')',
         parcelaEsperada===parcelaDoTotal || moeda(d.parcela)!==parcelaDoTotal,
         'leu "'+d.parcela+'"');
+
+    /* ===== 6. O "JA PAGUEI" E AS TRES LINHAS DA MENSAGEM (13/09/2026) =====
+       Lida da URL do wa.me que o PROPRIO botao carrega -- e nao de uma variavel do bloco.
+       Aqui o botao e uma ANCORA (target=_blank), e nao um window.open como nas duas irmas:
+       o que o cliente manda e literalmente o que esta no href. */
+    const msg = zapMsg(d.zapHref), idPac = idDe(rod.pac);
+    chk(tag+'6. o "Ja paguei" existe, dentro da area do Pix e logo depois do aviso',
+        d.zapTem && d.zapNaArea && d.zapDepoisDoAviso,
+        'tem='+d.zapTem+' naArea='+d.zapNaArea+' depoisDoAviso='+d.zapDepoisDoAviso);
+    chk(tag+'6. com o Pix gerado ele esta VISIVEL', d.zapVis===true);
+    chk(tag+'6. o rotulo e o campo da aba', d.zapTexto===TXT.zapPago, 'leu "'+d.zapTexto+'"');
+    chk(tag+'6. a abertura e a do SINAL (e nao a de pagamento inteiro)',
+        msg.indexOf(TXT.zapAberturaSinal)===0, msg.split('\n')[0]);
+    chk(tag+'6. a mensagem traz o IDENTIFICADOR da reserva ('+idPac+')',
+        msg.indexOf('ZAPPEDIDO: *'+idPac+'*')>=0, msg.split('\n')[1]);
+    chk(tag+'6. e e o MESMO identificador que foi para o codigo Pix (campo 62/05)',
+        !pix.erro && pix.txid===idPac, 'txid do payload = '+(pix.txid||pix.erro));
+    chk(tag+'6. e o MESMO que o pedido ao cartao leva',
+        d.pedido && d.pedido.custom===idPac, 'custom_id='+(d.pedido&&d.pedido.custom));
+    chk(tag+'6. linha do TOTAL na mensagem, com o numero da TELA',
+        msg.indexOf('ZAPTOTAL: '+d.totalTxt)>=0, 'procurava "ZAPTOTAL: '+d.totalTxt+'"');
+    chk(tag+'6. linha do SINAL na mensagem, com o numero da TELA',
+        msg.indexOf('ZAPSINAL: *'+d.sinalTxt+'*')>=0, 'procurava "ZAPSINAL: *'+d.sinalTxt+'*"');
+    chk(tag+'6. linha do SALDO na mensagem, com o numero da TELA',
+        msg.indexOf('ZAPSALDO: *'+d.saldoTxt+'*')>=0, 'procurava "ZAPSALDO: *'+d.saldoTxt+'*"');
+    chk(tag+'6. as tres saem nesta ordem: total, sinal, saldo',
+        msg.indexOf('ZAPTOTAL') < msg.indexOf('ZAPSINAL') &&
+        msg.indexOf('ZAPSINAL') < msg.indexOf('ZAPSALDO'));
+    chk(tag+'6. o ramo SEM sinal (linha do valor pago) nao aparece junto',
+        msg.indexOf('ZAPVALOR')<0);
+    /* O rotulo da TELA nao pode vazar para a mensagem: sao campos diferentes de proposito. */
+    chk(tag+'6. o rotulo da tela nao vaza para a mensagem',
+        msg.indexOf(TXT.t9+':')<0 && msg.indexOf(TXT.t8+':')<0);
+    /* A terceira linha e o pacote: o NOME exato dele, e o preco CHEIO (o do catalogo), nao o
+       do carrinho -- os opcionais e o cupom entram nas linhas seguintes e no total. O numero
+       e comparado ja lido de volta (moeda()), para a assercao nao depender do formato da
+       moeda que o bloco escolheu escrever. */
+    const linhaPac = msg.split('\n')[2] || '';
+    chk(tag+'6. a terceira linha e o PACOTE desta reserva, pelo nome exato',
+        linhaPac.indexOf('- *'+A_PACS[rod.pac].nome+'* ')===0, 'leu "'+linhaPac+'"');
+    chk(tag+'6. e com o preco CHEIO do catalogo ('+A_PACS[rod.pac].preco+')',
+        moeda(linhaPac)===parseFloat(A_PACS[rod.pac].preco), 'leu "'+linhaPac+'"');
+    chk(tag+'6. os opcionais marcados aparecem, e so eles',
+        (msg.split('\n   + ').length-1) === (caso.ops||[]).length,
+        'marcados='+(caso.ops||[]).length+' na mensagem='+(msg.split('\n   + ').length-1));
+    chk(tag+'6. a linha do CUPOM aparece exatamente quando ha cupom',
+        (msg.indexOf('ZAPCUPOM: '+caso.cupom)>=0) === !!caso.cupom, msg);
+    /* Com sinal ligado aCfg zera o desconto do Pix NA ORIGEM -- entao a linha dele nao pode
+       existir nem no bloco nem na mensagem. */
+    chk(tag+'6. NENHUMA linha de desconto do Pix (o sinal o zerou na origem)',
+        msg.indexOf('ZAPDESC')<0 && txt.indexOf('ZAPDESC')<0);
   }
 }
 
@@ -1272,15 +1424,172 @@ chk('pac/ID. as QUATRO combinacoes (meio prioritario x sinal) dao o MESMO identi
     idsDaMatriz.length===4 && idsDaMatriz.every(x => x===A_ID_ESPERADO),
     JSON.stringify(idsDaMatriz));
 
+
 /* ===========================================================================
-   O TEXTO HOSTIL nos quatro campos novos, com o bloco RODANDO
+   O "JA PAGUEI": A POSICAO, A MENSAGEM SEM SINAL, O CUPOM E O WHATSAPP VAZIO
+   ===========================================================================
+   Ate 13/09/2026 esta aba mostrava o Pix ao cliente e NAO tinha o botao que as tres
+   irmas tem dentro da area do Pix. Nao era decisao -- era omissao, herdada de quando
+   a aba foi construida espelhando o Checkout. Esta secao mede o que a correcao
+   entregou, no ramo que o laco de casos acima nao alcanca (aquele so roda com sinal).
+
+   O QUE SO SE MEDE AQUI, e por que:
+
+     - A POSICAO NO DOM. "Dentro da area do Pix" e uma afirmacao sobre o parentesco dos
+       elementos, e nao sobre a folha de estilo -- e a consequencia dela e a que importa:
+       ANTES de "Gerar Pix" nao existe botao visivel para avisar pagamento nenhum.
+       Medida nos dois instantes, e nao so depois.
+     - O RAMO SEM SINAL da mensagem (a linha unica do valor pago, mais a linha do
+       desconto do Pix, que com sinal ligado nao existe).
+     - O CUPOM entrando e o dinheiro MUDANDO enquanto o identificador NAO muda. Sem o
+       lado "o dinheiro mudou", "o identificador continuou igual" nao mede nada.
+     - O IDENTIFICADOR lido de TRES lugares na mesma passagem -- a mensagem, o campo
+       62/05 do payload Pix e o custom_id do pedido ao cartao. Os tres tem de dizer a
+       mesma coisa: e ele que o dono usa para achar a cobranca no extrato, e o defeito
+       mais caro da rodada daquela aba foi exatamente um identificador que variava.
+     - O ESTADO SEM WHATSAPP. A aba RECUSA gerar sem WhatsApp (aRecusa), entao esse
+       estado so existe editando o bloco publicado a mao -- que e o mesmo caminho ja
+       medido para UPSELL_ATIVO. Sem WHATSAPP, botaoZap devolve null e NENHUM dos tres
+       botoes existe; a prova aqui e que nenhum elemento carrega a classe.
+   =========================================================================== */
+console.log('\n== pac: o "Ja paguei" -- posicao, mensagem sem sinal, cupom e WhatsApp vazio ==');
+{
+  const idPac = idDe(A_PAC_ENS.cod);
+  const r = await comBlocoNaPagina({
+    bloco: aBlocos['offpix'], cabeca: CABECA, porta: 8981, busca: buscaDe(A_PAC_ENS.cod),
+    corpoDepois: '<div id="fim-do-documento">fim</div>',
+    medir: async pg => {
+      await pg.waitForTimeout(300);
+      const antes = await lerPac(pg);                   /* ANTES de gerar o Pix */
+      await pg.click(A_BT_PIX);
+      await pg.waitForTimeout(150);
+      const limpo = await lerPac(pg);                   /* gerado: so o pacote */
+      await carrinhoPac(pg,[0]);                        /* marca um opcional */
+      await pg.waitForTimeout(60);
+      await aplicarCupom(pg,'fca-ob',CUPOM.cod);
+      await pg.waitForTimeout(100);
+      const mexido = await lerPac(pg);                  /* mexer fecha a area de novo */
+      await pg.click(A_BT_PIX);
+      await pg.waitForTimeout(150);
+      const comCupom = await lerPac(pg);
+      return {antes, limpo, mexido, comCupom, fim: await pg.$('#fim-do-documento') !== null};
+    }
+  });
+  const tag = 'pac[C] ';
+  chk(tag+'o documento nao foi engolido pelo bloco', r.fim);
+  chk(tag+'sem erro de console proprio do bloco',
+      errosReais(r.erros||[]).length===0, (r.erros||[]).slice(0,2).join(' | '));
+
+  /* ---- a posicao, nos dois instantes ---- */
+  chk(tag+'o botao existe no DOM', r.antes.zapTem===true);
+  chk(tag+'e e uma ANCORA com target=_blank (e nao um window.open como nas duas irmas)',
+      r.antes.zapTag==='A' && r.antes.zapAlvo==='_blank',
+      'tag='+r.antes.zapTag+' target='+r.antes.zapAlvo);
+  chk(tag+'mora DENTRO da area do Pix', r.antes.zapNaArea===true);
+  chk(tag+'logo depois do aviso de que o Pix nao confirma sozinho',
+      r.antes.zapDepoisDoAviso===true);
+  chk(tag+'ANTES de "Gerar Pix" ele NAO esta visivel', r.antes.zapVis===false);
+  chk(tag+'DEPOIS de "Gerar Pix" ele esta visivel', r.limpo.zapVis===true);
+  chk(tag+'mexer no carrinho esconde a area, e o botao junto',
+      r.mexido.zapVis===false, 'visivel='+r.mexido.zapVis);
+  chk(tag+'ha UM so botao com a classe', r.limpo.zapQuantos===1, 'achei '+r.limpo.zapQuantos);
+  chk(tag+'o rotulo e o campo da aba', r.limpo.zapTexto===TXT.zapPago, 'leu "'+r.limpo.zapTexto+'"');
+
+  /* ---- a mensagem SEM sinal, sem cupom ---- */
+  const m1 = zapMsg(r.limpo.zapHref), l1 = m1.split('\n');
+  const pix1 = lerPayload(r.limpo.payload);
+  chk(tag+'a abertura e a do pagamento inteiro (e nao a do sinal)',
+      l1[0]===TXT.zapAbertura, 'leu "'+l1[0]+'"');
+  chk(tag+'a segunda linha e o IDENTIFICADOR da reserva ('+idPac+')',
+      l1[1]==='ZAPPEDIDO: *'+idPac+'*', 'leu "'+l1[1]+'"');
+  chk(tag+'a terceira e o PACOTE, com o preco cheio',
+      l1[2].indexOf('- *'+A_PAC_ENS.nome+'* ')===0 && moeda(l1[2])===parseFloat(A_PAC_ENS.preco),
+      'leu "'+l1[2]+'"');
+  chk(tag+'nenhum opcional na mensagem (nenhum foi marcado)',
+      m1.indexOf('\n   + ')<0, m1);
+  chk(tag+'nenhuma linha de CUPOM (nenhum foi aplicado)', m1.indexOf('ZAPCUPOM')<0, m1);
+  chk(tag+'a linha do DESCONTO DO PIX aparece (descpix=5, sem sinal)',
+      m1.indexOf('ZAPDESC: -5%')>=0, m1);
+  chk(tag+'a linha do VALOR PAGO traz o numero da TELA',
+      m1.indexOf('ZAPVALOR: *'+r.limpo.totalTxt+'*')>=0,
+      'procurava "ZAPVALOR: *'+r.limpo.totalTxt+'*" em '+JSON.stringify(l1));
+  chk(tag+'e NENHUMA das tres linhas do sinal (esta passagem nao cobra sinal)',
+      m1.indexOf('ZAPTOTAL')<0 && m1.indexOf('ZAPSINAL')<0 && m1.indexOf('ZAPSALDO')<0, m1);
+  chk(tag+'o identificador da mensagem e o do codigo Pix (campo 62/05)',
+      !pix1.erro && pix1.txid===idPac, 'txid='+(pix1.txid||pix1.erro));
+  chk(tag+'e o do pedido ao cartao (custom_id)',
+      r.limpo.pedido && r.limpo.pedido.custom===idPac,
+      'custom_id='+(r.limpo.pedido&&r.limpo.pedido.custom));
+
+  /* ---- a mensagem COM cupom e com um opcional ---- */
+  const m2 = zapMsg(r.comCupom.zapHref);
+  const pix2 = lerPayload(r.comCupom.payload);
+  chk(tag+'com cupom: a linha do cupom aparece, com o codigo',
+      m2.indexOf('ZAPCUPOM: '+CUPOM.cod)>=0, m2);
+  chk(tag+'com cupom: o opcional marcado aparece na lista, e e UM so',
+      (m2.split('\n   + ').length-1)===1 && m2.indexOf('   + '+A_OPS[0].nome+' ')>=0, m2);
+  chk(tag+'com cupom: a linha do valor pago acompanha a TELA',
+      m2.indexOf('ZAPVALOR: *'+r.comCupom.totalTxt+'*')>=0,
+      'procurava "ZAPVALOR: *'+r.comCupom.totalTxt+'*"');
+  chk(tag+'o DINHEIRO mudou entre as duas passagens (senao a prova seguinte nao mede nada)',
+      r.limpo.totalTxt!==r.comCupom.totalTxt && !pix1.erro && !pix2.erro &&
+      pix1.valor!==pix2.valor,
+      'tela '+r.limpo.totalTxt+' -> '+r.comCupom.totalTxt+
+      '  |  campo 54 '+pix1.valor+' -> '+pix2.valor);
+  chk(tag+'e o IDENTIFICADOR NAO mudou, nos tres lugares',
+      m2.indexOf('ZAPPEDIDO: *'+idPac+'*')>=0 && pix2.txid===idPac &&
+      r.comCupom.pedido && r.comCupom.pedido.custom===idPac,
+      'mensagem/'+(m2.split('\n')[1])+'  payload/'+pix2.txid+
+      '  cartao/'+(r.comCupom.pedido&&r.comCupom.pedido.custom));
+}
+
+/* ---- O ESTADO SEM WHATSAPP, editado A MAO no bloco publicado ---- */
+{
+  const tag = 'pac[C/sem WhatsApp] ';
+  const base = aBlocos['offpix'];
+  const semZap = base.replace(/var WHATSAPP='[^']*';/, "var WHATSAPP='';");
+  chk(tag+'a troca a mao pegou (uma declaracao de WHATSAPP, e ela ficou vazia)',
+      (base.split("var WHATSAPP='").length-1)===1 && semZap.indexOf("var WHATSAPP='';")>=0 &&
+      semZap!==base);
+  const r = await comBlocoNaPagina({
+    bloco: semZap, cabeca: CABECA, porta: 8982, busca: buscaDe(A_PAC_ENS.cod),
+    corpoDepois: '<div id="fim-do-documento">fim</div>',
+    medir: async pg => {
+      await pg.waitForTimeout(300);
+      await pg.click(A_BT_PIX);
+      await pg.waitForTimeout(150);
+      const d = await lerPac(pg);
+      /* Nenhuma ancora sobrando na area do Pix -- nem com a classe, nem sem ela. */
+      const ancoras = await pg.$$eval('.fca-ob-pixarea a', els => els.length);
+      return {d, ancoras, fim: await pg.$('#fim-do-documento') !== null};
+    }
+  });
+  chk(tag+'o bloco continua carregando e desenhando', r.fim && r.d.pixArea===true);
+  chk(tag+'sem erro de console proprio do bloco',
+      errosReais(r.erros||[]).length===0, (r.erros||[]).slice(0,2).join(' | '));
+  chk(tag+'NENHUM elemento carrega a classe do "Ja paguei"',
+      r.d.zapQuantos===0 && r.d.zapTem===false, 'achei '+r.d.zapQuantos);
+  chk(tag+'e nenhuma ancora sobrou dentro da area do Pix', r.ancoras===0, 'achei '+r.ancoras);
+  chk(tag+'o Pix continua sendo gerado normalmente (a falta do botao nao trava nada)',
+      r.d.payload.length>40 && !lerPayload(r.d.payload).erro);
+  /* A REGRA DE CSS CONTINUA NO BLOCO, e isto e limite DECLARADO e nao defeito: quem decide
+     se ha botao e o WHATSAPP em tempo de EXECUCAO, e a ferramenta recusa gerar sem ele
+     (aRecusa) -- entao no caminho que a ferramenta produz a classe nunca fica orfa. O bloco
+     editado a mao e o unico estado em que ela fica, e vale o mesmo para as classes dos dois
+     recados de recusa, que ja eram assim antes desta rodada. */
+  chk(tag+'a regra de CSS continua emitida (limite declarado: quem decide e o WHATSAPP, em execucao)',
+      semZap.indexOf('.fca-ob-zap{')>=0);
+}
+
+/* ===========================================================================
+   O TEXTO HOSTIL nos campos do sinal e nos do "Ja paguei", com o bloco RODANDO
    ===========================================================================
    A regressao byte a byte nao alcanca isto: com os padroes de fabrica -- que nao tem
    apostrofa, barra invertida nem '</script' -- a saida e identica com ou sem o escape.
    So um valor hostil denuncia um escJs esquecido, e a denuncia e barulhenta: o literal
    fecha no meio e o bloco inteiro deixa de carregar (o 'fim-do-documento' some junto).
    =========================================================================== */
-console.log('\n== pac: texto hostil nos quatro campos do sinal ==');
+console.log('\n== pac: texto hostil nos campos do sinal e nos do "Ja paguei" ==');
 for(const h of [{k:'hostilM', pac:A_PAC_CURTO.cod, recusa:'maior', porta:8975},
                 {k:'hostilZ', pac:A_PAC_MINI.cod,  recusa:'zero',  porta:8976}]){
   const cfg = A_CFGS[h.k], tag = '['+cfg.id+'] ';
@@ -1313,6 +1622,28 @@ for(const h of [{k:'hostilM', pac:A_PAC_CURTO.cod, recusa:'maior', porta:8975},
   chk(tag+'o cartao mostra a MESMA frase hostil', d.msgPP===frase, 'msg="'+d.msgPP+'"');
   chk(tag+'e o pagamento fica travado nas duas pontas',
       d.pixArea===false && d.ppClique==='REJEITADO', String(d.ppClique));
+
+  /* ===== OS CAMPOS DO "JA PAGUEI" (13/09/2026), pelos DOIS caminhos de escape =====
+     O rotulo e a abertura passam por escJsD direto; a linha do identificador passa por
+     aTplJs, que PARTE o texto no marcador e escapa cada pedaco -- um esquecimento em
+     qualquer dos dois fecha o literal de aspas duplas no meio e nada carrega (e por isso a
+     medida do 'fim-do-documento', acima, tambem cobre estes).
+     A AREA DO PIX NAO ABRE nestas duas configuracoes (as duas terminam em recusa), entao o
+     endereco lido e o que pix() montou ao desenhar -- que e justamente o estado em que o
+     texto configurado chega ao bloco. O VALOR do saldo nao e comparado aqui de proposito:
+     quem o compara e o laco de casos, com a tela ao lado; o que se mede aqui e o TEXTO. */
+  const msgH = zapMsg(d.zapHref);
+  chk(tag+'o rotulo do "Ja paguei" chega INTEIRO', d.zapTexto===A_HOSTIL.zapPago,
+      'leu "'+d.zapTexto+'"');
+  chk(tag+'a abertura hostil (com sinal) abre a mensagem, INTEIRA',
+      msgH.indexOf(A_HOSTIL.zapAbreS)===0, 'leu "'+msgH.split('\n')[0]+'"');
+  chk(tag+'a linha do identificador, PARTIDA por aTplJs, chega INTEIRA',
+      msgH.indexOf(A_HOSTIL.zapPedido.replace('{cod}', idDe(h.pac)))>=0,
+      'leu "'+msgH.split('\n')[1]+'"');
+  chk(tag+'a linha do saldo hostil chega INTEIRA ate o marcador',
+      msgH.indexOf(A_HOSTIL.zapSaldo.split('{valor}')[0])>=0, msgH);
+  chk(tag+'e o "</script" nao vazou para a mensagem cru (o bloco inteiro carregou)',
+      msgH.indexOf('</script')>=0 && r.fim===true);
 }
 
 process.exit(resumo());

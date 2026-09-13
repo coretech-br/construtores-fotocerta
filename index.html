@@ -3957,7 +3957,7 @@
         </div>
         <p class="ajuda"><b>Com o endereço preenchido, as duas variáveis saem no código mesmo com a chave em "não levar".</b> Elas ficam no topo do bloco, inertes, esperando um <code>true</code>: assim você liga e desliga o upsell direto na página publicada, trocando <code>UPSELL_ATIVO</code>, <b>sem voltar aqui e sem recolar nada</b>. Com o endereço vazio nada disso é escrito. Endereço vazio com a chave em "sim, levar" é recusado na hora de gerar — ligado sem destino não faz nada e parece que faz.</p>
         <p class="ajuda">São aceitos uma âncora (<code>#oferta</code>), um caminho do site (<code>/oferta-especial</code>) ou um endereço <code>http(s)</code> inteiro. É a mesma regra do botão de ação da Contagem regressiva.</p>
-        <p class="ajuda"><b>Vale para o pagamento aprovado no cartão</b>, que é quando houve confirmação de verdade. Esta página não tem o botão "Já paguei" do Pix, e o Pix não avisa a página quando o dinheiro cai — então quem paga por Pix aqui continua na página de obrigado.</p>
+        <p class="ajuda"><b>No cartão o cliente é levado assim que o pagamento é aprovado</b> — houve confirmação de verdade. <b>No Pix não existe aviso nenhum para a página</b> quando o dinheiro cai, então quem leva é o botão “Já paguei”, e quem clica nele pode ainda não ter pago. Se a sua oferta depende do primeiro pagamento estar feito, isso é decisão da campanha, não do código.</p>
       </fieldset>
     </div>
     <div>
@@ -4153,8 +4153,8 @@
         <label for="a-txt-nota">Aviso para conferir o recebedor</label>
         <input type="text" id="a-txt-nota" value="Confira o nome do recebedor antes de confirmar o pagamento">
         <label for="a-txt-pix-manual">Aviso de que o Pix não confirma sozinho</label>
-        <input type="text" id="a-txt-pix-manual" value="O Pix não avisa a gente automaticamente. Assim que você pagar, me avise para eu conferir e confirmar a sua reserva.">
-        <p class="ajuda">Aparece <b>dentro da área do Pix</b>, logo abaixo da instrução de pagamento — que é onde o cliente está olhando na hora de pagar. Sem ele, o cliente paga, a tela não muda, e ele pode sair achando que a reserva já está confirmada. O texto é diferente do das outras abas de propósito: <b>esta página não tem botão “Já paguei”</b>, então ele não manda tocar em nada.</p>
+        <input type="text" id="a-txt-pix-manual" value="O Pix não avisa a gente automaticamente. Assim que você pagar, toque em &quot;Já paguei&quot; para eu conferir e confirmar.">
+        <p class="ajuda">Aparece <b>dentro da área do Pix</b>, logo acima do botão “Já paguei” — que é onde o cliente está olhando na hora de pagar. Sem ele, o cliente paga, a tela não muda, e ele pode sair achando que a reserva já está confirmada. <b>Até 13/09/2026 esta aba não tinha o botão</b>, e por isso o texto dela mandava “me avise” em vez de mandar tocar nele; agora o botão existe e a frase é a mesma das outras três abas de pagamento.</p>
         <label for="a-txt-pix-copiado">Código copiado com sucesso</label>
         <input type="text" id="a-txt-pix-copiado" value="Código copiado! Cole no aplicativo do seu banco.">
         <label for="a-txt-pix-naocopiou">Não foi possível copiar</label>
@@ -4166,12 +4166,37 @@
       </fieldset>
       <fieldset>
         <legend>Botão e mensagens do WhatsApp</legend>
-        <label for="a-txt-zap-botao">Texto do botão</label>
+        <label for="a-txt-zap-botao">Texto do botão <small>(nos dois recados abaixo)</small></label>
         <input type="text" id="a-txt-zap-botao" value="Falar no WhatsApp">
         <label for="a-txt-zap-recusa">Mensagem quando o agendamento não é encontrado</label>
         <input type="text" id="a-txt-zap-recusa" value="Olá! Não encontrei meu agendamento na página de pagamento.">
         <label for="a-txt-zap-vencido">Mensagem quando o prazo da reserva passou</label>
         <input type="text" id="a-txt-zap-vencido" value="Olá! Meu prazo para pagar a reserva passou. Ainda está disponível?">
+      </fieldset>
+      <fieldset>
+        <legend>Botão “Já paguei” e a mensagem dele</legend>
+        <p class="ajuda">Aparece <b>dentro da área do Pix</b>, logo abaixo do aviso de que o Pix não confirma sozinho — e só depois que o cliente gera o código. É o mesmo botão que o Checkout, a Mini loja e o Link de cobrança têm. A mensagem cita o <b>identificador da reserva</b> e o <b>valor</b>, que é o que você usa para achar a cobrança no extrato.</p>
+        <label for="a-txt-zap-pago">Texto do botão</label>
+        <input type="text" id="a-txt-zap-pago" value="Já paguei - avisar no WhatsApp">
+        <label for="a-txt-zap-abertura">Primeira linha da mensagem</label>
+        <input type="text" id="a-txt-zap-abertura" value="Olá! Acabei de pagar via Pix.">
+        <label for="a-txt-zap-abertura-sinal">Primeira linha, com sinal ligado</label>
+        <input type="text" id="a-txt-zap-abertura-sinal" value="Olá! Acabei de pagar o SINAL via Pix.">
+        <label for="a-txt-zap-pedido">Linha do identificador da reserva</label>
+        <input type="text" id="a-txt-zap-pedido" value="Pedido cod: *{cod}*">
+        <label for="a-txt-zap-cupom">Linha do cupom</label>
+        <input type="text" id="a-txt-zap-cupom" value="Cupom: {codigo}">
+        <label for="a-txt-zap-descpix">Linha do desconto do Pix</label>
+        <input type="text" id="a-txt-zap-descpix" value="Desconto Pix: -{pct}%">
+        <label for="a-txt-zap-total">Linha do total <small>(só com sinal ligado)</small></label>
+        <input type="text" id="a-txt-zap-total" value="Total do pedido: {valor}">
+        <label for="a-txt-zap-sinal">Linha do sinal pago <small>(só com sinal ligado)</small></label>
+        <input type="text" id="a-txt-zap-sinal" value="Sinal pago agora: *{valor}*">
+        <label for="a-txt-zap-saldo">Linha do saldo <small>(só com sinal ligado)</small></label>
+        <input type="text" id="a-txt-zap-saldo" value="Restante no dia do ensaio: *{valor}*">
+        <label for="a-txt-zap-valor">Linha do valor pago <small>(sem sinal)</small></label>
+        <input type="text" id="a-txt-zap-valor" value="Valor pago: *{valor}*">
+        <p class="ajuda">Marcadores: <code>{cod}</code> o identificador da reserva, <code>{codigo}</code> o código do cupom, <code>{pct}</code> o percentual do Pix e <code>{valor}</code> o valor já formatado. O <b>*asterisco*</b> é o negrito do WhatsApp.</p>
       </fieldset>
     </div>
   </div>
@@ -17049,11 +17074,15 @@ var A_TXT_DEFS=[
   ['txtPixCopiar','a-txt-pix-copiar',FC_TXT_FABRICA.pixCopiar],
   ['txtPixInstrucao','a-txt-pix-instrucao',FC_TXT_FABRICA.pixInstrucao],
   ['txtNota','a-txt-nota',FC_TXT_FABRICA.nota],
-  /* O aviso de que o Pix nao confirma sozinho (decisao do dono, 03/09/2026) NAO sai de
-     FC_TXT_FABRICA.pixManual: esta pagina nao tem botao "Ja paguei" -- o botao de WhatsApp
-     desta aba so aparece nos dois recados de recusa --, e mandar tocar num botao que nao
-     existe seria texto de fabrica mentindo. Frase parecida nao e frase unica. */
-  ['txtPixManual','a-txt-pix-manual','O Pix não avisa a gente automaticamente. Assim que você pagar, me avise para eu conferir e confirmar a sua reserva.'],
+  /* O aviso de que o Pix nao confirma sozinho (decisao do dono, 03/09/2026). Ate 13/09/2026 ele
+     NAO saia de FC_TXT_FABRICA.pixManual, e o motivo estava escrito aqui: "esta pagina nao tem
+     botao Ja paguei". DEIXOU DE SER VERDADE nesta rodada -- o botao existe, dentro da area do
+     Pix, no mesmo lugar e com o mesmo papel que tem nas tres irmas --, e um texto de fabrica
+     mandando "me avise" com o botao logo abaixo virou registro descrevendo como DESENHO o que
+     era FALTA. Volta para a fabrica unica: uma frase, quatro abas.
+     QUEM JA TINHA A FRASE ANTIGA GRAVADA NAO A PERDE: fcTxtRestaura so cai na terceira coluna
+     quando a chave nao existe no estado, e 'txtPixManual' e gravado por aColeta desde 02/09. */
+  ['txtPixManual','a-txt-pix-manual',FC_TXT_FABRICA.pixManual],
   ['txtPixCopiado','a-txt-pix-copiado','Código copiado! Cole no aplicativo do seu banco.'],
   ['txtPixNaocopiou','a-txt-pix-naocopiou','Não consegui copiar. Selecione o código acima e copie na mão.'],
   ['txtOu','a-txt-ou','OU'],
@@ -17061,6 +17090,33 @@ var A_TXT_DEFS=[
   ['txtZapBotao','a-txt-zap-botao','Falar no WhatsApp'],
   ['txtZapRecusa','a-txt-zap-recusa','Olá! Não encontrei meu agendamento na página de pagamento.'],
   ['txtZapVencido','a-txt-zap-vencido','Olá! Meu prazo para pagar a reserva passou. Ainda está disponível?'],
+  /* ===== OS DEZ CAMPOS DO "JA PAGUEI" (13/09/2026) =====
+     Esta aba mostrava o Pix ao cliente e NAO tinha o botao que as tres irmas tem dentro da area
+     do Pix: o cliente copiava o codigo, pagava no banco, e nao tinha como avisar o dono. Nao foi
+     decisao -- foi omissao, herdada de quando a aba foi construida espelhando o Checkout.
+     A FRASE QUE GOVERNA e do dono: "todos os construtores que tem pagamento devem ter as mesmas
+     regras, mesmas configuracoes, para que mantenham a coerencia de uso". Por isso NENHUM texto
+     novo foi inventado: nove dos dez saem de FC_TXT_FABRICA, os mesmos que o Checkout e a Mini
+     loja ja usam.
+     'txtZapPago' E UM CAMPO NOVO, e nao o 'txtZapBotao' que ja existia: naquele o padrao e
+     "Falar no WhatsApp", porque ele rotula OUTRA coisa -- os dois recados de recusa (sem pacote
+     reconhecido, prazo vencido), em que ninguem pagou nada. Um campo so para os dois papeis
+     obrigaria o dono a escolher qual dos dois botoes ia mentir.
+     'txtZapSaldo' E O UNICO DOS DEZ QUE DIVERGE DA FABRICA, e a razao e de fato e nao de gosto:
+     o padrao das irmas e "Restante na entrega", e aqui nao ha entrega nenhuma -- ha um ensaio
+     marcado. O padrao repete a palavra que o proprio t9 desta aba ja usa ("Restante no dia do
+     ensaio"), na mesma forma ': *{valor}*' das irmas. Mesmo criterio que ja fez 'txtTotalZero'
+     e os textos do sinal desta aba divergirem: frase parecida nao e frase unica. */
+  ['txtZapPago','a-txt-zap-pago',FC_TXT_FABRICA.zapBotao],
+  ['txtZapAbertura','a-txt-zap-abertura',FC_TXT_FABRICA.zapAbertura],
+  ['txtZapAberturaSinal','a-txt-zap-abertura-sinal',FC_TXT_FABRICA.zapAberturaSinal],
+  ['txtZapPedido','a-txt-zap-pedido',FC_TXT_FABRICA.zapPedido],
+  ['txtZapCupom','a-txt-zap-cupom',FC_TXT_FABRICA.zapCupom],
+  ['txtZapDescPix','a-txt-zap-descpix',FC_TXT_FABRICA.zapDescPix],
+  ['txtZapTotal','a-txt-zap-total',FC_TXT_FABRICA.zapTotal],
+  ['txtZapSinal','a-txt-zap-sinal',FC_TXT_FABRICA.zapSinal],
+  ['txtZapSaldo','a-txt-zap-saldo','Restante no dia do ensaio: *{valor}*'],
+  ['txtZapValor','a-txt-zap-valor',FC_TXT_FABRICA.zapValor],
   ['txtPrazoBarra','a-txt-prazo-barra','Reserva garantida até {data}.'],
   ['txtPrazoAjuda','a-txt-prazo-ajuda','O relógio é um recado, não uma tranca: quem libera o horário depois do prazo é a gente, à mão, ao conferir o pagamento.'],
   ['txtPrazoVencido','a-txt-prazo-vencido','O prazo para pagar esta reserva já passou. Fale com a gente para confirmar se o horário ainda está disponível.'],
@@ -17092,15 +17148,21 @@ var A_TXT_DEFS=[
      O REMEDIO TAMBEM MUDA. As duas irmas mandam "escolher mais itens ou aumentar a quantidade";
      aqui o pacote e FIXO (spec 7.0), e o cliente nao tem item nenhum para escolher a mais --
      so opcionais e o cupom. Mandar fazer o que a tela nao permite e texto de fabrica mentindo,
-     o mesmo motivo que ja fez 'txtTotalZero' e 'txtPixManual' desta aba divergirem das irmas.
+     o mesmo motivo que ja fez 'txtTotalZero' desta aba divergir das irmas.
+     'txtPixManual' TAMBEM DIVERGIA, e deixou de divergir em 13/09/2026: ele so era diferente
+     porque esta aba nao tinha o botao "Ja paguei", e passou a ter. Citar aqui um exemplo que
+     nao existe mais mandaria procurar no lugar errado -- o defeito que este projeto ja pagou
+     duas vezes --, entao ele saiu da lista.
      NAO NASCE 'txtSinalRecusado' AQUI, e a ausencia e medida: nas duas irmas ele e o rotulo da
      recusa dentro do RESUMO COPIAVEL, e esta pagina nao tem resumo copiavel nenhum (montarResumo
      desenha nome e duracao do pacote, nao um <textarea>). Campo de texto sem consumidor e pior
      que campo faltando: o operador o preenche e nada acontece.
-     NAO NASCE 'txtZapSaldo' AQUI, pelo mesmo criterio: as duas unicas mensagens de WhatsApp
-     desta aba (txtZapRecusa, txtZapVencido) sao recados fixos e NAO citam valor nenhum -- medido
-     em botaoZap(), que recebe a frase pronta. Acrescentar linha de saldo a elas seria inventar
-     comportamento que ninguem pediu. */
+     'txtZapSaldo' NASCEU AQUI EM 13/09/2026, e o registro de por que ele NAO existia fica como
+     medida do que mudou: ate aquele dia as duas unicas mensagens de WhatsApp desta aba
+     (txtZapRecusa, txtZapVencido) eram recados fixos, sem valor nenhum, porque o botao "Ja
+     paguei" nao existia -- e linha de saldo num recado de recusa seria comportamento que
+     ninguem pediu. Com o botao existindo ele passou a ter consumidor, e entrou junto dos outros
+     nove (ver o bloco dos dez campos, acima). Os dois recados continuam sem citar valor. */
   ['t8','a-t8','Sinal agora'],
   ['t9','a-t9','Restante no dia do ensaio'],
   ['txtSinalMaior','a-txt-sinal-maior','O sinal desta reserva é maior que o total. Remova o cupom ou marque mais itens opcionais.'],
@@ -17888,8 +17950,9 @@ function aRecusa(cfg){
    backup nao reescrever o que o operador digitou. Modelo: uCfg (10802+). */
 function aCfg(){
   var prazoh=aPreso('a-prazoh');if(prazoh==null)prazoh=24;
-  /* O UPSELL -- ver uCfg. Nesta aba nao ha botao "Ja paguei": so o caminho do cartao
-     aprovado leva ao upsell, e a ajuda do campo diz isso. */
+  /* O UPSELL -- ver uCfg. Ate 13/09/2026 so o cartao aprovado levava ao upsell nesta aba, porque
+     o botao "Ja paguei" nao existia aqui. Com ele existindo, os DOIS caminhos valem -- o cartao
+     aprovado e o clique no "Ja paguei" --, como nas tres irmas; a ajuda do campo diz isso. */
   var upsellCfg={ativo:(radio('a-upsellon')==='sim'),url:aElVal('a-upsell','').trim()};
   /* ===== forma de pagamento (Tarefa do seletor) =====
      Mesmo molde de uCfg/mCfg (10913+/17650+): 'm' e o valor cru do radio, usaPP/usaPix sao os
@@ -19121,6 +19184,14 @@ function aBlocoObrigado(cfg){
   /* So com Pix na pagina: em "somente cartao" a funcao pix() nem e emitida, e uma regra para
      uma classe que nunca aparece seria peso e ruido no bloco entregue. */
   if(cfg.usaPix)c+='.fca-ob-pixmanual{font-size:12px;line-height:1.45;background:rgba(0,0,0,.05);border-radius:8px;padding:9px 10px;margin:10px 0 0;text-align:left}\n';
+  /* O "JA PAGUEI" (13/09/2026), no VERDE do WhatsApp -- o mesmo de .fcu-zap/.fcm-zap nas duas
+     irmas. E a mesma ancora de botaoZap (fca-ob-bt fca-ob-bt2) com esta classe por cima, e por
+     isso a regra vem DEPOIS de .fca-ob-bt2 na folha: mesma especificidade, quem vem depois vence.
+     'background' e 'border-color' e proposital -- .fca-ob-bt2 declarou 'border' (atalho), entao
+     a cor sozinha basta e a espessura continua sendo a dele.
+     SO COM PIX na pagina, como a regra acima: em "somente cartao" nao existe area do Pix, e
+     portanto nao existe este botao -- regra para classe que nunca aparece e peso e ruido. */
+  if(cfg.usaPix)c+='.fca-ob-zap{background:#25D366;color:#fff;border-color:#25D366}\n';
   c+='.fca-ob-pixarea{display:none;margin-top:10px}\n';
   c+='.fca-ob-pixarea.on{display:block}\n';
   c+='@media(prefers-reduced-motion: reduce){\n  .fca-ob-cartao *{transition:none}\n}\n';
@@ -19299,12 +19370,19 @@ function aBlocoObrigado(cfg){
   c+='else document.addEventListener("DOMContentLoaded",comecarMarcadores);\n\n';
 
   c+='/* ===== 3. o pagamento ===== */\n';
-  c+='/* O botao de WhatsApp aparece em DOIS recados -- sem pacote reconhecido e prazo vencido --\n';
-  c+='   e e a mesma fonte que os escreve, nunca uma segunda copia. */\n';
-  c+='function botaoZap(msg){\n';
+  c+='/* O botao de WhatsApp aparece em TRES lugares -- os dois recados (sem pacote reconhecido e\n';
+  c+='   prazo vencido) e o "Ja paguei" dentro da area do Pix -- e e a mesma fonte que os escreve,\n';
+  c+='   nunca uma segunda copia. "rot" e o rotulo: os dois recados nao passam nenhum e ficam com o\n';
+  c+='   padrao; o "Ja paguei" passa o dele, porque rotula outra coisa.\n';
+  c+='   SEM WHATSAPP nao ha botao NENHUM dos tres -- e ai tambem nao ha caminho de upsell pelo\n';
+  c+='   Pix, exatamente como nas tres irmas.\n';
+  c+='   zapHref e separada porque o "Ja paguei" REESCREVE o endereco a cada Pix gerado (o valor\n';
+  c+='   muda com os opcionais e com o cupom): montar a URL num segundo lugar seria a copia. */\n';
+  c+='function zapHref(msg){return "https://wa.me/"+WHATSAPP+"?text="+encodeURIComponent(msg);}\n';
+  c+='function botaoZap(msg,rot){\n';
   c+='  if(!WHATSAPP)return null;\n';
-  c+='  var zap=document.createElement("a");zap.className="fca-ob-bt fca-ob-bt2";zap.textContent="'+escJsD(cfg.txtZapBotao)+'";\n';
-  c+='  zap.setAttribute("href","https://wa.me/"+WHATSAPP+"?text="+encodeURIComponent(msg));\n';
+  c+='  var zap=document.createElement("a");zap.className="fca-ob-bt fca-ob-bt2";zap.textContent=rot||"'+escJsD(cfg.txtZapBotao)+'";\n';
+  c+='  zap.setAttribute("href",zapHref(msg));\n';
   c+='  zap.setAttribute("target","_blank");zap.setAttribute("rel","noopener noreferrer");\n';
   c+='  return zap;\n';
   c+='}\n';
@@ -19511,8 +19589,8 @@ function aBlocoObrigado(cfg){
      continue'). Sem isto, um opcional marcado e depois zerado no proprio seletor continuava
      entrando no nome que vai ao PayPal ("Album 20x30 x0"), cobrado por zero: o recibo
      anunciava um item que ninguem comprou. Esta e a UNICA lista de itens desta pagina -- o
-     resumo (montarResumo) mostra so o pacote, e o WhatsApp daqui leva recado fixo, sem
-     itens --, entao barrar aqui basta para os tres lugares concordarem. subtotal() nao
+     resumo (montarResumo) mostra so o pacote, e a mensagem do "Ja paguei" monta a lista dela
+     com a MESMA guarda, escrita ao lado em zapMsgPago --, entao barrar aqui basta. subtotal() nao
      ganha guarda pelo mesmo motivo que a irma nao tem: multiplicar por zero ja soma zero. */
   if(usaQtd)c+='    if(qtdOp(j)<1)return;\n';
   if(usaQtd)c+="    if(opChecks[j]&&opChecks[j].checked)ns.push(op.nome+(op.qtd?(' x'+qtdOp(j)):''));\n";
@@ -19743,6 +19821,50 @@ function aBlocoObrigado(cfg){
   /* Com sinal, o ramo do meio de fcTotalPixSrc entra e totalPix() PASSA A SER sinalAgora():
      nao existe caminho em que o desconto do Pix e o sinal convivam. */
   c+=fcTotalPixSrc(cfg.descpix,true,usaSinal);
+  /* ===== 3c1. A MENSAGEM DO "JA PAGUEI" (13/09/2026) =====
+     A MESMA FORMA das tres irmas (avisarZap no Checkout e na Mini loja, zapBotao na /pagar):
+     abertura, o identificador de conciliacao, os itens escolhidos, o cupom, o desconto do Pix e
+     o(s) valor(es). Nenhuma frase foi inventada -- os dez campos saem de FC_TXT_FABRICA (ver
+     A_TXT_DEFS), e o unico que diverge diverge por um fato da aba, nao por gosto.
+     ELA LE O IDENTIFICADOR; NUNCA O INFLUENCIA. CODIGO_PEDIDO ja foi calculado em montar(), so
+     a partir do pacote e do horario, ANTES deste carrinho existir (ver 3a) -- e essa
+     independencia e a correcao do defeito mais caro da rodada da aba (extrato com varias
+     cobrancas para uma reserva so). Marcar opcional, aplicar cupom ou recarregar a pagina nao
+     muda um caractere dele, e a mensagem so o copia.
+     A LISTA DE ITENS usa a MESMA guarda de quantidade zero que nomesSelecionados usa (ver o
+     comentario dela): opcional marcado e depois zerado no seletor nao entra, porque quantidade
+     zero equivale a nao ter escolhido -- se entrasse, a mensagem anunciaria um item que ninguem
+     comprou, cobrado por zero, que e exatamente o que o recibo do cartao ja teve.
+     O PACOTE SAI SEM SUFIXO DE QUANTIDADE porque nao tem quantidade nenhuma aqui: somaProdutos()
+     devolve PAC.preco sem multiplicar. */
+  c+='function zapMsgPago(){\n';
+  c+='  var partes=[];\n';
+  if(usaSinal)c+='  partes.push("'+escJsD(cfg.txtZapAberturaSinal)+'");\n';
+  else        c+='  partes.push("'+escJsD(cfg.txtZapAbertura)+'");\n';
+  c+='  partes.push('+aTplJs('"',cfg.txtZapPedido,[['{cod}','CODIGO_PEDIDO']])+');\n';
+  c+='  partes.push("- *"+PAC.nome+"* "+moedaFmt(PAC.preco));\n';
+  c+='  (PAC.ops||[]).forEach(function(op,j){\n';
+  if(usaQtd){
+  c+='    if(qtdOp(j)<1)return;\n';
+  c+='    if(opChecks[j]&&opChecks[j].checked)partes.push("   + "+op.nome+(op.qtd?(" x"+qtdOp(j)):"")+" "+moedaFmt(op.preco*qtdOp(j)));\n';
+  }else{
+  c+='    if(opChecks[j]&&opChecks[j].checked)partes.push("   + "+op.nome+" "+moedaFmt(op.preco));\n';
+  }
+  c+='  });\n';
+  c+='  if(cupomAtivo)partes.push('+aTplJs('"',cfg.txtZapCupom,[['{codigo}','cupomAtivo.codigo']])+');\n';
+  /* A linha do desconto do Pix so existe havendo desconto -- e com sinal ligado aCfg ja o zerou
+     na origem, entao este ramo nunca convive com os tres valores abaixo. */
+  if(cfg.descpix>0)
+  c+='  if(DESCONTO_PIX>0)partes.push('+aTplJs('"',cfg.txtZapDescPix,[['{pct}','DESCONTO_PIX']])+');\n';
+  if(usaSinal){
+  c+='  partes.push('+aTplJs('"',cfg.txtZapTotal,[['{valor}','moedaFmt(total())']])+');\n';
+  c+='  partes.push('+aTplJs('"',cfg.txtZapSinal,[['{valor}','moedaFmt(sinalAgora())']])+');\n';
+  c+='  partes.push('+aTplJs('"',cfg.txtZapSaldo,[['{valor}','moedaFmt(saldoDepois())']])+');\n';
+  }else{
+  c+='  partes.push('+aTplJs('"',cfg.txtZapValor,[['{valor}','moedaFmt(totalPix())']])+');\n';
+  }
+  c+='  return partes.join("\\n");\n';
+  c+='}\n';
   c+='function pix(cartao){\n';
   /* ... e aqui quando o PIX e a segunda secao (cartao prioritario). Espelho de secaoCartao. */
   var pixSegundo=(cfg.usaPP&&cfg.prio==='pp');
@@ -19762,6 +19884,24 @@ function aBlocoObrigado(cfg){
   /* DEPOIS da nota, e nao antes: a nota fala do que conferir ANTES de confirmar o pagamento;
      este aviso fala do que acontece DEPOIS que ele foi feito. */
   c+='  var man=document.createElement("div");man.className="fca-ob-pixmanual";man.textContent="'+escJsD(cfg.txtPixManual)+'";area.appendChild(man);\n';
+  /* O "JA PAGUEI", o ULTIMO da area e logo depois do aviso -- e o aviso que manda tocar nele,
+     e e o mesmo lugar que ele ocupa nas tres irmas. DENTRO da area: enquanto o cliente nao
+     clicar em "Gerar Pix" a area inteira esta escondida (.fca-ob-pixarea sem 'on'), entao nao
+     existe botao de avisar pagamento antes de existir codigo para pagar.
+     SEM WHATSAPP botaoZap devolve null e nao ha botao -- nem, portanto, caminho de upsell pelo
+     Pix aqui. E o mesmo que acontece nas irmas com o "Ja paguei" desligado. */
+  c+='  var zapPg=botaoZap(zapMsgPago(),"'+escJsD(cfg.txtZapPago)+'");\n';
+  c+='  if(zapPg){\n';
+  c+='    zapPg.className+=" fca-ob-zap";\n';
+  /* O CAMINHO C. Aqui o "Ja paguei" e uma ANCORA com target=_blank (ver botaoZap), e nao um
+     window.open como no Checkout e na Mini loja -- entao o upsell entra num OUVINTE DE CLIQUE,
+     do mesmo jeito que na /pagar. A pergunta que isso levanta (a navegacao da pagina de tras
+     cancela a acao padrao da ancora, e a aba nova se perde?) foi medida para ESTA aba em
+     scripts/verificar/upsell.mjs, e nao herdada da medicao da /pagar. */
+  if(fcUpsellEmite(cfg.upsell))
+  c+='    zapPg.addEventListener("click",function(){upsellIr();});\n';
+  c+='    area.appendChild(zapPg);\n';
+  c+='  }\n';
   c+='  b.appendChild(area);\n';
   c+='  cartao.appendChild(b);\n';
   c+='  var payloadAtual="";\n';
@@ -19772,6 +19912,11 @@ function aBlocoObrigado(cfg){
   c+='    if(total()<0.01){alert(TXT_TOTAL_ZERO);return;}\n';
   if(usaSinal)c+='    var rec=sinalRecusa();\n    if(rec){alert(rec);return;}\n';
   c+='    payloadAtual=montarPayload(totalPix());\n';
+  /* O ENDERECO DO "JA PAGUEI" E REFEITO AQUI, e nao em atualizar(): assim a mensagem descreve
+     exatamente o codigo que esta na tela, lido do MESMO instante que montou o payload. Mexer no
+     carrinho depois disso chama pixEsconder() e a area some inteira, entao nao existe janela em
+     que o botao visivel carregue um valor velho. */
+  c+='    if(zapPg)zapPg.setAttribute("href",zapHref(zapMsgPago()));\n';
   c+='    ta.value=payloadAtual;\n';
   c+='    qr.innerHTML="";\n';
   c+='    area.className="fca-ob-pixarea on";\n';
