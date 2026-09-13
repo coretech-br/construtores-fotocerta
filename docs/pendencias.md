@@ -736,3 +736,67 @@ duas linhas com o mesmo número e um selo de `-0%`. **O gerador já o impedia:**
 emitida com `descpix>0`, e o sinal zera o desconto antes disso. Em vez de tratamento para um estado
 impossível, o comportamento foi **fixado em teste** (+32 verificações) — que passa a falar no dia em
 que o sinal chegar às outras abas.
+
+## Entregue em 13/09/2026 — a prova do sinal, e três dívidas
+
+Spec: `docs/specs/2026-09-12-sinal-nos-quatro-construtores-design.md`, Rodada B. Ela vem **antes**
+de estender o sinal para mais duas abas, e o motivo é medido: o caminho do sinal tinha **zero**
+verificação em todo o arnês. `u-sinal`/`m-sinal` nascem em `nao` e nada as ligava, então as ~40
+linhas condicionais de `FC_CARRINHO_SRC.sinal`, `fcTotalPixSrc`, `fcPpBotoesSrc`, `uBloco` e
+`mBloco*` saíam **zero vezes** da regressão byte a byte. Quem mexesse na conta do sinal mexia sem
+rede — e a propriedade que este projeto mais persegue ("o cliente paga o número que leu") não tinha
+medida nenhuma ali, apesar de ter sido exatamente em arredondamento de meio centavo que se acharam
+60.097 divergências em 2.002.000 combinações.
+
+`sinal.mjs`, **533 verificações**: a conta nos dois tipos sobre o total com cupom; o campo 54 do
+payload relido por **leitor TLV escrito dentro do teste**; o `createOrder` lido do próprio bloco; o
+arredondamento com catálogo **escolhido por critério declarado** (a varredura de 39.006.394
+combinações achou 313.708 em que `Math.round` e `toFixed(2)` discordam, **sempre com o `Math.round`
+por cima**); as três recusas e os **quatro** consumidores recusando juntos; e as três linhas da tela
+e da mensagem.
+
+**O sinal entrou na regressão**, na passagem **configurada** e **só na Mini loja** — medido: ligar o
+do Checkout apagaria a cobertura de `u-txt-zap-valor`, que só existe no ramo **sem** sinal da mesma
+aba, e a própria regressão acusaria `SEM VESTIGIO`. Como a conta é fonte única, uma aba basta.
+`m-out` configurada foi de 46.196 para 49.048 bytes: ~2,8 KB que só agora estão sob a rede.
+
+### O defeito silencioso que a rodada quase publicou
+
+**D1** dava campo próprio à linha do saldo no WhatsApp. Só que essa linha era **derivada de outra**:
+o gerador montava `TXT_SALDO + ': *{valor}*'`, e `TXT_SALDO` é o rótulo da **TELA** (`t9`). Quem
+tivesse personalizado o rótulo veria a mensagem voltar ao padrão de fábrica, **em silêncio**.
+
+**A regressão byte a byte não pega isso** — com os textos de fábrica as duas formas produzem o mesmo
+texto, e a única divergência da rodada (uma linha em `m-out`) passava como inofensiva. Achado ao ler
+o diff à mão, não por teste.
+
+Conserto: `fcZapSaldoMigrar`, que age **só** quando a chave nova está ausente **e** o rótulo da tela
+foi personalizado. Prova em `zap-saldo-migracao.mjs` (18 verificações), com o estado colhido da
+própria referência. **A lição, que vale para toda rodada futura: dar campo próprio a uma frase
+derivada de outra é uma migração, não um acréscimo — e é da família que a regressão não vê.**
+
+### As outras duas dívidas
+
+- **D2** — `m-descpix` passou a ser desabilitado com sinal ligado, como o do Checkout já era.
+- **D3** — o aviso âmbar da Mini loja passou a seguir só o sinal. Medido: a condição extra não mudava
+  o que se via (o aviso mora dentro de um campo que já some fora de "ambos"); o que ela criava era
+  divergência de **regra** entre abas que a fonte declara gêmeas.
+
+### Achado registrado, sem ação — decisão do dono
+
+**Pedido em zero com sinal FIXO mostra três números que não fecham:** `Total R$ 0,00 · Sinal R$
+100,00 · Saldo R$ 0,00`, e no Checkout o resumo copiável repete isso. Vem da primeira guarda de
+`sinalRecusa()`, que devolve vazio de propósito quando o total é zero (para não haver dois avisos).
+**Ninguém chega a pagar esse número** — as duas pontas recusam pela recusa de total zero, e a prova
+verifica isso. É defeito de **leitura**, não de cobrança.
+
+Não virou asserção: congelar o comportamento de hoje faria a correção futura falhar como se fosse
+regressão. E mexer em recusa é da classe que precisa da palavra do dono antes. A suíte **imprime** o
+estado a cada passagem, para a rodada seguinte decidir.
+
+### Mais uma suíte com referência datada
+
+`meio-prio-migracao.mjs` acusava **nove falhas todo dia** desde que a rodada que ele mede chegou à
+`main` (medido: as mesmas 9 de 52 numa árvore limpa). É a **terceira** vez que este padrão aparece.
+Agora ele detecta a situação, diz "NAO MEDIU" e troca de pergunta. Contra `4c66719`, volta a medir
+de verdade: 51 verificações.
