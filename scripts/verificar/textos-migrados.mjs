@@ -385,7 +385,17 @@ console.log('\n--- o formato gravado, contra '+REF+' ---');
                m:['txtSinalGarante','txtSinalDesistir','txtSinalSaldo'],
                a:['txtSinalGarante','txtSinalDesistir','txtSinalSaldo'],
                p:['txtSinalGarante','txtSinalDesistir','txtSinalSaldo']},
-       esperado:() => ''}
+       esperado:() => ''},
+      /* O UPSELL (13/09/2026, rodada F). Duas chaves novas em cada aba de pagamento: o
+         ENDERECO da pagina para onde levar o cliente depois do pagamento, e o INTERRUPTOR.
+         A fabrica e endereco VAZIO e interruptor DESLIGADO, e com ela o bloco sai byte a byte
+         como saia antes da rodada -- e o mesmo criterio dos tres textos do sinal, logo acima.
+         O interruptor nasce 'nao' (e nao ausente): a ferramenta o restaura com ||'nao', e
+         gravar o valor e o que impede um estado antigo de abrir a aba com o radio em branco. */
+      {nome:'o upsell depois do pagamento (13/09/2026)',
+       chaves:{u:['upsell','upsellon'], m:['upsell','upsellon'],
+               a:['upsell','upsellon'], p:['upsell','upsellon']},
+       esperado:(aba,ch) => ch==='upsell' ? '' : 'nao'}
     ];
     /* FABRICA TROCADA e outra coisa de CHAVE NOVA, e a diferenca importa: a chave ja existia
        nos dois lados e o que mudou foi o PADRAO dela. Entao os dois valores sao declarados, e

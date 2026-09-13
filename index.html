@@ -1712,6 +1712,19 @@
           <p class="ajuda"><b>O número de destino saiu desta aba</b> — é o WhatsApp do painel <b>Identidade</b>, o mesmo que a Captação de leads, o Link de cobrança e a Mini loja usam. <span class="acoes"><button type="button" class="botao mini claro fci-ir">Abrir Identidade</button></span></p>
         </div>
       </fieldset>
+      <fieldset id="u-upsell-fieldset">
+        <legend>Depois do pagamento aprovado: levar o cliente a outra página</legend>
+        <label for="u-upsell">Endereço da página (upsell) <small>(vazio = o código sai exatamente como saía antes)</small></label>
+        <input type="text" id="u-upsell" value="" placeholder="https://www.fotocerta.com.br/oferta-especial">
+        <label>Levar o cliente para essa página?</label>
+        <div class="radios">
+          <label><input type="radio" name="u-upsellon" value="sim"><span>Sim, levar</span></label>
+          <label><input type="radio" name="u-upsellon" value="nao" checked><span>Não levar por enquanto</span></label>
+        </div>
+        <p class="ajuda"><b>Com o endereço preenchido, as duas variáveis saem no código mesmo com a chave em "não levar".</b> Elas ficam no topo do bloco, inertes, esperando um <code>true</code>: assim você liga e desliga o upsell direto na página publicada, trocando <code>UPSELL_ATIVO</code>, <b>sem voltar aqui e sem recolar nada</b>. Com o endereço vazio nada disso é escrito. Endereço vazio com a chave em "sim, levar" é recusado na hora de gerar — ligado sem destino não faz nada e parece que faz.</p>
+        <p class="ajuda">São aceitos uma âncora (<code>#oferta</code>), um caminho do site (<code>/oferta-especial</code>) ou um endereço <code>http(s)</code> inteiro. É a mesma regra do botão de ação da Contagem regressiva.</p>
+        <p class="ajuda"><b>No PayPal o cliente é levado assim que o pagamento é aprovado</b> — houve confirmação de verdade. <b>No Pix não existe aviso nenhum para a página</b> quando o dinheiro cai, então quem leva é o botão "Já paguei", e quem clica nele pode ainda não ter pago. Se a sua oferta depende do primeiro pagamento estar feito, isso é decisão da campanha, não do código.</p>
+      </fieldset>
     </div>
   </div>
 
@@ -1985,7 +1998,7 @@
         </div>
         <div id="u-pv-box"></div>
       </div>
-      <p class="ajuda">A prévia <b>roda o código gerado de verdade</b>: é o mesmo bloco que sai na saída ao lado, executando dentro de um quadro isolado — dá para marcar produtos, mudar quantidade, aplicar cupom, gerar o Pix e ler o Copia e Cola. Ela também passa pelas <b>mesmas recusas</b> do botão "Gerar código": enquanto a configuração for recusada, o quadro mostra a recusa e o motivo, nunca um carrinho.<br><br><b>O que a prévia prova sobre o PayPal:</b> o botão é um desenho, mas logo abaixo dele a prévia mostra o <b>valor que iria na ordem</b> e a <b>decisão do clique</b> (segue para o PayPal ou recusa, com o motivo) — os dois medidos chamando o <code>createOrder</code> e o <code>onClick</code> do próprio bloco, a cada mudança do carrinho. É por isso que o valor do sinal e as recusas do lado PayPal são verificáveis aqui sem baixar o SDK e sem mandar seu Client ID para fora.<br><br><b>O que ela ainda não prova:</b> o que depende da resposta do PayPal — a janela de pagamento, a captura e as mensagens de sucesso e de erro que vêm dela; o QR Code é real, mas depende da biblioteca do cdnjs (sem internet ele some e só o Copia e Cola aparece); o quadro não carrega o CSS do tema do site; e o botão "Já paguei" <b>não abre o WhatsApp aqui</b> — o quadro desliga a abertura de abas, e avisa em vermelho se não conseguir desligar.</p>
+      <p class="ajuda">A prévia <b>roda o código gerado de verdade</b>: é o mesmo bloco que sai na saída ao lado, executando dentro de um quadro isolado — dá para marcar produtos, mudar quantidade, aplicar cupom, gerar o Pix e ler o Copia e Cola. Ela também passa pelas <b>mesmas recusas</b> do botão "Gerar código": enquanto a configuração for recusada, o quadro mostra a recusa e o motivo, nunca um carrinho.<br><br><b>O que a prévia prova sobre o PayPal:</b> o botão é um desenho, mas logo abaixo dele a prévia mostra o <b>valor que iria na ordem</b> e a <b>decisão do clique</b> (segue para o PayPal ou recusa, com o motivo) — os dois medidos chamando o <code>createOrder</code> e o <code>onClick</code> do próprio bloco, a cada mudança do carrinho. É por isso que o valor do sinal e as recusas do lado PayPal são verificáveis aqui sem baixar o SDK e sem mandar seu Client ID para fora.<br><br><b>O que ela ainda não prova:</b> o que depende da resposta do PayPal — a janela de pagamento, a captura e as mensagens de sucesso e de erro que vêm dela; o QR Code é real, mas depende da biblioteca do cdnjs (sem internet ele some e só o Copia e Cola aparece); o quadro não carrega o CSS do tema do site; e o botão "Já paguei" <b>não abre o WhatsApp aqui</b> — o quadro desliga a abertura de abas, e avisa em vermelho se não conseguir desligar. <b>Com o upsell ligado, porém, clicar em “Já paguei” leva a prévia para a sua página de upsell</b> — exatamente como a página publicada faria. O quadro <b>não consegue desligar isso</b>: o endereço da página é imutável no navegador (medido em 13/09/2026 — trocar <code>location</code>, <code>location.href</code> ou <code>location.assign</code> lança erro, e a troca direta falha em silêncio), e desligar por conta própria só seria possível mudando o código gerado, que é justamente o que a prévia não pode fazer. Mexer em qualquer campo remonta a prévia.</p>
     </div>
     <div>
       <div class="saida">
@@ -2765,6 +2778,20 @@
       <input type="text" id="p-txt-zapmsg" value="Olá! Acabei de pagar: {desc} -- {valor}">
       <p class="ajuda">Onde você escrever <code>{desc}</code> entra a descrição da cobrança, e <code>{valor}</code> o valor pago. A mensagem ainda soma, se houver, o desconto do Pix e o identificador da cobrança — essas duas partes não são editáveis aqui.</p>
       </fieldset>
+      <fieldset id="p-upsell-fieldset">
+        <legend>Depois do pagamento aprovado: levar o cliente a outra página</legend>
+        <label for="p-upsell">Endereço da página (upsell) <small>(vazio = o código sai exatamente como saía antes)</small></label>
+        <input type="text" id="p-upsell" value="" placeholder="https://www.fotocerta.com.br/oferta-especial">
+        <p class="ajuda alerta"><b>O endereço é da página, não de cada cobrança.</b> Todas as cobranças geradas por esta aba levam ao mesmo upsell, e ele entra no <b>código 1</b> — o componente da página de pagamento. Ele <b>não viaja no link</b>: tudo que viaja no link entra no selo, e um parâmetro novo faria toda <code>/pagar</code> com o código 1 antigo recusar os links novos.</p>
+        <label>Levar o cliente para essa página?</label>
+        <div class="radios">
+          <label><input type="radio" name="p-upsellon" value="sim"><span>Sim, levar</span></label>
+          <label><input type="radio" name="p-upsellon" value="nao" checked><span>Não levar por enquanto</span></label>
+        </div>
+        <p class="ajuda"><b>Com o endereço preenchido, as duas variáveis saem no código mesmo com a chave em "não levar".</b> Elas ficam no topo do bloco, inertes, esperando um <code>true</code>: assim você liga e desliga o upsell direto na página publicada, trocando <code>UPSELL_ATIVO</code>, <b>sem voltar aqui e sem recolar nada</b>. Com o endereço vazio nada disso é escrito. Endereço vazio com a chave em "sim, levar" é recusado na hora de gerar — ligado sem destino não faz nada e parece que faz.</p>
+        <p class="ajuda">São aceitos uma âncora (<code>#oferta</code>), um caminho do site (<code>/oferta-especial</code>) ou um endereço <code>http(s)</code> inteiro. É a mesma regra do botão de ação da Contagem regressiva.</p>
+        <p class="ajuda"><b>No PayPal o cliente é levado assim que o pagamento é aprovado</b> — houve confirmação de verdade. <b>No Pix não existe aviso nenhum para a página</b> quando o dinheiro cai, então quem leva é o botão "Já paguei", e quem clica nele pode ainda não ter pago. Se a sua oferta depende do primeiro pagamento estar feito, isso é decisão da campanha, não do código.</p>
+      </fieldset>
     </div>
   </div>
 
@@ -2971,7 +2998,7 @@
       </div>
       <div id="p-pv-box"></div>
       </div>
-      <p class="ajuda">A prévia roda o código gerado de verdade: é o mesmo bloco que sai na saída ao lado, executando dentro de um quadro isolado que recebe um <b>endereço simulado</b> com os parâmetros da cobrança da seção 3 — <b>com o mesmo selo</b> que sai no link, calculado pela mesma conta. Os quatro botões acima trocam esse endereço: em <b>Link editado</b> um dígito do código Pix é trocado <i>depois</i> de o link ser selado, exatamente como aconteceria se alguém mexesse no link enviado; em <b>Prazo vencido</b> o link é íntegro, mas com validade de <b>ontem no horário de Brasília</b> — o mesmo fuso em que o prazo termina, e é o único estado que você não conseguiria provocar sem esperar a data chegar. O que ainda difere da página publicada: o QR Code é desenhado por uma biblioteca baixada da internet, então no quadro ele só aparece depois que ela carrega; o botão do PayPal não é o botão de verdade (o SDK não roda na prévia) e sai como desenho; o botão “Já paguei” não abre o WhatsApp aqui (o quadro desliga a abertura de abas, e avisa em vermelho se não conseguir desligar); e o quadro não carrega o CSS do tema do site.</p>
+      <p class="ajuda">A prévia roda o código gerado de verdade: é o mesmo bloco que sai na saída ao lado, executando dentro de um quadro isolado que recebe um <b>endereço simulado</b> com os parâmetros da cobrança da seção 3 — <b>com o mesmo selo</b> que sai no link, calculado pela mesma conta. Os quatro botões acima trocam esse endereço: em <b>Link editado</b> um dígito do código Pix é trocado <i>depois</i> de o link ser selado, exatamente como aconteceria se alguém mexesse no link enviado; em <b>Prazo vencido</b> o link é íntegro, mas com validade de <b>ontem no horário de Brasília</b> — o mesmo fuso em que o prazo termina, e é o único estado que você não conseguiria provocar sem esperar a data chegar. O que ainda difere da página publicada: o QR Code é desenhado por uma biblioteca baixada da internet, então no quadro ele só aparece depois que ela carrega; o botão do PayPal não é o botão de verdade (o SDK não roda na prévia) e sai como desenho; o botão “Já paguei” não abre o WhatsApp aqui (o quadro desliga a abertura de abas, e avisa em vermelho se não conseguir desligar); e o quadro não carrega o CSS do tema do site. <b>Com o upsell ligado, porém, clicar em “Já paguei” leva a prévia para a sua página de upsell</b> — exatamente como a página publicada faria. O quadro <b>não consegue desligar isso</b>: o endereço da página é imutável no navegador (medido em 13/09/2026 — trocar <code>location</code>, <code>location.href</code> ou <code>location.assign</code> lança erro, e a troca direta falha em silêncio), e desligar por conta própria só seria possível mudando o código gerado, que é justamente o que a prévia não pode fazer. Mexer em qualquer campo remonta a prévia.</p>
     </div>
     <div>
       <div class="saida">
@@ -3084,6 +3111,19 @@
           <p class="ajuda"><b>O número de destino saiu desta aba</b> — é o WhatsApp do painel <b>Identidade</b>, no topo da página. <span class="acoes"><button type="button" class="botao mini claro fci-ir">Abrir Identidade</button></span></p>
         </div>
         <p class="ajuda">A mensagem já vai com o identificador do pedido, os itens, o cupom e o valor. <b>Ao clicar nele o carrinho do cliente é esvaziado</b> — é o único momento em que a página sabe que a compra terminou. O Pix estático não avisa ninguém quando o dinheiro cai: a conferência é sua, no extrato.</p>
+      </fieldset>
+      <fieldset id="m-upsell-fieldset">
+        <legend>Depois do pagamento aprovado: levar o cliente a outra página</legend>
+        <label for="m-upsell">Endereço da página (upsell) <small>(vazio = o código sai exatamente como saía antes)</small></label>
+        <input type="text" id="m-upsell" value="" placeholder="https://www.fotocerta.com.br/oferta-especial">
+        <label>Levar o cliente para essa página?</label>
+        <div class="radios">
+          <label><input type="radio" name="m-upsellon" value="sim"><span>Sim, levar</span></label>
+          <label><input type="radio" name="m-upsellon" value="nao" checked><span>Não levar por enquanto</span></label>
+        </div>
+        <p class="ajuda"><b>Com o endereço preenchido, as duas variáveis saem no código mesmo com a chave em "não levar".</b> Elas ficam no topo do bloco, inertes, esperando um <code>true</code>: assim você liga e desliga o upsell direto na página publicada, trocando <code>UPSELL_ATIVO</code>, <b>sem voltar aqui e sem recolar nada</b>. Com o endereço vazio nada disso é escrito. Endereço vazio com a chave em "sim, levar" é recusado na hora de gerar — ligado sem destino não faz nada e parece que faz.</p>
+        <p class="ajuda">São aceitos uma âncora (<code>#oferta</code>), um caminho do site (<code>/oferta-especial</code>) ou um endereço <code>http(s)</code> inteiro. É a mesma regra do botão de ação da Contagem regressiva.</p>
+        <p class="ajuda"><b>No PayPal o cliente é levado assim que o pagamento é aprovado</b> — houve confirmação de verdade. <b>No Pix não existe aviso nenhum para a página</b> quando o dinheiro cai, então quem leva é o botão "Já paguei", e quem clica nele pode ainda não ter pago. Se a sua oferta depende do primeiro pagamento estar feito, isso é decisão da campanha, não do código.</p>
       </fieldset>
     </div>
   </div>
@@ -3498,7 +3538,7 @@
       </div>
       <div id="m-pv-box"></div>
       </div>
-      <p class="ajuda">A prévia <b>executa o código gerado de verdade</b>: é o mesmo bloco que sai na caixa ao lado, rodando dentro de um quadro isolado. Filtro, cartão de detalhe, carrinho, cupom e o Pix funcionam aqui como funcionarão na página. <b>O que ainda difere da página publicada:</b> o carrinho do quadro é guardado numa memória de mentira (o quadro não suja o carrinho do seu navegador, e por isso ele volta vazio a cada atualização da prévia); o QR Code é desenhado por uma biblioteca baixada da internet, então só aparece depois que ela carrega; o botão do PayPal <b>não é o botão de verdade</b> — o SDK não roda aqui e ele sai como desenho, com o <b>valor que iria na ordem</b> medido dentro do próprio bloco; o botão "Já paguei" <b>não abre o WhatsApp</b> — o quadro desliga a abertura de abas, e avisa em vermelho se não conseguir desligar; e o quadro não carrega o CSS do tema do site.</p>
+      <p class="ajuda">A prévia <b>executa o código gerado de verdade</b>: é o mesmo bloco que sai na caixa ao lado, rodando dentro de um quadro isolado. Filtro, cartão de detalhe, carrinho, cupom e o Pix funcionam aqui como funcionarão na página. <b>O que ainda difere da página publicada:</b> o carrinho do quadro é guardado numa memória de mentira (o quadro não suja o carrinho do seu navegador, e por isso ele volta vazio a cada atualização da prévia); o QR Code é desenhado por uma biblioteca baixada da internet, então só aparece depois que ela carrega; o botão do PayPal <b>não é o botão de verdade</b> — o SDK não roda aqui e ele sai como desenho, com o <b>valor que iria na ordem</b> medido dentro do próprio bloco; o botão "Já paguei" <b>não abre o WhatsApp</b> — o quadro desliga a abertura de abas, e avisa em vermelho se não conseguir desligar; e o quadro não carrega o CSS do tema do site. <b>Com o upsell ligado, porém, clicar em “Já paguei” leva a prévia para a sua página de upsell</b> — exatamente como a página publicada faria. O quadro <b>não consegue desligar isso</b>: o endereço da página é imutável no navegador (medido em 13/09/2026 — trocar <code>location</code>, <code>location.href</code> ou <code>location.assign</code> lança erro, e a troca direta falha em silêncio), e desligar por conta própria só seria possível mudando o código gerado, que é justamente o que a prévia não pode fazer. Mexer em qualquer campo remonta a prévia.</p>
     </div>
     <div>
       <div class="saida">
@@ -3905,6 +3945,19 @@
         <p class="ajuda">Se você mudar o preço de um pacote, quem agendou antes e pagar depois verá o preço novo. O preço mora no código da página, não no endereço — foi assim que se evitou que o cliente pudesse editá-lo na barra de endereço.</p>
         <label for="a-prazoh">Prazo da reserva <small>(horas; contadas a partir da primeira visita à página de obrigado)</small></label>
         <input type="number" id="a-prazoh" value="24" min="1" max="720" step="1">
+      </fieldset>
+      <fieldset id="a-upsell-fieldset">
+        <legend>Depois do pagamento aprovado: levar o cliente a outra página</legend>
+        <label for="a-upsell">Endereço da página (upsell) <small>(vazio = o código sai exatamente como saía antes)</small></label>
+        <input type="text" id="a-upsell" value="" placeholder="https://www.fotocerta.com.br/oferta-especial">
+        <label>Levar o cliente para essa página?</label>
+        <div class="radios">
+          <label><input type="radio" name="a-upsellon" value="sim"><span>Sim, levar</span></label>
+          <label><input type="radio" name="a-upsellon" value="nao" checked><span>Não levar por enquanto</span></label>
+        </div>
+        <p class="ajuda"><b>Com o endereço preenchido, as duas variáveis saem no código mesmo com a chave em "não levar".</b> Elas ficam no topo do bloco, inertes, esperando um <code>true</code>: assim você liga e desliga o upsell direto na página publicada, trocando <code>UPSELL_ATIVO</code>, <b>sem voltar aqui e sem recolar nada</b>. Com o endereço vazio nada disso é escrito. Endereço vazio com a chave em "sim, levar" é recusado na hora de gerar — ligado sem destino não faz nada e parece que faz.</p>
+        <p class="ajuda">São aceitos uma âncora (<code>#oferta</code>), um caminho do site (<code>/oferta-especial</code>) ou um endereço <code>http(s)</code> inteiro. É a mesma regra do botão de ação da Contagem regressiva.</p>
+        <p class="ajuda"><b>Vale para o pagamento aprovado no cartão</b>, que é quando houve confirmação de verdade. Esta página não tem o botão "Já paguei" do Pix, e o Pix não avisa a página quando o dinheiro cai — então quem paga por Pix aqui continua na página de obrigado.</p>
       </fieldset>
     </div>
     <div>
@@ -5494,6 +5547,75 @@ function fcMoedaFmtGer(soReal){
    da /pagar diverge em pelo menos um token -- forcar as tres a compartilhar pediria tantos
    parametros quanto linhas, o que nao e extracao, e template. Mantida como quarta copia,
    separada, no proprio gerador da /pagar. Precedente: a extracao parcial da Mini loja. */
+/* ===== UPSELL: a pagina para onde o cliente vai depois do pagamento aprovado =====
+   Pedido do dono em 13/09/2026, nas QUATRO abas de pagamento. Duas exigencias puxam para
+   lados opostos, e o desenho tem de respeitar as duas:
+
+   1. CAMPO VAZIO NAO PODE MUDAR UM BYTE do que a aba ja produzia -- mesmo criterio dos tres
+      textos do sinal. Quem nunca usar upsell nao paga nada por ele existir.
+   2. DESLIGADO NAO PODE SIGNIFICAR "NAO EMITIR". O pedido dele foi textual: "para nao ter que
+      ficar regerando codigo, eu poderia editar diretamente o codigo na pagina, alterando a
+      variavel que controla esse flag". Variavel que so existe quando esta ligada nao serve
+      para ser ligada na pagina.
+
+   Dai a regra de emissao ser pelo ENDERECO, e nao pelo interruptor:
+
+      endereco vazio   + desligado  ->  nada e emitido (byte a byte como antes)
+      endereco escrito + ligado     ->  as duas variaveis, UPSELL_ATIVO=true
+      endereco escrito + desligado  ->  as duas variaveis, UPSELL_ATIVO=false (inerte)
+      endereco vazio   + ligado     ->  a ferramenta RECUSA gerar
+
+   A quarta linha e recusa e nao aviso pelo mesmo motivo que a campanha sem codigo e o href com
+   esquema invalido ja sao recusados: ligado sem destino e um estado que NAO FAZ NADA e parece
+   que faz.
+
+   O ENDERECO E CONFERIDO NA HORA DE GERAR, pela MESMA regra do botao de acao da Contagem
+   regressiva (cUrlOk, que passa por urlLimpa): ancora, caminho do proprio site ou http(s), e
+   nenhum outro esquema. Campo de endereco que aceitasse "javascript:" seria um buraco que o
+   dono cola no proprio site. O BLOCO ENTREGUE NAO RECONFERE, de proposito -- ver
+   fcUpsellFnSrc. */
+function fcUpsellUrl(cfg){return String((cfg&&cfg.url)||'').trim();}
+/* O criterio de emissao, num lugar so: havendo endereco, as duas variaveis saem. */
+function fcUpsellEmite(cfg){return fcUpsellUrl(cfg)!=='';}
+/* As duas recusas, no formato de uRecusa/mRecusa/aRecusa: '' quando nao ha o que recusar. */
+function fcUpsellRecusa(cfg){
+  var u=fcUpsellUrl(cfg);
+  if(!u)return (cfg&&cfg.ativo)?'O redirecionamento depois do pagamento está ligado, mas o endereço da página está vazio. Assim ele não leva o cliente a lugar nenhum e parece que leva. Preencha o endereço da página, ou desligue o interruptor "Levar o cliente para essa página?".':'';
+  if(!cUrlOk(u))return 'O endereço da página para onde levar o cliente depois do pagamento ("'+u+'") precisa ser uma âncora (#oferta), um caminho do site (/oferta-especial) ou um endereço http(s). Outros esquemas, como javascript:, não são aceitos.';
+  return '';
+}
+/* As duas variaveis, no TOPO do bloco, comentadas com os valores aceitos -- o padrao da casa
+   ("variaveis de customizacao no topo"), aqui com uso concreto: ligar e desligar o upsell no
+   site publicado, sem voltar a ferramenta e sem recolar nada. "ind" e a indentacao (a /pagar
+   escreve com dois espacos, aninhada dentro da IIFE dela). */
+function fcUpsellVarsSrc(ind,cfg){
+  if(!fcUpsellEmite(cfg))return '';
+  var c='';
+  c+=ind+'/* ===== DEPOIS DO PAGAMENTO APROVADO: levar o cliente a outra pagina (upsell) ===== */\n';
+  c+=ind+'var UPSELL_ATIVO='+((cfg&&cfg.ativo)?'true':'false')+';   /* true = leva | false = nao leva. Trocar aqui liga e desliga sem regerar o codigo */\n';
+  c+=ind+"var UPSELL_URL='"+escJs(fcUpsellUrl(cfg))+"';   /* endereco da pagina de upsell */\n\n";
+  return c;
+}
+/* A funcao que leva. Emitida junto com as variaveis, e nunca sem elas.
+   NAO reconfere o endereco, de proposito: a conferencia acontece na hora de gerar, e um bloco
+   que recusasse o proprio UPSELL_URL depois de editado a mao deixaria o dono sem entender por
+   que nada acontece. As duas guardas que ela tem sao as que evitam acao ESTRANHA: desligado
+   nao navega, e endereco vazio nao navega -- um UPSELL_URL='' apagado a mao levaria a pagina
+   para o endereco dela mesma, recarregando em silencio. */
+function fcUpsellFnSrc(ind,cfg){
+  if(!fcUpsellEmite(cfg))return '';
+  var c='';
+  c+=ind+'function upsellIr(){\n';
+  c+=ind+'  if(!UPSELL_ATIVO)return;\n';
+  c+=ind+'  if(!UPSELL_URL)return;\n';
+  c+=ind+'  window.location.href=UPSELL_URL;\n';
+  c+=ind+'}\n\n';
+  return c;
+}
+/* O que entra no gancho aoAprovarExtra de fcPpBotoesSrc (e no onApprove proprio da /pagar):
+   uma chamada, ou NADA. Sai vazio quando nao ha upsell, e e por isso que a saida das quatro
+   abas continua identica byte a byte com o campo vazio. */
+function fcUpsellChamada(cfg){return fcUpsellEmite(cfg)?'upsellIr();':'';}
 function fcPpBotoesSrc(prefixo,ppcor,usaSinal,comentZero,aoAprovarExtra){
   var c='';
   c+='/* ===== PayPal ===== */\n';
@@ -13645,6 +13767,9 @@ function uColeta(){
          Sao coisa diferente de 'fora', que CONSERVA o que esta na tela. */
       edops:uEditOps,editidx:uEditIdx,form:fcFormLer(U_FORM),
       selprod:radio('u-selprod'),zap:radio('u-zap'),descpix:$('u-descpix').value,
+      /* O UPSELL (13/09/2026): o endereco e o interruptor. Os dois sao configuracao da
+         campanha, entao entram no preset desta aba como qualquer outro campo. */
+      upsell:$('u-upsell').value,upsellon:radio('u-upsellon'),
       sinal:radio('u-sinal'),sinaltipo:radio('u-sinaltipo'),sinalpct:$('u-sinalpct').value,sinalfixo:$('u-sinalfixo').value,
       resumo:radio('u-resumo'),
       larg:$('u-largura').value,ppcor:radio('u-ppcor'),qtdmax:$('u-qtdmax').value,
@@ -13664,6 +13789,10 @@ function uRestaura(st){
   setRadio('u-metodo',U.metodo);fcOrdRestaurar('u',U.prio);setRadio('u-moeda',U.moeda);setRadio('u-selprod',U.selprod);setRadio('u-zap',U.zap);
   $('u-cod').value=U.cod;
   $('u-descpix').value=(U.descpix!=null&&U.descpix!=='')?U.descpix:10;
+  /* O UPSELL (13/09/2026). Estado gravado por versao anterior nao tem as duas chaves --
+     endereco vazio e interruptor desligado e a fabrica, e com ela o bloco sai byte a byte
+     como sempre saiu. */
+  $('u-upsell').value=U.upsell||'';setRadio('u-upsellon',U.upsellon||'nao');
   /* t1..t10 saiam daqui, um por linha, ate 11/09/2026 -- agora vem de U_TXT_DEFS, na chamada
      de fcTxtRestaura no fim desta funcao. A guarda continua sendo '!=null' e nao "e verdade",
      pelo mesmo motivo que estava registrado aqui: texto livre VAZIO e uma escolha, nao um
@@ -14389,6 +14518,9 @@ function uCfg(){
   var r={
     sinal:{ativo:sinalOn,tipo:sinalTipo,valor:(sinalTipo==='fixo')?(Math.round(sinalFixo*100)/100):sinalPct},
     resumo:(radio('u-resumo')==='sim'),
+    /* O UPSELL: quem decide se as variaveis saem e o ENDERECO, nao o interruptor -- ver
+       fcUpsellEmite e o comentario da fonte unica. */
+    upsell:{ativo:(radio('u-upsellon')==='sim'),url:$('u-upsell').value.trim()},
     m:m, usaPP:(m!=='pix'), usaPix:usaPix,
     /* O MEIO PRIORITARIO (12/09/2026). Vai ao gerador como o dono deixou, e NAO forcado ao
        padrao quando ha um meio so: com um meio so os dois ramos do gerador produzem a mesma
@@ -14441,6 +14573,7 @@ function uRecusa(cfg){
     if(!cfg.chave||!cfg.nomer||!cfg.cidade)return fciRecusa('Preencha a chave Pix, o nome do recebedor e a cidade.');
   }
   if(cfg.zap&&!cfg.zapnum)return fciRecusa('Informe o número do WhatsApp de destino.');
+  var recUp=fcUpsellRecusa(cfg.upsell);if(recUp)return recUp;
 
   /* Os cupons sao conferidos AQUI, e nao so no formulario de cadastro: o campo de valor
      DENTRO da lista de cupons nao valida nada, entao apagar o numero de um cupom ja cadastrado
@@ -14689,6 +14822,7 @@ function uBloco(cfg){
     c+='var ZAP_ATIVO='+(zap?'true':'false')+';          /* true = mostra o botao "Ja paguei" apos gerar o Pix */\n';
     c+="var ZAP_NUMERO='"+zapnum+"';   /* WhatsApp de destino: DDI+DDD+numero, so digitos */\n\n";
   }
+  c+=fcUpsellVarsSrc('',cfg.upsell);
   c+='/* ===== APARENCIA ===== */\n';
   c+="var LARGURA_CARRINHO='"+larg+"px';   /* largura maxima do carrinho, ex: '420px' ou '100%' */\n";
   c+="var COR_DESTAQUE='"+cfg.c1+"';          /* titulo, linha do total e botoes */\n";
@@ -14762,6 +14896,7 @@ function uBloco(cfg){
 
   c+='/* ============================================================\n   Daqui para baixo nao precisa mexer\n   ============================================================ */\n\n';
   c+=fcMoedaFmtGer(false);
+  c+=fcUpsellFnSrc('',cfg.upsell);
 
   if(usaPix){
     /* A maquinaria do BR Code vem da fonte unica (FC_PIX_SRC, no bloco de utilidades). Antes
@@ -15150,7 +15285,7 @@ function uBloco(cfg){
     c+='function msg(txt,ok){\n';
     c+="var m=raiz.querySelector('.fcu-msg');\n";
     c+="m.textContent=txt;m.className='fcu-msg '+(ok?'ok':'erro');\n}\n\n";
-    c+=fcPpBotoesSrc('fcu',ppcor,usaSinal,true,'');
+    c+=fcPpBotoesSrc('fcu',ppcor,usaSinal,true,fcUpsellChamada(cfg.upsell));
   }
   if(usaPix){
     c+='/* ===== Pix ===== */\n';
@@ -15220,7 +15355,11 @@ function uBloco(cfg){
         c+="partes.push("+aTplJs("'",cfg.txtZapValor,[['{valor}','moedaFmt(totalPix())']])+");\n";
       }
       c+="var url='https://wa.me/'+ZAP_NUMERO+'?text='+encodeURIComponent(partes.join('\\n'));\n";
-      c+="window.open(url,'_blank');\n}\n";
+      c+="window.open(url,'_blank');\n";
+      /* O CAMINHO C, e a ordem dele. O upsell so entra DEPOIS da abertura do WhatsApp -- ver a
+         medicao em scripts/verificar/upsell-janela.mjs. */
+      if(fcUpsellEmite(cfg.upsell))c+='upsellIr();\n';
+      c+='}\n';
       c+="raiz.querySelector('.fcu-zap').addEventListener('click',avisarZap);\n";
     }
   }
@@ -17661,6 +17800,7 @@ function aRecusa(cfg){
      identificador de conciliacao" */
   pre=fcIdUteis(cfg.prefixo);
   if(!cfg.pacotes.length)return 'Cadastre ao menos um pacote.';
+  var recUp=fcUpsellRecusa(cfg.upsell);if(recUp)return recUp;
   /* GUARDA DE INTEGRIDADE, e nao caso comum: aRestaura garante ao menos uma familia e aFamDel
      recusa apagar a ultima, mas um estado importado quebrado nao garante nada -- e aRecusa e o
      que roda antes de gerar E antes da previa. */
@@ -17748,6 +17888,9 @@ function aRecusa(cfg){
    backup nao reescrever o que o operador digitou. Modelo: uCfg (10802+). */
 function aCfg(){
   var prazoh=aPreso('a-prazoh');if(prazoh==null)prazoh=24;
+  /* O UPSELL -- ver uCfg. Nesta aba nao ha botao "Ja paguei": so o caminho do cartao
+     aprovado leva ao upsell, e a ajuda do campo diz isso. */
+  var upsellCfg={ativo:(radio('a-upsellon')==='sim'),url:aElVal('a-upsell','').trim()};
   /* ===== forma de pagamento (Tarefa do seletor) =====
      Mesmo molde de uCfg/mCfg (10913+/17650+): 'm' e o valor cru do radio, usaPP/usaPix sao os
      dois booleanos que os dois geradores desta aba consultam para decidir o que emitir. O
@@ -17802,7 +17945,7 @@ function aCfg(){
     prazoh:prazoh, descpix:descpix, parcelas:parcelas,
     sinal:{ativo:sinalOn,tipo:sinalTipo,valor:(sinalTipo==='fixo')?(Math.round(sinalFixo*100)/100):sinalPct},
     altdesk:altdesk, altmob:altmob, largmob:largmob, largcards:largcards, qtdmax:qtdmax,
-    medir:medir, sempre:sempre, precal:precal,
+    medir:medir, sempre:sempre, precal:precal, upsell:upsellCfg,
     c1:corSegura('a-c1','#0F3A30'), c2:corSegura('a-c2','#ffffff'), c3:corSegura('a-c3','#333333'),
     ob:aObCfg()
   };
@@ -17836,6 +17979,8 @@ function aColeta(){
     prio:radio('a-prio'),
     ppcor:radio('a-ppcor'),
     prazoh:aElVal('a-prazoh',24),
+    /* O UPSELL (13/09/2026) -- ver uColeta. */
+    upsell:aElVal('a-upsell',''),upsellon:radio('a-upsellon'),
     descpix:aElVal('a-descpix',5),
     parcelas:aElVal('a-parcelas',1),
     /* O sinal grava CRU, como todo o resto do coleta: o que esta na tela ainda por corrigir --
@@ -17926,6 +18071,9 @@ function aRestaura(st){
   fcOrdRestaurar('a',A.prio);
   setRadio('a-ppcor',A.ppcor);
   el=$('a-prazoh');if(el)el.value=(A.prazoh!=null&&A.prazoh!=='')?A.prazoh:24;
+  /* O UPSELL (13/09/2026) -- ver uRestaura. */
+  el=$('a-upsell');if(el)el.value=A.upsell||'';
+  setRadio('a-upsellon',A.upsellon||'nao');
   el=$('a-descpix');if(el)el.value=(A.descpix!=null&&A.descpix!=='')?A.descpix:5;
   el=$('a-parcelas');if(el)el.value=(A.parcelas!=null&&A.parcelas!=='')?A.parcelas:1;
   /* O SINAL (13/09/2026). Estado gravado por versao anterior NAO tem nenhuma das quatro chaves,
@@ -19049,6 +19197,7 @@ function aBlocoObrigado(cfg){
      outros 30 campos desta aba (02/09/2026) -- e o UNICO dos 31 que muda a saida padrao desta
      funcao, porque e o unico que nao existia de forma nenhuma antes. */
   c+="var TXT_NOTA='"+escJs(cfg.txtNota)+"';\n\n";
+  c+=fcUpsellVarsSrc('',cfg.upsell);
   /* Todo o resto dos 31 textos (selo/linha do cartao/parcela, rotulos da secao de pagamento,
      WhatsApp e as tres frases do prazo) NAO ganha variavel propria aqui -- ao contrario dos que
      ja eram var antes desta rodada (TXT_RECUSA e acima), estes eram literais DIRETO na
@@ -19065,6 +19214,7 @@ function aBlocoObrigado(cfg){
 
   c+='/* ============================================================\n   Daqui para baixo nao precisa mexer\n   ============================================================ */\n\n';
   c+=fcMoedaFmtGer(true);
+  c+=fcUpsellFnSrc('',cfg.upsell);
   c+=FC_PARAM_SRC;
   if(usaQtd)c+=fcFazQtdSrc('fca-ob');
 
@@ -19684,7 +19834,7 @@ function aBlocoObrigado(cfg){
   c+='  var m=document.createElement("div");m.className="fca-ob-msg";b.appendChild(m);\n';
   c+='  cartao.appendChild(b);\n';
   c+='  function msg(txt,ok){m.textContent=txt;m.className="fca-ob-msg "+(ok?"ok":"erro");}\n';
-  c+=fcPpBotoesSrc('fca-ob',cfg.ppcor,usaSinal,true,'');
+  c+=fcPpBotoesSrc('fca-ob',cfg.ppcor,usaSinal,true,fcUpsellChamada(cfg.upsell));
   c+='}\n\n';
   }
 
@@ -21512,6 +21662,9 @@ function pCfg(){
     zap:(radio('p-zap')!=='nao'),
     zapnum:fciDigitos('zapnum'),
     url:$('p-url').value.trim(),
+    /* O UPSELL -- ver uCfg. Nesta aba ele e da PAGINA, e por isso fica ACIMA da linha
+       que separa o que e do bloco do que e desta cobranca. */
+    upsell:{ativo:(radio('p-upsellon')==='sim'),url:$('p-upsell').value.trim()},
     larg:pPreso('p-larg',420), qr:pPreso('p-qr',180),
     c1:corSegura('p-c1','#075E54'), c2:corSegura('p-c2','#ffffff'), c3:corSegura('p-c3','#333333'),
     coruja:{pos:cpos,ativo:cpos!=='nao',esq:(cpos==='esq'||cpos==='ambos'),dir:(cpos==='dir'||cpos==='ambos'),
@@ -21702,7 +21855,12 @@ function pJs(cfg){
   j+="  var TXT_SINAL='"+escJs(cfg.txtSinal)+"';   /* CADA {valor} vira o sinal */\n";
   j+="  var TXT_SALDO='"+escJs(cfg.txtSaldo)+"';   /* CADA {valor} vira o saldo */\n";
   if(cfg.zap)j+="  var TXT_ZAP_SINAL='"+escJs(cfg.txtZapSinal)+"';  /* {sinal} e {saldo} */\n";
+  /* O UPSELL: FIXO DA PAGINA. Ele nasce aqui, no codigo 1, e nao no link -- ver pColeta.
+     A linha em branco do fim e aparada porque o marcador "Daqui para baixo" desta aba ja
+     comeca com uma: somadas, sairiam duas linhas vazias no meio do bloco entregue. */
+  j+=fcUpsellVarsSrc('  ',cfg.upsell).replace(/\n$/,'');
   j+='\n  /* ============================================================\n     Daqui para baixo nao precisa mexer\n     ============================================================ */\n\n';
+  j+=fcUpsellFnSrc('  ',cfg.upsell);
   /* A maquinaria do BR Code vem da FONTE UNICA. Aqui ela e usada ao contrario do Checkout: em
      vez de montar um payload para o carrinho, o bloco LE o payload que chegou no endereco --
      e depois remonta, para exigir igualdade. Por isso as cinco pecas entram: montarPayload e a
@@ -22084,6 +22242,12 @@ function pJs(cfg){
     j+='        onApprove:function(d,actions){\n';
     j+='          return actions.order.capture().then(function(){\n';
     j+="            texto(alvo,'"+escJs(cfg.txtSucesso)+"');\n";
+    /* ESTA ABA NAO USA fcPpBotoesSrc, e continua nao usando -- ver o comentario de
+       fcPpBotoesSrc, que mede por que: praticamente toda linha da /pagar diverge em pelo menos
+       um token, e forcar as tres a compartilhar pediria tantos parametros quanto linhas. O que
+       e compartilhado e o que ESCREVE a chamada (fcUpsellChamada), nao o onApprove inteiro --
+       assim nao existe segunda decisao sobre quando o upsell entra. */
+    if(fcUpsellEmite(cfg.upsell))j+='            upsellIr();\n';
     j+='          });\n';
     j+='        }\n';
     j+="      }).render('#fcpg-pp');\n";
@@ -22117,6 +22281,10 @@ function pJs(cfg){
     j+="    a.setAttribute('href','https://wa.me/'+WHATSAPP+'?text='+encodeURIComponent(msg));\n";
     j+="    a.setAttribute('target','_blank');\n";
     j+="    a.setAttribute('rel','noopener noreferrer');\n";
+    /* O CAMINHO C. Aqui o botao e uma ANCORA com target=_blank (e nao um window.open, como no
+       Checkout e na Mini loja), entao o upsell entra num ouvinte de clique -- ver a medicao em
+       scripts/verificar/upsell-janela.mjs. */
+    if(fcUpsellEmite(cfg.upsell))j+="    a.addEventListener('click',function(){upsellIr();});\n";
     j+='    return a;\n';
     j+='  }\n';
   }
@@ -22184,6 +22352,9 @@ function pGerar(){
   if(pDescAjustar())mudou=true;
   if(mudou)salvarEstado();
   var cfg=pCfg(),r=pRecusaBloco(cfg);
+  /* A recusa do upsell fica AQUI, e nao em pRecusaBloco: aquela funcao mora em
+     fc-compartilhado.js e serve tambem a /cobrar, que nao tem estes dois campos. */
+  if(!r)r=fcUpsellRecusa(cfg.upsell);
   if(r){alert(r);fciApontarSe(r);return;}
   $('p-out1').value=pBloco(cfg);
   fccMarcar('cob');
@@ -22417,6 +22588,7 @@ function pPvMontar(){
   var box=$('p-pv-box');if(!box)return;
   var cfg=pCfg();
   var recusa=pRecusaBloco(cfg);
+  if(!recusa)recusa=fcUpsellRecusa(cfg.upsell);
   /* o quadro so precisa de cobranca valida quando o estado pedido nao e o "sem parametros" */
   if(!recusa&&pPvModo!=='vazio')recusa=pRecusaCobranca(cfg);
   var busca=recusa?'':pPvBusca(cfg);
@@ -22463,6 +22635,10 @@ function pColeta(){
   var r={
     usapp:radio('p-usapp'),prio:radio('p-prio'),ppcor:radio('p-ppcor'),
     zap:radio('p-zap'),url:$('p-url').value,
+    /* O UPSELL (13/09/2026): FIXO DA PAGINA, decisao do dono. Ele entra no CODIGO 1 e
+       NAO viaja no link -- tudo que viaja no link entra no selo, e um parametro novo
+       faria toda /pagar com o codigo 1 antigo recusar os links novos. */
+    upsell:$('p-upsell').value,upsellon:radio('p-upsellon'),
     larg:$('p-larg').value,qr:$('p-qr').value,
     c1:$('p-c1-t').value,c2:$('p-c2-t').value,c3:$('p-c3-t').value,
     coruja:radio('p-coruja'),corujaalt:$('p-corujaalt').value,
@@ -22484,6 +22660,10 @@ function pRestaura(st){
   if(P.ppcor)setRadio('p-ppcor',P.ppcor);
   if(P.zap)setRadio('p-zap',P.zap);
   if(P.url!==undefined)$('p-url').value=P.url;
+  /* O UPSELL (13/09/2026). Estado gravado por versao anterior nao tem as duas chaves --
+     endereco vazio e interruptor desligado e a fabrica, e com ela o bloco sai byte a byte
+     como sempre saiu. */
+  $('p-upsell').value=P.upsell||'';setRadio('p-upsellon',P.upsellon||'nao');
   if(P.larg!==undefined)$('p-larg').value=P.larg;
   if(P.qr!==undefined)$('p-qr').value=P.qr;
   [['c1','p-c1'],['c2','p-c2'],['c3','p-c3'],['corujacorpo','p-corujacorpo'],['corujadet','p-corujadet']]
@@ -22599,6 +22779,8 @@ function mColeta(){
   /* Sem client, chave, nomer, cidade e zapnum: a identidade saiu desta aba (ver uColeta). */
   var r={m:{metodo:radio('m-metodo'),prio:radio('m-prio'),moeda:radio('m-moeda'),ppcor:radio('m-ppcor'),
     descpix:$('m-descpix').value,zap:radio('m-zap'),cod:$('m-cod').value,
+    /* O UPSELL (13/09/2026) -- ver uColeta. */
+    upsell:$('m-upsell').value,upsellon:radio('m-upsellon'),
     prods:mProds,cps:mCps,
     /* O FORMULARIO INACABADO viaja junto -- ver uColeta, a primeira das tres. */
     edops:mEditOps,editidx:mEditIdx,form:fcFormLer(M_FORM),
@@ -22623,6 +22805,10 @@ function mRestaura(st){
   if(M.descpix!=null)$('m-descpix').value=M.descpix;
   if(M.zap)setRadio('m-zap',M.zap);
   if(M.cod!=null)$('m-cod').value=M.cod;
+  /* O UPSELL (13/09/2026). Estado gravado por versao anterior nao tem as duas chaves --
+     endereco vazio e interruptor desligado e a fabrica, e com ela o bloco sai byte a byte
+     como sempre saiu. */
+  $('m-upsell').value=M.upsell||'';setRadio('m-upsellon',M.upsellon||'nao');
   if(fcEhArray(M.prods))mProds=M.prods;
   if(fcEhArray(M.cps))mCps=M.cps;
   if(M.cols!=null)$('m-cols').value=M.cols;
@@ -23459,6 +23645,8 @@ function mCfg(){
     cod:$('m-cod').value.trim(),
     zap:usaPix&&(radio('m-zap')==='sim'),
     zapnum:fciDigitos('zapnum'),
+    /* O UPSELL -- ver uCfg. */
+    upsell:{ativo:(radio('m-upsellon')==='sim'),url:$('m-upsell').value.trim()},
     descpix:descpix,
     sinal:{ativo:sinalOn,tipo:sinalTipo,valor:(sinalTipo==='fixo')?(Math.round(sinalFixo*100)/100):sinalPct},
     resumo:(radio('m-resumo')==='sim'),
@@ -23502,6 +23690,7 @@ function mRecusa(cfg){
     if(!cfg.chave||!cfg.nomer||!cfg.cidade)return fciRecusa('Preencha a chave Pix, o nome do recebedor e a cidade.');
   }
   if(cfg.zap&&!cfg.zapnum)return fciRecusa('Informe o número do WhatsApp de destino.');
+  var recUp=fcUpsellRecusa(cfg.upsell);if(recUp)return recUp;
   for(i=0;i<cfg.cps.length;i++){
     cpc=String(cfg.cps[i].codigo||'').trim();
     if(!cpc)return 'O cupom na posição '+(i+1)+' da lista está sem código. Um cupom sem código nunca pode ser digitado pelo cliente: preencha o código ou remova a linha.';
@@ -23857,6 +24046,7 @@ function mBlocoJs(cfg,prods,cps,cats,client,cod){
      carrinho, nem aviso. Medido executando o bloco -- a geracao do texto nunca acusaria isto,
      e por isso a regressao de saidas passou por cima dele. */
   c+="var MOEDA='"+cfg.moeda+"';"+(usaPix?"   /* fixa em reais: o Pix so existe em BRL */":"   /* 'BRL' | 'USD' | 'EUR' */")+"\n\n";
+  c+=fcUpsellVarsSrc('',cfg.upsell);
   c+='/* ===== APARENCIA ===== */\n';
   c+="var LARGURA_LOJA='"+cfg.larg+"px';   /* largura maxima do bloco inteiro */\n";
   c+='var IMG_VITRINE='+cfg.imgvit+';        /* largura pedida ao redimensionador para a miniatura da vitrine */\n';
@@ -23960,6 +24150,7 @@ function mBlocoJs(cfg,prods,cps,cats,client,cod){
 
   c+='/* ============================================================\n   Daqui para baixo nao precisa mexer\n   ============================================================ */\n\n';
   c+=fcMoedaFmtGer(false);
+  c+=fcUpsellFnSrc('',cfg.upsell);
   /* O identificador do pedido vive no escopo do BLOCO, e nao dentro de montar(): montarPayload
      o le por nome (e a mesma fonte do Checkout, FC_PIX_SRC) e e emitida aqui em cima, fora de
      montar. Declarado la dentro, ele existia so para quem estava dentro -- e o Pix quebrava com
@@ -24583,7 +24774,9 @@ function mBlocoPagar(cfg,usaPP,usaPix,usaQtd,usaSinal,usaResumo,descpix,zap,usaC
     c+='function msg(txt,ok){\n';
     c+="var m=raiz.querySelector('.fcm-msg');\n";
     c+="m.textContent=txt;m.className='fcm-msg '+(ok?'ok':'erro');\n}\n\n";
-    c+=fcPpBotoesSrc('fcm',cfg.ppcor,usaSinal,false,'cestaLimpar();');
+    /* A ORDEM: cestaLimpar() ANTES do upsell. Invertido, o cliente sairia da pagina com a
+       cesta ainda cheia e voltaria a ela cheia depois de ter pago. */
+    c+=fcPpBotoesSrc('fcm',cfg.ppcor,usaSinal,false,'cestaLimpar();'+fcUpsellChamada(cfg.upsell));
   }
   if(usaPix){
     c+='/* ===== Pix ===== */\n';
@@ -24633,7 +24826,12 @@ function mBlocoPagar(cfg,usaPP,usaPix,usaQtd,usaSinal,usaResumo,descpix,zap,usaC
       c+="var url='https://wa.me/'+ZAP_NUMERO+'?text='+encodeURIComponent(partes.join('\\n'));\n";
       c+="window.open(url,'_blank');\n";
       c+='cestaLimpar();\n';
-      c+="raiz.querySelector('.fcm-nota').textContent=TXT_PEDIDO_ENVIADO;\n}\n";
+      c+="raiz.querySelector('.fcm-nota').textContent=TXT_PEDIDO_ENVIADO;\n";
+      /* O CAMINHO C, e A ORDEM DELE: o upsell entra DEPOIS de cestaLimpar(). Invertido, o
+         cliente sairia da pagina com a cesta ainda cheia e voltaria a ela cheia depois de ter
+         pago -- a unica hora em que esta pagina sabe que a compra terminou e este clique. */
+      if(fcUpsellEmite(cfg.upsell))c+='upsellIr();\n';
+      c+='}\n';
       c+="raiz.querySelector('.fcm-zap').addEventListener('click',avisarZap);\n\n";
     }
   }
