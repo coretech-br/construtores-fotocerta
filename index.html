@@ -1948,9 +1948,11 @@
         <input type="text" id="u-txt-zap-total" value="Total do pedido: {valor}">
         <label for="u-txt-zap-sinal">Linha do sinal pago <small>(só com sinal ligado)</small></label>
         <input type="text" id="u-txt-zap-sinal" value="Sinal pago agora: *{valor}*">
+        <label for="u-txt-zap-saldo">Linha do saldo <small>(só com sinal ligado)</small></label>
+        <input type="text" id="u-txt-zap-saldo" value="Restante na entrega: *{valor}*">
         <label for="u-txt-zap-valor">Linha do valor pago <small>(sem sinal)</small></label>
         <input type="text" id="u-txt-zap-valor" value="Valor pago: *{valor}*">
-        <p class="ajuda">Marcadores: <code>{cod}</code> o código do pedido, <code>{codigo}</code> o código do cupom, <code>{pct}</code> o percentual do Pix e <code>{valor}</code> o valor já formatado. O <b>*asterisco*</b> é o negrito do WhatsApp. A linha do saldo usa o campo “Restante na entrega”, da seção 3.</p>
+        <p class="ajuda">Marcadores: <code>{cod}</code> o código do pedido, <code>{codigo}</code> o código do cupom, <code>{pct}</code> o percentual do Pix e <code>{valor}</code> o valor já formatado. O <b>*asterisco*</b> é o negrito do WhatsApp.</p>
       </fieldset>
     </div>
   </div>
@@ -3387,6 +3389,8 @@
         <input type="text" id="m-txt-zap-total" value="Total do pedido: {valor}">
         <label for="m-txt-zap-sinal">Linha do sinal pago <small>(só com sinal ligado)</small></label>
         <input type="text" id="m-txt-zap-sinal" value="Sinal pago agora: *{valor}*">
+        <label for="m-txt-zap-saldo">Linha do saldo <small>(só com sinal ligado)</small></label>
+        <input type="text" id="m-txt-zap-saldo" value="Restante na entrega: *{valor}*">
         <label for="m-txt-zap-valor">Linha do valor pago <small>(sem sinal)</small></label>
         <input type="text" id="m-txt-zap-valor" value="Valor pago: *{valor}*">
         <label for="m-txt-pedido-enviado">Recado depois de avisar <small>(o carrinho é esvaziado)</small></label>
@@ -4403,6 +4407,14 @@ var FC_TXT_FABRICA={
   zapDescPix:'Desconto Pix: -{pct}%',
   zapTotal:'Total do pedido: {valor}',
   zapSinal:'Sinal pago agora: *{valor}*',
+  /* A LINHA DO SALDO NO WHATSAPP (13/09/2026). Ate esta rodada ela era o UNICO texto do
+     conjunto do sinal que nao era campo: o bloco emitia TXT_SALDO mais um ': *...*' cravado,
+     enquanto todas as outras linhas da MESMA mensagem passavam por aTplJs com {valor}. E a
+     regra D-2 de novo -- metade configuravel e armadilha: o dono trocava o rotulo do saldo na
+     secao 3 e os dois pontos, o asterisco e a ordem continuavam fora do alcance dele. O padrao
+     repete letra por letra o que o bloco emitia com os textos de fabrica, entao quem nunca
+     tocar no campo recebe a mesma mensagem; o que muda e que o campo passa a existir. */
+  zapSaldo:'Restante na entrega: *{valor}*',
   zapValor:'Valor pago: *{valor}*'
 };
 /* As duas metades da persistencia de uma tabela de textos, escritas UMA vez para as quatro
@@ -4548,6 +4560,24 @@ var FC_ORD_TXT={
   a:[['txtCartaoLinha','a-txt-cartaolinha','cartaoLinha'],['txtErroComPix','a-txt-erro-compix','erroComPix']],
   p:[['txtPaypalFora','p-txt-paypalfora','paypalFora'],['txtCartaoLinha','p-txt-cartaolinha','cartaoLinha']]
 };
+/* ===== A MIGRACAO DA LINHA DO SALDO NO WHATSAPP (13/09/2026, divida D1) =====
+   Ate esta rodada a linha do saldo na mensagem do WhatsApp NAO era campo: ela era montada com
+   TXT_SALDO -- o rotulo da TELA (t9) -- mais ': *{valor}*' cravado no gerador. Agora ela tem
+   campo proprio (txtZapSaldo), como todas as outras linhas da mesma mensagem.
+   Sem esta migracao a troca seria SILENCIOSA e para pior: quem personalizou o rotulo da tela
+   ("Falta pagar", por exemplo) via a mensagem dizer "Falta pagar: *R$ 200*", e passaria a ver
+   "Restante na entrega" -- o padrao de fabrica do campo novo --, sem nada na tela avisando.
+   Regra: so age quando a chave nova esta AUSENTE (estado anterior a esta rodada) E o rotulo da
+   tela foi personalizado. Estado que ja tem a chave nova e escolha do dono e nao se toca. */
+function fcZapSaldoMigrar(st,fabricaT9){
+  if(!st||typeof st!=='object')return st;
+  if(st.txtZapSaldo!=null)return st;
+  if(st.t9==null||st.t9===''||st.t9===fabricaT9)return st;
+  var r={},k;
+  for(k in st)if(Object.prototype.hasOwnProperty.call(st,k))r[k]=st[k];
+  r.txtZapSaldo=st.t9+': *{valor}*';
+  return r;
+}
 /* A ORDEM QUE OS CAMPOS DA TELA REFLETEM AGORA. Nao se le do radio: no instante em que o
    change dispara o radio JA esta no valor novo, e virar de "novo" para "novo" nao viraria
    nada. Guardar a anterior aqui e o que torna a virada possivel. */
@@ -13321,6 +13351,7 @@ function uRestaura(st){
   /* A MIGRACAO DO MEIO PRIORITARIO (12/09/2026). Esta aba era PayPal-primeiro ate esta rodada,
      entao a fabrica antiga das duas frases do separador e a do ramo 'pp'. Ver fcOrdMigrar. */
   var U=fcOrdMigrar(st.u,'u','pp');
+  U=fcZapSaldoMigrar(U,'Restante na entrega');
   uProds=U.prods||[];uProdRender();uCps=U.cps||[];uCpRender();
   setRadio('u-metodo',U.metodo);fcOrdRestaurar('u',U.prio);setRadio('u-moeda',U.moeda);setRadio('u-selprod',U.selprod);setRadio('u-zap',U.zap);
   $('u-cod').value=U.cod;
@@ -13995,6 +14026,7 @@ var U_TXT_DEFS=[
   ['txtZapDescPix','u-txt-zap-descpix',FC_TXT_FABRICA.zapDescPix],
   ['txtZapTotal','u-txt-zap-total',FC_TXT_FABRICA.zapTotal],
   ['txtZapSinal','u-txt-zap-sinal',FC_TXT_FABRICA.zapSinal],
+  ['txtZapSaldo','u-txt-zap-saldo',FC_TXT_FABRICA.zapSaldo],
   ['txtZapValor','u-txt-zap-valor',FC_TXT_FABRICA.zapValor],
   /* ===== os que estavam FORA da tabela ate 11/09/2026 (leva 2) =====
      A CHAVE de cada um e a MESMA que o coleta ja gravava, letra por letra: estado, preset e
@@ -14808,7 +14840,7 @@ function uBloco(cfg){
       if(usaSinal){
         c+="partes.push("+aTplJs("'",cfg.txtZapTotal,[['{valor}','moedaFmt(total())']])+");\n";
         c+="partes.push("+aTplJs("'",cfg.txtZapSinal,[['{valor}','moedaFmt(sinalAgora())']])+");\n";
-        c+="partes.push(TXT_SALDO+': *'+moedaFmt(saldoDepois())+'*');\n";
+        c+="partes.push("+aTplJs("'",cfg.txtZapSaldo,[['{valor}','moedaFmt(saldoDepois())']])+");\n";
       }else{
         c+="partes.push("+aTplJs("'",cfg.txtZapValor,[['{valor}','moedaFmt(totalPix())']])+");\n";
       }
@@ -21801,6 +21833,7 @@ function mRestaura(st){
   if(!st.m)return;
   /* Mesma migracao do Checkout, e pelo mesmo motivo: esta aba era PayPal-primeiro. */
   var M=fcOrdMigrar(st.m,'m','pp');
+  M=fcZapSaldoMigrar(M,'Restante na entrega');
   if(M.metodo)setRadio('m-metodo',M.metodo);
   fcOrdRestaurar('m',M.prio);
   if(M.moeda)setRadio('m-moeda',M.moeda);
@@ -22504,7 +22537,16 @@ function mToggles(){
   ver('m-pix-campos',usaPix);
   ver('m-moeda-campo',usaPP&&!usaPix);
   ver('m-descpix-campo',m==='ambos');
-  ver('m-descpix-aviso',m==='ambos'&&sinalOn);
+  /* O AVISO E O CAMPO DESABILITADO seguem a MESMA regra do Checkout (13/09/2026, dividas D2
+     e D3). Antes daqui o aviso desta aba pedia tambem m==='ambos' e o campo continuava
+     editavel com o sinal ligado -- duas divergencias de uma fonte que a propria ferramenta
+     declara gemea. A condicao extra nao mudava o que se via (o aviso mora DENTRO de
+     m-descpix-campo, que ja some fora de 'ambos' -- medido), mas divergencia de regra e o
+     defeito de amanha: bastaria o aviso mudar de lugar para as duas abas passarem a dizer
+     coisas diferentes. Desabilitar, e nao esconder, e a decisao ja registrada no Checkout:
+     esconder um campo que continua guardando 10% trocaria defeito visivel por invisivel. */
+  ver('m-descpix-aviso',sinalOn);
+  var elDp=$('m-descpix');if(elDp)elDp.disabled=sinalOn;
   ver('m-zap-fieldset',usaPix);
   ver('m-zap-campo',usaPix&&radio('m-zap')==='sim');
   ver('m-sinal-campos',sinalOn);
@@ -22571,6 +22613,7 @@ var M_TXT_DEFS=[
   ['txtZapDescPix','m-txt-zap-descpix',FC_TXT_FABRICA.zapDescPix],
   ['txtZapTotal','m-txt-zap-total',FC_TXT_FABRICA.zapTotal],
   ['txtZapSinal','m-txt-zap-sinal',FC_TXT_FABRICA.zapSinal],
+  ['txtZapSaldo','m-txt-zap-saldo',FC_TXT_FABRICA.zapSaldo],
   ['txtZapValor','m-txt-zap-valor',FC_TXT_FABRICA.zapValor],
   ['txtPedidoEnviado','m-txt-pedido-enviado','Pedido enviado. O carrinho foi esvaziado -- combine o restante pelo WhatsApp.'],
   ['txtLimitePedidos','m-txt-limite-pedidos','Esta página não guarda pedidos: cada compra existe como a mensagem que você recebe, a transação no PayPal e o Pix na conta.'],
@@ -23744,7 +23787,7 @@ function mBlocoPagar(cfg,usaPP,usaPix,usaQtd,usaSinal,usaResumo,descpix,zap,usaC
       if(usaSinal){
         c+="partes.push("+aTplJs("'",cfg.txtZapTotal,[['{valor}','moedaFmt(total())']])+");\n";
         c+="partes.push("+aTplJs("'",cfg.txtZapSinal,[['{valor}','moedaFmt(sinalAgora())']])+");\n";
-        c+="partes.push(TXT_SALDO+': *'+moedaFmt(saldoDepois())+'*');\n";
+        c+="partes.push("+aTplJs("'",cfg.txtZapSaldo,[['{valor}','moedaFmt(saldoDepois())']])+");\n";
       }else{
         c+="partes.push("+aTplJs("'",cfg.txtZapValor,[['{valor}','moedaFmt(totalPix())']])+");\n";
       }

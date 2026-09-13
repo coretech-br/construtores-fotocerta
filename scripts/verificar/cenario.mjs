@@ -151,7 +151,8 @@ export async function conteudo(pg){
 /* ============================================================================
    OS TEXTOS DA PASSAGEM CONFIGURADA
    ============================================================================
-   Sao 28 dos 162 campos, escolhidos por CRITERIO e nao por amostragem. Cada linha e
+   Sao 28 campos, escolhidos por CRITERIO e nao por amostragem (quantos ha no total nao
+   se escreve aqui: o numero envelhece a cada campo novo, e ja estava errado). Cada linha e
    [id do campo, valor, por que este] -- e, quando o campo so age num ramo que este
    cenario nao percorre, uma QUARTA coluna com o motivo. Sem essa quarta coluna, campo
    que nao chega a saida nenhuma e tratado como defeito, que e o padrao certo. O criterio
@@ -211,10 +212,12 @@ export const TEXTOS = [
   ['u-txt-zap-total','Zx26 Total do pedido: {valor}',
    'o mesmo marcador no ramo COM sinal -- a frase existe so la',
    'so e emitido quando o Checkout cobra SINAL (usaSinal). O cenario da fotografia nao liga '+
-   'sinal em nenhuma das duas abas grandes, entao os textos do sinal (zapTotal, zapSinal, '+
-   'sinal-maior, sinal-zero, sinal-recusado) ficam fora dela. Ligar o sinal mudaria a passagem '+
-   'de FABRICA, que e a que prova o invariante -- e isso esta fora do alcance desta tarefa. '+
-   'Fica declarado como buraco conhecido, nao como esquecimento.'],
+   'sinal NO CHECKOUT: desde 13/09/2026 a passagem configurada liga o sinal da MINI LOJA '+
+   '(ver ramoSinal, mais abaixo), mas nao o do Checkout -- ligar os dois apagaria a cobertura '+
+   'de u-txt-zap-valor (Zx10), que so existe no ramo SEM sinal da mesma aba. Os dois ramos da '+
+   'MESMA aba nao cabem numa passagem so. Entao os textos do sinal do Checkout (zapTotal, '+
+   'zapSinal, zapSaldo, sinal-maior, sinal-zero, sinal-recusado) continuam fora da fotografia; '+
+   'quem os cobre, com o bloco rodando, e scripts/verificar/sinal.mjs.'],
   ['u-txt-zap-pedido','Zx11 Pedido cod: *{cod}*',
    'marcador {cod} numa SEGUNDA aba -- marcador igual em abas diferentes ja divergiu antes'],
   ['u-txt-nota','Zx12 Confira o nome do recebedor \\ antes de pagar',
@@ -263,6 +266,46 @@ export const TEXTOS = [
    'o unico caminho escJsD (literal entre aspas DUPLAS) -- aspas duplas, barra invertida e '+
    '</script no mesmo texto']
 ];
+/* ============================================================================
+   O SINAL NA PASSAGEM CONFIGURADA -- a rede byte a byte que nao existia
+   ============================================================================
+   ATE 13/09/2026 o caminho do sinal nao era alcancado por NENHUMA das duas
+   passagens: 'u-sinal'/'m-sinal' nascem em 'nao' e nada aqui os ligava. Logo, as
+   ~40 linhas condicionais de FC_CARRINHO_SRC.sinal, fcTotalPixSrc (ramo do
+   meio), fcPpBotoesSrc, uBloco e mBloco* saiam ZERO vezes da fotografia, e a
+   regressao byte a byte diria "OK" mesmo se sinalAgora() mudasse de resultado.
+   Medido na propria rodada que escreveu isto: com a divida D1 ja aplicada -- que
+   troca a linha do saldo no WhatsApp nas DUAS abas --, a regressao contra main
+   deu ZERO divergencia. Zero ali nao significava "nada mudou": significava "o
+   cenario nao chega la".
+
+   POR QUE SO A MINI LOJA, e nao as duas. A escolha e medida, nao de gosto:
+     - a passagem de FABRICA nao pode ser tocada. E ela quem prova o invariante
+       ("mexer numa aba nao muda um byte do que as outras geram com a
+       configuracao padrao"), e sinal ligado nao e configuracao padrao;
+     - na passagem CONFIGURADA, ligar o sinal do CHECKOUT apagaria a cobertura de
+       'u-txt-zap-valor' (Zx10), que so e emitido no ramo SEM sinal -- o selo dele
+       sumiria de todas as saidas e a propria regressao acusaria SEM VESTIGIO.
+       O ramo com sinal e o ramo sem sinal da MESMA aba nao cabem numa passagem
+       so;
+     - a Mini loja nao tem esse conflito: nenhum dos textos dela na tabela TEXTOS
+       ('m-txt-tirar-aria', 'm-txt-sumiram', 'm-txt-cesta-estragada') mora num
+       ramo que o sinal desliga -- medido, os tres continuam aparecendo.
+   Como a CONTA e a mesma fonte nas duas abas (FC_CARRINHO_SRC.sinal, emitida
+   identica pelos dois geradores), uma aba basta para o motor do sinal entrar na
+   rede byte a byte. O que fica de fora e o que e PROPRIO do Checkout com sinal
+   -- e isso e coberto pelo scripts/verificar/sinal.mjs, que executa os dois
+   blocos numa pagina de verdade.
+
+   O TIPO E 'pct', o padrao da aba: o de valor fixo tem o ramo de recusa "sinal
+   maior que o total", que depende do carrinho e nao cabe numa fotografia de
+   texto -- ele e medido com o bloco rodando, em sinal.mjs. */
+export async function ramoSinal(pg){
+  if(!(await pg.$('#aba-loja'))) return;
+  await clicar(pg,'aba-loja');
+  await radio(pg,'m-sinal','sim');
+}
+
 /* Preenche o campo se ele existir, e devolve os que NAO existiam. A arvore de referencia
    pode ser anterior a rodada dos textos, e la nenhum destes campos existe: o set() de
    lib.mjs lanca nesse caso, e derrubaria a captura da referencia inteira -- a mesma razao
