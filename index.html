@@ -1931,6 +1931,8 @@
         <legend>Aparência do carrinho</legend>
         <label for="u-largura">Largura máxima <small>(pixels; o carrinho encolhe sozinho em telas menores)</small></label>
         <input type="number" id="u-largura" value="420" min="240" max="2000" step="10">
+        <label for="u-qr">Tamanho do QR Code <small>(px, de 120 a 320)</small></label>
+        <input type="number" id="u-qr" value="200" min="120" max="320" step="10">
         <label>Cor de destaque <small>(título, linha do total e botões Pix)</small></label>
         <div class="cor-linha"><input type="color" id="u-c1" value="#075E54"><input type="text" id="u-c1-t" value="#075E54"></div>
         <label>Fundo do card</label>
@@ -3416,6 +3418,8 @@
         <legend>Aparência</legend>
         <label for="m-larg">Largura máxima do bloco <small>(px, de 600 a 1600)</small></label>
         <input type="number" id="m-larg" value="1080" min="600" max="1600" step="20">
+        <label for="m-qr">Tamanho do QR Code <small>(px, de 120 a 320)</small></label>
+        <input type="number" id="m-qr" value="200" min="120" max="320" step="10">
         <label>Cor de destaque</label>
         <div class="cor-linha"><input type="color" id="m-c1" value="#0F3A30"><input type="text" id="m-c1-t" value="#0F3A30"></div>
         <label>Cor do fundo dos cartões</label>
@@ -4111,7 +4115,9 @@
     </div>
     <div>
       <fieldset>
-        <legend>Cores</legend>
+        <legend>Aparência</legend>
+        <label for="a-qr">Tamanho do QR Code <small>(px, de 120 a 320)</small></label>
+        <input type="number" id="a-qr" value="200" min="120" max="320" step="10">
         <label>Cor de destaque</label>
         <div class="cor-linha"><input type="color" id="a-c1" value="#0F3A30"><input type="text" id="a-c1-t" value="#0F3A30"></div>
         <label>Fundo do cartão</label>
@@ -5284,6 +5290,7 @@ var FCR_ROTULOS={novo:'novo',corrigido:'corr',melhorado:'melh',atencao:'aten',ex
 /* A lista, da versao mais recente para a mais antiga. NAO reordenar: o agrupamento por
    dia assume que versoes do mesmo dia estao juntas, e o desenho respeita esta ordem. */
 var FCR_NOTAS=[
+ {v:"2026-09-14e",d:"14 de setembro de 2026",itens:[["Novo","O **tamanho do QR Code** do Pix passou a ser ajustável também no Checkout, na Mini loja e no Agendamento por Pacote — até agora só o Link de cobrança tinha esse ajuste. Quem não mexer no campo continua com o tamanho de sempre."]]},
  {v:"2026-09-14d",d:"14 de setembro de 2026",itens:[["Novo","Nasceu esta lista. O botão **Novidades**, na barra do topo, conta o que mudou em cada versão publicada, da mais recente para a mais antiga."],["Novo","Cada dia abre e fecha: a lista nasce com o dia mais recente aberto e o resto recolhido."],["Novo","**A partir daqui, toda alteração publicada entra nesta lista** — correção ou novidade, sempre. E se alguma versão ficar de fora, a ferramenta **avisa sozinha**: uma barra vermelha no alto da tela diz qual versão foi publicada sem descrição. Antes disso, quem esquecesse não teria como saber."]]},
  {v:"2026-09-14c",d:"14 de setembro de 2026",itens:[["Novo","Checkout, Mini loja e Agendamento por Pacote: cada produto e cada item opcional pode ter o seu próprio **SKU** — o código de referência que aparece linha por linha no seu relatório do PayPal. São seis campos novos."],["Corrigido","Todas as linhas do relatório do PayPal levavam o mesmo código: o do pedido. Agora cada linha leva o seu."],["Melhorado","SKU em branco sai sem o campo, em vez de cair no código do pedido. SKU repetido em dois itens é recusado, nomeando os dois."],["Atenção","O pacote não reaproveita o código do TidyCal, e SKU vazio não herda nada de ninguém: são códigos com significados diferentes, e herdar em silêncio seria pior que deixar em branco."]]},
  {v:"2026-09-14b",d:"14 de setembro de 2026",itens:[["Corrigido","Agendamento por Pacote: uma chave Pix colada com um caractere invisível na ponta era aceita, e a prévia gerava um código Pix **diferente** do que ia para a página. As duas pontas passaram a limpar a chave do mesmo jeito — o mesmo que o Link de cobrança e a página `/cobrar` já usavam. As outras três abas não tinham o problema."],["Melhorado","Dois textos configuráveis ganharam, por dentro, o mesmo nome que já tinham nas outras abas. A conversão é automática e acontece uma vez: o que você escreveu continua onde estava."],["Melhorado","A frase que aparece quando o cliente copia o código Pix passou a ser a mesma nas quatro abas de pagamento."]]},
@@ -6404,8 +6411,9 @@ function fcPpBotoesSrc(prefixo,ppcor,usaSinal,comentZero,aoAprovarExtra,temItens
    comportamento, nao refatoracao) -- por isso o commit desta extracao fica sozinho.
    Parametros: "ind" e a indentacao da linha da funcao e do fechamento (a /pagar escreve com
    dois espacos, aninhada dentro de pix()); "tamanho" e o texto que vai no width/height -- na
-   /pagar e o nome de uma variavel do bloco (TAMANHO_QR, configuravel na aba), mas pode ser um
-   numero literal para quem nao tiver essa variavel. */
+   /pagar e o nome de uma variavel do bloco (TAMANHO_QR, configuravel na aba), e nas outras
+   tres e o numero literal que o campo da aba escolheu ('u-qr'/'m-qr'/'a-qr', desde
+   14/09/2026). As QUATRO sao configuraveis; o que muda e so a forma de escrever o numero. */
 /* O AVISO DE QUE O PIX NAO CONFIRMA SOZINHO -- uma regra, quatro abas (leva 5, 13/09/2026).
    Ate esta rodada as quatro abas emitiam QUATRO aparencias: cor #444 com veu .045 no Checkout,
    #5a5346 com .045 na Mini loja, e sem cor com .05 na Agendamento e na Link de cobranca.
@@ -7370,7 +7378,7 @@ var ABAS=[
            ['u.prods.ops',{nome:'',desc:'',preco:0,qtd:false},'nome'],
            ['u.cps',{codigo:'',tipo:'pct_total',valor:0,validade:'',minimo:''},'codigo']],
    exemplo:'ex.: Natal 2026 - pacotes',
-   guarda:'tudo o que está configurado nesta aba — formas de pagamento, o <b>meio prioritário</b>, moeda, <b>produtos com os opcionais de cada um</b>, cupons, código do pedido, sinal, desconto Pix, textos, largura e cores. Não guarda o <b>formulário de cadastro</b> pela metade, e aplicar um preset <b>esvazia</b> esse formulário: ele descreve um produto que ainda não existe no catálogo que está chegando.'},
+   guarda:'tudo o que está configurado nesta aba — formas de pagamento, o <b>meio prioritário</b>, moeda, <b>produtos com os opcionais de cada um</b>, cupons, código do pedido, sinal, desconto Pix, textos, largura, o <b>tamanho do QR Code</b> e cores. Não guarda o <b>formulário de cadastro</b> pela metade, e aplicar um preset <b>esvazia</b> esse formulário: ele descreve um produto que ainda não existe no catálogo que está chegando.'},
   {id:'bor',  nome:'Bordas com efeito',   chaves:['b'],         coleta:bColeta,restaura:bRestaura,gerar:bGerar,
    pref:'b',fora:['consol'],resumo:bPresetResumo,redesenhar:bPresetDepois,antesDeSalvar:bPresetAntes,
    presetOk:bPresetOk,aposPresets:bConsolRender,
@@ -7394,7 +7402,7 @@ var ABAS=[
            ['m.cps',{codigo:'',tipo:'pct_total',valor:0,validade:'',minimo:''},'codigo']],
    importar:mImportarLimpar,
    exemplo:'ex.: Foto Certa - loja de álbuns',
-   guarda:'tudo o que está configurado nesta aba — formas de pagamento, o <b>meio prioritário</b>, moeda, <b>o catálogo inteiro</b> (nome, descrição, preço, categoria, foto e os opcionais de cada produto), cupons, sinal, desconto Pix, a grade da vitrine, o tamanho pedido das fotos, textos e cores. Não guarda o que está no importador de galeria, que não é configuração e sim uma colagem de trabalho, nem o <b>formulário de cadastro</b> pela metade — aplicar um preset <b>esvazia</b> esse formulário.'},
+   guarda:'tudo o que está configurado nesta aba — formas de pagamento, o <b>meio prioritário</b>, moeda, <b>o catálogo inteiro</b> (nome, descrição, preço, categoria, foto e os opcionais de cada produto), cupons, sinal, desconto Pix, a grade da vitrine, o tamanho pedido das fotos, o <b>tamanho do QR Code</b>, textos e cores. Não guarda o que está no importador de galeria, que não é configuração e sim uma colagem de trabalho, nem o <b>formulário de cadastro</b> pela metade — aplicar um preset <b>esvazia</b> esse formulário.'},
   {id:'efe',  nome:'Efeitos de página',   chaves:['e'],         coleta:eColeta,restaura:eRestaura,gerar:eGerar,
    pref:'e',fora:[],resumo:ePresetResumo,redesenhar:ePresetDepois,antesDeSalvar:ePresetAntes,
    presetOk:ePresetOk,
@@ -7421,7 +7429,7 @@ var ABAS=[
            ['a.pacotes.ops',{nome:'',desc:'',preco:0,qtd:false},'nome'],
            ['a.cps',{codigo:'',tipo:'pct_total',valor:0,validade:'',minimo:''},'codigo']],
    exemplo:'ex.: Ensaios 2026 - pacotes',
-   guarda:'tudo o que está configurado nesta aba — a <b>forma de pagamento</b>, o <b>meio prioritário</b> e a cor dos botões do PayPal, as <b>famílias de pacotes</b> e a família de cada pacote, os pacotes (código, nome, duração, preço, o que inclui, o endereço do TidyCal e os <b>itens opcionais</b> de cada um), os <b>cupons</b>, o endereço da página de obrigado, o prefixo do identificador, o prazo da reserva, o desconto no Pix, as parcelas, a <b>cobrança de sinal</b> (se cobra, como calcula e o rótulo das duas linhas), quais <b>marcadores da página de obrigado</b> viajam e o texto reserva de cada um, como o quadro abre espaço para o formulário de reserva (medindo ou pela altura calibrada), as alturas do calendário, quando abrir o espaço calibrado, a largura das linhas compactas, textos e cores. Aplicar um preset <b>substitui as famílias que estão na tela</b> e <b>esvazia o formulário de cadastro</b>: ele é a fotografia da aba inteira.'}
+   guarda:'tudo o que está configurado nesta aba — a <b>forma de pagamento</b>, o <b>meio prioritário</b> e a cor dos botões do PayPal, as <b>famílias de pacotes</b> e a família de cada pacote, os pacotes (código, nome, duração, preço, o que inclui, o endereço do TidyCal e os <b>itens opcionais</b> de cada um), os <b>cupons</b>, o endereço da página de obrigado, o prefixo do identificador, o prazo da reserva, o desconto no Pix, as parcelas, a <b>cobrança de sinal</b> (se cobra, como calcula e o rótulo das duas linhas), quais <b>marcadores da página de obrigado</b> viajam e o texto reserva de cada um, como o quadro abre espaço para o formulário de reserva (medindo ou pela altura calibrada), as alturas do calendário, quando abrir o espaço calibrado, a largura das linhas compactas, o <b>tamanho do QR Code</b> da página de obrigado, textos e cores. Aplicar um preset <b>substitui as famílias que estão na tela</b> e <b>esvazia o formulário de cadastro</b>: ele é a fotografia da aba inteira.'}
 ];
 var fcFrag={};       /* ultimo pedaco bom de cada aba, para nao apagar o que a aba quebrada tinha */
 var fcSoLeitura={};  /* abas que falharam ao restaurar: param de coletar do DOM ate recarregar */
@@ -14849,7 +14857,7 @@ function uColeta(){
       upsell:$('u-upsell').value,upsellon:radio('u-upsellon'),
       sinal:radio('u-sinal'),sinaltipo:radio('u-sinaltipo'),sinalpct:$('u-sinalpct').value,sinalfixo:$('u-sinalfixo').value,
       resumo:radio('u-resumo'),
-      larg:$('u-largura').value,ppcor:radio('u-ppcor'),qtdmax:$('u-qtdmax').value,
+      larg:$('u-largura').value,ppcor:radio('u-ppcor'),qtdmax:$('u-qtdmax').value,qr:$('u-qr').value,
       c1:$('u-c1-t').value,c2:$('u-c2-t').value,c3:$('u-c3-t').value}
   };
   /* Os textos configuraveis (ver U_TXT_DEFS, logo antes de uCfg). */
@@ -14887,6 +14895,10 @@ function uRestaura(st){
      guardado nao trazia a chave; e chave ausente passa a devolver a FABRICA da tabela em vez
      do valor que estivesse na tela. */
   $('u-largura').value=U.larg||420;
+  /* O TAMANHO DO QR (14/09/2026) e ACRESCIMO PURO: estado gravado por versao anterior nao tem
+     a chave, e o ausente cai nos 200 -- o mesmo numero que a aba emitia fixo. Backup antigo
+     abre e o bloco sai igual. */
+  $('u-qr').value=(U.qr!=null&&U.qr!=='')?U.qr:200;
   $('u-qtdmax').value=(U.qtdmax!=null&&U.qtdmax!=='')?U.qtdmax:10;
   setRadio('u-sinal',U.sinal||'nao');setRadio('u-sinaltipo',U.sinaltipo||'pct');
   $('u-sinalpct').value=(U.sinalpct!=null&&U.sinalpct!=='')?U.sinalpct:30;
@@ -14962,7 +14974,14 @@ function uPresetDepois(){
    entre 0 e 90 na frente do operador. O teto de 2000px da largura so pega erro de digitacao
    (mesmo criterio do s-larg no Slideshow) e esta declarado tambem no HTML. */
 var U_NUMS=[['u-qtdmax',10,2,99,true],['u-sinalpct',30,1,99,false],['u-sinalfixo',100,0.01,999999,false],
-  ['u-descpix',5,0,90,false],['u-largura',420,240,2000,true]];
+  ['u-descpix',5,0,90,false],['u-largura',420,240,2000,true],
+  /* O TAMANHO DO QR (14/09/2026). Mesma faixa e mesmo passo do campo que ja existia na aba
+     Link de cobranca ('p-qr', 120 a 320, de dez em dez) -- faixa nova seria uma segunda regra
+     para a mesma coisa. O PADRAO E 200, e nao os 180 de la: 200 e o numero que esta aba ja
+     emitia fixo, e padrao de fabrica que muda a saida sem ninguem pedir e exatamente o que a
+     regressao byte a byte existe para denunciar. Os 180 continuam certos na Link de cobranca,
+     onde o QR E a pagina; aqui ele e um elemento no meio de um carrinho. */
+  ['u-qr',200,120,320,true]];
 function uPreso(id){return fcPreso(U_NUMS,id);}
 /* Quantos itens DESTE produto (ele proprio e seus opcionais) foram marcados como vendidos por
    quantidade. Serve a lista da aba e, somado, decide se o recurso inteiro esta ligado. */
@@ -15652,6 +15671,9 @@ function uCfg(){
     selprod:radio('u-selprod')||'unico',
     prods:uProds, cps:uCps,
     qtdLigada:uQtdLigada(uProds), qtdmax:uPreso('u-qtdmax')||10,
+    /* Preso por U_NUMS, a MESMA linha que corrige o campo na tela -- o clamp nao pode morar
+       so aqui, senao ele mudaria em silencio um numero que o operador esta lendo. */
+    qr:uPreso('u-qr')||200,
     c1:corSegura('u-c1','#075E54'), c2:corSegura('u-c2','#ffffff'), c3:corSegura('u-c3','#333333')
   };
   /* Os textos configuraveis (ver U_TXT_DEFS): lidos direto do DOM pela tabela unica --
@@ -16095,11 +16117,12 @@ function uBloco(cfg){
        sob demanda (sem a corrida do onload eager) e desenha dentro de try/catch, escondendo a
        caixa se a biblioteca nao chegar em vez de deixar a excecao derrubar o resto de
        gerarPix. Corrige os dois defeitos medidos no Checkout (spec 0.1). */
-    /* 200 como na Mini loja e na Agendamento por pacote (leva 5): era 220 so aqui. O
-       tamanho CONFIGURAVEL da Link de cobranca (TAMANHO_QR, 120 a 320) nao foi estendido as
-       outras tres -- campo novo muda o formato do que fica gravado (estado, preset e
-       "Exportar tudo"), e isso pede a palavra do dono antes. Esta declarado no relatorio. */
-    c+=fcDesenharQrSrc('','200');
+    /* O TAMANHO E CONFIGURAVEL desde 14/09/2026 ('u-qr', 120 a 320). Era fixo em 200 -- 220
+       ate a leva 5, que uniformizou o numero das tres abas --, e o campo existia so na Link de
+       cobranca. O dono autorizou estende-lo sabendo o preco: chave nova no estado, no preset e
+       no "Exportar tudo". E acrescimo puro, e o padrao de fabrica e o proprio 200, entao a
+       saida de quem nao mexer no campo continua byte a byte a mesma. */
+    c+=fcDesenharQrSrc('',String(cfg.qr));
   }
 
   c+='function montar(){\n';
@@ -18141,7 +18164,10 @@ var A_NUMS=[['a-prazoh',24,1,720,true],['a-descpix',5,0,90,false],['a-parcelas',
      640 e o valor que a aba ja usava fixo para passar de tres colunas para uma -- a troca de
      formato acontece no MESMO ponto em que a grade ja mudava, o unico que nao cria um terceiro
      estado intermediario (uma coluna de cartoes altos). */
-  ['a-largcards',640,320,1024,true]];
+  ['a-largcards',640,320,1024,true],
+  /* O tamanho do QR da PAGINA DE OBRIGADO: mesma faixa das outras tres abas, padrao 200 --
+     ver U_NUMS, onde a escolha do 200 (e nao do 180 da Link de cobranca) esta escrita. */
+  ['a-qr',200,120,320,true]];
 function aPreso(id){return fcPreso(A_NUMS,id);}
 /* ===== mostra/esconde campos conforme a forma de pagamento escolhida =====
    Mesmo molde de uToggles/mToggles (10738+/17609+): 'a-pp-campos' some com 'pix' (nada de
@@ -19294,6 +19320,9 @@ function aCfg(){
      alimenta uma @media): prender so a largura da previa deixaria o iframe num valor e o CSS
      gerado em outro, e a previa passaria a mentir. */
   var largcards=aPreso('a-largcards');if(largcards==null)largcards=640;
+  /* O tamanho do QR da pagina de obrigado, preso por A_NUMS -- a mesma linha que corrige o
+     campo na tela. Ver uCfg. */
+  var qr=aPreso('a-qr');if(qr==null)qr=200;
   var r={
     pacotes:aPacotes, familias:aFamilias, cps:aCps,
     /* IDENTIDADE: lida do painel global (ver o bloco "identidade e paleta"), no MESMO molde de
@@ -19308,7 +19337,7 @@ function aCfg(){
     metodo:m, usaPP:usaPP, usaPix:usaPix, prio:prio, ppcor:radio('a-ppcor')||'gold',
     prazoh:prazoh, descpix:descpix, parcelas:parcelas,
     sinal:{ativo:sinalOn,tipo:sinalTipo,valor:(sinalTipo==='fixo')?(Math.round(sinalFixo*100)/100):sinalPct},
-    altdesk:altdesk, altmob:altmob, largmob:largmob, largcards:largcards, qtdmax:qtdmax,
+    altdesk:altdesk, altmob:altmob, largmob:largmob, largcards:largcards, qtdmax:qtdmax, qr:qr,
     medir:medir, sempre:sempre, precal:precal, upsell:upsellCfg,
     c1:corSegura('a-c1','#0F3A30'), c2:corSegura('a-c2','#ffffff'), c3:corSegura('a-c3','#333333'),
     ob:aObCfg()
@@ -19354,6 +19383,7 @@ function aColeta(){
     sinalpct:aElVal('a-sinalpct',30),sinalfixo:aElVal('a-sinalfixo',100),
     altdesk:aElVal('a-altdesk',2350),altmob:aElVal('a-altmob',2700),largmob:aElVal('a-largmob',700),
     largcards:aElVal('a-largcards',640),
+    qr:aElVal('a-qr',200),
     medir:radio('a-medir'),sempre:radio('a-sempre'),precal:radio('a-precal'),
     qtdmax:aElVal('a-qtdmax',10),
     c1:aElVal('a-c1-t','#0F3A30'),c2:aElVal('a-c2-t','#ffffff'),c3:aElVal('a-c3-t','#333333'),
@@ -19468,6 +19498,9 @@ function aRestaura(st){
      tem. Sem alerta: nada foi convertido e nada se perdeu. */
   setRadio('a-precal',(A.precal==='nao'||A.precal==='todos')?A.precal:'um');
   el=$('a-qtdmax');if(el)el.value=(A.qtdmax!=null&&A.qtdmax!=='')?A.qtdmax:10;
+  /* Acrescimo puro -- ver uRestaura: chave ausente cai nos 200, que e o que a pagina de
+     obrigado emitia fixo. */
+  el=$('a-qr');if(el)el.value=(A.qr!=null&&A.qr!=='')?A.qr:200;
   el=$('a-c1-t');if(el){el.value=A.c1;elc=$('a-c1');if(elc)elc.value=corValida(A.c1)?A.c1:'#0F3A30';}
   el=$('a-c2-t');if(el){el.value=A.c2;elc=$('a-c2');if(elc)elc.value=corValida(A.c2)?A.c2:'#ffffff';}
   el=$('a-c3-t');if(el){el.value=A.c3;elc=$('a-c3');if(elc)elc.value=corValida(A.c3)?A.c3:'#333333';}
@@ -21305,7 +21338,7 @@ function aBlocoObrigado(cfg){
      try/catch) mas escrita a mao, com aspas duplas em vez de simples nas strings internas.
      Agora consome a mesma fonte que as outras tres; o comentario que explicava o desenho
      tambem veio junto, de dentro da funcao compartilhada. */
-  c+=fcDesenharQrSrc('','200');
+  c+=fcDesenharQrSrc('',String(cfg.qr));
   }
 
   /* ===== 3d. o cartao -- SO EMITIDO com usaPP (Tarefa do seletor de forma de pagamento): em
@@ -24295,7 +24328,10 @@ var mProds=[],mCps=[],mEditOps=[],mEditIdx=-1;
 var M_NUMS=[['m-larg',1080,600,1600,true],['m-cols',3,2,5,true],['m-mob',760,320,1024,true],
   ['m-imgvit',400,200,900,true],['m-imgdet',1000,400,1600,true],
   ['m-descpix',5,0,90,false],['m-sinalpct',30,1,99,false],['m-sinalfixo',100,0.01,999999,false],
-  ['m-qtdmax',10,2,99,true]];
+  ['m-qtdmax',10,2,99,true],
+  /* O tamanho do QR: mesma faixa das outras tres abas, padrao 200 -- ver U_NUMS, onde a
+     escolha do 200 (e nao do 180 da Link de cobranca) esta medida e escrita. */
+  ['m-qr',200,120,320,true]];
 function mPreso(id){return fcPreso(M_NUMS,id);}
 /* Quantos itens DESTE produto (ele proprio e seus opcionais) foram marcados como vendidos por
    quantidade, e se ALGUM produto do catalogo pede quantidade. Mesmo par de uQtdItens/uQtdLigada
@@ -24336,7 +24372,7 @@ function mColeta(){
     prop:radio('m-prop'),filtro:radio('m-filtro'),
     sinal:radio('m-sinal'),sinaltipo:radio('m-sinaltipo'),sinalpct:$('m-sinalpct').value,
     sinalfixo:$('m-sinalfixo').value,qtdmax:$('m-qtdmax').value,resumo:radio('m-resumo'),
-    larg:$('m-larg').value,c1:$('m-c1-t').value,c2:$('m-c2-t').value,c3:$('m-c3-t').value}};
+    larg:$('m-larg').value,qr:$('m-qr').value,c1:$('m-c1-t').value,c2:$('m-c2-t').value,c3:$('m-c3-t').value}};
   /* Os textos configuraveis (ver M_TXT_DEFS, logo antes de mCfg). */
   fcTxtLer(M_TXT_DEFS,r.m);
   return r;
@@ -24373,6 +24409,10 @@ function mRestaura(st){
   if(M.qtdmax!=null)$('m-qtdmax').value=M.qtdmax;
   if(M.resumo)setRadio('m-resumo',M.resumo);
   if(M.larg!=null)$('m-larg').value=M.larg;
+  /* Acrescimo puro -- ver uRestaura: chave ausente cai nos 200, que e o que a aba emitia fixo.
+     A guarda aqui e escrita com o padrao do lado direito (e nao 'if(M.qr!=null)') de proposito:
+     backup antigo tem de deixar o campo NO PADRAO, e nao no que estivesse na tela. */
+  $('m-qr').value=(M.qr!=null&&M.qr!=='')?M.qr:200;
   /* Cor e numero se corrigem a vista (fcCoresAjustar/fcAjustarTodos rodam depois); texto livre
      HONRA o vazio -- guarda de !=null, e nao de verdade, pelo motivo registrado na §4 da
      documentacao: com if(M.t1) o operador que apaga um rotulo de proposito recebe o padrao de
@@ -25215,6 +25255,8 @@ function mCfg(){
        digitado, e prender so a previa deixaria o quadro num numero e o CSS gerado em outro. */
     larg:mPreso('m-larg')||1080, cols:mPreso('m-cols')||3, mob:mPreso('m-mob')||760,
     imgvit:mPreso('m-imgvit')||400, imgdet:mPreso('m-imgdet')||1000,
+    /* Preso por M_NUMS, a mesma linha que corrige o campo na tela -- ver uCfg. */
+    qr:mPreso('m-qr')||200,
     prop:radio('m-prop')||'1 / 1', filtro:(radio('m-filtro')!=='nao'),
     c1:corSegura('m-c1','#0F3A30'), c2:corSegura('m-c2','#ffffff'), c3:corSegura('m-c3','#333333')
   };
@@ -25768,7 +25810,7 @@ function mBlocoJs(cfg,prods,cps,cats,client,cod){
        sob demanda (sem a corrida do onload eager) e desenha dentro de try/catch, escondendo a
        caixa se a biblioteca nao chegar em vez de deixar a excecao derrubar o resto de
        gerarPix. Corrige os dois defeitos medidos na Mini loja (spec 0.1). */
-    c+=fcDesenharQrSrc('','200');
+    c+=fcDesenharQrSrc('',String(cfg.qr));
   }
   return c+mBlocoRuntime(cfg,usaPP,usaPix,usaQtd,usaSinal,usaResumo,descpix,zap,usaFiltro);
 }
