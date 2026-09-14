@@ -461,7 +461,18 @@ console.log('\n--- o formato gravado, contra '+REF+' ---');
       {nome:'o upsell depois do pagamento (13/09/2026)',
        chaves:{u:['upsell','upsellon'], m:['upsell','upsellon'],
                a:['upsell','upsellon'], p:['upsell','upsellon']},
-       esperado:(aba,ch) => ch==='upsell' ? '' : 'nao'}
+       esperado:(aba,ch) => ch==='upsell' ? '' : 'nao'},
+      /* O TAMANHO DO QR CODE (14/09/2026, leva 9, autorizado pelo dono). Uma chave nova em
+         cada uma das TRES abas que emitiam o QR fixo em 200. A quarta nao aparece aqui, e a
+         ausencia e deliberada: 'p.qr' ja existia nos dois lados -- o campo nasceu na Link de
+         cobranca --, entao ele nao e chave nova e continua sendo cobrado pela comparacao final.
+         A FABRICA E 200, e nao os 180 da Link de cobranca: 200 e o numero que estas tres ja
+         emitiam, e com ele o bloco sai byte a byte como saia antes da rodada. E o mesmo
+         criterio do upsell logo acima -- e o que a regressao contra 46ab2fd confirmou com zero
+         divergencia. */
+      {nome:'o tamanho do QR Code nas tres abas que o emitiam fixo (14/09/2026)',
+       chaves:{u:['qr'], m:['qr'], a:['qr']},
+       esperado:() => '200'}
     ];
     /* FABRICA TROCADA e outra coisa de CHAVE NOVA, e a diferenca importa: a chave ja existia
        nos dois lados e o que mudou foi o PADRAO dela. Entao os dois valores sao declarados, e
