@@ -527,6 +527,51 @@
   .fcg-painel textarea{height:110px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
     font-size:11.5px;line-height:1.45}
 
+  /* ===== NOVIDADES (14/09/2026) =====
+     Terceiro painel da barra do topo, vestido pela mesma .fcg-painel de "Detalhes" e
+     "Identidade". Espaco de nomes 'fcr-': 'fcn-' estava tomado pelas variaveis que as Bordas
+     escrevem no CODIGO GERADO (--fcn-h/v/c), e prefixo de ferramenta nunca pode coincidir com
+     prefixo de bloco gerado -- um grep traria as duas coisas misturadas.
+     A rolagem e do painel, e nao da pagina: sem teto, dez secoes abertas empurrariam as abas
+     para fora da tela, que e exatamente o que fez os outros dois paineis nunca ficarem abertos
+     juntos. 66vh deixa a barra e o inicio das abas visiveis atras. */
+  .fcr-rolo{max-width:var(--larg);margin:0 auto;padding:0 20px;max-height:66vh;overflow:auto}
+  .fcr-rolo .secao{margin:22px 0 10px}
+  .fcr-conta{margin-left:auto;font-size:11px;font-weight:400;letter-spacing:.4px;opacity:.8;
+    text-transform:none}
+  .fcr-rolo .secao-dobra-seta{margin-left:12px}
+  .fcr-corpo{margin-bottom:6px}
+  .fcr-v{margin:0 0 14px;padding-left:12px;border-left:2px solid var(--linha)}
+  .fcr-vcab{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11.5px;
+    letter-spacing:.3px;color:var(--tinta-suave);margin-bottom:5px}
+  .fcr-nota{font-size:12.5px;line-height:1.6;margin:0 0 6px;color:var(--tinta-suave)}
+  .fcr-item{font-size:12.5px;line-height:1.65;margin:0 0 5px}
+  .fcr-item code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11.5px;
+    background:#EFEADC;border-radius:4px;padding:1px 4px}
+  /* A etiqueta e inline-block e nao flex: ela e a PRIMEIRA PALAVRA do item, e o texto que vem
+     depois tem de fluir em volta dela nas linhas seguintes. Em flex ela viraria uma coluna e o
+     texto de tres linhas abriria uma calha vazia ao lado. */
+  .fcr-et{display:inline-block;font-size:10.5px;font-weight:700;text-transform:uppercase;
+    letter-spacing:.6px;border-radius:5px;padding:1px 6px;margin-right:7px;
+    vertical-align:1px;white-space:nowrap}
+  .fcr-novo{background:#E3F0E1;color:#2C5A27;border:1px solid #9FC49A}
+  .fcr-corr{background:#E6EEF6;color:#254C73;border:1px solid #9CB8D4}
+  .fcr-melh{background:#F1ECDC;color:#5A4E27;border:1px solid #C9BC93}
+  .fcr-aten{background:#FFF6DF;color:#6B5210;border:1px solid #E3B23C}
+  .fcr-outro{background:#EEE;color:#555;border:1px solid #CCC}
+  .fcr-acoes{border:1px solid #E3B23C;background:#FFF6DF;border-radius:10px;padding:12px 14px;
+    margin:12px 0 4px}
+  .fcr-acoes-tit{font-size:12px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;
+    color:#6B5210;margin-bottom:8px}
+  .fcr-acoes .fcr-et{background:#fff}
+  .fcr-quando{display:inline-block;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    font-size:10.5px;font-weight:700;background:#fff;color:#6B5210;border:1px solid #E3B23C;
+    border-radius:5px;padding:1px 6px;margin-right:7px;vertical-align:1px;white-space:nowrap}
+  /* O aviso de que a versao em execucao nao esta descrita: vermelho, porque ele nao e um
+     detalhe de estilo -- ele diz que a lista abaixo pode estar mentindo por omissao. */
+  .fcr-orfa{border:1px solid #C0392B;background:#FDEDEC;color:#7B241C;border-radius:10px;
+    padding:10px 13px;margin:12px 0 4px;font-size:12.5px;line-height:1.6}
+
   /* ===== backup: exportar e importar (fase 4) =====
      Espaco de nomes 'fcx-', pelo mesmo motivo de 'fcp-' e 'fcg-': campo de aba comeca por
      prefixo de UMA letra, entao 'fcx-...' nao colide com campo nenhum e nao e alcancado pelos
@@ -662,6 +707,7 @@
     <button class="botao mini claro" type="button" id="fcg-descartar" title="Descartar as alterações e voltar ao que está guardado neste preset geral">Descartar</button>
     <button class="botao mini claro" type="button" id="fcg-detalhes">Detalhes</button>
     <button class="botao mini claro" type="button" id="fci-botao" title="Chave Pix, recebedor, Client ID, WhatsApp e a paleta — configuração da ferramenta, não da campanha">Identidade</button>
+    <button class="botao mini claro" type="button" id="fcr-botao" title="O que mudou em cada versão publicada da ferramenta">Novidades</button>
   </div>
   <!-- ==================== ACHAR UM TEXTO (11/09/2026) ====================
        Segunda linha da barra grudada no topo. Procura no DOM de TODAS as abas, abertas ou
@@ -684,6 +730,16 @@
      A distincao que o rotulo precisa carregar: "Detalhes" e da CAMPANHA (campanha, pagina,
      codigos manuais, backup); "Identidade" e da FERRAMENTA. E ela que explica por que a
      identidade nao entra no preset geral -- chave Pix e a mesma no Natal e na Pascoa. -->
+<!-- ==================== NOVIDADES ====================
+     Terceiro painel recolhivel da barra do topo, ao lado de "Detalhes" e "Identidade", e
+     pela mesma razao dos outros dois: isto e informacao SOBRE a ferramenta, nao um
+     construtor. O carimbo embaixo do titulo diz QUAL versao esta rodando; este painel diz
+     O QUE ela mudou. O conteudo e montado por fcrDesenhar na primeira abertura -- aqui fica
+     so a casca, para o HTML nao carregar 59 versoes escritas a mao. -->
+<div class="fcg-painel" id="fcr-painel">
+  <div class="fcr-rolo" id="fcr-lista"></div>
+</div>
+
 <div class="fcg-painel" id="fci-painel">
     <div class="grade">
       <!-- Recado da migracao: o que a ferramenta recolheu das abas e o que ela ignorou nos
@@ -5130,11 +5186,17 @@ function fcOrdSo1(pref,umSo){
    por aria-controls, o container que ele esconde. addEventListener e nunca onclick (item 1 do
    Manual do Prosite -- aqui e a propria ferramenta, mas a norma da casa e a mesma), e o teclado
    entra junto: o cabecalho e um div, entao Enter e espaco precisam ser tratados a mao. */
+/* IDEMPOTENTE de proposito: o painel Novidades cria secoes DEPOIS da partida e chama esta
+   funcao de novo para liga-las. Sem a marca, os cabecalhos das abas ganhariam um segundo
+   listener, o clique alternaria duas vezes e a secao nunca mais abriria -- e nao haveria erro
+   nenhum na tela para denunciar isso. */
 function fcdLigar(){
   var cabs=document.querySelectorAll('.secao.dobra'),i;
   for(i=0;i<cabs.length;i++)(function(cab){
     var corpo=$(cab.getAttribute('aria-controls'));
     if(!corpo)return;
+    if(cab.getAttribute('data-fcd')==='1')return;
+    cab.setAttribute('data-fcd','1');
     function alterna(){fcdEstado(cab,corpo,corpo.className.indexOf('fcd-oculto')>=0);}
     cab.addEventListener('click',alterna);
     cab.addEventListener('keydown',function(e){
@@ -5162,6 +5224,362 @@ function fcdEstado(cab,corpo,abrir){
 function fcdAbrir(corpo){
   if(!corpo||!corpo.id)return;
   fcdEstado(document.querySelector('.secao.dobra[aria-controls="'+corpo.id+'"]'),corpo,true);
+}
+/* ============================================================================
+   NOVIDADES -- o registro do que mudou em cada versao publicada (14/09/2026)
+   ============================================================================
+   POR QUE ISTO EXISTE. O carimbo embaixo do titulo diz QUAL versao o navegador esta
+   executando; ele nunca disse O QUE aquela versao mudou. O dono acompanha a ferramenta
+   sem ler codigo, e o unico lugar onde o historico existia era a docs/pendencias.md e o
+   git log -- os dois escritos para quem programa.
+
+   POR QUE NAO E UMA ABA. As abas de ABAS sao CONSTRUTORES: cada uma coleta, restaura,
+   guarda preset, entra no preset geral, aparece no painel consolidado e e varrida pelo
+   'Gerar todos os codigos'. Uma aba que nao gera nada teria de ser excecao em cada um
+   desses lugares -- e fcAbasTxt() passaria a contar como construtor uma pagina de texto,
+   fazendo as 16 frases que passam por ele mentirem por um. Isto e informacao SOBRE a
+   ferramenta, exatamente como o painel Identidade, e mora onde ele mora: um terceiro
+   painel da barra grudada no topo, ao lado de 'Detalhes' e 'Identidade'.
+
+   POR QUE O TEXTO MORA AQUI DENTRO, E NAO NUM ARQUIVO PROPRIO. A ferramenta ja carrega
+   fc-compartilhado.js, entao um segundo arquivo seria possivel -- e seria o defeito que
+   esta lista existe para descrever. O carimbo de publicacao denuncia copia velha guardada
+   pelo navegador; um arquivo separado tem VALIDADE PROPRIA no cache, entao a ferramenta
+   poderia anunciar 2026-09-14d e a lista parar em 2026-09-14a, cada uma certa sobre si
+   mesma e a dupla mentindo. Aqui dentro isso e impossivel por construcao: a lista viaja
+   nos mesmos bytes que o FC_VERSAO que ela descreve.
+   O CUSTO, MEDIDO: 31 KB de dados, 2,6% do arquivo -- e nenhuma disciplina de versao nova
+   (um arquivo proprio exigiria a troca em quatro lugares, como a fc-compartilhado.js, para
+   comprar em troca a possibilidade de ficar defasado). O outro custo, o de a lista
+   envelhecer, e uma versao publicada sem descricao -- e esse o painel denuncia em vermelho
+   (ver fcrDesenhar) e a prova cobra (scripts/verificar/novidades.mjs).
+
+   >>> COMO ENTRA A PROXIMA VERSAO <<<
+   1. Rode scripts/carimbar-publicacao.sh e anote a versao que ele escolheu (ele avanca a
+      letra sozinho: mesma data -> a, b, c...; data nova -> volta ao 'a').
+   2. Acrescente a entrada NO TOPO de FCR_NOTAS, na forma
+        {v:'AAAA-MM-DDx', d:'<dia> de <mes> de <ano>', nota:'', itens:[
+          ['Novo','o que passou a existir'],
+          ['Corrigido','o que deixou de estar errado'],
+          ['Melhorado','o que ficou melhor sem ser nenhum dos dois'],
+          ['Atencao','o que exige cuidado ou uma acao do dono']]}
+      Sem explicacao tecnica: o leitor e o dono, nao quem programa. Os rotulos permitidos
+      sao os de FCR_ROTULOS; rotulo desconhecido sai em cinza, sem quebrar nada.
+   3. O agrupamento por dia, a contagem e o rotulo da data saem daqui -- nao se escreve
+      numero de versao em frase nenhuma (mesma regra de ABAS.length).
+   4. *negrito* com dois asteriscos e `mono` com crase funcionam no texto do item.
+   5. Rode 'node scripts/verificar/novidades.mjs'. Ele compara esta lista com TODAS as
+      versoes que o git conhece e FALHA nomeando a que ficou sem descricao -- e aceita
+      UMA entrada ainda ausente do git: a que a rodada em curso vai publicar hoje.
+   Esquecer o passo 2 nao e silencioso: o painel abre com um aviso VERMELHO dizendo que a
+   versao em execucao nao foi descrita, e a prova do passo 5 fica vermelha junto.
+   ============================================================================ */
+
+/* Os rotulos aceitos e a cor de cada um. A chave e a PRIMEIRA PALAVRA do rotulo, sem acento e
+   em caixa baixa: assim 'Atencao' com til e 'Exige uma acao sua, uma unica vez' caem na mesma
+   entrada sem que a tabela precise repetir cada redacao. Rotulo fora dela sai em cinza -- some
+   a cor, nunca o texto; e a varredura de novidades.mjs cobra que nao sobre nenhum. */
+var FCR_ROTULOS={novo:'novo',corrigido:'corr',melhorado:'melh',atencao:'aten',exige:'aten'};
+
+/* A lista, da versao mais recente para a mais antiga. NAO reordenar: o agrupamento por
+   dia assume que versoes do mesmo dia estao juntas, e o desenho respeita esta ordem. */
+var FCR_NOTAS=[
+ {v:"2026-09-14d",d:"14 de setembro de 2026",itens:[["Novo","Nasceu esta lista. O botão **Novidades**, na barra do topo, conta o que mudou em cada versão publicada, da mais recente para a mais antiga."],["Novo","Cada dia abre e fecha: a lista nasce com o dia mais recente aberto e o resto recolhido."],["Novo","**A partir daqui, toda alteração publicada entra nesta lista** — correção ou novidade, sempre. E se alguma versão ficar de fora, a ferramenta **avisa sozinha**: uma barra vermelha no alto da tela diz qual versão foi publicada sem descrição. Antes disso, quem esquecesse não teria como saber."]]},
+ {v:"2026-09-14c",d:"14 de setembro de 2026",itens:[["Novo","Checkout, Mini loja e Agendamento por Pacote: cada produto e cada item opcional pode ter o seu próprio **SKU** — o código de referência que aparece linha por linha no seu relatório do PayPal. São seis campos novos."],["Corrigido","Todas as linhas do relatório do PayPal levavam o mesmo código: o do pedido. Agora cada linha leva o seu."],["Melhorado","SKU em branco sai sem o campo, em vez de cair no código do pedido. SKU repetido em dois itens é recusado, nomeando os dois."],["Atenção","O pacote não reaproveita o código do TidyCal, e SKU vazio não herda nada de ninguém: são códigos com significados diferentes, e herdar em silêncio seria pior que deixar em branco."]]},
+ {v:"2026-09-14b",d:"14 de setembro de 2026",itens:[["Corrigido","Agendamento por Pacote: uma chave Pix colada com um caractere invisível na ponta era aceita, e a prévia gerava um código Pix **diferente** do que ia para a página. As duas pontas passaram a limpar a chave do mesmo jeito — o mesmo que o Link de cobrança e a página `/cobrar` já usavam. As outras três abas não tinham o problema."],["Melhorado","Dois textos configuráveis ganharam, por dentro, o mesmo nome que já tinham nas outras abas. A conversão é automática e acontece uma vez: o que você escreveu continua onde estava."],["Melhorado","A frase que aparece quando o cliente copia o código Pix passou a ser a mesma nas quatro abas de pagamento."]]},
+ {v:"2026-09-14a",d:"14 de setembro de 2026",itens:[["Melhorado","A última rodada de alinhamento das quatro abas de pagamento: **doze diferenças de aparência** entre elas foram acertadas. A moldura branca atrás do QR Code do Pix, que só o Checkout tinha, passou às outras três; e o aviso de que o Pix não confirma sozinho passou a usar a cor de texto que você escolheu, em vez de uma cor fixa."],["Corrigido","Mini loja e vitrine do Agendamento por Pacote: dez botões saíam com a fonte, o tamanho e o peso errados — o navegador descartava a regra inteira, sem avisar. Agora seguem a fonte do seu site."],["Atenção","O tamanho do QR Code continua ajustável só no Link de cobrança. Dá-lo às outras três criaria um campo novo no que fica guardado e nos seus arquivos de backup, e isso espera a sua palavra. O tamanho fixo das quatro foi alinhado."]]},
+ {v:"2026-09-13l",d:"13 de setembro de 2026",itens:[["Melhorado","Mini loja: o código gerado passa a sair sempre com a máquina de cupom, como nos outros construtores. Assim dá para criar um cupom editando o código já colado no site, sem regerar."],["Corrigido","O contador de caracteres dos campos com limite mostrava número errado quando o valor entrava sem digitação: ao limpar, ao editar, ao duplicar um pacote e ao aplicar um preset."]]},
+ {v:"2026-09-13k",d:"13 de setembro de 2026",itens:[["Novo","Cada construtor com PayPal mostra agora uma prévia de como o pedido vai aparecer no seu relatório do PayPal."],["Corrigido","O pedido enviado ao PayPal passou a listar o produto e cada item opcional separadamente. Antes ia tudo numa linha só, e no Checkout e na Mini loja os opcionais nem apareciam."],["Corrigido","Em alguns pedidos com cupom o cliente pagava um centavo a mais do que a conta exata. Acontecia em 0,17% das combinações e era sempre para mais; agora a conta fecha em todas."]]},
+ {v:"2026-09-13j",d:"13 de setembro de 2026",itens:[["Novo","Agendamento por Pacote: a ferramenta passou a recusar um sinal maior do que o maior pacote. Antes dava para publicar uma página que ninguém conseguia pagar."],["Corrigido","Checkout: o código do pedido com espaço, barra ou acento chegava desfigurado ao extrato do banco (`Pedido No 1 - Natal/2026` virava `PedidoNo1Natal2026`). Agora a ferramenta avisa e recusa, como a Mini loja já fazia."],["Corrigido","Agendamento por Pacote: o endereço da página de obrigado passou a ser conferido de verdade, e só aceita endereço completo."],["Melhorado","As quatro abas de pagamento passaram a seguir as mesmas regras: preço zero recusado, resumo copiável ligado de fábrica, desconto no Pix de 5% nas três de catálogo, separador neutro \"OU\" entre as formas de pagamento e o percentual de desconto andando de meio em meio. O separador antigo é trocado sozinho na abertura."]]},
+ {v:"2026-09-13i",d:"13 de setembro de 2026",itens:[["Novo","Agendamento por Pacote: depois de gerar o Pix o cliente ganhou o botão \"Já paguei\", que avisa você pelo WhatsApp — e que também leva à página seguinte quando o redirecionamento está ligado. As outras três abas de pagamento já tinham."],["Corrigido","Agendamento por Pacote: o WhatsApp era exigido para gerar o código mesmo numa página que vende só por cartão, onde ele não era usado."]]},
+ {v:"2026-09-13h",d:"13 de setembro de 2026",itens:[["Novo","Nas quatro abas de pagamento: depois de pagar, o cliente pode ser levado a outra página sua — uma oferta, um agradecimento, o que você quiser. Pelo cartão o envio é automático; pelo Pix ele acontece quando o cliente clica em \"Já paguei\", o que significa que chega gente que ainda não pagou."],["Melhorado","O endereço de destino fica escrito no código mesmo com o recurso desligado, para você poder ligá-lo depois direto no código colado no site, sem voltar à ferramenta."],["Atenção","Na prévia da ferramenta, clicar em \"Já paguei\" com o recurso ligado leva a própria prévia para a página de destino, porque a prévia executa o código de verdade. O aviso está escrito embaixo das prévias."]]},
+ {v:"2026-09-13g",d:"13 de setembro de 2026",itens:[["Novo","Checkout, Mini loja e Agendamento por Pacote: cada item opcional pode ter uma descrição própria. Ela aparece em cinza claro na hora de escolher, não no carrinho, e texto longo quebra em várias linhas em vez de ser cortado."]]},
+ {v:"2026-09-13f",d:"13 de setembro de 2026",itens:[["Corrigido","No celular, o valor saía partido ao meio nas linhas de preço — o \"R$\" numa linha e o número na outra. Agora o número nunca quebra; quem cede é o rótulo. Vale para as quatro abas de pagamento."]]},
+ {v:"2026-09-13e",d:"13 de setembro de 2026",itens:[["Novo","Nas quatro abas de pagamento: três textos livres para explicar o sinal antes de o cliente pagar — o que o sinal garante, o que acontece se ele desistir e como pagar o restante. Nascem vazios de propósito: uma política de cancelamento inventada pela ferramenta seria pior que nenhuma. Vazio não aparece na página."],["Melhorado","Com o sinal ligado e os três textos em branco, a ferramenta acende um aviso âmbar na aba."]]},
+ {v:"2026-09-13d",d:"13 de setembro de 2026",itens:[["Novo","Link de cobrança: cada cobrança pode pedir um sinal, em valor fixo ou em percentual, com o restante combinado para depois."],["Exige uma ação sua, uma única vez","Gere de novo o Código 1 da aba Link de cobrança e recole no componente da sua página de pagamento, publicando em seguida. Sem isso ela recusa os links novos que tiverem sinal. Nenhum link já enviado deixa de funcionar."],["Corrigido","Havia um aviso ao lado do Código 1 dizendo que recolar derrubaria os links já enviados. Deixou de ser verdade há tempos, e você leria isso justamente no passo que precisa executar."]]},
+ {v:"2026-09-13c",d:"13 de setembro de 2026",itens:[["Novo","Agendamento por Pacote: o cliente pode reservar pagando um sinal, com o restante no dia do ensaio. O parcelamento no cartão passou a ser calculado sobre o sinal, e não sobre um valor que ninguém está cobrando."],["Corrigido","Com o carrinho zerado, a tela mostrava três números que não fechavam: \"Total R$ 0,00 · Sinal R$ 100,00 · Saldo R$ 0,00\". Essas linhas somem quando não há o que pagar, no Checkout, na Mini loja e no Agendamento por Pacote."],["Corrigido","A segunda linha de preço (\"ou X no cartão\") repetia o mesmo número de cima quando não havia desconto no Pix, na vitrine e na página de obrigado."]]},
+ {v:"2026-09-13b",d:"13 de setembro de 2026",itens:[["Corrigido","Quem tinha personalizado o rótulo do saldo via a mensagem de WhatsApp voltar ao texto de fábrica, sem aviso. A personalização passou a ser preservada."],["Corrigido","Mini loja: o campo de desconto no Pix passou a ficar desabilitado com o sinal ligado, como no Checkout."],["Melhorado","Mini loja: o aviso âmbar sobre o sinal passou a aparecer nas mesmas situações que no Checkout."],["","O resto da versão foi conferência interna da conta do sinal, sem mudança na tela."]]},
+ {v:"2026-09-13a",d:"13 de setembro de 2026",itens:[["Novo","Nas quatro abas de pagamento: você escolhe qual meio aparece primeiro e com o preço em destaque, Pix ou cartão. De fábrica, Pix — que é como as páginas já publicadas saem."]]},
+ {v:"2026-09-11d",d:"11 de setembro de 2026",itens:[["Novo","Agendamento TidyCal e Agendamento por Pacote: os nove textos que a página de obrigado mostra quando o agendamento não traz o dado (a data, o horário, o nome do tipo) viraram campos editáveis, e a busca os encontra."],["Corrigido","A página de obrigado deixava de carregar por inteiro se um desses nove textos tivesse aspas dentro."],["Atenção","Um preset geral salvo antes desta versão aparece como \"alterado\" mesmo sem você ter mudado nada. Nada na tela mudou; salvar uma vez resolve para sempre."]]},
+ {v:"2026-09-11c",d:"11 de setembro de 2026",itens:[["Novo","Uma busca no alto da ferramenta acha qualquer campo pelo nome ou pelo texto que ele tem hoje. Ela abre a aba certa, expande a seção e leva você até o campo."],["Novo","O rótulo de cada campo de texto passou a mostrar o valor que ele tem agora, para dar para reconhecer a frase sem abrir o campo."],["Novo","Mais 58 textos que o cliente final lê viraram campos editáveis."],["Corrigido","O botão \"Restaurar padrões\" não repunha os textos: no Slideshow repunha 0 de 5, na Captação de leads 0 de 20, no Agendamento por Pacote 0 de 21 e na Contagem regressiva 4 de 14."],["Corrigido","Captação de leads: os cinco textos que você configurava se perdiam a cada recarga da ferramenta."],["Corrigido","Alguns campos apareciam com a palavra \"undefined\" escrita dentro."]]},
+ {v:"2026-09-11b",d:"11 de setembro de 2026",itens:[["Corrigido","Mini loja e Agendamento por Pacote: um código de pedido longo demais chegava cortado ao extrato do banco, e dois pacotes diferentes podiam gerar exatamente o mesmo código — dois pagamentos indistinguíveis no extrato, sem erro nenhum na tela. Agora a ferramenta recusa e diz quantos caracteres cabem."]]},
+ {v:"2026-09-11a",d:"11 de setembro de 2026",itens:[["Novo","Os campos que têm limite de tamanho passaram a mostrar o contador de caracteres e a impedir digitar além do limite, em vez de cortar em silêncio depois."]]},
+ {v:"2026-09-04d",d:"4 de setembro de 2026",itens:[["Corrigido","Agendamento TidyCal: o calendário voltava, de vez em quando, a sair com a altura errada, alta demais. Duas partes do bloco mandavam na altura ao mesmo tempo e nem sempre ganhava a certa. Agora acerta em todas as aberturas, e não em cinco de cada seis."]]},
+ {v:"2026-09-04c",d:"4 de setembro de 2026",itens:[["Novo","Agendamento por Pacote: você escolhe quando os calendários são preparados — só quando o cliente escolhe o pacote, um já na abertura (padrão) ou todos na abertura. O texto do campo traz o tempo medido de cada opção."],["Melhorado","Trocar de família e voltar deixou de jogar fora o calendário já preparado."]]},
+ {v:"2026-09-04b",d:"4 de setembro de 2026",itens:[["Corrigido","Agendamento por Pacote: o calendário abria na hora, sumia e voltava desbotando. Ele estava sendo preparado numa largura de zero, escondido, e ao aparecer tinha de se desenhar de novo por inteiro."]]},
+ {v:"2026-09-04a",d:"4 de setembro de 2026",itens:[["Melhorado","Agendamento por Pacote: o calendário começa a ser preparado assim que o cliente demonstra intenção, e não só no clique. Na primeira visita a espera medida era de cerca de 9 segundos, e ela é dos arquivos do TidyCal, não do seu bloco."]]},
+ {v:"2026-09-03i",d:"3 de setembro de 2026",itens:[["Novo","Botão de duplicar nas demais listas: produtos e itens opcionais do Checkout e da Mini loja, mensagens da Contagem regressiva, opções de qualificação da Captação de leads, cupons das três abas que têm cupom, e famílias. Duplicar uma família leva os pacotes dela junto, como duplicar um pacote já levava os opcionais."],["Novo","Apagar uma família passou a poder levar os pacotes dela, com uma confirmação que lista pacote por pacote, e não só a quantidade."],["Corrigido","Agendamento por Pacote: dois pacotes com o mesmo código entravam no catálogo sem aviso, e a recusa só aparecia depois, na hora de gerar."],["Corrigido","O aviso de formulário pendente mandava clicar em \"Adicionar\" enquanto o botão já dizia \"Salvar alterações\"."]]},
+ {v:"2026-09-03h",d:"3 de setembro de 2026",itens:[["Corrigido","Checkout e Mini loja aceitavam dois cupons com o mesmo código sem avisar. O carrinho aplica o primeiro que bate, então o segundo era um cupom que você cadastrava, via na lista e que nunca funcionava. Agora é recusado."]]},
+ {v:"2026-09-03g",d:"3 de setembro de 2026",itens:[["Corrigido","Os campos de texto do formulário de cadastro deixaram de se perder ao recarregar a ferramenta. Faltava esta parte para o formulário sobreviver por inteiro."]]},
+ {v:"2026-09-03f",d:"3 de setembro de 2026",itens:[["Novo","Agendamento por Pacote: botão de duplicar em pacote e em item opcional. Duplicar um pacote leva os opcionais dele. Os botões passaram a ficar logo abaixo do item."]]},
+ {v:"2026-09-03e",d:"3 de setembro de 2026",itens:[["Novo","Agendamento TidyCal e Agendamento por Pacote: os dois ajustes finos do calendário (forçar a altura e medir o formulário de reserva) viraram campos na aba. Antes só existiam dentro do código gerado, e a escolha se perdia na próxima geração, sem aviso."]]},
+ {v:"2026-09-03d",d:"3 de setembro de 2026",itens:[["Melhorado","Os três jeitos de mostrar o calendário do TidyCal passaram a ser um só. O ganho visível é que o calendário continua funcionando mesmo quando o servidor do TidyCal não entrega a biblioteca dele."]]},
+ {v:"2026-09-03c",d:"3 de setembro de 2026",itens:[["Corrigido","O calendário do TidyCal aparecia como uma fresta no Agendamento por Pacote, e com altura fixa e cortada no Agendamento TidyCal com domínio próprio. Agora ele ajusta a altura sozinho, em qualquer largura de tela."],["Atenção","Isso não resolve o formulário \"Confirme a reserva\", que é uma sobreposição e não empurra a página. Se você o vir cortado na página publicada, a saída continua sendo ligar a altura fixa e regerar."]]},
+ {v:"2026-09-03b",d:"3 de setembro de 2026",itens:[["Novo","Agendamento TidyCal e Agendamento por Pacote: o campo passou a aceitar o endereço inteiro do seu calendário, inclusive com domínio próprio (`agendamento.fotocerta.com.br`). Quem tinha só o caminho curto é convertido na abertura, com aviso, uma vez."],["Corrigido","Com domínio próprio, o calendário aparecia na página e não se ajustava mais — sem erro e sem nada na tela."],["Atenção","Conferir no botão de teste da aba deixou de ser opcional: a ferramenta consegue recusar um endereço escrito errado, mas não consegue saber se o domínio é o seu."]]},
+ {v:"2026-09-03a",d:"3 de setembro de 2026",itens:[["Corrigido","Aplicar um preset com um item em edição deixava o formulário apontando para a posição de outro catálogo: o botão dizia \"Salvar alterações\" e o clique seguinte gravava por cima de um produto que você nunca escolheu editar. Aplicar um preset agora limpa o formulário; recarregar a ferramenta continua devolvendo o que estava digitado."]]},
+ {v:"2026-09-02h",d:"2 de setembro de 2026",itens:[["Corrigido","Mini loja: mudar o valor de um cupom não atualizava a prévia, que continuava mostrando o valor antigo enquanto o código gerado já levava o novo. E a validade do cupom era gravada e nunca aparecia na lista."],["Corrigido","Agendamento por Pacote: no recibo do PayPal, um opcional com quantidade 3 cobrava 3× e escrevia o nome sem o \"x3\"; e um opcional com quantidade zero entrava no nome cobrando zero."],["Corrigido","118 frases da ferramenta estavam sem acento."],["Melhorado","A ordem das caixas dentro das abas ficou lógica no Agendamento por Pacote (famílias antes de pacotes), no Slideshow (os dois passos da importação numa caixa só) e na Mini loja."],["Corrigido","Os itens opcionais digitados e ainda não salvos deixaram de se perder ao recarregar, nas três abas que têm catálogo, e a tela passou a dizer que há um formulário pendente, nomeando o item."],["Corrigido","O código do cupom não era gravado quando você já o digitava em maiúsculas."]]},
+ {v:"2026-09-02g",d:"2 de setembro de 2026",itens:[["Novo","Checkout, Mini loja e Agendamento por Pacote: cada cupom pode exigir um valor mínimo de pedido para valer."]]},
+ {v:"2026-09-02f",d:"2 de setembro de 2026",itens:[["Corrigido","Mini loja: o aviso de que um item saiu do catálogo aparecia para o cliente com \"{n}\" escrito na tela em vez do número — \"2 {n} itens do seu carrinho saíram do catálogo\"."]]},
+ {v:"2026-09-02d",d:"2 de setembro de 2026",itens:[["Novo","Todo texto que o cliente final lê virou campo editável: 157 campos em oito abas. Bordas com efeito e Efeitos de página não têm nenhum texto assim."],["Novo","Agendamento por Pacote: famílias de pacotes. O cliente escolhe primeiro a família — por exemplo, dias úteis ou fins de semana — e depois o pacote. Quem tiver uma família só continua vendo dois passos, sem passo vazio. Os pacotes que você já tinha entram numa família chamada \"Pacotes\", com aviso, uma vez."],["Novo","Agendamento por Pacote: a prévia da vitrine ganhou o alternador computador/celular, que seis das outras abas já tinham."],["Novo","Agendamento por Pacote: subtítulo opcional da vitrine, com o marcador de percentual de desconto."],["Novo","Nas quatro abas de pagamento: um aviso configurável de que o Pix não confirma sozinho, dentro da área do Pix e logo acima do \"Já paguei\"."],["","(A letra \"e\" foi pulada na numeração desta data; não existe versão 2026-09-02e.)"]]},
+ {v:"2026-09-02c",d:"2 de setembro de 2026",itens:[["Novo","Agendamento por Pacote: seletor de forma de pagamento. Antes o bloco saía sempre com Pix e cartão juntos, e não dava para vender um pacote só por Pix. Em \"somente Pix\" o cartão não é mais exigido, e vice-versa."],["Novo","Agendamento por Pacote: a cor do botão do PayPal virou escolha, com as mesmas cinco opções das outras abas. Estava fixa em dourado."],["Corrigido","A paleta global não alcançava o Agendamento por Pacote."],["Corrigido","Captação de leads: o botão \"Restaurar padrões\" desfazia os acentos dos textos."],["Corrigido","O painel da direita mostrava a vitrine sem respeitar a página selecionada."],["Corrigido","O código do pacote passou a se corrigir na hora, no próprio campo, e não só ao salvar."]]},
+ {v:"2026-09-02b",d:"2 de setembro de 2026",itens:[["Novo","Agendamento por Pacote: a página de obrigado passou a ter itens opcionais, quantidade e cupom, como o Checkout. O link do TidyCal virou caminho em vez de endereço inteiro."],["Corrigido","Checkout e Mini loja: a quantidade marcada nos itens opcionais existia e não fazia nada no pagamento."],["Corrigido","Checkout e Mini loja: cupom com código repetido passou a ser recusado."],["Corrigido","Checkout: o QR Code do Pix podia não aparecer. O desenho passou a ser o mesmo usado na página de pagamento."]]},
+ {v:"2026-09-02a",d:"2 de setembro de 2026",itens:[["Novo","Nasceu o Agendamento por Pacote, a décima aba: uma vitrine em dois passos onde o cliente escolhe o pacote e agenda na mesma página, mais uma página de obrigado que cobra (Pix e cartão) e mostra o prazo da reserva."],["Exige uma ação sua","Colar os três códigos gerados e criar os tipos de agendamento no TidyCal, cada um com o endereço de redirecionamento que a ferramenta gera para ele. O cadastro dos tipos é do lado do TidyCal, e a aba não consegue fazer isso sozinha."]]},
+ {v:"2026-09-01e",d:"1º de setembro de 2026",itens:[["Melhorado","Checkout: a frase mostrada quando o pedido está zerado passou a ser uma só, a que você escreve, valendo nos três modos de pagamento. Antes havia mais de uma, e só uma era editável."]]},
+ {v:"2026-09-01d",d:"1º de setembro de 2026",itens:[["Corrigido","A mensagem de WhatsApp que o cliente envia passou a sair acentuada."],["Melhorado","Mini loja: a frase do pedido zerado passou a ser uma só."]]},
+ {v:"2026-09-01c",d:"1º de setembro de 2026",itens:[["Corrigido","Todo texto que uma pessoa lê passou a sair acentuado: 24 textos nos blocos do Checkout e da Mini loja, incluindo o rodapé de limites da loja inteiro, mais 9 na tela da própria ferramenta."]]},
+ {v:"2026-09-01b",d:"1º de setembro de 2026",itens:[["Corrigido","O aviso de até quando o cupom vale saía sem os dois acentos."]]},
+ {v:"2026-09-01a",d:"1º de setembro de 2026",itens:[["Novo","Checkout e Mini loja: o cupom aplicado passou a dizer até quando vale, ao lado do desconto. Cupom sem prazo não mostra nada."]]},
+ {v:"2026-08-27a",d:"27 de agosto de 2026",itens:[["Melhorado","O pedido que chega ao seu painel do PayPal passou a levar o nome e o código do produto, mais um código de conciliação, em vez de chegar sem identificação."]]},
+ {v:"2026-08-25f",d:"25 de agosto de 2026",itens:[["Corrigido","O botão \"Gerar todos os códigos\" nascia invisível. Ele estava lá, mas não aparecia na tela."]]},
+ {v:"2026-08-25e",d:"25 de agosto de 2026",itens:[["Novo","Painel da direita: botão \"Gerar todos os códigos\", que percorre as abas ligadas naquela página e junta tudo o que falta numa lista só."]]},
+ {v:"2026-08-25d",d:"25 de agosto de 2026",itens:[["Novo","Contagem regressiva: o marcador `{prazo}` mostra a data limite ao lado do tempo que falta, com o mesmo destaque do contador."]]},
+ {v:"2026-08-25c",d:"25 de agosto de 2026",itens:[["Novo","Agendamento TidyCal: o formato da data na página de obrigado virou selecionável, com quatro opções."]]},
+ {v:"2026-08-25b",d:"25 de agosto de 2026",itens:[["Melhorado","Efeitos de página: as partículas e o fundo animado passaram a exigir bem menos do aparelho do cliente — o desenho da tela ficou cerca de sessenta vezes mais leve."]]},
+ {v:"2026-08-25a",d:"25 de agosto de 2026",itens:[["Corrigido","Efeitos de página: os botões e os doze campos de cor dessa aba podiam parar de funcionar por causa de uma falha em outra aba — e o aviso vermelho acusaria a aba errada."]]},
+ {v:"2026-08-24h",d:"24 de agosto de 2026",itens:[["Novo","Efeitos de página: mais três efeitos — confete caindo, fundo animado (aurora) e luzes piscando."],["Novo","Efeitos de página: prévia de celular, e o tamanho do efeito proporcional no celular."]]},
+ {v:"2026-08-24g",d:"24 de agosto de 2026",itens:[["Novo","Nasceu a aba Efeitos de página, com o primeiro efeito: neve caindo, na página inteira ou presa a um bloco."]]},
+ {v:"2026-08-24f",d:"24 de agosto de 2026",itens:[["Novo","O painel da direita passou a montar a página com até cinco outros componentes seus além dos construtores, com uma saída numerada para cada."]]},
+ {v:"2026-08-24e",d:"24 de agosto de 2026",itens:[["Novo","O painel da direita passou a entregar também o Código 2 das Bordas, aquele que vai no campo de estilo do próprio componente. Antes ele ficava para trás: você colava o bloco e o componente saía sem o efeito, sem erro nenhum."]]},
+ {v:"2026-08-24d",d:"24 de agosto de 2026",itens:[["Corrigido","Bordas com efeito: dois componentes com o mesmo efeito e ajustes diferentes brigavam entre si na mesma página. Agora convivem — e dois componentes com o efeito idêntico passam a usar um bloco só."]]},
+ {v:"2026-08-24c",d:"24 de agosto de 2026",itens:[["Novo","Bordas com efeito: selo de destaque para marcar o pacote recomendado, em três formas — faixa no topo, selo circular e fita diagonal —, com texto, cores e tamanho à sua escolha, mais a ênfase por elevação como opção separada."]]},
+ {v:"2026-08-24b",d:"24 de agosto de 2026",nota:"Primeira versão numerada. O que veio antes dela está na seção **Antes da numeração de versões**, no fim deste documento.",itens:[["Novo","A ferramenta passou a dizer, embaixo do título, qual versão o seu navegador está executando e quando ela foi publicada. É o que denuncia uma cópia velha guardada pelo navegador."],["Novo","Captação de leads: o pop-up que abre sozinho passou a respeitar o horário de atendimento. O comportamento antigo (abrir à noite com o aviso \"deixe seu recado\") continua disponível como escolha; o padrão passou a ser não abrir. O botão flutuante continua na tela sempre."]]}
+];
+
+/* O que veio antes de a ferramenta anunciar versao: de 18 a 24 de agosto de 2026. Por dia,
+   e nao por versao -- agrupar aqui seria inventar versoes que nunca existiram. */
+var FCR_ANTES=[
+ {d:"18 e 19 de agosto",itens:[["Novo","Nasceu a aba Contagem regressiva: barra de urgência para o topo de páginas de venda, com mensagens, contador, cores, movimento e a coruja."],["Melhorado","A prévia da Contagem regressiva passou a executar o próprio código gerado, em vez de desenhar uma imitação dele."],["Corrigido","Texto com apóstrofo, cor inválida e chave Pix quebravam o bloco depois de colado no site. Corrigido nas abas antigas."],["Novo","Mais de vinte recursos nas abas antigas: Slideshow com ordem aleatória, setas, bolinhas, arrastar e pausar, e proporção no celular; Captação de leads com horário de atendimento, perguntas de qualificação, posição do botão, efeitos e coruja; Agendamento TidyCal com página de teste num clique e alturas por situação; Bordas com prévia sobre o fundo real e presets salvos; Checkout com sinal, quantidade por item e resumo copiável."],["Corrigido","Uma revisão em cinco fases fechou as falhas das cinco abas antigas: campos numéricos que se corrigem sozinhos na tela, endereços validados, avisos que diziam a verdade sobre o que foi copiado."]]},
+ {d:"20 de agosto",itens:[["Novo","Slideshow: importador de galeria. Dá para trazer uma galeria inteira de fotos de uma vez, em vez de cadastrar link por link."],["Novo","Biblioteca de presets em todas as abas, com o mesmo jeito de usar em todas."],["Corrigido","Salvar um preset com o formulário de produto preenchido pegava o nome do produto como nome do preset e apagava aquele campo, sem avisar."],["Melhorado","Slideshow: com 46 fotos importadas a lista ficou usável — o endereço parou de vazar para fora do cartão, a lista ganhou rolagem própria em vez de empurrar a aba inteira para baixo, e apareceu o botão \"Limpar lista\"."],["Novo","Preset geral: uma campanha com as suas páginas, guardando de uma vez a configuração de todas as abas, com barra fixa no topo mostrando a campanha e a página ativa."],["Novo","Exportar e importar a configuração em arquivo, com escolha entre \"com os dados\" e \"sem os dados\". É a sua rede de segurança de verdade."],["Novo","Painel consolidado, na faixa à direita: ele junta os códigos das abas ligadas nos campos prontos para colar, e diz o que falta gerar, o que está velho e o que é de outra página."],["Melhorado","A ferramenta deixou de ser estreita e centralizada, aproveitando a largura do monitor."],["Novo","Nasceu a sétima aba, Link de cobrança: gera o link de uma cobrança avulsa, com Pix e cartão lendo o mesmo valor que a tela mostra."]]},
+ {d:"21 de agosto",itens:[["Novo","Nasceu a oitava aba, Mini loja."],["Corrigido","Um defeito de dinheiro que já estava no ar: em cerca de 2% das combinações de preço com cupom, o Pix cobrava um centavo a mais do que a tela mostrava. Corrigido também no Checkout, que tinha o mesmo defeito."],["Corrigido","Mini loja configurada em \"somente Pix\" simplesmente não mostrava nada: nenhum produto, nenhum aviso."],["Novo","Terceira fonte de imagem nos importadores, além das duas que já havia."],["Novo","Painel Identidade: chave Pix, nome e cidade do recebedor, conta do PayPal, WhatsApp e paleta de cores num lugar só, acima das abas, servindo todas elas."],["Corrigido","Restaurar um backup da versão anterior jogava fora a identidade enquanto anunciava o contrário."],["Novo","Link de cobrança: prazo de validade por cobrança e um selo que impede alterar o valor no endereço do link."],["Corrigido","Contagem regressiva: a barra em rolagem mostrava só a primeira mensagem, e não todas."],["Novo","Nasceu a página `/cobrar`: o link do dia, feita para o celular, para o uso diário sem abrir a ferramenta inteira."]]},
+ {d:"22 de agosto",itens:[["Corrigido","O campo de desconto sumia na página `/cobrar` aberta no celular. O bloco passou a sempre saber fazer desconto, e quem decide é cada cobrança."],["Melhorado","Botão \"Já paguei\" no lugar certo e um \"OU\" entre as duas formas de pagamento."],["Corrigido","A chave Pix saía num formato que o aplicativo do banco não aceitava. Achado no primeiro pagamento real, que foi recusado. A correção alcançou Checkout e Mini loja também."],["Novo","Contagem regressiva: o contador da barra virou opcional — a barra pode mostrar só a mensagem."],["Novo","Bordas com efeito: guirlanda de Natal, o sexto efeito, com sete enfeites desenhados."]]},
+ {d:"23 de agosto",itens:[["Novo","Agendamento TidyCal: página de obrigado, com os dados do agendamento marcados dentro do seu próprio texto."],["Corrigido","A Tag Body da página de obrigado não aparecia no painel da direita. Além de corrigir, o painel passou a denunciar qualquer código gerado que ele tenha esquecido de mostrar."],["Novo","\"Página de obrigado\" virou um tipo de página do preset geral, ao lado de hospedeira e embutida."],["Corrigido","A ferramenta afirmava em onze lugares que o site tem um cabeçalho global, e chegava a indicar um caminho de menu que não existe. O Prosite só tem Tag Head e Tag Body por página."],["Corrigido","A recusa da chave Pix passou a abrir o painel Identidade e levar o foco ao campo, em vez de só reclamar."]]}
+];
+
+/* O que ainda depende de uma acao do dono. Fica ABERTO no topo do painel: e a unica parte
+   da lista que pede alguma coisa dele, e recolhe-la seria esconder justamente isso. */
+var FCR_ACOES=[
+ ["2026-09-13d","Gerar de novo o **Código 1 da aba Link de cobrança** e recolar no componente da página de pagamento, publicando em seguida. Sem isso ela recusa os links novos que tiverem sinal. Nenhum link já enviado deixa de funcionar. **Uma vez só.**"],
+ ["2026-09-11d","Se o seu **preset geral** aparecer como \"alterado\" sem você ter mudado nada, salve-o uma vez. Resolve para sempre."],
+ ["2026-09-03b","Com domínio próprio no TidyCal, conferir no botão de teste da aba deixou de ser opcional. A ferramenta recusa um endereço escrito errado, mas não sabe se o domínio é o seu."],
+ ["2026-09-03c","Se o formulário \"Confirme a reserva\" aparecer **cortado** na página publicada, ligar a altura fixa na aba e regerar o código."],
+ ["2026-09-02a","Colar os **três códigos** do Agendamento por Pacote e criar os tipos de agendamento no TidyCal, cada um com o endereço de redirecionamento que a ferramenta gera."],
+ ["Aberto desde 23/08","A **Tag Head da landing de Natal** pode ainda ter a regra antiga que mata as animações daquela página para quem pede menos movimento. Quem a substitui é o Código 1 da aba Bordas com efeito: gerar com o efeito em uso e colar no lugar do bloco antigo. Não é urgente, e vale para uma página só."]
+];
+
+/* ---- desenho ----------------------------------------------------------------
+   Tudo por createElement + textContent, e nunca por innerHTML: o texto das notas e
+   escrito a mao e pode conter <, & ou aspas (ja contem `/cobrar` e {prazo}), e montar
+   HTML por concatenacao aqui seria criar, na propria interface, a classe de defeito que
+   o escape dos geradores existe para impedir.
+   O painel e montado na PRIMEIRA abertura, e nao na partida: quem nunca abre "Novidades"
+   nao paga por ele. MEDIDO no clique que o monta (Chromium, arvore de 14/09/2026): 2,6 ms,
+   518 nos, 159 itens -- barato o bastante para nao valer partir em pedacos, e caro o
+   bastante para nao valer pagar na partida de quem so quer gerar um bloco. */
+var FCR={montado:false};
+
+/* *negrito* e `mono` dentro do texto de um item. Um tokenizador de duas marcas, nao um
+   interpretador de markdown: o que nao casar sai como texto puro, que e o pior caso
+   aceitavel (o leitor ve os asteriscos) em vez de HTML inventado. */
+function fcrTexto(pai,txt){
+  var re=/\*\*([^*]+)\*\*|`([^`]+)`/g,pos=0,m,el;
+  txt=String(txt==null?'':txt);
+  while((m=re.exec(txt))){
+    if(m.index>pos)pai.appendChild(document.createTextNode(txt.slice(pos,m.index)));
+    el=document.createElement(m[1]!==undefined?'b':'code');
+    el.textContent=m[1]!==undefined?m[1]:m[2];
+    pai.appendChild(el);
+    pos=m.index+m[0].length;
+  }
+  if(pos<txt.length)pai.appendChild(document.createTextNode(txt.slice(pos)));
+  return pai;
+}
+function fcrDiv(cls){var e=document.createElement('div');if(cls)e.className=cls;return e;}
+
+/* Uma linha "rotulo + texto". O rotulo e olhado sem acento e em caixa baixa, entao o dado
+   pode escrever 'Atencao' com til sem que a chave da tabela precise de acento. Item sem
+   rotulo (existem alguns, que sao observacao e nao mudanca) sai so com o texto. */
+function fcrItem(rot,txt){
+  var li=fcrDiv('fcr-item'),et,k;
+  if(rot){
+    k=FCR_ROTULOS[fcSemAcento(String(rot)).toLowerCase().split(/[ ,]/)[0]]||'outro';
+    et=document.createElement('span');
+    et.className='fcr-et fcr-'+k;
+    et.textContent=rot;
+    li.appendChild(et);
+  }
+  fcrTexto(li,txt);
+  return li;
+}
+
+/* Uma linha da lista de acoes pendentes. O primeiro campo dela e QUANDO (a versao, ou
+   'Aberto desde 23/08'), e nao um rotulo de tipo -- passa-lo por fcrItem pintaria um numero de
+   versao como se fosse a palavra 'Novo'. */
+function fcrAcao(quando,txt){
+  var li=fcrDiv('fcr-item'),q=document.createElement('span');
+  q.className='fcr-quando';q.textContent=quando;
+  li.appendChild(q);fcrTexto(li,txt);
+  return li;
+}
+
+/* Uma versao: o cabecalho com o numero dela e os itens. */
+function fcrVersao(n){
+  var c=fcrDiv('fcr-v'),h=fcrDiv('fcr-vcab'),i;
+  h.textContent=n.v;
+  /* data-v e o que a prova le: a lista de versoes na TELA, e nao a variavel -- o codigo da
+     ferramenta vive dentro de um IIFE e FCR_NOTAS nao e alcancavel de fora. Medir a tela e o
+     que importa de qualquer modo: dado certo que nao chega a ser desenhado nao informa nada. */
+  h.setAttribute('data-v',n.v);
+  c.appendChild(h);
+  if(n.nota)c.appendChild(fcrTexto(fcrDiv('fcr-nota'),n.nota));
+  for(i=0;i<n.itens.length;i++)c.appendChild(fcrItem(n.itens[i][0],n.itens[i][1]));
+  return c;
+}
+
+/* Uma secao recolhivel, na mecanica que ja existe (class="secao dobra" + aria-controls,
+   ligada por fcdLigar). Nao se inventa um segundo jeito de recolher: fcdEstado escreve os
+   TRES sinais de aberto, e a busca do topo ja sabe abrir o que ele fecha. */
+/* A contagem vai num span proprio, e nao no .secao-n: aquele e um disco de 24 px feito para
+   um digito, e "12 versoes" nao cabe nele. */
+function fcrSecao(id,titulo,direita,aberta){
+  var cab=fcrDiv('secao dobra'),corpo=fcrDiv(aberta?'fcr-corpo':'fcr-corpo fcd-oculto'),s;
+  cab.id=id+'-cab';corpo.id=id+'-corpo';
+  cab.setAttribute('role','button');cab.setAttribute('tabindex','0');
+  cab.setAttribute('aria-controls',corpo.id);
+  cab.setAttribute('aria-expanded',aberta?'true':'false');
+  cab.appendChild(document.createTextNode(titulo));
+  s=document.createElement('span');s.className='fcr-conta';s.textContent=direita;cab.appendChild(s);
+  s=document.createElement('span');s.className='secao-dobra-seta';
+  s.textContent=aberta?'esconder':'mostrar';cab.appendChild(s);
+  return {cab:cab,corpo:corpo};
+}
+
+/* O agrupamento por DIA sai da propria lista, nunca de uma tabela escrita a mao: 59 versoes
+   abertas de uma vez sao uma parede, e 59 cabecalhos recolhidos tambem. Dez dias nao sao.
+   O dia mais recente nasce aberto -- e o que o dono vem ver. */
+function fcrDias(){
+  var out=[],i,n;
+  for(i=0;i<FCR_NOTAS.length;i++){
+    n=FCR_NOTAS[i];
+    if(!out.length||out[out.length-1].dia!==n.v.slice(0,10))out.push({dia:n.v.slice(0,10),d:n.d,vers:[]});
+    out[out.length-1].vers.push(n);
+  }
+  return out;
+}
+function fcrPlural(n,um,muitos){return n+' '+(n===1?um:muitos);}
+
+function fcrDesenhar(){
+  var raiz=$('fcr-lista'),dias,i,j,sec,cx,av,p;
+  if(!raiz)return;
+  while(raiz.firstChild)raiz.removeChild(raiz.firstChild);
+
+  /* A DETECCAO DO ESQUECIMENTO. A lista descreve versoes; o carimbo diz qual esta rodando.
+     Se a que esta rodando nao foi descrita, quem ler a lista concluiria que nada mudou --
+     que e a mentira confortavel. Ela aparece em vermelho e nomeia a versao. */
+  if(!fcrTemVersao(FC_VERSAO)){
+    av=fcrDiv('fcr-orfa');
+    fcrTexto(av,'A versão que este navegador está executando, **'+FC_VERSAO+'**, ainda não foi descrita nesta lista. O que você está usando pode ter mudanças que não estão aqui.');
+    raiz.appendChild(av);
+  }
+
+  /* O resumo. A contagem sai de FCR_NOTAS.length -- numero de versao nao se escreve em
+     frase nenhuma, pela mesma razao de ABAS.length. */
+  p=fcrDiv('ajuda');
+  fcrTexto(p,'**'+fcrPlural(FCR_NOTAS.length,'versão publicada','versões publicadas')+'**, da mais recente para a mais antiga, agrupadas por dia. Clique num dia para abrir. A versão que o seu navegador está executando agora é a **'+FC_VERSAO+'**, e ela aparece embaixo do título.');
+  raiz.appendChild(p);
+  /* A frase abaixo nao e enfeite: e ela que faz a AUSENCIA ser percebida. Sem a promessa
+     escrita na tela, uma lista que parou de crescer parece uma ferramenta que parou de mudar --
+     e ninguem reclama do que nao sabe que deveria estar ali. */
+  p=fcrDiv('ajuda');
+  fcrTexto(p,'**Esta lista é atualizada a cada versão.** Toda alteração publicada — correção ou novidade — entra aqui. Se você publicar uma versão e ela não aparecer nesta lista, a ferramenta avisa sozinha, numa barra vermelha no alto da tela.');
+  raiz.appendChild(p);
+
+  /* As acoes do dono ficam ABERTAS: e a unica parte que pede alguma coisa dele. */
+  if(FCR_ACOES.length){
+    cx=fcrDiv('fcr-acoes');
+    p=fcrDiv('fcr-acoes-tit');p.textContent='O que ainda depende de você';cx.appendChild(p);
+    for(i=0;i<FCR_ACOES.length;i++)cx.appendChild(fcrAcao(FCR_ACOES[i][0],FCR_ACOES[i][1]));
+    raiz.appendChild(cx);
+  }
+
+  dias=fcrDias();
+  for(i=0;i<dias.length;i++){
+    sec=fcrSecao('fcr-d'+i,dias[i].d,fcrPlural(dias[i].vers.length,'versão','versões'),i===0);
+    for(j=0;j<dias[i].vers.length;j++)sec.corpo.appendChild(fcrVersao(dias[i].vers[j]));
+    raiz.appendChild(sec.cab);raiz.appendChild(sec.corpo);
+  }
+
+  sec=fcrSecao('fcr-antes','Antes de a ferramenta anunciar versão',fcrPlural(FCR_ANTES.length,'dia','dias'),false);
+  p=fcrDiv('ajuda');
+  fcrTexto(p,'De 18 a 24 de agosto de 2026 a ferramenta ainda não dizia qual versão estava rodando. Tudo o que está aqui já existia quando a numeração começou. Por dia, e não por versão: agrupar seria inventar versões que nunca existiram.');
+  sec.corpo.appendChild(p);
+  for(i=0;i<FCR_ANTES.length;i++){
+    cx=fcrDiv('fcr-v');
+    p=fcrDiv('fcr-vcab');p.textContent=FCR_ANTES[i].d;cx.appendChild(p);
+    for(j=0;j<FCR_ANTES[i].itens.length;j++)cx.appendChild(fcrItem(FCR_ANTES[i].itens[j][0],FCR_ANTES[i].itens[j][1]));
+    sec.corpo.appendChild(cx);
+  }
+  raiz.appendChild(sec.cab);raiz.appendChild(sec.corpo);
+
+  p=fcrDiv('ajuda');
+  fcrTexto(p,'**Duas lacunas da numeração, medidas e não supostas:** não existe versão `2026-09-02e` (a letra foi pulada) nem `2026-08-24a` (a numeração começou direto na `2026-08-24b`). E as versões de 24 a 27 de agosto são mais curtas que as outras porque o registro daquele intervalo era mais curto, não porque mudaram menos.');
+  raiz.appendChild(p);
+
+  /* fcdLigar e idempotente (marca o cabecalho que ja ligou), entao chama-la aqui liga SO os
+     cabecalhos recem-criados e nao duplica os das abas -- ligar duas vezes faria o clique
+     alternar duas vezes, e a secao nao abriria mais. */
+  fcdLigar();
+}
+function fcrTemVersao(v){var i;for(i=0;i<FCR_NOTAS.length;i++)if(FCR_NOTAS[i].v===v)return true;return false;}
+
+/* ---- o painel ---- */
+function fcrPainelAbrir(abrir){
+  var el=$('fcr-painel'),b=$('fcr-botao');
+  if(!el)return;
+  if(abrir===undefined)abrir=!el.classList.contains('aberto');
+  if(abrir&&!FCR.montado){FCR.montado=true;fcrDesenhar();}
+  el.classList.toggle('aberto',!!abrir);
+  if(b)b.setAttribute('aria-expanded',abrir?'true':'false');
+  /* Os TRES paineis da barra sao o mesmo lugar da tela e nunca ficam abertos juntos. */
+  if(abrir){fcgPainelAbrir(false);fciPainelAbrir(false);}
+}
+function fcrIniciar(){
+  liga('fcr-botao',function(){fcrPainelAbrir();});
+  /* ===== A REDE QUE FAZ O ESQUECIMENTO APARECER =====
+     Desde 14/09/2026 vale a regra do dono: TODA alteracao publicada -- melhoria ou correcao --
+     tem de entrar nesta lista. Compromisso que depende de alguem lembrar ja falhou neste
+     projeto (a Tag Body da pagina de obrigado nasceu fora do mapa do painel consolidado, em
+     silencio), e a resposta certa nao foi "lembrar melhor": foi fccOrfas, que MOSTRA o buraco.
+     Esta e a mesma rede, no mesmo molde -- ela nao conserta, ela denuncia.
+
+     O ALCANCE, MEDIDO E NAO PROMETIDO. A pagina servida conhece UMA versao: FC_VERSAO, o
+     carimbo. Nao existe historico de versoes dentro dela -- scripts/versoes.txt nao e servido
+     e tambem guarda so a atual. Entao esta guarda responde exatamente uma pergunta: "a versao
+     que este navegador esta executando foi descrita?". E basta para o caso que a regra do dono
+     cria: publicou e esqueceu de escrever a nota. Quem compara a lista com TODAS as versoes ja
+     publicadas e scripts/verificar/novidades.mjs, que le o git; e quem impede a publicacao e
+     scripts/conferir-versoes.sh, que roda dentro do proprio carimbador.
+
+     POR QUE NA BARRA VERMELHA E NAO SO DENTRO DO PAINEL. O aviso do painel (fcr-orfa) so
+     aparece para quem abre "Novidades" -- e quem esqueceu de escrever a nota e justamente quem
+     nao vai abrir. A barra da partida aparece sem ninguem pedir, que e o ponto. */
+  if(!fcrTemVersao(FC_VERSAO)){
+    try{fcBarra('Novidades: a versão '+FC_VERSAO+' está publicada e não tem nota nenhuma. '+
+      'Acrescente a entrada no topo de FCR_NOTAS, no index.html — o comentário '+
+      '"COMO ENTRA A PRÓXIMA VERSÃO", logo acima da lista, diz como. '+
+      'Desde 14/09/2026 toda alteração publicada entra aqui.');}catch(e){}
+  }
+  /* A conferencia que impede a lista de mentir por engano: versao repetida faria a mesma
+     mudanca aparecer duas vezes, e fora de ordem faria o agrupamento por dia quebrar o dia
+     em dois. As duas passam despercebidas na tela, entao a barra vermelha da partida e quem
+     avisa -- e a lista continua desenhando, porque texto fora de ordem ainda informa. */
+  var i,vis={},fora=[],rep=[];
+  for(i=0;i<FCR_NOTAS.length;i++){
+    if(vis[FCR_NOTAS[i].v])rep.push(FCR_NOTAS[i].v);
+    vis[FCR_NOTAS[i].v]=true;
+    if(i&&FCR_NOTAS[i].v>=FCR_NOTAS[i-1].v)fora.push(FCR_NOTAS[i].v);
+  }
+  if(rep.length)throw new Error('estas versões aparecem duas vezes na lista de novidades: '+rep.join(', '));
+  if(fora.length)throw new Error('a lista de novidades não está da mais recente para a mais antiga; fora de ordem a partir de: '+fora.join(', '));
 }
 /* ============================================================================
    ACHAR UM TEXTO -- a busca da ferramenta, e o eco do texto atual em cada rotulo
@@ -7903,9 +8321,9 @@ function fciPainelAbrir(abrir){
   if(abrir===undefined)abrir=!el.classList.contains('aberto');
   el.classList.toggle('aberto',!!abrir);
   if(b)b.setAttribute('aria-expanded',abrir?'true':'false');
-  /* Os dois paineis da barra nunca ficam abertos juntos: sao o mesmo lugar da tela, e dois
+  /* Os TRES paineis da barra nunca ficam abertos juntos: sao o mesmo lugar da tela, e dois
      abertos empurrariam as abas para muito longe. */
-  if(abrir)fcgPainelAbrir(false);
+  if(abrir){fcgPainelAbrir(false);fcrPainelAbrir(false);}
 }
 
 /* ---- armazenamento ---- */
@@ -9363,10 +9781,10 @@ function fcgPainelAbrir(abrir){
   if(abrir===undefined)abrir=!el.classList.contains('aberto');
   el.classList.toggle('aberto',!!abrir);
   if(b)b.setAttribute('aria-expanded',abrir?'true':'false');
-  /* O par de fciPainelAbrir: os dois paineis da barra sao o mesmo lugar da tela e nunca ficam
+  /* O par de fciPainelAbrir: os TRES paineis da barra sao o mesmo lugar da tela e nunca ficam
      abertos juntos. So um dos dois fechava o outro, e os dois abertos somavam 2219 px de barra
      antes da primeira aba -- a recursao nao acontece porque quem fecha chama sempre com falso. */
-  if(abrir)fciPainelAbrir(false);
+  if(abrir){fciPainelAbrir(false);fcrPainelAbrir(false);}
 }
 /* Escreve nos CAMPOS (campanha, pagina, codigos manuais). So e chamada quando o preset ativo
    muda ou quando a ferramenta abre -- nunca no redesenho de cada tecla, senao o cursor do
@@ -27370,6 +27788,10 @@ prep('Limites visíveis nos campos','uni bor cob loja pac',fcLimIniciar,'pôr o 
    busca, e nao o preset geral, que continua funcionando. Sem aba associada: a busca e de
    todas elas. */
 prep('Achar um texto','',fcsIniciar,'ligar a busca e escrever o texto atual nos rótulos');
+/* Passo proprio, com rotulo proprio: a lista de novidades nao gera nada e nao mexe em aba
+   nenhuma, entao se ela falhar a barra vermelha precisa dizer que foi ELA -- e todo o resto da
+   ferramenta continua servindo. */
+prep('Novidades','',fcrIniciar,'ligar o painel do que mudou em cada versão');
 prep('Preset geral','',fcgIniciar,'preparar a barra do preset geral');
 /* Passo proprio, com rotulo proprio: se ligar os botoes de backup falhar, a barra vermelha
    precisa dizer que foi o backup -- e nao o preset geral, que continua funcionando. */
