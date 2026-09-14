@@ -768,7 +768,8 @@ console.log('\n== D2 e D3: o campo do desconto do Pix nas duas abas ==');
         correcao do defeito mais caro daquela rodada (um extrato com varias
         cobrancas diferentes para uma reserva so). Sinal que entrasse nele
         reabriria o defeito. Aqui ele e lido de onde o cliente de fato o manda
-        -- o custom_id/sku do pedido ao SDK do cartao -- e comparado com sinal
+        -- o custom_id do pedido ao SDK do cartao (o 'sku' deixou de carrega-lo
+        na leva 7; ver a prova do identificador) -- e comparado com sinal
         LIGADO e DESLIGADO, depois de recarregar a pagina e depois de mexer no
         carrinho.
 
@@ -962,7 +963,12 @@ const lerPac = pg => pg.evaluate(() => {
     if(!window.__pp || !window.__pp.createOrder) return null;
     try{
       const u = window.__pp.createOrder(null,{order:{create:x=>x}}).purchase_units[0];
-      return {valor:u.amount.value, custom:u.custom_id, sku:u.items[0].sku, nome:u.items[0].name};
+      /* 'temSku' e 'sku' sao coisas DIFERENTES desde a leva 7 (14/09/2026), e as duas viajam:
+         "a chave nao existe" e "a chave existe valendo undefined" dao a mesma leitura num
+         '=== undefined' e produzem JSON diferente no pedido que vai ao PayPal. */
+      return {valor:u.amount.value, custom:u.custom_id, nome:u.items[0].name,
+              sku:u.items[0].sku,
+              temSku:Object.prototype.hasOwnProperty.call(u.items[0],'sku')};
     }catch(e){ return {erro:'ERRO: '+(e && e.message || e)}; }
   }
   /* O CLIQUE ANTES da mensagem que ele escreve: num literal de objeto as propriedades
@@ -1350,7 +1356,7 @@ for(const rod of A_RODADAS){
        exatamente isso.
      - O IDENTIFICADOR DE CONCILIACAO e o MESMO nas quatro, e continua o mesmo
        depois de RECARREGAR a pagina e depois de MEXER no carrinho. Ele e lido de
-       onde o cliente de fato o manda (custom_id e sku do pedido ao SDK), e nao de
+       onde o cliente de fato o manda (o custom_id do pedido ao SDK), e nao de
        uma variavel interna do bloco -- a variavel poderia estar certa e o pedido
        sair errado.
    =========================================================================== */
@@ -1417,7 +1423,17 @@ for(const m of A_MATRIZ){
   /* ===== 4. O IDENTIFICADOR ===== */
   chk(tag+'ID. o pedido ao cartao leva o identificador esperado ('+A_ID_ESPERADO+')',
       d.pedido && d.pedido.custom===A_ID_ESPERADO, 'custom_id='+(d.pedido&&d.pedido.custom));
-  chk(tag+'ID. o sku leva o MESMO identificador', d.pedido && d.pedido.sku===d.pedido.custom);
+  /* O 'sku' DEIXOU DE CARREGAR O IDENTIFICADOR em 14/09/2026 (leva 7), e a mudanca e a
+     correcao de um defeito que o dono relatou: ate ali TODA linha do pedido levava o mesmo
+     'sku' -- o codigo do pedido --, e a coluna "ID do produto" do relatorio repetia o mesmo
+     texto em toda linha. Agora o 'sku' e o SKU DAQUELE item, cadastrado pelo operador, e este
+     cenario nao cadastra nenhum: a linha tem de sair SEM O CAMPO.
+     O QUE ESTA PROVA CONTINUA DIZENDO e o que ela sempre disse -- que o identificador de
+     conciliacao chega ao pedido --, so que agora por UM caminho, o custom_id (a linha acima),
+     que e o campo que existe para isso. O caminho COM SKU cadastrado tem prova propria em
+     sku-por-item.mjs. */
+  chk(tag+'ID. e a linha NAO leva sku (sem SKU cadastrado, ela sai sem o campo)',
+      d.pedido && d.pedido.temSku===false, 'sku='+JSON.stringify(d.pedido&&d.pedido.sku));
   chk(tag+'ID. RECARREGAR a pagina nao muda o identificador',
       r.recarregado.pedido && r.recarregado.pedido.custom===A_ID_ESPERADO,
       'depois da recarga: '+(r.recarregado.pedido&&r.recarregado.pedido.custom));

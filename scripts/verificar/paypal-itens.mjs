@@ -22,6 +22,11 @@
    mesmo caminho, o teste nao teria opiniao nenhuma -- e esse e o mesmo criterio
    ja escrito em sinal.mjs.
 
+   ESTE ARQUIVO NAO CADASTRA SKU NENHUM, e isso e proposital desde 14/09/2026: ele mede o
+   caminho VAZIO -- que nenhuma linha leve o campo 'sku', e em especial que nenhuma volte a levar
+   o codigo do pedido. O caminho COM SKU cadastrado (um por produto, um por opcional, a recusa de
+   repetido e a previa) mora em scripts/verificar/sku-por-item.mjs, ao lado.
+
    O CATALOGO E O MESMO DE sinal.mjs, E O CRITERIO ESTA DECLARADO. Os cinco
    precos (113.70 / 29.60 / 425.55 / 341.45 / 0.49) sao os que a varredura de
    ago-set/2026 escolheu: sao eles que produzem a "familia do meio centavo",
@@ -262,10 +267,17 @@ function provarItemizado(rot, r, esperados, cupom){
         'nomes: '+nomes.join(' | '));
   }
 
-  /* --- 8. conciliacao --- */
-  chk(rot+'8. custom_id e o codigo do pedido, e todo item leva o mesmo sku',
-      !!pu.custom_id && its.every(it => it.sku === String(pu.custom_id).substring(0,127)),
-      'custom_id='+pu.custom_id+' skus='+its.map(i=>i.sku).join(','));
+  /* --- 8. conciliacao: o custom_id e do PEDIDO, o sku e da LINHA ---
+     ESTA PROVA MUDOU EM 14/09/2026, e a mudanca e o conserto. Ate aqui ela cobrava que TODO item
+     levasse o MESMO sku (o codigo do pedido) -- e era exatamente o defeito que o dono relatou ao
+     ler a previa: a coluna "ID do produto" do relatorio repetindo o mesmo texto em toda linha.
+     Agora o sku e o SKU DAQUELE item, e este cenario nao cadastra SKU nenhum: entao o que se
+     cobra aqui e a decisao 1 -- SKU vazio sai SEM o campo, e nunca com o codigo do pedido.
+     Quem mede o caminho COM SKU cadastrado e scripts/verificar/sku-por-item.mjs. */
+  chk(rot+'8. custom_id continua sendo o codigo do pedido', !!pu.custom_id, 'custom_id='+pu.custom_id);
+  chk(rot+'8b. sem SKU cadastrado, NENHUMA linha leva o campo sku (e nenhuma leva o codigo do pedido)',
+      its.every(it => !Object.prototype.hasOwnProperty.call(it,'sku')),
+      'skus='+JSON.stringify(its.map(i=>i.sku)));
 }
 
 /* Com sinal: uma linha so, e nenhum desconto inventado. */
@@ -285,6 +297,11 @@ function provarLinhaUnica(rot, r, sinalC){
       'amount '+amC+' vs tela '+sinalC);
   chk(rot+'S5. o nome do item diz que e sinal', /sinal/i.test(String(its[0].name)),
       String(its[0].name).slice(0,90));
+  /* S6, desde 14/09/2026: a linha unica e o PEDIDO INTEIRO, e nao um produto -- ela nao tem SKU
+     de produto que a descreva, e o codigo do pedido ja viaja no custom_id. Ate esta rodada ela
+     levava 'sku=CODIGO_PEDIDO', que e a mesma repeticao inutil dos itens. */
+  chk(rot+'S6. a linha unica NAO leva sku (ela e o pedido inteiro, e nao um produto)',
+      !Object.prototype.hasOwnProperty.call(its[0],'sku'), JSON.stringify(its[0].sku));
 }
 
 /* ===========================================================================
@@ -784,21 +801,41 @@ console.log('\n== o pedido comparado com a referencia presa ('+REF+') ==');
     ]){
       const a = await pedidoDe(velho, p1, caso, aba);
       const b = await pedidoDe(novo,  p2, caso, aba);
-      /* custom_id e sku sao sorteados a cada pedido: a comparacao os NEUTRALIZA, e
-         a identidade deles ja e cobrada pela prova 8, caso a caso. */
+      /* custom_id e sorteado a cada pedido: a comparacao o NEUTRALIZA.
+         O 'sku' SAI DOS DOIS LADOS, e isso e uma mudanca deliberada de 14/09/2026 -- nao uma
+         neutralizacao de ruido. Ate a referencia a linha unica levava 'sku=codigo do pedido';
+         desde esta rodada ela nao leva sku nenhum. Apagar o campo aqui deixa a comparacao dizer
+         o que ela sempre disse ("o resto do pedido nao mudou"), e a mudanca em si e cobrada
+         logo abaixo, nomeada, nos dois sentidos -- em vez de ficar escondida dentro de um
+         "identico" que na verdade nao seria identico. */
       const limpar = p => {
         if(!p.pu) return p;
         const c = JSON.parse(JSON.stringify(p.pu));
         const cod = String(c.custom_id||'');
         c.custom_id = '<cod>';
-        (c.items||[]).forEach(it => { if(it.sku===cod) it.sku='<cod>';
+        (c.items||[]).forEach(it => { delete it.sku;
           if(cod) it.name = String(it.name).split(cod).join('<cod>'); });
         if(cod) c.description = String(c.description).split(cod).join('<cod>');
         return c;
       };
-      chk('[sinal/'+nome+'] o pedido e IDENTICO ao da referencia '+REF,
+      chk('[sinal/'+nome+'] o pedido e IDENTICO ao da referencia '+REF+' (fora o sku, cobrado abaixo)',
           JSON.stringify(limpar(a)) === JSON.stringify(limpar(b)),
           'ref '+JSON.stringify(limpar(a)).slice(0,200)+'  |  novo '+JSON.stringify(limpar(b)).slice(0,200));
+      /* A MUDANCA, nomeada nos dois sentidos. Se a referencia ja nao tiver o sku antigo, ela
+         deixou de servir para ESTA prova: diz NAO MEDIU, e nao falha por envelhecer. */
+      {
+        const iA = (((a.pu||{}).items)||[{}])[0]||{}, iB = (((b.pu||{}).items)||[{}])[0]||{};
+        const codA = String((a.pu||{}).custom_id||'');
+        if(!Object.prototype.hasOwnProperty.call(iA,'sku')){
+          console.log('  NAO MEDIU  a referencia '+REF+' ja nao leva sku na linha unica --');
+          console.log('             esta prova precisa de um commit ANTERIOR a 14/09/2026.');
+        }else{
+          chk('[sinal/'+nome+'] a referencia '+REF+' levava o CODIGO DO PEDIDO no sku da linha unica',
+              String(iA.sku) === codA, 'sku='+iA.sku+' custom_id='+codA);
+        }
+        chk('[sinal/'+nome+'] e a arvore de hoje nao leva sku nenhum nessa linha',
+            !Object.prototype.hasOwnProperty.call(iB,'sku'), JSON.stringify(iB.sku));
+      }
     }
 
     /* --- sem sinal: os ITENS mudaram de proposito; a DESCRICAO nao pode ter mudado --- */
