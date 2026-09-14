@@ -1441,3 +1441,43 @@ Uma linha em `u-out` e uma em `m-out`, nas duas passagens. As saídas dos dois r
 `meio-prio-migracao.mjs 4c66719` acusava 1 falha numa árvore sem defeito: a linha exigia uma
 referência **anterior a 12/09 e posterior a 13/09** ao mesmo tempo — condições que não se encontram
 e não vão passar a se encontrar. Passou a dizer `NÃO MEDIU`.
+
+## Entregue em 14/09/2026 — SKU próprio por produto e por item opcional
+
+Spec: `docs/specs/2026-09-14-sku-por-item-design.md`. O dono olhou a prévia do relatório do PayPal
+que a leva 3 criou e viu que **todas as linhas levavam o mesmo `sku`** — o código do pedido. E
+nomeou a distinção que resolve: *"Código do pedido é uma coisa... SKU de produto e o SKU para cada
+um dos itens opcionais é outra."*
+
+**Não era ausência de informação: era informação que não distingue nada, com cara de que distingue.**
+
+**Seis campos novos**, com contador à vista. O **pacote não reaproveita o código do TidyCal** —
+decisão dele, pela própria distinção: aquele código identifica o **agendamento**, não o produto
+vendido. A opção "se vazio, herda o do TidyCal" foi oferecida e **recusada**, pelo motivo certo:
+olhando o relatório não daria para saber se o valor foi escolhido ou herdado.
+
+### As decisões dentro da recusa de SKU repetido
+
+- **Comparação literal:** `ALB20` e `alb20` geram. O código do pacote é comparado em maiúsculas
+  porque o Pix apaga a diferença **dentro do payload**; aqui não há payload — o `sku` vai ao
+  relatório byte a byte, e recusar inventaria uma colisão que não existe.
+- **Duplicar deriva o SKU com `-COPIA`**, a regra que já valia para o código do pacote. Cópia com
+  SKU intacto nasceria recusada; cópia com campo vazio perderia o que o dono cadastrou.
+- Chave com prefixo, para um SKU chamado `constructor` não achar o protótipo.
+
+### O defeito que a regressão pegou, e era do próprio executor
+
+`temSku` nasceu num gerador e quem escreve a lista de itens da Mini loja é **outro** — o bloco morria
+inteiro com `temSku is not defined`, e a saída da Mini loja saía **vazia**. Pega pela regressão, não
+por leitura.
+
+### Três acoplamentos ao defeito antigo, no arnês
+
+`sinal.mjs` cobrava `sku === custom_id` em quatro casos e `pac-quantidade.mjs` montava a descrição
+esperada lendo o código do pedido de `items[0].sku`. **As duas provas dependiam do defeito para
+passar.** Passaram a ler o `custom_id`, e `sinal.mjs` agora cobra a **ausência** da chave.
+
+### Rider por analogia
+
+`txtCopiado`/`txtNaocopiou` da aba `cob` → `txtPixCopiado`/`txtPixNaocopiou`, com a mesma conversão
+das duas que o dono autorizou. Era a **terceira** da mesma família; as quatro abas agora concordam.
