@@ -1523,3 +1523,27 @@ seção nunca mais abriria — sem erro nenhum no console.**
 
 **A busca do topo não alcança as Novidades** — medido, não suposto: ela varre campos de formulário
 dentro dos painéis, e o painel não tem campo nenhum.
+
+## Entregue em 14/09/2026 — tamanho do QR configurável nas quatro abas
+
+O campo existia só no Link de cobrança. O dono autorizou dá-lo às outras três **depois de eu
+recomendar não fazer** — a recomendação vinha de uma explicação coerente (lá o QR **é** o conteúdo
+da página; nas outras é um elemento no meio de um carrinho), mas **não havia justificativa escrita**,
+e a decisão é dele.
+
+**Padrão de fábrica 200, não 180** — é o número que as três já emitiam. Padrão que muda a saída sem
+ninguém pedir é o que a regressão existe para denunciar. **Zero divergência**, e o zero é a prova:
+quem não mexer no campo recebe exatamente os mesmos bytes.
+
+**Medido com a biblioteca de verdade**, não pelo CSS emitido: 140 px no Checkout, 260 na Mini loja,
+320 no Agendamento — **três números diferentes de propósito**, porque com um só um bloco lendo o
+campo da aba errada passaria.
+
+**Dois comentários que afirmavam "o campo não foi estendido às outras três" foram corrigidos.**
+Registro que descreve o passado como presente manda procurar no lugar errado.
+
+A legenda do fieldset da aba `pac` passou de "Cores" para "Aparência" — o conjunto deixou de ser só
+de cores. Única mudança de texto de interface fora dos campos, declarada por isso.
+
+**Primeira rodada sob a regra das release notes:** a entrada foi escrita antes do carimbo, e
+`conferir-versoes.sh` a exigiu.
