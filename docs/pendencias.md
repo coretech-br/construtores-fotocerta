@@ -1600,3 +1600,48 @@ Tamanho do link, medido: 231 simples · 259 um item · 362 cinco itens · 365 it
 `sinal-cobranca` fixava o **texto inteiro** da assinatura do selo e passou a medir a **propriedade**
 (sobrevive ao próximo parâmetro); `upsell` exigia um comportamento que deixou de valer **só numa
 aba** e passou a pular aquela **dizendo por quê**; `textos-migrados` ganhou as duas chaves novas.
+
+## Entregue em 14/09/2026 — prévia na página /cobrar
+
+Spec: `docs/specs/2026-09-14-previa-na-cobrar-design.md`. Duas metades **independentes**.
+
+### 1. A página REAL, não um desenho
+
+Um quadro carregando a `/pagar` publicada do dono, com o link recém-gerado. Fiel por construção.
+Desenhar a página ali seria **segunda implementação** do que o bloco faz — a `/cobrar` não tem o
+gerador, e a regra da casa é *"prévia roda o gerador, não imita o gerador"*.
+
+**Quem rola é a caixa, não o quadro:** o iframe tem 1100 px e a caixa 520, com rolagem própria —
+assim a página inteira é alcançável sem um toque entrar nela. `pointer-events` desligado, medido no
+estilo computado.
+
+**O efeito colateral é a maior vantagem:** bloco desatualizado → a prévia mostra **a recusa**.
+Provado servindo um bloco gerado na árvore anterior à leva 10. Até agora isso só apareceria **com o
+cliente na frente**.
+
+### 2. A tabela do PayPal, da mesma fonte
+
+Lida do pedido que o **mesmo texto** do bloco monta. Foi para `fc-compartilhado.js`:
+`P_PP_PEDIDO_SRC` (o corpo do `createOrder`, movido **verbatim**, convertendo as linhas `j+='…'` por
+script para não redigitar um byte), `fcPpItensSrc`, os tetos, `FC_PP_CAMPOS` (os nove nomes, que a
+sonda passou a ler em vez de literais) e `pPpPedidoApi()`, no padrão de `fcPixApi`.
+
+**Não** foi compartilhado o desenho da tabela — o da ferramenta é texto JS que roda dentro do
+iframe; o da `/cobrar` é DOM da página em largura de celular. Declarado no código, e **a paridade é
+provada por teste em vez de por construção**: três caminhos comparados para a mesma cobrança.
+
+### A falta de rede, em três camadas
+
+`navigator.onLine` falso nem cria o quadro; enquanto carrega, aviso dentro da caixa; e na espera de
+15 s **pergunta-se ao próprio iframe se ele chegou a navegar** — leitura que lança significa que
+navegou para o site do dono (mantém o quadro). Sem essa distinção, a espera derrubaria uma prévia
+que está lá toda vez que o SDK do PayPal demorasse.
+
+### Achado pelo caminho, e não era desta rodada
+
+`aparencia.mjs` falhou uma vez medindo a zona quieta do QR. **`m-out` era byte a byte idêntico** e a
+mesma suíte passava em `main`. Causa: a medida lia **uma** linha do canvas, e o código do pedido da
+Mini loja embute `Date.now()` — o desenho muda a cada execução. Passou a ser o **menor branco entre
+todas as linhas**, que é o que "zona quieta" significa. Quatro execuções seguidas, 201/201.
+
+**Regressão: zero divergência.** É prévia, não gerador.
