@@ -252,6 +252,24 @@ console.log('\n=== 2. a faixa se corrige no change/blur, e NAO no input ===');
         chk('[' + aba + '] "' + digitado + '": no change o campo se corrige para ' + preso,
             noChange === preso, 'o campo ficou em "' + noChange + '"');
       }
+      /* O OUTRO GESTO QUE ENCERRA A DIGITACAO: sair do campo sem 'change'. 'blur' nao
+         borbulha, entao ele tem ouvinte proprio em fcLigarFaixa -- e e o ramo que redesenha a
+         previa. Medir so o 'change' deixaria metade da regra sem prova. */
+      const soInput = await pg.evaluate(([id]) => {
+        const el = document.getElementById(id);
+        el.value = '400';
+        el.dispatchEvent(new Event('input', {bubbles: true}));
+        return el.value;
+      }, [campo]);
+      chk('[' + aba + '] "400": no input o campo NAO e corrigido', soInput === '400',
+          'o campo ficou em "' + soInput + '"');
+      const noBlur = await pg.evaluate(([id]) => {
+        const el = document.getElementById(id);
+        el.dispatchEvent(new Event('blur', {bubbles: true}));
+        return el.value;
+      }, [campo]);
+      chk('[' + aba + '] "400": no blur (sem change) o campo se corrige para 320',
+          noBlur === '320', 'o campo ficou em "' + noBlur + '"');
       /* Volta ao padrao para nao sujar a aba seguinte. */
       await set(pg, campo, '200');
     }
