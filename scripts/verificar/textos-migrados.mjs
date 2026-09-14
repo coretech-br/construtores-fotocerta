@@ -535,7 +535,14 @@ console.log('\n--- o formato gravado, contra '+REF+' ---');
        referencia, bloco rodando -- tem prova propria em chaves-renomeadas.mjs. */
     const RENOMEADAS = [
       ['a','txtPixRotulo','txtSecaoPix'],   /* o titulo da secao Pix (leva 6, 14/09/2026) */
-      ['p','t4','txtZapBotao']              /* o rotulo do botao "Ja paguei" (idem) */
+      ['p','t4','txtZapBotao'],             /* o rotulo do botao "Ja paguei" (idem) */
+      /* LEVA 7 (14/09/2026), por analogia a mesma autorizacao do dono: era a TERCEIRA
+         divergencia de nome da mesma familia das duas acima. As outras tres abas ja chamam
+         este par de 'txtPixCopiado'/'txtPixNaocopiou', com a MESMA fabrica, para o MESMO
+         texto -- o aviso de que o codigo Pix foi (ou nao foi) copiado. A conversao esta em
+         pRestaura e tem prova propria em chaves-renomeadas.mjs. */
+      ['p','txtCopiado','txtPixCopiado'],
+      ['p','txtNaocopiou','txtPixNaocopiou']
     ];
     const maur = [];
     for(const [aba,velha,nova] of RENOMEADAS){
@@ -551,6 +558,35 @@ console.log('\n--- o formato gravado, contra '+REF+' ---');
     }
     chk('gravado: as chaves RENOMEADAS carregam o mesmo valor dos dois lados',
         maur.length === 0, maur.join(' | '));
+    /* ===== CHAVE NOVA DENTRO DE 'form' e uma QUARTA coisa (leva 7, 14/09/2026) =====
+       As tres listas acima falam de chaves do PRIMEIRO nivel do fragmento da aba. 'form' e uma
+       chave que ja existia nos dois lados e cujo VALOR e um objeto: quando um campo novo entra
+       no formulario de cadastro, e o INTERIOR dele que cresce, e nenhuma das tres alcanca isso.
+       Sem esta lista a unica coisa que a comparacao final saberia dizer e "a aba u diverge" --
+       verdade, mas inutil, e do tipo que se aprende a ignorar.
+       MESMA DISCIPLINA DAS OUTRAS TRES: cobra primeiro (a chave existe aqui, com o valor
+       esperado; se a referencia ja a tiver, os dois lados tem de concordar), e SO ENTAO tira
+       da comparacao. Tirar sem cobrar seria varrer a mudanca para baixo do tapete.
+       O VALOR ESPERADO E A STRING VAZIA porque este cenario nao digita nada no campo -- ele e
+       o campo de SKU do formulario de cadastro, e o que fica gravado e o que esta na tela. */
+    const FORM_NOVOS = [
+      ['u','u_psku','','o SKU do produto (Checkout)'],
+      ['m','m_psku','','o SKU do produto (Mini loja)'],
+      ['a','a_psku','','o SKU do pacote (Agendamento por pacote)']
+    ];
+    const mauf = [];
+    for(const [aba,ch,esperado,que] of FORM_NOVOS){
+      const aq = ((depois[aba]||{}).form||{})[ch];
+      const re = ((antes[aba]||{}).form||{})[ch];
+      if(aq !== esperado)
+        mauf.push(que+': aqui '+aba+'.form.'+ch+'='+JSON.stringify(aq)+' (esperava '+JSON.stringify(esperado)+')');
+      if(re !== undefined && re !== aq)
+        mauf.push(REF+' tem '+aba+'.form.'+ch+'='+JSON.stringify(re)+', diferente daqui');
+      if((depois[aba]||{}).form) delete depois[aba].form[ch];
+      if((antes[aba]||{}).form) delete antes[aba].form[ch];
+    }
+    chk('gravado: o campo de SKU entrou no formulario inacabado das tres abas de catalogo (leva 7)',
+        mauf.length === 0, mauf.join(' | '));
     for(const rodada of RODADAS){
       const faltando = [];
       for(const [aba, chaves] of Object.entries(rodada.chaves))

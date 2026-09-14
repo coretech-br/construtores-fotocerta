@@ -1,5 +1,5 @@
 /* ============================================================================
-   AS DUAS CHAVES DE TEXTO QUE TROCARAM DE NOME -- E A CONVERSAO (leva 6, 14/09/2026)
+   AS CHAVES DE TEXTO QUE TROCARAM DE NOME -- E A CONVERSAO (levas 6 e 7, 14/09/2026)
    ============================================================================
    O QUE MUDOU, e por que precisava de conversao.
 
@@ -13,6 +13,13 @@
      que abre o WhatsApp -- o mesmo papel que 'txtZapBotao' tem no Checkout e na
      Mini loja. Era o unico dos quatro fora da familia 'txtZap*', e 't4' nao diz
      papel nenhum. Nao ha colisao: esta aba nao tinha essa chave.
+
+     LEVA 7, POR ANALOGIA A MESMA AUTORIZACAO (e nao por pedido novo):
+     'txtCopiado' -> 'txtPixCopiado' e 'txtNaocopiou' -> 'txtPixNaocopiou', tambem na
+     aba Link de cobranca. Era a TERCEIRA divergencia de nome da MESMA familia das duas
+     acima: as outras tres abas ja chamam este par de 'txtPixCopiado'/'txtPixNaocopiou',
+     com a MESMA fabrica (FC_TXT_FABRICA), para o MESMO texto -- o aviso de que o codigo
+     Pix foi (ou nao foi) copiado. Tres de quatro concordavam; a quarta era esta.
 
    O RISCO QUE ESTE ARQUIVO MEDE, e ele e SILENCIOSO. Renomear a chave sem converter
    ZERA o campo de quem personalizou: fcTxtRestaura cai no padrao de fabrica quando a
@@ -57,11 +64,23 @@ const refTemNomesAntigos =
   idxRef.indexOf("['txtPixRotulo','a-txt-pix-rotulo'") >= 0 && idxRef.indexOf("['t4','p-t4'") >= 0;
 if(!refTemNomesAntigos)
   console.log('AVISO: a referencia ' + REF + ' ja usa os nomes NOVOS -- as partes 1 e 2 nao medem nada.');
+/* A DETECCAO DA LEVA 7 e SEPARADA, e tem de ser: a referencia de leva 6 (7e2baec) e anterior as
+   duas rodadas, mas uma referencia escolhida entre elas teria os nomes novos de uma e os velhos
+   da outra. Cada renome detecta o proprio envelhecimento. */
+const refTemCopiadoAntigo = idxRef.indexOf("['txtCopiado','p-txt-copiado'") >= 0;
+if(!refTemCopiadoAntigo)
+  console.log('AVISO: a referencia ' + REF + ' ja usa \'txtPixCopiado\' -- a parte 5 nao mede nada.');
 
 const FABRICA_TITULO = 'Pix';
 const FABRICA_BOTAO  = 'Já paguei';
 const MEU_TITULO = 'Pagar por Pix aqui';
 const MEU_BOTAO  = 'Já fiz o pagamento';
+/* Leva 7. Sem aspas nem barra de proposito: estes dois sao procurados LITERALMENTE dentro do
+   bloco gerado (var TXT_COPIADO='...'), e escJs os reescreveria. O escape em si ja e medido em
+   textos-escape.mjs, que e onde ele mora. */
+const MEU_COPIADO   = 'Copiei o codigo, ja vou colar no banco';
+const MEU_NAOCOPIOU = 'Nao deu para copiar sozinho';
+const FABRICA_COPIADO = 'Código copiado! Cole no aplicativo do seu banco.';
 /* O cenario compartilhado ja escreve 'Já paguei' em p-t4 (BLOCO_FIXO), que por acaso e a
    fabrica: a passagem "de fabrica" abaixo confere exatamente esse valor, e nao o do campo
    em branco -- o que importa e que o texto atravesse igual, nao qual texto e. */
@@ -75,6 +94,8 @@ async function colher(personalizar, porta){
     if(personalizar){
       await set(pg, 'a-txt-pix-rotulo', MEU_TITULO);
       await set(pg, 'p-t4', MEU_BOTAO);
+      await set(pg, 'p-txt-copiado', MEU_COPIADO);
+      await set(pg, 'p-txt-naocopiou', MEU_NAOCOPIOU);
     }
     globalThis.__colhido = await pg.evaluate(() => ({
       abas: localStorage.getItem('fcConstrutores'),
@@ -100,6 +121,7 @@ async function restaurarAqui(estado, porta){
       const v = i => { const e = document.getElementById(i); return e ? e.value : null; };
       const st = JSON.parse(localStorage.getItem('fcConstrutores') || '{}');
       return {titulo: v('a-txt-pix-rotulo'), botao: v('p-t4'),
+              copiado: v('p-txt-copiado'), naocopiou: v('p-txt-naocopiou'),
               gravA: (st.a || {}), gravP: (st.p || {}),
               falhas: (document.getElementById('fc-falhas') || {}).textContent || ''};
     });
@@ -111,7 +133,7 @@ async function restaurarAqui(estado, porta){
        ser PLANTADO, e nao o que a ferramenta de hoje escreve. Um 'input' num campo qualquer
        com o mesmo valor e o gesto mais barato que passa pelo salvarEstado global. */
     await pg.evaluate(() => {
-      for(const id of ['a-txt-pix-rotulo','p-t4']){
+      for(const id of ['a-txt-pix-rotulo','p-t4','p-txt-copiado','p-txt-naocopiou']){
         const e = document.getElementById(id);
         if(e) e.dispatchEvent(new Event('input', {bubbles:true}));
       }
@@ -184,6 +206,32 @@ if(!refTemNomesAntigos){
       a.grav.a.txtPixRotulo === undefined && a.grav.p.t4 === undefined,
       JSON.stringify([a.grav.a.txtPixRotulo, a.grav.p.t4]));
 
+  /* ---- LEVA 7, no mesmo estado colhido: o par do "copiado" ---- */
+  if(!refTemCopiadoAntigo){
+    console.log('  -- leva 7 NAO MEDIU: a referencia ' + REF + ' ja usa os nomes novos do "copiado".');
+  }else{
+    chk('leva 7: o estado da referencia tem a chave ANTIGA do copiado',
+        a.tela.gravP.txtCopiado === MEU_COPIADO, JSON.stringify(a.tela.gravP.txtCopiado));
+    chk('leva 7: ...e NAO tem a nova', a.tela.gravP.txtPixCopiado === undefined,
+        JSON.stringify(a.tela.gravP.txtPixCopiado));
+    chk('leva 7: o COPIADO atravessou inteiro (e NAO caiu na fabrica)',
+        a.tela.copiado === MEU_COPIADO, JSON.stringify(a.tela.copiado));
+    chk('leva 7: o NAO COPIOU atravessou inteiro',
+        a.tela.naocopiou === MEU_NAOCOPIOU, JSON.stringify(a.tela.naocopiou));
+    chk('leva 7: o estado regravado ja traz as chaves NOVAS',
+        a.grav.p.txtPixCopiado === MEU_COPIADO && a.grav.p.txtPixNaocopiou === MEU_NAOCOPIOU,
+        JSON.stringify([a.grav.p.txtPixCopiado, a.grav.p.txtPixNaocopiou]));
+    chk('leva 7: e as chaves antigas sumiram na primeira gravacao',
+        a.grav.p.txtCopiado === undefined && a.grav.p.txtNaocopiou === undefined,
+        JSON.stringify([a.grav.p.txtCopiado, a.grav.p.txtNaocopiou]));
+    /* O BLOCO GERADO carrega o texto do dono, e nao a fabrica -- e a ponta que importa: a
+       conversao so serve se ela alcancar o que o cliente le. */
+    chk('leva 7: o BLOCO gerado leva o texto do dono em TXT_COPIADO',
+        String(a.saidas['p-out1']).indexOf("TXT_COPIADO='" + MEU_COPIADO + "'") >= 0);
+    chk('leva 7: e em TXT_NAO_COPIOU',
+        String(a.saidas['p-out1']).indexOf("TXT_NAO_COPIOU='" + MEU_NAOCOPIOU + "'") >= 0);
+  }
+
   const pac = await tituloNoBlocoPac(a.saidas['a-out3'], 8883);
   chk('BLOCO RODANDO (pac): o titulo da secao Pix na tela do cliente e o texto do dono',
       String(pac.txt).trim() === MEU_TITULO, JSON.stringify(pac.txt));
@@ -206,6 +254,9 @@ if(!refTemNomesAntigos){
       JSON.stringify(a.tela.botao));
   chk('a barra vermelha de fabrica divergente nao acendeu', a.tela.falhas.trim() === '',
       a.tela.falhas.slice(0,140));
+  if(refTemCopiadoAntigo)
+    chk('leva 7: o copiado ficou na fabrica', a.tela.copiado === FABRICA_COPIADO,
+        JSON.stringify(a.tela.copiado));
 }
 
 console.log('\n[3] estado que JA tem a chave nova nao e tocado');
@@ -217,7 +268,8 @@ console.log('\n[3] estado que JA tem a chave nova nao e tocado');
     await pg.evaluate(() => {
       localStorage.setItem('fcConstrutores', JSON.stringify({
         a: {txtPixRotulo:'o velho', txtSecaoPix:'o que eu escolhi'},
-        p: {t4:'o velho', txtZapBotao:'o que eu escolhi'}
+        p: {t4:'o velho', txtZapBotao:'o que eu escolhi',
+            txtCopiado:'o velho', txtPixCopiado:'o que eu escolhi'}
       }));
     });
     await pg.reload();
@@ -226,7 +278,7 @@ console.log('\n[3] estado que JA tem a chave nova nao e tocado');
     await pg.waitForTimeout(200);
     globalThis.__dep = await pg.evaluate(() => {
       const v = i => { const e = document.getElementById(i); return e ? e.value : null; };
-      return {titulo: v('a-txt-pix-rotulo'), botao: v('p-t4')};
+      return {titulo: v('a-txt-pix-rotulo'), botao: v('p-t4'), copiado: v('p-txt-copiado')};
     });
   }, [], {porta: 8887});
   chk('restaurou sem alerta', r.alertas.length === 0, JSON.stringify(r.alertas));
@@ -234,6 +286,8 @@ console.log('\n[3] estado que JA tem a chave nova nao e tocado');
       JSON.stringify(globalThis.__dep.titulo));
   chk('a escolha do dono ficou intocada (botao)', globalThis.__dep.botao === 'o que eu escolhi',
       JSON.stringify(globalThis.__dep.botao));
+  chk('a escolha do dono ficou intocada (copiado, leva 7)',
+      globalThis.__dep.copiado === 'o que eu escolhi', JSON.stringify(globalThis.__dep.copiado));
 }
 
 console.log('\n[4] o fonte de hoje: um nome, um papel');
@@ -253,9 +307,23 @@ console.log('\n[4] o fonte de hoje: um nome, um papel');
   const linhaPreco = (idx.match(/\['txtPixRotulo','[ump]-txt-pix-?rotulo'/g) || []).length;
   chk("'txtPixRotulo' continua nas tres abas onde significa a linha do preco", linhaPreco === 3,
       String(linhaPreco));
+  /* ---- leva 7: o par do "copiado" entrou na familia 'txtPix*' ---- */
+  chk("P_TXT_DEFS usa 'txtPixCopiado'", idx.indexOf("['txtPixCopiado','p-txt-copiado'") >= 0);
+  chk("P_TXT_DEFS usa 'txtPixNaocopiou'", idx.indexOf("['txtPixNaocopiou','p-txt-naocopiou'") >= 0);
+  chk("P_TXT_DEFS nao usa mais 'txtCopiado'", idx.indexOf("['txtCopiado','p-txt-copiado'") < 0);
+  chk("P_TXT_DEFS nao usa mais 'txtNaocopiou'", idx.indexOf("['txtNaocopiou','p-txt-naocopiou'") < 0);
+  chk('o gerador do Link de cobranca le cfg.txtPixCopiado', idx.indexOf('escJs(cfg.txtPixCopiado)') >= 0);
+  chk('o gerador do Link de cobranca le cfg.txtPixNaocopiou', idx.indexOf('escJs(cfg.txtPixNaocopiou)') >= 0);
+  /* AS QUATRO ABAS concordam agora: uma chave, um papel. */
+  /* Os ids NAO foram renomeados junto (id nao e persistido, e renomea-lo quebraria o cenario
+     contra a referencia), entao o 'pix-' do meio e opcional: 'p-txt-copiado' contra
+     'u/m/a-txt-pix-copiado'. O que tinha de concordar era a CHAVE, e concorda. */
+  chk("'txtPixCopiado' aparece nas QUATRO abas", (idx.match(/\['txtPixCopiado','[umap]-txt-(pix-)?copiado'/g) || []).length === 4,
+      String((idx.match(/\['txtPixCopiado','[umap]-txt-(pix-)?copiado'/g) || []).length));
   chk('a conversao existe e e uma so (fcTxtChaveMigrar)',
       (idx.match(/function fcTxtChaveMigrar\(/g) || []).length === 1);
-  chk('e as duas abas a chamam', (idx.match(/fcTxtChaveMigrar\(/g) || []).length === 3,
+  chk('e as duas abas a chamam, agora com quatro conversoes',
+      (idx.match(/fcTxtChaveMigrar\(/g) || []).length === 5,
       String((idx.match(/fcTxtChaveMigrar\(/g) || []).length));
 }
 

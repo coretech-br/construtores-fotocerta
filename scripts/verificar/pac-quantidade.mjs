@@ -107,7 +107,12 @@ const SONDA = '<scr'+'ipt>(function(){\n'
 const pedido = pg => pg.evaluate(() => {
   const p = window.__pp.createOrder(null, {order:{create:o => o}});
   const u = p.purchase_units[0];
-  return {name:u.items[0].name, descricao:u.description, valor:u.amount.value, sku:u.items[0].sku,
+  /* 'cod' SAI DO custom_id, e nao do sku. Ate a leva 7 (14/09/2026) o 'sku' de toda linha
+     carregava o codigo do pedido, e ler dali era conveniente -- e era o defeito que o dono
+     relatou: a coluna "ID do produto" do relatorio repetia o mesmo texto em toda linha.
+     Desde entao o 'sku' e o SKU DAQUELE item (vazio aqui, porque este cenario nao cadastra
+     nenhum) e quem identifica o pedido e o custom_id, que e o campo que existe para isso. */
+  return {name:u.items[0].name, descricao:u.description, valor:u.amount.value, cod:u.custom_id,
           itens:(u.items||[]).map(it => ({name:it.name, quantity:it.quantity, unit:it.unit_amount.value}))};
 });
 
@@ -194,7 +199,7 @@ for(const caso of CASOS){
      Entao a intencao nao muda de lugar: o que era cobrado do 'name' passa a ser cobrado do
      'description', e a lista de itens ganha cobranca PROPRIA logo abaixo -- o teste fica
      mais forte, nao mais fraco. */
-  const esperado = caso.nome+' (cod: '+r.ped.sku+')';
+  const esperado = caso.nome+' (cod: '+r.ped.cod+')';
   chk(caso.rotulo+': description da ordem', r.ped.descricao===esperado,
       'saiu: '+r.ped.descricao+' | esperado: '+esperado);
   /* A LISTA DE ITENS DERIVADA DO MESMO caso.nome, e nao de uma segunda tabela: se as duas
@@ -233,7 +238,7 @@ for(const caso of CASOS){
       return {ped: await pedido(pg), tela: await naTela(pg)};
     }
   });
-  const inteiro = LONGO_PAC+' + '+LONGO_OP+' x3 (cod: '+r.ped.sku+')';
+  const inteiro = LONGO_PAC+' + '+LONGO_OP+' x3 (cod: '+r.ped.cod+')';
   chk('corte 127: bloco rodou sem erro proprio', errosReais(r.erros).length===0, errosReais(r.erros).join(' | '));
   chk('corte 127: o nome inteiro passaria do teto', inteiro.length>127, 'inteiro tem '+inteiro.length);
   /* O TETO ATRAVESSOU A LEVA 3 INTEIRO, so mudou de campo: o resumo concatenado, que e o

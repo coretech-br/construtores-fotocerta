@@ -1749,6 +1749,8 @@
           <input type="text" id="u-pdesc" placeholder="Sessão em estúdio com cenário natalino">
           <label for="u-ppreco">Preço</label>
           <input type="number" id="u-ppreco" placeholder="420" min="0" step="0.01">
+          <label for="u-psku">SKU do produto <small>(opcional)</small></label>
+          <input type="text" id="u-psku" placeholder="ENS-NATAL">
           <label>Vende por quantidade? <small>(um ensaio se vende uma vez; uma foto extra se vende em várias)</small></label>
           <div class="radios">
             <label><input type="radio" name="u-pqtd" value="nao" checked><span>Não <small>(sim ou não)</small></span></label>
@@ -1761,6 +1763,9 @@
             <input type="number" id="u-op-preco" placeholder="300" min="0" step="0.01">
           </div>
           <input type="text" id="u-op-desc" placeholder="Descrição deste opcional (opcional) — ex.: 10 fotos extras, tratadas e em alta resolução">
+          <label for="u-op-sku">SKU deste opcional <small>(opcional)</small></label>
+          <input type="text" id="u-op-sku" placeholder="FOTO-EXTRA-10">
+          <p class="ajuda">O <b>SKU</b> é o <b>seu</b> código de produto, e ele vai na coluna <b>&ldquo;ID do produto&rdquo;</b> do relatório do PayPal — <b>uma linha por produto e uma por opcional</b>. Ele <b>não</b> é o <b>código do pedido</b>, que continua identificando o pedido inteiro no campo de conciliação — são dois campos com papéis diferentes. <b>Em branco, a linha sai sem o campo</b> — nunca com o código do pedido. Dois itens com o mesmo SKU são <b>recusados</b> na hora de gerar: repetido, ele não identifica nada. Aceita letras, números, hífen e ponto, até 127 caracteres.</p>
           <div class="radios">
             <label><input type="checkbox" id="u-op-qtd"><span>Este opcional vende por quantidade</span></label>
           </div>
@@ -3162,6 +3167,8 @@
           <input type="text" id="m-pdesc" placeholder="Capa dura, 30 páginas, impressão fine art">
           <label for="m-ppreco">Preço</label>
           <input type="number" id="m-ppreco" placeholder="420" min="0" step="0.01">
+          <label for="m-psku">SKU do produto <small>(opcional)</small></label>
+          <input type="text" id="m-psku" placeholder="ALB-20X30">
           <label for="m-pcat">Categoria <small>(livre; a lista sugere as que você já usou)</small></label>
           <input type="text" id="m-pcat" list="m-cat-lista" placeholder="Álbuns">
           <datalist id="m-cat-lista"></datalist>
@@ -3178,6 +3185,9 @@
             <input type="number" id="m-op-preco" placeholder="80" min="0" step="0.01">
           </div>
           <input type="text" id="m-op-desc" placeholder="Descrição deste opcional (opcional) — ex.: caixa rígida com laço de cetim">
+          <label for="m-op-sku">SKU deste opcional <small>(opcional)</small></label>
+          <input type="text" id="m-op-sku" placeholder="CAIXA-PRES">
+          <p class="ajuda">O <b>SKU</b> é o <b>seu</b> código de produto, e ele vai na coluna <b>&ldquo;ID do produto&rdquo;</b> do relatório do PayPal — <b>uma linha por produto e uma por opcional</b>. Ele <b>não</b> é o <b>código do pedido</b>, que continua identificando o pedido inteiro no campo de conciliação — são dois campos com papéis diferentes. <b>Em branco, a linha sai sem o campo</b> — nunca com o código do pedido. Dois itens com o mesmo SKU são <b>recusados</b> na hora de gerar: repetido, ele não identifica nada. Aceita letras, números, hífen e ponto, até 127 caracteres.</p>
           <div class="radios">
             <label><input type="checkbox" id="m-op-qtd"><span>Este opcional vende por quantidade</span></label>
           </div>
@@ -3884,6 +3894,9 @@
           <input type="text" id="a-pdur" placeholder="1 hora">
           <label for="a-ppreco">Preço</label>
           <input type="number" id="a-ppreco" placeholder="420" min="0" step="0.01">
+          <label for="a-psku">SKU do pacote <small>(opcional)</small></label>
+          <input type="text" id="a-psku" placeholder="MINI-1H-PROD">
+          <p class="ajuda">O <b>SKU não é o código acima</b>, e isso é de propósito: o <b>código</b> identifica o <b>agendamento</b> no TidyCal e na URL; o <b>SKU</b> identifica o <b>produto vendido</b>, na coluna &ldquo;ID do produto&rdquo; do relatório do PayPal. Hoje eles podem coincidir — mas quem preenche é você, e olhando o relatório dá para saber que aquele valor foi escolhido, e não herdado.</p>
           <label for="a-pinclui">O que inclui</label>
           <input type="text" id="a-pinclui" placeholder="10 fotos tratadas">
           <label for="a-ppath">Endereço do TidyCal deste pacote <small>(o endereço completo, começando com https://)</small></label>
@@ -3897,6 +3910,9 @@
             <input type="number" id="a-op-preco" placeholder="300" min="0" step="0.01">
           </div>
           <input type="text" id="a-op-desc" placeholder="Descrição deste opcional (opcional) — ex.: 20 páginas, capa dura, entregue em 15 dias">
+          <label for="a-op-sku">SKU deste opcional <small>(opcional)</small></label>
+          <input type="text" id="a-op-sku" placeholder="ALB-IMP">
+          <p class="ajuda">O <b>SKU</b> é o <b>seu</b> código de produto, e ele vai na coluna <b>&ldquo;ID do produto&rdquo;</b> do relatório do PayPal — <b>uma linha por produto e uma por opcional</b>. Ele <b>não</b> é o <b>código do pedido</b>, que continua identificando o pedido inteiro no campo de conciliação — são dois campos com papéis diferentes. <b>Em branco, a linha sai sem o campo</b> — nunca com o código do pedido. Dois itens com o mesmo SKU são <b>recusados</b> na hora de gerar: repetido, ele não identifica nada. Aceita letras, números, hífen e ponto, até 127 caracteres.</p>
           <div class="radios">
             <label><input type="checkbox" id="a-op-qtd"><span>Este opcional vende por quantidade</span></label>
           </div>
@@ -5839,7 +5855,7 @@ function fcUpsellChamada(cfg){return fcUpsellEmite(cfg)?'upsellIr();':'';}
    o sufixo " x3" do rotulo, que aqui viraria quantidade repetida), a quantidade e o preco
    unitario. As tres abas com catalogo ja tinham essa enumeracao ou ganharam a sua nesta
    rodada, e nas tres ela e a UNICA -- nomesSelecionados() passou a sair dela. */
-function fcPpItensSrc(){
+function fcPpItensSrc(temSku){
   return '/* Os itens do pedido, do jeito que o relatorio do PayPal vai mostrar: um por linha,\n'+
     '   com quantidade e preco unitario. A conta fecha por CONSTRUCAO -- item_total e a soma\n'+
     '   dos itens em centavos inteiros e o desconto e a DIFERENCA para o valor cobrado --,\n'+
@@ -5868,7 +5884,7 @@ function fcPpItensSrc(){
     'if(!nome)return;   /* name e obrigatorio: item sem nome derruba o pedido */\n'+
     'cent+=uc*q;\n'+
     'novo={name:nome,quantity:String(q),unit_amount:{value:(uc/100).toFixed(2),currency_code:MOEDA}};\n'+
-    'if(CODIGO_PEDIDO)novo.sku=String(CODIGO_PEDIDO).substring(0,'+FC_LIM_PP+');   /* a coluna "ID do produto" */\n'+
+    (temSku?'if(li[z].sku)novo.sku=String(li[z].sku).substring(0,'+FC_LIM_PP+');   /* o SKU DAQUELE item: a coluna "ID do produto" do relatorio */\n':'')+
     'itens.push(novo);\n'+
     '}\n'+
     'if(!itens.length)return;   /* so itens zerados: nao ha pedido itemizado a montar */\n'+
@@ -5881,7 +5897,7 @@ function fcPpItensSrc(){
     'if(descC>0)pu.amount.breakdown.discount={value:(descC/100).toFixed(2),currency_code:MOEDA};\n'+
     '}\n\n';
 }
-function fcPpBotoesSrc(prefixo,ppcor,usaSinal,comentZero,aoAprovarExtra,temItens){
+function fcPpBotoesSrc(prefixo,ppcor,usaSinal,comentZero,aoAprovarExtra,temItens,temSku){
   /* ITEMIZA quando o bloco hospedeiro declara itensEscolhidos() E o pedido e cobrado
      INTEIRO. Com sinal o cliente paga uma fracao, e o formato do PayPal nao tem campo
      para entrada: ver o comentario de fcPpItensSrc, que mede por que a linha unica
@@ -5889,7 +5905,7 @@ function fcPpBotoesSrc(prefixo,ppcor,usaSinal,comentZero,aoAprovarExtra,temItens
   var itemiza=!!temItens&&!usaSinal;
   var c='';
   c+='/* ===== PayPal ===== */\n';
-  if(itemiza)c+=fcPpItensSrc();
+  if(itemiza)c+=fcPpItensSrc(temSku);
   c+="var sdk=document.createElement('script');\n";
   c+="sdk.src='https://www.paypal.com/sdk/js?client-id='+encodeURIComponent(PAYPAL_CLIENT_ID)+'&currency='+MOEDA+'&intent=capture&locale=pt_BR';\n";
   c+='sdk.onload=function(){\n';
@@ -5920,7 +5936,13 @@ function fcPpBotoesSrc(prefixo,ppcor,usaSinal,comentZero,aoAprovarExtra,temItens
      Unificar aqui ou truncaria as duas abas grandes ou tiraria informacao da terceira. */
   c+='if(!nm)nm=CODIGO_PEDIDO;   /* name e obrigatorio no item: nunca pode sair vazio */\n';
   c+='var it={name:nm,quantity:"1",unit_amount:{value:v,currency_code:MOEDA}};\n';
-  c+='if(CODIGO_PEDIDO)it.sku=CODIGO_PEDIDO;   /* sku vazio nao ajuda ninguem a conciliar */\n';
+  /* ESTA LINHA NAO TEM 'sku', e a ausencia e a correcao (14/09/2026). Ate aqui ela levava
+     'sku=CODIGO_PEDIDO' -- e era exatamente o defeito que o dono relatou: a coluna "ID do
+     produto" do relatorio repetindo o codigo do pedido em toda linha. Aqui e pior ainda que nos
+     itens, porque esta linha nao e um produto: ela e o PEDIDO INTEIRO resumido num item so (o
+     piso de ppDetalhar, e o formato com sinal). Nao ha SKU de produto que a descreva, e o codigo
+     do pedido ja viaja no campo que existe para isso -- o custom_id, logo abaixo. */
+  c+='/* Sem sku: esta linha e o PEDIDO INTEIRO, e nao um produto -- quem identifica o pedido e o custom_id. */\n';
   if(!itemiza){
   c+='return actions.order.create({purchase_units:[{\n';
   c+='amount:{value:v,currency_code:MOEDA,breakdown:{item_total:{value:v,currency_code:MOEDA}}},\n';
@@ -6364,8 +6386,8 @@ function fcPvShim(o){
    medido e nao presumido, que o que o relatorio vai registrar e o que a tela mostra.
 
    A PREVIA NUNCA REMONTA O PEDIDO. Tudo o que ela exibe e LIDO do objeto que o createOrder do
-   proprio bloco devolveu -- nome, quantidade, preco unitario, item_total, desconto, valor,
-   descricao, custom_id e sku. Previa que redesenha o resultado com codigo proprio e uma
+   proprio bloco devolveu -- nome, SKU, quantidade, preco unitario, item_total, desconto, valor,
+   descricao e custom_id. Previa que redesenha o resultado com codigo proprio e uma
    segunda implementacao, e duas implementacoes divergem; e regra deste projeto, e aqui ela
    tem um segundo dente: uma previa que montasse a lista por conta propria poderia mostrar
    uma conta que fecha enquanto o bloco manda uma que nao fecha, e o defeito so apareceria no
@@ -6452,6 +6474,7 @@ function fcPvSondaPP(o){
   s+='            var its=pu.items||[];\n';
   s+="            var cab=cel('div','display:flex;gap:8px;font-weight:700;border-bottom:1px solid #e4dfd2;padding-bottom:2px;margin-bottom:2px');\n";
   s+="            cab.appendChild(cel('div',CAMPO+';flex:1','items[].name'));\n";
+  s+="            cab.appendChild(cel('div',CAMPO+';width:104px','items[].sku'));\n";
   s+="            cab.appendChild(cel('div',CAMPO+';width:58px;text-align:right','quantity'));\n";
   s+="            cab.appendChild(cel('div',CAMPO+';width:96px;text-align:right','unit_amount'));\n";
   s+='            pai.appendChild(cab);\n';
@@ -6463,12 +6486,20 @@ function fcPvSondaPP(o){
   s+='              if(!isNaN(uc)&&!isNaN(qn))somaC+=uc*qn;\n';
   s+="              var ln=cel('div','display:flex;gap:8px;padding:1px 0');\n";
   s+="              ln.appendChild(cel('div','flex:1;word-break:break-word',String(it.name==null?'':it.name)));\n";
+  /* O TRACO, e nao vazio: celula em branco se le como "a previa nao sabe", e a ausencia do
+     campo e justamente o que precisa aparecer. */
+  s+="              ln.appendChild(cel('div','width:104px;word-break:break-word'+(it.sku==null?';color:#8a8375':''),it.sku==null?'\u2014':String(it.sku)));\n";
   s+="              ln.appendChild(cel('div','width:58px;text-align:right',String(it.quantity)));\n";
   s+="              ln.appendChild(cel('div','width:96px;text-align:right',String((it.unit_amount||{}).value)+' '+String((it.unit_amount||{}).currency_code)));\n";
   s+='              pai.appendChild(ln);\n';
   s+='            }\n';
   s+='            if(!its.length)\n';
   s+="              pai.appendChild(cel('div',NOSSO,'(nenhum item — o pedido não seria criado)'));\n";
+  /* A EXPLICACAO MUDOU COM O CAMPO (14/09/2026). Ate aqui havia uma linha unica, la embaixo,
+     dizendo que o sku era "igual em todas as linhas" -- e ela era honesta sobre um defeito.
+     Agora o SKU e de cada linha, entao ele mora na TABELA, e o que sobra em cinza e a distincao
+     que o dono nomeou: SKU de produto nao e codigo do pedido. */
+  s+="            pai.appendChild(cel('div',NOSSO+';margin:2px 0 0','items[].sku é a coluna \"ID do produto\" do relatório, e é o SKU DAQUELE item — um por produto e um por opcional. Item sem SKU cadastrado sai sem o campo (o traço), e nunca com o código do pedido: quem identifica o pedido inteiro é o custom_id, abaixo.'));\n";
   /* --- os totais --- */
   s+="            var br=(pu.amount||{}).breakdown||{};\n";
   s+='            function din(o2){return o2?(String(o2.value)+\' \'+String(o2.currency_code)):null;}\n';
@@ -6496,7 +6527,6 @@ function fcPvSondaPP(o){
   s+="            pai.appendChild(cel('div','border-top:1px solid #e4dfd2;margin-top:2px;padding-top:3px'));\n";
   s+="            linha('description',pu.description,'o resumo do pedido, no extrato do cliente');\n";
   s+="            linha('custom_id',pu.custom_id,'o campo de conciliação: aparece no relatório, não para o cliente');\n";
-  s+="            linha('items[].sku',its.length?its[0].sku:null,'a coluna \"ID do produto\" do relatório, igual em todas as linhas');\n";
   s+='          }\n';
   /* --- a decisao do clique, quando a aba tem onClick --- */
   s+='          if(decisao!==null){\n';
@@ -7090,11 +7120,12 @@ function restaurarEstado(){
    descobre ao duplicar um produto e ver a descricao sumir.
    A COPIA E RASA de proposito: o opcional nao tem nada aninhado, e copiar chave a chave e
    justamente o que garante que os dois arrays deixem de apontar para o mesmo objeto.
-   'desc' sai com ||'' pela mesma razao que 'qtd' sai com !!: estado gravado antes desta
-   rodada nao tem a chave, e um undefined viajando por dentro da ferramenta viraria a palavra
-   "undefined" dentro do campo da tela. */
+   'desc' e 'sku' saem com ||'' pela mesma razao que 'qtd' sai com !!: estado gravado antes de
+   cada uma das rodadas que as criou nao tem a chave, e um undefined viajando por dentro da
+   ferramenta viraria a palavra "undefined" dentro do campo da tela. E por isso que um BACKUP
+   ANTIGO abre com o SKU vazio em vez de quebrar -- e, vazio, a linha sai sem o campo. */
 function fcOpCopia(o){
-  return {nome:o.nome,desc:o.desc||'',preco:o.preco,qtd:!!o.qtd};
+  return {nome:o.nome,desc:o.desc||'',preco:o.preco,qtd:!!o.qtd,sku:o.sku||''};
 }
 /* O pedaco 'desc' de um opcional dentro do array do BLOCO ENTREGUE -- fonte unica das tres
    abas. Sai VAZIO quando nao ha descricao: com o campo em branco (a fabrica) o array continua
@@ -7103,6 +7134,118 @@ function fcOpCopia(o){
 function fcOpDescSrc(o){
   var d=(o.desc==null)?'':String(o.desc);
   return d?(", desc:'"+escJs(d)+"'"):"";
+}
+/* ===== O SKU DE CADA LINHA DO RELATORIO DO PAYPAL (14/09/2026, pedido do dono) =====
+   O DEFEITO QUE ISTO FECHA, e ele e pior que "faltar": ate aqui TODAS as linhas do pedido
+   levavam o mesmo 'sku' -- o codigo do pedido --, entao a coluna "ID do produto" do relatorio
+   repetia o mesmo texto em toda linha. Nao era ausencia de informacao: era informacao que nao
+   distingue nada, com cara de que distingue. O dono nomeou a distincao ao pedir: "Codigo do
+   pedido e uma coisa... SKU de produto e o SKU para cada um dos itens opcionais e outra".
+   AS QUATRO REGRAS, e cada uma esta escrita tambem onde ela age:
+     1. SKU vazio -> a linha sai SEM 'sku'. Nao volta ao codigo do pedido: esse fallback ERA o
+        defeito relatado. Omitir e honesto; repetir e mentir com cara de dado.
+     2. 'custom_id' continua sendo o codigo do pedido -- papeis diferentes, campos diferentes.
+     3. SKU repetido dentro da mesma aba RECUSA gerar (fcSkuRecusa), nomeando os dois itens.
+     4. A regra de caractere e LARGA de proposito: apara as pontas e corta em FC_LIM_PP, e nada
+        mais. O 'sku' NAO entra no payload do Pix, entao ele nao herda a regra estreita do txid
+        (so letras e numeros) -- cortar 'ALB-20x30' para 'ALB20x30' atrapalharia a conciliacao
+        do dono em vez de ajudar. O teto e o da especificacao do PayPal (items[].sku maxLength
+        127), e o contador fica a vista (FC_LIM_CAMPOS).
+   O PACOTE NAO REAPROVEITA O CODIGO DO TIDYCAL que ele ja tem, e isso foi oferecido e RECUSADO
+   pelo dono: o codigo identifica o AGENDAMENTO, o SKU identifica o produto vendido. Herdar
+   criaria confluencia silenciosa -- olhando o relatorio ninguem saberia se aquele valor foi
+   escolhido como SKU ou herdado de outra coisa, que e a familia do defeito que ele achou. */
+function fcSkuLimpo(v){
+  return String(v==null?'':v).replace(/^\s+|\s+$/g,'').substring(0,FC_LIM_PP);
+}
+/* O pedaco ", sku:'...'" dentro do array do BLOCO ENTREGUE -- fonte unica das tres abas, e
+   serve tanto ao item de catalogo (produto, pacote) quanto ao opcional. Sai VAZIO quando nao ha
+   SKU: com os campos em branco (a fabrica) o array continua byte a byte o de antes desta
+   rodada, e e isso que a regressao cobra. Se ela divergir com o campo vazio, quem esta errado e
+   esta emissao, nao o teste. */
+function fcSkuSrc(o){
+  var s=fcSkuLimpo(o&&o.sku);
+  return s?(", sku:'"+escJs(s)+"'"):"";
+}
+/* Ha pelo menos um SKU cadastrado entre estes itens (no proprio item ou em algum opcional)? E o
+   que decide a emissao do campo 'sku' em itensEscolhidos() e da linha que o copia para o pedido
+   -- mesma disciplina de 'temMin', 'usaQtd' e 'temOpDesc': sem nenhum SKU cadastrado nada disto
+   entra no bloco, e a saida continua byte a byte a de antes. */
+function fcTemSku(itens){
+  var i,j,ops;
+  for(i=0;i<(itens||[]).length;i++){
+    if(fcSkuLimpo(itens[i]&&itens[i].sku))return true;
+    ops=(itens[i]&&itens[i].ops)||[];
+    for(j=0;j<ops.length;j++)if(fcSkuLimpo(ops[j].sku))return true;
+  }
+  return false;
+}
+/* Todos os SKUs em uso numa lista de itens (o do item e os dos opcionais dele). Serve a duas
+   coisas: a recusa de repetido e a derivacao do SKU de uma COPIA. */
+function fcSkuUsados(itens){
+  var L=[],i,j,ops,s;
+  for(i=0;i<(itens||[]).length;i++){
+    s=fcSkuLimpo(itens[i]&&itens[i].sku);
+    if(s)L.push(s);
+    ops=(itens[i]&&itens[i].ops)||[];
+    for(j=0;j<ops.length;j++){s=fcSkuLimpo(ops[j].sku);if(s)L.push(s);}
+  }
+  return L;
+}
+/* O SKU DE UMA COPIA NAO COLIDE, e diz de quem ele e copia -- a MESMA regra que fcDupCod ja
+   aplica ao codigo do pacote, e pela mesma razao: duplicar um item levando o SKU intacto
+   produziria, no clique seguinte, a recusa de SKU repetido -- o dono pediu uma copia e ganharia
+   um "nao". Vazio continua vazio: copia de item sem SKU nasce sem SKU.
+   O TETO PODE ESTOURAR ('-COPIA' sao seis caracteres), e o que acontece entao esta medido e nao
+   e silencioso: fcSkuLimpo corta em FC_LIM_PP, o contador do campo mostra o numero, e se o
+   corte recriar a colisao e fcSkuRecusa quem a nomeia antes de gerar. */
+function fcSkuDup(sku,usados){
+  var s=fcSkuLimpo(sku);
+  return s?fcSkuLimpo(fcDupCod(s,usados,fcSkuLimpo)):'';
+}
+/* Copia os opcionais de um item para o formulario de cadastro DERIVANDO o SKU de cada um contra
+   'usados', que CRESCE a cada derivacao -- sem isso dois opcionais de mesmo SKU virariam duas
+   copias de mesmo SKU, e a copia nasceria ja recusada. */
+function fcOpsDup(ops,usados){
+  return (ops||[]).map(function(o){
+    var c=fcOpCopia(o);
+    c.sku=fcSkuDup(c.sku,usados);
+    if(c.sku)usados.push(c.sku);
+    return c;
+  });
+}
+/* A RECUSA DE SKU REPETIDO -- mesma familia do codigo de pacote repetido e do cupom repetido,
+   que esta ferramenta ja recusa. SKU que se repete nao identifica: um relatorio com duas linhas
+   dizendo 'ALB20' para coisas diferentes e pior que duas linhas sem SKU nenhum.
+   A COMPARACAO E LITERAL, e isto e decisao medida e nao descuido. O codigo do pacote e comparado
+   em maiusculas porque o Pix REALMENTE apaga a diferenca dentro do payload ('MINI-1H' e 'MINI1H'
+   viram o mesmo identificador); aqui nao ha payload nenhum -- o 'sku' chega ao relatorio byte a
+   byte. 'ALB20' e 'alb20' sao duas linhas distinguiveis na tela do dono, e recusar essa
+   configuracao seria a ferramenta inventar uma colisao que nao existe.
+   A CHAVE LEVA UM PREFIXO ('#') porque um SKU chamado 'constructor' ou 'toString' encontraria o
+   prototipo do objeto e acusaria repeticao onde nao ha -- e '__proto__' trocaria o prototipo. */
+function fcSkuRecusa(itens,nomeItem){
+  var vistos={},i,j,ops,s,err,nomeI;
+  function guardar(sku,quem){
+    var k='#'+sku;
+    if(Object.prototype.hasOwnProperty.call(vistos,k))
+      return 'O SKU "'+sku+'" está em dois itens: '+vistos[k]+' e '+quem+'. Um SKU repetido não identifica nada: as duas linhas chegariam ao relatório do PayPal com o mesmo texto na coluna "ID do produto", e você não teria como saber qual é qual. Troque um dos dois, ou deixe um deles em branco — linha sem SKU sai sem o campo.';
+    vistos[k]=quem;
+    return '';
+  }
+  for(i=0;i<(itens||[]).length;i++){
+    nomeI=(itens[i]&&itens[i].nome)||('#'+(i+1));
+    s=fcSkuLimpo(itens[i]&&itens[i].sku);
+    if(s){err=guardar(s,'o '+nomeItem+' \u201c'+nomeI+'\u201d');if(err)return err;}
+    ops=(itens[i]&&itens[i].ops)||[];
+    for(j=0;j<ops.length;j++){
+      s=fcSkuLimpo(ops[j].sku);
+      if(!s)continue;
+      err=guardar(s,'o opcional \u201c'+(ops[j].nome||('#'+(j+1)))+'\u201d de \u201c'+nomeI+'\u201d');
+      if(err)return err;
+    }
+  }
+  return '';
 }
 /* Ha pelo menos um opcional com descricao entre estes itens (produtos ou pacotes)? E o que
    decide a emissao da REGRA DE CSS e das linhas de JS que desenham a descricao. Sem nenhuma
@@ -7515,6 +7658,16 @@ var FC_LIM_CAMPOS=[
   {id:'a-pcod',     max:A_ID_MAX,      sobra:fcIdLimpo, semCap:true, parceiro:'a-prefixo',
    mais:function(){return fcLimUteisDe('a-prefixo');},
    nota:function(){return 'o prefixo e o código do pacote dividem este limite';}},
+  /* OS SEIS SKUs (14/09/2026). Sem 'sobra' e sem 'filtro': aqui a regra de caractere e LARGA de
+     proposito (ver fcSkuLimpo) -- o que o operador digita e o que chega ao relatorio, entao o
+     numero da esquerda e simplesmente o tamanho do campo, sem "(n digitados)" entre parenteses.
+     O teto e o da especificacao do PayPal, e nao o do txid: o 'sku' nao entra no payload do Pix. */
+  {id:'u-psku',   max:FC_LIM_PP},
+  {id:'u-op-sku', max:FC_LIM_PP},
+  {id:'m-psku',   max:FC_LIM_PP},
+  {id:'m-op-sku', max:FC_LIM_PP},
+  {id:'a-psku',   max:FC_LIM_PP},
+  {id:'a-op-sku', max:FC_LIM_PP},
   {id:'b-selo-txt'},
   {id:'p-desc',     max:P_DESC_MAX,    nota:fcLimNotaPp},
   {id:'p-txid',     max:FC_TXID_MAX,   sobra:function(v){return pTxidLimpo(v);}, filtro:/[^A-Za-z0-9]/g}
@@ -14252,7 +14405,7 @@ var uEditIdx=-1;
 /* OS CAMPOS DE TEXTO do formulario "Cadastrar produto" -- a lista foi MEDIDA em uProdSalvar,
    que e quem decide o que compoe um produto: nome, descricao, preco e os tres radios. Os
    opcionais nao estao aqui; eles ja viajam em 'edops'. Ver fcFormLer. */
-var U_FORM=[['c','u-pnome',''],['c','u-pdesc',''],['c','u-ppreco',''],
+var U_FORM=[['c','u-pnome',''],['c','u-pdesc',''],['c','u-ppreco',''],['c','u-psku',''],
             ['r','u-opsel','unico'],['r','u-opnenhum','nao'],['r','u-pqtd','nao']];
 
 /* Salvamento e restauracao desta aba (registradas em ABAS). */
@@ -14506,6 +14659,14 @@ function uOpRender(){
     var ds=document.createElement('input');ds.type='text';ds.value=op.desc||'';ds.placeholder='Descrição (opcional)';
     ds.addEventListener('input',function(){uEditOps[i].desc=ds.value;salvarEstado();});
     info.appendChild(ds);
+    /* O SKU NA PROPRIA LINHA, como o nome, o preco e a descricao -- os campos do opcional se
+       editam ONDE ele esta. So no 'input', sem correcao no change/blur: SKU vazio e configuracao
+       legitima (a maioria dos opcionais nao tem nenhum), como a descricao. O aparo das pontas e
+       o corte em 127 sao de fcSkuLimpo, na hora de gerar -- corrigir a cada tecla impediria
+       colar um codigo com espaco no fim e continuar digitando. */
+    var sk=document.createElement('input');sk.type='text';sk.value=op.sku||'';sk.placeholder='SKU (opcional)';sk.maxLength=FC_LIM_PP;
+    sk.addEventListener('input',function(){uEditOps[i].sku=sk.value;salvarEstado();});
+    info.appendChild(sk);
     /* R2: cada opcional declara se aceita quantidade. Um "album impresso" vende varios; uma
        "hora extra de estudio" tambem; "revelacao em papel fine art" nao. Fica no proprio item
        porque a decisao e do item, nao do carrinho. */
@@ -14533,21 +14694,26 @@ function uOpAdd(){
   if(!n){alert('Informe o nome do opcional.');return;}
   var v=parseFloat(String($('u-op-preco').value).replace(',','.'));
   if(isNaN(v)||v<0)v=0;
-  uEditOps.push({nome:n,desc:$('u-op-desc').value.trim(),preco:v,qtd:!!$('u-op-qtd').checked});
-  $('u-op-nome').value='';$('u-op-preco').value='';$('u-op-desc').value='';$('u-op-qtd').checked=false;
+  uEditOps.push({nome:n,desc:$('u-op-desc').value.trim(),preco:v,qtd:!!$('u-op-qtd').checked,sku:fcSkuLimpo($('u-op-sku').value)});
+  $('u-op-nome').value='';$('u-op-preco').value='';$('u-op-desc').value='';$('u-op-qtd').checked=false;$('u-op-sku').value='';
   uOpRender();salvarEstado();
 }
 function uOpMove(i,d){var j=i+d;if(j<0||j>=uEditOps.length)return;var t=uEditOps[i];uEditOps[i]=uEditOps[j];uEditOps[j]=t;uOpRender();salvarEstado();}
 function uOpDel(i){uEditOps.splice(i,1);uOpRender();salvarEstado();}
 function uOpDuplicar(i){
   var o=uEditOps[i];if(!o)return;
-  uEditOps.splice(i+1,0,{nome:fcDupNome(o.nome),desc:o.desc||'',preco:o.preco,qtd:!!o.qtd});
+  var c=fcOpCopia(o);
+  c.nome=fcDupNome(o.nome);
+  /* O SKU DA COPIA E DERIVADO (ver fcSkuDup): repetido, ele faria a geracao ser recusada logo
+     no clique seguinte. 'usados' conta o catalogo JA GRAVADO mais o que esta no formulario. */
+  c.sku=fcSkuDup(c.sku,fcSkuUsados(uProds).concat(fcSkuUsados([{ops:uEditOps}])));
+  uEditOps.splice(i+1,0,c);
   uOpRender();salvarEstado();
 }
 
 /* ===== produtos ===== */
 function uProdLimpar(){
-  $('u-pnome').value='';$('u-pdesc').value='';$('u-ppreco').value='';
+  $('u-pnome').value='';$('u-pdesc').value='';$('u-ppreco').value='';$('u-psku').value='';
   uEditOps=[];uEditIdx=-1;uOpRender();
   setRadio('u-opsel','unico');setRadio('u-opnenhum','nao');setRadio('u-pqtd','nao');
   $('u-op-qtd').checked=false;
@@ -14558,6 +14724,9 @@ function uProdLimpar(){
   $('u-prod-cancelar').style.display='none';
   uProdCopiaAviso(null);
   uToggles();
+  /* O contador do SKU (FC_LIM_CAMPOS) so se refaz sozinho no 'input'. Aqui o valor chega SEM
+     teclado -- ver o mesmo apontamento em aPacLimpar. */
+  fcLimAtualizarTodos();
 }
 function uProdSalvar(){
   var n=$('u-pnome').value.trim();
@@ -14567,7 +14736,7 @@ function uProdSalvar(){
      catalogo a preco zero, como o Agendamento por pacote ja fazia. Opcional a zero continua
      valendo -- e brinde, e a propria aba emite "Sem opcional" a zero. */
   if(isNaN(v)||v<=0){alert('Informe o preço do produto (maior que zero). Um produto de R$ 0,00 seria entregue como uma cobrança de zero. Opcional grátis continua valendo — esta recusa é do item de catálogo.');return;}
-  var p={nome:n,desc:$('u-pdesc').value.trim(),preco:v,
+  var p={nome:n,desc:$('u-pdesc').value.trim(),preco:v,sku:fcSkuLimpo($('u-psku').value),
     opsel:radio('u-opsel')||'unico',opnenhum:radio('u-opnenhum')||'nao',
     qtd:radio('u-pqtd')==='sim',
     ops:uEditOps.map(fcOpCopia)};
@@ -14577,6 +14746,7 @@ function uProdSalvar(){
 function uProdEditar(i){
   var p=uProds[i];
   $('u-pnome').value=p.nome;$('u-pdesc').value=p.desc||'';$('u-ppreco').value=p.preco;
+  $('u-psku').value=p.sku||'';
   uEditOps=(p.ops||[]).map(fcOpCopia);
   /* O ROTULO ANTES DO uOpRender: fcOpPendente le o rotulo deste botao -- ver o mesmo
      apontamento em aPacEditar (Agendamento por pacote), onde o defeito foi medido. */
@@ -14589,6 +14759,7 @@ function uProdEditar(i){
   $('u-prod-cancelar').style.display='inline-block';
   uProdCopiaAviso(null);
   uToggles();
+  fcLimAtualizarTodos();   /* o contador do SKU -- ver uProdLimpar */
 }
 /* ===== duplicar um produto (03/09/2026) =====
    MESMA FORMA DE aPacDuplicar, e pela mesma medicao: o produto tem formulario proprio, e a
@@ -14603,15 +14774,21 @@ function uProdEditar(i){
 function uProdDuplicar(i){
   var p=uProds[i];if(!p)return;
   uProdLimpar();
+  /* O SKU DA COPIA NAO COLIDE -- ver fcSkuDup, que aplica ao SKU a mesma regra que fcDupCod ja
+     aplica ao codigo do pacote. 'usados' CRESCE a cada derivacao (o do produto entra antes dos
+     dos opcionais), senao duas linhas da copia poderiam sair com o mesmo SKU derivado. */
+  var usados=fcSkuUsados(uProds);
   $('u-pnome').value=fcDupNome(p.nome);
   $('u-pdesc').value=p.desc||'';
   $('u-ppreco').value=p.preco;
+  $('u-psku').value=fcSkuDup(p.sku,usados);
+  if($('u-psku').value)usados.push($('u-psku').value);
   setRadio('u-opsel',p.opsel);setRadio('u-opnenhum',p.opnenhum);
   setRadio('u-pqtd',p.qtd?'sim':'nao');
   /* OS OPCIONAIS VAO JUNTO, copiados chave a chave como em uProdEditar: sem isto os dois
      produtos apontariam para o MESMO array, e mexer num opcional da copia mexeria no original
      ja gravado. */
-  uEditOps=(p.ops||[]).map(fcOpCopia);
+  uEditOps=fcOpsDup(p.ops,usados);
   $('u-prod-cancelar').textContent='Descartar cópia';
   $('u-prod-cancelar').style.display='inline-block';
   uProdCopiaAviso(p);
@@ -15111,6 +15288,10 @@ function uRecusa(cfg){
     prc=parseFloat(String(cfg.prods[i].preco).replace(',','.'));
     if(!(prc>0))return 'O produto "'+(cfg.prods[i].nome||('#'+(i+1)))+'" está com o preço vazio ou zerado. Ele seria entregue como uma cobrança de R$ 0,00. Preencha o preço ou remova o produto — opcional grátis continua valendo, a recusa é do item de catálogo.';
   }
+  /* SKU REPETIDO RECUSA -- ver fcSkuRecusa. Conferido AQUI, e nao so no cadastro, pela razao
+     de sempre nesta ferramenta: estado importado e backup antigo nao passam pelo formulario. */
+  var recSku=fcSkuRecusa(cfg.prods,'produto');
+  if(recSku)return recSku;
   if(cfg.usaPP&&!cfg.client)return fciRecusa('Informe o Client ID do PayPal.');
   if(cfg.usaPix){
     var erroChave=pixChaveErro(cfg.chave,cfg.chaveBruta);
@@ -15186,6 +15367,9 @@ function uBloco(cfg){
   /* Ha alguma descricao de opcional cadastrada? Nenhuma -> nem a regra de CSS nem as
      linhas que a desenham entram no bloco, e a saida continua byte a byte a de antes. */
   var temOpDesc=fcTemOpDesc(cfg.prods);
+  /* Ha algum SKU cadastrado? Nenhum -> o campo 'sku' nem entra em itensEscolhidos(), nem a
+     linha que o copia para o pedido, e a saida continua byte a byte a de antes (ver fcTemSku). */
+  var temSku=fcTemSku(cfg.prods);
 
   /* Nome, descricao, opcional, cupom e validade sao texto livre e viram strings JS do array
      PRODUTOS/CUPONS: escJs. Uma descricao colada de um e-mail com comentario HTML fazia o
@@ -15194,9 +15378,9 @@ function uBloco(cfg){
   var prods=cfg.prods.map(function(p){
     var ops=(p.ops||[]).map(function(o){
       var v=parseFloat(String(o.preco).replace(',','.'))||0;
-      return "{nome:'"+escJs(o.nome)+"'"+fcOpDescSrc(o)+", preco:"+v.toFixed(2)+(o.qtd?", qtd:true":"")+"}";
+      return "{nome:'"+escJs(o.nome)+"'"+fcOpDescSrc(o)+", preco:"+v.toFixed(2)+fcSkuSrc(o)+(o.qtd?", qtd:true":"")+"}";
     }).join(', ');
-    return "  {nome:'"+escJs(p.nome)+"', descricao:'"+escJs(p.desc||'')+"', preco:"+(parseFloat(p.preco)||0).toFixed(2)+",\n"+
+    return "  {nome:'"+escJs(p.nome)+"', descricao:'"+escJs(p.desc||'')+"', preco:"+(parseFloat(p.preco)||0).toFixed(2)+fcSkuSrc(p)+",\n"+
            "   selecaoOpcionais:'"+p.opsel+"', permitirNenhum:"+(p.opnenhum==='sim'?'true':'false')+(p.qtd?", quantidade:true":"")+",\n"+
            "   opcionais:["+ops+"]}";
   }).join(',\n');
@@ -15829,8 +16013,8 @@ function uBloco(cfg){
   c+='var lista=[];\n';
   c+='PRODUTOS.forEach(function(p,i){\n';
   c+='if(!produtoAtivo(i))return;\n';
-  if(usaQtd)c+="lista.push({rotulo:p.nome+(p.quantidade?(' x'+qtdProd(i)):''),valor:p.preco*qtdProd(i),opcional:false,nome:p.nome,qtd:qtdProd(i),unit:p.preco});\n";
-  else c+="lista.push({rotulo:p.nome,valor:p.preco,opcional:false,nome:p.nome,qtd:1,unit:p.preco});\n";
+  if(usaQtd)c+="lista.push({rotulo:p.nome+(p.quantidade?(' x'+qtdProd(i)):''),valor:p.preco*qtdProd(i),opcional:false,nome:p.nome,qtd:qtdProd(i),unit:p.preco"+(temSku?",sku:p.sku":"")+"});\n";
+  else c+="lista.push({rotulo:p.nome,valor:p.preco,opcional:false,nome:p.nome,qtd:1,unit:p.preco"+(temSku?",sku:p.sku":"")+"});\n";
   c+='var sel=raiz.querySelectorAll(\'input[name="fcu-op-\'+i+\'"]:checked\');\n';
   c+='for(var k=0;k<sel.length;k++){\n';
   c+='var j=parseInt(sel[k].value,10);\n';
@@ -15838,9 +16022,9 @@ function uBloco(cfg){
   c+='if(!op||op.nenhum)continue;\n';
   if(usaQtd){
     c+='if(qtdOp(i,j)<1)continue;\n';
-    c+="lista.push({rotulo:op.nome+(op.qtd?(' x'+qtdOp(i,j)):''),valor:op.preco*qtdOp(i,j),opcional:true,nome:op.nome,qtd:qtdOp(i,j),unit:op.preco});\n";
+    c+="lista.push({rotulo:op.nome+(op.qtd?(' x'+qtdOp(i,j)):''),valor:op.preco*qtdOp(i,j),opcional:true,nome:op.nome,qtd:qtdOp(i,j),unit:op.preco"+(temSku?",sku:op.sku":"")+"});\n";
   }else{
-    c+="lista.push({rotulo:op.nome,valor:op.preco,opcional:true,nome:op.nome,qtd:1,unit:op.preco});\n";
+    c+="lista.push({rotulo:op.nome,valor:op.preco,opcional:true,nome:op.nome,qtd:1,unit:op.preco"+(temSku?",sku:op.sku":"")+"});\n";
   }
   c+='}\n});\n';
   c+='return lista;\n}\n\n';
@@ -15892,7 +16076,7 @@ function uBloco(cfg){
     c+='function msg(txt,ok){\n';
     c+="var m=raiz.querySelector('.fcu-msg');\n";
     c+="m.textContent=txt;m.className='fcu-msg '+(ok?'ok':'erro');\n}\n\n";
-    c+=fcPpBotoesSrc('fcu',ppcor,usaSinal,true,fcUpsellChamada(cfg.upsell),true);
+    c+=fcPpBotoesSrc('fcu',ppcor,usaSinal,true,fcUpsellChamada(cfg.upsell),true,temSku);
   }
   if(usaPix){
     c+='/* ===== Pix ===== */\n';
@@ -17816,6 +18000,14 @@ function aOpRender(){
     var ds=document.createElement('input');ds.type='text';ds.value=op.desc||'';ds.placeholder='Descrição (opcional)';
     ds.addEventListener('input',function(){aEditOps[i].desc=ds.value;salvarEstado();});
     info.appendChild(ds);
+    /* O SKU NA PROPRIA LINHA, como o nome, o preco e a descricao -- os campos do opcional se
+       editam ONDE ele esta. So no 'input', sem correcao no change/blur: SKU vazio e configuracao
+       legitima (a maioria dos opcionais nao tem nenhum), como a descricao. O aparo das pontas e
+       o corte em 127 sao de fcSkuLimpo, na hora de gerar -- corrigir a cada tecla impediria
+       colar um codigo com espaco no fim e continuar digitando. */
+    var sk=document.createElement('input');sk.type='text';sk.value=op.sku||'';sk.placeholder='SKU (opcional)';sk.maxLength=FC_LIM_PP;
+    sk.addEventListener('input',function(){aEditOps[i].sku=sk.value;salvarEstado();});
+    info.appendChild(sk);
     var lq=document.createElement('label');
     lq.style.cssText='display:flex;align-items:center;gap:6px;margin:5px 0 0;font-size:12px;font-weight:400;color:var(--tinta-suave)';
     var cq=document.createElement('input');cq.type='checkbox';cq.checked=!!op.qtd;
@@ -17842,15 +18034,18 @@ function aOpAdd(){
   if(!n){alert('Informe o nome do opcional.');return;}
   var v=parseFloat(String($('a-op-preco').value).replace(',','.'));
   if(isNaN(v)||v<0)v=0;
-  aEditOps.push({nome:n,desc:$('a-op-desc').value.trim(),preco:v,qtd:!!$('a-op-qtd').checked});
-  $('a-op-nome').value='';$('a-op-preco').value='';$('a-op-desc').value='';$('a-op-qtd').checked=false;
+  aEditOps.push({nome:n,desc:$('a-op-desc').value.trim(),preco:v,qtd:!!$('a-op-qtd').checked,sku:fcSkuLimpo($('a-op-sku').value)});
+  $('a-op-nome').value='';$('a-op-preco').value='';$('a-op-desc').value='';$('a-op-qtd').checked=false;$('a-op-sku').value='';
   aOpRender();salvarEstado();
 }
 function aOpMove(i,d){var j=i+d;if(j<0||j>=aEditOps.length)return;var t=aEditOps[i];aEditOps[i]=aEditOps[j];aEditOps[j]=t;aOpRender();salvarEstado();}
 function aOpDel(i){aEditOps.splice(i,1);aOpRender();salvarEstado();}
 function aOpDuplicar(i){
   var o=aEditOps[i];if(!o)return;
-  aEditOps.splice(i+1,0,{nome:fcDupNome(o.nome),desc:o.desc||'',preco:o.preco,qtd:!!o.qtd});
+  var c=fcOpCopia(o);
+  c.nome=fcDupNome(o.nome);
+  c.sku=fcSkuDup(c.sku,fcSkuUsados(aPacotes).concat(fcSkuUsados([{ops:aEditOps}])));   /* ver uOpDuplicar */
+  aEditOps.splice(i+1,0,c);
   aOpRender();salvarEstado();
 }
 
@@ -18159,6 +18354,7 @@ function aPacTestar(){
 }
 function aPacLimpar(){
   $('a-pcod').value='';$('a-pnome').value='';$('a-pdur').value='';$('a-ppreco').value='';
+  $('a-psku').value='';
   $('a-pinclui').value='';$('a-ppath').value='';
   /* nunca em branco: sem familia selecionada o pacote nasceria orfao */
   $('a-pfam').value=aFamilias.length?aFamilias[0].id:'';
@@ -18246,6 +18442,8 @@ function aPacSalvar(){
   var preco=parseFloat(String($('a-ppreco').value).replace(',','.'));
   if(isNaN(preco)||preco<=0){alert('Informe o preço do pacote (maior que zero).');return;}
   var p={cod:cod,nome:nome,dur:$('a-pdur').value.trim(),preco:preco,
+    /* O SKU DO PACOTE e campo PROPRIO, e nao o 'cod' acima reaproveitado -- ver fcSkuLimpo. */
+    sku:fcSkuLimpo($('a-psku').value),
     inclui:$('a-pinclui').value.trim(),cal:fcTidyUrl($('a-ppath').value),
     /* Sem recusa nova: o seletor sempre tem uma opcao valida selecionada (aFamOpcoes garante),
        e a lista de familias nunca fica vazia (aRestaura cria uma, aFamDel recusa apagar a
@@ -18258,7 +18456,7 @@ function aPacSalvar(){
 function aPacEditar(i){
   var p=aPacotes[i];
   $('a-pcod').value=p.cod;$('a-pnome').value=p.nome;$('a-pdur').value=p.dur||'';
-  $('a-ppreco').value=p.preco;$('a-pinclui').value=p.inclui||'';$('a-ppath').value=p.cal||'';
+  $('a-ppreco').value=p.preco;$('a-psku').value=p.sku||'';$('a-pinclui').value=p.inclui||'';$('a-ppath').value=p.cal||'';
   $('a-pfam').value=(p.fam&&aFamAcha(p.fam))?p.fam:(aFamilias.length?aFamilias[0].id:'');
   aEditOps=(p.ops||[]).map(fcOpCopia);
   aEditIdx=i;
@@ -18296,9 +18494,14 @@ function aPacDuplicar(i){
   var p=aPacotes[i];if(!p)return;
   aPacLimpar();
   $('a-pcod').value=fcDupCod(p.cod,aPacotes.map(function(q){return q.cod;}),aCodPix);
+  /* O SKU DA COPIA E DERIVADO tambem, e pelo MESMO motivo do codigo logo acima -- ver
+     fcSkuDup. Sao dois identificadores diferentes, e cada um deriva contra a propria lista. */
+  var usados=fcSkuUsados(aPacotes);
   $('a-pnome').value=fcDupNome(p.nome);
   $('a-pdur').value=p.dur||'';
   $('a-ppreco').value=p.preco;
+  $('a-psku').value=fcSkuDup(p.sku,usados);
+  if($('a-psku').value)usados.push($('a-psku').value);
   $('a-pinclui').value=p.inclui||'';
   $('a-ppath').value=p.cal||'';
   $('a-pfam').value=(p.fam&&aFamAcha(p.fam))?p.fam:(aFamilias.length?aFamilias[0].id:'');
@@ -18306,7 +18509,7 @@ function aPacDuplicar(i){
      explicito ("duplicar um pacote (e seus opcionais)"). Copia chave a chave, como aPacEditar:
      sem isto os dois pacotes apontariam para o MESMO array, e mexer num opcional da copia
      mexeria no original ja gravado. */
-  aEditOps=(p.ops||[]).map(fcOpCopia);
+  aEditOps=fcOpsDup(p.ops,usados);
   $('a-pac-cancelar').textContent='Descartar cópia';
   $('a-pac-cancelar').style.display='inline-block';
   aPacCopiaAviso(p);
@@ -18537,6 +18740,10 @@ function aRecusa(cfg){
     if(!fcTidyUrlOk(p.cal))return 'Pacote "'+p.cod+'": '+fcTidyRecusa(p.cal);
     if(!aFamAchaEm(cfg.familias,p.fam))return 'O pacote "'+p.cod+'" está numa família que não existe mais. Abra o pacote no lápis (seção '+fcSecN('a-pacotes')+'), escolha uma família e salve.';
   }
+  /* SKU REPETIDO RECUSA -- ver fcSkuRecusa. O SKU do pacote e um identificador DIFERENTE do
+     codigo conferido no laco acima: aquele identifica o agendamento, este o produto vendido. */
+  var recSku=fcSkuRecusa(cfg.pacotes,'pacote');
+  if(recSku)return recSku;
   /* As familias sao conferidas AQUI, e nao so no cadastro, pela mesma razao ja registrada para
      os cupons: o editor EM LINHA nao valida nada -- apagar o nome de uma familia ja cadastrada
      deixaria um botao em branco na tela do cliente sem aviso nenhum. */
@@ -18703,7 +18910,7 @@ function aElVal(id,def){var el=$(id);return el?el.value:def;}
    quem decide o que compoe um pacote. 'a-pfam' e um <select> e entra como campo comum: o que
    se guarda e o id da familia escolhida, e aEditRestaurar confere se ela ainda existe. Ver
    fcFormLer. */
-var A_FORM=[['c','a-pcod',''],['c','a-pnome',''],['c','a-pdur',''],['c','a-ppreco',''],
+var A_FORM=[['c','a-pcod',''],['c','a-pnome',''],['c','a-pdur',''],['c','a-ppreco',''],['c','a-psku',''],
             ['c','a-pinclui',''],['c','a-ppath',''],['c','a-pfam','']];
 function aColeta(){
   var r={
@@ -18968,6 +19175,12 @@ function aPresetDepois(){
    entregue (e o que abrirCalendario() usa em f.src=link, 13470-ish) -- e montada AQUI, uma vez
    so: e o proprio 'cal' cadastrado, que desde 03/09/2026 JA e o endereco completo (dominio
    proprio do TidyCal nao cabe num caminho). */
+/* 'sku' VIAJA SEMPRE, ao contrario de 'comFam' logo abaixo, e a diferenca e de significado: a
+   familia so existe na VITRINE (a pagina de obrigado acha o pacote pelo ?pac= e nem sabe o que
+   e familia), enquanto o SKU e do PRODUTO -- ele descreve o mesmo pacote nas duas saidas. Um
+   segundo parametro aqui trocaria uma fonte unica por duas formas do mesmo array, e o preco
+   disso seria maior que os bytes que ele pouparia na vitrine. Com o campo vazio (a fabrica) ele
+   nao e emitido em lugar nenhum e as duas saidas continuam byte a byte as de antes. */
 /* 'comFam' e um PARAMETRO, e nao um campo que sempre viaja: a pagina de obrigado nao sabe o
    que e familia -- ela acha o pacote pelo ?pac= e cobra --, entao aBlocoObrigado chama esta
    funcao SEM ele e a saida 3 continua byte a byte a de antes desta rodada. Se a-out3 mudar, a
@@ -18977,9 +19190,9 @@ function aPacotesSrc(pacotes,comFam){
     var preco=parseFloat(String(p.preco).replace(',','.'))||0;
     var ops=(p.ops||[]).map(function(o){
       var v=parseFloat(String(o.preco).replace(',','.'))||0;
-      return "{nome:'"+escJs(o.nome)+"'"+fcOpDescSrc(o)+", preco:"+v.toFixed(2)+(o.qtd?", qtd:true":"")+"}";
+      return "{nome:'"+escJs(o.nome)+"'"+fcOpDescSrc(o)+", preco:"+v.toFixed(2)+fcSkuSrc(o)+(o.qtd?", qtd:true":"")+"}";
     }).join(', ');
-    return "  {cod:'"+escJs(p.cod)+"', nome:'"+escJs(p.nome)+"', dur:'"+escJs(p.dur)+"', preco:"+preco.toFixed(2)+",\n"+
+    return "  {cod:'"+escJs(p.cod)+"', nome:'"+escJs(p.nome)+"', dur:'"+escJs(p.dur)+"', preco:"+preco.toFixed(2)+fcSkuSrc(p)+",\n"+
       "   inclui:'"+escJs(p.inclui)+"', link:'"+escJs(p.cal)+"',\n"+
       (comFam?("   fam:'"+escJs(p.fam)+"',\n"):"")+
       "   ops:["+ops+"]}";
@@ -19774,6 +19987,9 @@ function aBlocoObrigado(cfg){
   /* Pelo MESMO motivo de usaQtd, e do catalogo inteiro: este bloco e gerado uma vez para
      todos os pacotes, e qualquer um deles pode ser o PAC em tempo de execucao. */
   var temOpDesc=fcTemOpDesc(cfg.pacotes);
+  /* Pelo MESMO motivo de usaQtd e de temOpDesc, e do catalogo inteiro: qualquer pacote pode ser
+     o PAC em tempo de execucao. Ver fcTemSku. */
+  var temSku=fcTemSku(cfg.pacotes);
   c+='<!-- ============================================================\n';
   c+='     FOTO CERTA - PAGINA DE OBRIGADO DO AGENDAMENTO POR PACOTE\n';
   c+='     ONDE COLAR: componente HTML da pagina de obrigado do TidyCal\n';
@@ -20308,7 +20524,7 @@ function aBlocoObrigado(cfg){
      dela. O PACOTE nao tem quantidade (aPacotesSrc nao emite o campo e somaProdutos() devolve
      PAC.preco sem multiplicar), entao ele entra sempre com qtd 1. */
   c+='function itensEscolhidos(){\n';
-  c+='  var lista=[{rotulo:PAC.nome,valor:PAC.preco,opcional:false,nome:PAC.nome,qtd:1,unit:PAC.preco}];\n';
+  c+='  var lista=[{rotulo:PAC.nome,valor:PAC.preco,opcional:false,nome:PAC.nome,qtd:1,unit:PAC.preco'+(temSku?',sku:PAC.sku':'')+'}];\n';
   c+='  (PAC.ops||[]).forEach(function(op,j){\n';
   /* Quantidade zero equivale a opcional nao escolhido -- a mesma regra das duas irmas
      (produtoAtivo: 'if(qtdProd(i)<1)return false'; itensEscolhidos: 'if(qtdOp(i,j)<1)
@@ -20320,8 +20536,8 @@ function aBlocoObrigado(cfg){
      ganha guarda pelo mesmo motivo que a irma nao tem: multiplicar por zero ja soma zero. */
   if(usaQtd)c+='    if(qtdOp(j)<1)return;\n';
   c+='    if(!(opChecks[j]&&opChecks[j].checked))return;\n';
-  if(usaQtd)c+="    lista.push({rotulo:op.nome+(op.qtd?(' x'+qtdOp(j)):''),valor:op.preco*qtdOp(j),opcional:true,nome:op.nome,qtd:qtdOp(j),unit:op.preco});\n";
-  else c+="    lista.push({rotulo:op.nome,valor:op.preco,opcional:true,nome:op.nome,qtd:1,unit:op.preco});\n";
+  if(usaQtd)c+="    lista.push({rotulo:op.nome+(op.qtd?(' x'+qtdOp(j)):''),valor:op.preco*qtdOp(j),opcional:true,nome:op.nome,qtd:qtdOp(j),unit:op.preco"+(temSku?",sku:op.sku":"")+"});\n";
+  else c+="    lista.push({rotulo:op.nome,valor:op.preco,opcional:true,nome:op.nome,qtd:1,unit:op.preco"+(temSku?",sku:op.sku":"")+"});\n";
   c+='  });\n';
   c+='  return lista;\n';
   c+='}\n\n';
@@ -20714,7 +20930,7 @@ function aBlocoObrigado(cfg){
   c+='  var m=document.createElement("div");m.className="fca-ob-msg";b.appendChild(m);\n';
   c+='  cartao.appendChild(b);\n';
   c+='  function msg(txt,ok){m.textContent=txt;m.className="fca-ob-msg "+(ok?"ok":"erro");}\n';
-  c+=fcPpBotoesSrc('fca-ob',cfg.ppcor,usaSinal,true,fcUpsellChamada(cfg.upsell),true);
+  c+=fcPpBotoesSrc('fca-ob',cfg.ppcor,usaSinal,true,fcUpsellChamada(cfg.upsell),true,temSku);
   c+='}\n\n';
   }
 
@@ -22462,13 +22678,21 @@ function pValDia(){
    Checkout e a Mini loja que tinham, decisao do dono de leva-lo tambem para ca e para a aba
    Agendamento por pacote). */
 var P_TXT_DEFS=[
-  /* AS CHAVES CONTINUAM 'txtCopiado'/'txtNaocopiou', e nao 'txtPixCopiado'/'txtPixNaocopiou'
-     como nas outras tres: renomear uma chave RESETA o campo de quem tinha o texto customizado
-     (fcTxtRestaura cai no padrao quando a chave nao existe no estado), e isso atinge backup em
-     arquivo que o dono ja tem. Formato do que fica gravado e a classe que espera a palavra dele.
-     O que a leva 4 unificou aqui foi a FABRICA, que e o que estava escrito duas vezes. */
-  ['txtCopiado','p-txt-copiado',FC_TXT_FABRICA.pixCopiado],
-  ['txtNaocopiou','p-txt-naocopiou',FC_TXT_FABRICA.pixNaocopiou],
+  /* RENOMEADAS EM 14/09/2026 (leva 7), POR ANALOGIA A AUTORIZACAO DO DONO na leva 6. Eram
+     'txtCopiado'/'txtNaocopiou' -- a TERCEIRA divergencia de nome da MESMA familia das duas que
+     ele acabou de mandar renomear com conversao ('txtPixRotulo'->'txtSecaoPix' na aba pac e
+     't4'->'txtZapBotao' aqui). As outras tres abas ja chamam este mesmo par de
+     'txtPixCopiado'/'txtPixNaocopiou', com a MESMA fabrica (FC_TXT_FABRICA), para o MESMO texto:
+     o aviso de que o codigo Pix foi (ou nao foi) copiado. Eram tres de quatro concordando, e a
+     quarta era esta -- exatamente o formato do que ele mandou consertar.
+     O QUE O COMENTARIO ANTERIOR DIZIA, e por que ele deixou de valer: "renomear RESETA o campo de
+     quem tinha o texto customizado". Estava certo -- e a leva 6 resolveu isso com fcTxtChaveMigrar,
+     que leva o valor gravado ate o nome novo, no proprio restaura, e por isso alcanca tambem o
+     backup em ARQUIVO que o dono ja tem. A conversao esta em pRestaura, ao lado da do 't4'.
+     OS IDS DOS CAMPOS CONTINUAM 'p-txt-copiado'/'p-txt-naocopiou' pelo mesmo motivo dos outros
+     dois renomes: id nao e persistido, e renomea-lo quebraria o cenario.mjs contra a referencia. */
+  ['txtPixCopiado','p-txt-copiado',FC_TXT_FABRICA.pixCopiado],
+  ['txtPixNaocopiou','p-txt-naocopiou',FC_TXT_FABRICA.pixNaocopiou],
   ['txtRef','p-txt-ref','Identificador da cobrança: '],
   /* D-2 (03/09/2026): a frase INTEIRA, com {pct}. Antes o campo valia so "Pagando via Pix" e
      o " (-N%)" era colado por fora, no bloco. Mesma tabela unica do Checkout e da Mini loja. */
@@ -22752,8 +22976,8 @@ function pJs(cfg){
   /* Os seis a seguir ja eram 'var TXT_X=...' antes da Rodada de textos configuraveis
      (02/09/2026) -- so o literal fixo virou escJs(cfg.txtX): a saida padrao nao muda um byte,
      porque a declaracao ja existia. */
-  j+="  var TXT_COPIADO='"+escJs(cfg.txtCopiado)+"';\n";
-  j+="  var TXT_NAO_COPIOU='"+escJs(cfg.txtNaocopiou)+"';\n";
+  j+="  var TXT_COPIADO='"+escJs(cfg.txtPixCopiado)+"';\n";
+  j+="  var TXT_NAO_COPIOU='"+escJs(cfg.txtPixNaocopiou)+"';\n";
   j+="  var TXT_REF='"+escJs(cfg.txtRef)+"';\n";
   /* O mesmo rotulo que o carrinho do Checkout escreve, pela mesma razao de sempre: o cliente
      que ja viu a loja le a mesma frase na pagina de cobranca. */
@@ -23556,6 +23780,11 @@ function pRestaura(st){
      esta linha, quem personalizou o rotulo perderia o texto na primeira abertura -- ver
      fcTxtChaveMigrar. */
   P=fcTxtChaveMigrar(P,'t4','txtZapBotao');
+  /* Leva 7, por analogia a mesma autorizacao: o par do "copiado" entrou na familia 'txtPix*'
+     que as outras tres abas ja usam. A fabrica nao mudou junto (e a mesma FC_TXT_FABRICA das
+     tres), que e a condicao em que este molde de conversao serve sozinho -- ver fcTxtChaveMigrar. */
+  P=fcTxtChaveMigrar(P,'txtCopiado','txtPixCopiado');
+  P=fcTxtChaveMigrar(P,'txtNaocopiou','txtPixNaocopiou');
   if(P.usapp)setRadio('p-usapp',P.usapp);
   fcOrdRestaurar('p',P.prio);
   if(P.ppcor)setRadio('p-ppcor',P.ppcor);
@@ -23671,7 +23900,7 @@ function mFmt(v){return precoFmt(radio('m-metodo')==='paypal'?(radio('m-moeda')|
 /* OS CAMPOS DE TEXTO do formulario "Cadastrar produto" desta aba -- lista medida em
    mProdSalvar. Dois campos a mais que o Checkout (categoria e foto); 'larg' nao entra porque
    nao e campo: e a largura DEDUZIDA da foto (sLargSabida). Ver fcFormLer. */
-var M_FORM=[['c','m-pnome',''],['c','m-pdesc',''],['c','m-ppreco',''],['c','m-pcat',''],
+var M_FORM=[['c','m-pnome',''],['c','m-pdesc',''],['c','m-ppreco',''],['c','m-psku',''],['c','m-pcat',''],
             ['c','m-pimg',''],
             ['r','m-opsel','unico'],['r','m-opnenhum','nao'],['r','m-pqtd','nao']];
 
@@ -23843,6 +24072,14 @@ function mOpRender(){
     var ds=document.createElement('input');ds.type='text';ds.value=op.desc||'';ds.placeholder='Descrição (opcional)';
     ds.addEventListener('input',function(){mEditOps[i].desc=ds.value;salvarEstado();});
     info.appendChild(ds);
+    /* O SKU NA PROPRIA LINHA, como o nome, o preco e a descricao -- os campos do opcional se
+       editam ONDE ele esta. So no 'input', sem correcao no change/blur: SKU vazio e configuracao
+       legitima (a maioria dos opcionais nao tem nenhum), como a descricao. O aparo das pontas e
+       o corte em 127 sao de fcSkuLimpo, na hora de gerar -- corrigir a cada tecla impediria
+       colar um codigo com espaco no fim e continuar digitando. */
+    var sk=document.createElement('input');sk.type='text';sk.value=op.sku||'';sk.placeholder='SKU (opcional)';sk.maxLength=FC_LIM_PP;
+    sk.addEventListener('input',function(){mEditOps[i].sku=sk.value;salvarEstado();});
+    info.appendChild(sk);
     var lq=document.createElement('label');
     lq.style.cssText='display:flex;align-items:center;gap:6px;margin:5px 0 0;font-size:12px;font-weight:400;color:var(--tinta-suave)';
     var cq=document.createElement('input');cq.type='checkbox';cq.checked=!!op.qtd;
@@ -23863,21 +24100,24 @@ function mOpAdd(){
   if(!n){alert('Informe o nome do opcional.');return;}
   var v=parseFloat(String($('m-op-preco').value).replace(',','.'));
   if(isNaN(v)||v<0)v=0;
-  mEditOps.push({nome:n,desc:$('m-op-desc').value.trim(),preco:v,qtd:!!$('m-op-qtd').checked});
-  $('m-op-nome').value='';$('m-op-preco').value='';$('m-op-desc').value='';$('m-op-qtd').checked=false;
+  mEditOps.push({nome:n,desc:$('m-op-desc').value.trim(),preco:v,qtd:!!$('m-op-qtd').checked,sku:fcSkuLimpo($('m-op-sku').value)});
+  $('m-op-nome').value='';$('m-op-preco').value='';$('m-op-desc').value='';$('m-op-qtd').checked=false;$('m-op-sku').value='';
   mOpRender();salvarEstado();
 }
 function mOpMove(i,d){var j=i+d;if(j<0||j>=mEditOps.length)return;var t=mEditOps[i];mEditOps[i]=mEditOps[j];mEditOps[j]=t;mOpRender();salvarEstado();}
 function mOpDel(i){mEditOps.splice(i,1);mOpRender();salvarEstado();}
 function mOpDuplicar(i){
   var o=mEditOps[i];if(!o)return;
-  mEditOps.splice(i+1,0,{nome:fcDupNome(o.nome),desc:o.desc||'',preco:o.preco,qtd:!!o.qtd});
+  var c=fcOpCopia(o);
+  c.nome=fcDupNome(o.nome);
+  c.sku=fcSkuDup(c.sku,fcSkuUsados(mProds).concat(fcSkuUsados([{ops:mEditOps}])));   /* ver uOpDuplicar */
+  mEditOps.splice(i+1,0,c);
   mOpRender();salvarEstado();
 }
 
 /* ===== produtos ===== */
 function mProdLimpar(){
-  $('m-pnome').value='';$('m-pdesc').value='';$('m-ppreco').value='';
+  $('m-pnome').value='';$('m-pdesc').value='';$('m-ppreco').value='';$('m-psku').value='';
   $('m-pcat').value='';$('m-pimg').value='';
   mEditOps=[];mEditIdx=-1;mOpRender();
   setRadio('m-opsel','unico');setRadio('m-opnenhum','nao');setRadio('m-pqtd','nao');
@@ -23888,6 +24128,7 @@ function mProdLimpar(){
   $('m-prod-cancelar').style.display='none';
   mProdCopiaAviso(null);
   mToggles();
+  fcLimAtualizarTodos();   /* o contador do SKU -- ver uProdLimpar */
 }
 function mProdSalvar(){
   var n=$('m-pnome').value.trim(),img=String($('m-pimg').value).trim();
@@ -23908,7 +24149,7 @@ function mProdSalvar(){
      '//storage.alboom.ninja/foto.jpg' (que tem host, mas nao tem esquema) passavam calados --
      um ia inteiro para a vitrine sem aviso nenhum. */
   if(!mImgResize(img)&&!confirm('Esta foto não passa pelo redimensionador da Alboom, que só alcança endereços completos em '+S_HOSTS_ALBOOM.join(' ou ')+'.\n\nEla vai funcionar, mas será carregada no tamanho ORIGINAL na vitrine, e não na miniatura. Com muitos produtos isso pesa.\n\nContinuar mesmo assim?'))return;
-  var p={nome:n,desc:$('m-pdesc').value.trim(),preco:v,cat:String($('m-pcat').value).trim(),img:img,
+  var p={nome:n,desc:$('m-pdesc').value.trim(),preco:v,sku:fcSkuLimpo($('m-psku').value),cat:String($('m-pcat').value).trim(),img:img,
     larg:sLargSabida(img),
     opsel:radio('m-opsel')||'unico',opnenhum:radio('m-opnenhum')||'nao',
     qtd:radio('m-pqtd')==='sim',
@@ -23923,6 +24164,7 @@ function mProdSalvar(){
 function mProdEditar(i){
   var p=mProds[i];
   $('m-pnome').value=p.nome;$('m-pdesc').value=p.desc||'';$('m-ppreco').value=p.preco;
+  $('m-psku').value=p.sku||'';
   $('m-pcat').value=p.cat||'';$('m-pimg').value=p.img||'';
   mEditOps=(p.ops||[]).map(fcOpCopia);
   /* O ROTULO ANTES DO mOpRender: fcOpPendente le o rotulo deste botao -- ver o mesmo
@@ -23936,6 +24178,7 @@ function mProdEditar(i){
   $('m-prod-cancelar').style.display='inline-block';
   mProdCopiaAviso(null);
   mToggles();
+  fcLimAtualizarTodos();   /* o contador do SKU -- ver uProdLimpar */
 }
 /* ===== duplicar um produto (03/09/2026) =====
    Copia de uProdDuplicar, com os DOIS campos a mais desta aba. Ver la a razao da primeira
@@ -23958,14 +24201,17 @@ function mProdEditar(i){
 function mProdDuplicar(i){
   var p=mProds[i];if(!p)return;
   mProdLimpar();
+  var usados=fcSkuUsados(mProds);   /* o SKU da copia e derivado -- ver uProdDuplicar */
   $('m-pnome').value=fcDupNome(p.nome);
   $('m-pdesc').value=p.desc||'';
   $('m-ppreco').value=p.preco;
+  $('m-psku').value=fcSkuDup(p.sku,usados);
+  if($('m-psku').value)usados.push($('m-psku').value);
   $('m-pcat').value=p.cat||'';
   $('m-pimg').value=p.img||'';
   setRadio('m-opsel',p.opsel);setRadio('m-opnenhum',p.opnenhum);
   setRadio('m-pqtd',p.qtd?'sim':'nao');
-  mEditOps=(p.ops||[]).map(fcOpCopia);
+  mEditOps=fcOpsDup(p.ops,usados);
   $('m-prod-cancelar').textContent='Descartar cópia';
   $('m-prod-cancelar').style.display='inline-block';
   mProdCopiaAviso(p);
@@ -24581,6 +24827,10 @@ function mRecusa(cfg){
     prc=parseFloat(String(cfg.prods[i].preco).replace(',','.'));
     if(!(prc>0))return 'O produto "'+(cfg.prods[i].nome||('#'+(i+1)))+'" está com o preço vazio ou zerado. Ele seria entregue como uma cobrança de R$ 0,00. Preencha o preço ou remova o produto — opcional grátis continua valendo, a recusa é do item de catálogo.';
   }
+  /* SKU REPETIDO RECUSA -- ver fcSkuRecusa. Conferido AQUI, e nao so no cadastro, pela razao
+     de sempre nesta ferramenta: estado importado e backup antigo nao passam pelo formulario. */
+  var recSku=fcSkuRecusa(cfg.prods,'produto');
+  if(recSku)return recSku;
   if(cfg.usaPP&&!cfg.client)return fciRecusa('Informe o Client ID do PayPal.');
   if(cfg.usaPix){
     var erroChave=pixChaveErro(cfg.chave,cfg.chaveBruta);
@@ -24672,13 +24922,13 @@ function mBloco(cfg){
   var prods=cfg.prods.map(function(p){
     var ops=(p.ops||[]).map(function(o){
       var v=parseFloat(String(o.preco).replace(',','.'))||0;
-      return "{nome:'"+escJs(o.nome)+"'"+fcOpDescSrc(o)+", preco:"+v.toFixed(2)+(o.qtd?", qtd:true":"")+"}";
+      return "{nome:'"+escJs(o.nome)+"'"+fcOpDescSrc(o)+", preco:"+v.toFixed(2)+fcSkuSrc(o)+(o.qtd?", qtd:true":"")+"}";
     }).join(', ');
     /* larguraFonte so sai quando e SABIDA. Emitir 0 seria pior do que nao emitir: o bloco teria
        de tratar 0 como "sem teto" e o numero na tela pareceria uma medida. Sem o campo, a foto
        e pedida na largura escolhida, que e o comportamento de antes desta rodada. */
     var lf=(parseInt(p.larg,10)>0)?(", larguraFonte:"+parseInt(p.larg,10)):"";
-    return "  {nome:'"+escJs(p.nome)+"', descricao:'"+escJs(p.desc||'')+"', preco:"+(parseFloat(p.preco)||0).toFixed(2)+",\n"+
+    return "  {nome:'"+escJs(p.nome)+"', descricao:'"+escJs(p.desc||'')+"', preco:"+(parseFloat(p.preco)||0).toFixed(2)+fcSkuSrc(p)+",\n"+
            "   categoria:'"+escJs(p.cat||'')+"', imagem:'"+escJs(urlLimpa(p.img||''))+"'"+lf+",\n"+
            "   selecaoOpcionais:'"+p.opsel+"', permitirNenhum:"+(p.opnenhum==='sim'?'true':'false')+(p.qtd?", quantidade:true":"")+",\n"+
            "   opcionais:["+ops+"]}";
@@ -25583,6 +25833,12 @@ function mBlocoVitrine(cfg,usaPP,usaPix,usaQtd,usaSinal,usaResumo,descpix,zap,us
 /* O total na tela, o cupom, o resumo e as duas pontas de pagamento. */
 function mBlocoPagar(cfg,usaPP,usaPix,usaQtd,usaSinal,usaResumo,descpix,zap,usaFiltro){
   var c='',temMin=fcCpTemMinimo(cfg.cps);
+  /* Ha algum SKU cadastrado? Nenhum -> nem o campo 'sku' em itensEscolhidos() nem a linha que o
+     copia para o pedido entram no bloco, e a saida continua byte a byte a de antes (fcTemSku).
+     MORA AQUI, e nao em mBlocoJs: e ESTA funcao que escreve itensEscolhidos() e que chama
+     fcPpBotoesSrc. Medido em 14/09/2026 -- com a variavel na funcao de cima, o bloco da Mini loja
+     morria inteiro com "temSku is not defined" e a caixa de saida ficava VAZIA. */
+  var temSku=fcTemSku(cfg.prods);
   c+='function linhaDesconto(){\n';
   c+="var l=raiz.querySelector('.fcm-desconto');\n";
   c+='if(cupomAtivo){\n';
@@ -25680,12 +25936,12 @@ function mBlocoPagar(cfg,usaPP,usaPix,usaQtd,usaSinal,usaResumo,descpix,zap,usaF
   c+='for(i=0;i<CARRINHO.length;i++){\n';
   c+='it=CARRINHO[i];p=PRODUTOS[it.p];\n';
   c+='if(!(it.q>=1))continue;   /* linha zerada = item nao escolhido, como nas duas irmas */\n';
-  c+="lista.push({rotulo:p.nome+(it.q>1?(' x'+it.q):''),valor:p.preco*it.q,opcional:false,nome:p.nome,qtd:it.q,unit:p.preco});\n";
+  c+="lista.push({rotulo:p.nome+(it.q>1?(' x'+it.q):''),valor:p.preco*it.q,opcional:false,nome:p.nome,qtd:it.q,unit:p.preco"+(temSku?",sku:p.sku":"")+"});\n";
   c+='for(k=0;k<it.ops.length;k++){\n';
   c+='op=(p.opcionais||[])[it.ops[k].j];\n';
   c+='if(!op)continue;\n';
   c+='if(!(it.ops[k].q>=1))continue;   /* opcional zerado no seletor = nao escolhido */\n';
-  c+="lista.push({rotulo:op.nome+(it.ops[k].q>1?(' x'+it.ops[k].q):''),valor:op.preco*it.ops[k].q,opcional:true,nome:op.nome,qtd:it.ops[k].q,unit:op.preco});\n";
+  c+="lista.push({rotulo:op.nome+(it.ops[k].q>1?(' x'+it.ops[k].q):''),valor:op.preco*it.ops[k].q,opcional:true,nome:op.nome,qtd:it.ops[k].q,unit:op.preco"+(temSku?",sku:op.sku":"")+"});\n";
   c+='}\n}\n';
   c+='return lista;\n}\n\n';
   if(usaResumo){
@@ -25736,7 +25992,7 @@ function mBlocoPagar(cfg,usaPP,usaPix,usaQtd,usaSinal,usaResumo,descpix,zap,usaF
     /* comentZero LIGADO (leva 5): era o unico 'false' das tres chamadas, sem justificativa
        nenhuma. A TRAVA do pedido zerado ja saia identica nas tres -- o que faltava aqui era so
        a explicacao dela dentro do bloco entregue, que e justamente onde alguem vai le-la. */
-    c+=fcPpBotoesSrc('fcm',cfg.ppcor,usaSinal,true,'cestaLimpar();'+fcUpsellChamada(cfg.upsell),true);
+    c+=fcPpBotoesSrc('fcm',cfg.ppcor,usaSinal,true,'cestaLimpar();'+fcUpsellChamada(cfg.upsell),true,temSku);
   }
   if(usaPix){
     c+='/* ===== Pix ===== */\n';

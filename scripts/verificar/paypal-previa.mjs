@@ -3,9 +3,14 @@
    ============================================================================
    O QUE ELA PROMETE. Desde 13/09/2026 as quatro abas com PayPal mostram, dentro
    do quadro da previa, os campos que de fato vao para o pedido: a lista de itens
-   com nome, quantidade e preco unitario, o item_total, o desconto, o valor
-   cobrado, a descricao, o custom_id e o sku. Ela promete que aquilo e o que o
+   com nome, SKU, quantidade e preco unitario, o item_total, o desconto, o valor
+   cobrado, a descricao e o custom_id. Ela promete que aquilo e o que o
    PayPal vai registrar.
+
+   O SKU E POR LINHA desde 14/09/2026, e por isso ele e uma COLUNA da tabela em vez de uma linha
+   de campo la embaixo. Este cenario cadastra SKU em UM produto e no opcional e deixa o OUTRO
+   produto sem nenhum: assim a mesma passagem cobre os dois casos -- o valor escrito e o traco
+   que anuncia a ausencia do campo.
 
    POR QUE ISSO PRECISA SER MEDIDO. Previa que redesenha o resultado com codigo
    proprio e uma segunda implementacao, e duas implementacoes divergem -- e regra
@@ -43,10 +48,11 @@ const RAIZ = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '.
 const IDENT = {chave:'ensaio@fotocerta.com.br', nomer:'Foto Certa', cidade:'Vitoria',
   client:'AbCdEf123456789ClientIdDeTeste', zapnum:'5527999998888'};
 const PROD = [
-  {nome:'Ensaio "A" \\ é',  preco:'113.70'},
-  {nome:'Ensaio B',        preco:'29.60'}
+  /* o ponto e o hifen entram de proposito: o 'sku' NAO passa pela regra estreita do txid */
+  {nome:'Ensaio "A" \\ é',  preco:'113.70', sku:'ENS-A.2026'},
+  {nome:'Ensaio B',        preco:'29.60',  sku:''}
 ];
-const OP = {nome:'Álbum 20x30', preco:'20.00'};
+const OP = {nome:'Álbum 20x30', preco:'20.00', sku:'ALB-20x30'};
 const CUPOM = {cod:'MEIO', valor:'25'};
 
 /* ===========================================================================
@@ -77,9 +83,9 @@ function lerQuadro(escopo, caixaId){
 function interpretar(q){
   const itens = [], campos = {};
   for(const l of (q.linhas||[])){
-    if(l.length === 3){
+    if(l.length === 4){
       if(l[0] === 'items[].name') continue;                 /* o cabecalho */
-      itens.push({nome:l[0], qtd:l[1], unit:l[2]});
+      itens.push({nome:l[0], sku:l[1], qtd:l[2], unit:l[3]});
     }else if(l.length === 2){
       campos[l[0]] = l[1];
     }
@@ -97,12 +103,15 @@ function comoATelaEscreveria(pu){
     'amount.breakdown.item_total': din(br.item_total),
     'amount.value':                din(pu.amount),
     'description':                 pu.description,
-    'custom_id':                   pu.custom_id,
-    'items[].sku':                 its.length ? its[0].sku : null
+    'custom_id':                   pu.custom_id
   };
   if(br.discount) campos['amount.breakdown.discount'] = '- '+din(br.discount);
+  /* O TRACO e como a tela escreve a AUSENCIA do campo. Escrito aqui, e nao lido da previa:
+     se os dois lados formatassem pelo mesmo codigo, a prova nao teria opiniao nenhuma. */
   return {
-    itens: its.map(it => ({nome:String(it.name), qtd:String(it.quantity), unit:din(it.unit_amount)})),
+    itens: its.map(it => ({nome:String(it.name),
+      sku: (it.sku==null ? '\u2014' : String(it.sku)),
+      qtd:String(it.quantity), unit:din(it.unit_amount)})),
     campos
   };
 }
@@ -113,8 +122,8 @@ function comparar(rot, tela, pedido){
   const n = Math.min(tela.itens.length, pedido.itens.length);
   for(let z=0;z<n;z++){
     const a = tela.itens[z], b = pedido.itens[z];
-    chk(rot+'item '+(z+1)+': nome, quantidade e unit_amount iguais aos do pedido',
-        a.nome===b.nome && a.qtd===b.qtd && a.unit===b.unit,
+    chk(rot+'item '+(z+1)+': nome, SKU, quantidade e unit_amount iguais aos do pedido',
+        a.nome===b.nome && a.sku===b.sku && a.qtd===b.qtd && a.unit===b.unit,
         'previa '+JSON.stringify(a)+' x pedido '+JSON.stringify(b));
   }
   for(const k of Object.keys(pedido.campos)){
@@ -175,8 +184,10 @@ console.log('\n== Checkout: a previa contra o proprio createOrder ==');
     await clicar(pg,'aba-uni');
     for(let i=0;i<PROD.length;i++){
       await set(pg,'u-pnome',PROD[i].nome); await set(pg,'u-ppreco',PROD[i].preco);
+      if(PROD[i].sku) await set(pg,'u-psku',PROD[i].sku);
       if(i===0){
         await set(pg,'u-op-nome',OP.nome); await set(pg,'u-op-preco',OP.preco);
+        await set(pg,'u-op-sku',OP.sku);
         await clicar(pg,'u-op-add');
         await radio(pg,'u-opsel','multiplo');
       }
@@ -196,6 +207,9 @@ console.log('\n== Checkout: a previa contra o proprio createOrder ==');
     chk('[Checkout] a previa desenhou o bloco dentro do iframe', !!alvo);
     if(alvo) await marcar(alvo, 'input[name="fcu-prod"][value="0"]', true);
     await pg.waitForTimeout(200);
+    /* o produto SEM sku entra no carrinho de proposito: e ele que produz a linha do traco */
+    if(alvo) await marcar(alvo, 'input[name="fcu-prod"][value="1"]', true);
+    await pg.waitForTimeout(200);
     if(alvo) await marcar(alvo, 'input[name="fcu-op-0"][value="0"]', true);
     await pg.waitForTimeout(200);
     if(alvo){
@@ -211,6 +225,15 @@ console.log('\n== Checkout: a previa contra o proprio createOrder ==');
           /R\$ 0,00 não entra na lista/.test((await lerQuadro(alvo,'u-pv-pp')).texto||''));
       chk('[Checkout] e declara que a conta fecha ao centavo',
           /Confere ao centavo/.test((await lerQuadro(alvo,'u-pv-pp')).texto||''));
+      /* A FRASE VELHA NAO PODE SOBREVIVER AO CAMPO. Ate 14/09/2026 a previa dizia, em cinza,
+         que o sku era "igual em todas as linhas" -- uma descricao honesta de um defeito. Com o
+         SKU por linha ela viraria mentira, e mentira em cinza e a que ninguem confere. */
+      const txtQ = (await lerQuadro(alvo,'u-pv-pp')).texto||'';
+      chk('[Checkout] a previa NAO diz mais que o sku e "igual em todas as linhas"',
+          !/igual em todas as linhas/.test(txtQ));
+      chk('[Checkout] e explica que o SKU e daquele item, e nunca o codigo do pedido',
+          /SKU DAQUELE item/.test(txtQ) && /nunca com o código do pedido/.test(txtQ),
+          txtQ.slice(0,200));
     }
     await pg.close();
   } finally { await br.close(); srv.close(); }
@@ -221,6 +244,8 @@ console.log('\n== Checkout: a previa contra o proprio createOrder ==');
     medir: async pg => {
       await pg.waitForTimeout(250);
       await marcar(pg, 'input[name="fcu-prod"][value="0"]', true);
+      await pg.waitForTimeout(120);
+      await marcar(pg, 'input[name="fcu-prod"][value="1"]', true);
       await pg.waitForTimeout(120);
       await marcar(pg, 'input[name="fcu-op-0"][value="0"]', true);
       await pg.waitForTimeout(120);
