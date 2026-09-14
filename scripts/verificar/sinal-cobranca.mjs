@@ -599,9 +599,13 @@ console.log('\n=== PARTE 5 -- as recusas da GERACAO (e o pedido em zero, que aqu
   const br = await navegador();
   const base = 'http://127.0.0.1:8803';
   const casos = [
+    /* AS FRASES ESPERADAS SAO AS ACENTUADAS desde 13/09/2026 (leva 4): as recusas do
+       fc-compartilhado.js passaram a sair com acento, como manda a norma de 01/09/2026 para
+       todo texto que uma pessoa le. O que mudou foi a GRAFIA, nunca a recusa -- os tres casos
+       aqui recusam exatamente o que recusavam antes. */
     { n:'valor em zero, com sinal',   c:{ valor:'0' },        s:{ tipo:'pct', pct:'30' },  espera:'arredonda para zero' },
-    { n:'sinal MAIOR que o valor',    c:{ valor:'50,00' },    s:{ tipo:'fixo', fixo:'100' }, espera:'maior que o valor da cobranca' },
-    { n:'sinal que arredonda a zero', c:{ valor:'0,49' },     s:{ tipo:'pct', pct:'1' },   espera:'sinal desta cobranca arredonda para zero' },
+    { n:'sinal MAIOR que o valor',    c:{ valor:'50,00' },    s:{ tipo:'fixo', fixo:'100' }, espera:'maior que o valor da cobrança' },
+    { n:'sinal que arredonda a zero', c:{ valor:'0,49' },     s:{ tipo:'pct', pct:'1' },   espera:'sinal desta cobrança arredonda para zero' },
     { n:'percentual apagado',         c:{ valor:'1200,50' },  s:{ tipo:'pct', pct:'' },    espera:'Informe o percentual do sinal' },
     { n:'valor fixo apagado',         c:{ valor:'1200,50' },  s:{ tipo:'fixo', fixo:'' },  espera:'Informe o valor fixo do sinal' }
   ];

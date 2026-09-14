@@ -1639,7 +1639,7 @@
           </div>
           <div id="u-sinalfixo-campo">
             <label for="u-sinalfixo">Valor fixo do sinal</label>
-            <input type="number" id="u-sinalfixo" value="100" min="0.01" step="0.01">
+            <input type="number" id="u-sinalfixo" value="100" min="0.01" max="999999" step="0.01">
           </div>
           <label for="u-t8">Rótulo do sinal <small>(a linha do que se paga agora)</small></label>
           <input type="text" id="u-t8" value="Sinal agora">
@@ -1666,7 +1666,7 @@
 
       <fieldset id="u-pp-campos">
         <legend>Conta PayPal</legend>
-        <p class="ajuda"><b>O Client ID saiu desta aba</b> e está no painel <b>Identidade</b>, no topo da página, com a chave Pix, o recebedor e o WhatsApp. É a mesma conta nas três abas de pagamento. <span class="acoes"><button type="button" class="botao mini claro fci-ir">Abrir Identidade</button></span></p>
+        <p class="ajuda"><b>O Client ID saiu desta aba</b> e está no painel <b>Identidade</b>, no topo da página, com a chave Pix, o recebedor e o WhatsApp. É a mesma conta nas quatro abas de pagamento. <span class="acoes"><button type="button" class="botao mini claro fci-ir">Abrir Identidade</button></span></p>
         <div id="u-moeda-campo">
           <label>Moeda</label>
           <div class="radios">
@@ -2746,6 +2746,7 @@
       </div>
       <div id="p-pp-campos">
       <p class="ajuda"><b>O Client ID saiu desta aba</b> e está no painel <b>Identidade</b>, no topo da página. <span class="acoes"><button type="button" class="botao mini claro fci-ir">Abrir Identidade</button></span></p>
+      <p class="ajuda"><b>A moeda aqui é sempre o real (BRL)</b>, e não há campo para trocá-la — nem nesta aba nem no Agendamento por pacote. O Pix só existe em reais, e o cartão cobra o mesmo valor. O <b>Checkout</b> e a <b>Mini loja</b> têm o seletor porque ali é possível vender só com cartão, sem Pix nenhum na página.</p>
       <label>Cor do botão PayPal</label>
       <div class="radios">
       <label><input type="radio" name="p-ppcor" value="gold" checked><span>Dourado</span></label>
@@ -2921,7 +2922,7 @@
       <input type="date" id="p-validade" value="" max="2099-12-31">
       <label for="p-descpix">Desconto para quem pagar via Pix <small>(opcional; em %, 0 ou vazio = sem desconto)</small></label>
       <input type="number" id="p-descpix" value="0" min="0" max="90" step="0.5">
-      <p class="ajuda alerta" id="p-descpix-aviso"><b>Com o sinal ligado nesta cobrança, este campo não vale.</b> O Pix passa a cobrar o sinal, e o desconto do Pix não se aplica sobre o sinal — seria desconto dobrado. O número acima fica guardado, mas <b>não entra no link</b> enquanto o sinal estiver ligado.</p>
+      <p class="ajuda alerta" id="p-descpix-aviso"><b>Com o sinal ligado nesta cobrança, este campo não vale.</b> O Pix passa a cobrar o sinal, e o desconto do Pix não se aplica sobre o sinal — seria desconto dobrado, porque o sinal já sai do valor cheio. O número acima fica guardado, mas <b>não entra no link</b> enquanto o sinal estiver ligado. Para usar o desconto do Pix, volte a cobrar o valor cheio nesta cobrança.</p>
       <div>
       <label>Cobrança de sinal <small>(desta cobrança, como o desconto — cada link carrega o seu)</small></label>
       <div class="radios">
@@ -2940,7 +2941,7 @@
         </div>
         <div id="p-sinalfixo-campo">
           <label for="p-sinalfixo">Valor fixo do sinal</label>
-          <input type="number" id="p-sinalfixo" value="100" min="0.01" step="0.01">
+          <input type="number" id="p-sinalfixo" value="100" min="0.01" max="999999.99" step="0.01">
         </div>
       </div>
       </div>
@@ -3099,7 +3100,7 @@
         <legend>Desconto para pagamento via Pix</legend>
         <label for="m-descpix">Percentual de desconto no Pix <small>(0 = sem desconto; aplica sobre o total já com cupom)</small></label>
         <input type="number" id="m-descpix" value="5" min="0" max="90" step="0.5">
-        <p class="ajuda alerta" id="m-descpix-aviso"><b>Com a cobrança de sinal ligada este campo não vale.</b> O Pix passa a cobrar o sinal, e o desconto do Pix não se aplica sobre o sinal — seria desconto dobrado, porque o sinal já sai de um total que pode ter cupom. O número acima fica guardado, mas <b>não entra no código gerado</b>.</p>
+        <p class="ajuda alerta" id="m-descpix-aviso"><b>Com a cobrança de sinal ligada este campo não vale.</b> O Pix passa a cobrar o sinal, e o desconto do Pix não se aplica sobre o sinal — seria desconto dobrado, porque o sinal já sai de um total que pode ter cupom. O número acima fica guardado, mas <b>não entra no código gerado</b> nem aparece na cesta enquanto o sinal estiver ligado. Para usar o desconto do Pix, volte a cobrar o valor cheio.</p>
       </fieldset>
       <fieldset id="m-zap-fieldset">
         <legend>Aviso de pagamento Pix via WhatsApp</legend>
@@ -3239,19 +3240,22 @@
           <label><input type="radio" name="m-sinal" value="sim"><span>Cobrar sinal agora, saldo na entrega</span></label>
         </div>
         <div id="m-sinal-campos">
+          <label>Como calcular o sinal</label>
           <div class="radios">
             <label><input type="radio" name="m-sinaltipo" value="pct" checked><span>Percentual do total</span></label>
             <label><input type="radio" name="m-sinaltipo" value="fixo"><span>Valor fixo</span></label>
           </div>
           <div id="m-sinalpct-campo">
-            <label for="m-sinalpct">Percentual do sinal <small>(de 1 a 99)</small></label>
+            <label for="m-sinalpct">Percentual do sinal <small>(de 1 a 99; fora da faixa o campo se corrige sozinho)</small></label>
             <input type="number" id="m-sinalpct" value="30" min="1" max="99" step="0.5">
           </div>
           <div id="m-sinalfixo-campo">
             <label for="m-sinalfixo">Valor fixo do sinal</label>
-            <input type="number" id="m-sinalfixo" value="100" min="0.01" step="0.01">
+            <input type="number" id="m-sinalfixo" value="100" min="0.01" max="999999" step="0.01">
           </div>
         </div>
+        <p class="ajuda">Ligado, o <b>PayPal cobra o sinal</b>, o <b>Pix gera o QR do sinal</b>, a mensagem do WhatsApp declara sinal pago e saldo devido, e a cesta passa a mostrar três linhas: total, sinal agora e saldo na entrega. A ordem da conta é <b>quantidade multiplica → cupom incide sobre o total → o sinal sai do total já com o cupom</b>. Um <b>sinal maior que o total</b> é recusado: a cesta avisa e não deixa pagar.</p>
+        <p class="ajuda"><b>Os textos do sinal ficam na seção <span class="sec-ref" data-sec="m-textos"></span></b>, e não aqui: o rótulo do sinal, o rótulo do saldo e as três respostas que o cliente lê antes de pagar (o que o sinal garante, o que acontece se ele desistir, o que fazer com o saldo). No <b>Checkout</b> e no <b>Agendamento por pacote</b> esses mesmos cinco campos ficam dentro deste quadro, ao lado do interruptor. São <b>os mesmos campos nas quatro abas</b> — o que muda é onde eles estão na tela, e esta linha existe para você não procurá-los aqui.</p>
       </fieldset>
     </div>
   </div>
@@ -3295,7 +3299,7 @@
     </div>
   </div>
 
-  <div class="secao"><span class="secao-n">4</span> Textos e aparência</div>
+  <div class="secao" data-sec="m-textos"><span class="secao-n">4</span> Textos e aparência</div>
   <div class="grade">
     <div>
       <fieldset>
@@ -3784,7 +3788,7 @@
           </div>
           <div id="a-sinalfixo-campo">
             <label for="a-sinalfixo">Valor fixo do sinal</label>
-            <input type="number" id="a-sinalfixo" value="100" min="0.01" step="0.01">
+            <input type="number" id="a-sinalfixo" value="100" min="0.01" max="999999" step="0.01">
           </div>
           <label for="a-t8">Rótulo do sinal <small>(a linha do que se paga agora)</small></label>
           <input type="text" id="a-t8" value="Sinal agora">
@@ -3805,7 +3809,7 @@
 
       <fieldset>
         <legend>Identificação do agendamento</legend>
-        <label for="a-prefixo">Prefixo do identificador de conciliação <small>(aparece no txid do Pix e no extrato)</small></label>
+        <label for="a-prefixo">Prefixo do identificador de conciliação <small>(letras, números e hífen; aparece no txid do Pix e no extrato)</small></label>
         <input type="text" id="a-prefixo" value="" placeholder="ex.: FC">
       </fieldset>
     </div>
@@ -3817,6 +3821,7 @@
       <fieldset id="a-pp-campos">
         <legend>Conta PayPal</legend>
         <p class="ajuda"><b>O Client ID saiu desta aba</b> e está no painel <b>Identidade</b>, no topo da página, com a chave Pix, o recebedor e o WhatsApp. É a mesma conta nas quatro abas de pagamento. <span class="acoes"><button type="button" class="botao mini claro fci-ir">Abrir Identidade</button></span></p>
+        <p class="ajuda"><b>A moeda aqui é sempre o real (BRL)</b>, e não há campo para trocá-la — nem nesta aba nem no Link de cobrança. O Pix só existe em reais, e o cartão cobra o mesmo pedido: um seletor de moeda faria o QR Code e o cartão pedirem valores diferentes. O <b>Checkout</b> e a <b>Mini loja</b> têm o seletor porque ali é possível vender só com cartão, sem Pix nenhum na página.</p>
         <label>Cor dos botões do PayPal</label>
         <div class="radios">
           <label><input type="radio" name="a-ppcor" value="gold" checked><span>Dourado</span></label>
@@ -4275,7 +4280,7 @@
      nova para a outra, e o resultado seriam links que a propria /pagar recusa -- sem
      erro nenhum na tela. Ao mexer no arquivo, troque a versao AQUI, em cobrar/index.html
      e no FC_COMPART_VERSAO de dentro dele. -->
-<script src="fc-compartilhado.js?v=2026-09-13a"></script>
+<script src="fc-compartilhado.js?v=2026-09-13b"></script>
 <script>
 'use strict';
 (function(){
@@ -4324,7 +4329,7 @@ var FC_PUBLICADO='2026-09-13 21:51';   /* America/Sao_Paulo -- escrito pelo cari
    OS APELIDOS ABAIXO NAO SAO COPIA: sao o mesmo objeto, com o nome que o resto
    deste arquivo sempre usou. Trocar os nomes em cem lugares so para dizer
    FCCOMPART.x mudaria muito codigo para nao mudar comportamento nenhum. */
-var FC_COMPART_ESPERADA='2026-09-13a';
+var FC_COMPART_ESPERADA='2026-09-13b';
 if(!window.FCCOMPART||FCCOMPART.versao!==FC_COMPART_ESPERADA){
   fcCompartParar(FC_COMPART_ESPERADA,window.FCCOMPART?FCCOMPART.versao:null);
   return;
@@ -4510,9 +4515,14 @@ function aTplJs(q,texto,pares,sep){
    CAMPO POR ABA -- ele pediu poder escrever coisas diferentes em cada uma --, mas com o TEXTO
    DE FABRICA vindo de UMA TABELA SO: dois campos divergirem e escolha do dono; duas fabricas
    divergirem por acidente e o defeito de amanha.
-   O que NAO entra aqui e o que so parece igual: 'Desconto' sai sem o codigo do cupom na aba
-   pac e com ele nas duas abas grandes (decisao D-3), e o aviso de sinal maior que o total fala
-   em "carrinho" no Checkout e em "pedido" na Mini loja. Frase parecida nao e frase unica. */
+   O que NAO entra aqui e o que so parece igual: o aviso de sinal maior que o total fala em
+   "carrinho" no Checkout, em "pedido" na Mini loja e em "reserva" na Agendamento por pacote, e
+   o rotulo do saldo nomeia um momento diferente em cada aba. Frase parecida nao e frase unica.
+   ATE 13/09/2026 ESTA LISTA CITAVA MAIS UM EXEMPLO -- "'Desconto' sai sem o codigo do cupom na
+   aba pac" --, e ele tinha deixado de ser verdade na propria Etapa 2: a decisao D-3 pos o
+   {codigo} dentro da frase nas quatro, e A_TXT_DEFS usa FC_TXT_FABRICA.desconto desde entao. O
+   exemplo saiu daqui porque registro que descreve como decisao o que ja mudou manda procurar no
+   lugar errado -- e quem le confia. */
 /* ===== OS PARES DE FABRICA QUE DEPENDEM DA ORDEM DOS MEIOS DE PAGAMENTO =====
    Rodada do meio prioritario (12/09/2026). As quatro abas de pagamento passaram a ter UM campo
    "meio prioritario" (Pix ou cartao) que decide, JUNTAS, a ordem em que os dois meios aparecem
@@ -4575,6 +4585,33 @@ var FC_TXT_FABRICA={
   cartaoLinha:FC_ORD_PARES.cartaoLinha.pix,
   pixVal:'Valor no Pix',
   pixCopiado:'Código copiado!',
+  /* AS DUAS CONFIRMACOES DE COPIA, e por que sao DUAS entradas e nao uma (leva 4, 13/09/2026).
+     Ate esta rodada existiam DUAS FABRICAS para o mesmo instante: 'Código copiado!' saia de
+     FC_TXT_FABRICA no Checkout e na Mini loja, e 'Código copiado! Cole no aplicativo do seu
+     banco.' estava escrita A MAO em A_TXT_DEFS e outra vez em P_TXT_DEFS -- duas copias
+     manuscritas da mesma frase, que e exatamente o que esta tabela existe para impedir. As
+     duas copias viraram uma entrada; a frase de cada aba NAO foi trocada, e a razao esta aqui:
+     trocar qualquer uma das duas mudaria o texto que o CLIENTE le em duas paginas ja
+     publicadas, e escolha de redacao para o cliente e da leva de aparencia, com a palavra do
+     dono. O que esta rodada devia consertar -- a frase escrita duas vezes -- esta consertado.
+     Quem quiser as quatro dizendo a mesma coisa troca UM valor aqui, e as quatro seguem. */
+  pixCopiadoCola:'Código copiado! Cole no aplicativo do seu banco.',
+  /* Estava escrita a mao nas mesmas duas tabelas, e nem sequer divergia -- fonte unica mesmo
+     quando as copias concordam: copia que concorda hoje e a que diverge amanha, sem aviso. */
+  pixNaocopiou:'Não consegui copiar. Selecione o código acima e copie na mão.',
+  /* Idem: 'txtSucesso' da aba pac e da aba cob, letra por letra. O Checkout e a Mini loja
+     dizem outra coisa ('Pagamento aprovado! Recebemos seu pedido.' / '...Em breve entramos em
+     contato.'), e por isso esta entrada nao alcanca os quatro -- frase parecida nao e frase
+     unica, e aqui elas nem sao parecidas. */
+  sucessoCurto:'Pagamento aprovado. Obrigado!',
+  /* Os quatro rotulos do carrinho que duas ou tres tabelas escreviam a mao. 'sinalRotulo'
+     aparece em tres (u, m, pac) e 'saldoEntrega' em duas -- a aba pac diz "Restante no dia do
+     ensaio", que e divergencia DECLARADA (nao ha entrega numa reserva de horario) e por isso
+     continua escrita la. */
+  total:'Total',
+  erroPagamento:'Não foi possível concluir o pagamento. Tente novamente.',
+  sinalRotulo:'Sinal agora',
+  saldoEntrega:'Restante na entrega',
   zapBotao:'Já paguei - avisar no WhatsApp',
   /* O AVISO DE QUE O PIX NAO CONFIRMA SOZINHO (decisao do dono, 03/09/2026). Ate esta rodada
      so a Mini loja dizia isso ao cliente, e no RODAPE de limites -- longe de onde ele esta
@@ -4684,6 +4721,37 @@ function fcSinalTxtDefs(pref){
   var r=[],i;
   for(i=0;i<FC_SINAL_TXT.length;i++)r.push([FC_SINAL_TXT[i][1],fcSinalTxtId(pref,i),'']);
   return r;
+}
+/* ===== AS DEZ LINHAS DA MENSAGEM DE WHATSAPP, escritas UMA vez (leva 4, 13/09/2026) =====
+   O Checkout, a Mini loja e a Agendamento por pacote tinham as MESMAS dez linhas digitadas a
+   mao, uma tabela de cada vez -- trinta linhas para dez fatos. Nenhuma delas divergia, e e por
+   isso que a duplicacao era perigosa: copia que concorda hoje e a que diverge amanha, sem erro
+   e sem aviso. Mesmo molde de fcSinalTxtDefs e fcObFbDefs, que ja fazem isto para os tres
+   textos do sinal e para os marcadores da pagina de obrigado.
+   OS DOIS PONTOS EM QUE A ABA pac DIVERGE viram PARAMETRO, e nao excecao escondida:
+     - o PRIMEIRO campo. No Checkout e na Mini loja ele e 'txtZapBotao' e rotula o proprio botao
+       "Ja paguei"; na pac ele e 'txtZapPago', porque la 'txtZapBotao' ja existe e rotula OUTRA
+       coisa (os dois recados de recusa, em que ninguem pagou nada). Ver o comentario em
+       A_TXT_DEFS, que registra a medida.
+     - o SALDO. As duas irmas dizem "Restante na entrega"; a pac diz "Restante no dia do
+       ensaio", porque nao ha entrega numa reserva de horario.
+   A ORDEM E O CONTEUDO SAO OS MESMOS de antes, linha por linha -- e por isso nenhuma saida
+   muda um byte. As tabelas chamam esta funcao no LUGAR exato onde as dez linhas estavam
+   (.concat no meio, e nao no fim), para a ordem da busca "Achar um texto" tambem nao mudar. */
+function fcZapTxtDefs(pref,o){
+  o=o||{};
+  return [
+    [o.botaoChave||'txtZapBotao',pref+'-txt-zap-'+(o.botaoSuf||'botao'),FC_TXT_FABRICA.zapBotao],
+    ['txtZapAbertura',pref+'-txt-zap-abertura',FC_TXT_FABRICA.zapAbertura],
+    ['txtZapAberturaSinal',pref+'-txt-zap-abertura-sinal',FC_TXT_FABRICA.zapAberturaSinal],
+    ['txtZapPedido',pref+'-txt-zap-pedido',FC_TXT_FABRICA.zapPedido],
+    ['txtZapCupom',pref+'-txt-zap-cupom',FC_TXT_FABRICA.zapCupom],
+    ['txtZapDescPix',pref+'-txt-zap-descpix',FC_TXT_FABRICA.zapDescPix],
+    ['txtZapTotal',pref+'-txt-zap-total',FC_TXT_FABRICA.zapTotal],
+    ['txtZapSinal',pref+'-txt-zap-sinal',FC_TXT_FABRICA.zapSinal],
+    ['txtZapSaldo',pref+'-txt-zap-saldo',o.saldo||FC_TXT_FABRICA.zapSaldo],
+    ['txtZapValor',pref+'-txt-zap-valor',FC_TXT_FABRICA.zapValor]
+  ];
 }
 /* AS PREENCHIDAS, na ordem das perguntas. Vazia nao vira linha -- e a decisao de desenho. */
 function fcSinalTxtLista(cfg){
@@ -5794,6 +5862,14 @@ function fcPpBotoesSrc(prefixo,ppcor,usaSinal,comentZero,aoAprovarExtra,temItens
   c+='var v='+(usaSinal?'sinalAgora()':'total()')+'.toFixed(2);\n';
   if(usaSinal)c+="var nm=(nomesSelecionados().join(' + ')+' (sinal - cod: '+CODIGO_PEDIDO+(cupomAtivo?(' cupom:'+cupomAtivo.codigo):'')+')').substring(0,"+FC_LIM_PP+");\n";
   else c+="var nm=(nomesSelecionados().join(' + ')+' (cod: '+CODIGO_PEDIDO+(cupomAtivo?(' cupom:'+cupomAtivo.codigo):'')+')').substring(0,"+FC_LIM_PP+");\n";
+  /* A 'description' E UM RESUMO, e nao o registro do pedido -- medido na leva 4 (13/09/2026)
+     e DECLARADO em vez de unificado. nomesSelecionados() devolve so os itens de catalogo no
+     Checkout e na Mini loja, e TAMBEM os opcionais na Agendamento por pacote, e as duas coisas
+     estao certas pelo mesmo motivo: o PayPal corta a description em FC_LIM_PP caracteres. Num
+     carrinho de tres produtos com dois opcionais cada, incluir os opcionais cortaria justamente
+     os nomes que identificam a compra; naquela aba o pedido e UM pacote, e os opcionais dele
+     cabem. Quem registra o pedido item a item e items[], que desde a leva 3 e identico nas tres.
+     Unificar aqui ou truncaria as duas abas grandes ou tiraria informacao da terceira. */
   c+='if(!nm)nm=CODIGO_PEDIDO;   /* name e obrigatorio no item: nunca pode sair vazio */\n';
   c+='var it={name:nm,quantity:"1",unit_amount:{value:v,currency_code:MOEDA}};\n';
   c+='if(CODIGO_PEDIDO)it.sku=CODIGO_PEDIDO;   /* sku vazio nao ajuda ninguem a conciliar */\n';
@@ -6446,6 +6522,38 @@ function fcLigarFaixa(tabela,depois){
       el.addEventListener('blur',function(){if(fcAjustar(tabela,id)){salvarEstado();if(depois)depois();}});
     })(tabela[i][0]);
   }
+}
+/* ===== A GUARDA DA FAIXA (leva 4, 13/09/2026) =====
+   A tabela numerica e o <input> dizem a MESMA faixa em dois lugares, e dois lugares dizendo o
+   mesmo numero sao a porta por onde eles divergem. Ate esta rodada nada conferia: medido, os
+   quatro campos de sinal fixo declaravam teto 999999 na tabela e NENHUM max no HTML -- os
+   unicos tres dos setenta e cinco campos numericos em que os dois discordavam. O efeito nao era
+   grave (fcPreso prende do mesmo jeito), mas e exatamente o tipo de discordancia que o projeto
+   ja fechou no maxlength (fcLimIniciar): se um dia a tabela mudar e o HTML nao, a seta do campo
+   passa a oferecer um valor que a geracao apara em silencio.
+   'p-sinalfixo' NAO entra aqui de proposito: ele nao esta em P_NUMS -- quem o prende e
+   fcSinalFixoCorrigido, com P_VALOR_MAX, a regra compartilhada com a /cobrar. O max do HTML dele
+   foi escrito a mao com esse mesmo numero, e a razao de ele ficar de fora esta nesta frase. */
+function fcNumTabelas(){
+  return [['slide',S_NUMS],['leads',L_NUMS],['tidy',T_NUMS],['uni',U_NUMS],['bor',B_NUMS],
+          ['efe',E_NUMS],['cnt',C_NUMS],['cob',P_NUMS],['loja',M_NUMS],['pac',A_NUMS]];
+}
+function fcNumConferir(){
+  var ts=fcNumTabelas(),i,j,f,el,dec,ruins=[];
+  for(i=0;i<ts.length;i++){
+    for(j=0;j<ts[i][1].length;j++){
+      f=ts[i][1][j];
+      el=$(f[0]);
+      if(!el){ruins.push(f[0]+' (não existe na tela)');continue;}
+      dec=el.getAttribute('value');
+      if(dec!==String(f[1]))ruins.push(f[0]+' value="'+dec+'" e a tabela diz '+f[1]);
+      dec=el.getAttribute('min');
+      if(dec!==String(f[2]))ruins.push(f[0]+' min="'+dec+'" e a tabela diz '+f[2]);
+      dec=el.getAttribute('max');
+      if(dec!==String(f[3]))ruins.push(f[0]+' max="'+dec+'" e a tabela diz '+f[3]);
+    }
+  }
+  if(ruins.length)throw new Error('a faixa declarada no HTML discorda da tabela numérica da aba: '+ruins.join('; '));
 }
 function corMockPP(v){
   if(v==='blue')return ['#0070BA','#fff',''];
@@ -7309,29 +7417,60 @@ function fcLimNotaPp(v){
 }
 /* A tabela. 'max' ausente quer dizer "o numero ja esta no maxlength do HTML"; 'max' zero quer
    dizer "este campo nao tem teto, so regra de caractere". */
+/* O QUE O CAMPO VIZINHO JA GASTOU do orcamento compartilhado (ver 'mais', abaixo). */
+function fcLimUteisDe(id){var el=$(id);return el?fcIdUteis(el.value):0;}
+/* ===== OS TRES CAMPOS DE IDENTIFICADOR QUE FALTAVAM (leva 4, 13/09/2026) =====
+   Esta tabela cobria 'u-cod' e 'p-txid' e deixava de fora os outros tres campos que alimentam o
+   MESMO teto de txid -- o codigo da loja, o codigo do pacote e o prefixo de conciliacao. Os tres
+   ja tinham RECUSA (mRecusa com M_COD_MAX, aRecusa com A_ID_MAX); o que faltava era o contador,
+   que e a unica peca que diz ao operador quanto sobra ANTES de ele apertar Gerar.
+   'sobra' e fcIdLimpo nos tres: e a MESMA limpeza que o payload aplica -- fcIdConferir e a guarda
+   que impede fcIdLimpo e pTxidLimpo de divergirem --, e por isso hifen e sublinhado contam zero
+   no numero da esquerda e reaparecem no "(n digitados)".
+   OS DOIS DA ABA pac DIVIDEM UM ORCAMENTO SO. O identificador e prefixo + codigo do pacote +
+   cauda, e e por isso que os dois trazem 'mais' (o contador soma o que o vizinho ja gastou, que
+   e exatamente a conta que aRecusa faz) e 'semCap'.
+   'semCap' NAO e preguica, e a medida esta escrita: um maxlength do tamanho de A_ID_MAX cortaria
+   a DIGITACAO de um codigo hifenizado que CABE no orcamento -- 'ABC-DEF-GHI-JKL' ocupa quinze
+   teclas e so doze caracteres uteis --, e o campo passaria a recusar o que a regra aceita. Quem
+   recusa aqui e aRecusa, que conta certo; o contador so mostra. Nos outros quatro campos o
+   maxlength continua, porque la o teto do campo E o teto do orcamento. */
 var FC_LIM_CAMPOS=[
   {id:'fci-chave',  max:PIX_CHAVE_MAX, sobra:function(v){return pixLimpar(v);}},
   {id:'fci-nomer',  max:FC_NOMER_MAX,  sobra:function(v){return fcPixTexto(v,1e9);}},
   {id:'fci-cidade', max:FC_CIDADE_MAX, sobra:function(v){return fcPixTexto(v,1e9);}},
   {id:'fci-zapnum', max:0,             sobra:fcLimSoDigitos, filtro:/[^0-9]/g},
   {id:'u-cod',      max:FC_TXID_MAX,   sobra:function(v){return pTxidLimpo(v);}},
+  {id:'m-cod',      max:M_COD_MAX,     sobra:fcIdLimpo},
+  {id:'a-prefixo',  max:A_ID_MAX,      sobra:fcIdLimpo, semCap:true, parceiro:'a-pcod',
+   mais:function(){return fcLimUteisDe('a-pcod');},
+   nota:function(){return 'o prefixo e o código do pacote dividem este limite';}},
+  {id:'a-pcod',     max:A_ID_MAX,      sobra:fcIdLimpo, semCap:true, parceiro:'a-prefixo',
+   mais:function(){return fcLimUteisDe('a-prefixo');},
+   nota:function(){return 'o prefixo e o código do pacote dividem este limite';}},
   {id:'b-selo-txt'},
   {id:'p-desc',     max:P_DESC_MAX,    nota:fcLimNotaPp},
   {id:'p-txid',     max:FC_TXID_MAX,   sobra:function(v){return pTxidLimpo(v);}, filtro:/[^A-Za-z0-9]/g}
 ];
 function fcLimSobra(c,v){return c.sobra?String(c.sobra(v)):String(v==null?'':v);}
+/* 'soma' e o que conta contra o teto; 'n' continua sendo o DESTE campo, porque e ele que o
+   "(n digitados)" compara com o que esta na tela. Sem 'mais' os dois sao o mesmo numero, e os
+   cinco campos antigos saem letra por letra como saiam. */
 function fcLimAtualizar(c){
-  var el=$(c.id),sp=$('fcl-'+c.id),tela,n,t,nota;
+  var el=$(c.id),sp=$('fcl-'+c.id),tela,n,soma,t,nota;
   if(!el||!sp)return;
   tela=String(el.value).length;
   n=fcLimSobra(c,el.value).length;
-  t=n+' de '+c.max;
+  soma=n+(c.mais?c.mais():0);
+  t=soma+' de '+c.max;
   if(n!==tela)t+=' ('+tela+' digitado'+(tela===1?'':'s')+')';
   nota=c.nota?c.nota(el.value):'';
   if(nota)t+=' \u00b7 '+nota;
   sp.textContent=t;
-  sp.className='fcl-cont'+(n>c.max?' fcl-passou':(n===c.max?' fcl-cheio':''));
+  sp.className='fcl-cont'+(soma>c.max?' fcl-passou':(soma===c.max?' fcl-cheio':''));
 }
+/* A linha da tabela, achada pelo id -- so o refresco do vizinho precisa dela. */
+function fcLimLinha(id){var i;for(i=0;i<FC_LIM_CAMPOS.length;i++)if(FC_LIM_CAMPOS[i].id===id)return FC_LIM_CAMPOS[i];return null;}
 function fcLimAtualizarTodos(){
   var i;
   if(!FC_LIM_PRONTO)return;
@@ -7383,9 +7522,14 @@ function fcLimConferir(c){
 }
 function fcLimLigar(c,el){
   el.addEventListener('input',function(){
+    var p;
     fcLimCorteLimpar(c);
     if(c.filtro)fcLimFiltrar(el,c.filtro);
     fcLimAtualizar(c);
+    /* Orcamento compartilhado: mexer num dos dois muda o numero do OUTRO. Sem esta linha o
+       contador do prefixo continuaria mostrando a conta de antes do codigo mudar -- contador
+       que mente e o defeito que esta tabela existe para fechar. */
+    if(c.parceiro){p=fcLimLinha(c.parceiro);if(p)fcLimAtualizar(p);}
   });
   if(!c.max)return;
   /* O colar e ouvido ANTES do 'input', entao o aviso e agendado para depois dele -- senao o
@@ -7415,7 +7559,7 @@ function fcLimIniciar(){
       throw new Error('o campo '+c.id+' declara maxlength="'+dec+'" e a tabela de limites diz '+c.max+'; os dois números têm de ser o mesmo');
     if(c.filtro&&c.sobra)fcLimConferir(c);
     if(c.max){
-      el.setAttribute('maxlength',String(c.max));
+      if(!c.semCap)el.setAttribute('maxlength',String(c.max));
       lab=document.querySelector('label[for="'+c.id+'"]');
       if(!lab)throw new Error('o campo '+c.id+' não tem rótulo, e o contador mora no rótulo');
       sp=document.createElement('span');
@@ -7952,7 +8096,7 @@ function fciEstadoRender(){
   if(!el)return;
   difs=fciPaletaDiferencas();
   if(!difs.length){
-    txt='As três abas de pagamento e as três da coruja estão exatamente com estas cores.';
+    txt='As quatro abas de pagamento e as três da coruja estão exatamente com estas cores.';
     if(FCI.aplicadaEm)txt+=' Última aplicação: '+fciData(FCI.aplicadaEm)+'.';
   }else{
     txt=difs.length+' campo(s) de cor nas abas estão diferentes desta paleta';
@@ -8267,6 +8411,10 @@ function fcPresetAplicar(a,i){
      anotacao nao pode desfazer um "Aplicar" que ja deu certo. */
   try{fcgOrigemMarcar(a,p);}
   catch(e){fcFalha('Preset geral','anotar a origem do preset aplicado',e,'');}
+  /* O contador dos campos de identificador (FC_LIM_CAMPOS) so se refaz sozinho no 'input'.
+     Aqui o valor chega SEM teclado, e sem esta linha o numero na tela ficaria falando do
+     item anterior -- contador que mente e exatamente o que aquela tabela existe para fechar. */
+  fcLimAtualizarTodos();
   salvarEstado();
 }
 function fcPresetRemover(a,i){
@@ -8517,6 +8665,10 @@ function fcgAplicarAba(a,valores){
   fcPresetZerarForm(a,frag);
   a.restaura(frag);
   if(a.redesenhar)a.redesenhar();
+  /* O contador dos campos de identificador (FC_LIM_CAMPOS) so se refaz sozinho no 'input'.
+     Aqui o valor chega SEM teclado, e sem esta linha o numero na tela ficaria falando do
+     item anterior -- contador que mente e exatamente o que aquela tabela existe para fechar. */
+  fcLimAtualizarTodos();
 }
 
 /* ---- leitura e gravacao do armazenamento ---- */
@@ -14766,16 +14918,7 @@ var U_TXT_DEFS=[
   ['txtResumoCopiado','u-txt-resumo-copiado',FC_TXT_FABRICA.resumoCopiado],
   ['txtResumoSubtotal','u-txt-resumo-subtotal',FC_TXT_FABRICA.resumoSubtotal],
   ['txtResumoPedido','u-txt-resumo-pedido',FC_TXT_FABRICA.resumoPedido],
-  ['txtZapBotao','u-txt-zap-botao',FC_TXT_FABRICA.zapBotao],
-  ['txtZapAbertura','u-txt-zap-abertura',FC_TXT_FABRICA.zapAbertura],
-  ['txtZapAberturaSinal','u-txt-zap-abertura-sinal',FC_TXT_FABRICA.zapAberturaSinal],
-  ['txtZapPedido','u-txt-zap-pedido',FC_TXT_FABRICA.zapPedido],
-  ['txtZapCupom','u-txt-zap-cupom',FC_TXT_FABRICA.zapCupom],
-  ['txtZapDescPix','u-txt-zap-descpix',FC_TXT_FABRICA.zapDescPix],
-  ['txtZapTotal','u-txt-zap-total',FC_TXT_FABRICA.zapTotal],
-  ['txtZapSinal','u-txt-zap-sinal',FC_TXT_FABRICA.zapSinal],
-  ['txtZapSaldo','u-txt-zap-saldo',FC_TXT_FABRICA.zapSaldo],
-  ['txtZapValor','u-txt-zap-valor',FC_TXT_FABRICA.zapValor],
+].concat(fcZapTxtDefs('u')).concat([
   /* ===== os que estavam FORA da tabela ate 11/09/2026 (leva 2) =====
      A CHAVE de cada um e a MESMA que o coleta ja gravava, letra por letra: estado, preset e
      backup gravados antes desta rodada sao lidos sem conversao nenhuma, e o que a ferramenta
@@ -14783,17 +14926,17 @@ var U_TXT_DEFS=[
      rotulo e a vigilancia de fcTxtFabricaDiverge, que ate agora nao os alcancava. */
   ['t1','u-t1','Resumo do pedido'],
   ['t2','u-t2','Escolha seu pacote'],
-  ['t3','u-t3','Total'],
+  ['t3','u-t3',FC_TXT_FABRICA.total],
   ['t4','u-t4','Gerar Pix para pagamento'],
   ['t5','u-t5','Pagamento aprovado! Recebemos seu pedido.'],
-  ['t6','u-t6','Não foi possível concluir o pagamento. Tente novamente.'],
+  ['t6','u-t6',FC_TXT_FABRICA.erroPagamento],
   ['t7','u-t7','Escolha seu ensaio'],
-  ['t8','u-t8','Sinal agora'],
-  ['t9','u-t9','Restante na entrega'],
+  ['t8','u-t8',FC_TXT_FABRICA.sinalRotulo],
+  ['t9','u-t9',FC_TXT_FABRICA.saldoEntrega],
   ['t10','u-t10','Resumo para conferência']
 /* Os tres textos que explicam o sinal (rodada E): a MESMA fonte nas quatro abas de pagamento.
    Padrao vazio -- ver FC_SINAL_TXT para o porque. */
-].concat(fcSinalTxtDefs('u'));
+]).concat(fcSinalTxtDefs('u'));
 /* ===== configuracao da aba =====
    Uma leitura so da interface, ja presa nas faixas. E o que uGerar valida, e e o que uBloco
    monta -- e como a previa passou a executar o retorno de uBloco, nao sobrou nenhuma segunda
@@ -17382,9 +17525,19 @@ var A_TXT_DEFS=[
      " (CODIGO)" era colado por fora, no bloco -- meia frase configuravel e armadilha. */
   ['txtDesconto','a-txt-desconto',FC_TXT_FABRICA.desconto],
   ['txtCupomValidade','a-txt-cupom-validade',FC_TXT_FABRICA.cupomValidade],
-  ['txtSucesso','a-txt-sucesso','Pagamento aprovado. Obrigado!'],
+  ['txtSucesso','a-txt-sucesso',FC_TXT_FABRICA.sucessoCurto],
   ['txtErroComPix','a-txt-erro-compix',FC_ORD_PARES.erroComPix.pix],
   ['txtErroSemPix','a-txt-erro-sempix','Não foi possível carregar o pagamento por cartão agora. Fale com a gente para receber outra forma de pagar.'],
+  /* A UNICA CHAVE DESTA FERRAMENTA COM DOIS SIGNIFICADOS, e esta escrito para que nenhuma
+     varredura futura por chave conclua sozinha que as quatro abas discordam do mesmo texto:
+     AQUI 'txtPixRotulo' e o TITULO DA SECAO do Pix (fabrica 'Pix', a mesma de p-txt-secao-pix);
+     no Checkout, na Mini loja e no Link de cobranca a MESMA chave e a LINHA DO PRECO com
+     desconto ('Pagando via Pix (-{pct}%)'). Nesta aba essa linha nao existe -- quem anuncia o
+     desconto e o SELO da vitrine (txtSeloPix).
+     MEDIDO NA LEVA 4 (13/09/2026) E DEIXADO COMO ESTA. O conserto e renomear a chave para
+     'txtSecaoPix', e renomear chave RESETA o campo de quem ja customizou o titulo: fcTxtRestaura
+     cai no padrao quando a chave nao existe no estado, e isso atinge backup em arquivo que o
+     dono ja tem. Formato do que fica gravado e a classe que espera a palavra dele. */
   ['txtPixRotulo','a-txt-pix-rotulo',FC_TXT_FABRICA.secaoPix],
   ['txtPixGerar','a-txt-pix-gerar','Gerar Pix'],
   ['txtPixCopiar','a-txt-pix-copiar',FC_TXT_FABRICA.pixCopiar],
@@ -17399,9 +17552,9 @@ var A_TXT_DEFS=[
      QUEM JA TINHA A FRASE ANTIGA GRAVADA NAO A PERDE: fcTxtRestaura so cai na terceira coluna
      quando a chave nao existe no estado, e 'txtPixManual' e gravado por aColeta desde 02/09. */
   ['txtPixManual','a-txt-pix-manual',FC_TXT_FABRICA.pixManual],
-  ['txtPixCopiado','a-txt-pix-copiado','Código copiado! Cole no aplicativo do seu banco.'],
-  ['txtPixNaocopiou','a-txt-pix-naocopiou','Não consegui copiar. Selecione o código acima e copie na mão.'],
-  ['txtOu','a-txt-ou','OU'],
+  ['txtPixCopiado','a-txt-pix-copiado',FC_TXT_FABRICA.pixCopiadoCola],
+  ['txtPixNaocopiou','a-txt-pix-naocopiou',FC_TXT_FABRICA.pixNaocopiou],
+  ['txtOu','a-txt-ou',FC_TXT_FABRICA.ou],
   ['txtCartaoRotulo','a-txt-cartao-rotulo','Cartão de crédito ou débito'],
   ['txtZapBotao','a-txt-zap-botao','Falar no WhatsApp'],
   ['txtZapRecusa','a-txt-zap-recusa','Olá! Não encontrei meu agendamento na página de pagamento.'],
@@ -17423,16 +17576,7 @@ var A_TXT_DEFS=[
      marcado. O padrao repete a palavra que o proprio t9 desta aba ja usa ("Restante no dia do
      ensaio"), na mesma forma ': *{valor}*' das irmas. Mesmo criterio que ja fez 'txtTotalZero'
      e os textos do sinal desta aba divergirem: frase parecida nao e frase unica. */
-  ['txtZapPago','a-txt-zap-pago',FC_TXT_FABRICA.zapBotao],
-  ['txtZapAbertura','a-txt-zap-abertura',FC_TXT_FABRICA.zapAbertura],
-  ['txtZapAberturaSinal','a-txt-zap-abertura-sinal',FC_TXT_FABRICA.zapAberturaSinal],
-  ['txtZapPedido','a-txt-zap-pedido',FC_TXT_FABRICA.zapPedido],
-  ['txtZapCupom','a-txt-zap-cupom',FC_TXT_FABRICA.zapCupom],
-  ['txtZapDescPix','a-txt-zap-descpix',FC_TXT_FABRICA.zapDescPix],
-  ['txtZapTotal','a-txt-zap-total',FC_TXT_FABRICA.zapTotal],
-  ['txtZapSinal','a-txt-zap-sinal',FC_TXT_FABRICA.zapSinal],
-  ['txtZapSaldo','a-txt-zap-saldo','Restante no dia do ensaio: *{valor}*'],
-  ['txtZapValor','a-txt-zap-valor',FC_TXT_FABRICA.zapValor],
+].concat(fcZapTxtDefs('a',{botaoChave:'txtZapPago',botaoSuf:'pago',saldo:'Restante no dia do ensaio: *{valor}*'})).concat([
   ['txtPrazoBarra','a-txt-prazo-barra','Reserva garantida até {data}.'],
   ['txtPrazoAjuda','a-txt-prazo-ajuda','O relógio é um recado, não uma tranca: quem libera o horário depois do prazo é a gente, à mão, ao conferir o pagamento.'],
   ['txtPrazoVencido','a-txt-prazo-vencido','O prazo para pagar esta reserva já passou. Fale com a gente para confirmar se o horário ainda está disponível.'],
@@ -17479,7 +17623,7 @@ var A_TXT_DEFS=[
      paguei" nao existia -- e linha de saldo num recado de recusa seria comportamento que
      ninguem pediu. Com o botao existindo ele passou a ter consumidor, e entrou junto dos outros
      nove (ver o bloco dos dez campos, acima). Os dois recados continuam sem citar valor. */
-  ['t8','a-t8','Sinal agora'],
+  ['t8','a-t8',FC_TXT_FABRICA.sinalRotulo],
   ['t9','a-t9','Restante no dia do ensaio'],
   ['txtSinalMaior','a-txt-sinal-maior','O sinal desta reserva é maior que o total. Remova o cupom ou marque mais itens opcionais.'],
   ['txtSinalZero','a-txt-sinal-zero','O sinal desta reserva arredonda para zero. Remova o cupom ou marque mais itens opcionais.'],
@@ -17488,7 +17632,7 @@ var A_TXT_DEFS=[
    fabrica. Na ordem de A_OB_VARS, que e a ordem em que a chave antiga foi colada.
    E os TRES TEXTOS QUE EXPLICAM O SINAL entram pelo segundo concat (rodada E, 13/09/2026), da
    mesma tabela unica que serve as quatro abas de pagamento -- ver FC_SINAL_TXT. */
-].concat(fcObFbDefs(A_OB_VARS,'a')).concat(fcSinalTxtDefs('a'));
+]).concat(fcObFbDefs(A_OB_VARS,'a')).concat(fcSinalTxtDefs('a'));
 function aObMarcadas(){
   var r=[],i,el;
   for(i=0;i<A_OB_VARS.length;i++){
@@ -17913,6 +18057,10 @@ function aPacLimpar(){
   aPacCopiaAviso(null);
   aOpRender();
   $('a-op-qtd').checked=false;
+  /* O contador dos campos de identificador (FC_LIM_CAMPOS) so se refaz sozinho no 'input'.
+     Aqui o valor chega SEM teclado, e sem esta linha o numero na tela ficaria falando do
+     item anterior -- contador que mente e exatamente o que aquela tabela existe para fechar. */
+  fcLimAtualizarTodos();
 }
 /* Corrige o codigo do pacote A VISTA, no proprio campo -- molde de uCpCodAjustar (10527) e da
    regra do projeto (CLAUDE.md: campo que alimenta a saida se corrige na TELA, em 'change'/
@@ -17942,6 +18090,26 @@ function aPcodAjustar(){
   var cod=String(el.value).trim().replace(/[^A-Za-z0-9-]/g,'').toUpperCase();
   if(cod===el.value)return false;
   el.value=cod;
+  return true;
+}
+/* O PREFIXO SEGUE A MESMA REGRA DO CODIGO DO PACOTE (leva 4, 13/09/2026) -- e nao por simetria:
+   os dois sao concatenados no MESMO identificador (PREFIXO+cod+cauda, ver idConciliacao), e ate
+   esta rodada so metade dessa string tinha regra. O que passava calado era o CARACTERE, e nao a
+   conta: 'FC Natal/26' entrava inteiro no campo, saia 'FCNatal26' no extrato, e o operador
+   conciliava lendo uma coisa e recebendo outra -- o MESMO defeito que uRecusa fechou no 'u-cod'
+   em 13/09/2026, num campo cujo vizinho de identificador ja recusava.
+   O QUE FOI MEDIDO, e o que NAO era o defeito: a conta do orcamento (A_ID_MAX) JA estava certa.
+   Ela usa fcIdUteis, que limpa antes de contar, exatamente como limpaId limpa dentro do bloco --
+   entao o prefixo sujo nunca consumiu orcamento a mais. O que faltava era so a regra do campo.
+   SEM MAIUSCULAS, ao contrario de aPcodAjustar, e a diferenca e medida: o codigo do pacote e
+   COMPARADO em maiusculas (aCodPix decide colisao de conciliacao entre dois pacotes), e por isso
+   subir a caixa la e parte da regra; o prefixo nao e comparado com nada -- e a marca que o dono
+   le no proprio extrato, e subir a caixa dela reescreveria uma escolha dele sem motivo. */
+function aPrefixoAjustar(){
+  var el=$('a-prefixo');if(!el)return false;
+  var v=String(el.value).trim().replace(/[^A-Za-z0-9-]/g,'');
+  if(v===el.value)return false;
+  el.value=v;
   return true;
 }
 function aPacSalvar(){
@@ -17993,6 +18161,10 @@ function aPacEditar(i){
   $('a-pac-cancelar').style.display='inline-block';
   aPacCopiaAviso(null);
   aOpRender();
+  /* O contador dos campos de identificador (FC_LIM_CAMPOS) so se refaz sozinho no 'input'.
+     Aqui o valor chega SEM teclado, e sem esta linha o numero na tela ficaria falando do
+     item anterior -- contador que mente e exatamente o que aquela tabela existe para fechar. */
+  fcLimAtualizarTodos();
 }
 /* ===== duplicar um pacote =====
    DUPLICAR CARREGA UMA COPIA NO FORMULARIO, e nao cria item na lista (decisao do dono): assim
@@ -18023,6 +18195,10 @@ function aPacDuplicar(i){
   $('a-pac-cancelar').style.display='inline-block';
   aPacCopiaAviso(p);
   aOpRender();
+  /* O contador dos campos de identificador (FC_LIM_CAMPOS) so se refaz sozinho no 'input'.
+     Aqui o valor chega SEM teclado, e sem esta linha o numero na tela ficaria falando do
+     item anterior -- contador que mente e exatamente o que aquela tabela existe para fechar. */
+  fcLimAtualizarTodos();
   salvarEstado();
   var el=$('a-pcod');
   if(el){try{el.focus();el.select();}catch(e){}}
@@ -18209,6 +18385,10 @@ function aRecusa(cfg){
   /* o que o prefixo ja gasta do orcamento do identificador -- ver "o orcamento do
      identificador de conciliacao" */
   pre=fcIdUteis(cfg.prefixo);
+  /* A MESMA RECUSA QUE O CODIGO DO PACOTE JA TINHA, agora tambem na outra metade do
+     identificador (ver aPrefixoAjustar). Conferida AQUI, e nao so no campo, pela razao de
+     sempre nesta ferramenta: estado importado e backup antigo nao passam pelo formulario. */
+  if(cfg.prefixo&&!/^[A-Za-z0-9-]+$/.test(cfg.prefixo))return 'O prefixo do identificador "'+cfg.prefixo+'" tem caractere que o Pix não carrega. Use apenas letras sem acento, números e hífen: o Pix aceita só letras e números, e "'+cfg.prefixo+'" chegaria ao seu extrato como "'+fcIdLimpo(cfg.prefixo)+'" — você concilia lendo uma coisa e recebendo outra. Corrija na seção '+fcSecN('a-pagamento')+'.';
   if(!cfg.pacotes.length)return 'Cadastre ao menos um pacote.';
   var recUp=fcUpsellRecusa(cfg.upsell);if(recUp)return recUp;
   /* GUARDA DE INTEGRIDADE, e nao caso comum: aRestaura garante ao menos uma familia e aFamDel
@@ -18298,13 +18478,24 @@ function aRecusa(cfg){
      mesmo molde de uRecusa/mRecusa (10969/17690 e 10970/17691+): "somente cartao" nao exige
      chave Pix (o bloco nem carrega a maquinaria do Pix), e "somente Pix" nao exige Client ID
      do PayPal (o bloco nem carrega o SDK). */
+  /* LIDO DO cfg, e nao do DOM (leva 4, 13/09/2026). Ate esta rodada estas cinco linhas
+     chamavam fciVal/fciBruto direto, contra o que o cabecalho desta funcao promete ("para uma
+     configuracao ja coletada"): o preset desta aba descrevia uma configuracao e a recusa
+     avaliava outra fonte. As tres irmas (uRecusa/mRecusa/pRecusa) ja liam do cfg -- esta era a
+     unica fora. Os valores sao os MESMOS, campo a campo, entao nenhuma recusa mudou.
+     O WHATSAPP CONTINUA EXIGIDO SEM INTERRUPTOR, e isso e decisao medida e nao esquecimento:
+     a regra das quatro abas e "exija o que o bloco usa". Nas outras tres o WhatsApp so aparece
+     no "Ja paguei", que tem interruptor (u-zap/m-zap/p-zap); aqui botaoZap escreve TRES botoes
+     -- os dois recados (sem pacote reconhecido, prazo vencido) e o "Ja paguei" --, e os dois
+     recados existem em qualquer forma de pagamento. Sem numero, quem cai num deles fica sem
+     nenhum caminho de contato. Mesma regra, resultado diferente porque o bloco e diferente. */
   if(cfg.usaPix){
-    var erroChave=pixChaveErro(pixLimpar(fciBruto('chave')),fciBruto('chave'));
+    var erroChave=pixChaveErro(cfg.chave,cfg.chaveBruta);
     if(erroChave)return erroChave;
-    if(!fciVal('chave')||!fciVal('nomer')||!fciVal('cidade'))return fciRecusa('Preencha a chave Pix, o nome do recebedor e a cidade.');
+    if(!cfg.chave||!cfg.nomer||!cfg.cidade)return fciRecusa('Preencha a chave Pix, o nome do recebedor e a cidade.');
   }
-  if(cfg.usaPP&&!fciVal('client'))return fciRecusa('Informe o Client ID do PayPal.');
-  if(!fciVal('zapnum'))return fciRecusa('Informe o WhatsApp de destino.');
+  if(cfg.usaPP&&!cfg.client)return fciRecusa('Informe o Client ID do PayPal.');
+  if(!cfg.zapnum)return fciRecusa('Informe o WhatsApp de destino.');
   return '';
 }
 /* ===== configuracao da aba, ja validada (o que aRecusa confere e o que os geradores
@@ -18364,6 +18555,13 @@ function aCfg(){
   var largcards=aPreso('a-largcards');if(largcards==null)largcards=640;
   var r={
     pacotes:aPacotes, familias:aFamilias, cps:aCps,
+    /* IDENTIDADE: lida do painel global (ver o bloco "identidade e paleta"), no MESMO molde de
+       uCfg/mCfg/pCfg. Ate 13/09/2026 esta aba nao trazia estes cinco para o cfg, e aRecusa
+       (e o gerador da pagina de obrigado) liam do DOM. 'chaveBruta' acompanha porque a recusa
+       precisa distinguir "campo nunca preenchido" de "so tinha invisiveis". */
+    chave:pixLimpar(fciBruto('chave')), chaveBruta:fciBruto('chave'),
+    nomer:fciVal('nomer'), cidade:fciVal('cidade'),
+    client:fciVal('client'), zapnum:fciDigitos('zapnum'),
     urlobrigado:$('a-urlobrigado').value.trim(),
     prefixo:$('a-prefixo').value.trim(),
     metodo:m, usaPP:usaPP, usaPix:usaPix, prio:prio, ppcor:radio('a-ppcor')||'gold',
@@ -19583,11 +19781,19 @@ function aBlocoObrigado(cfg){
   c+='var PRAZOH='+cfg.prazoh+';   /* horas de reserva, a partir da primeira visita a esta pagina */\n';
   if(usaQtd)c+='var QUANTIDADE_MAXIMA='+cfg.qtdmax+';   /* teto do seletor de quantidade; o seletor vai de 0 ate ele, e 0 = item nao escolhido */\n';
   c+="var MOEDA='BRL';                     /* o Pix so existe em BRL, e o cartao segue o mesmo pedido */\n";
+  /* A CHAVE E A UNICA DAS CINCO QUE CONTINUA SAINDO DE fciVal, e isto esta ESCRITO porque e
+     divergencia conhecida e nao descuido: cfg.chave passa por pixLimpar (que apara tambem
+     invisiveis de controle, \u00AD, \u200B-\u200F, \u2060) e fciVal passa por fcTrim (que apara so
+     o que \s cobre). Trocar aqui mudaria o PAYLOAD numa chave com invisivel na ponta -- classe
+     que o dono pediu para ser avisado ANTES. Medido e registrado em 13/09/2026, com a nota de
+     que aRecusa ja confere a versao limpa: quem tiver invisivel na chave e validado por uma
+     string e cobrado por outra. Esta linha espera a palavra do dono. As outras quatro trocaram
+     e sao byte a byte identicas (cfg.nomer === fciVal('nomer'), e assim por diante). */
   c+="var CHAVE_PIX='"+escJs(fciVal('chave'))+"';\n";
-  c+="var NOME_RECEBEDOR='"+escJs(fciVal('nomer'))+"';\n";
-  c+="var CIDADE='"+escJs(fciVal('cidade'))+"';\n";
-  c+="var PAYPAL_CLIENT_ID='"+escJs(fciVal('client'))+"';\n";
-  c+="var WHATSAPP='"+escJs(fciDigitos('zapnum'))+"';\n";
+  c+="var NOME_RECEBEDOR='"+escJs(cfg.nomer)+"';\n";
+  c+="var CIDADE='"+escJs(cfg.cidade)+"';\n";
+  c+="var PAYPAL_CLIENT_ID='"+escJs(cfg.client)+"';\n";
+  c+="var WHATSAPP='"+escJs(cfg.zapnum)+"';\n";
   c+="var COR_DESTAQUE='"+cfg.c1+"';\n";
   c+="var COR_FUNDO='"+cfg.c2+"';\n";
   c+="var COR_TEXTO='"+cfg.c3+"';\n";
@@ -19741,6 +19947,15 @@ function aBlocoObrigado(cfg){
   c+='   zapHref e separada porque o "Ja paguei" REESCREVE o endereco a cada Pix gerado (o valor\n';
   c+='   muda com os opcionais e com o cupom): montar a URL num segundo lugar seria a copia. */\n';
   c+='function zapHref(msg){return "https://wa.me/"+WHATSAPP+"?text="+encodeURIComponent(msg);}\n';
+  /* ANCORA, E NAO window.open -- e as quatro NAO foram unificadas, por medicao (leva 4,
+     13/09/2026). No Checkout e na Mini loja o "Ja paguei" e um <button> com window.open, e o
+     upsell entra DEPOIS da abertura da janela; a ordem foi medida em upsell-janela.mjs. Aqui e
+     na /pagar ele e uma <a target="_blank">, e o upsell entra num OUVINTE DE CLIQUE; isso foi
+     medido para ESTA aba em upsell.mjs, e nao herdado. As duas formas ja tem prova propria, o
+     cliente nao ve diferenca entre elas, e trocar uma pela outra jogaria fora uma das duas
+     medicoes sem ganhar nada. Extracao parcial bem justificada e melhor que completa e fragil.
+     O que a ancora custa esta declarado onde importa: a previa nao consegue neutraliza-la, e o
+     aviso do shim diz isso em vez de prometer o que nao entrega. */
   c+='function botaoZap(msg,rot){\n';
   c+='  if(!WHATSAPP)return null;\n';
   c+='  var zap=document.createElement("a");zap.className="fca-ob-bt fca-ob-bt2";zap.textContent=rot||"'+escJsD(cfg.txtZapBotao)+'";\n';
@@ -22104,13 +22319,18 @@ function pValDia(){
    Checkout e a Mini loja que tinham, decisao do dono de leva-lo tambem para ca e para a aba
    Agendamento por pacote). */
 var P_TXT_DEFS=[
-  ['txtCopiado','p-txt-copiado','Código copiado! Cole no aplicativo do seu banco.'],
-  ['txtNaocopiou','p-txt-naocopiou','Não consegui copiar. Selecione o código acima e copie na mão.'],
+  /* AS CHAVES CONTINUAM 'txtCopiado'/'txtNaocopiou', e nao 'txtPixCopiado'/'txtPixNaocopiou'
+     como nas outras tres: renomear uma chave RESETA o campo de quem tinha o texto customizado
+     (fcTxtRestaura cai no padrao quando a chave nao existe no estado), e isso atinge backup em
+     arquivo que o dono ja tem. Formato do que fica gravado e a classe que espera a palavra dele.
+     O que a leva 4 unificou aqui foi a FABRICA, que e o que estava escrito duas vezes. */
+  ['txtCopiado','p-txt-copiado',FC_TXT_FABRICA.pixCopiadoCola],
+  ['txtNaocopiou','p-txt-naocopiou',FC_TXT_FABRICA.pixNaocopiou],
   ['txtRef','p-txt-ref','Identificador da cobrança: '],
   /* D-2 (03/09/2026): a frase INTEIRA, com {pct}. Antes o campo valia so "Pagando via Pix" e
      o " (-N%)" era colado por fora, no bloco. Mesma tabela unica do Checkout e da Mini loja. */
   ['txtPixRotulo','p-txt-pixrotulo',FC_TXT_FABRICA.pixRotulo],
-  ['txtOu','p-txt-ou','OU'],
+  ['txtOu','p-txt-ou',FC_TXT_FABRICA.ou],
   /* O TITULO DE CADA UMA DAS DUAS SECOES DE PAGAMENTO. Ficaram fixos na Etapa 1 e sao os
      unicos textos que sobraram cravados nesta pagina.
      O do Pix sai de FC_TXT_FABRICA: a aba Agendamento por pacote ja tem o mesmo texto ('Pix'),
@@ -22127,9 +22347,17 @@ var P_TXT_DEFS=[
      PayPal cobra, fica a vista logo abaixo do valor do Pix em destaque. Mesma frase da aba
      Agendamento por pacote, e por isso a mesma fabrica. */
   ['txtCartaoLinha','p-txt-cartaolinha',FC_ORD_PARES.cartaoLinha.pix],
-  ['txtSucesso','p-txt-sucesso','Pagamento aprovado. Obrigado!'],
+  ['txtSucesso','p-txt-sucesso',FC_TXT_FABRICA.sucessoCurto],
   ['txtNota','p-txt-nota',FC_TXT_FABRICA.nota],
   ['txtPixManual','p-txt-pixmanual',FC_TXT_FABRICA.pixManual],
+  /* UMA FRASE, e nao as nove linhas configuraveis das outras tres abas -- medido na leva 4
+     (13/09/2026) e DECLARADO em vez de unificado. Ali a mensagem enumera um CARRINHO: abertura,
+     codigo do pedido, cada item, cupom, desconto do Pix, total, sinal e saldo. Aqui nao ha
+     carrinho nenhum -- a cobranca e uma descricao e um valor, que e exatamente o que {desc} e
+     {valor} carregam. Partir isto em nove campos daria ao dono SETE que nunca produziriam nada,
+     e "campo de texto sem consumidor e pior que campo faltando" ja e regra escrita nesta
+     ferramenta (ver 'txtSinalRecusado' em A_TXT_DEFS). A unica linha a mais que esta pagina pode
+     ter e a do sinal, e ela existe: e o 'txtZapSinal' abaixo. */
   ['txtZapMsg','p-txt-zapmsg','Olá! Acabei de pagar: {desc} -- {valor}'],
   /* ===== AS TRES LINHAS DO SINAL (13/09/2026) =====
      A FRASE INTEIRA e configuravel, com {valor} dentro dela (regra D-2): metade configuravel
@@ -22152,6 +22380,13 @@ var P_TXT_DEFS=[
   ['t1','p-t1','Pagamento do seu ensaio'],
   ['t2','p-t2','Total a pagar'],
   ['t3','p-t3','Copiar código Pix'],
+  /* 't4' E O BOTAO "JA PAGUEI" -- o mesmo papel que 'txtZapBotao' tem no Checkout e na Mini
+     loja e 'txtZapPago' tem na Agendamento por pacote. Tres nomes para um botao so, e o desta
+     aba e o unico fora da familia 'txtZap*'. Mesmo registro de 'txtCopiado', acima: o conserto e
+     renomear a chave, e renomear chave RESETA o campo de quem ja customizou -- espera a palavra
+     do dono. O TEXTO DE FABRICA diverge de proposito ('Ja paguei' contra 'Ja paguei - avisar no
+     WhatsApp'): aqui a pagina inteira e uma cobranca so, com dois botoes na tela; o rotulo
+     comprido das irmas existe para distinguir o "Ja paguei" do meio de um carrinho cheio. */
   ['t4','p-t4','Já paguei'],
   ['t5','p-t5','Este endereço não está trazendo nenhuma cobrança. Peça o link de pagamento por WhatsApp que a gente manda na hora.'],
   ['t6','p-t6','Este link de pagamento não pôde ser conferido: o código da cobrança chegou alterado ou incompleto. Por segurança não vamos exibir nenhum valor. Peça um link novo por WhatsApp.'],
@@ -24080,16 +24315,7 @@ var M_TXT_DEFS=[
   ['txtResumoCopiado','m-txt-resumo-copiado',FC_TXT_FABRICA.resumoCopiado],
   ['txtResumoSubtotal','m-txt-resumo-subtotal',FC_TXT_FABRICA.resumoSubtotal],
   ['txtResumoPedido','m-txt-resumo-pedido',FC_TXT_FABRICA.resumoPedido],
-  ['txtZapBotao','m-txt-zap-botao',FC_TXT_FABRICA.zapBotao],
-  ['txtZapAbertura','m-txt-zap-abertura',FC_TXT_FABRICA.zapAbertura],
-  ['txtZapAberturaSinal','m-txt-zap-abertura-sinal',FC_TXT_FABRICA.zapAberturaSinal],
-  ['txtZapPedido','m-txt-zap-pedido',FC_TXT_FABRICA.zapPedido],
-  ['txtZapCupom','m-txt-zap-cupom',FC_TXT_FABRICA.zapCupom],
-  ['txtZapDescPix','m-txt-zap-descpix',FC_TXT_FABRICA.zapDescPix],
-  ['txtZapTotal','m-txt-zap-total',FC_TXT_FABRICA.zapTotal],
-  ['txtZapSinal','m-txt-zap-sinal',FC_TXT_FABRICA.zapSinal],
-  ['txtZapSaldo','m-txt-zap-saldo',FC_TXT_FABRICA.zapSaldo],
-  ['txtZapValor','m-txt-zap-valor',FC_TXT_FABRICA.zapValor],
+].concat(fcZapTxtDefs('m')).concat([
   ['txtPedidoEnviado','m-txt-pedido-enviado','Pedido enviado. O carrinho foi esvaziado -- combine o restante pelo WhatsApp.'],
   ['txtLimitePedidos','m-txt-limite-pedidos','Esta página não guarda pedidos: cada compra existe como a mensagem que você recebe, a transação no PayPal e o Pix na conta.'],
   ['txtLimitePix','m-txt-limite-pix','O Pix estático não avisa ninguém quando o dinheiro cai -- a confirmação é por conferência do extrato.'],
@@ -24104,17 +24330,17 @@ var M_TXT_DEFS=[
      rotulo e a vigilancia de fcTxtFabricaDiverge, que ate agora nao os alcancava. */
   ['t1','m-t1','Nossa loja'],
   ['t2','m-t2','Itens opcionais'],
-  ['t3','m-t3','Total'],
+  ['t3','m-t3',FC_TXT_FABRICA.total],
   ['t4','m-t4','Pagar com Pix'],
   ['t5','m-t5','Pagamento aprovado! Em breve entramos em contato.'],
-  ['t6','m-t6','Não foi possível concluir o pagamento. Tente novamente.'],
+  ['t6','m-t6',FC_TXT_FABRICA.erroPagamento],
   ['t7','m-t7','Adicionar ao carrinho'],
-  ['t8','m-t8','Sinal agora'],
-  ['t9','m-t9','Restante na entrega'],
+  ['t8','m-t8',FC_TXT_FABRICA.sinalRotulo],
+  ['t9','m-t9',FC_TXT_FABRICA.saldoEntrega],
   ['t10','m-t10','Seu carrinho'],
   ['t11','m-t11','Voltar para a vitrine'],
   ['t12','m-t12','Resumo para conferência']
-].concat(fcSinalTxtDefs('m'));
+]).concat(fcSinalTxtDefs('m'));
 /* ===== configuracao da aba =====
    Uma leitura so da interface, ja presa nas faixas. E o que mRecusa valida e o que mBloco
    monta -- e como a previa executa o retorno de mBloco, nao existe segunda implementacao da
@@ -24224,7 +24450,13 @@ function mTotalMaximo(prods,qtdmax){
   var t=0,i,j,p,ops,mais,v;
   for(i=0;i<prods.length;i++){
     p=prods[i];
-    t+=(parseFloat(p.preco)||0)*(p.qtd?qtdmax:1);
+    /* A TROCA DE VIRGULA POR PONTO (leva 4, 13/09/2026). Os opcionais tres linhas abaixo ja a
+       faziam, e uTotalMaximo a faz nos DOIS lados: aqui o preco do produto era lido cru, e
+       '1.200,00' vindo de estado importado ou de backup antigo virava 1.2 em vez de 1200 --
+       um teto mil vezes menor, que faz a recusa do sinal fixo acusar o que cabe. Produto
+       gravado pelo formulario ja chega numerico (mProdSalvar converte), entao nada muda no
+       caminho comum: o que muda e o caminho que nao passa pelo formulario. */
+    t+=(parseFloat(String(p.preco).replace(',','.'))||0)*(p.qtd?qtdmax:1);
     ops=p.ops||[];mais=0;
     for(j=0;j<ops.length;j++){
       v=(parseFloat(String(ops[j].preco).replace(',','.'))||0)*(ops[j].qtd?qtdmax:1);
@@ -24257,7 +24489,7 @@ function mBloco(cfg){
   var prio=cfg.prio||FC_ORD_FABRICA;
   var usaPP=cfg.usaPP,usaPix=cfg.usaPix,usaQtd=cfg.qtdLigada,usaSinal=cfg.sinal.ativo;
   var usaResumo=cfg.resumo,descpix=cfg.descpix,zap=cfg.zap;
-  var usaCupom=cfg.cps.length>0,usaFiltro=cfg.filtro&&cfg.cats.length>0;
+  var usaFiltro=cfg.filtro&&cfg.cats.length>0;
   var temOpDesc=fcTemOpDesc(cfg.prods);   /* ver o mesmo no Checkout */
   var client=escJs(cfg.client||'COLE_AQUI_SEU_CLIENT_ID');
   var cod=escJs(cfg.cod||'LOJA');
@@ -24353,19 +24585,17 @@ function mBloco(cfg){
   c+='.fcmloja .fcm-cesta-vazia{font-size:13px;color:#8a8375;margin:0;text-align:left}\n';
   c+='.fcmloja .fcm-aviso-cesta{display:none;font-size:12px;background:#FDF2F1;color:#5E1310;border-radius:8px;padding:8px 10px;margin:0 0 10px;text-align:left}\n';
   c+='.fcmloja .fcm-aviso-cesta.on{display:block}\n';
-  if(usaCupom){
-    c+='.fcmloja .fcm-cupom{margin:10px 0 0}\n';
-    c+='.fcmloja .fcm-cupom-l{display:flex;gap:6px}\n';
-    c+='.fcmloja .fcm-cupom-l input{flex:1;min-width:0;border:1px solid #d8d2c4;border-radius:8px;padding:8px;font:inherit;font-size:13px}\n';
-    c+='.fcmloja .fcm-cupom-l button{border:1px solid var(--fcm-destaque,#0F3A30);background:#fff;color:var(--fcm-destaque,#0F3A30);border-radius:8px;padding:0 12px;font:600 12px/1 inherit;cursor:pointer}\n';
-    c+='.fcmloja .fcm-cupom-msg{font-size:12px;margin-top:5px;text-align:left}\n';
-    c+='.fcmloja .fcm-cupom-msg.ok{color:#1e7e34}\n';
-    c+='.fcmloja .fcm-cupom-msg.erro{color:#c0392b}\n';
-    c+='.fcmloja .fcm-desconto{display:none;justify-content:space-between;font-size:13px;color:#1e7e34;margin-top:8px}\n';
-    c+='.fcmloja .fcm-desconto.on{display:flex}\n';
-    c+='.fcmloja .fcm-desconto-p{display:none;margin-left:6px;font-size:11px;white-space:nowrap}\n';
-    c+='.fcmloja .fcm-desconto-p.on{display:inline}\n';
-  }
+  c+='.fcmloja .fcm-cupom{margin:10px 0 0}\n';
+  c+='.fcmloja .fcm-cupom-l{display:flex;gap:6px}\n';
+  c+='.fcmloja .fcm-cupom-l input{flex:1;min-width:0;border:1px solid #d8d2c4;border-radius:8px;padding:8px;font:inherit;font-size:13px}\n';
+  c+='.fcmloja .fcm-cupom-l button{border:1px solid var(--fcm-destaque,#0F3A30);background:#fff;color:var(--fcm-destaque,#0F3A30);border-radius:8px;padding:0 12px;font:600 12px/1 inherit;cursor:pointer}\n';
+  c+='.fcmloja .fcm-cupom-msg{font-size:12px;margin-top:5px;text-align:left}\n';
+  c+='.fcmloja .fcm-cupom-msg.ok{color:#1e7e34}\n';
+  c+='.fcmloja .fcm-cupom-msg.erro{color:#c0392b}\n';
+  c+='.fcmloja .fcm-desconto{display:none;justify-content:space-between;font-size:13px;color:#1e7e34;margin-top:8px}\n';
+  c+='.fcmloja .fcm-desconto.on{display:flex}\n';
+  c+='.fcmloja .fcm-desconto-p{display:none;margin-left:6px;font-size:11px;white-space:nowrap}\n';
+  c+='.fcmloja .fcm-desconto-p.on{display:inline}\n';
   c+='.fcmloja .fcm-total{display:flex;justify-content:space-between;align-items:baseline;font-size:16px;font-weight:700;color:var(--fcm-destaque,#0F3A30);border-top:2px solid var(--fcm-destaque,#0F3A30);margin-top:10px;padding-top:9px}\n';
   if(usaSinal){
     c+='.fcmloja .fcm-sinal,.fcmloja .fcm-saldo{display:flex;justify-content:space-between;font-size:13px;margin-top:6px}\n';
@@ -24464,7 +24694,7 @@ function mAssinatura(txt){
 function mBlocoJs(cfg,prods,cps,cats,client,cod){
   var usaPP=cfg.usaPP,usaPix=cfg.usaPix,usaQtd=cfg.qtdLigada,usaSinal=cfg.sinal.ativo;
   var usaResumo=cfg.resumo,descpix=cfg.descpix,zap=cfg.zap;
-  var usaCupom=cfg.cps.length>0,usaFiltro=cfg.filtro&&cfg.cats.length>0,temMin=fcCpTemMinimo(cfg.cps);
+  var usaFiltro=cfg.filtro&&cfg.cats.length>0,temMin=fcCpTemMinimo(cfg.cps);
   var c='';
   c+='<scr'+'ipt>\n(function(){\n';
   c+='/* ============================================================\n';
@@ -24625,24 +24855,22 @@ function mBlocoJs(cfg,prods,cps,cats,client,cod){
     c+="var TXT_RESUMO_SUBTOTAL='"+escJs(cfg.txtResumoSubtotal)+"';\n";
     c+="var TXT_RESUMO_PEDIDO='"+escJs(cfg.txtResumoPedido)+"';\n";
   }
-  if(usaCupom){
-    c+="var TXT_CUPOM_ROTULO='"+escJs(cfg.txtCupomRotulo)+"';\n";
-    c+="var TXT_CUPOM_BOTAO='"+escJs(cfg.txtCupomBotao)+"';\n";
-    c+="var TXT_CUPOM_OK='"+escJs(cfg.txtCupomOk)+"';\n";
-    c+="var TXT_CUPOM_INVALIDO='"+escJs(cfg.txtCupomInvalido)+"';\n";
-    c+="var TXT_CUPOM_EXPIRADO='"+escJs(cfg.txtCupomExpirado)+"';\n";
-    c+="var TXT_DESCONTO='"+escJs(cfg.txtDesconto)+"';\n";
-    /* ACENTO DE PROPOSITO, e o unico texto acentuado que estes dois blocos emitem. O item 10 do
-       Manual do Prosite proibe acento em CODIGO, nao no texto que o cliente le -- o bloco do Link
-       de cobranca ja carrega texto visivel acentuado desde ago/2026. Pedido do dono em 01/09/2026,
-       depois de ver "Valido ate" na tela. Em 01/09/2026 todo texto que uma pessoa le passou a sair
-       acentuado -- a tela do cliente e tambem a mensagem do WhatsApp. Continua sem acento so o
-       CODIGO: comentario, identificador, CSS e o payload Pix (item 10 do Manual, e a norma do BC). */
-    c+="var TXT_CUPOM_VALIDADE='"+escJs(cfg.txtCupomValidade)+"';   /* precede a data, na propria linha do desconto; so aparece se o cupom tiver validade */\n";
-    if(temMin){
-      c+="var TXT_CUPOM_MINIMO='"+escJs(cfg.txtCupomMinimo)+"';   /* recusa ao aplicar; {valor} vira o minimo daquele cupom, na moeda do bloco */\n";
-      c+="var TXT_CUPOM_MINIMO_QUEDA='"+escJs(cfg.txtCupomMinimoQueda)+"';   /* o cupom que CAIU porque o pedido desceu abaixo do minimo */\n";
-    }
+  c+="var TXT_CUPOM_ROTULO='"+escJs(cfg.txtCupomRotulo)+"';\n";
+  c+="var TXT_CUPOM_BOTAO='"+escJs(cfg.txtCupomBotao)+"';\n";
+  c+="var TXT_CUPOM_OK='"+escJs(cfg.txtCupomOk)+"';\n";
+  c+="var TXT_CUPOM_INVALIDO='"+escJs(cfg.txtCupomInvalido)+"';\n";
+  c+="var TXT_CUPOM_EXPIRADO='"+escJs(cfg.txtCupomExpirado)+"';\n";
+  c+="var TXT_DESCONTO='"+escJs(cfg.txtDesconto)+"';\n";
+  /* ACENTO DE PROPOSITO, e o unico texto acentuado que estes dois blocos emitem. O item 10 do
+     Manual do Prosite proibe acento em CODIGO, nao no texto que o cliente le -- o bloco do Link
+     de cobranca ja carrega texto visivel acentuado desde ago/2026. Pedido do dono em 01/09/2026,
+     depois de ver "Valido ate" na tela. Em 01/09/2026 todo texto que uma pessoa le passou a sair
+     acentuado -- a tela do cliente e tambem a mensagem do WhatsApp. Continua sem acento so o
+     CODIGO: comentario, identificador, CSS e o payload Pix (item 10 do Manual, e a norma do BC). */
+  c+="var TXT_CUPOM_VALIDADE='"+escJs(cfg.txtCupomValidade)+"';   /* precede a data, na propria linha do desconto; so aparece se o cupom tiver validade */\n";
+  if(temMin){
+    c+="var TXT_CUPOM_MINIMO='"+escJs(cfg.txtCupomMinimo)+"';   /* recusa ao aplicar; {valor} vira o minimo daquele cupom, na moeda do bloco */\n";
+    c+="var TXT_CUPOM_MINIMO_QUEDA='"+escJs(cfg.txtCupomMinimoQueda)+"';   /* o cupom que CAIU porque o pedido desceu abaixo do minimo */\n";
   }
   /* Os limites da pagina sao TEXTO DA PAGINA, nao comentario: eles ficam a vista do cliente e
      do dono no rodape do carrinho. Escritos como sao -- prometer menos e o unico jeito de o
@@ -24672,7 +24900,7 @@ function mBlocoJs(cfg,prods,cps,cats,client,cod){
        gerarPix. Corrige os dois defeitos medidos na Mini loja (spec 0.1). */
     c+=fcDesenharQrSrc('','200');
   }
-  return c+mBlocoRuntime(cfg,usaPP,usaPix,usaQtd,usaSinal,usaResumo,descpix,zap,usaCupom,usaFiltro);
+  return c+mBlocoRuntime(cfg,usaPP,usaPix,usaQtd,usaSinal,usaResumo,descpix,zap,usaFiltro);
 }
 /* O texto dos limites, montado a partir da configuracao -- so entra o que aquela loja tem.
    Cada frase corresponde a um limite real e medido do desenho, e nenhuma promete conserto. */
@@ -24692,7 +24920,7 @@ function mLimitesTexto(cfg){
 /* O miolo do bloco: a marcacao, o carrinho, a vitrine e o pagamento. Separado de mBlocoJs
    apenas para nenhuma funcao desta aba passar de uma tela de leitura -- as duas escrevem o
    MESMO texto, na ordem em que sao chamadas. */
-function mBlocoRuntime(cfg,usaPP,usaPix,usaQtd,usaSinal,usaResumo,descpix,zap,usaCupom,usaFiltro){
+function mBlocoRuntime(cfg,usaPP,usaPix,usaQtd,usaSinal,usaResumo,descpix,zap,usaFiltro){
   var prio=cfg.prio||FC_ORD_FABRICA;
   var c='';
   c+='function montar(){\n';
@@ -24709,12 +24937,10 @@ function mBlocoRuntime(cfg,usaPP,usaPix,usaQtd,usaSinal,usaResumo,descpix,zap,us
   c+="h+='<p class=\"fcm-rotulo fcm-cesta-t\"></p>';\n";
   c+="h+='<div class=\"fcm-aviso-cesta\"></div>';\n";
   c+="h+='<div class=\"fcm-itens\"></div><p class=\"fcm-cesta-vazia\"></p>';\n";
-  if(usaCupom){
-    c+="h+='<div class=\"fcm-cupom\"><p class=\"fcm-rotulo fcm-cupom-t\"></p><div class=\"fcm-cupom-l\"><input type=\"text\"><button type=\"button\"></button></div><div class=\"fcm-cupom-msg\"></div></div>';\n";
-    /* Dois filhos, pelo mesmo motivo do Checkout: a validade pertence ao rotulo do cupom,
-       e um terceiro filho seria espalhado pelo space-between. */
-    c+="h+='<div class=\"fcm-desconto\"><span class=\"fcm-desconto-e\"><span class=\"fcm-desconto-t\"></span><span class=\"fcm-desconto-p\"></span></span><span class=\"fcm-desconto-v\"></span></div>';\n";
-  }
+  c+="h+='<div class=\"fcm-cupom\"><p class=\"fcm-rotulo fcm-cupom-t\"></p><div class=\"fcm-cupom-l\"><input type=\"text\"><button type=\"button\"></button></div><div class=\"fcm-cupom-msg\"></div></div>';\n";
+  /* Dois filhos, pelo mesmo motivo do Checkout: a validade pertence ao rotulo do cupom,
+     e um terceiro filho seria espalhado pelo space-between. */
+  c+="h+='<div class=\"fcm-desconto\"><span class=\"fcm-desconto-e\"><span class=\"fcm-desconto-t\"></span><span class=\"fcm-desconto-p\"></span></span><span class=\"fcm-desconto-v\"></span></div>';\n";
   c+="h+='<div class=\"fcm-total\"><span class=\"fcm-total-t\"></span><span class=\"fcm-total-v\"></span></div>';\n";
   if(usaSinal){
     c+="h+='<div class=\"fcm-sinal\"><span class=\"fcm-sinal-t\"></span><span class=\"fcm-sinal-v\"></span></div>';\n";
@@ -24749,10 +24975,24 @@ function mBlocoRuntime(cfg,usaPP,usaPix,usaQtd,usaSinal,usaResumo,descpix,zap,us
   c+="raiz.querySelector('.fcm-cesta-vazia').textContent=TXT_CESTA_VAZIA;\n";
   c+="raiz.querySelector('.fcm-total-t').textContent=TXT_TOTAL;\n";
   c+="raiz.querySelector('.fcm-limites').textContent=TXT_LIMITES;\n";
-  if(usaCupom){
-    c+="raiz.querySelector('.fcm-cupom-t').textContent=TXT_CUPOM_ROTULO;\n";
-    c+="raiz.querySelector('.fcm-cupom-l button').textContent=TXT_CUPOM_BOTAO;\n";
-  }
+  c+="raiz.querySelector('.fcm-cupom-t').textContent=TXT_CUPOM_ROTULO;\n";
+  c+="raiz.querySelector('.fcm-cupom-l button').textContent=TXT_CUPOM_BOTAO;\n";
+  /* ===== A MAQUINA DO CUPOM SAI SEMPRE, E QUEM ESCONDE E O BLOCO (leva 4, 13/09/2026) =====
+     Esta aba era a UNICA das quatro que amarrava o cupom inteiro -- CSS, HTML, textos, aplicar,
+     linha de desconto, resumo e a linha do WhatsApp -- a "ha cupom cadastrado NA HORA DE GERAR".
+     O Checkout e a Agendamento por pacote sempre emitiram a maquina e escondem a caixa no
+     carregamento, com esta mesma linha; a /pagar nao tem cupom.
+     A DIFERENCA QUE O DONO SENTE: a lista CUPONS e editavel DENTRO do bloco publicado. Com o
+     recorte, uma loja gerada sem cupons nao aceitava cupom acrescentado a mao depois -- o dono
+     escrevia a linha em CUPONS e nada acontecia, sem erro e sem aviso. E o mesmo defeito que o
+     comentario de uBloco ja registra para a validade: amarrar o bloco a uma configuracao do
+     momento de gerar ja custou uma rodada nesta ferramenta.
+     O QUE ISSO CUSTA, MEDIDO e nao estimado (13/09/2026, uma loja de um produto, sem cupom):
+     o bloco passou de 43.415 para 46.975 caracteres -- 3.560 a mais, 8,2%. Com cupom cadastrado
+     ele cresce 73 (so a linha que esconde a caixa). O cliente nao ve nada a mais: a caixa nasce
+     escondida por esta linha, e .fcm-desconto so aparece com a classe 'on'. Tres abas contra
+     uma: unificou-se para o lado que nao TIRA capacidade de ninguem. */
+  c+="if(!CUPONS.length)raiz.querySelector('.fcm-cupom').style.display='none';\n";
   if(usaSinal){
     if(cfg.sinal.tipo==='pct')c+="raiz.querySelector('.fcm-sinal-t').textContent=TXT_SINAL+' ('+SINAL_VALOR+'%)';\n";
     else c+="raiz.querySelector('.fcm-sinal-t').textContent=TXT_SINAL;\n";
@@ -24870,11 +25110,11 @@ function mBlocoRuntime(cfg,usaPP,usaPix,usaQtd,usaSinal,usaResumo,descpix,zap,us
   if(usaSinal)c+=FC_CARRINHO_SRC.sinal;
   c+=fcTotalPixSrc(descpix,usaPix,usaSinal);
   if(usaQtd)c+=fcFazQtdSrc('fcm')+'\n';
-  return c+mBlocoVitrine(cfg,usaPP,usaPix,usaQtd,usaSinal,usaResumo,descpix,zap,usaCupom,usaFiltro);
+  return c+mBlocoVitrine(cfg,usaPP,usaPix,usaQtd,usaSinal,usaResumo,descpix,zap,usaFiltro);
 }
 
 /* A vitrine, o filtro, o cartao de detalhe e o desenho do carrinho. */
-function mBlocoVitrine(cfg,usaPP,usaPix,usaQtd,usaSinal,usaResumo,descpix,zap,usaCupom,usaFiltro){
+function mBlocoVitrine(cfg,usaPP,usaPix,usaQtd,usaSinal,usaResumo,descpix,zap,usaFiltro){
   var c='',temOpDesc=fcTemOpDesc(cfg.prods);   /* ver o mesmo no Checkout */
   c+='/* ===== vitrine =====\n';
   c+='   A miniatura pede IMG_VITRINE px ao redimensionador da Alboom; a foto grande so e pedida\n';
@@ -25135,25 +25375,23 @@ function mBlocoVitrine(cfg,usaPP,usaPix,usaQtd,usaSinal,usaResumo,descpix,zap,us
   c+='cx.appendChild(li);\n});\n}\n';
   c+='function valorDaLinha(it){\n';
   c+='return Math.round(PRODUTOS[it.p].preco*it.q*100)/100;\n}\n\n';
-  return c+mBlocoPagar(cfg,usaPP,usaPix,usaQtd,usaSinal,usaResumo,descpix,zap,usaCupom,usaFiltro);
+  return c+mBlocoPagar(cfg,usaPP,usaPix,usaQtd,usaSinal,usaResumo,descpix,zap,usaFiltro);
 }
 
 /* O total na tela, o cupom, o resumo e as duas pontas de pagamento. */
-function mBlocoPagar(cfg,usaPP,usaPix,usaQtd,usaSinal,usaResumo,descpix,zap,usaCupom,usaFiltro){
+function mBlocoPagar(cfg,usaPP,usaPix,usaQtd,usaSinal,usaResumo,descpix,zap,usaFiltro){
   var c='',temMin=fcCpTemMinimo(cfg.cps);
-  if(usaCupom){
-    c+='function linhaDesconto(){\n';
-    c+="var l=raiz.querySelector('.fcm-desconto');\n";
-    c+='if(cupomAtivo){\n';
-    c+="l.className='fcm-desconto on';\n";
-    /* D-3, ver o mesmo trecho no Checkout. */
-    c+="raiz.querySelector('.fcm-desconto-t').textContent=TXT_DESCONTO.replace(/\\{codigo\\}/g,cupomAtivo.codigo);\n";
-    c+="raiz.querySelector('.fcm-desconto-v').textContent='- '+moedaFmt(descontoAtual());\n";
-    c+="var p=raiz.querySelector('.fcm-desconto-p'),dv=validadeBr(cupomAtivo.validade);\n";
-    c+="p.textContent=dv?TXT_CUPOM_VALIDADE+' '+dv:'';\n";
-    c+="p.className=dv?'fcm-desconto-p on':'fcm-desconto-p';\n";
-    c+="}else{l.className='fcm-desconto';}\n}\n\n";
-  }
+  c+='function linhaDesconto(){\n';
+  c+="var l=raiz.querySelector('.fcm-desconto');\n";
+  c+='if(cupomAtivo){\n';
+  c+="l.className='fcm-desconto on';\n";
+  /* D-3, ver o mesmo trecho no Checkout. */
+  c+="raiz.querySelector('.fcm-desconto-t').textContent=TXT_DESCONTO.replace(/\\{codigo\\}/g,cupomAtivo.codigo);\n";
+  c+="raiz.querySelector('.fcm-desconto-v').textContent='- '+moedaFmt(descontoAtual());\n";
+  c+="var p=raiz.querySelector('.fcm-desconto-p'),dv=validadeBr(cupomAtivo.validade);\n";
+  c+="p.textContent=dv?TXT_CUPOM_VALIDADE+' '+dv:'';\n";
+  c+="p.className=dv?'fcm-desconto-p on':'fcm-desconto-p';\n";
+  c+="}else{l.className='fcm-desconto';}\n}\n\n";
   if(usaPix){
     c+='function esconderPix(){\n';
     c+="raiz.querySelector('.fcm-pixarea').className='fcm-pixarea';\n";
@@ -25192,33 +25430,31 @@ function mBlocoPagar(cfg,usaPP,usaPix,usaQtd,usaSinal,usaResumo,descpix,zap,usaC
     c+="raiz.querySelector('.fcm-pixlinha-v').textContent=moedaFmt(totalPix());\n";
     c+="raiz.querySelector('.fcm-pixlinha').className='fcm-pixlinha'+(CARRINHO.length?' on':'');\n";
   }
-  if(usaCupom)c+='linhaDesconto();\n';
+  c+='linhaDesconto();\n';
   if(usaResumo){
     c+="raiz.querySelector('.fcm-resumo').value=textoResumo();\n";
     c+="raiz.querySelector('.fcm-resumo-ok').className='fcm-resumo-ok';\n";
   }
   if(usaPix)c+='esconderPix();\n';
   c+='}\n\n';
-  if(usaCupom){
-    c+=FC_CARRINHO_SRC.cupomVigente;
-    c+=FC_CARRINHO_SRC.validadeBr;
-    if(temMin)c+=FC_CARRINHO_SRC.cupomMinimo;
-    c+='function msgCupom(t,ok){\n';
-    c+="var m=raiz.querySelector('.fcm-cupom-msg');\n";
-    c+="m.textContent=t;m.className='fcm-cupom-msg'+(t?(ok?' ok':' erro'):'');\n}\n\n";
-    c+='function aplicarCupom(){\n';
-    c+="var v=raiz.querySelector('.fcm-cupom-l input').value.trim();\n";
-    c+="if(!v){cupomAtivo=null;msgCupom('',true);atualizar();return;}\n";
-    c+='var achado=null,i;\n';
-    c+='for(i=0;i<CUPONS.length;i++){\n';
-    c+='if(CUPONS[i].codigo.toUpperCase()===v.toUpperCase()){achado=CUPONS[i];break;}\n}\n';
-    c+='if(!achado){cupomAtivo=null;msgCupom(TXT_CUPOM_INVALIDO,false);}\n';
-    c+='else if(!cupomVigente(achado)){cupomAtivo=null;msgCupom(TXT_CUPOM_EXPIRADO,false);}\n';
-    if(temMin)c+='else if(!cupomMinimoOk(achado)){cupomAtivo=null;msgCupom(TXT_CUPOM_MINIMO.replace(/\\{valor\\}/g,moedaFmt(achado.minimo)),false);}\n';
-    c+='else{cupomAtivo=achado;msgCupom(TXT_CUPOM_OK,true);}\n';
-    c+='atualizar();\n}\n';
-    c+="raiz.querySelector('.fcm-cupom-l button').addEventListener('click',aplicarCupom);\n\n";
-  }
+  c+=FC_CARRINHO_SRC.cupomVigente;
+  c+=FC_CARRINHO_SRC.validadeBr;
+  if(temMin)c+=FC_CARRINHO_SRC.cupomMinimo;
+  c+='function msgCupom(t,ok){\n';
+  c+="var m=raiz.querySelector('.fcm-cupom-msg');\n";
+  c+="m.textContent=t;m.className='fcm-cupom-msg'+(t?(ok?' ok':' erro'):'');\n}\n\n";
+  c+='function aplicarCupom(){\n';
+  c+="var v=raiz.querySelector('.fcm-cupom-l input').value.trim();\n";
+  c+="if(!v){cupomAtivo=null;msgCupom('',true);atualizar();return;}\n";
+  c+='var achado=null,i;\n';
+  c+='for(i=0;i<CUPONS.length;i++){\n';
+  c+='if(CUPONS[i].codigo.toUpperCase()===v.toUpperCase()){achado=CUPONS[i];break;}\n}\n';
+  c+='if(!achado){cupomAtivo=null;msgCupom(TXT_CUPOM_INVALIDO,false);}\n';
+  c+='else if(!cupomVigente(achado)){cupomAtivo=null;msgCupom(TXT_CUPOM_EXPIRADO,false);}\n';
+  if(temMin)c+='else if(!cupomMinimoOk(achado)){cupomAtivo=null;msgCupom(TXT_CUPOM_MINIMO.replace(/\\{valor\\}/g,moedaFmt(achado.minimo)),false);}\n';
+  c+='else{cupomAtivo=achado;msgCupom(TXT_CUPOM_OK,true);}\n';
+  c+='atualizar();\n}\n';
+  c+="raiz.querySelector('.fcm-cupom-l button').addEventListener('click',aplicarCupom);\n\n";
   /* Enumeracao UNICA dos itens do carrinho: ela alimenta o resumo copiavel E a mensagem do
      WhatsApp. Dois lacos poderiam discordar sobre a mesma compra, e foi assim que o Checkout
      imprimiu um resumo que as duas pontas de pagamento recusavam. */
@@ -25256,10 +25492,8 @@ function mBlocoPagar(cfg,usaPP,usaPix,usaQtd,usaSinal,usaResumo,descpix,zap,usaC
     c+="if(!li.length)return '';\n";
     c+="L.push(TXT_RESUMO_PEDIDO+' '+CODIGO_PEDIDO);\n";
     c+="for(z=0;z<li.length;z++)L.push((li[z].opcional?'   + ':'- ')+li[z].rotulo+'  '+moedaFmt(li[z].valor));\n";
-    if(usaCupom){
-      c+="if(cupomAtivo)L.push(TXT_RESUMO_SUBTOTAL+': '+moedaFmt(subtotal()));\n";
-      c+="if(cupomAtivo)L.push(TXT_DESCONTO.replace(/\\{codigo\\}/g,cupomAtivo.codigo)+': - '+moedaFmt(descontoAtual()));\n";
-    }
+    c+="if(cupomAtivo)L.push(TXT_RESUMO_SUBTOTAL+': '+moedaFmt(subtotal()));\n";
+    c+="if(cupomAtivo)L.push(TXT_DESCONTO.replace(/\\{codigo\\}/g,cupomAtivo.codigo)+': - '+moedaFmt(descontoAtual()));\n";
     c+="L.push(TXT_TOTAL+': '+moedaFmt(total()));\n";
     if(usaSinal){
       /* O resumo segue a mesma regra da tela (13/09/2026): com o total em zero ele nao imprime
@@ -25335,7 +25569,7 @@ function mBlocoPagar(cfg,usaPP,usaPix,usaQtd,usaSinal,usaResumo,descpix,zap,usaC
       else c+="partes.push('"+escJs(cfg.txtZapAbertura)+"');\n";
       c+="partes.push("+aTplJs("'",cfg.txtZapPedido,[['{cod}','CODIGO_PEDIDO']])+");\n";
       c+="for(z=0;z<li.length;z++)partes.push(li[z].opcional?('   + '+li[z].rotulo+' '+moedaFmt(li[z].valor)):('- *'+li[z].rotulo+'* '+moedaFmt(li[z].valor)));\n";
-      if(usaCupom)c+="if(cupomAtivo)partes.push("+aTplJs("'",cfg.txtZapCupom,[['{codigo}','cupomAtivo.codigo']])+");\n";
+      c+="if(cupomAtivo)partes.push("+aTplJs("'",cfg.txtZapCupom,[['{codigo}','cupomAtivo.codigo']])+");\n";
       if(descpix>0)c+="if(DESCONTO_PIX>0)partes.push("+aTplJs("'",cfg.txtZapDescPix,[['{pct}','DESCONTO_PIX']])+");\n";
       if(usaSinal){
         c+="partes.push("+aTplJs("'",cfg.txtZapTotal,[['{valor}','moedaFmt(total())']])+");\n";
@@ -25347,6 +25581,12 @@ function mBlocoPagar(cfg,usaPP,usaPix,usaQtd,usaSinal,usaResumo,descpix,zap,usaC
       c+="var url='https://wa.me/'+ZAP_NUMERO+'?text='+encodeURIComponent(partes.join('\\n'));\n";
       c+="window.open(url,'_blank');\n";
       c+='cestaLimpar();\n';
+      /* O RECADO E A CESTA VAZIA SAO SO DESTA ABA, e isso e CONSEQUENCIA, nao divergencia --
+         medido na leva 4 (13/09/2026). Esta e a unica das quatro que guarda a cesta no navegador
+         (CHAVE_CESTA, logo acima): o recado existe para explicar o que acabou de sumir da tela.
+         No Checkout, na Agendamento por pacote e na /pagar nao ha cesta guardada para esvaziar,
+         nada some ao clicar, e o retorno do gesto e a propria aba do WhatsApp que abre. Um
+         recado ali anunciaria um esvaziamento que nao aconteceu. */
       c+="raiz.querySelector('.fcm-nota').textContent=TXT_PEDIDO_ENVIADO;\n";
       /* O CAMINHO C, e A ORDEM DELE: o upsell entra DEPOIS de cestaLimpar(). Invertido, o
          cliente sairia da pagina com a cesta ainda cheia e voltaria a ela cheia depois de ter
@@ -26603,6 +26843,13 @@ prep('Agendamento por pacote','pac',function(){
   /* correcao a vista do codigo, em 'change'/'blur' -- nunca em 'input', que corrigiria a cada
      tecla e impediria digitar. Mesmo padrao da chave Pix do painel Identidade. */
   (function(){var el=$('a-pcod');if(el){el.addEventListener('change',aPcodAjustar);el.addEventListener('blur',aPcodAjustar);}})();
+  /* O prefixo entra no bloco gerado (var PREFIXO), entao a correcao a vista dele tambem grava e
+     redesenha a previa -- 'blur' nao borbulha e nao acionaria o salvarEstado de document. */
+  (function(){
+    var el=$('a-prefixo');if(!el)return;
+    function ajustar(){if(aPrefixoAjustar()){salvarEstado();aPreview(true);}}
+    el.addEventListener('change',ajustar);el.addEventListener('blur',ajustar);
+  })();
   (function(){var el=$('a-ppath');if(el){el.addEventListener('change',aPpathAjustar);el.addEventListener('blur',aPpathAjustar);}})();
   liga('a-pac-salvar',aPacSalvar);
   liga('a-pac-cancelar',function(){aPacLimpar();salvarEstado();});
@@ -26647,12 +26894,15 @@ prep('Textos configuraveis','slide leads tidy uni bor cnt cob loja pac',function
 },'preparar as seções de texto e conferir os padrões de fábrica');
 /* Passo proprio, e antes dos contadores: se a contagem do identificador divergir da limpeza
    do payload, as recusas das duas abas compostas passariam a citar um orcamento errado. */
+/* Passo proprio, e antes dos contadores pela mesma razao do de cima: numero que o campo oferece
+   e numero que a geracao prende tem de ser o mesmo, e a barra vermelha precisa dizer QUAL campo. */
+prep('Faixa dos campos numéricos','slide leads tidy uni bor efe cnt cob loja pac',fcNumConferir,'conferir a faixa declarada nos campos numéricos');
 prep('Orçamento do identificador','loja pac',fcIdConferir,'conferir a conta do identificador de conciliação');
 /* Os limites visiveis entram DEPOIS das abas serem desenhadas com o estado restaurado e ANTES
    do preset geral: o contador tem de nascer sobre o valor que o operador vai ler na tela, e nao
    sobre um campo ainda vazio. Passo proprio, com rotulo proprio -- se ele falhar, a barra
    vermelha precisa dizer que foram os contadores, e nao o preset geral. */
-prep('Limites visíveis nos campos','uni bor cob',fcLimIniciar,'pôr o contador e o limite nos campos que alimentam API');
+prep('Limites visíveis nos campos','uni bor cob loja pac',fcLimIniciar,'pôr o contador e o limite nos campos que alimentam API');
 /* A busca e o eco entram DEPOIS de as abas serem desenhadas com o estado restaurado: o eco
    tem de nascer sobre o texto que o operador vai ler na tela, e nao sobre o valor de fabrica.
    Passo proprio, com rotulo proprio -- se ele falhar, a barra vermelha precisa dizer que foi a
