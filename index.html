@@ -4383,7 +4383,7 @@
      nova para a outra, e o resultado seriam links que a propria /pagar recusa -- sem
      erro nenhum na tela. Ao mexer no arquivo, troque a versao AQUI, em cobrar/index.html
      e no FC_COMPART_VERSAO de dentro dele. -->
-<script src="fc-compartilhado.js?v=2026-09-14a"></script>
+<script src="fc-compartilhado.js?v=2026-09-14b"></script>
 <script>
 'use strict';
 (function(){
@@ -4432,7 +4432,7 @@ var FC_PUBLICADO='2026-09-14 04:30';   /* America/Sao_Paulo -- escrito pelo cari
    OS APELIDOS ABAIXO NAO SAO COPIA: sao o mesmo objeto, com o nome que o resto
    deste arquivo sempre usou. Trocar os nomes em cem lugares so para dizer
    FCCOMPART.x mudaria muito codigo para nao mudar comportamento nenhum. */
-var FC_COMPART_ESPERADA='2026-09-14a';
+var FC_COMPART_ESPERADA='2026-09-14b';
 if(!window.FCCOMPART||FCCOMPART.versao!==FC_COMPART_ESPERADA){
   fcCompartParar(FC_COMPART_ESPERADA,window.FCCOMPART?FCCOMPART.versao:null);
   return;
@@ -4447,6 +4447,11 @@ var urlLimpa=C.urlLimpa, pUrlOk=C.pUrlOk, fcUrlRelativo=C.fcUrlRelativo;
    FC_ITENS_SRC e o leitor dos itens como TEXTO LITERAL -- o bloco da /pagar o leva
    dentro, e a ferramenta avalia o MESMO texto para conferir a ida e volta. */
 var cUrlOk=C.cUrlOk, FC_ITENS_SRC=C.FC_ITENS_SRC;
+/* O pedido do PayPal mudou para o arquivo compartilhado em 14/09/2026 (ver la o comentario
+   de P_PP_PEDIDO_SRC): a ferramenta continua sendo quem EMITE esse texto dentro do bloco, e
+   a /cobrar passou a avalia-lo. Os tetos e os nomes de campo foram junto, e por isso nao ha
+   dois lugares onde o numero 127 possa divergir. */
+var P_PP_PEDIDO_SRC=C.P_PP_PEDIDO_SRC, FC_PP_CAMPOS=C.FC_PP_CAMPOS;
 var FC_URL_EXEMPLO=C.FC_URL_EXEMPLO, pUrlRecusa=C.pUrlRecusa, fcUrlAvisoMigracao=C.fcUrlAvisoMigracao;
 var FCI_CHAVE=C.FCI_CHAVE, FCI_CAMPOS=C.FCI_CAMPOS, FCI_PADRAO=C.FCI_PADRAO;
 var FCI_APONTA=C.FCI_APONTA, fciRecusa=C.fciRecusa, fciPrimeiroProblema=C.fciPrimeiroProblema;
@@ -5313,6 +5318,7 @@ var FCR_ROTULOS={novo:'novo',corrigido:'corr',melhorado:'melh',atencao:'aten',ex
 /* A lista, da versao mais recente para a mais antiga. NAO reordenar: o agrupamento por
    dia assume que versoes do mesmo dia estao juntas, e o desenho respeita esta ordem. */
 var FCR_NOTAS=[
+ {v:"2026-09-14g",d:"14 de setembro de 2026",itens:[["Novo","A página `/cobrar` ganhou uma **prévia**. Depois de gerar o link, ela mostra num quadro a **sua própria página de pagamento**, já com esta cobrança dentro — é a página de verdade, carregada do seu site, e não um desenho parecido."],["Novo","Logo abaixo dela, uma tabela diz **o que vai para o PayPal** nesta cobrança: cada item com nome, SKU, quantidade e preço, mais a soma dos itens, o valor cobrado, a descrição e o código de conciliação. São os mesmos campos que a ferramenta completa já mostrava, lidos da mesma fonte."],["Novo","No computador a prévia fica numa **coluna ao lado**, que acompanha a rolagem. No celular ela fica **abaixo do link, recolhida** — um toque abre."],["Atenção","O quadro é **só para olhar**: o toque não passa por ele, para você não pagar sem querer a sua própria cobrança. Para mexer de verdade, use **Abrir em outra aba**."],["Atenção","Se aparecer uma **recusa** dentro do quadro, é o aviso que faltava: o código colado na sua página de pagamento é anterior a esta cobrança. Gere de novo o **Código 1** e recole no site — até agora isso só apareceria com o cliente na frente."],["Atenção","Esta é a **única parte da `/cobrar` que precisa de internet**. Sem conexão aparece um recado dizendo isso, e nunca um quadro em branco — que pareceria defeito da cobrança. O link continua sendo montado no próprio aparelho, com ou sem rede."]]},
  {v:"2026-09-14f",d:"14 de setembro de 2026",itens:[["Novo","Link de cobrança: cada cobrança pode ser **detalhada em itens** — nome, SKU e preço, um por linha. O cliente passa a ler na página de que o valor é feito, e o seu **relatório do PayPal** mostra uma linha por item com o SKU na coluna \"ID do produto\", em vez de uma linha única. Está na aba e também na página `/cobrar`, em \"Mais opções desta cobrança\"."],["Novo","Isso **não muda um centavo** do que é cobrado: o valor continua sendo um só, e a soma dos itens tem de bater com ele ao centavo. Se não bater, a ferramenta recusa e diz os dois números."],["Novo","Link de cobrança: o endereço do **upsell** (a página para onde o cliente vai depois de pagar) pode ser escolhido **por cobrança**, e não só uma vez para a página inteira. Dá para ter uma oferta diferente por campanha sem recolar nada no site."],["Atenção","O interruptor mestre continua mandando: com o redirecionamento **desligado** no código da página, o endereço escrito na cobrança não leva a lugar nenhum. A `/cobrar` diz isso na tela, ao lado do campo."],["Exige uma ação sua, uma única vez","Gere de novo o **Código 1** da aba Link de cobrança e recole no componente da sua página de pagamento, publicando em seguida. **Este recolar cobre tudo de uma vez**: o sinal (de 13/09), os itens e o upsell por cobrança. Sem ele, a página recusa os links novos que tiverem sinal, itens ou upsell — ela não conhece esses parâmetros. Links **sem** nenhum deles continuam funcionando como sempre."],["Atenção","Itens e sinal não convivem na mesma cobrança, e a ferramenta recusa os dois juntos. Com sinal o PayPal cobra só o sinal, e detalhar em itens faria o recibo chamar de **desconto** o saldo que o cliente ainda deve — no documento que ele guarda."]]},
  {v:"2026-09-14e",d:"14 de setembro de 2026",itens:[["Novo","O **tamanho do QR Code** do Pix passou a ser ajustável também no Checkout, na Mini loja e no Agendamento por Pacote — até agora só o Link de cobrança tinha esse ajuste. Quem não mexer no campo continua com o tamanho de sempre."]]},
  {v:"2026-09-14d",d:"14 de setembro de 2026",itens:[["Novo","Nasceu esta lista. O botão **Novidades**, na barra do topo, conta o que mudou em cada versão publicada, da mais recente para a mais antiga."],["Novo","Cada dia abre e fecha: a lista nasce com o dia mais recente aberto e o resto recolhido."],["Novo","**A partir daqui, toda alteração publicada entra nesta lista** — correção ou novidade, sempre. E se alguma versão ficar de fora, a ferramenta **avisa sozinha**: uma barra vermelha no alto da tela diz qual versão foi publicada sem descrição. Antes disso, quem esquecesse não teria como saber."]]},
@@ -6289,93 +6295,12 @@ function fcUpsellFnSrc(ind,cfg,sempre,fonte){
    uma chamada, ou NADA. Sai vazio quando nao ha upsell, e e por isso que a saida das quatro
    abas continua identica byte a byte com o campo vazio. */
 function fcUpsellChamada(cfg){return fcUpsellEmite(cfg)?'upsellIr();':'';}
-/* ===== OS ITENS QUE O RELATORIO DO PAYPAL VAI MOSTRAR: fonte unica =====
-   PEDIDO DO DONO (13/09/2026): "verifica se todos os construtores com pagamento no PayPal
-   estao levando o produto e seus opcionais para o PayPal". Nao estavam. Ate aqui as tres
-   abas com catalogo mandavam UM item so, com os nomes concatenados num campo de 127
-   caracteres, e os opcionais do Checkout e da Mini loja nao apareciam em lugar nenhum do
-   relatorio -- entravam no valor e sumiam. Agora cada item vai numa linha, com quantidade e
-   preco unitario, que e a forma que o dono escolheu.
+/* fcPpItensSrc MUDOU para fc-compartilhado.js em 14/09/2026, com os tetos que ela usa: a
+   /cobrar passou a AVALIAR o mesmo texto para mostrar o pedido do PayPal daquela cobranca.
+   A explicacao inteira (por que a conta fecha por construcao, por que o item zerado fica de
+   fora, por que com sinal nao se itemiza) foi junto com ela, e continua sendo uma so. */
+var fcPpItensSrc=C.fcPpItensSrc;
 
-   A ARMADILHA, e ela recusa o pedido INTEIRO (nao e aviso): a especificacao do PayPal diz
-   que, havendo breakdown, "the amount equals item_total plus tax_total plus shipping" menos
-   os descontos. Se a conta nao fechar ao centavo o pedido nao e criado e o cliente fica sem
-   meio de pagamento.
-
-   O DESENHO QUE FECHA A CONTA POR CONSTRUCAO -- e o porque de cada linha dele:
-     1. cada item leva o preco CHEIO em unit_amount e a quantidade real em quantity;
-     2. item_total e a SOMA DOS ITENS, somada aqui em CENTAVOS INTEIROS -- nunca lida de
-        subtotal(). Os precos do catalogo saem do gerador com duas casas exatas
-        (preco:<n>.toFixed(2)), entao Math.round(preco*100) e exato e a soma nao tem residuo
-        binario. Ler subtotal() somaria os mesmos numeros em OUTRA ordem (produtos primeiro,
-        depois os opcionais) e um centavo de diferenca ja recusaria o pedido;
-     3. discount e a DIFERENCA item_total - amount, e jamais o percentual do cupom recalculado.
-        Esta e a linha que sustenta o desenho: recomputar o percentual reintroduziria o
-        arredondamento de meio centavo que este projeto ja mediu (60.097 divergencias em
-        2.002.000 combinacoes preco x cupom). Pela diferenca, amount = item_total - discount e
-        uma identidade aritmetica -- vale para o cupom percentual, para o de valor fixo, para
-        o minimo do pedido e para qualquer regra que venha depois, porque nenhuma delas e
-        consultada aqui.
-
-   O PISO. Toda duvida faz a funcao voltar SEM MEXER, e o pedido sai com a linha unica que
-   esta aba sempre mandou: lista vazia, lista longa demais, quantidade que nao e inteiro
-   positivo, preco negativo, nome vazio, ou uma diferenca NEGATIVA (que seria um "desconto"
-   de sinal trocado). Degradar para o que ja funcionava e sempre melhor que arriscar um
-   pedido que o PayPal recusa.
-
-   COM SINAL, ITEMIZAR SERIA MENTIR, e por isso o chamador nem chama: o cliente paga uma
-   fracao e o formato do PayPal nao tem conceito de entrada. Forcar a diferenca para
-   'discount' faria o recibo chamar de DESCONTO o saldo que o cliente ainda deve -- num
-   valor grande e visivel, no documento que ele guarda. A linha unica de hoje diz "(sinal -
-   cod: ...)" no nome e continua honesta.
-
-   O CONTRATO E POR NOME, como o do motor de dinheiro: o bloco hospedeiro declara
-   itensEscolhidos(), que devolve, por item escolhido, {nome, qtd, unit} -- o nome cru (sem
-   o sufixo " x3" do rotulo, que aqui viraria quantidade repetida), a quantidade e o preco
-   unitario. As tres abas com catalogo ja tinham essa enumeracao ou ganharam a sua nesta
-   rodada, e nas tres ela e a UNICA -- nomesSelecionados() passou a sair dela. */
-function fcPpItensSrc(temSku){
-  return '/* Os itens do pedido, do jeito que o relatorio do PayPal vai mostrar: um por linha,\n'+
-    '   com quantidade e preco unitario. A conta fecha por CONSTRUCAO -- item_total e a soma\n'+
-    '   dos itens em centavos inteiros e o desconto e a DIFERENCA para o valor cobrado --,\n'+
-    '   porque o PayPal recusa o pedido inteiro se ela nao fechar ao centavo.\n'+
-    '   Em qualquer duvida esta funcao volta sem mexer, e o pedido sai com a linha unica. */\n'+
-    'function ppDetalhar(pu,v){\n'+
-    'var li=itensEscolhidos(),itens=[],cent=0,z,q,uc,nome,novo;\n'+
-    'if(!li.length||li.length>'+FC_PP_MAX_ITENS+')return;   /* '+FC_PP_MAX_ITENS+' e o maxItems declarado pelo PayPal */\n'+
-    'for(z=0;z<li.length;z++){\n'+
-    'q=li[z].qtd;\n'+
-    'if(!(q>=1)||q!==Math.round(q)||q>'+FC_PP_MAX_QTD+')return;   /* quantity: ^[1-9][0-9]{0,9}$ */\n'+
-    'uc=Math.round(li[z].unit*100);\n'+
-    'if(!(uc>=0))return;\n'+
-    '/* O ITEM DE PRECO ZERO FICA DE FORA DA LISTA, e isto foi MEDIDO, nao presumido. A\n'+
-    '   especificacao do PayPal permite unit_amount "0.00" (o unico limite escrito e "can not\n'+
-    '   be a negative number") -- mas a lista de erros 422 traz um CANNOT_BE_ZERO_OR_NEGATIVE\n'+
-    '   ("Must be greater than zero") sem dizer a que campos ele se aplica. Mandar o item\n'+
-    '   zerado e apostar num comportamento NAO DOCUMENTADO com o pedido inteiro em jogo: se o\n'+
-    '   PayPal recusar, o cliente fica sem meio de pagamento. Deixa-lo de fora nao mexe em\n'+
-    '   dinheiro nenhum (ele soma zero centavo, e item_total continua exato) e custa uma linha\n'+
-    '   no relatorio. Quando houver um pedido de verdade provando que o zero passa, trocar\n'+
-    '   este "continue" por nada e uma edicao de uma linha -- e a previa ao lado declara a\n'+
-    '   omissao em cada montagem, para ela nunca ser silenciosa. */\n'+
-    'if(uc===0)continue;\n'+
-    'nome=String(li[z].nome==null?\'\':li[z].nome).substring(0,'+FC_LIM_PP+');\n'+
-    'if(!nome)return;   /* name e obrigatorio: item sem nome derruba o pedido */\n'+
-    'cent+=uc*q;\n'+
-    'novo={name:nome,quantity:String(q),unit_amount:{value:(uc/100).toFixed(2),currency_code:MOEDA}};\n'+
-    (temSku?'if(li[z].sku)novo.sku=String(li[z].sku).substring(0,'+FC_LIM_PP+');   /* o SKU DAQUELE item: a coluna "ID do produto" do relatorio */\n':'')+
-    'itens.push(novo);\n'+
-    '}\n'+
-    'if(!itens.length)return;   /* so itens zerados: nao ha pedido itemizado a montar */\n'+
-    '/* A DIFERENCA, e nunca o percentual recalculado: e ela que faz amount = item_total -\n'+
-    '   discount ser identidade, qualquer que seja a regra que produziu o total. */\n'+
-    'var descC=cent-Math.round(parseFloat(v)*100);\n'+
-    'if(descC<0)return;   /* os itens somam MENOS que o cobrado: nao ha desconto que explique */\n'+
-    'pu.items=itens;\n'+
-    'pu.amount.breakdown.item_total={value:(cent/100).toFixed(2),currency_code:MOEDA};\n'+
-    'if(descC>0)pu.amount.breakdown.discount={value:(descC/100).toFixed(2),currency_code:MOEDA};\n'+
-    '}\n\n';
-}
 function fcPpBotoesSrc(prefixo,ppcor,usaSinal,comentZero,aoAprovarExtra,temItens,temSku){
   /* ITEMIZA quando o bloco hospedeiro declara itensEscolhidos() E o pedido e cobrado
      INTEIRO. Com sinal o cliente paga uma fracao, e o formato do PayPal nao tem campo
@@ -6892,6 +6817,10 @@ function fcPvShim(o){
      caixaId  id do quadro do desenho;
      marca    quando verdadeiro, pendura appendChild.fcPvSemPayPal -- e so a /pagar confere
               essa marca, e continua conferindo. */
+/* OS NOVE NOMES DE CAMPO saem de FC_PP_CAMPOS (fc-compartilhado.js) desde 14/09/2026, e nao
+   mais de literais escritos aqui: a tabela da /cobrar mostra os MESMOS nove, e dois lugares
+   escrevendo nome de campo de uma especificacao de fora sao duas chances de o dono ler um nome
+   que o PayPal nao conhece. O que o texto da sonda emite continua identico. */
 function fcPvSondaPP(o){
   var s='';
   s+="  var DESENHO_PP='"+escJs(mockPP(o.ppcor))+"';\n";
@@ -6953,10 +6882,10 @@ function fcPvSondaPP(o){
   /* --- a lista de itens --- */
   s+='            var its=pu.items||[];\n';
   s+="            var cab=cel('div','display:flex;gap:8px;font-weight:700;border-bottom:1px solid #e4dfd2;padding-bottom:2px;margin-bottom:2px');\n";
-  s+="            cab.appendChild(cel('div',CAMPO+';flex:1','items[].name'));\n";
-  s+="            cab.appendChild(cel('div',CAMPO+';width:104px','items[].sku'));\n";
-  s+="            cab.appendChild(cel('div',CAMPO+';width:58px;text-align:right','quantity'));\n";
-  s+="            cab.appendChild(cel('div',CAMPO+';width:96px;text-align:right','unit_amount'));\n";
+  s+="            cab.appendChild(cel('div',CAMPO+';flex:1','"+FC_PP_CAMPOS.nome+"'));\n";
+  s+="            cab.appendChild(cel('div',CAMPO+';width:104px','"+FC_PP_CAMPOS.sku+"'));\n";
+  s+="            cab.appendChild(cel('div',CAMPO+';width:58px;text-align:right','"+FC_PP_CAMPOS.qtd+"'));\n";
+  s+="            cab.appendChild(cel('div',CAMPO+';width:96px;text-align:right','"+FC_PP_CAMPOS.unit+"'));\n";
   s+='            pai.appendChild(cab);\n';
   s+='            var somaC=0,z,it,uc,qn;\n';
   s+='            for(z=0;z<its.length;z++){\n';
@@ -6991,9 +6920,9 @@ function fcPvSondaPP(o){
   s+="              if(nota)pai.appendChild(cel('div',NOSSO+';margin:0 0 2px',nota));\n";
   s+='            }\n';
   s+="            pai.appendChild(cel('div','border-top:1px solid #e4dfd2;margin-top:4px;padding-top:3px'));\n";
-  s+="            linha('amount.breakdown.item_total',din(br.item_total),'a soma dos itens acima');\n";
-  s+="            if(br.discount)linha('amount.breakdown.discount','- '+din(br.discount),'o PayPal subtrai este valor do item_total');\n";
-  s+="            linha('amount.value',din(pu.amount),'o que o cartão do cliente debita');\n";
+  s+="            linha('"+FC_PP_CAMPOS.itemTotal+"',din(br.item_total),'a soma dos itens acima');\n";
+  s+="            if(br.discount)linha('"+FC_PP_CAMPOS.desconto+"','- '+din(br.discount),'o PayPal subtrai este valor do item_total');\n";
+  s+="            linha('"+FC_PP_CAMPOS.valor+"',din(pu.amount),'o que o cartão do cliente debita');\n";
   /* --- a conferencia: segunda opiniao sobre o que o bloco montou --- */
   s+="            var itC=Math.round(parseFloat((br.item_total||{}).value)*100);\n";
   s+="            var dsC=br.discount?Math.round(parseFloat(br.discount.value)*100):0;\n";
@@ -7005,8 +6934,8 @@ function fcPvSondaPP(o){
   s+="            pai.appendChild(cel('div',NOSSO+';margin-bottom:5px','Item de R$ 0,00 não entra na lista: o PayPal não documenta se aceita preço unitário zero, e arriscar isso derrubaria o pedido todo.'));\n";
   /* --- os campos de conciliacao --- */
   s+="            pai.appendChild(cel('div','border-top:1px solid #e4dfd2;margin-top:2px;padding-top:3px'));\n";
-  s+="            linha('description',pu.description,'o resumo do pedido, no extrato do cliente');\n";
-  s+="            linha('custom_id',pu.custom_id,'o campo de conciliação: aparece no relatório, não para o cliente');\n";
+  s+="            linha('"+FC_PP_CAMPOS.descricao+"',pu.description,'o resumo do pedido, no extrato do cliente');\n";
+  s+="            linha('"+FC_PP_CAMPOS.conciliacao+"',pu.custom_id,'o campo de conciliação: aparece no relatório, não para o cliente');\n";
   s+='          }\n';
   /* --- a decisao do clique, quando a aba tem onClick --- */
   s+='          if(decisao!==null){\n';
@@ -8091,23 +8020,13 @@ function fcIdConferir(){
   if(!(M_COD_MAX>0&&A_ID_MAX>0))throw new Error('a cauda do identificador não cabe nos '+FC_TXID_MAX+' caracteres do txid: mini loja '+M_CAUDA_N+', agendamento '+A_CAUDA_N);
 }
 function fcLimSoDigitos(v){return String(v==null?'':v).replace(/[^0-9]/g,'');}
-/* O SEGUNDO teto da descricao da cobranca. A recusa de P_DESC_MAX e do LINK; o PayPal ve so os
-   FC_LIM_PP primeiros caracteres nos campos name e description do item. Sao dois tetos
-   diferentes no MESMO campo, e o operador precisa de saber dos dois. O numero mora aqui e e
-   daqui que os tres geradores o escrevem -- unifica-se a fonte que escreve, e por isso a saida
-   nao muda um byte. */
-var FC_LIM_PP=127;
-/* O TETO DE ITENS DO PEDIDO, lido da especificacao OpenAPI do PayPal (checkout_orders_v2,
-   info.version 2.32) e nao de memoria: purchase_units[].items[] declara maxItems 32767
-   (minItems 0). Nao e um teto que um catalogo desta ferramenta alcance -- esta aqui porque a
-   guarda tem de existir com o numero CERTO: inventar um teto baixo desitemizaria pedidos que
-   o PayPal aceitaria, e nao ter guarda nenhuma deixaria o unico caso que ele recusa passar.
-   Outros dois numeros da mesma leitura, usados logo abaixo em ppDetalhar:
-     items[].quantity  string, padrao ^[1-9][0-9]{0,9}$ -- inteiro de 1 a 9999999999. "0" NAO
-                       e aceito, e e por isso que o opcional zerado nao pode virar quantity 0;
-     items[].sku       maxLength 127, o mesmo teto do name (que o PayPal trunca em 127). */
-var FC_PP_MAX_ITENS=32767;
-var FC_PP_MAX_QTD=9999999999;
+/* OS TETOS DO PEDIDO DO PAYPAL mudaram para fc-compartilhado.js em 14/09/2026, junto com a
+   fcPpItensSrc que os escreve. O apelido fica AQUI, na linha em que a declaracao estava, para
+   a ordem de execucao da pagina nao mudar. FC_LIM_PP e o SEGUNDO teto da descricao da
+   cobranca: a recusa de P_DESC_MAX e do LINK, e o PayPal ve so os primeiros caracteres nos
+   campos name e description do item -- dois tetos no MESMO campo, e o operador precisa de
+   saber dos dois. */
+var FC_LIM_PP=C.FC_LIM_PP;
 function fcLimNotaPp(v){
   return (String(v==null?'':v).length>FC_LIM_PP)?('o PayPal recebe só os '+FC_LIM_PP+' primeiros'):'';
 }
@@ -23924,30 +23843,11 @@ function pJs(cfg){
        default". Numa pagina de cobranca isso viraria recusa silenciosa na segunda vez que o
        mesmo identificador fosse cobrado, e essa e uma decisao do dono, nao deste bloco. */
     j+='        createOrder:function(d,actions){\n';
-    /* O QUE O PAYPAL COBRA. Com sinal e o SINAL, e nao o total: e o valor que o cartao
-       debita naquele momento, e cobrar o total aqui seria a tela dizer uma coisa e o cartao
-       fazer outra. O numero e calculado UMA vez, na variavel v, e usado nos tres lugares do
-       pedido (amount, item_total, unit_amount) -- a armadilha do breakdown, ja registrada
-       acima, recusa o pedido inteiro se os tres divergirem num centavo. */
-    j+='          var v=(SINAL_AGORA>0?SINAL_AGORA:valor).toFixed(2);\n';
-    j+="          var ref=(txid&&txid!=='***')?String(txid).substring(0,"+FC_LIM_PP+"):'';\n";
-    j+='          var item={name:String(desc).substring(0,'+FC_LIM_PP+'),quantity:"1",\n';
-    j+='            unit_amount:{value:v,currency_code:"BRL"}};\n';
-    j+='          if(ref)item.sku=ref;\n';
-    j+='          var pu={\n';
-    j+='            amount:{value:v,currency_code:"BRL",\n';
-    j+='              breakdown:{item_total:{value:v,currency_code:"BRL"}}},\n';
-    j+='            description:String(desc).substring(0,'+FC_LIM_PP+'),\n';
-    j+='            items:[item]\n';
-    j+='          };\n';
-    j+='          if(ref)pu.custom_id=ref;\n';
-    /* ITEMIZA SO SEM SINAL, e a decisao ja esta medida em fcPpItensSrc: com sinal o cliente
-       paga uma fracao, o formato do PayPal nao tem conceito de entrada, e a diferenca viraria
-       um "desconto" do tamanho do saldo no recibo que o cliente guarda. A geracao do link ja
-       recusa itens junto de sinal, e este bloco recusa um link que traga os dois -- esta
-       linha e a terceira rede, e ela e a que sobreviveria a um link montado a mao. */
-    j+='          if(SINAL_AGORA===0)ppDetalhar(pu,v);\n';
-    j+='          return actions.order.create({purchase_units:[pu]});\n';
+    /* O CORPO DESTE createOrder mora em fc-compartilhado.js (P_PP_PEDIDO_SRC) desde
+       14/09/2026: a /cobrar AVALIA o mesmo texto para mostrar, ao lado do link, os campos
+       que o PayPal vai registrar. O que sai daqui e byte a byte o que saia antes -- a
+       regressao e a prova --, e as razoes de cada linha foram junto com o texto. */
+    j+=P_PP_PEDIDO_SRC;
     j+='        },\n';
     j+='        onApprove:function(d,actions){\n';
     j+='          return actions.order.capture().then(function(){\n';

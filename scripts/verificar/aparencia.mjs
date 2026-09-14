@@ -459,10 +459,25 @@ console.log('\n=== item 6: a chapa branca do QR, com a biblioteca de verdade (us
                      temCanvas: !!cv, larguraCaixa: Math.round(cx.getBoundingClientRect().width),
                      rolagemH: document.documentElement.scrollWidth > document.documentElement.clientWidth + 1};
           if(cv){
-            const g = cv.getContext('2d'), w = cv.width, meio = Math.floor(cv.height/2);
-            const d = g.getImageData(0, meio, w, 1).data;
-            let b = 0; for(let x=0;x<w;x++){const i=x*4; if(d[i]>200&&d[i+1]>200&&d[i+2]>200) b++; else break;}
-            o.canvas = w; o.brancoNaBordaDoCanvas = b;
+            /* A LEITURA E DE TODAS AS LINHAS, e o numero e o MENOR -- nao o da linha do meio.
+               ZONA QUIETA e branco em VOLTA da imagem inteira: se existe, TODA linha comeca com
+               ela. Uma linha so responde outra pergunta -- 'o primeiro modulo DESTA linha e
+               claro?' --, e a resposta muda com o conteudo do codigo. Medido em 14/09/2026: o
+               codigo do pedido da Mini loja e CODIGO_LOJA + Date.now() em base 36 (novoPedido),
+               entao o payload -- e o desenho -- mudam a CADA execucao, e esta linha acusava
+               '8px de branco na borda' de vez em quando, sem defeito nenhum por tras. Vermelho
+               intermitente e pior que vermelho nenhum: ele ensina a ignorar o proximo.
+               Pelo minimo entre as linhas a medida volta a ser do DESENHO e nao do conteudo. */
+            const g = cv.getContext('2d'), w = cv.width, h = cv.height;
+            const d = g.getImageData(0, 0, w, h).data;
+            let menor = w;
+            for(let y=0;y<h;y++){
+              let b = 0;
+              for(let x=0;x<w;x++){const i=(y*w+x)*4; if(d[i]>200&&d[i+1]>200&&d[i+2]>200) b++; else break;}
+              if(b < menor) menor = b;
+              if(menor === 0) break;
+            }
+            o.canvas = w; o.brancoNaBordaDoCanvas = menor;
           }
           return o;
         }, sel);
@@ -481,7 +496,7 @@ console.log('\n=== item 6: a chapa branca do QR, com a biblioteca de verdade (us
        o item 6 se reabre com medicao nova, em vez de continuar por inercia. */
     chk('['+larg+'] '+aba+': a imagem do QR continua sem zona quieta propria (e por isso a chapa existe)',
         m.brancoNaBordaDoCanvas < 8,
-        'achei '+m.brancoNaBordaDoCanvas+'px de branco na borda de um canvas de '+m.canvas);
+        'toda linha do canvas de '+m.canvas+'px comeca com pelo menos '+m.brancoNaBordaDoCanvas+'px de branco');
     chk('['+larg+'] '+aba+': com a chapa desenhada, a pagina NAO ganha rolagem horizontal',
         m.rolagemH === false, 'a caixa do QR mediu '+m.larguraCaixa+'px de largura');
   }
