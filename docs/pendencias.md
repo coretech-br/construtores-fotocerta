@@ -1385,3 +1385,59 @@ sobre aquele estado** — de novo.
 O **campo configurável de tamanho do QR** existe só no Link de cobrança. Dá-lo às outras três cria
 chave nova no estado, no preset e no "Exportar tudo" — formato do que fica gravado, que atinge
 backups em arquivo. Alinhado só o número fixo (220 → 200 nas quatro).
+
+## Entregue em 14/09/2026 — as três decisões do dono
+
+### 1. A chave Pix da aba `pac`: validada por uma string, cobrada por outra
+
+`aRecusa` validava a chave passada por `fcTrim` e o gerador emitia a passada por `pixLimpar` — os
+dois aparam conjuntos **diferentes** de invisíveis. Passou a usar `pixLimpar` nas duas pontas: é a
+que já governa o payload, a que `pixChaveErro` confere e a que a `/cobrar` usa dos dois lados.
+
+**O defeito foi provado ANTES do conserto**, e é o que dá valor à prova: chave com U+200B na ponta
+era **aceita**, e a **prévia** emitia com o invisível enquanto a **textarea** emitia sem — os dois
+blocos executados produziram **BR Codes diferentes, os dois fechando o CRC**.
+
+**O alcance, medido e não suposto:** o defeito **não** chegava à textarea entregue (`aGerar` limpa
+antes) **nem** pelo estado gravado (a partida limpa e regrava). O caminho que alcança é a
+**colagem** — `input` não corrige o campo mas dispara a prévia em 400 ms, que executa o bloco com a
+chave suja. É o gesto mais provável de todos: colar a chave vinda do app do banco e conferir na
+prévia. **A primeira versão do teste não alcançava o estado** e foi refeita.
+
+**As outras três abas não tinham o descompasso** — virou varredura estática, para não voltar.
+
+### 2. Os dois renomes, com conversão
+
+`txtPixRotulo` → **`txtSecaoPix`** na `pac`: o nome que o Link de cobrança **já usa para este mesmo
+texto**. Um terceiro nome criaria um terceiro vocabulário para um papel só. Agora `txtPixRotulo`
+significa **uma** coisa em toda a ferramenta.
+
+`t4` → **`txtZapBotao`** na `cob`: o mesmo papel das irmãs, sem colisão.
+
+**Os ids dos campos não mudaram, de propósito:** o id não é persistido, e renomeá-lo faria o cenário
+— que dirige **as duas** árvores na regressão — estourar contra qualquer referência anterior.
+
+**Correção de uma afirmação do próprio executor:** ele escreveu que "a chave antiga fica no estado";
+a medição desmentiu (`coleta()` reescreve o fragmento inteiro). Comentário e asserção corrigidos
+para o que foi medido.
+
+### 3. A frase do "código copiado"
+
+As quatro dizem `Código copiado! Cole no aplicativo do seu banco.` A segunda entrada de fábrica foi
+removida — duas entradas com a mesma string seriam duas fábricas para divergir.
+
+**Quem já personalizou não é tocado, e aqui isso é o desejado.** A diferença para o separador "OU",
+que **precisou** de migração: a frase curta continua **certa**, só mais curta; "ou pague com cartão"
+ficaria **errado** depois da decisão do meio prioritário. Está escrito nos dois lugares **para
+ninguém copiar a migração por analogia**.
+
+### Quatro divergências, todas do item 3
+
+Uma linha em `u-out` e uma em `m-out`, nas duas passagens. As saídas dos dois renomes (`a-out3`,
+`p-out1`) saíram **byte a byte idênticas**, como tinham de sair. Nenhuma cobrança, nenhum link.
+
+### A oitava referência congelada
+
+`meio-prio-migracao.mjs 4c66719` acusava 1 falha numa árvore sem defeito: a linha exigia uma
+referência **anterior a 12/09 e posterior a 13/09** ao mesmo tempo — condições que não se encontram
+e não vão passar a se encontrar. Passou a dizer `NÃO MEDIU`.
