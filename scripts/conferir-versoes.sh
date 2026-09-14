@@ -138,7 +138,12 @@ n=$(grep -c "manifest\.json?v=$v_manifesto" "$raiz/cobrar/index.html" || true)
 # A entrada mora em FCR_NOTAS, no index.html, na forma {v:"AAAA-MM-DDx",...}. Uma
 # ocorrencia, exatamente: zero e a nota que ninguem escreveu; duas e a mesma versao
 # descrita em dois lugares, que o painel desenharia repetida.
-n=$(grep -c "{v:\"$v_index\"," "$raiz/index.html" || true)
+# CONTA OCORRENCIAS, NAO LINHAS. 'grep -c' devolve o numero de LINHAS que casam, e as
+# entradas de FCR_NOTAS sao uma por linha -- entao duas entradas da MESMA versao escritas
+# na mesma linha contavam 1 e passavam. Medido em 14/09/2026: a propria prova que existe
+# para cobrar isto (novidades.mjs, cenario "a mesma versao descrita duas vezes") estava
+# vermelha desde que nasceu, e vermelho permanente esconde o proximo que seria de verdade.
+n=$(grep -o "{v:\"$v_index\"," "$raiz/index.html" | wc -l | tr -d " ")
 if [ "$n" = "0" ]; then
   erro "a versao \"$v_index\" esta carimbada e NAO tem release note. Acrescente a entrada no topo de FCR_NOTAS, no index.html -- o comentario \"COMO ENTRA A PROXIMA VERSAO\", logo acima da lista, diz a forma. Desde 14/09/2026 toda alteracao publicada entra la."
 elif [ "$n" != "1" ]; then

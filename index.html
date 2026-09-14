@@ -4404,8 +4404,8 @@
    QUEM IMPEDE QUE ELE MINTA: scripts/conferir-versoes.sh, que recusa index.html
    alterado sem a versao mudar junto -- a mesma disciplina do fc-compartilhado.js,
    e pela mesma razao: carimbo que ninguem confere e o defeito de amanha. */
-var FC_VERSAO='2026-09-14g';
-var FC_PUBLICADO='2026-09-14 05:32';   /* America/Sao_Paulo -- escrito pelo carimbador */
+var FC_VERSAO='2026-09-14i';
+var FC_PUBLICADO='2026-09-14 12:48';   /* America/Sao_Paulo -- escrito pelo carimbador */
 (function(){
   var el=document.getElementById('fc-versao');
   if(!el) return;
@@ -5318,6 +5318,7 @@ var FCR_ROTULOS={novo:'novo',corrigido:'corr',melhorado:'melh',atencao:'aten',ex
 /* A lista, da versao mais recente para a mais antiga. NAO reordenar: o agrupamento por
    dia assume que versoes do mesmo dia estao juntas, e o desenho respeita esta ordem. */
 var FCR_NOTAS=[
+ {v:"2026-09-14i",d:"14 de setembro de 2026",itens:[["Corrigido","A prévia **O que o PayPal vai registrar** ficava ilegível em tela estreita: a coluna do nome do produto era espremida a ponto de sair quase uma letra por linha. Quando não há largura para a tabela, a lista passa a sair **um item por bloco**, com o nome de cada campo ao lado do valor — a mesma forma que os totais logo abaixo já usavam."],["Melhorado","As colunas dessa tabela foram estreitadas para as larguras que a página `/cobrar` já usava, então sobra mais espaço para o nome do produto antes de precisar empilhar. Nas prévias do computador nada muda de forma."],["Melhorado","A mesma tabela na página `/cobrar` passou a empilhar em telas menores que 375 pontos, onde antes era preciso arrastar de lado para ler as últimas colunas."],["","O resto da versão foi conferência interna, sem mudança na tela."]]},
  {v:"2026-09-14g",d:"14 de setembro de 2026",itens:[["Novo","A página `/cobrar` ganhou uma **prévia**. Depois de gerar o link, ela mostra num quadro a **sua própria página de pagamento**, já com esta cobrança dentro — é a página de verdade, carregada do seu site, e não um desenho parecido."],["Novo","Logo abaixo dela, uma tabela diz **o que vai para o PayPal** nesta cobrança: cada item com nome, SKU, quantidade e preço, mais a soma dos itens, o valor cobrado, a descrição e o código de conciliação. São os mesmos campos que a ferramenta completa já mostrava, lidos da mesma fonte."],["Novo","No computador a prévia fica numa **coluna ao lado**, que acompanha a rolagem. No celular ela fica **abaixo do link, recolhida** — um toque abre."],["Atenção","O quadro é **só para olhar**: o toque não passa por ele, para você não pagar sem querer a sua própria cobrança. Para mexer de verdade, use **Abrir em outra aba**."],["Atenção","Se aparecer uma **recusa** dentro do quadro, é o aviso que faltava: o código colado na sua página de pagamento é anterior a esta cobrança. Gere de novo o **Código 1** e recole no site — até agora isso só apareceria com o cliente na frente."],["Atenção","Esta é a **única parte da `/cobrar` que precisa de internet**. Sem conexão aparece um recado dizendo isso, e nunca um quadro em branco — que pareceria defeito da cobrança. O link continua sendo montado no próprio aparelho, com ou sem rede."]]},
  {v:"2026-09-14f",d:"14 de setembro de 2026",itens:[["Novo","Link de cobrança: cada cobrança pode ser **detalhada em itens** — nome, SKU e preço, um por linha. O cliente passa a ler na página de que o valor é feito, e o seu **relatório do PayPal** mostra uma linha por item com o SKU na coluna \"ID do produto\", em vez de uma linha única. Está na aba e também na página `/cobrar`, em \"Mais opções desta cobrança\"."],["Novo","Isso **não muda um centavo** do que é cobrado: o valor continua sendo um só, e a soma dos itens tem de bater com ele ao centavo. Se não bater, a ferramenta recusa e diz os dois números."],["Novo","Link de cobrança: o endereço do **upsell** (a página para onde o cliente vai depois de pagar) pode ser escolhido **por cobrança**, e não só uma vez para a página inteira. Dá para ter uma oferta diferente por campanha sem recolar nada no site."],["Atenção","O interruptor mestre continua mandando: com o redirecionamento **desligado** no código da página, o endereço escrito na cobrança não leva a lugar nenhum. A `/cobrar` diz isso na tela, ao lado do campo."],["Exige uma ação sua, uma única vez","Gere de novo o **Código 1** da aba Link de cobrança e recole no componente da sua página de pagamento, publicando em seguida. **Este recolar cobre tudo de uma vez**: o sinal (de 13/09), os itens e o upsell por cobrança. Sem ele, a página recusa os links novos que tiverem sinal, itens ou upsell — ela não conhece esses parâmetros. Links **sem** nenhum deles continuam funcionando como sempre."],["Atenção","Itens e sinal não convivem na mesma cobrança, e a ferramenta recusa os dois juntos. Com sinal o PayPal cobra só o sinal, e detalhar em itens faria o recibo chamar de **desconto** o saldo que o cliente ainda deve — no documento que ele guarda."]]},
  {v:"2026-09-14e",d:"14 de setembro de 2026",itens:[["Novo","O **tamanho do QR Code** do Pix passou a ser ajustável também no Checkout, na Mini loja e no Agendamento por Pacote — até agora só o Link de cobrança tinha esse ajuste. Quem não mexer no campo continua com o tamanho de sempre."]]},
@@ -6881,26 +6882,61 @@ function fcPvSondaPP(o){
   s+='          }else{\n';
   /* --- a lista de itens --- */
   s+='            var its=pu.items||[];\n';
-  s+="            var cab=cel('div','display:flex;gap:8px;font-weight:700;border-bottom:1px solid #e4dfd2;padding-bottom:2px;margin-bottom:2px');\n";
-  s+="            cab.appendChild(cel('div',CAMPO+';flex:1','"+FC_PP_CAMPOS.nome+"'));\n";
-  s+="            cab.appendChild(cel('div',CAMPO+';width:104px','"+FC_PP_CAMPOS.sku+"'));\n";
-  s+="            cab.appendChild(cel('div',CAMPO+';width:58px;text-align:right','"+FC_PP_CAMPOS.qtd+"'));\n";
-  s+="            cab.appendChild(cel('div',CAMPO+';width:96px;text-align:right','"+FC_PP_CAMPOS.unit+"'));\n";
-  s+='            pai.appendChild(cab);\n';
+  /* AS DUAS FORMAS DA LISTA DE ITENS, e as DUAS MEDICOES que escolhem entre elas (14/09/2026).
+     O dono viu "Ensaio de Natal" sair quase uma letra por linha numa previa de celular.
+
+     PRIMEIRA MEDICAO -- as larguras. Elas eram 104/58/96 com vaos de 8 (282px fixos) e foram
+     escolhidas com folga, nao medidas. Passam a ser as MESMAS que a /cobrar ja tinha medido
+     pelo nome de campo mais longo de cada coluna em 10,5px mono: 80/52/82 com vaos de 6, mais
+     76 para items[].name. Da 308px, e e por isso que o limiar abaixo e 308 e nao um numero
+     escolhido. Duas telas que mostram os mesmos nove campos nao podem ter geometrias
+     diferentes.
+
+     SEGUNDA MEDICAO -- a largura do quadro, lida no proprio pai (que ja esta no documento
+     aqui) e nunca deduzida da janela: o quadro tem recuos que a janela nao conhece. Medido:
+     402px na previa do Checkout e 364px na do Link de cobranca -- as duas continuam em
+     coluna, que e como o dono as aprovou. Abaixo de 308 nao cabe nem o cabecalho, e a lista
+     vira EMPILHADA: um bloco por item, cada campo com o proprio nome ao lado -- a mesma forma
+     que os totais desta caixa ja usam. Largura 0 (sem layout ainda) mantem a coluna, que e o
+     comportamento que existia antes. */
+  s+='            var empilha=(pai.clientWidth>0&&pai.clientWidth<308);\n';
+  s+='            if(!empilha){\n';
+  s+="              var cab=cel('div','display:flex;gap:6px;font-weight:700;border-bottom:1px solid #e4dfd2;padding-bottom:2px;margin-bottom:2px');\n";
+  s+="              cab.appendChild(cel('div',CAMPO+';flex:1','"+FC_PP_CAMPOS.nome+"'));\n";
+  s+="              cab.appendChild(cel('div',CAMPO+';width:80px','"+FC_PP_CAMPOS.sku+"'));\n";
+  s+="              cab.appendChild(cel('div',CAMPO+';width:52px;text-align:right','"+FC_PP_CAMPOS.qtd+"'));\n";
+  s+="              cab.appendChild(cel('div',CAMPO+';width:82px;text-align:right','"+FC_PP_CAMPOS.unit+"'));\n";
+  s+='              pai.appendChild(cab);\n';
+  s+='            }\n';
+  /* Nome do campo a esquerda, valor a direita -- igual as linhas de total logo abaixo. */
+  s+='            function parIt(campo,valor,fraco){\n';
+  s+="              var l=cel('div','display:flex;gap:10px;padding:1px 0');\n";
+  s+="              l.appendChild(cel('div',CAMPO+';flex:none',campo));\n";
+  s+="              l.appendChild(cel('div','flex:1;text-align:right;word-break:break-word'+(fraco?';color:#8a8375':''),valor));\n";
+  s+='              pai.appendChild(l);\n';
+  s+='            }\n';
   s+='            var somaC=0,z,it,uc,qn;\n';
   s+='            for(z=0;z<its.length;z++){\n';
   s+='              it=its[z]||{};\n';
   s+='              uc=Math.round(parseFloat((it.unit_amount||{}).value)*100);\n';
   s+='              qn=parseInt(it.quantity,10);\n';
   s+='              if(!isNaN(uc)&&!isNaN(qn))somaC+=uc*qn;\n';
-  s+="              var ln=cel('div','display:flex;gap:8px;padding:1px 0');\n";
-  s+="              ln.appendChild(cel('div','flex:1;word-break:break-word',String(it.name==null?'':it.name)));\n";
   /* O TRACO, e nao vazio: celula em branco se le como "a previa nao sabe", e a ausencia do
-     campo e justamente o que precisa aparecer. */
-  s+="              ln.appendChild(cel('div','width:104px;word-break:break-word'+(it.sku==null?';color:#8a8375':''),it.sku==null?'\u2014':String(it.sku)));\n";
-  s+="              ln.appendChild(cel('div','width:58px;text-align:right',String(it.quantity)));\n";
-  s+="              ln.appendChild(cel('div','width:96px;text-align:right',String((it.unit_amount||{}).value)+' '+String((it.unit_amount||{}).currency_code)));\n";
-  s+='              pai.appendChild(ln);\n';
+     campo e justamente o que precisa aparecer. Vale nas duas formas. */
+  s+='              if(empilha){\n';
+  s+="                if(z)pai.appendChild(cel('div','border-top:1px dashed #d8d2c4;margin-top:5px;padding-top:5px'));\n";
+  s+="                parIt('"+FC_PP_CAMPOS.nome+"',String(it.name==null?'':it.name));\n";
+  s+="                parIt('"+FC_PP_CAMPOS.sku+"',it.sku==null?'—':String(it.sku),it.sku==null);\n";
+  s+="                parIt('"+FC_PP_CAMPOS.qtd+"',String(it.quantity));\n";
+  s+="                parIt('"+FC_PP_CAMPOS.unit+"',String((it.unit_amount||{}).value)+' '+String((it.unit_amount||{}).currency_code));\n";
+  s+='              }else{\n';
+  s+="                var ln=cel('div','display:flex;gap:6px;padding:1px 0');\n";
+  s+="                ln.appendChild(cel('div','flex:1;min-width:0;word-break:break-word',String(it.name==null?'':it.name)));\n";
+  s+="                ln.appendChild(cel('div','width:80px;word-break:break-word'+(it.sku==null?';color:#8a8375':''),it.sku==null?'—':String(it.sku)));\n";
+  s+="                ln.appendChild(cel('div','width:52px;text-align:right',String(it.quantity)));\n";
+  s+="                ln.appendChild(cel('div','width:82px;text-align:right',String((it.unit_amount||{}).value)+' '+String((it.unit_amount||{}).currency_code)));\n";
+  s+='                pai.appendChild(ln);\n';
+  s+='              }\n';
   s+='            }\n';
   s+='            if(!its.length)\n';
   s+="              pai.appendChild(cel('div',NOSSO,'(nenhum item — o pedido não seria criado)'));\n";
@@ -6947,6 +6983,15 @@ function fcPvSondaPP(o){
   s+='          }\n';
   s+='        }\n';
   s+='        sondar();\n';
+  /* A FORMA DA LISTA DEPENDE DA LARGURA, entao ela precisa refazer quando a largura muda --
+     senao a previa continua em coluna depois de a janela estreitar, mostrando exatamente o
+     amassado que a medicao existe para evitar. Timer unico, cancelado antes de reagendar,
+     como nas demais previas desta ferramenta. */
+  s+='        var tRedim=null;\n';
+  s+="        window.addEventListener('resize',function(){\n";
+  s+='          if(tRedim)clearTimeout(tRedim);\n';
+  s+='          tRedim=setTimeout(function(){tRedim=null;sondar();},150);\n';
+  s+='        });\n';
   /* Sem raizId (a /pagar) nao ha o que reagir: o valor daquela pagina vem do endereco e nao
      muda enquanto a pagina existe. */
   if(o.raizId){

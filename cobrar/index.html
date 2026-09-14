@@ -179,6 +179,30 @@
   .cb-pp-sep{border-top:1px solid var(--linha);margin-top:6px;padding-top:5px}
   .cb-pp-ok{color:var(--ok);font-weight:700;margin-top:5px}
   .cb-pp-mau{color:var(--vermelho);font-weight:700;margin-top:5px}
+  /* ABAIXO DE 380px A LISTA DEIXA DE SER TABELA. As quatro colunas somam 308px e cabem nos
+     309 uteis de uma tela de 375 -- medido --, mas numa tela menor elas so cabiam rolando de
+     lado, e coluna estreita faz "Ensaio de Natal" sair quase uma letra por linha. Aqui cada
+     item vira um BLOCO, e cada celula mostra o proprio nome de campo (o data-campo posto em
+     cbPvLin) no lugar do cabecalho, que some. E a mesma forma que a previa da ferramenta usa
+     na mesma largura -- e com as MESMAS larguras de coluna, que sairam desta medicao e foram
+     levadas para la: duas telas que mostram os mesmos nove campos nao podem discordar de como
+     mostra-los. O corte e 374 e nao um numero redondo: 375 e a tela em que os 308px ainda
+     cabem, medida acima. */
+  @media (max-width:374px){
+    .cb-pp-cab{display:none}
+    /* O PISO DE 308px CAI JUNTO, e nao so nas linhas de item. Medido em 14/09/2026: num
+       aparelho de 360 a caixa tem 294px uteis, e as linhas de TOTAL -- que sao um par
+       (nome, valor) e nunca precisaram de 308 -- sozinhas faziam a caixa rolar 14px de
+       lado, cortando o fim de "420.00 BRL". Sem piso nenhum aqui, nada rola. */
+    .cb-pp-lin{min-width:0}
+    .cb-pp-lin.cb-pp-lin-item{display:block;padding:0}
+    .cb-pp-lin-item+.cb-pp-lin-item{border-top:1px dashed var(--linha);margin-top:5px;padding-top:5px}
+    .cb-pp-lin-item>div{display:flex;gap:10px;justify-content:space-between;
+      width:auto;text-align:right;padding:1px 0}
+    .cb-pp-lin-item>div::before{content:attr(data-campo);flex:none;text-align:left;
+      font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10.5px;
+      font-weight:700;color:var(--tinta);white-space:nowrap}
+  }
 
   /* Acima de 560px a coluna para de crescer e ganha respiro; nada muda de forma. */
   @media (min-width:600px){
@@ -1154,9 +1178,16 @@ function cbPvPedido(cfg,codigo){
   return (ped&&ped.purchase_units&&ped.purchase_units[0])||null;
 }
 function cbPvLin(cls,celulas){
-  var l=document.createElement('div'),i;
+  var l=document.createElement('div'),i,c;
   l.className='cb-pp-lin'+(cls?(' '+cls):'');
-  for(i=0;i<celulas.length;i++)l.appendChild(cbTexto('div',celulas[i][1],celulas[i][0]));
+  for(i=0;i<celulas.length;i++){
+    c=cbTexto('div',celulas[i][1],celulas[i][0]);
+    /* O NOME DO CAMPO VIAJA NA CELULA (14/09/2026), e nao so no cabecalho: abaixo de 380px o
+       cabecalho some e cada celula passa a mostrar o proprio nome pelo CSS. Sem ele aqui, a
+       forma empilhada mostraria quatro valores soltos sem dizer o que e cada um. */
+    if(celulas[i][2])c.setAttribute('data-campo',celulas[i][2]);
+    l.appendChild(c);
+  }
   return l;
 }
 function cbPvDin(o){return o?(String(o.value)+' '+String(o.currency_code)):null;}
@@ -1194,11 +1225,11 @@ function cbPvPayPal(cfg,codigo){
     /* O TRAÇO, e não a célula vazia: célula em branco se lê como "a prévia não sabe", e a
        AUSÊNCIA do campo é justamente o que precisa aparecer. Mesma decisão da prévia da
        ferramenta. */
-    cx.appendChild(cbPvLin('',[
-      [String(it.name==null?'':it.name),'cb-pp-nome'],
-      [it.sku==null?'—':String(it.sku),'cb-pp-sku'+(it.sku==null?' cb-pp-ausente':'')],
-      [String(it.quantity),'cb-pp-qtd'],
-      [String((it.unit_amount||{}).value)+' '+String((it.unit_amount||{}).currency_code),'cb-pp-unit']]));
+    cx.appendChild(cbPvLin('cb-pp-lin-item',[
+      [String(it.name==null?'':it.name),'cb-pp-nome',K.nome],
+      [it.sku==null?'—':String(it.sku),'cb-pp-sku'+(it.sku==null?' cb-pp-ausente':''),K.sku],
+      [String(it.quantity),'cb-pp-qtd',K.qtd],
+      [String((it.unit_amount||{}).value)+' '+String((it.unit_amount||{}).currency_code),'cb-pp-unit',K.unit]]));
   }
   if(!its.length)cx.appendChild(cbTexto('div','cb-pp-nota','(nenhum item — o pedido não seria criado)'));
   cx.appendChild(cbTexto('div','cb-pp-nota',K.sku+' é a coluna "ID do produto" do relatório, e é o SKU daquele item. Item sem SKU sai sem o campo (o traço), e nunca com o código do pedido: quem identifica o pedido inteiro é o '+K.conciliacao+', no fim.'));
