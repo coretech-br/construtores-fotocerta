@@ -44,6 +44,19 @@
 # mudou. Quem troca a versao dele e scripts/carimbar-publicacao.sh -- aqui so
 # se confere que ela foi trocada.
 #
+# ALEM DISSO, desde 14/09/2026 ele confere se a VERSAO CARIMBADA TEM RELEASE NOTE.
+# Regra do dono, nas palavras dele: "sempre que alterar algo no projeto, seja
+# melhoria, seja correcao, o release notes tem que SEMPRE ser atualizado". Isso
+# deixou de ser lembranca e virou contrato -- e contrato sem guarda e o defeito
+# de amanha (a Tag Body da pagina de obrigado nasceu fora do painel consolidado
+# exatamente assim, em silencio).
+#
+# ESTE e o momento certo de cobrar: carimbar-publicacao.sh escolhe a versao nova
+# e chama este script em seguida, entao o "esqueci de escrever a nota" para AQUI,
+# antes do commit que vai ao ar -- e nao depois, no navegador do dono. A cobranca
+# e um grep pela chave da entrada dentro de FCR_NOTAS, sem Node e sem navegador,
+# como o resto deste arquivo.
+#
 # Saida: "OK" e codigo 0, ou a lista do que nao bate e codigo 1.
 # sh puro, sem dependencia -- roda no Mac do dono e em qualquer CI.
 # ============================================================================
@@ -120,6 +133,17 @@ for pag in index.html cobrar/index.html; do
 done
 n=$(grep -c "manifest\.json?v=$v_manifesto" "$raiz/cobrar/index.html" || true)
 [ "$n" = "1" ] || erro "cobrar/index.html: o <link rel=manifest> deveria pedir manifest.json?v=$v_manifesto (achei $n)."
+
+# ---- 3. a versao carimbada tem release note? (regra do dono, 14/09/2026) ----
+# A entrada mora em FCR_NOTAS, no index.html, na forma {v:"AAAA-MM-DDx",...}. Uma
+# ocorrencia, exatamente: zero e a nota que ninguem escreveu; duas e a mesma versao
+# descrita em dois lugares, que o painel desenharia repetida.
+n=$(grep -c "{v:\"$v_index\"," "$raiz/index.html" || true)
+if [ "$n" = "0" ]; then
+  erro "a versao \"$v_index\" esta carimbada e NAO tem release note. Acrescente a entrada no topo de FCR_NOTAS, no index.html -- o comentario \"COMO ENTRA A PROXIMA VERSAO\", logo acima da lista, diz a forma. Desde 14/09/2026 toda alteracao publicada entra la."
+elif [ "$n" != "1" ]; then
+  erro "a versao \"$v_index\" aparece $n vezes em FCR_NOTAS (index.html). Deveria aparecer uma so -- duas entradas fazem o painel mostrar a mesma versao duas vezes."
+fi
 
 if [ -n "$falhas" ]; then
   echo "CONFERENCIA DE VERSOES: FALHOU$falhas"
