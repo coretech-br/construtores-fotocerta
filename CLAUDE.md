@@ -125,6 +125,33 @@ falhas por dia, outra três, e ninguém olhava mais para elas.
 Isto **não** enfraquece a regressão byte a byte de `regressao.sh`: lá a referência é escolhida a
 cada execução e o invariante é "esta mudança não alterou as saídas", que é outra pergunta.
 
+## Toda rodada que publica ESCREVE a release note da versão (regra de 14/09/2026)
+
+Fixada pelo dono: *"A partir de agora, sempre que alterar algo no projeto, seja melhoria, seja
+correção, o release notes tem que SEMPRE ser atualizado."*
+
+A lista mora no painel **Novidades** da barra do topo, como dados (`FCR_NOTAS`, no `index.html`).
+A entrada da versão é escrita **no mesmo commit que vai ao ar**, no topo do array, logo abaixo do
+comentário `>>> COMO ENTRA A PRÓXIMA VERSÃO <<<`, que traz os passos.
+
+**O tom é o do dono, não o nosso:** uma linha por mudança, marcada `Novo` / `Corrigido` /
+`Melhorado` / `Atencao`, dizendo **o efeito e não a causa**, sem vocabulário técnico — nada de
+"regressão", "fonte única", "payload", nome de função ou de arquivo. Rodada que só mexe em arnês ou
+documentação diz isso honestamente ("Ajustes internos, sem mudança na tela") em vez de inventar
+benefício. Quando a mudança exigir algo dele (recolar um bloco, regerar um código), a linha diz.
+
+**Por que existe rede, e não confiança:** compromisso que depende de alguém lembrar já falhou aqui
+— a Tag Body da página de obrigado ficou fora do painel consolidado em silêncio, e a resposta certa
+foi `fccOrfas`, que **faz o buraco aparecer**. São três, no mesmo espírito:
+
+1. **Na partida da ferramenta:** `FC_VERSAO` sem entrada acende a **barra vermelha**, nomeando a
+   versão. Fica na barra e não só no painel, porque quem esqueceu a nota é justamente quem não vai
+   abrir *Novidades*. Alcance declarado: a página conhece **uma** versão, então ela responde só "a
+   que estou executando foi descrita?" — que é exatamente o caso que a regra cria.
+2. **Antes de publicar:** `conferir-versoes.sh` **recusa carimbo sem nota** e recusa nota duplicada.
+   É o momento certo — `carimbar-publicacao.sh` o chama logo depois de escolher a versão.
+3. **No arnês:** `novidades.mjs` compara com **todas** as versões do git, sem referência congelada.
+
 ## Fluxo de manutenção (importante)
 
 0. **`git push` só quando o dono pedir, sempre — sem exceção para arquivo "inerte".** Combinado em 23/08/2026, depois de um componente de teste (fora dos construtores) ser enviado por iniciativa própria com o argumento de que não mudava a ferramenta. O argumento não vale: **enviar é publicar**, e quem decide o que fica no repositório público é o dono. Vale também para material que ele peça "fora do projeto": entrega-se o arquivo, não se versiona sem pedir.

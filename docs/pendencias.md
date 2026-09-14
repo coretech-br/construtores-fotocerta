@@ -1481,3 +1481,45 @@ passar.** Passaram a ler o `custom_id`, e `sinal.mjs` agora cobra a **ausência*
 
 `txtCopiado`/`txtNaocopiou` da aba `cob` → `txtPixCopiado`/`txtPixNaocopiou`, com a mesma conversão
 das duas que o dono autorizou. Era a **terceira** da mesma família; as quatro abas agora concordam.
+
+## Entregue em 14/09/2026 — Novidades: as release notes dentro da ferramenta
+
+Pedido do dono, e logo depois a regra que o acompanha: *"sempre que alterar algo no projeto, seja
+melhoria, seja correção, o release notes tem que SEMPRE ser atualizado."*
+
+**59 versões** — as 58 que o git conhece mais a desta rodada. Agrupadas por **dia**: 10 seções
+recolhíveis mais uma de "antes da numeração", a mais recente nascendo aberta. 59 cabeçalhos
+recolhidos seriam parede também.
+
+### Onde vive, e por quê
+
+**Terceiro painel da barra do topo**, ao lado de *Detalhes* e *Identidade* — **não é aba**. As abas
+de `ABAS` são construtores: coletam, restauram, guardam preset, entram no preset geral e no painel
+consolidado. Uma aba que não gera nada viraria exceção em cada um desses lugares, e `fcAbasTxt()`
+passaria a contar uma página de texto como construtor — **16 frases** mentiriam por um.
+
+### O texto mora DENTRO do `index.html`, e a razão é a própria lista
+
+Um arquivo próprio era viável e **seria o defeito que esta lista existe para descrever**: arquivo
+separado tem validade própria no cache, então a ferramenta poderia anunciar uma versão enquanto a
+lista para noutra — cada uma certa sobre si, **a dupla mentindo**. Aqui a lista viaja nos mesmos
+bytes que o `FC_VERSAO` que ela descreve; a divergência é impossível por construção.
+
+Custo medido: **+31 KB (+2,6%)**, desenho de **2,6 ms / 518 nós**, na primeira abertura e não na
+partida.
+
+### As três redes
+
+Detalhadas na `CLAUDE.md`. **São exercitadas, não prometidas:** a árvore é servida de novo com um
+byte trocado (uma versão não descrita) e as guardas têm de acender nomeando-a.
+
+### Achado resolvido no caminho
+
+`fcdLigar` **não era idempotente**. O painel cria seções recolhíveis depois da partida; uma segunda
+chamada penduraria um segundo ouvinte nos cabeçalhos das abas, o clique alternaria duas vezes e **a
+seção nunca mais abriria — sem erro nenhum no console.**
+
+### Declarado
+
+**A busca do topo não alcança as Novidades** — medido, não suposto: ela varre campos de formulário
+dentro dos painéis, e o painel não tem campo nenhum.
