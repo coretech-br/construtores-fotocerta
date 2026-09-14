@@ -267,9 +267,37 @@ for(const [nome,saida] of [['Checkout','u-out'],['Mini loja','m-out']]){
       dif.length <= 12, dif.length+' linhas divergentes');
 }
 
-chk('vitrine da Agendamento por pacote com o PIX prioritario == referencia, byte a byte',
-    comPix['a-out1'] === daRef['a-out1'],
-    'tamanhos '+comPix['a-out1'].length+' x '+daRef['a-out1'].length);
+/* A SETIMA VEZ, e a ultima linha deste arquivo que ainda dependia de um congelado (leva 5,
+   13/09/2026). Ela cobrava "a vitrine com o Pix prioritario e byte a byte igual a da
+   referencia" -- uma afirmacao de MIGRACAO, que so uma referencia anterior a rodada do meio
+   prioritario consegue responder. Quando a leva 5 consertou o atalho `font:` invalido de
+   .fca-trocar, a-out1 mudou por um motivo legitimo e esta linha passou a acusar falha todo dia,
+   sem defeito nenhum por tras: 29378 contra 29337 bytes. E o mesmo vermelho permanente que o
+   resto deste arquivo ja tinha aprendido a nao produzir.
+   AGORA SAO DUAS LINHAS, e so a primeira depende de referencia:
+   1. a afirmacao de migracao fica atras do MESMO guarda das partes 1 e 2 -- contra referencia
+      moderna ela diz "nao mediu", com o comando que mediria de verdade;
+   2. no lugar dela entra uma PROPRIEDADE da arvore de hoje, que nao envelhece: trocar a escolha
+      muda a vitrine, e muda POUCO. O teto de linhas e o que a mede sem depender de commit
+      nenhum. Nao se usou aqui a lista de marcas das duas abas acima de proposito: na vitrine a
+      troca move o CORPO de duas funcoes (textoCartao e textoPix), e a lista teria de aceitar
+      linhas nuas como `return t;`, que deixariam passar quase qualquer coisa -- teto sozinho
+      mede menos, mas nao mente sobre o que mede. */
+if(refAnterior){
+  chk('vitrine da Agendamento por pacote com o PIX prioritario == referencia, byte a byte',
+      comPix['a-out1'] === daRef['a-out1'],
+      'tamanhos '+comPix['a-out1'].length+' x '+daRef['a-out1'].length);
+}else{
+  console.log('  ..    NAO MEDIU (byte a byte da vitrine) -- mesma razao das partes 1 e 2.');
+  console.log('        Para medir a migracao de verdade: node scripts/verificar/meio-prio-migracao.mjs <commit anterior a 12/09/2026>');
+}
+{
+  const difA = linhasQueMudam(comPix['a-out1'], comPP['a-out1']);
+  chk('vitrine da Agendamento por pacote: trocar a escolha REALMENTE muda a vitrine',
+      difA.length > 0, 'nenhuma linha divergente');
+  chk('vitrine da Agendamento por pacote: e muda POUCO -- a assinatura de uma troca de ordem',
+      difA.length <= 20, difA.length+' linhas divergentes');
+}
 
 /* ===== 5. COM UM MEIO SO, a escolha nao muda um byte =====
    A ferramenta desliga o campo nesse caso (fcOrdSo1), mas o valor gravado continua indo ao
