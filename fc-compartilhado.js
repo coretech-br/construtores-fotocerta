@@ -49,7 +49,7 @@
    ============================================================================ */
 'use strict';
 var FCCOMPART=(function(){
-var FC_COMPART_VERSAO='2026-09-13a';
+var FC_COMPART_VERSAO='2026-09-13b';
 
 /* Limpeza compartilhada pelos DOIS validadores de endereco -- cUrlOk (botao de acao da
    Contagem regressiva) e tUrlOk (pagina intermediaria do TidyCal). Ela faz o que o NAVEGADOR
@@ -279,32 +279,32 @@ function pixChaveFormato(c){
   /* 2. e-mail: tem arroba, entao a intencao esta clara e a recusa pode ser especifica */
   if(c.indexOf('@')>=0){
     if(/^[^@]+@[^@.]+(\.[^@.]+)+$/.test(c))return '';
-    return 'A chave Pix "'+c+'" tem arroba, entao seria um e-mail -- mas nao esta escrito como um. Um e-mail precisa de algo antes do arroba, um dominio depois dele e pelo menos um ponto no dominio (exemplo: contato@fotocerta.com.br).';
+    return 'A chave Pix "'+c+'" tem arroba, então seria um e-mail -- mas não está escrito como um. Um e-mail precisa de algo antes do arroba, um domínio depois dele e pelo menos um ponto no domínio (exemplo: contato@fotocerta.com.br).';
   }
   /* 3. telefone: comeca com + */
   if(c.charAt(0)==='+'){
     if(/^\+55[0-9]{10,11}$/.test(c))return '';
-    return 'A chave Pix "'+c+'" comeca com + e por isso seria um telefone, mas nao esta no formato do Banco Central: +55, o DDD com dois digitos e o numero com oito ou nove -- por exemplo +5527999998888. Sem espaco, sem parenteses e sem traco.';
+    return 'A chave Pix "'+c+'" começa com + e por isso seria um telefone, mas não está no formato do Banco Central: +55, o DDD com dois dígitos e o número com oito ou nove -- por exemplo +5527999998888. Sem espaço, sem parênteses e sem traço.';
   }
   /* 4. so digitos: CPF (11) ou CNPJ (14), conferidos pelos digitos verificadores */
   if(/^[0-9]+$/.test(c)){
     if(c.length===11&&fcDigitosOk(c,FC_CPF_P1,FC_CPF_P2))return '';
     if(c.length===14&&fcDigitosOk(c,FC_CNPJ_P1,FC_CNPJ_P2))return '';
-    if(c.length===11)return 'A chave Pix "'+c+'" tem 11 digitos, o tamanho de um CPF, mas os digitos verificadores nao fecham -- entao ela nao e um CPF. Se voce quis usar o TELEFONE, ele precisa vir com o +55 e o DDD: +55'+c+'. Se quis o CPF, confira os numeros.';
-    if(c.length===14)return 'A chave Pix "'+c+'" tem 14 digitos, o tamanho de um CNPJ, mas os digitos verificadores nao fecham. Confira os numeros, e digite so os digitos -- sem ponto, barra ou traco.';
-    return 'A chave Pix "'+c+'" so tem numeros, entao seria um CPF (11 digitos) ou um CNPJ (14) -- mas tem '+c.length+'. Se for telefone, a chave precisa do +55 na frente e do DDD: +5527999998888. Se for CPF ou CNPJ, digite so os digitos, sem ponto, barra ou traco.';
+    if(c.length===11)return 'A chave Pix "'+c+'" tem 11 dígitos, o tamanho de um CPF, mas os dígitos verificadores não fecham -- então ela não é um CPF. Se você quis usar o TELEFONE, ele precisa vir com o +55 e o DDD: +55'+c+'. Se quis o CPF, confira os números.';
+    if(c.length===14)return 'A chave Pix "'+c+'" tem 14 dígitos, o tamanho de um CNPJ, mas os dígitos verificadores não fecham. Confira os números, e digite só os dígitos -- sem ponto, barra ou traço.';
+    return 'A chave Pix "'+c+'" só tem números, então seria um CPF (11 dígitos) ou um CNPJ (14) -- mas tem '+c.length+'. Se for telefone, a chave precisa do +55 na frente e do DDD: +5527999998888. Se for CPF ou CNPJ, digite só os dígitos, sem ponto, barra ou traço.';
   }
   /* 5. parecia uma aleatoria e nao e: 32 hexadecimais sem hifen, ou hexadecimais com hifen
      fora do desenho 8-4-4-4-12 */
   if(/^[0-9a-fA-F]{32}$/.test(c)||(c.indexOf('-')>=0&&/^[0-9a-fA-F-]+$/.test(c)))
-    return 'A chave Pix "'+c+'" parece uma chave aleatoria, mas nao esta no desenho que o Banco Central usa: 32 caracteres hexadecimais em cinco grupos separados por hifen, 8-4-4-4-12 (exemplo: 123e4567-e89b-12d3-a456-426614174000). Copie a chave inteira do aplicativo do banco, com os hifens.';
+    return 'A chave Pix "'+c+'" parece uma chave aleatória, mas não está no desenho que o Banco Central usa: 32 caracteres hexadecimais em cinco grupos separados por hífen, 8-4-4-4-12 (exemplo: 123e4567-e89b-12d3-a456-426614174000). Copie a chave inteira do aplicativo do banco, com os hífens.';
   /* 6. nao e nenhum dos cinco. E aqui que "contato" para. */
-  return 'A chave Pix "'+c+'" nao e nenhum dos cinco formatos que o Banco Central aceita: e-mail, telefone com +55, CPF, CNPJ ou chave aleatoria. Do jeito que esta, o codigo Pix sai bem formado e o aplicativo do banco do seu cliente recusa o pagamento dizendo que a instituicao recebedora nao conseguiu processar -- e voce so descobre pelo cliente. Copie a chave do aplicativo do seu banco.';
+  return 'A chave Pix "'+c+'" não é nenhum dos cinco formatos que o Banco Central aceita: e-mail, telefone com +55, CPF, CNPJ ou chave aleatória. Do jeito que está, o código Pix sai bem formado e o aplicativo do banco do seu cliente recusa o pagamento dizendo que a instituição recebedora não conseguiu processar -- e você só descobre pelo cliente. Copie a chave do aplicativo do seu banco.';
 }
 function pixChaveErro(chave,bruta){
-  if(!chave)return String(bruta||'').length?fciRecusa('A chave Pix so tinha espacos ou caracteres invisiveis (vindos de copiar-e-colar) e ficou vazia depois da limpeza das pontas. Digite a chave novamente.'):'';
-  if(!/^[!-~]+$/.test(chave))return fciRecusa('A chave Pix tem, no meio, um espaco ou um caractere fora do padrao -- pode ser um caractere invisivel que veio junto do copiar-e-colar do app do banco e que voce nao esta vendo. O codigo do QR conta os caracteres em bytes, e qualquer um fora da faixa comum (letras, numeros e sinais, sem espacos) faz o banco recusar o pagamento sem explicacao. Apague o campo e digite a chave de novo.');
-  if(chave.length>PIX_CHAVE_MAX)return fciRecusa('A chave Pix tem '+chave.length+' caracteres e o padrao do Banco Central aceita no maximo '+PIX_CHAVE_MAX+' no campo da chave. Uma chave maior desmonta o codigo do QR sem que ele pareca invalido: confira se nao colou algo a mais.');
+  if(!chave)return String(bruta||'').length?fciRecusa('A chave Pix só tinha espaços ou caracteres invisíveis (vindos de copiar-e-colar) e ficou vazia depois da limpeza das pontas. Digite a chave novamente.'):'';
+  if(!/^[!-~]+$/.test(chave))return fciRecusa('A chave Pix tem, no meio, um espaço ou um caractere fora do padrão -- pode ser um caractere invisível que veio junto do copiar-e-colar do app do banco e que você não está vendo. O código do QR conta os caracteres em bytes, e qualquer um fora da faixa comum (letras, números e sinais, sem espaços) faz o banco recusar o pagamento sem explicação. Apague o campo e digite a chave de novo.');
+  if(chave.length>PIX_CHAVE_MAX)return fciRecusa('A chave Pix tem '+chave.length+' caracteres e o padrão do Banco Central aceita no máximo '+PIX_CHAVE_MAX+' no campo da chave. Uma chave maior desmonta o código do QR sem que ele pareça inválido: confira se não colou algo a mais.');
   /* O formato vem DEPOIS do charset e do tamanho, de proposito: os dois anteriores nomeiam
      acidentes de copiar-e-colar, que sao mais especificos e mais provaveis.
      AS TRES APONTAM O PAINEL desde 23/08/2026: antes so a recusa de campo VAZIO levava o
@@ -338,7 +338,7 @@ var FCI_PADRAO={chave:'',nomer:'Foto Certa',cidade:'Vitoria',client:'',zapnum:''
 /* "abra o painel", e nao "preencha": desde 23/08/2026 a recusa de FORMATO da chave tambem
    aponta, e ali o campo esta preenchido -- errado, mas preenchido. Uma frase que serve aos
    dois casos e melhor que duas frases parecidas para divergir. */
-var FCI_APONTA=' Este campo agora e um so para a ferramenta inteira: abra o painel Identidade, no topo da pagina.';
+var FCI_APONTA=' Este campo agora é um só para a ferramenta inteira: abra o painel Identidade, no topo da página.';
 function fciRecusa(t){return t+FCI_APONTA;}
 /* ===== QUAL CAMPO A RECUSA DEVE APONTAR =====
    Ate 23/08/2026 quem reagia a recusa focava o primeiro campo VAZIO. Servia para "preencha a
@@ -617,9 +617,9 @@ var FC_URL_EXEMPLO='https://www.fotocerta.com.br/pagar';
    recusa que nao nomeia o defeito manda o operador procurar no lugar errado. */
 function pUrlRecusa(v){
   var s=String(v==null?'':v);
-  if(!s.replace(/\s/g,''))return 'Informe o endereco da pagina de pagamento, e ele precisa ser o endereco INTEIRO: com https:// e o dominio (exemplo: '+FC_URL_EXEMPLO+'). O link desta cobranca vai colado numa conversa, fora do site, e ali um endereco pela metade nao leva a lugar nenhum.';
-  if(fcUrlRelativo(s))return 'O endereco da pagina de pagamento esta escrito como caminho do proprio site ("'+s+'"). Isso funciona dentro do site e NAO funciona no WhatsApp: colado numa conversa, "'+s+'" nao abre nada. Escreva o endereco INTEIRO, com https:// e o dominio (exemplo: '+FC_URL_EXEMPLO+'). Nenhum link foi gerado.';
-  if(!pUrlOk(s))return 'Nao entendi o endereco da pagina de pagamento ("'+s+'"). Ele precisa ser um endereco INTEIRO, comecando com http:// ou https:// e trazendo o dominio do site (exemplo: '+FC_URL_EXEMPLO+'). Nenhum link foi gerado.';
+  if(!s.replace(/\s/g,''))return 'Informe o endereço da página de pagamento, e ele precisa ser o endereço INTEIRO: com https:// e o domínio (exemplo: '+FC_URL_EXEMPLO+'). O link desta cobrança vai colado numa conversa, fora do site, e ali um endereço pela metade não leva a lugar nenhum.';
+  if(fcUrlRelativo(s))return 'O endereço da página de pagamento está escrito como caminho do próprio site ("'+s+'"). Isso funciona dentro do site e NÃO funciona no WhatsApp: colado numa conversa, "'+s+'" não abre nada. Escreva o endereço INTEIRO, com https:// e o domínio (exemplo: '+FC_URL_EXEMPLO+'). Nenhum link foi gerado.';
+  if(!pUrlOk(s))return 'Não entendi o endereço da página de pagamento ("'+s+'"). Ele precisa ser um endereço INTEIRO, começando com http:// ou https:// e trazendo o domínio do site (exemplo: '+FC_URL_EXEMPLO+'). Nenhum link foi gerado.';
   return '';
 }
 /* ---- a MIGRACAO do que ja estava guardado: avisa, nunca sobrescreve ----
@@ -632,7 +632,7 @@ function pUrlRecusa(v){
    identificador e no limiar de urgencia. */
 function fcUrlAvisoMigracao(v){
   if(!fcUrlRelativo(v))return '';
-  return 'O endereco da pagina de pagamento guardado aqui e um caminho do proprio site ("'+String(v)+'"), e ele nao serve mais: o link precisa do endereco INTEIRO para funcionar colado numa conversa de WhatsApp. Nada foi trocado sozinho -- a ferramenta nao sabe qual e o seu dominio. Complete o campo com https:// e o dominio (exemplo: '+FC_URL_EXEMPLO+').';
+  return 'O endereço da página de pagamento guardado aqui é um caminho do próprio site ("'+String(v)+'"), e ele não serve mais: o link precisa do endereço INTEIRO para funcionar colado numa conversa de WhatsApp. Nada foi trocado sozinho -- a ferramenta não sabe qual é o seu domínio. Complete o campo com https:// e o domínio (exemplo: '+FC_URL_EXEMPLO+').';
 }
 
 /* Lista de permissao do link de cobranca do PayPal. O endereco viaja NO LINK, entao ele e
@@ -880,9 +880,9 @@ function pValTexto(cfg){
 function pRecusaBloco(cfg){
   var erroChave=pixChaveErro(cfg.chave,cfg.chaveBruta);
   if(erroChave)return erroChave;
-  if(!cfg.chave||!cfg.nomer||!cfg.cidade)return fciRecusa('Preencha a chave Pix, o nome do recebedor e a cidade. Sao eles que a pagina usa para conferir se um link de cobranca e mesmo seu.');
-  if(cfg.usapp&&!cfg.client)return fciRecusa('Informe o Client ID do PayPal, ou marque "Nao -- so Pix" em PayPal.');
-  if(cfg.zap&&!cfg.zapnum)return fciRecusa('Informe o numero do WhatsApp de destino, ou desligue o botao "Ja paguei".');
+  if(!cfg.chave||!cfg.nomer||!cfg.cidade)return fciRecusa('Preencha a chave Pix, o nome do recebedor e a cidade. São eles que a página usa para conferir se um link de cobrança é mesmo seu.');
+  if(cfg.usapp&&!cfg.client)return fciRecusa('Informe o Client ID do PayPal, ou marque "Não -- só Pix" em PayPal.');
+  if(cfg.zap&&!cfg.zapnum)return fciRecusa('Informe o número do WhatsApp de destino, ou desligue o botão "Já paguei".');
   return '';
 }
 function pRecusaCobranca(cfg){
@@ -891,22 +891,22 @@ function pRecusaCobranca(cfg){
   /* O ENDERECO INTEIRO: as tres recusas moram em pUrlRecusa, e as duas paginas usam a mesma. */
   var erroUrl=pUrlRecusa(cfg.url);
   if(erroUrl)return erroUrl;
-  if(!String(cfg.desc).replace(/\s/g,''))return 'Escreva a descricao do que esta sendo cobrado. E o que o cliente le na pagina e o que volta na mensagem do WhatsApp.';
+  if(!String(cfg.desc).replace(/\s/g,''))return 'Escreva a descrição do que está sendo cobrado. É o que o cliente lê na página e o que volta na mensagem do WhatsApp.';
   /* Caractere que NAO CABE num endereco. encodeURIComponent LANCA (URIError) diante de uma
      metade solta de par substituto -- o que acontece quando um emoji e cortado ao meio numa
      copia entre aplicativos. Sem esta guarda, o erro subia de pBusca e derrubava as duas saidas
      EM SILENCIO: medido, "Gerar link" nao fazia nada e nao avisava, e a previa ficava parada no
      quadro anterior, mostrando a descricao ANTIGA ao lado do campo novo. Falha muda no caminho
      principal da aba, que e a classe que este projeto mais recusa. */
-  if(!pEncOk(cfg.desc))return 'A descricao tem um caractere que o link nao consegue carregar. Costuma ser um emoji que chegou pela metade ao copiar de outro aplicativo, e ele pode estar invisivel na tela. Apague a descricao e digite de novo. Nenhum link foi gerado.';
-  if(String(cfg.desc).length>P_DESC_MAX)return 'A descricao tem '+String(cfg.desc).length+' caracteres e o limite e '+P_DESC_MAX+'. Ela viaja inteira dentro do link, e link comprido quebra em aplicativo de mensagem e em cliente de e-mail. Resuma para uma linha -- o detalhe do combinado voce conta na conversa.';
-  if(!String(cfg.valorBruto).replace(/\s/g,''))return 'Informe o valor da cobranca. Um codigo Pix sem valor deixa o pagador digitar o que quiser -- que e exatamente o que esta aba existe para impedir.';
-  if(isNaN(cfg.valor))return 'Nao entendi o valor "'+cfg.valorBruto+'". Escreva so o numero, com virgula ou ponto nos centavos: 1200 ou 1200,00.';
+  if(!pEncOk(cfg.desc))return 'A descrição tem um caractere que o link não consegue carregar. Costuma ser um emoji que chegou pela metade ao copiar de outro aplicativo, e ele pode estar invisível na tela. Apague a descrição e digite de novo. Nenhum link foi gerado.';
+  if(String(cfg.desc).length>P_DESC_MAX)return 'A descrição tem '+String(cfg.desc).length+' caracteres e o limite é '+P_DESC_MAX+'. Ela viaja inteira dentro do link, e link comprido quebra em aplicativo de mensagem e em cliente de e-mail. Resuma para uma linha -- o detalhe do combinado você conta na conversa.';
+  if(!String(cfg.valorBruto).replace(/\s/g,''))return 'Informe o valor da cobrança. Um código Pix sem valor deixa o pagador digitar o que quiser -- que é exatamente o que esta aba existe para impedir.';
+  if(isNaN(cfg.valor))return 'Não entendi o valor "'+cfg.valorBruto+'". Escreva só o número, com vírgula ou ponto nos centavos: 1200 ou 1200,00.';
   /* Valor que o operador entendeu, mas que arredonda para zero (0,004). Dizer "nao entendi"
      aqui seria mentira: a ferramenta entendeu, e o problema e outro -- e o operador ficaria
      conferindo a grafia de um numero que esta escrito certo. */
-  if(cfg.valor<=0)return 'O valor "'+cfg.valorBruto+'" arredonda para zero. O Pix cobra em centavos, entao o minimo e R$ 0,01. Um codigo Pix com valor zero deixa o pagador digitar o que quiser -- que e exatamente o que esta aba existe para impedir.';
-  if(cfg.valor>P_VALOR_MAX)return 'O valor passa de '+precoFmt('BRL',P_VALOR_MAX)+'. Confira se nao sobrou um zero.';
+  if(cfg.valor<=0)return 'O valor "'+cfg.valorBruto+'" arredonda para zero. O Pix cobra em centavos, então o mínimo é R$ 0,01. Um código Pix com valor zero deixa o pagador digitar o que quiser -- que é exatamente o que esta aba existe para impedir.';
+  if(cfg.valor>P_VALOR_MAX)return 'O valor passa de '+precoFmt('BRL',P_VALOR_MAX)+'. Confira se não sobrou um zero.';
   /* ===== O SINAL DESTA COBRANCA =====
      Quatro recusas, e as quatro tem nome proprio. Elas vem DEPOIS das do valor de proposito:
      o sinal sai do valor, e recusar o sinal antes de saber se o valor existe mandaria o
@@ -916,37 +916,37 @@ function pRecusaCobranca(cfg){
      e a mesma classe de defeito que assumir um centavo no lugar do valor que falta.
      SINAL MAIOR QUE O TOTAL E RECUSADO, nao aparado: aparar cobraria um valor que o operador
      nao configurou -- a mesma regra do sinalRecusa() das abas com carrinho. */
-  if(pSinalOn(cfg)&&pSinalTipo(cfg)==='pct'&&!pSinalPct(cfg))return 'Informe o percentual do sinal (de '+P_SINAL_PCT_MIN+' a '+P_SINAL_PCT_MAX+'), ou volte a cobrar o valor cheio nesta cobranca.';
-  if(pSinalOn(cfg)&&pSinalTipo(cfg)==='fixo'&&!pSinalFixo(cfg))return 'Informe o valor fixo do sinal (no minimo R$ 0,01), ou volte a cobrar o valor cheio nesta cobranca.';
-  if(pSinalOn(cfg)&&pSinalValor(cfg)<0.01)return 'O sinal desta cobranca arredonda para zero. O Pix cobra em centavos, entao o minimo e R$ 0,01: escolha um sinal maior ou um valor maior.';
-  if(pSinalOn(cfg)&&pSinalValor(cfg)>cfg.valor)return 'O sinal ('+precoFmt('BRL',pSinalValor(cfg))+') e maior que o valor da cobranca ('+precoFmt('BRL',cfg.valor)+'). Um sinal maior que o total nao e aparado: ele cobraria um numero que voce nao configurou. Baixe o sinal ou aumente o valor.';
+  if(pSinalOn(cfg)&&pSinalTipo(cfg)==='pct'&&!pSinalPct(cfg))return 'Informe o percentual do sinal (de '+P_SINAL_PCT_MIN+' a '+P_SINAL_PCT_MAX+'), ou volte a cobrar o valor cheio nesta cobrança.';
+  if(pSinalOn(cfg)&&pSinalTipo(cfg)==='fixo'&&!pSinalFixo(cfg))return 'Informe o valor fixo do sinal (no mínimo R$ 0,01), ou volte a cobrar o valor cheio nesta cobrança.';
+  if(pSinalOn(cfg)&&pSinalValor(cfg)<0.01)return 'O sinal desta cobrança arredonda para zero. O Pix cobra em centavos, então o mínimo é R$ 0,01: escolha um sinal maior ou um valor maior.';
+  if(pSinalOn(cfg)&&pSinalValor(cfg)>cfg.valor)return 'O sinal ('+precoFmt('BRL',pSinalValor(cfg))+') é maior que o valor da cobrança ('+precoFmt('BRL',cfg.valor)+'). Um sinal maior que o total não é aparado: ele cobraria um número que você não configurou. Baixe o sinal ou aumente o valor.';
   /* O DESCONTO NO PIX. Ele e opcional: campo vazio ou zero = link sem desconto, exatamente como
      antes de ele existir. O que se recusa e o desconto que derruba o Pix abaixo de um centavo --
      o Pix cobra em centavos, e um payload de valor zero nem passaria na propria conferencia
      (pConferir), com uma frase que falaria do codigo montado em vez de falar do desconto. O
      defeito mais especifico e o que deve ser nomeado. */
-  if(pDescPct(cfg)>0&&pValorPix(cfg)<0.01)return 'O desconto de '+pDescPct(cfg)+'% derruba o valor do Pix para menos de um centavo (o total e '+precoFmt('BRL',cfg.valor)+'). O Pix cobra em centavos, entao o minimo e R$ 0,01: escolha um desconto menor ou um valor maior.';
+  if(pDescPct(cfg)>0&&pValorPix(cfg)<0.01)return 'O desconto de '+pDescPct(cfg)+'% derruba o valor do Pix para menos de um centavo (o total é '+precoFmt('BRL',cfg.valor)+'). O Pix cobra em centavos, então o mínimo é R$ 0,01: escolha um desconto menor ou um valor maior.';
   /* A validade e opcional: campo vazio = link sem prazo, como antes de ela existir. O que se
      recusa e data que a ferramenta nao entendeu, e data JA VENCIDA -- um link que nasce
      vencido chega ao cliente como uma pagina que nao mostra o pagamento, e o operador so
      descobre pelo cliente. Aqui o relogio consultado e o do PROPRIO operador, que e o mesmo
      limite declarado do outro lado: sem servidor, a hora vem sempre de um aparelho. */
-  if(String(cfg.valbruto).replace(/\s/g,'')&&cfg.valdia===P_VAL_NADA)return 'Nao entendi a data "'+cfg.valbruto+'" em "Valido ate". Escolha uma data no calendario do campo, ou apague o campo para gerar um link sem prazo.';
+  if(String(cfg.valbruto).replace(/\s/g,'')&&cfg.valdia===P_VAL_NADA)return 'Não entendi a data "'+cfg.valbruto+'" em "Válido até". Escolha uma data no calendário do campo, ou apague o campo para gerar um link sem prazo.';
   /* A ORDEM DAS DUAS RECUSAS importa, e e esta: primeiro "ja passou", depois "longe demais".
      Data no passado tambem esta fora da faixa que prazoDia le (01/01/1970 e o dia zero, e a
      faixa comeca no dia 1), e se a faixa fosse conferida antes, 01/01/1970 sairia com a recusa
      "longe demais" -- que e falsa, e mandaria o operador procurar um digito a mais no ano de
      uma data que ele digitou inteira. Vencida primeiro, e sobra para "longe demais" so o que e
      mesmo longe: data FUTURA alem de 31/12/2099. */
-  if(cfg.valdia!==P_VAL_NADA&&(new Date()).getTime()>pSeloApi().prazoFim(cfg.valdia))return 'A data "Valido ate" ('+pValTexto(cfg)+') ja passou. O link nasceria vencido: o cliente abriria a pagina e ela nao mostraria o pagamento. Escolha hoje ou uma data adiante, ou apague o campo para gerar um link sem prazo.';
+  if(cfg.valdia!==P_VAL_NADA&&(new Date()).getTime()>pSeloApi().prazoFim(cfg.valdia))return 'A data "Válido até" ('+pValTexto(cfg)+') já passou. O link nasceria vencido: o cliente abriria a página e ela não mostraria o pagamento. Escolha hoje ou uma data adiante, ou apague o campo para gerar um link sem prazo.';
   /* A ida e volta pela MESMA prazoDia que a pagina publicada roda. Sem ela, uma data absurda
      (ano 9999, digitada por engano num campo de data) sairia daqui num link que a propria
      pagina do dono recusaria -- a divergencia "a ferramenta diz sim e a pagina diz nao" que
      esta aba ja pagou uma vez, no endereco do PayPal. */
-  if(cfg.valdia!==P_VAL_NADA&&pSeloApi().prazoDia(pValCod(cfg))!==cfg.valdia)return 'A data "Valido ate" ('+pValTexto(cfg)+') esta longe demais: a pagina de pagamento so sabe ler prazos ate 31/12/2099, e recusaria este link. Confira se nao sobrou um digito no ano. Escolha uma data mais proxima, ou apague o campo para gerar um link sem prazo.';
-  if(cfg.ppmodo==='link'&&!cfg.pplink)return 'Cole o endereco do link de cobranca criado no PayPal, ou escolha outro modo de PayPal para esta cobranca.';
-  if(cfg.ppmodo==='link'&&!pEncOk(cfg.pplink))return 'O endereco do PayPal tem um caractere que o link nao consegue carregar, e ele pode estar invisivel na tela. Apague o campo e cole o endereco de novo. Nenhum link foi gerado.';
-  if(cfg.ppmodo==='link'&&!pPpHostOk(cfg.pplink))return 'O link de cobranca do PayPal precisa comecar com https:// e ser de um endereco do proprio PayPal ('+P_PP_HOSTS.join(', ')+'). Um link de pagamento apontando para outro lugar e dinheiro indo para outro lugar.\n\nEspaco, quebra de linha, tabulacao ou barra invertida NO MEIO do endereco tambem sao recusados, e podem estar invisiveis: costumam vir junto ao copiar de um PDF ou de um e-mail. Se o endereco parece certo, apague e digite de novo. Esta e a mesma conferencia que a pagina publicada faz -- se ela passasse aqui e falhasse la, o cliente e que ficaria sem o botao.';
+  if(cfg.valdia!==P_VAL_NADA&&pSeloApi().prazoDia(pValCod(cfg))!==cfg.valdia)return 'A data "Válido até" ('+pValTexto(cfg)+') está longe demais: a página de pagamento só sabe ler prazos até 31/12/2099, e recusaria este link. Confira se não sobrou um dígito no ano. Escolha uma data mais próxima, ou apague o campo para gerar um link sem prazo.';
+  if(cfg.ppmodo==='link'&&!cfg.pplink)return 'Cole o endereço do link de cobrança criado no PayPal, ou escolha outro modo de PayPal para esta cobrança.';
+  if(cfg.ppmodo==='link'&&!pEncOk(cfg.pplink))return 'O endereço do PayPal tem um caractere que o link não consegue carregar, e ele pode estar invisível na tela. Apague o campo e cole o endereço de novo. Nenhum link foi gerado.';
+  if(cfg.ppmodo==='link'&&!pPpHostOk(cfg.pplink))return 'O link de cobrança do PayPal precisa começar com https:// e ser de um endereço do próprio PayPal ('+P_PP_HOSTS.join(', ')+'). Um link de pagamento apontando para outro lugar é dinheiro indo para outro lugar.\n\nEspaço, quebra de linha, tabulação ou barra invertida NO MEIO do endereço também são recusados, e podem estar invisíveis: costumam vir junto ao copiar de um PDF ou de um e-mail. Se o endereço parece certo, apague e digite de novo. Esta é a mesma conferência que a página publicada faz -- se ela passasse aqui e falhasse lá, o cliente é que ficaria sem o botão.';
   return '';
 }
 
@@ -1014,11 +1014,11 @@ function pPayload(cfg){
    vai rodar, entao o que passa aqui passa la. */
 function pConferir(cfg,codigo){
   var api=fcPixApi(),lido=api.pixLer(codigo),alvo=pValorPix(cfg);
-  if(!lido.ok)return 'O codigo Pix montado para esta cobranca nao passou na propria conferencia ('+lido.erro+'). Nenhum link foi gerado. Confira a chave, o nome e a cidade.';
+  if(!lido.ok)return 'O código Pix montado para esta cobrança não passou na própria conferência ('+lido.erro+'). Nenhum link foi gerado. Confira a chave, o nome e a cidade.';
   /* COM DESCONTO, o alvo e o valor JA DESCONTADO -- e o que vai dentro do codigo Pix. Comparar
      com o total aqui recusaria toda cobranca com desconto; comparar com o desconto sem dizer
      isso ao operador faria a frase mentir sobre qual numero nao bateu. */
-  if(Math.abs(lido.valor-alvo)>0.0001)return 'O valor dentro do codigo Pix ('+precoFmt('BRL',lido.valor)+') nao bate com o valor que esta cobranca cobra no Pix ('+precoFmt('BRL',alvo)+'). Nenhum link foi gerado.';
+  if(Math.abs(lido.valor-alvo)>0.0001)return 'O valor dentro do código Pix ('+precoFmt('BRL',lido.valor)+') não bate com o valor que esta cobrança cobra no Pix ('+precoFmt('BRL',alvo)+'). Nenhum link foi gerado.';
   return '';
 }
 /* ===== a consulta do link: UMA montagem =====

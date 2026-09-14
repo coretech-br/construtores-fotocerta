@@ -133,8 +133,43 @@ const soDoBloco = e => e.filter(x => !RUIDO.some(re => re.test(x)));
    dois sao EXPANDIDOS, cada um montando as mesmas linhas que a funcao dele monta. */
 const SINAL_TXT = [['garante','txtSinalGarante'],['desistir','txtSinalDesistir'],
                    ['saldo','txtSinalSaldo']];
+
+/* AS DEZ LINHAS DO WHATSAPP saem de fcZapTxtDefs desde 13/09/2026 (leva 4) -- eram trinta
+   linhas manuscritas em tres tabelas. O concat delas fica NO MEIO da tabela, e nao no fim:
+   '].concat(fcZapTxtDefs('u')).concat([', exatamente onde as dez estavam, para a ordem da busca
+   "Achar um texto" nao mudar. Isso quebra o parser do mesmo jeito que o comentario acima
+   registra: o '[\s\S]*?' para no ']' do meio, a tabela e lida pela metade, e os campos que vem
+   DEPOIS dele passam a ser atribuidos a tabela seguinte -- foram 22 campos acusados de estar na
+   aba errada na primeira execucao depois da leva 4.
+   O conserto e o mesmo que o arquivo ja usava para os outros dois concats: EXPANDIR a chamada
+   nas mesmas linhas que a funcao monta, antes de parsear. Aqui a expansao e literal, e nao
+   opcional na expressao, porque este concat fica no meio e nao no fim. Os dois pontos em que a
+   aba pac diverge sao parametro da funcao, e por isso sao lidos da propria chamada. */
+const ZAP_SUF = ['abertura','abertura-sinal','pedido','cupom','descpix','total','sinal','saldo','valor'];
+const ZAP_CHAVE = ['txtZapAbertura','txtZapAberturaSinal','txtZapPedido','txtZapCupom',
+                   'txtZapDescPix','txtZapTotal','txtZapSinal','txtZapSaldo','txtZapValor'];
+function expandirZap(html){
+  /* O concat do meio ABRE um parentese que so fecha no FIM da tabela ('  ]).concat(fcSinal...').
+     Expandir so o comeco deixaria esse ')' orfao no final, e o parser -- que espera '\n]' seguido
+     dos concats conhecidos -- nao reconheceria o fim da tabela: ele seguiria ate o fim da tabela
+     SEGUINTE e atribuiria os campos dela a esta. Foi exatamente o que aconteceu na primeira
+     tentativa desta correcao. Entao a expansao desfaz os DOIS lados. */
+  return html.replace(/\n\]\)\.concat\(/g, '\n].concat(')
+    .replace(/\]\.concat\(fcZapTxtDefs\('([a-z])'(?:,\{([^}]*)\})?\)\)\.concat\(\[/g,
+    (todo, pref, opts) => {
+      const o = opts || '';
+      const chaveBt = (/botaoChave:'([^']+)'/.exec(o)||[,'txtZapBotao'])[1];
+      const sufBt   = (/botaoSuf:'([^']+)'/.exec(o)||[,'botao'])[1];
+      let linhas = "  ['"+chaveBt+"','"+pref+"-txt-zap-"+sufBt+"',0],\n";
+      for(let i=0;i<ZAP_SUF.length;i++)
+        linhas += "  ['"+ZAP_CHAVE[i]+"','"+pref+"-txt-zap-"+ZAP_SUF[i]+"',0],\n";
+      return linhas;
+    });
+}
+
 function tabelasDoArquivo(html){
   const m = {};
+  html = expandirZap(html);
   const obVars = nome => {
     const b = new RegExp('var '+nome+'_OB_VARS=\\[([\\s\\S]*?)\\n\\];').exec(html);
     return b ? Array.from(b[1].matchAll(/\{id:'([^']+)'/g)).map(x => x[1]) : [];
