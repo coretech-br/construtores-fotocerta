@@ -1276,3 +1276,65 @@ Quem o pega é comparar com uma conta **exata**, e é o que `centavo-do-desconto
 A primeira versão de `centavo-do-desconto.mjs` chamava `new Function()` **dentro do laço** — 79
 milhões de compilações, mais de dez minutos, e o custo era todo do compilador. Compilado uma vez:
 **4 segundos**, medindo exatamente o mesmo.
+
+## Entregue em 13/09/2026 — unificar as abas de pagamento, leva 4 (configuração e textos)
+
+Catorze itens feitos, três **justificados** e deixados como estavam, quatro declarados com a
+medição sem mexer, **três parados esperando a palavra do dono**.
+
+**Duas divergências**, as duas `m-out` (+73 bytes). **Nenhum link e nenhuma cobrança mudaram.**
+
+### O item que saiu na direção oposta à primeira leitura
+
+Eu tinha catalogado como defeito a máquina de cupom ser emitida **sem cupom cadastrado** em `u` e
+`a`, com a Mini loja "fazendo certo" ao recortá-la. **A justificativa escrita estava do outro lado,
+em três abas:** *a lista `CUPONS` é editável dentro do bloco publicado*, e amarrar o bloco à
+configuração do momento de gerar já custou uma rodada a este projeto.
+
+Quem estava fora do padrão era a Mini loja. Custo medido, não estimado: bloco sem cupom cadastrado
+vai de **43.415 para 46.975 caracteres (+8,2%)**. Em troca, o cupom escrito à mão dentro do bloco
+publicado volta a funcionar — caminho que o recorte matava em silêncio.
+
+**A lição:** a varredura marcou "não" na coluna de justificativa porque **não leu a documentação
+inteira** — e declarou esse limite. Ler a justificativa antes de arrumar inverteu o conserto.
+
+### Correção a uma premissa minha
+
+Eu disse que o prefixo sujo do Agendamento **consumia orçamento errado** na conta do identificador.
+**Não consumia:** `fcIdUteis` limpa antes de contar, igual ao bloco. O que passava calado era só o
+caractere — real, mas menor do que eu descrevi.
+
+### Justificados — divergência que é decisão
+
+- **`a` exigir WhatsApp**: a regra é a mesma das irmãs ("exija o que o bloco usa"); ali o `botaoZap`
+  escreve três botões, dois deles recados de recusa que existem em qualquer forma de pagamento.
+- **`u-cod` vazio cair em `'PEDIDO'`**: comentário em `uRecusa` explica.
+- **Só a Mini loja dar retorno visual** depois do clique: só ela guarda cesta; nas outras não há o
+  que esvaziar.
+
+### Declarados com a medição, sem mudar código
+
+Onde moram os textos do sinal (mover campo é leva 5); as duas mecânicas do botão (cada forma tem
+medição própria — trocar joga uma prova fora sem o cliente ver diferença); a mensagem da `/pagar`
+(não há carrinho: nove campos dariam sete sem consumidor); e a `description` do PayPal (cortada em
+127; o registro é `items[]`, idêntico nas três desde a leva 3).
+
+### Achados fora da lista, resolvidos
+
+Nove textos eram literais escritos à mão em duas ou três tabelas, **todos concordando** — viraram
+entradas de `FC_TXT_FABRICA`. *Cópia que concorda hoje é a que diverge amanhã.*
+
+E o contador de limite podia **mentir** quando o valor chega sem teclado (limpar, editar, duplicar
+pacote, aplicar preset da aba e preset geral): cinco chamadas que faltavam.
+
+### PARADO — precisa da palavra do dono
+
+1. **`CHAVE_PIX` da aba `pac`.** Quatro das cinco linhas passaram a ler do `cfg` (byte a byte
+   idênticas). A quinta não: `cfg.chave` passa por `pixLimpar` e `fciVal` por `fcTrim`, que aparam
+   conjuntos **diferentes** de invisíveis — trocar mexeria no **payload**. Achado junto, e é o mais
+   sério: hoje `aRecusa` valida a versão limpa e o gerador emite a outra. **Quem tiver invisível na
+   ponta da chave Pix é validado por uma string e cobrado por outra.**
+2. **Renomear `txtPixRotulo` (dois significados) e o `t4` da `/pagar`.** Renomear chave **zera o
+   campo de quem já customizou** — atinge backup em arquivo.
+3. **Qual frase de "código copiado" as quatro vão dizer.** A fonte já é única; escolher o texto é
+   redação para o cliente.
