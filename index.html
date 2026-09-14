@@ -1939,7 +1939,7 @@
         <label for="u-txt-pix-copiar">Botão de copiar o código</label>
         <input type="text" id="u-txt-pix-copiar" value="Copiar código Pix">
         <label for="u-txt-pix-copiado">Código copiado com sucesso</label>
-        <input type="text" id="u-txt-pix-copiado" value="Código copiado!">
+        <input type="text" id="u-txt-pix-copiado" value="Código copiado! Cole no aplicativo do seu banco.">
         <label for="u-txt-nota">Aviso para conferir o recebedor</label>
         <input type="text" id="u-txt-nota" value="Confira o nome do recebedor antes de confirmar o pagamento">
         <label for="u-txt-pix-manual">Aviso de que o Pix não confirma sozinho <small>(só com o botão “Já paguei” ligado)</small></label>
@@ -3465,7 +3465,7 @@
         <label for="m-txt-pix-copiar">Botão de copiar o código</label>
         <input type="text" id="m-txt-pix-copiar" value="Copiar código Pix">
         <label for="m-txt-pix-copiado">Código copiado com sucesso</label>
-        <input type="text" id="m-txt-pix-copiado" value="Código copiado!">
+        <input type="text" id="m-txt-pix-copiado" value="Código copiado! Cole no aplicativo do seu banco.">
         <label for="m-txt-nota">Aviso para conferir o recebedor</label>
         <input type="text" id="m-txt-nota" value="Confira o nome do recebedor antes de confirmar o pagamento">
         <label for="m-txt-pix-manual">Aviso de que o Pix não confirma sozinho <small>(só com o botão “Já paguei” ligado)</small></label>
@@ -4591,18 +4591,25 @@ var FC_TXT_FABRICA={
   ouDesc:'OU',
   cartaoLinha:FC_ORD_PARES.cartaoLinha.pix,
   pixVal:'Valor no Pix',
-  pixCopiado:'Código copiado!',
-  /* AS DUAS CONFIRMACOES DE COPIA, e por que sao DUAS entradas e nao uma (leva 4, 13/09/2026).
-     Ate esta rodada existiam DUAS FABRICAS para o mesmo instante: 'Código copiado!' saia de
-     FC_TXT_FABRICA no Checkout e na Mini loja, e 'Código copiado! Cole no aplicativo do seu
-     banco.' estava escrita A MAO em A_TXT_DEFS e outra vez em P_TXT_DEFS -- duas copias
-     manuscritas da mesma frase, que e exatamente o que esta tabela existe para impedir. As
-     duas copias viraram uma entrada; a frase de cada aba NAO foi trocada, e a razao esta aqui:
-     trocar qualquer uma das duas mudaria o texto que o CLIENTE le em duas paginas ja
-     publicadas, e escolha de redacao para o cliente e da leva de aparencia, com a palavra do
-     dono. O que esta rodada devia consertar -- a frase escrita duas vezes -- esta consertado.
-     Quem quiser as quatro dizendo a mesma coisa troca UM valor aqui, e as quatro seguem. */
-  pixCopiadoCola:'Código copiado! Cole no aplicativo do seu banco.',
+  /* A CONFIRMACAO DE COPIA, UMA SO NAS QUATRO ABAS (14/09/2026, decisao do dono).
+     ERAM DUAS ENTRADAS ate aqui: 'Código copiado!' (Checkout e Mini loja) e 'Código copiado!
+     Cole no aplicativo do seu banco.' (Agendamento por pacote e Link de cobranca). A leva 4
+     ja tinha acabado com as COPIAS MANUSCRITAS da frase longa, mas deixou duas fabricas para o
+     mesmo instante, esperando a decisao de redacao. Ela veio, e e a longa, pela razao dele: e
+     o momento em que o cliente esta prestes a SAIR DA PAGINA -- para o aplicativo do banco --,
+     e a frase diz o que fazer em seguida. Com um valor so, a SEGUNDA entrada deixou de ter
+     motivo para existir e foi removida: duas entradas com a mesma string sao duas fabricas
+     para divergir amanha, que e o que esta tabela existe para impedir.
+     QUEM JA PERSONALIZOU O CAMPO NAO E TOCADO, E AQUI ISSO E O DESEJADO -- nao um descuido.
+     Os campos de texto sao gravados a cada tecla, entao o estado do dono ja contem a frase
+     curta e valor gravado vence padrao de fabrica: o Checkout e a Mini loja DELE continuarao
+     dizendo "Código copiado!". Esta rodada NAO da migracao a esta troca, ao contrario do que
+     fcSepNeutro fez com o separador "OU" no mesmo mes, e a diferenca e de FATO, nao de esforco:
+     o separador antigo ("ou pague com cartão") ficaria ERRADO depois da decisao do meio
+     prioritario, apontando para um lado que podia nem estar la; a frase curta continua
+     CERTA -- so mais curta. Reescrever em silencio um texto que o dono ve na tela dele e o que
+     esta ferramenta nao faz sem um motivo que o obrigue. Nao copie a migracao por analogia. */
+  pixCopiado:'Código copiado! Cole no aplicativo do seu banco.',
   /* Estava escrita a mao nas mesmas duas tabelas, e nem sequer divergia -- fonte unica mesmo
      quando as copias concordam: copia que concorda hoje e a que diverge amanha, sem aviso. */
   pixNaocopiou:'Não consegui copiar. Selecione o código acima e copie na mão.',
@@ -4961,6 +4968,40 @@ function fcZapSaldoMigrar(st,fabricaT9){
   var r={},k;
   for(k in st)if(Object.prototype.hasOwnProperty.call(st,k))r[k]=st[k];
   r.txtZapSaldo=st.t9+': *{valor}*';
+  return r;
+}
+/* ===== RENOMEAR UMA CHAVE DE TEXTO SEM ZERAR O CAMPO DE QUEM PERSONALIZOU (14/09/2026) =====
+   Renomear a chave de um campo de texto e, sozinho, uma PERDA SILENCIOSA: fcTxtRestaura cai no
+   padrao de fabrica quando a chave nao existe no estado, entao o texto que o dono escreveu
+   desapareceria na primeira abertura -- e isso alcanca tambem o backup em arquivo que ele ja
+   tem guardado, que e a classe que espera a palavra dele. Ela veio, e a conversao e o preco.
+   MESMO MOLDE DE fcZapSaldoMigrar, e a regra e a mesma: so age quando a chave NOVA esta
+   AUSENTE e a ANTIGA existe. Estado que ja tem a nova e escolha do dono e nao se toca;
+   idempotente por construcao (depois de migrar, a nova existe).
+   ESTA FUNCAO SO ACRESCENTA -- ela nao apaga a chave antiga. Mas a antiga NAO SOBREVIVE, e
+   isto foi MEDIDO e nao suposto: coleta() reescreve o fragmento inteiro da aba com as chaves
+   da tabela, entao na primeira gravacao seguinte (a primeira tecla em qualquer campo) a chave
+   velha some do localStorage. O que isso significa, dito inteiro:
+     - o BACKUP EM ARQUIVO do dono nao e tocado por nada disto, e continua trazendo a chave
+       antiga -- importa-lo daqui a um ano continua convertendo, porque a conversao roda no
+       restaura e nao numa migracao de uma vez so;
+     - a janela que se perde e a de uma COPIA VELHA da ferramenta em cache aberta DEPOIS de a
+       nova ter gravado. Essa janela existe para toda chave que ja nasceu nesta ferramenta, o
+       carimbo de publicacao existe justamente para denuncia-la, e mante-la fechada exigiria
+       coleta() emitir tambem os nomes velhos -- maquinaria permanente por um caso transitorio.
+   Nao se apaga a antiga a mao aqui de qualquer forma: quem escreve o estado e coleta(), e uma
+   remocao explicita seria uma segunda ideia de quem manda no formato gravado.
+   NAO HA aqui a conferencia de "valor de fabrica antigo vira o de fabrica novo" que
+   fcZapSaldoMigrar faz, e a razao e que nos DOIS usos desta rodada a fabrica nao mudou: 'Pix'
+   continua 'Pix' e 'Ja paguei' continua 'Ja paguei'. Copiar cobre o caso de fabrica sem
+   precisar cita-lo. Se um dia a fabrica mudar junto com o nome, este molde nao serve sozinho. */
+function fcTxtChaveMigrar(st,antiga,nova){
+  if(!st||typeof st!=='object')return st;
+  if(st[nova]!=null)return st;
+  if(st[antiga]==null)return st;
+  var r={},k;
+  for(k in st)if(Object.prototype.hasOwnProperty.call(st,k))r[k]=st[k];
+  r[nova]=st[antiga];
   return r;
 }
 /* A ORDEM QUE OS CAMPOS DA TELA REFLETEM AGORA. Nao se le do radio: no instante em que o
@@ -17595,17 +17636,25 @@ var A_TXT_DEFS=[
   ['txtSucesso','a-txt-sucesso',FC_TXT_FABRICA.sucessoCurto],
   ['txtErroComPix','a-txt-erro-compix',FC_ORD_PARES.erroComPix.pix],
   ['txtErroSemPix','a-txt-erro-sempix','Não foi possível carregar o pagamento por cartão agora. Fale com a gente para receber outra forma de pagar.'],
-  /* A UNICA CHAVE DESTA FERRAMENTA COM DOIS SIGNIFICADOS, e esta escrito para que nenhuma
-     varredura futura por chave conclua sozinha que as quatro abas discordam do mesmo texto:
-     AQUI 'txtPixRotulo' e o TITULO DA SECAO do Pix (fabrica 'Pix', a mesma de p-txt-secao-pix);
-     no Checkout, na Mini loja e no Link de cobranca a MESMA chave e a LINHA DO PRECO com
-     desconto ('Pagando via Pix (-{pct}%)'). Nesta aba essa linha nao existe -- quem anuncia o
-     desconto e o SELO da vitrine (txtSeloPix).
-     MEDIDO NA LEVA 4 (13/09/2026) E DEIXADO COMO ESTA. O conserto e renomear a chave para
-     'txtSecaoPix', e renomear chave RESETA o campo de quem ja customizou o titulo: fcTxtRestaura
-     cai no padrao quando a chave nao existe no estado, e isso atinge backup em arquivo que o
-     dono ja tem. Formato do que fica gravado e a classe que espera a palavra dele. */
-  ['txtPixRotulo','a-txt-pix-rotulo',FC_TXT_FABRICA.secaoPix],
+  /* RENOMEADA EM 14/09/2026 (leva 6, palavra do dono). Ate aqui esta chave se chamava
+     'txtPixRotulo' e era A UNICA DESTA FERRAMENTA COM DOIS SIGNIFICADOS: aqui o TITULO DA
+     SECAO do Pix; no Checkout, na Mini loja e no Link de cobranca a LINHA DO PRECO com desconto
+     ('Pagando via Pix (-{pct}%)'). Uma varredura por chave concluia sozinha que as quatro abas
+     discordavam do mesmo texto, e concluia errado.
+     POR QUE 'txtSecaoPix' E NAO UM TERCEIRO NOME: o Link de cobranca ja chama exatamente este
+     texto por exatamente este nome ('txtSecaoPix', campo p-txt-secao-pix), e as duas fabricas
+     ja sao a MESMA entrada (FC_TXT_FABRICA.secaoPix). Inventar um nome novo criaria um terceiro
+     vocabulario para um papel so; adotando o da irma, um grep por chave devolve os dois campos
+     que de fato sao a mesma coisa -- e 'txtPixRotulo' passa a significar UMA coisa em toda a
+     ferramenta. Nesta aba a linha do preco nao existe: quem anuncia o desconto e o SELO da
+     vitrine (txtSeloPix).
+     O ID DO CAMPO CONTINUA 'a-txt-pix-rotulo', de proposito: o id nao e persistido (estado,
+     preset e backup carregam a PRIMEIRA coluna), e renomea-lo faria cenario.mjs -- que em
+     regressao.sh dirige as DUAS arvores, a de referencia inclusive -- estourar 'sem campo'
+     contra qualquer referencia anterior a esta rodada. Nome bonito de handle interno nao vale
+     uma comparacao que nao roda.
+     QUEM LEVA O VALOR GRAVADO ATE O NOME NOVO e fcTxtChaveMigrar, chamada em aRestaura. */
+  ['txtSecaoPix','a-txt-pix-rotulo',FC_TXT_FABRICA.secaoPix],
   ['txtPixGerar','a-txt-pix-gerar','Gerar Pix'],
   ['txtPixCopiar','a-txt-pix-copiar',FC_TXT_FABRICA.pixCopiar],
   ['txtPixInstrucao','a-txt-pix-instrucao',FC_TXT_FABRICA.pixInstrucao],
@@ -17619,7 +17668,7 @@ var A_TXT_DEFS=[
      QUEM JA TINHA A FRASE ANTIGA GRAVADA NAO A PERDE: fcTxtRestaura so cai na terceira coluna
      quando a chave nao existe no estado, e 'txtPixManual' e gravado por aColeta desde 02/09. */
   ['txtPixManual','a-txt-pix-manual',FC_TXT_FABRICA.pixManual],
-  ['txtPixCopiado','a-txt-pix-copiado',FC_TXT_FABRICA.pixCopiadoCola],
+  ['txtPixCopiado','a-txt-pix-copiado',FC_TXT_FABRICA.pixCopiado],
   ['txtPixNaocopiou','a-txt-pix-naocopiou',FC_TXT_FABRICA.pixNaocopiou],
   ['txtOu','a-txt-ou',FC_TXT_FABRICA.ou],
   ['txtCartaoRotulo','a-txt-cartao-rotulo','Cartão de crédito ou débito'],
@@ -18703,6 +18752,11 @@ function aRestaura(st){
      mesma da ordem de fabrica de hoje -- o laco de fcOrdMigrar e um no-op aqui, de proposito
      (a regra e uma so para as quatro abas). */
   var A=fcOrdMigrar(st.a,'a','pix'),el,elc,k,i,migrouCal=false,movidos=0,reparouOrfao=0,reparouNome=0,partes;
+  /* O titulo da secao Pix trocou de nome em 14/09/2026 ('txtPixRotulo' -> 'txtSecaoPix'). Sem
+     esta linha, quem personalizou o titulo perderia o texto na primeira abertura -- ver
+     fcTxtChaveMigrar. Nao e calado no codigo, mas tambem nao precisa de aviso na tela: o campo
+     volta com o texto DELE, que e o que ele esperava ver. */
+  A=fcTxtChaveMigrar(A,'txtPixRotulo','txtSecaoPix');
   var tinhaFamilias=(A.familias!=null);
   /* ===== migracao v2 -> v3: as FAMILIAS de pacotes (03/09/2026) =====
      Mesmo molde da migracao link->path logo abaixo: converter na hora do restaura, com a mesma
@@ -19860,15 +19914,25 @@ function aBlocoObrigado(cfg){
   c+='var PRAZOH='+cfg.prazoh+';   /* horas de reserva, a partir da primeira visita a esta pagina */\n';
   if(usaQtd)c+='var QUANTIDADE_MAXIMA='+cfg.qtdmax+';   /* teto do seletor de quantidade; o seletor vai de 0 ate ele, e 0 = item nao escolhido */\n';
   c+="var MOEDA='BRL';                     /* o Pix so existe em BRL, e o cartao segue o mesmo pedido */\n";
-  /* A CHAVE E A UNICA DAS CINCO QUE CONTINUA SAINDO DE fciVal, e isto esta ESCRITO porque e
-     divergencia conhecida e nao descuido: cfg.chave passa por pixLimpar (que apara tambem
-     invisiveis de controle, \u00AD, \u200B-\u200F, \u2060) e fciVal passa por fcTrim (que apara so
-     o que \s cobre). Trocar aqui mudaria o PAYLOAD numa chave com invisivel na ponta -- classe
-     que o dono pediu para ser avisado ANTES. Medido e registrado em 13/09/2026, com a nota de
-     que aRecusa ja confere a versao limpa: quem tiver invisivel na chave e validado por uma
-     string e cobrado por outra. Esta linha espera a palavra do dono. As outras quatro trocaram
-     e sao byte a byte identicas (cfg.nomer === fciVal('nomer'), e assim por diante). */
-  c+="var CHAVE_PIX='"+escJs(fciVal('chave'))+"';\n";
+  /* ===== A CHAVE SAI DE cfg.chave, COMO AS OUTRAS QUATRO (14/09/2026, palavra do dono) =====
+     Ate aqui esta linha usava fciVal, e as duas pontas aparavam conjuntos DIFERENTES de
+     invisiveis: fcTrim apara so o que \s cobre; pixLimpar apara tambem \u0000-\u001F, \u007F,
+     \u00AD, \u200B-\u200F e \u2060. Como aRecusa valida cfg.chave -- que ja passou por
+     pixLimpar --, uma chave com invisivel na ponta era VALIDADA por uma string e COBRADA por
+     outra. Classe que mexe no PAYLOAD, e por isso esperou a palavra dele.
+     QUAL LIMPEZA GANHOU, E POR QUE: pixLimpar. Ela e a que ja governa o payload (o BR Code do
+     bloco entregue nasce dela, em montarPayload), a que pixChaveErro confere, a que
+     fcChaveCorrigida escreve de volta no campo e a que a /cobrar usa nas duas pontas. Escolher
+     fcTrim seria trocar a limpeza do PAGAMENTO pela limpeza generica de formulario, e deixar
+     entrar no BR Code exatamente os invisiveis que fazem tlv() (UTF-16) e o banco (UTF-8)
+     discordarem de comprimento -- o motivo pelo qual pixLimpar existe.
+     ATE ONDE A DIVERGENCIA ALCANCAVA, MEDIDO ANTES DO CONSERTO: aGerar chama
+     fcPixChaveAjustar('fci-chave') antes de aCfg(), entao a saida da TEXTAREA ja saia limpa.
+     Quem NAO chama e a PREVIA -- aPvMontar e aPvObMontar leem aCfg() direto --, e era ela que
+     executava um bloco com a chave suja logo depois de aRecusa ter aceitado a limpa. O estado
+     que alcanca isso e o restaurado: fciEscrever escreve no campo sem disparar evento nenhum,
+     entao identidade gravada com invisivel volta suja para a tela. */
+  c+="var CHAVE_PIX='"+escJs(cfg.chave)+"';\n";
   c+="var NOME_RECEBEDOR='"+escJs(cfg.nomer)+"';\n";
   c+="var CIDADE='"+escJs(cfg.cidade)+"';\n";
   c+="var PAYPAL_CLIENT_ID='"+escJs(cfg.client)+"';\n";
@@ -20543,7 +20607,7 @@ function aBlocoObrigado(cfg){
   c+='  var sep=document.createElement("div");sep.className="fca-ob-sep";sep.textContent="'+escJsD(cfg.txtOu)+'";cartao.appendChild(sep);\n';
   }
   c+='  var b=document.createElement("div");b.className="fca-ob-bloco'+(pixSegundo?' fca-ob-semtopo':'')+'";\n';
-  c+='  var r=document.createElement("div");r.className="fca-ob-rot";r.textContent="'+escJsD(cfg.txtPixRotulo)+'";b.appendChild(r);\n';
+  c+='  var r=document.createElement("div");r.className="fca-ob-rot";r.textContent="'+escJsD(cfg.txtSecaoPix)+'";b.appendChild(r);\n';
   c+='  var gerar=document.createElement("button");gerar.type="button";gerar.className="fca-ob-bt";gerar.textContent="'+escJsD(cfg.txtPixGerar)+'";b.appendChild(gerar);\n';
   c+='  var area=document.createElement("div");area.className="fca-ob-pixarea";\n';
   c+='  var ta=document.createElement("textarea");ta.className="fca-ob-cod";ta.setAttribute("readonly","readonly");area.appendChild(ta);\n';
@@ -22403,7 +22467,7 @@ var P_TXT_DEFS=[
      (fcTxtRestaura cai no padrao quando a chave nao existe no estado), e isso atinge backup em
      arquivo que o dono ja tem. Formato do que fica gravado e a classe que espera a palavra dele.
      O que a leva 4 unificou aqui foi a FABRICA, que e o que estava escrito duas vezes. */
-  ['txtCopiado','p-txt-copiado',FC_TXT_FABRICA.pixCopiadoCola],
+  ['txtCopiado','p-txt-copiado',FC_TXT_FABRICA.pixCopiado],
   ['txtNaocopiou','p-txt-naocopiou',FC_TXT_FABRICA.pixNaocopiou],
   ['txtRef','p-txt-ref','Identificador da cobrança: '],
   /* D-2 (03/09/2026): a frase INTEIRA, com {pct}. Antes o campo valia so "Pagando via Pix" e
@@ -22459,14 +22523,22 @@ var P_TXT_DEFS=[
   ['t1','p-t1','Pagamento do seu ensaio'],
   ['t2','p-t2','Total a pagar'],
   ['t3','p-t3','Copiar código Pix'],
-  /* 't4' E O BOTAO "JA PAGUEI" -- o mesmo papel que 'txtZapBotao' tem no Checkout e na Mini
-     loja e 'txtZapPago' tem na Agendamento por pacote. Tres nomes para um botao so, e o desta
-     aba e o unico fora da familia 'txtZap*'. Mesmo registro de 'txtCopiado', acima: o conserto e
-     renomear a chave, e renomear chave RESETA o campo de quem ja customizou -- espera a palavra
-     do dono. O TEXTO DE FABRICA diverge de proposito ('Ja paguei' contra 'Ja paguei - avisar no
+  /* RENOMEADA EM 14/09/2026 (leva 6, palavra do dono): era 't4', e 't4' nao diz papel nenhum.
+     Este campo e O BOTAO "JA PAGUEI" que abre o WhatsApp -- o mesmo papel que 'txtZapBotao' tem
+     no Checkout e na Mini loja e que 'txtZapPago' tem na Agendamento por pacote. Eram TRES
+     nomes para um botao so, e este era o unico fora da familia 'txtZap*'.
+     POR QUE 'txtZapBotao': e o nome que as duas irmas ja usam para o MESMO papel, e esta aba
+     nao tinha essa chave (a familia dela aqui e 'txtZapMsg' e 'txtZapSinal'), entao nao ha
+     colisao. Passam a ser tres de quatro concordando; a quarta (a Agendamento por pacote) so
+     nao entra porque la 'txtZapBotao' ja esta ocupado por OUTRO texto -- os dois recados de
+     recusa, em que ninguem pagou nada --, e essa divergencia esta declarada onde ela mora.
+     O ID DO CAMPO CONTINUA 'p-t4' pelo mesmo motivo do 'a-txt-pix-rotulo' acima: id nao e
+     persistido, e renomea-lo quebraria cenario.mjs contra a arvore de referencia.
+     O TEXTO DE FABRICA diverge de proposito ('Ja paguei' contra 'Ja paguei - avisar no
      WhatsApp'): aqui a pagina inteira e uma cobranca so, com dois botoes na tela; o rotulo
-     comprido das irmas existe para distinguir o "Ja paguei" do meio de um carrinho cheio. */
-  ['t4','p-t4','Já paguei'],
+     comprido das irmas existe para distinguir o "Ja paguei" do meio de um carrinho cheio.
+     QUEM LEVA O VALOR GRAVADO ATE O NOME NOVO e fcTxtChaveMigrar, chamada em pRestaura. */
+  ['txtZapBotao','p-t4','Já paguei'],
   ['t5','p-t5','Este endereço não está trazendo nenhuma cobrança. Peça o link de pagamento por WhatsApp que a gente manda na hora.'],
   ['t6','p-t6','Este link de pagamento não pôde ser conferido: o código da cobrança chegou alterado ou incompleto. Por segurança não vamos exibir nenhum valor. Peça um link novo por WhatsApp.'],
   ['t7','p-t7','Abra o aplicativo do seu banco, escolha Pix e use o Copia e Cola ou o QR Code.'],
@@ -22662,7 +22734,7 @@ function pJs(cfg){
   j+="  var TXT_TITULO='"+escJs(cfg.t1)+"';\n";
   j+="  var TXT_VALOR='"+escJs(cfg.t2)+"';\n";
   j+="  var TXT_COPIAR='"+escJs(cfg.t3)+"';\n";
-  if(cfg.zap)j+="  var TXT_ZAP='"+escJs(cfg.t4)+"';\n";
+  if(cfg.zap)j+="  var TXT_ZAP='"+escJs(cfg.txtZapBotao)+"';\n";
   j+="  var TXT_SEM_COBRANCA='"+escJs(cfg.t5)+"';\n";
   j+="  var TXT_CODIGO_RUIM='"+escJs(cfg.t6)+"';\n";
   j+="  var TXT_INSTRUCAO_PIX='"+escJs(cfg.t7)+"';\n";
@@ -23480,6 +23552,10 @@ function pColeta(){
 function pRestaura(st){
   /* Esta aba JA era Pix-primeiro na tela -- ver o comentario de aRestaura. */
   var P=fcOrdMigrar(st.p||{},'p','pix'),i;
+  /* O rotulo do botao "Ja paguei" trocou de nome em 14/09/2026 ('t4' -> 'txtZapBotao'). Sem
+     esta linha, quem personalizou o rotulo perderia o texto na primeira abertura -- ver
+     fcTxtChaveMigrar. */
+  P=fcTxtChaveMigrar(P,'t4','txtZapBotao');
   if(P.usapp)setRadio('p-usapp',P.usapp);
   fcOrdRestaurar('p',P.prio);
   if(P.ppcor)setRadio('p-ppcor',P.ppcor);

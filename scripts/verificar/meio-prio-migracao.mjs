@@ -23,8 +23,13 @@
      5. O OUTRO LADO DA REGRESSAO: com o meio prioritario em 'cartao', o Checkout e
         a Mini loja voltam a ser BYTE A BYTE identicos aos da referencia. Se nao
         voltarem, a mudanca levou junto algo que nao era a ordem.
-        E, com 'Pix' (a fabrica), a VITRINE da aba Agendamento por pacote tambem e
-        byte a byte identica -- aquela aba ja era Pix-primeiro.
+        E, com 'Pix' (a fabrica), a VITRINE da aba Agendamento por pacote tambem seria
+        byte a byte identica -- aquela aba ja era Pix-primeiro. ESSA ULTIMA AFIRMACAO
+        FICOU SEM COMMIT QUE A RESPONDA (medido em 14/09/2026): ela exige uma referencia
+        anterior a 12/09 E posterior a leva 5 de 13/09, que mudou a-out1 por um motivo
+        legitimo -- as duas condicoes nao se encontram. Ela agora diz "NAO MEDIU" com a
+        razao escrita, em vez de acusar falha todo dia; quem cobre a vitrine e a
+        PROPRIEDADE ao lado (trocar a escolha muda pouco, e so a ordem).
 
    AS PARTES 1, 2 e 4 PRECISAM DE UMA REFERENCIA ANTERIOR A 12/09/2026. Desde que a
    rodada chegou a 'main', o padrao deixou de servir para elas -- e o arquivo passou a
@@ -283,13 +288,32 @@ for(const [nome,saida] of [['Checkout','u-out'],['Mini loja','m-out']]){
       troca move o CORPO de duas funcoes (textoCartao e textoPix), e a lista teria de aceitar
       linhas nuas como `return t;`, que deixariam passar quase qualquer coisa -- teto sozinho
       mede menos, mas nao mente sobre o que mede. */
-if(refAnterior){
+/* ===== A OITAVA VEZ, e desta vez a conclusao e que a pergunta NAO TEM MAIS RESPOSTA =====
+   Medido em 14/09/2026 (leva 6): contra 4c66719 -- o commit que este proprio arquivo indica --
+   a linha acusava falha, 29378 contra 29337 bytes, numa arvore SEM nenhum defeito. O guarda
+   'refAnterior' nao bastava: ele so responde "a referencia e anterior a rodada do meio
+   prioritario", e a comparacao tambem exige que a referencia ja tenha a leva 5, que consertou o
+   atalho `font:` invalido de .fca-trocar e mudou a-out1 por um motivo legitimo.
+   AS DUAS CONDICOES SAO INCOMPATIVEIS: anterior a 12/09 E posterior a 13/09 nao existe, e nao
+   vai passar a existir. Entao esta afirmacao ficou sem commit que a responda -- e uma linha que
+   nao pode mais medir nada nao pode continuar falhando todo dia, porque vermelho permanente
+   esconde o proximo vermelho. Ela passa a DIZER isso, com a razao escrita, e a propriedade que
+   nao envelhece (logo abaixo) continua sendo o que de fato cobre a vitrine.
+   O SINAL E LIDO DO PROPRIO ARQUIVO DA REFERENCIA, e nao de uma data: o atalho `font:` antigo. */
+const refTemLeva5 = !/font:600 12px\/1\.2 inherit/.test(
+  fs.readFileSync(path.join(dirRef, 'index.html'), 'utf8'));
+if(refAnterior && refTemLeva5){
   chk('vitrine da Agendamento por pacote com o PIX prioritario == referencia, byte a byte',
       comPix['a-out1'] === daRef['a-out1'],
       'tamanhos '+comPix['a-out1'].length+' x '+daRef['a-out1'].length);
-}else{
+}else if(!refAnterior){
   console.log('  ..    NAO MEDIU (byte a byte da vitrine) -- mesma razao das partes 1 e 2.');
   console.log('        Para medir a migracao de verdade: node scripts/verificar/meio-prio-migracao.mjs <commit anterior a 12/09/2026>');
+}else{
+  console.log('  ..    NAO MEDIU (byte a byte da vitrine): a referencia e anterior a leva 5, que');
+  console.log('        mudou a-out1 por um motivo legitimo (o atalho `font:` de .fca-trocar).');
+  console.log('        Esta afirmacao exigiria um commit anterior a 12/09 E posterior a 13/09 --');
+  console.log('        nao existe. Quem cobre a vitrine e a propriedade medida logo abaixo.');
 }
 {
   const difA = linhasQueMudam(comPix['a-out1'], comPP['a-out1']);

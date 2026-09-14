@@ -71,7 +71,11 @@ const MIGRADOS = {
   bor:   [['b-selo-txt','selotxt']],
   cnt:   [['c-fimtxt','fimtxt'],['c-rd','rd'],['c-rh','rh'],['c-rm','rm'],['c-rs','rs'],
           ['c-ctatxt','ctatxt']],
-  cob:   [['p-t1','t1'],['p-t2','t2'],['p-t3','t3'],['p-t4','t4'],['p-t5','t5'],
+  /* 'p-t4' guarda em 'txtZapBotao' desde 14/09/2026 (leva 6): a chave era 't4', que nao
+     dizia papel nenhum, e o campo e o rotulo do botao "Ja paguei" -- o mesmo papel que
+     'txtZapBotao' tem no Checkout e na Mini loja. A conversao do valor ja gravado tem prova
+     propria: chaves-renomeadas.mjs. O ID do campo nao mudou, de proposito. */
+  cob:   [['p-t1','t1'],['p-t2','t2'],['p-t3','t3'],['p-t4','txtZapBotao'],['p-t5','t5'],
           ['p-t6','t6'],['p-t7','t7'],['p-t8','t8'],['p-t9','t9']],
   loja:  [['m-t1','t1'],['m-t2','t2'],['m-t3','t3'],['m-t4','t4'],['m-t5','t5'],['m-t6','t6'],
           ['m-t7','t7'],['m-t8','t8'],['m-t9','t9'],['m-t10','t10'],['m-t11','t11'],['m-t12','t12']],
@@ -496,6 +500,16 @@ console.log('\n--- o formato gravado, contra '+REF+' ---');
          o que era falta -- e a fabrica voltou a ser a unica, a mesma das outras tres abas.
          A chave ja existia nos dois lados: o que mudou foi o PADRAO, e e por isso que ela entra
          AQUI e nao em RODADAS. */
+      /* A FRASE DO "CODIGO COPIADO" (14/09/2026, leva 6, decisao do dono): as quatro abas de
+         pagamento passam a dizer a frase LONGA de fabrica, que a Agendamento por pacote e o
+         Link de cobranca ja diziam. AQUI NAO HA MIGRACAO, e e deliberado -- ao contrario do
+         separador logo acima: a frase curta gravada continua CERTA, so mais curta, enquanto
+         "ou pague com cartao" ficaria ERRADO. Reescrever em silencio um texto que o dono ve
+         na tela dele so se faz quando o texto velho passou a mentir. Por isso a referencia
+         traz a curta e a arvore de hoje traz a longa numa ferramenta de armazenamento LIMPO,
+         que e como este arquivo mede. Prova propria: frase-copiado.mjs. */
+      ['u','txtPixCopiado', ['Código copiado!'], 'Código copiado! Cole no aplicativo do seu banco.'],
+      ['m','txtPixCopiado', ['Código copiado!'], 'Código copiado! Cole no aplicativo do seu banco.'],
       ['a','txtPixManual',
        ['O Pix não avisa a gente automaticamente. Assim que você pagar, me avise para eu conferir e confirmar a sua reserva.'],
        'O Pix não avisa a gente automaticamente. Assim que você pagar, toque em "Já paguei" para eu conferir e confirmar.']
@@ -511,6 +525,32 @@ console.log('\n--- o formato gravado, contra '+REF+' ---');
     }
     chk('gravado: as fabricas TROCADAS por rodada declarada, nos dois lados',
         mau.length === 0, mau.join(' | '));
+    /* ===== CHAVE RENOMEADA e uma TERCEIRA coisa, e nao cabe nas duas listas acima =====
+       Em CHAVE NOVA a referencia nao tem nada; em FABRICA TROCADA a chave e a mesma dos dois
+       lados. Aqui a chave MUDA DE NOME: a referencia tem a antiga, a arvore de hoje tem a
+       nova, e o VALOR tem de ser o mesmo nas duas -- e isso que prova que a conversao nao
+       perdeu o texto de ninguem. Quando a rodada chegar a referencia, os dois lados trazem a
+       nova e isso tambem passa (o lado antigo fica 'undefined', que e aceito).
+       A conversao em si -- valor personalizado atravessando, estado colhido da propria
+       referencia, bloco rodando -- tem prova propria em chaves-renomeadas.mjs. */
+    const RENOMEADAS = [
+      ['a','txtPixRotulo','txtSecaoPix'],   /* o titulo da secao Pix (leva 6, 14/09/2026) */
+      ['p','t4','txtZapBotao']              /* o rotulo do botao "Ja paguei" (idem) */
+    ];
+    const maur = [];
+    for(const [aba,velha,nova] of RENOMEADAS){
+      const aq = (depois[aba]||{})[nova], reNova = (antes[aba]||{})[nova], reVelha = (antes[aba]||{})[velha];
+      const doLado = (reNova !== undefined) ? reNova : reVelha;
+      if(aq === undefined) maur.push('aqui '+aba+'.'+nova+' nao existe');
+      else if(doLado !== undefined && doLado !== aq)
+        maur.push(REF+' '+aba+'.'+(reNova!==undefined?nova:velha)+'='+JSON.stringify(doLado)+', diferente daqui');
+      if((depois[aba]||{})[velha] !== undefined)
+        maur.push('aqui '+aba+'.'+velha+' ainda existe (coleta deveria ter parado de emiti-la)');
+      if(depois[aba]){ delete depois[aba][nova]; delete depois[aba][velha]; }
+      if(antes[aba]){ delete antes[aba][nova]; delete antes[aba][velha]; }
+    }
+    chk('gravado: as chaves RENOMEADAS carregam o mesmo valor dos dois lados',
+        maur.length === 0, maur.join(' | '));
     for(const rodada of RODADAS){
       const faltando = [];
       for(const [aba, chaves] of Object.entries(rodada.chaves))
