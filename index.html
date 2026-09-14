@@ -376,15 +376,30 @@
      Em uso normal a moldura ja cabe na coluna e a regra nao muda nada. */
   .c-pv-modos{display:flex;gap:8px;align-items:center;margin:0 0 10px}
   .c-pv-modos .rotulo{font-size:12px;color:var(--tinta-suave)}
-  .c-pv-moldura{overflow:hidden;max-width:100%;margin:0 auto;background:#fff;border:1px solid var(--linha);border-radius:8px}
-  .c-pv-moldura iframe{border:0;display:block;background:#fff}
+  /* A MOLDURA DA PREVIA, UMA REGRA SO PARA TODAS AS ABAS (leva 5, 13/09/2026).
+     Ate esta rodada eram SEIS declaracoes byte a byte iguais -- .c-, .s-, .l-, .u-, .m- e
+     .a-pv-moldura -- para NOVE prévias em oito abas (a Agendamento por pacote tem duas),
+     porque a Link de cobranca e a Efeitos de pagina nunca tiveram a propria e pegavam
+     emprestada a da Contagem regressiva. Seis copias da mesma regra
+     e a divergencia de amanha: mexer numa e deixar cinco para tras nao da erro nem aviso.
+     O precedente da casa e o de logo abaixo, escrito para o aviso ambar: "uma regra so, sem
+     prefixo de aba, porque o visual e o mesmo nos dois lugares". Vale igual aqui. 'pv-' e
+     espaco de nomes da FERRAMENTA: nenhum bloco gerado emite essa classe (os blocos usam
+     fcu-, fcm-, fca-, fcpg- e companhia), entao nao ha como colidir.
+     max-width:100% (fase 5): a largura da moldura e escrita em PIXELS na hora de montar, com a
+     largura que a coluna tinha naquele instante, e a previa so e remontada ao abrir a aba ou ao
+     clicar em "Atualizar previa". Encolher a janela depois disso deixava a moldura maior que a
+     coluna e a PAGINA INTEIRA ganhava rolagem horizontal -- medido na main, com a previa
+     montada a 2560 px e a janela levada a 400: scrollWidth 513 contra clientWidth 400. Com o
+     teto, a moldura encolhe junto e o excesso e cortado pelo overflow:hidden: previa cortada em
+     vez de pagina torta. Em uso normal a moldura ja cabe na coluna e a regra nao muda nada. */
+  .pv-moldura{overflow:hidden;max-width:100%;margin:0 auto;background:#fff;border:1px solid var(--linha);border-radius:8px}
+  .pv-moldura iframe{border:0;display:block;background:#fff}
 
   /* Previa do slideshow: mesma tecnica da Contagem regressiva -- o bloco gerado roda dentro
      de um iframe de mesma origem. Nao ha estilo de slideshow aqui de proposito. */
   .s-pv-modos{display:flex;gap:8px;align-items:center;margin:0 0 10px}
   .s-pv-modos .rotulo{font-size:12px;color:var(--tinta-suave)}
-  .s-pv-moldura{overflow:hidden;max-width:100%;margin:0 auto;background:#fff;border:1px solid var(--linha);border-radius:8px}
-  .s-pv-moldura iframe{border:0;display:block;background:#fff}
   /* Aviso de configuracao (nao e erro): a combinacao e legitima, mas o operador precisa
      enxergar o que ela custa antes de publicar. */
   .s-alerta{background:#FFF6DF;border:1px solid #E3B23C;color:#6B5210}
@@ -405,8 +420,6 @@
      proposito: quem pinta o pop-up e o CSS que o proprio gerador emite. */
   .l-pv-modos{display:flex;gap:8px;align-items:center;margin:0 0 10px}
   .l-pv-modos .rotulo{font-size:12px;color:var(--tinta-suave)}
-  .l-pv-moldura{overflow:hidden;max-width:100%;margin:0 auto;background:#fff;border:1px solid var(--linha);border-radius:8px}
-  .l-pv-moldura iframe{border:0;display:block;background:#fff}
   .l-alerta{background:#FFF6DF;border:1px solid #E3B23C;color:#6B5210}
   .l-alerta b{color:#6B5210}
 
@@ -415,12 +428,6 @@
      quem pinta o carrinho e o CSS que o proprio gerador emite. */
   .u-pv-modos{display:flex;gap:8px;align-items:center;margin:0 0 10px}
   .u-pv-modos .rotulo{font-size:12px;color:var(--tinta-suave)}
-  .u-pv-moldura{overflow:hidden;max-width:100%;margin:0 auto;background:#fff;border:1px solid var(--linha);border-radius:8px}
-  .u-pv-moldura iframe{border:0;display:block;background:#fff}
-  .m-pv-moldura{overflow:hidden;max-width:100%;margin:0 auto;background:#fff;border:1px solid var(--linha);border-radius:8px}
-  .m-pv-moldura iframe{border:0;display:block;background:#fff}
-  .a-pv-moldura{overflow:hidden;max-width:100%;margin:0 auto;background:#fff;border:1px solid var(--linha);border-radius:8px}
-  .a-pv-moldura iframe{border:0;display:block;background:#fff}
   /* aviso ambar de recurso que nao vale agora: nasceu no desconto Pix da aba Checkout e
      passou a servir tambem a Contagem regressiva (pulsar x alternar deslizando). Uma regra so,
      sem prefixo de aba, porque o visual e o mesmo nos dois lugares. */
@@ -5918,6 +5925,25 @@ function fcPpBotoesSrc(prefixo,ppcor,usaSinal,comentZero,aoAprovarExtra,temItens
    dois espacos, aninhada dentro de pix()); "tamanho" e o texto que vai no width/height -- na
    /pagar e o nome de uma variavel do bloco (TAMANHO_QR, configuravel na aba), mas pode ser um
    numero literal para quem nao tiver essa variavel. */
+/* O AVISO DE QUE O PIX NAO CONFIRMA SOZINHO -- uma regra, quatro abas (leva 5, 13/09/2026).
+   Ate esta rodada as quatro abas emitiam QUATRO aparencias: cor #444 com veu .045 no Checkout,
+   #5a5346 com .045 na Mini loja, e sem cor com .05 na Agendamento e na Link de cobranca.
+   O QUE DECIDIU NAO FOI A MAIORIA, E SIM UMA MEDICAO: as QUATRO abas tem a cor do texto
+   configuravel pelo dono (u-c3, m-c3, a-c3 e p-c3 sao o MESMO campo 'texto' da paleta), entao
+   uma cor fixa dentro de um veu translucido ignora a escolha dele -- com texto claro sobre
+   cartao escuro, o aviso ficava cinza-escuro sobre cinza-escuro. Sem cor, o aviso herda a cor
+   que o dono escolheu, que e a unica que funciona em qualquer fundo. As duas cores fixas eram
+   avulsas nas proprias abas: #444 aparece uma vez so no Checkout (os cinzas dele sao #333/#555/
+   #777/#999) e #5a5346 uma vez so na Mini loja (o cinza dela e #8a8375).
+   O VEU FICOU EM .05, e nao em .045, porque era 2 contra 2: escolheu-se o valor das duas regras
+   que ja concordavam POR INTEIRO, para a rodada terminar com quatro regras iguais em vez de
+   trocar um empate por outro. A diferenca entre os dois e invisivel; a divergencia, nao.
+   Unifica-se a FONTE QUE ESCREVE, nunca a saida: cada bloco entregue continua levando a regra
+   dentro dele, e nenhum passa a depender da ferramenta. */
+function fcPixManualCss(seletor){
+  return seletor+'{font-size:12px;line-height:1.45;background:rgba(0,0,0,.05);'
+    +'border-radius:8px;padding:9px 10px;margin:10px 0 0;text-align:left}\n';
+}
 function fcDesenharQrSrc(ind,tamanho){
   var c='',i2=ind+'  ',i3=ind+'    ',ic=ind+'   ';
   c+=ind+"/* O QR e desenhado a partir do MESMO codigo que esta na caixa de copiar: um segundo\n";
@@ -11694,7 +11720,7 @@ function sPvMontar(){
      listeners dele morrem junto com o documento. */
   box.innerHTML='';
   var moldura=document.createElement('div');
-  moldura.className='s-pv-moldura';
+  moldura.className='pv-moldura';
   moldura.style.width=Math.round(larg*k)+'px';
   moldura.style.height=alt+'px';
   var ifr=document.createElement('iframe');
@@ -13075,7 +13101,7 @@ function lPvMontar(){
      documento. */
   box.innerHTML='';
   var moldura=document.createElement('div');
-  moldura.className='l-pv-moldura';
+  moldura.className='pv-moldura';
   moldura.style.width=Math.round(larg*k)+'px';
   moldura.style.height=L_PV_ALTURA+'px';
   var ifr=document.createElement('iframe');
@@ -14840,7 +14866,7 @@ function uPvMontar(){
      script do QR Code morrem junto com o documento. */
   box.innerHTML='';
   var moldura=document.createElement('div');
-  moldura.className='u-pv-moldura';
+  moldura.className='pv-moldura';
   moldura.style.width=Math.round(larg*k)+'px';
   moldura.style.height=U_PV_ALTURA+'px';
   var ifr=document.createElement('iframe');
@@ -15168,7 +15194,10 @@ function uBloco(cfg){
     c+='.fcuni .fcu-resumo{width:100%;box-sizing:border-box;border:1px solid #ccc;border-radius:8px;padding:10px;font-size:11.5px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;line-height:1.55;background:#fafafa;color:#333;resize:vertical;height:150px;text-align:left;position:static;opacity:1;pointer-events:auto}\n';
     c+='.fcuni .fcu-resumo-b{display:block;width:100%;box-sizing:border-box;margin-top:8px;border:none;border-radius:8px;background:var(--fcu-destaque,#075E54);color:#fff;font-size:14px;font-weight:600;padding:11px;cursor:pointer;font-family:inherit}\n';
     c+='.fcuni .fcu-resumo-b:hover{filter:brightness(.92)}\n';
-    c+='.fcuni .fcu-resumo-ok{display:none;font-size:12px;color:#1e7e34;font-weight:600;margin-top:5px;text-align:center}\n';
+    /* Tambem a esquerda (leva 5): e o irmao do aviso de "copiado" da area do Pix, que passou
+       a alinhar a esquerda junto com ela -- deixar os dois "copiei!" da MESMA aba em lados
+       diferentes seria trocar uma incoerencia entre abas por uma dentro de uma. */
+    c+='.fcuni .fcu-resumo-ok{display:none;font-size:12px;color:#1e7e34;font-weight:600;margin-top:5px;text-align:left}\n';
     c+='.fcuni .fcu-resumo-ok.on{display:block}\n';
   }
   c+='.fcuni .fcu-cupom{margin:12px 0 2px}\n';
@@ -15182,7 +15211,13 @@ function uBloco(cfg){
   c+='.fcuni .fcu-desconto.on{display:flex}\n';
   c+='.fcuni .fcu-desconto-p{display:none;margin-left:6px;font-size:12px;font-weight:400;white-space:nowrap}\n';
   c+='.fcuni .fcu-desconto-p.on{display:inline}\n';
-  c+='.fcuni .fcu-total{display:flex;justify-content:space-between;padding:12px 0 4px;border-top:2px solid var(--fcu-destaque,#075E54);font-size:17px;font-weight:700;color:var(--fcu-destaque,#075E54);margin-top:10px}\n';
+  /* align-items:baseline como na Mini loja (leva 5). Medido: hoje a linha do total tem dois
+     spans do MESMO tamanho nas duas abas, entao a regra nao muda um pixel -- ela e a rede para
+     o dia em que algo menor entrar na linha, e alinhar para o lado que PROTEGE custa nada. O
+     tamanho (17px aqui, 16 na Mini loja) NAO foi alinhado: medido, cada aba guarda a propria
+     escala, e o destaque do Pix e sempre o total + 3px nas duas (17->20 e 16->19). Mexer num
+     numero so quebraria a escala da aba; mexer na escala inteira seria redesenho. */
+  c+='.fcuni .fcu-total{display:flex;justify-content:space-between;align-items:baseline;padding:12px 0 4px;border-top:2px solid var(--fcu-destaque,#075E54);font-size:17px;font-weight:700;color:var(--fcu-destaque,#075E54);margin-top:10px}\n';
   if(usaSinal){
     c+='.fcuni .fcu-sinal{display:flex;justify-content:space-between;gap:10px;padding:6px 0 0;font-size:16px;font-weight:700;color:var(--fcu-destaque,#075E54)}\n';
     c+='.fcuni .fcu-saldo{display:flex;justify-content:space-between;gap:10px;padding:4px 0 0;font-size:13px;color:#777}\n';
@@ -15193,14 +15228,25 @@ function uBloco(cfg){
        aparecem -- o bloco sai byte a byte como saia antes desta rodada. Mesma escolha de
        'a-txt-subtitulo', e e o que mantem a regressao honesta. */
     if(fcSinalTxtLista(cfg).length)
-      c+='.fcuni .fcu-sinal-txt-l{font-size:12px;line-height:1.45;color:#777;padding:4px 0 0;text-align:left}\n';
+      /* MARGEM, e nao enchimento (leva 5): a Mini loja e a Agendamento por pacote usam
+         margin-top:4px; so esta usava padding:4px 0 0. Em elemento de bloco sem fundo nem
+         borda os dois desenham a mesma coisa -- medido, a caixa nao muda --, e por isso o
+         alinhamento e de graca: some uma divergencia sem o cliente ver diferenca. */
+      c+='.fcuni .fcu-sinal-txt-l{font-size:12px;line-height:1.45;color:#777;margin-top:4px;text-align:left}\n';
   }
   if(descpix>0){
     /* UMA regra so para o seletor, com os valores trocados -- e nunca uma segunda regra por
        cima: shorthand nao se funde entre duas regras de mesma especificidade (regra da casa).
        Com o Pix prioritario, o valor do Pix e o numero grande do carrinho; o TOTAL continua
        logo acima, no tamanho de sempre. Os dois numeros a vista e o desenho da pagina de
-       obrigado da aba Agendamento por pacote, que e a referencia desta rodada. */
+       obrigado da aba Agendamento por pacote, que e a referencia desta rodada.
+       OS TAMANHOS E O PESO NAO FORAM ALINHADOS COM A MINI LOJA, e isto e decisao medida (leva
+       5): 20/14px e peso 800/700 aqui contra 19/13px e 800/600 la. Nao e deriva -- e a escala
+       de cada aba, e ela e consistente nas duas: o destaque do Pix e sempre o TOTAL + 3px
+       (17->20 aqui, 16->19 la) e o ramo secundario e sempre um passo acima da linha do desconto
+       da propria aba (600->700 aqui, 400->600 la). Mexer num numero so quebraria a escala; mexer
+       na escala inteira seria redesenho. O que ERA deriva -- a Mini loja sem o gap:10px que as
+       outras duas dao as linhas de dinheiro -- foi alinhado. */
     c+='.fcuni .fcu-pixlinha{display:none;justify-content:space-between;gap:10px;'+((prio==='pix')?'padding:8px 0 0;font-size:20px;color:var(--fcu-destaque,#075E54);font-weight:800':'padding:4px 0 0;font-size:14px;color:#1e7e34;font-weight:700')+'}\n';
     c+='.fcuni .fcu-pixlinha.on{display:flex}\n';
   }
@@ -15232,13 +15278,23 @@ function uBloco(cfg){
        que .fcu-botoes tem: sem ela ele encostaria na linha do preco. */
     c+='.fcuni .fcu-gerar{display:block;width:100%;box-sizing:border-box;'+((usaPP&&prio==='pp')?'':'margin-top:14px;')+'border:none;border-radius:8px;background:var(--fcu-destaque,#075E54);color:#fff;font-size:15px;font-weight:700;padding:13px;cursor:pointer;text-align:center;font-family:inherit}\n';
     c+='.fcuni .fcu-gerar:hover{filter:brightness(.92)}\n';
-    c+='.fcuni .fcu-pixarea{display:none;margin-top:16px;text-align:center}\n';
+    /* A AREA DO PIX A ESQUERDA (leva 5). Era a unica das quatro centralizada: a Mini loja
+       declara 'left', a Agendamento herda de .fca-ob-raiz * e a Link de cobranca do proprio
+       cartao. Tres contra uma, e do lado das tres esta o item 8 do Manual do Prosite --
+       'o tema centraliza textos dentro de componentes, force text-align:left no card e nos
+       elementos'. O respiro (16px aqui, 12 na Mini loja, 10 na Agendamento) NAO foi alinhado:
+       e um contra um contra um, sem criterio que decida, e esta declarado no relatorio. */
+    c+='.fcuni .fcu-pixarea{display:none;margin-top:16px;text-align:left}\n';
     c+='.fcuni .fcu-pixarea.on{display:block}\n';
-    c+='.fcuni .fcu-instrucao{font-size:13px;color:#555;margin:0 0 10px;text-align:center}\n';
-    c+='.fcuni .fcu-pixval{font-size:15px;font-weight:700;color:#1e7e34;margin:0 0 10px;text-align:center}\n';
+    c+='.fcuni .fcu-instrucao{font-size:13px;color:#555;margin:0 0 10px;text-align:left}\n';
+    c+='.fcuni .fcu-pixval{font-size:15px;font-weight:700;color:#1e7e34;margin:0 0 10px;text-align:left}\n';
     c+='.fcuni .fcu-qr{display:inline-block;background:#fff;padding:10px;border:1px solid #e0e0e0;border-radius:10px}\n';
     c+='.fcuni .fcu-qr img,.fcuni .fcu-qr canvas{display:block}\n';
-    c+='.fcuni .fcu-cola{margin-top:12px;width:100%;box-sizing:border-box;border:1px solid #ccc;border-radius:8px;padding:10px;font-size:11px;font-family:monospace;word-break:break-all;background:#fafafa;color:#333;resize:none;height:84px;text-align:left}\n';
+    /* A CAIXA DO COPIA E COLA, 74px como na Agendamento e na Link de cobranca (leva 5):
+       era 84px aqui, 70px na Mini loja e 74px nas outras duas -- tres alturas para a mesma
+       caixa. 74 e a maioria, e cabe o payload (medido: 72px de conteudo). Ninguem LE este
+       texto, so confere que colou algo, entao rolar dentro dela nao custa nada. */
+    c+='.fcuni .fcu-cola{margin-top:12px;width:100%;box-sizing:border-box;border:1px solid #ccc;border-radius:8px;padding:10px;font-size:11px;font-family:monospace;word-break:break-all;background:#fafafa;color:#333;resize:none;height:74px;text-align:left}\n';
     c+='.fcuni .fcu-copiar{display:block;width:100%;box-sizing:border-box;margin-top:8px;border:none;border-radius:8px;background:var(--fcu-destaque,#075E54);color:#fff;font-size:14px;font-weight:600;padding:11px;cursor:pointer;font-family:inherit}\n';
     c+='.fcuni .fcu-copiado{display:none;font-size:12px;color:#1e7e34;font-weight:600;margin-top:5px}\n';
     c+='.fcuni .fcu-copiado.on{display:block}\n';
@@ -15247,9 +15303,16 @@ function uBloco(cfg){
       c+='.fcuni .fcu-zap:hover{filter:brightness(.92)}\n';
       /* O aviso de que o Pix nao confirma sozinho fica na MESMA condicao do botao: ele manda
          tocar no "Ja paguei", entao sem o botao nem a regra nem o texto sao emitidos. */
-      c+='.fcuni .fcu-pixmanual{font-size:12px;line-height:1.45;color:#444;background:rgba(0,0,0,.045);border-radius:8px;padding:9px 10px;margin-top:10px;text-align:left}\n';
+      c+=fcPixManualCss('.fcuni .fcu-pixmanual');
     }
-    c+='.fcuni .fcu-nota{font-size:11px;color:#999;text-align:center;margin-top:8px}\n';
+    /* AS CORES DE APOIO NAO FORAM ALINHADAS, e isto e decisao medida (leva 5). Instrucao,
+       nota e "copiado" usam #555/#999/peso 600 aqui e #666/#8a8375/sem peso na Mini loja. Cada
+       um desses valores e a paleta da PROPRIA aba: #8a8375 aparece seis vezes na Mini loja
+       (categoria do cartao, cesta vazia, separador, limites) e #999 duas vezes aqui; e o peso
+       600 do "copiado" bate com o "copiado" do resumo desta mesma aba, como o sem-peso da Mini
+       loja bate com o dela. Alinhar pela maioria trocaria uma divergencia ENTRE abas por varias
+       DENTRO de cada uma -- e o objetivo desta leva e coerencia, nao redesenho. */
+    c+='.fcuni .fcu-nota{font-size:11px;color:#999;text-align:left;margin-top:8px}\n';
   }
   c+='</sty'+'le>\n\n';
 
@@ -15389,7 +15452,11 @@ function uBloco(cfg){
        sob demanda (sem a corrida do onload eager) e desenha dentro de try/catch, escondendo a
        caixa se a biblioteca nao chegar em vez de deixar a excecao derrubar o resto de
        gerarPix. Corrige os dois defeitos medidos no Checkout (spec 0.1). */
-    c+=fcDesenharQrSrc('','220');
+    /* 200 como na Mini loja e na Agendamento por pacote (leva 5): era 220 so aqui. O
+       tamanho CONFIGURAVEL da Link de cobranca (TAMANHO_QR, 120 a 320) nao foi estendido as
+       outras tres -- campo novo muda o formato do que fica gravado (estado, preset e
+       "Exportar tudo"), e isso pede a palavra do dono antes. Esta declarado no relatorio. */
+    c+=fcDesenharQrSrc('','200');
   }
 
   c+='function montar(){\n';
@@ -17279,7 +17346,7 @@ function ePvMontar(){
   var larg=ePvLargura(),disp=box.clientWidth||440,k=Math.min(1,disp/larg);
   box.innerHTML='';
   var moldura=document.createElement('div');
-  moldura.className='c-pv-moldura';
+  moldura.className='pv-moldura';
   moldura.style.width=Math.round(larg*k)+'px';
   moldura.style.height=E_PV_ALTURA+'px';
   var ifr=document.createElement('iframe');
@@ -18985,7 +19052,7 @@ function aBlocoVitrine(cfg){
   c+='.fca-resumo{display:none;align-items:center;justify-content:space-between;gap:14px;border:1px solid #e5dfd0;border-radius:14px;background:var(--fca-fundo,#fff);padding:14px 16px;margin:0 0 18px;text-align:left}\n';
   c+='.fca-resumo.on{display:flex}\n';
   c+='.fca-resumo-nome{font-size:14px;font-weight:700;margin:0 0 2px;text-align:left}\n';
-  c+='.fca-trocar{border:1px solid #d8d2c4;background:#fff;color:inherit;border-radius:8px;padding:8px 14px;font:600 12px/1.2 inherit;cursor:pointer;white-space:nowrap}\n';
+  c+='.fca-trocar{border:1px solid #d8d2c4;background:#fff;color:inherit;border-radius:8px;padding:8px 14px;font-family:inherit;font-size:12px;font-weight:600;line-height:1.2;cursor:pointer;white-space:nowrap}\n';
   if(temFam){
     c+='.fca-fams{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:0 0 18px;text-align:left}\n';
     c+='.fca-fam{border:1px solid #e5dfd0;border-radius:14px;background:var(--fca-fundo,#fff);padding:16px;cursor:pointer;text-align:left;color:inherit;font:inherit;display:block;width:100%;transition:box-shadow .18s,transform .18s}\n';
@@ -19688,7 +19755,19 @@ function aBlocoObrigado(cfg){
   c+='.fca-ob-cod{width:100%;height:74px;font:11px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace;border:1px solid rgba(0,0,0,.18);border-radius:8px;padding:8px;resize:none;background:#fff;color:#333}\n';
   c+='.fca-ob-bt{display:inline-block;border:0;border-radius:8px;padding:11px 16px;font-size:14px;font-weight:700;cursor:pointer;background:var(--fca-ob-destaque,#0F3A30);color:var(--fca-ob-fundo,#fff);margin:8px 8px 0 0;text-decoration:none;text-align:center}\n';
   c+='.fca-ob-bt2{background:transparent;color:var(--fca-ob-destaque,#0F3A30);border:1px solid var(--fca-ob-destaque,#0F3A30)}\n';
-  c+='.fca-ob-qr{margin:12px 0 0;min-height:200px}\n';
+  /* A CHAPA BRANCA DO QR, agora nas quatro abas (leva 5, 13/09/2026). Ate esta rodada so o
+     Checkout a tinha, e a maioria era o lado ERRADO para alinhar: medido com a biblioteca
+     de verdade (qrcodejs, carregada do cdnjs numa sonda com a rede aberta para esse host
+     so), o canvas de 220px sai com ZERO pixel branco nas duas bordas -- ela desenha o codigo
+     de borda a borda e nao reserva zona quieta nenhuma. O padding:10px da chapa E a zona
+     quieta, e as quatro abas tem o FUNDO DO CARTAO configuravel pelo dono: num fundo escuro,
+     sem a chapa, o QR fica sem contraste e o leitor do banco perde o codigo. Tirar a chapa do
+     Checkout espalharia a fraqueza; dar a chapa as outras tres tira.
+     O 'min-height' SAIU junto, de proposito: com display:inline-block ele reservaria a altura
+     numa tira branca estreita enquanto o QR nao chega. O Checkout nunca reservou altura -- a
+     caixa some se a biblioteca nao carregar --, e alinhar e adotar o comportamento dele
+     inteiro, e nao metade dele. */
+  c+='.fca-ob-qr{margin:12px 0 0;display:inline-block;background:#fff;padding:10px;border:1px solid #e0e0e0;border-radius:10px}\n';
   c+='.fca-ob-qr img,.fca-ob-qr canvas{display:block;max-width:100%;height:auto}\n';
   c+='.fca-ob-recusa-msg{font-size:15px;line-height:1.6;margin:0 0 12px;text-align:left}\n';
   c+='.fca-ob-sep{display:flex;align-items:center;gap:10px;margin:16px 0 0;font-size:12px;font-weight:700;letter-spacing:.10em;color:var(--fca-ob-destaque,#0F3A30);opacity:.7}\n';
@@ -19743,7 +19822,7 @@ function aBlocoObrigado(cfg){
   }
   /* So com Pix na pagina: em "somente cartao" a funcao pix() nem e emitida, e uma regra para
      uma classe que nunca aparece seria peso e ruido no bloco entregue. */
-  if(cfg.usaPix)c+='.fca-ob-pixmanual{font-size:12px;line-height:1.45;background:rgba(0,0,0,.05);border-radius:8px;padding:9px 10px;margin:10px 0 0;text-align:left}\n';
+  if(cfg.usaPix)c+=fcPixManualCss('.fca-ob-pixmanual');
   /* O "JA PAGUEI" (13/09/2026), no VERDE do WhatsApp -- o mesmo de .fcu-zap/.fcm-zap nas duas
      irmas. E a mesma ancora de botaoZap (fca-ob-bt fca-ob-bt2) com esta classe por cima, e por
      isso a regra vem DEPOIS de .fca-ob-bt2 na folha: mesma especificidade, quem vem depois vence.
@@ -20803,7 +20882,7 @@ function aPvObMontar(){
   var k=Math.min(1,disp/A_PV_OB_LARGURA);
   box.innerHTML='';
   var moldura=document.createElement('div');
-  moldura.className='a-pv-moldura';
+  moldura.className='pv-moldura';
   moldura.style.width=Math.round(A_PV_OB_LARGURA*k)+'px';
   moldura.style.height=A_PV_OB_ALTURA+'px';
   var ifr=document.createElement('iframe');
@@ -20867,7 +20946,7 @@ function aPvMontar(){
   var k=Math.min(1,disp/larg);
   box.innerHTML='';
   var moldura=document.createElement('div');
-  moldura.className='a-pv-moldura';
+  moldura.className='pv-moldura';
   moldura.style.width=Math.round(larg*k)+'px';
   moldura.style.height=A_PV_ALTURA+'px';
   var ifr=document.createElement('iframe');
@@ -22143,7 +22222,7 @@ function cPvMontar(){
      listeners de scroll/resize e o ResizeObserver dele morrem junto com o documento. */
   box.innerHTML='';
   var moldura=document.createElement('div');
-  moldura.className='c-pv-moldura';
+  moldura.className='pv-moldura';
   moldura.style.width=Math.round(larg*k)+'px';
   moldura.style.height=C_PV_ALTURA+'px';
   var ifr=document.createElement('iframe');
@@ -22496,7 +22575,12 @@ function pCss(cfg){
      leva o peso do destaque (e o numero que sera cobrado agora) e o saldo vem menor, para o
      cliente ler os dois na ordem em que eles acontecem. */
   s+='.fcpg-sinal{font-size:16px;font-weight:800;color:'+cfg.c1+';margin:0 0 2px}\n';
-  s+='.fcpg-saldo{font-size:13px;font-weight:700;opacity:.75;margin:0 0 4px}\n';
+  /* SEM NEGRITO (leva 5): era a unica das quatro com font-weight:700 no saldo -- Checkout,
+     Mini loja e Agendamento deixam a linha no peso normal. O comentario acima justifica o
+     saldo "menor", que e o font-size, e nunca mencionou o peso. O que distingue o sinal do
+     saldo continua sendo tamanho e opacidade, nas quatro. A opacidade FICA no lugar de uma cor
+     fixa: aqui a cor do texto e do dono (cfg.c3), e #777 fixo brigaria com a escolha dele. */
+  s+='.fcpg-saldo{font-size:13px;opacity:.75;margin:0 0 4px}\n';
   /* AS TRES RESPOSTAS SOBRE O SINAL (rodada E). Diferente das duas linhas acima, a regra delas
      NAO entra sempre: ela depende de haver texto escrito, e nao da cobranca aberta agora. Com
      os tres campos vazios -- a fabrica -- nem a regra nem as linhas existem, e o bloco sai byte
@@ -22511,13 +22595,24 @@ function pCss(cfg){
   s+='.fcpg-rot{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:'+cfg.c1+';margin:0 0 8px}\n';
   s+='.fcpg-ajuda{font-size:12px;line-height:1.5;opacity:.75;margin:8px 0 0}\n';
   /* Mesma condicao do botao "Ja paguei": o aviso manda tocar nele. */
-  if(cfg.zap)s+='.fcpg-pixmanual{font-size:12px;line-height:1.45;background:rgba(0,0,0,.05);border-radius:8px;padding:9px 10px;margin:10px 0 0}\n';
+  if(cfg.zap)s+=fcPixManualCss('.fcpg-pixmanual');
   s+='.fcpg-cod{width:100%;height:74px;font:11px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace;';
   s+='border:1px solid rgba(0,0,0,.18);border-radius:8px;padding:8px;resize:none;background:#fff;color:#333}\n';
   s+='.fcpg-bt{display:inline-block;border:0;border-radius:8px;padding:11px 16px;font-size:14px;font-weight:700;';
   s+='cursor:pointer;background:'+cfg.c1+';color:'+cfg.c2+';margin:8px 8px 0 0;text-decoration:none}\n';
   s+='.fcpg-bt2{background:transparent;color:'+cfg.c1+';border:1px solid '+cfg.c1+'}\n';
-  s+='.fcpg-qr{margin:12px 0 0;min-height:'+cfg.qr+'px}\n';
+  /* A CHAPA BRANCA DO QR, agora nas quatro abas (leva 5, 13/09/2026). Ate esta rodada so o
+     Checkout a tinha, e a maioria era o lado ERRADO para alinhar: medido com a biblioteca
+     de verdade (qrcodejs, carregada do cdnjs numa sonda com a rede aberta para esse host
+     so), o canvas de 220px sai com ZERO pixel branco nas duas bordas -- ela desenha o codigo
+     de borda a borda e nao reserva zona quieta nenhuma. O padding:10px da chapa E a zona
+     quieta, e as quatro abas tem o FUNDO DO CARTAO configuravel pelo dono: num fundo escuro,
+     sem a chapa, o QR fica sem contraste e o leitor do banco perde o codigo. Tirar a chapa do
+     Checkout espalharia a fraqueza; dar a chapa as outras tres tira.
+     O 'min-height' SAIU junto, de proposito: com display:inline-block ele reservaria a altura
+     numa tira branca estreita enquanto o QR nao chega. O tamanho configuravel (TAMANHO_QR)
+     continua valendo -- ele e quem DESENHA o QR; aqui so deixou de reservar espaco vazio. */
+  s+='.fcpg-qr{margin:12px 0 0;display:inline-block;background:#fff;padding:10px;border:1px solid #e0e0e0;border-radius:10px}\n';
   s+='.fcpg-qr img,.fcpg-qr canvas{display:block;max-width:100%;height:auto}\n';
   s+='.fcpg-aviso{font-size:12px;margin:8px 0 0;color:#8C1D18;font-weight:700}\n';
   s+='.fcpg-recado{font-size:15px;line-height:1.6;margin:0}\n';
@@ -23328,7 +23423,7 @@ function pPvMontar(){
   /* trocar o iframe inteiro e o jeito barato de parar o bloco anterior */
   box.innerHTML='';
   var moldura=document.createElement('div');
-  moldura.className='c-pv-moldura';
+  moldura.className='pv-moldura';
   moldura.style.width=Math.round(larg*k)+'px';
   moldura.style.height=P_PV_ALTURA+'px';
   var ifr=document.createElement('iframe');
@@ -24526,7 +24621,16 @@ function mBloco(cfg){
   c+='.fcmloja .fcm-dir{position:sticky;top:16px}\n';
   if(usaFiltro){
     c+='.fcmloja .fcm-filtros{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 14px}\n';
-    c+='.fcmloja .fcm-filtro{border:1px solid #d8d2c4;background:#fff;color:inherit;border-radius:999px;padding:6px 14px;font:600 12px/1.2 inherit;cursor:pointer}\n';
+    /* NADA DE ATALHO `font:` COM `inherit` NA FAMILIA (achado e consertado na leva 5,
+      13/09/2026). `font:700 13px/1.2 inherit` NAO E CSS VALIDO -- 'inherit' so vale como o
+      valor INTEIRO da propriedade, nunca como o nome da familia dentro do atalho --, e o
+      navegador descarta a declaracao TODA, em silencio. Medido com o bloco rodando: os nove
+      botoes da Mini loja saiam em 400 / 13.3333px / Arial (o padrao do <button>), e nao no
+      peso, no tamanho e na fonte do site; o controle da mesma aba escrito sem atalho
+      (.fcm-total) saia 700 / 16px, como mandado. Um decimo caso vivia na vitrine da
+      Agendamento por pacote (.fca-trocar). Escrever as quatro propriedades separadas custa
+      alguns bytes e nao tem como ser descartado. */
+    c+='.fcmloja .fcm-filtro{border:1px solid #d8d2c4;background:#fff;color:inherit;border-radius:999px;padding:6px 14px;font-family:inherit;font-size:12px;font-weight:600;line-height:1.2;cursor:pointer}\n';
     c+='.fcmloja .fcm-filtro.on{background:var(--fcm-destaque,#0F3A30);border-color:var(--fcm-destaque,#0F3A30);color:#fff}\n';
   }
   c+='.fcmloja .fcm-grade{display:grid;grid-template-columns:repeat('+cfg.cols+',minmax(0,1fr));gap:16px}\n';
@@ -24558,8 +24662,8 @@ function mBloco(cfg){
   c+='.fcmloja .fcm-det-n{font-size:20px;font-weight:700;margin:0 0 4px;text-align:left}\n';
   c+='.fcmloja .fcm-det-p{font-size:18px;font-weight:700;color:var(--fcm-destaque,#0F3A30);margin:0 0 10px;text-align:left}\n';
   c+='.fcmloja .fcm-det-d{font-size:13px;color:#666;margin:0 0 14px;text-align:left}\n';
-  c+='.fcmloja .fcm-voltar{border:1px solid #d8d2c4;background:#fff;color:inherit;border-radius:8px;padding:7px 14px;font:600 12px/1.2 inherit;cursor:pointer;margin:0 0 14px}\n';
-  c+='.fcmloja .fcm-add{width:100%;border:0;border-radius:10px;background:var(--fcm-destaque,#0F3A30);color:#fff;padding:12px;font:700 14px/1.2 inherit;cursor:pointer;margin-top:12px}\n';
+  c+='.fcmloja .fcm-voltar{border:1px solid #d8d2c4;background:#fff;color:inherit;border-radius:8px;padding:7px 14px;font-family:inherit;font-size:12px;font-weight:600;line-height:1.2;cursor:pointer;margin:0 0 14px}\n';
+  c+='.fcmloja .fcm-add{width:100%;border:0;border-radius:10px;background:var(--fcm-destaque,#0F3A30);color:#fff;padding:12px;font-family:inherit;font-size:14px;font-weight:700;line-height:1.2;cursor:pointer;margin-top:12px}\n';
   c+='.fcmloja .fcm-linha-p{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px;font-size:13px;font-weight:600}\n';
   /* opcionais: marcadores desenhados, porque o tema do Prosite esconde radio e checkbox nativos */
   c+='.fcmloja .fcm-ops{margin:6px 0 2px}\n';
@@ -24581,14 +24685,14 @@ function mBloco(cfg){
   c+='.fcmloja .fcm-item{border-bottom:1px solid #eee;padding:8px 0}\n';
   c+='.fcmloja .fcm-item-l{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:13px;font-weight:600}\n';
   c+='.fcmloja .fcm-item-op{font-size:12px;color:#777;margin-left:2px;text-align:left}\n';
-  c+='.fcmloja .fcm-tirar{border:0;background:none;color:#8C1D18;cursor:pointer;font:700 13px/1 inherit;padding:2px 4px}\n';
+  c+='.fcmloja .fcm-tirar{border:0;background:none;color:#8C1D18;cursor:pointer;font-family:inherit;font-size:13px;font-weight:700;line-height:1;padding:2px 4px}\n';
   c+='.fcmloja .fcm-cesta-vazia{font-size:13px;color:#8a8375;margin:0;text-align:left}\n';
   c+='.fcmloja .fcm-aviso-cesta{display:none;font-size:12px;background:#FDF2F1;color:#5E1310;border-radius:8px;padding:8px 10px;margin:0 0 10px;text-align:left}\n';
   c+='.fcmloja .fcm-aviso-cesta.on{display:block}\n';
   c+='.fcmloja .fcm-cupom{margin:10px 0 0}\n';
   c+='.fcmloja .fcm-cupom-l{display:flex;gap:6px}\n';
   c+='.fcmloja .fcm-cupom-l input{flex:1;min-width:0;border:1px solid #d8d2c4;border-radius:8px;padding:8px;font:inherit;font-size:13px}\n';
-  c+='.fcmloja .fcm-cupom-l button{border:1px solid var(--fcm-destaque,#0F3A30);background:#fff;color:var(--fcm-destaque,#0F3A30);border-radius:8px;padding:0 12px;font:600 12px/1 inherit;cursor:pointer}\n';
+  c+='.fcmloja .fcm-cupom-l button{border:1px solid var(--fcm-destaque,#0F3A30);background:#fff;color:var(--fcm-destaque,#0F3A30);border-radius:8px;padding:0 12px;font-family:inherit;font-size:12px;font-weight:600;line-height:1;cursor:pointer}\n';
   c+='.fcmloja .fcm-cupom-msg{font-size:12px;margin-top:5px;text-align:left}\n';
   c+='.fcmloja .fcm-cupom-msg.ok{color:#1e7e34}\n';
   c+='.fcmloja .fcm-cupom-msg.erro{color:#c0392b}\n';
@@ -24598,10 +24702,21 @@ function mBloco(cfg){
   c+='.fcmloja .fcm-desconto-p.on{display:inline}\n';
   c+='.fcmloja .fcm-total{display:flex;justify-content:space-between;align-items:baseline;font-size:16px;font-weight:700;color:var(--fcm-destaque,#0F3A30);border-top:2px solid var(--fcm-destaque,#0F3A30);margin-top:10px;padding-top:9px}\n';
   if(usaSinal){
-    c+='.fcmloja .fcm-sinal,.fcmloja .fcm-saldo{display:flex;justify-content:space-between;font-size:13px;margin-top:6px}\n';
+    /* gap:10px como no Checkout e na Agendamento por pacote (leva 5): sem ele o rotulo e o
+       valor encostam quando o rotulo enche a linha. O TOTAL segue sem gap nas duas abas. */
+    c+='.fcmloja .fcm-sinal,.fcmloja .fcm-saldo{display:flex;justify-content:space-between;gap:10px;font-size:13px;margin-top:6px}\n';
     c+='.fcmloja .fcm-sinal{font-weight:700}\n';
     c+='.fcmloja .fcm-saldo{color:#777}\n';
-    c+='.fcmloja .fcm-sinal-aviso{display:none;font-size:12px;color:#8C1D18;background:#FDF2F1;border-radius:8px;padding:7px 9px;margin-top:8px;text-align:left}\n';
+    /* A CAIXA, E NAO O TEXTO VERMELHO SOLTO, FICA -- e a divergencia com as irmas esta
+       JUSTIFICADA, nao esquecida (leva 5, 13/09/2026). O Checkout e a Agendamento por pacote
+       usam texto vermelho solto (#c0392b, sem fundo); esta aba usa caixa com fundo. Nao e
+       deriva: a Mini loja tem OUTRO aviso, o da cesta (.fcm-aviso-cesta), com exatamente o
+       mesmo tratamento -- fundo #FDF2F1, raio 8px e enchimento --, e as outras duas abas nao
+       tem caixa de aviso nenhuma. A caixa e o idioma desta aba para avisar; alinhar pela
+       maioria deixaria os DOIS avisos da mesma tela em desenhos diferentes.
+       A COR DO TEXTO PASSOU A SER A DA IRMA (#5E1310, era #8C1D18): as duas caixas da mesma
+       aba diziam a mesma coisa em vermelhos diferentes, e era isso, sim, que era deriva. */
+    c+='.fcmloja .fcm-sinal-aviso{display:none;font-size:12px;color:#5E1310;background:#FDF2F1;border-radius:8px;padding:7px 9px;margin-top:8px;text-align:left}\n';
     c+='.fcmloja .fcm-sinal-aviso.on{display:block}\n';
     /* AS TRES RESPOSTAS SOBRE O SINAL (rodada E). So entram quando ha alguma preenchida: os tres
        vazios sao a fabrica, e nesse estado nem a regra de CSS, nem a div, nem uma linha de JS
@@ -24612,7 +24727,7 @@ function mBloco(cfg){
   }
   if(descpix>0){
     /* UMA regra so, com os valores trocados -- ver o mesmo ponto no Checkout. */
-    c+='.fcmloja .fcm-pixlinha{display:none;justify-content:space-between;'+((prio==='pix')?'font-size:19px;color:var(--fcm-destaque,#0F3A30);margin-top:8px;font-weight:800':'font-size:13px;color:#1e7e34;margin-top:6px;font-weight:600')+'}\n';
+    c+='.fcmloja .fcm-pixlinha{display:none;justify-content:space-between;gap:10px;'+((prio==='pix')?'font-size:19px;color:var(--fcm-destaque,#0F3A30);margin-top:8px;font-weight:800':'font-size:13px;color:#1e7e34;margin-top:6px;font-weight:600')+'}\n';
     c+='.fcmloja .fcm-pixlinha.on{display:flex}\n';
   }
   /* FORA de qualquer 'if': estas quatro linhas existem em combinacoes diferentes (a do Pix so
@@ -24637,27 +24752,38 @@ function mBloco(cfg){
   if(usaPix){
     if(usaPP)c+='.fcmloja .fcm-sep{display:flex;align-items:center;gap:8px;margin:14px 0 10px;font-size:12px;color:#8a8375}\n';
     /* Com o Pix prioritario o botao e o PRIMEIRO dos dois: a mesma margem de .fcm-botoes. */
-    c+='.fcmloja .fcm-gerar{width:100%;'+((usaPP&&prio==='pix')?'margin-top:12px;':'')+'border:0;border-radius:10px;background:var(--fcm-destaque,#0F3A30);color:#fff;padding:12px;font:700 14px/1.2 inherit;cursor:pointer}\n';
+    c+='.fcmloja .fcm-gerar{width:100%;'+((usaPP&&prio==='pix')?'margin-top:12px;':'')+'border:0;border-radius:10px;background:var(--fcm-destaque,#0F3A30);color:#fff;padding:12px;font-family:inherit;font-size:14px;font-weight:700;line-height:1.2;cursor:pointer}\n';
     c+='.fcmloja .fcm-pixarea{display:none;margin-top:12px;text-align:left}\n';
     c+='.fcmloja .fcm-pixarea.on{display:block}\n';
     c+='.fcmloja .fcm-instrucao{font-size:12px;color:#666;margin:0 0 8px;text-align:left}\n';
     c+='.fcmloja .fcm-pixval{font-size:14px;font-weight:700;margin:0 0 8px;text-align:left}\n';
-    c+='.fcmloja .fcm-qr{margin:0 0 8px}\n';
-    c+='.fcmloja .fcm-cola{width:100%;height:70px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:10px;border:1px solid #d8d2c4;border-radius:8px;padding:7px;resize:vertical}\n';
-    c+='.fcmloja .fcm-copiar{width:100%;border:1px solid var(--fcm-destaque,#0F3A30);background:#fff;color:var(--fcm-destaque,#0F3A30);border-radius:8px;padding:9px;font:600 13px/1.2 inherit;cursor:pointer;margin-top:6px}\n';
+    /* A CHAPA BRANCA DO QR, agora nas quatro abas (leva 5, 13/09/2026). Ate esta rodada so o
+       Checkout a tinha, e a maioria era o lado ERRADO para alinhar: medido com a biblioteca
+       de verdade (qrcodejs, carregada do cdnjs numa sonda com a rede aberta para esse host
+       so), o canvas de 220px sai com ZERO pixel branco nas duas bordas -- ela desenha o codigo
+       de borda a borda e nao reserva zona quieta nenhuma. O padding:10px da chapa E a zona
+       quieta, e as quatro abas tem o FUNDO DO CARTAO configuravel pelo dono: num fundo escuro,
+       sem a chapa, o QR fica sem contraste e o leitor do banco perde o codigo. Tirar a chapa do
+       Checkout espalharia a fraqueza; dar a chapa as outras tres tira. */
+    c+='.fcmloja .fcm-qr{margin:0 0 8px;display:inline-block;background:#fff;padding:10px;border:1px solid #e0e0e0;border-radius:10px}\n';
+    /* 74px, fonte 11 e SEM redimensionar (leva 5). Eram 70px, fonte 10 e resize:vertical --
+       a unica das quatro que o cliente podia arrastar, e a unica com fonte 10. A fonte 11
+       tambem alinha esta caixa com o resumo copiavel da PROPRIA aba, que ja era 11. */
+    c+='.fcmloja .fcm-cola{width:100%;height:74px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11px;border:1px solid #d8d2c4;border-radius:8px;padding:7px;resize:none}\n';
+    c+='.fcmloja .fcm-copiar{width:100%;border:1px solid var(--fcm-destaque,#0F3A30);background:#fff;color:var(--fcm-destaque,#0F3A30);border-radius:8px;padding:9px;font-family:inherit;font-size:13px;font-weight:600;line-height:1.2;cursor:pointer;margin-top:6px}\n';
     c+='.fcmloja .fcm-copiado{display:none;font-size:12px;color:#1e7e34;margin-top:5px;text-align:left}\n';
     c+='.fcmloja .fcm-copiado.on{display:block}\n';
     if(zap){
-      c+='.fcmloja .fcm-zap{width:100%;border:0;border-radius:8px;background:#25D366;color:#fff;padding:10px;font:700 13px/1.2 inherit;cursor:pointer;margin-top:8px}\n';
+      c+='.fcmloja .fcm-zap{width:100%;border:0;border-radius:8px;background:#25D366;color:#fff;padding:10px;font-family:inherit;font-size:13px;font-weight:700;line-height:1.2;cursor:pointer;margin-top:8px}\n';
       /* Mesma condicao do botao: o aviso manda tocar no "Ja paguei". */
-      c+='.fcmloja .fcm-pixmanual{font-size:12px;line-height:1.45;color:#5a5346;background:rgba(0,0,0,.045);border-radius:8px;padding:9px 10px;margin-top:10px;text-align:left}\n';
+      c+=fcPixManualCss('.fcmloja .fcm-pixmanual');
     }
     c+='.fcmloja .fcm-nota{font-size:11px;color:#8a8375;margin-top:8px;text-align:left}\n';
   }
   if(usaResumo){
     c+='.fcmloja .fcm-resumo-c{margin-top:14px}\n';
     c+='.fcmloja .fcm-resumo{width:100%;height:120px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11px;border:1px solid #d8d2c4;border-radius:8px;padding:7px;resize:vertical}\n';
-    c+='.fcmloja .fcm-resumo-b{width:100%;border:1px solid #d8d2c4;background:#fff;color:inherit;border-radius:8px;padding:8px;font:600 12px/1.2 inherit;cursor:pointer;margin-top:6px}\n';
+    c+='.fcmloja .fcm-resumo-b{width:100%;border:1px solid #d8d2c4;background:#fff;color:inherit;border-radius:8px;padding:8px;font-family:inherit;font-size:12px;font-weight:600;line-height:1.2;cursor:pointer;margin-top:6px}\n';
     c+='.fcmloja .fcm-resumo-ok{display:none;font-size:12px;color:#1e7e34;margin-top:5px;text-align:left}\n';
     c+='.fcmloja .fcm-resumo-ok.on{display:block}\n';
   }
@@ -25531,7 +25657,10 @@ function mBlocoPagar(cfg,usaPP,usaPix,usaQtd,usaSinal,usaResumo,descpix,zap,usaF
     c+="m.textContent=txt;m.className='fcm-msg '+(ok?'ok':'erro');\n}\n\n";
     /* A ORDEM: cestaLimpar() ANTES do upsell. Invertido, o cliente sairia da pagina com a
        cesta ainda cheia e voltaria a ela cheia depois de ter pago. */
-    c+=fcPpBotoesSrc('fcm',cfg.ppcor,usaSinal,false,'cestaLimpar();'+fcUpsellChamada(cfg.upsell),true);
+    /* comentZero LIGADO (leva 5): era o unico 'false' das tres chamadas, sem justificativa
+       nenhuma. A TRAVA do pedido zerado ja saia identica nas tres -- o que faltava aqui era so
+       a explicacao dela dentro do bloco entregue, que e justamente onde alguem vai le-la. */
+    c+=fcPpBotoesSrc('fcm',cfg.ppcor,usaSinal,true,'cestaLimpar();'+fcUpsellChamada(cfg.upsell),true);
   }
   if(usaPix){
     c+='/* ===== Pix ===== */\n';
@@ -25703,7 +25832,7 @@ function mPvMontar(){
   var k=Math.min(1,disp/larg);
   box.innerHTML='';
   var moldura=document.createElement('div');
-  moldura.className='m-pv-moldura';
+  moldura.className='pv-moldura';
   moldura.style.width=Math.round(larg*k)+'px';
   moldura.style.height=M_PV_ALTURA+'px';
   var ifr=document.createElement('iframe');
