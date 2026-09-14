@@ -1338,3 +1338,50 @@ pacote, aplicar preset da aba e preset geral): cinco chamadas que faltavam.
    campo de quem já customizou** — atinge backup em arquivo.
 3. **Qual frase de "código copiado" as quatro vão dizer.** A fonte já é única; escolher o texto é
    redação para o cliente.
+
+## Entregue em 14/09/2026 — unificar as abas de pagamento, leva 5 (aparência)
+
+A última da unificação. **Doze itens alinhados, três justificados, um parado.**
+
+**Dos 15 catalogados, 2 eram decisão registrada** — e os dois que a varredura errou eram os que
+custariam mais caro. A justificativa do item 15 **não estava em comentário nem em `docs/`: estava no
+texto da tela**, que é onde varredura de código não olha. Outros seis tinham comentário ao lado que
+*parecia* justificativa e explicava **quando a regra é emitida**, nunca a aparência.
+
+### Dois casos em que a MAIORIA era o lado errado
+
+- **A moldura do QR.** Medido com a biblioteca de verdade: o canvas sai com **zero pixel branco nas
+  bordas**. A chapa branca do Checkout era a **única zona quieta** das quatro, e as quatro têm fundo
+  de cartão configurável. Alinhar pela maioria espalharia a fraqueza — a chapa foi dada às outras.
+- **A cor do aviso do Pix.** As quatro têm a cor do texto configurável. **Cor fixa dentro de um véu
+  translúcido ignora a escolha do dono.** As quatro passaram a herdar.
+
+### O achado que mais valia
+
+**`font:700 13px/1.2 inherit` não é CSS válido** — `inherit` não é nome de família, e o navegador
+**descarta a declaração inteira, em silêncio**. Medido com o bloco rodando: os **nove botões da Mini
+loja** e o `.fca-trocar` da vitrine saíam em **400 / 13,33px / Arial**, não no peso, tamanho e fonte
+do site. O controle vizinho escrito sem o atalho saía correto. Dez declarações corrigidas.
+
+### 19 divergências, todas intencionais
+
+Cinco saídas mudaram, em 60 linhas. **Nenhuma cobrança e nenhum LINK mudaram** — os nove links byte
+a byte idênticos, o selo intacto, e a `/pagar` aceita tudo o que já foi enviado.
+
+### A sétima referência congelada
+
+`meio-prio-migracao.mjs` parte 4 comparava uma saída byte a byte com `main` e virou vermelho
+permanente quando o conserto do `font:` a mudou. Agora diz `NÃO MEDIU` e ganhou uma propriedade que
+não envelhece. **Sétima ocorrência** — a regra da `CLAUDE.md` segue sendo cobrada na prática.
+
+### A armadilha que mordeu durante a escrita da prova
+
+A área do Pix do Checkout **nunca abria**, e 30 valores foram lidos de elementos escondidos até
+entrar a guarda "a área do Pix abriu de verdade". **Teste que não alcança o estado não prova nada
+sobre aquele estado** — de novo.
+
+### PARADO — precisa da palavra do dono
+
+O **campo configurável de tamanho do QR** existe só no Link de cobrança. Dá-lo às outras três cria
+chave nova no estado, no preset e no "Exportar tudo" — formato do que fica gravado, que atinge
+backups em arquivo. Alinhado só o número fixo (220 → 200 nas quatro).
