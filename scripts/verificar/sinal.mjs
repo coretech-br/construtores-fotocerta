@@ -110,11 +110,22 @@ const CAT = [
 const CUPOM = {cod:'DEZ', pct:10};
 
 /* A CONTA, TRANSCRITA DE NOVO AQUI. Nao e reuso: e a segunda opiniao. Se o bloco e o teste
-   dissessem a mesma coisa por lerem o mesmo codigo, o teste nao teria opiniao nenhuma. */
+   dissessem a mesma coisa por lerem o mesmo codigo, o teste nao teria opiniao nenhuma.
+
+   O DESCONTO EM CENTAVOS INTEIROS (13/09/2026). Ate esta data esta transcricao fazia
+   r2(sub*pct/100) -- multiplicar em ponto flutuante e arredondar depois --, que e exatamente a
+   forma que o gerador tinha e que cobrava um centavo a mais do cliente. As duas concordavam, e
+   por isso a suite passava: transcricao que repete o erro do original nao e segunda opiniao,
+   e eco.
+   Medido no caso B+D desta familia: subtotal 371,05 com cupom de 10%. A forma antiga da
+   desconto 37,10 e total 333,95; a conta exata em centavos da 37,11 e 333,94 -- e o gerador
+   corrigido concorda com a exata. A transcricao passou a fazer a conta EXATA, que e o que uma
+   segunda opiniao deve fazer: dizer qual e o numero certo, nao repetir o que o outro lado faz. */
 const r2 = x => Math.round(x*100)/100;
+const cent = x => Math.round(x*100);
 function esperado(itens, comCupom, tipo, valor){
   const sub   = r2(itens.reduce((s,i)=>s+CAT[i].v,0));
-  const desc  = comCupom ? r2(sub*CUPOM.pct/100) : 0;
+  const desc  = comCupom ? Math.round(cent(sub)*CUPOM.pct/100)/100 : 0;
   const total = r2(sub-desc);
   const sinal = (tipo==='fixo') ? r2(valor) : r2(total*valor/100);
   const saldo = Math.max(0, r2(total-sinal));
@@ -441,7 +452,14 @@ const CASOS = {
   pct50: [
     {n:'A (meio centavo)',        itens:[0],       cupom:true},
     {n:'A+B (meio centavo)',      itens:[0,1],     cupom:true},
-    {n:'B+D (meio centavo)',      itens:[1,3],     cupom:true},
+    /* B+D SAIU da familia quando o desconto passou a ser calculado em centavos inteiros
+       (13/09/2026): o total foi de 333,95 para 333,94, e metade disso deixou de cair em meio
+       centavo. Trocado por A+B+D, que a mesma varredura mostra AINDA na familia -- total
+       436,27, sinal cru 218,135, com Math.round dando 218,14 e toFixed dando 218,13.
+       Trocar o caso e o certo aqui: o que este teste protege e o COMPORTAMENTO no meio
+       centavo, nao aquele subconjunto em particular. Manter B+D so faria a assercao 3
+       falhar para sempre dizendo a verdade -- que ele nao serve mais para isso. */
+    {n:'A+B+D (meio centavo)',    itens:[0,1,3],   cupom:true},
     {n:'A+B+C+D (meio centavo)',  itens:[0,1,2,3], cupom:true},
     {n:'A+B SEM cupom',           itens:[0,1],     cupom:false},
     {n:'C sozinho (controle)',    itens:[2],       cupom:true}

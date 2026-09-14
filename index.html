@@ -5678,9 +5678,102 @@ function fcUpsellFnSrc(ind,cfg){
    uma chamada, ou NADA. Sai vazio quando nao ha upsell, e e por isso que a saida das quatro
    abas continua identica byte a byte com o campo vazio. */
 function fcUpsellChamada(cfg){return fcUpsellEmite(cfg)?'upsellIr();':'';}
-function fcPpBotoesSrc(prefixo,ppcor,usaSinal,comentZero,aoAprovarExtra){
+/* ===== OS ITENS QUE O RELATORIO DO PAYPAL VAI MOSTRAR: fonte unica =====
+   PEDIDO DO DONO (13/09/2026): "verifica se todos os construtores com pagamento no PayPal
+   estao levando o produto e seus opcionais para o PayPal". Nao estavam. Ate aqui as tres
+   abas com catalogo mandavam UM item so, com os nomes concatenados num campo de 127
+   caracteres, e os opcionais do Checkout e da Mini loja nao apareciam em lugar nenhum do
+   relatorio -- entravam no valor e sumiam. Agora cada item vai numa linha, com quantidade e
+   preco unitario, que e a forma que o dono escolheu.
+
+   A ARMADILHA, e ela recusa o pedido INTEIRO (nao e aviso): a especificacao do PayPal diz
+   que, havendo breakdown, "the amount equals item_total plus tax_total plus shipping" menos
+   os descontos. Se a conta nao fechar ao centavo o pedido nao e criado e o cliente fica sem
+   meio de pagamento.
+
+   O DESENHO QUE FECHA A CONTA POR CONSTRUCAO -- e o porque de cada linha dele:
+     1. cada item leva o preco CHEIO em unit_amount e a quantidade real em quantity;
+     2. item_total e a SOMA DOS ITENS, somada aqui em CENTAVOS INTEIROS -- nunca lida de
+        subtotal(). Os precos do catalogo saem do gerador com duas casas exatas
+        (preco:<n>.toFixed(2)), entao Math.round(preco*100) e exato e a soma nao tem residuo
+        binario. Ler subtotal() somaria os mesmos numeros em OUTRA ordem (produtos primeiro,
+        depois os opcionais) e um centavo de diferenca ja recusaria o pedido;
+     3. discount e a DIFERENCA item_total - amount, e jamais o percentual do cupom recalculado.
+        Esta e a linha que sustenta o desenho: recomputar o percentual reintroduziria o
+        arredondamento de meio centavo que este projeto ja mediu (60.097 divergencias em
+        2.002.000 combinacoes preco x cupom). Pela diferenca, amount = item_total - discount e
+        uma identidade aritmetica -- vale para o cupom percentual, para o de valor fixo, para
+        o minimo do pedido e para qualquer regra que venha depois, porque nenhuma delas e
+        consultada aqui.
+
+   O PISO. Toda duvida faz a funcao voltar SEM MEXER, e o pedido sai com a linha unica que
+   esta aba sempre mandou: lista vazia, lista longa demais, quantidade que nao e inteiro
+   positivo, preco negativo, nome vazio, ou uma diferenca NEGATIVA (que seria um "desconto"
+   de sinal trocado). Degradar para o que ja funcionava e sempre melhor que arriscar um
+   pedido que o PayPal recusa.
+
+   COM SINAL, ITEMIZAR SERIA MENTIR, e por isso o chamador nem chama: o cliente paga uma
+   fracao e o formato do PayPal nao tem conceito de entrada. Forcar a diferenca para
+   'discount' faria o recibo chamar de DESCONTO o saldo que o cliente ainda deve -- num
+   valor grande e visivel, no documento que ele guarda. A linha unica de hoje diz "(sinal -
+   cod: ...)" no nome e continua honesta.
+
+   O CONTRATO E POR NOME, como o do motor de dinheiro: o bloco hospedeiro declara
+   itensEscolhidos(), que devolve, por item escolhido, {nome, qtd, unit} -- o nome cru (sem
+   o sufixo " x3" do rotulo, que aqui viraria quantidade repetida), a quantidade e o preco
+   unitario. As tres abas com catalogo ja tinham essa enumeracao ou ganharam a sua nesta
+   rodada, e nas tres ela e a UNICA -- nomesSelecionados() passou a sair dela. */
+function fcPpItensSrc(){
+  return '/* Os itens do pedido, do jeito que o relatorio do PayPal vai mostrar: um por linha,\n'+
+    '   com quantidade e preco unitario. A conta fecha por CONSTRUCAO -- item_total e a soma\n'+
+    '   dos itens em centavos inteiros e o desconto e a DIFERENCA para o valor cobrado --,\n'+
+    '   porque o PayPal recusa o pedido inteiro se ela nao fechar ao centavo.\n'+
+    '   Em qualquer duvida esta funcao volta sem mexer, e o pedido sai com a linha unica. */\n'+
+    'function ppDetalhar(pu,v){\n'+
+    'var li=itensEscolhidos(),itens=[],cent=0,z,q,uc,nome,novo;\n'+
+    'if(!li.length||li.length>'+FC_PP_MAX_ITENS+')return;   /* '+FC_PP_MAX_ITENS+' e o maxItems declarado pelo PayPal */\n'+
+    'for(z=0;z<li.length;z++){\n'+
+    'q=li[z].qtd;\n'+
+    'if(!(q>=1)||q!==Math.round(q)||q>'+FC_PP_MAX_QTD+')return;   /* quantity: ^[1-9][0-9]{0,9}$ */\n'+
+    'uc=Math.round(li[z].unit*100);\n'+
+    'if(!(uc>=0))return;\n'+
+    '/* O ITEM DE PRECO ZERO FICA DE FORA DA LISTA, e isto foi MEDIDO, nao presumido. A\n'+
+    '   especificacao do PayPal permite unit_amount "0.00" (o unico limite escrito e "can not\n'+
+    '   be a negative number") -- mas a lista de erros 422 traz um CANNOT_BE_ZERO_OR_NEGATIVE\n'+
+    '   ("Must be greater than zero") sem dizer a que campos ele se aplica. Mandar o item\n'+
+    '   zerado e apostar num comportamento NAO DOCUMENTADO com o pedido inteiro em jogo: se o\n'+
+    '   PayPal recusar, o cliente fica sem meio de pagamento. Deixa-lo de fora nao mexe em\n'+
+    '   dinheiro nenhum (ele soma zero centavo, e item_total continua exato) e custa uma linha\n'+
+    '   no relatorio. Quando houver um pedido de verdade provando que o zero passa, trocar\n'+
+    '   este "continue" por nada e uma edicao de uma linha -- e a previa ao lado declara a\n'+
+    '   omissao em cada montagem, para ela nunca ser silenciosa. */\n'+
+    'if(uc===0)continue;\n'+
+    'nome=String(li[z].nome==null?\'\':li[z].nome).substring(0,'+FC_LIM_PP+');\n'+
+    'if(!nome)return;   /* name e obrigatorio: item sem nome derruba o pedido */\n'+
+    'cent+=uc*q;\n'+
+    'novo={name:nome,quantity:String(q),unit_amount:{value:(uc/100).toFixed(2),currency_code:MOEDA}};\n'+
+    'if(CODIGO_PEDIDO)novo.sku=String(CODIGO_PEDIDO).substring(0,'+FC_LIM_PP+');   /* a coluna "ID do produto" */\n'+
+    'itens.push(novo);\n'+
+    '}\n'+
+    'if(!itens.length)return;   /* so itens zerados: nao ha pedido itemizado a montar */\n'+
+    '/* A DIFERENCA, e nunca o percentual recalculado: e ela que faz amount = item_total -\n'+
+    '   discount ser identidade, qualquer que seja a regra que produziu o total. */\n'+
+    'var descC=cent-Math.round(parseFloat(v)*100);\n'+
+    'if(descC<0)return;   /* os itens somam MENOS que o cobrado: nao ha desconto que explique */\n'+
+    'pu.items=itens;\n'+
+    'pu.amount.breakdown.item_total={value:(cent/100).toFixed(2),currency_code:MOEDA};\n'+
+    'if(descC>0)pu.amount.breakdown.discount={value:(descC/100).toFixed(2),currency_code:MOEDA};\n'+
+    '}\n\n';
+}
+function fcPpBotoesSrc(prefixo,ppcor,usaSinal,comentZero,aoAprovarExtra,temItens){
+  /* ITEMIZA quando o bloco hospedeiro declara itensEscolhidos() E o pedido e cobrado
+     INTEIRO. Com sinal o cliente paga uma fracao, e o formato do PayPal nao tem campo
+     para entrada: ver o comentario de fcPpItensSrc, que mede por que a linha unica
+     continua sendo a resposta certa nesse caso. */
+  var itemiza=!!temItens&&!usaSinal;
   var c='';
   c+='/* ===== PayPal ===== */\n';
+  if(itemiza)c+=fcPpItensSrc();
   c+="var sdk=document.createElement('script');\n";
   c+="sdk.src='https://www.paypal.com/sdk/js?client-id='+encodeURIComponent(PAYPAL_CLIENT_ID)+'&currency='+MOEDA+'&intent=capture&locale=pt_BR';\n";
   c+='sdk.onload=function(){\n';
@@ -5704,11 +5797,25 @@ function fcPpBotoesSrc(prefixo,ppcor,usaSinal,comentZero,aoAprovarExtra){
   c+='if(!nm)nm=CODIGO_PEDIDO;   /* name e obrigatorio no item: nunca pode sair vazio */\n';
   c+='var it={name:nm,quantity:"1",unit_amount:{value:v,currency_code:MOEDA}};\n';
   c+='if(CODIGO_PEDIDO)it.sku=CODIGO_PEDIDO;   /* sku vazio nao ajuda ninguem a conciliar */\n';
+  if(!itemiza){
   c+='return actions.order.create({purchase_units:[{\n';
   c+='amount:{value:v,currency_code:MOEDA,breakdown:{item_total:{value:v,currency_code:MOEDA}}},\n';
   c+='description:nm,\n';
   c+='items:[it],\n';
   c+='custom_id:CODIGO_PEDIDO\n}]});\n},\n';
+  }else{
+  /* A LINHA UNICA CONTINUA SENDO O PISO. ppDetalhar so TROCA os itens quando a conta dele
+     fecha ao centavo; em qualquer duvida ele volta sem mexer, e o pedido sai como sempre
+     saiu. Um pedido que nao fecha nao e criado pelo PayPal -- o cliente ficaria sem meio de
+     pagamento --, entao o piso nao e zelo, e a diferenca entre cobrar e nao cobrar. */
+  c+='var pu={\n';
+  c+='amount:{value:v,currency_code:MOEDA,breakdown:{item_total:{value:v,currency_code:MOEDA}}},\n';
+  c+='description:nm,\n';
+  c+='items:[it],\n';
+  c+='custom_id:CODIGO_PEDIDO\n};\n';
+  c+='ppDetalhar(pu,v);\n';
+  c+='return actions.order.create({purchase_units:[pu]});\n},\n';
+  }
   c+='onApprove:function(data,actions){\n';
   c+='return actions.order.capture().then(function(){msg(TXT_SUCESSO,true);'+aoAprovarExtra+'});\n},\n';
   c+='onError:function(){msg(TXT_ERRO,false);}\n';
@@ -5930,12 +6037,27 @@ function fcCpMinErro(cp,cod){
    resto deste motor ja fazia; a resposta de toFixed em ".xx5" e artefato do binario, nao regra.
    Isto MUDA o que a aba Checkout emite, de proposito: o carrinho publicado hoje tem o mesmo
    defeito, e a regressao byte a byte existe para pegar mudanca nao intencional -- esta e. */
+/* ===== O CENTAVO QUE FALTAVA (13/09/2026) =====
+   O arredondamento de 22/08 acertou O LUGAR (arredondar na origem, uma vez) e errou A ORDEM:
+   ele multiplicava em PONTO FLUTUANTE e arredondava depois. Com subtotal 10,35 e cupom de 10%,
+   o exato e 1,035 -> 1,04; o binario guarda 1,0349999999999999 -> 1,03. Desconto um centavo
+   MENOR, total um centavo MAIOR -- cobrado do cliente.
+   Medido antes de mexer, em 79.200.000 combinacoes de subtotal x percentual: 133.476 divergiam
+   da conta exata (0,169%), e em TODAS o cliente pagava a mais. Em nenhuma pagava a menos: nao
+   era ruido, era vies, e sempre contra ele. Com esta forma: ZERO divergencias nas mesmas
+   79.200.000.
+   O conserto e fazer a conta em CENTAVOS INTEIROS: Math.round(base*100) primeiro, e so entao o
+   percentual. Assim o numero que entra na multiplicacao ja e exato, e nao ha binario a
+   propagar. O Math.round final fica: para os dois ramos de percentual ele virou identidade,
+   mas ele ainda serve ao cupom de VALOR FIXO e aos dois clamps -- e tira-lo faria a proxima
+   pessoa que mexer aqui depender de uma identidade que nao esta escrita em lugar nenhum.
+   Isto MUDA o que as tres abas emitem, de proposito. */
 FC_CARRINHO_SRC.descontoAtual=
   'function descontoAtual(){\n'+
   'if(!cupomAtivo)return 0;\n'+
-  'var s=subtotal(),d=0;\n'+
-  "if(cupomAtivo.tipo==='pct_produto')d=somaProdutos()*cupomAtivo.valor/100;\n"+
-  "else if(cupomAtivo.tipo==='pct_total')d=s*cupomAtivo.valor/100;\n"+
+  'var s=subtotal(),b,d=0;\n'+
+  "if(cupomAtivo.tipo==='pct_produto'){b=Math.round(somaProdutos()*100);d=Math.round(b*cupomAtivo.valor/100)/100;}\n"+
+  "else if(cupomAtivo.tipo==='pct_total'){b=Math.round(s*100);d=Math.round(b*cupomAtivo.valor/100)/100;}\n"+
   'else d=cupomAtivo.valor;\n'+
   'if(d>s)d=s;\nif(d<0)d=0;\nreturn Math.round(d*100)/100;\n}\n\n';
 FC_CARRINHO_SRC.total=
@@ -6089,84 +6211,176 @@ function fcPvShim(o){
   s+='})();\n</scr'+'ipt>\n';
   return s;
 }
-/* ===== a sonda do botao do PayPal nas previas: fonte unica =====
+/* ===== a sonda do botao do PayPal nas previas: fonte unica das QUATRO abas =====
    O SDK do PayPal nao roda em previa nenhuma -- baixa-lo mandaria o Client ID do operador para
    fora a cada remontagem e, com o campo ainda vazio, desenharia um erro de pagamento falso. No
    lugar dele o shim intercepta o pedido do script, desenha o botao (mockPP) e EXERCITA a
    configuracao que o bloco passou para paypal.Buttons: chama o onClick do proprio bloco (com
    reject/resolve de mentira) e o createOrder do proprio bloco (com order.create devolvendo o
-   objeto), e mostra o valor que iria na ordem e a decisao que o clique tomaria. E assim que a
-   previa prova, medido e nao presumido, que o valor do PayPal e o mesmo da tela.
+   objeto), e mostra o PEDIDO INTEIRO que iria para o PayPal. E assim que a previa prova,
+   medido e nao presumido, que o que o relatorio vai registrar e o que a tela mostra.
+
+   A PREVIA NUNCA REMONTA O PEDIDO. Tudo o que ela exibe e LIDO do objeto que o createOrder do
+   proprio bloco devolveu -- nome, quantidade, preco unitario, item_total, desconto, valor,
+   descricao, custom_id e sku. Previa que redesenha o resultado com codigo proprio e uma
+   segunda implementacao, e duas implementacoes divergem; e regra deste projeto, e aqui ela
+   tem um segundo dente: uma previa que montasse a lista por conta propria poderia mostrar
+   uma conta que fecha enquanto o bloco manda uma que nao fecha, e o defeito so apareceria no
+   cliente, sem meio de pagamento. A UNICA coisa que a previa calcula e a CONFERENCIA -- ela
+   soma os itens que o bloco mandou e compara com o item_total que o bloco escreveu. Isso nao
+   e remontar: e uma segunda opiniao sobre o que ja foi montado, e existe para a previa poder
+   dizer "NAO FECHA" em vez de exibir numeros errados com cara de certos.
+
    A sonda RESTAURA a mensagem que o onClick tiver escrito: sonda que deixa rastro mostraria
    uma recusa velha depois de o pedido voltar a ser valido.
-   Duas abas emitem carrinho com PayPal (Checkout e Mini loja) e as duas precisam disto. O que
-   muda entre elas sao tres nomes -- o id da raiz do bloco, a classe da linha de mensagem e o id
-   da caixa do desenho --, e por isso eles entram por parametro. Passando os do Checkout, o
-   texto sai byte a byte igual ao que ele ja emitia. */
+
+   AS QUATRO ABAS USAM ESTA. Ate 13/09/2026 eram DUAS implementacoes: esta, do Checkout, da
+   Mini loja e do Agendamento por pacote, e uma copia manuscrita quase igual na aba Link de
+   cobranca (pPvPayPal), com um render() que aceita seletor em texto e uma marca no
+   appendChild que a conferencia do shim daquela aba le. As duas concordavam -- e por isso
+   mesmo eram o defeito de amanha: esta rodada ia acrescentar o relatorio a "todas as abas
+   com PayPal", e com duas copias isso quer dizer escrever o relatorio duas vezes. O que
+   variava entrou por parametro:
+     raizId   id do bloco, para reagir a cada clique/mudanca (a /pagar nao tem: o valor dela
+              vem do endereco e nao muda enquanto a pagina existe -- ausente, nao reage);
+     msgSel   classe da linha de mensagem que o onClick escreve (ausente na /pagar);
+     caixaId  id do quadro do desenho;
+     marca    quando verdadeiro, pendura appendChild.fcPvSemPayPal -- e so a /pagar confere
+              essa marca, e continua conferindo. */
 function fcPvSondaPP(o){
   var s='';
   s+="  var DESENHO_PP='"+escJs(mockPP(o.ppcor))+"';\n";
   s+='  var inserir=document.head.appendChild;\n';
   s+='  document.head.appendChild=function(n){\n';
   s+="    if(n&&n.tagName==='SCRIPT'&&/paypal\\.com/.test(String(n.src||''))){\n";
-  s+='      window.paypal={Buttons:function(bt){return {render:function(alvo){\n';
+  s+='      window.paypal={Buttons:function(bt){return {render:function(sel){\n';
+  /* seletor em TEXTO ou elemento: a /pagar chama render('#fcpg-pp'), as outras tres passam o
+     elemento. Aceitar os dois e o que permitiu a copia manuscrita sumir. */
+  s+="        var alvo=(typeof sel==='string')?document.querySelector(sel):sel;\n";
   s+='        if(!alvo)return;\n';
   s+="        var caixa=document.createElement('div');\n";
   s+="        caixa.id='"+o.caixaId+"';\n";
   s+='        caixa.setAttribute(\'style\',\'border:1px dashed #b9b3a4;border-radius:8px;padding:6px 8px 10px\');\n';
   s+="        alvo.innerHTML='';alvo.appendChild(caixa);\n";
+  /* ===== as pecinhas de desenho, uma vez so ===== */
+  s+='        function cel(tag,estilo,txt){\n';
+  s+='          var e=document.createElement(tag);\n';
+  s+="          if(estilo)e.setAttribute('style',estilo);\n";
+  s+='          if(txt!=null)e.textContent=txt;\n';
+  s+='          return e;\n';
+  s+='        }\n';
+  s+="        var FONTE='font:12px/1.5 -apple-system,BlinkMacSystemFont,sans-serif';\n";
+  s+="        var CAMPO='font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10.5px;font-weight:700;color:#2f2a20';\n";
+  s+="        var NOSSO='color:#8a8375;font-size:10.5px';\n";
   s+='        function sondar(){\n';
-  s+="          var raiz=document.getElementById(\'"+o.raizId+"\');\n";
-  s+="          var cx=raiz?raiz.querySelector(\'."+o.msgSel+"\'):null;\n";
+  /* ---- 1. o clique, e a mensagem que ele escreve (restaurada em seguida) ---- */
+  s+="          var raiz="+(o.raizId?"document.getElementById('"+o.raizId+"')":'null')+";\n";
+  s+="          var cx="+(o.msgSel?"(raiz?raiz.querySelector('."+o.msgSel+"'):null)":'null')+";\n";
   s+="          var antesT=cx?cx.textContent:'',antesC=cx?cx.className:'';\n";
   s+='          var decisao=null,motivo=\'\';\n';
   s+='          try{\n';
   s+="            if(bt&&bt.onClick){\n";
   s+="              var r=bt.onClick(null,{reject:function(){return 'RECUSA';},resolve:function(){return 'ACEITA';}});\n";
   s+="              decisao=(r==='RECUSA')?'recusa':'aceita';\n";
-  s+="              if(cx&&cx.textContent!==antesT)motivo=cx.textContent;\n";
+  s+='              if(cx&&cx.textContent!==antesT)motivo=cx.textContent;\n';
   s+='            }\n';
   s+='          }catch(e){decisao=\'erro\';motivo=String(e&&e.message||e);}\n';
   s+='          if(cx){cx.textContent=antesT;cx.className=antesC;}\n';
-  s+="          var valor='',descricao='';\n";
+  /* ---- 2. o PEDIDO, lido do proprio bloco ---- */
+  s+="          var pu=null,falha='';\n";
   s+='          try{\n';
   s+="            var ped=bt.createOrder(null,{order:{create:function(o){return o;}}});\n";
-  s+='            var am=ped.purchase_units[0].amount;\n';
-  s+="            valor=am.value+' '+am.currency_code;\n";
-  s+='            descricao=ped.purchase_units[0].description;\n';
-  s+="          }catch(e2){valor='(erro: '+String(e2&&e2.message||e2)+')';}\n";
+  s+='            pu=ped.purchase_units[0];\n';
+  s+="          }catch(e2){falha=String(e2&&e2.message||e2);}\n";
+  /* ---- 3. o desenho ---- */
   s+="          caixa.innerHTML='';\n";
-  s+="          var eti=document.createElement('div');\n";
-  s+='          eti.setAttribute(\'style\',\'font:600 10px/1.4 -apple-system,BlinkMacSystemFont,sans-serif;color:#8a8375;text-align:center;text-transform:uppercase;letter-spacing:.06em\');\n';
-  s+="          eti.textContent='desenho: o SDK do PayPal não roda na prévia';\n";
-  s+='          caixa.appendChild(eti);\n';
-  s+="          var des=document.createElement('div');des.innerHTML=DESENHO_PP;caixa.appendChild(des);\n";
-  s+="          var pai=document.createElement('div');\n";
-  s+='          pai.setAttribute(\'style\',\'margin-top:8px;border-top:1px dashed #d8d2c4;padding-top:7px;font:12px/1.5 -apple-system,BlinkMacSystemFont,sans-serif;color:#555;text-align:left\');\n';
-  s+='          function linha(rot,txt,cor){\n';
-  s+="            var l=document.createElement('div');\n";
-  s+="            var b=document.createElement('span');b.setAttribute('style','font-weight:700');b.textContent=rot;\n";
-  s+="            var v=document.createElement('span');v.textContent=' '+txt;\n";
-  s+="            if(cor)v.setAttribute('style','color:'+cor+';font-weight:700');\n";
-  s+='            l.appendChild(b);l.appendChild(v);pai.appendChild(l);\n';
-  s+='          }\n';
-  s+="          linha('Medido no proprio bloco -- valor que iria na ordem:',valor,'#1e7e34');\n";
-  s+="          linha('Ao clicar em pagar:',(decisao==='recusa')?('recusa -- '+motivo):(decisao==='aceita'?'segue para o PayPal':('erro -- '+motivo)),(decisao==='recusa')?'#c0392b':'');\n";
-  s+="          if(descricao)linha('Descricao da ordem:',descricao,'');\n";
+  s+="          caixa.appendChild(cel('div','font:600 10px/1.4 -apple-system,BlinkMacSystemFont,sans-serif;color:#8a8375;text-align:center;text-transform:uppercase;letter-spacing:.06em','desenho: o SDK do PayPal não roda na prévia'));\n";
+  s+="          var des=cel('div','');des.innerHTML=DESENHO_PP;caixa.appendChild(des);\n";
+  s+="          var pai=cel('div','margin-top:8px;border-top:1px dashed #d8d2c4;padding-top:7px;'+FONTE+';color:#555;text-align:left');\n";
   s+='          caixa.appendChild(pai);\n';
+  s+="          pai.appendChild(cel('div','font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:#2f2a20','O que o PayPal vai registrar'));\n";
+  s+="          pai.appendChild(cel('div',NOSSO+';margin:1px 0 7px','Lido do pedido que o próprio bloco monta. Em destaque, o nome do campo no PayPal; em cinza, explicação nossa.'));\n";
+  s+='          if(falha){\n';
+  s+="            pai.appendChild(cel('div','color:#c0392b;font-weight:700','O bloco não conseguiu montar o pedido: '+falha));\n";
+  s+='          }else if(!pu){\n';
+  s+="            pai.appendChild(cel('div','color:#c0392b;font-weight:700','O bloco não devolveu unidade de compra nenhuma.'));\n";
+  s+='          }else{\n';
+  /* --- a lista de itens --- */
+  s+='            var its=pu.items||[];\n';
+  s+="            var cab=cel('div','display:flex;gap:8px;font-weight:700;border-bottom:1px solid #e4dfd2;padding-bottom:2px;margin-bottom:2px');\n";
+  s+="            cab.appendChild(cel('div',CAMPO+';flex:1','items[].name'));\n";
+  s+="            cab.appendChild(cel('div',CAMPO+';width:58px;text-align:right','quantity'));\n";
+  s+="            cab.appendChild(cel('div',CAMPO+';width:96px;text-align:right','unit_amount'));\n";
+  s+='            pai.appendChild(cab);\n';
+  s+='            var somaC=0,z,it,uc,qn;\n';
+  s+='            for(z=0;z<its.length;z++){\n';
+  s+='              it=its[z]||{};\n';
+  s+='              uc=Math.round(parseFloat((it.unit_amount||{}).value)*100);\n';
+  s+='              qn=parseInt(it.quantity,10);\n';
+  s+='              if(!isNaN(uc)&&!isNaN(qn))somaC+=uc*qn;\n';
+  s+="              var ln=cel('div','display:flex;gap:8px;padding:1px 0');\n";
+  s+="              ln.appendChild(cel('div','flex:1;word-break:break-word',String(it.name==null?'':it.name)));\n";
+  s+="              ln.appendChild(cel('div','width:58px;text-align:right',String(it.quantity)));\n";
+  s+="              ln.appendChild(cel('div','width:96px;text-align:right',String((it.unit_amount||{}).value)+' '+String((it.unit_amount||{}).currency_code)));\n";
+  s+='              pai.appendChild(ln);\n';
+  s+='            }\n';
+  s+='            if(!its.length)\n';
+  s+="              pai.appendChild(cel('div',NOSSO,'(nenhum item — o pedido não seria criado)'));\n";
+  /* --- os totais --- */
+  s+="            var br=(pu.amount||{}).breakdown||{};\n";
+  s+='            function din(o2){return o2?(String(o2.value)+\' \'+String(o2.currency_code)):null;}\n';
+  s+='            function linha(campo,valor,nota,cor){\n';
+  s+="              var l=cel('div','display:flex;gap:8px;padding:1px 0'+(cor?(';color:'+cor):''));\n";
+  s+="              l.appendChild(cel('div',CAMPO+(cor?(';color:'+cor):''),campo));\n";
+  s+="              l.appendChild(cel('div','flex:1;text-align:right;font-weight:700',valor==null?'—':String(valor)));\n";
+  s+='              pai.appendChild(l);\n';
+  s+="              if(nota)pai.appendChild(cel('div',NOSSO+';margin:0 0 2px',nota));\n";
+  s+='            }\n';
+  s+="            pai.appendChild(cel('div','border-top:1px solid #e4dfd2;margin-top:4px;padding-top:3px'));\n";
+  s+="            linha('amount.breakdown.item_total',din(br.item_total),'a soma dos itens acima');\n";
+  s+="            if(br.discount)linha('amount.breakdown.discount','- '+din(br.discount),'o PayPal subtrai este valor do item_total');\n";
+  s+="            linha('amount.value',din(pu.amount),'o que o cartão do cliente debita');\n";
+  /* --- a conferencia: segunda opiniao sobre o que o bloco montou --- */
+  s+="            var itC=Math.round(parseFloat((br.item_total||{}).value)*100);\n";
+  s+="            var dsC=br.discount?Math.round(parseFloat(br.discount.value)*100):0;\n";
+  s+="            var amC=Math.round(parseFloat((pu.amount||{}).value)*100);\n";
+  s+='            var fecha=(!isNaN(itC)&&!isNaN(amC)&&somaC===itC&&(itC-dsC)===amC);\n';
+  s+="            pai.appendChild(cel('div',(fecha?'color:#1e7e34':'color:#c0392b')+';font-weight:700;margin-top:3px',\n";
+  s+="              fecha?'Confere ao centavo: a soma dos itens é o item_total, e item_total menos desconto é o valor cobrado.'\n";
+  s+="                   :'NÃO FECHA: o PayPal recusaria este pedido inteiro e o cliente ficaria sem meio de pagamento.'));\n";
+  s+="            pai.appendChild(cel('div',NOSSO+';margin-bottom:5px','Item de R$ 0,00 não entra na lista: o PayPal não documenta se aceita preço unitário zero, e arriscar isso derrubaria o pedido todo.'));\n";
+  /* --- os campos de conciliacao --- */
+  s+="            pai.appendChild(cel('div','border-top:1px solid #e4dfd2;margin-top:2px;padding-top:3px'));\n";
+  s+="            linha('description',pu.description,'o resumo do pedido, no extrato do cliente');\n";
+  s+="            linha('custom_id',pu.custom_id,'o campo de conciliação: aparece no relatório, não para o cliente');\n";
+  s+="            linha('items[].sku',its.length?its[0].sku:null,'a coluna \"ID do produto\" do relatório, igual em todas as linhas');\n";
+  s+='          }\n';
+  /* --- a decisao do clique, quando a aba tem onClick --- */
+  s+='          if(decisao!==null){\n';
+  s+="            var dl=cel('div','margin-top:5px;border-top:1px dashed #d8d2c4;padding-top:4px');\n";
+  s+="            dl.appendChild(cel('span','font-weight:700','Ao clicar em pagar:'));\n";
+  s+="            dl.appendChild(cel('span',(decisao==='recusa')?'color:#c0392b;font-weight:700':'',\n";
+  s+="              ' '+((decisao==='recusa')?('recusa -- '+motivo):(decisao==='aceita'?'segue para o PayPal':('erro -- '+motivo)))));\n";
+  s+='            pai.appendChild(dl);\n';
+  s+='          }\n';
   s+='        }\n';
   s+='        sondar();\n';
-  s+="        var r0=document.getElementById(\'"+o.raizId+"\');\n";
-  s+='        if(r0){\n';
-  s+="          r0.addEventListener('change',function(){setTimeout(sondar,0);});\n";
-  s+="          r0.addEventListener('click',function(){setTimeout(sondar,0);});\n";
-  s+='        }\n';
+  /* Sem raizId (a /pagar) nao ha o que reagir: o valor daquela pagina vem do endereco e nao
+     muda enquanto a pagina existe. */
+  if(o.raizId){
+    s+="        var r0=document.getElementById('"+o.raizId+"');\n";
+    s+='        if(r0){\n';
+    s+="          r0.addEventListener('change',function(){setTimeout(sondar,0);});\n";
+    s+="          r0.addEventListener('click',function(){setTimeout(sondar,0);});\n";
+    s+='        }\n';
+  }
   s+='      }};}};\n';
   s+='      setTimeout(function(){if(n.onload)n.onload();},0);\n';
   s+='      return n;\n';
   s+='    }\n';
   s+='    return inserir.call(document.head,n);\n';
   s+='  };\n';
+  if(o.marca)s+='  document.head.appendChild.fcPvSemPayPal=true;\n';
   return s;
 }
 /* ===== faixa declarada dos campos numericos, compartilhada por TODAS as abas =====
@@ -7079,6 +7293,17 @@ function fcLimSoDigitos(v){return String(v==null?'':v).replace(/[^0-9]/g,'');}
    daqui que os tres geradores o escrevem -- unifica-se a fonte que escreve, e por isso a saida
    nao muda um byte. */
 var FC_LIM_PP=127;
+/* O TETO DE ITENS DO PEDIDO, lido da especificacao OpenAPI do PayPal (checkout_orders_v2,
+   info.version 2.32) e nao de memoria: purchase_units[].items[] declara maxItems 32767
+   (minItems 0). Nao e um teto que um catalogo desta ferramenta alcance -- esta aqui porque a
+   guarda tem de existir com o numero CERTO: inventar um teto baixo desitemizaria pedidos que
+   o PayPal aceitaria, e nao ter guarda nenhuma deixaria o unico caso que ele recusa passar.
+   Outros dois numeros da mesma leitura, usados logo abaixo em ppDetalhar:
+     items[].quantity  string, padrao ^[1-9][0-9]{0,9}$ -- inteiro de 1 a 9999999999. "0" NAO
+                       e aceito, e e por isso que o opcional zerado nao pode virar quantity 0;
+     items[].sku       maxLength 127, o mesmo teto do name (que o PayPal trunca em 127). */
+var FC_PP_MAX_ITENS=32767;
+var FC_PP_MAX_QTD=9999999999;
 function fcLimNotaPp(v){
   return (String(v==null?'':v).length>FC_LIM_PP)?('o PayPal recebe só os '+FC_LIM_PP+' primeiros'):'';
 }
@@ -15339,27 +15564,35 @@ function uBloco(cfg){
      'usaResumo||(usaPix&&zap)' em vez de incondicional para nao deixar funcao sem chamador no
      bloco entregue -- avisarZap, que e o outro chamador, nasce DENTRO do ramo do Pix (15356).
      Com o resumo ligado a saida nao muda um byte: o ramo comecava exatamente aqui. */
-  if(usaResumo||(usaPix&&zap)){
-    c+='function itensEscolhidos(){\n';
-    c+='var lista=[];\n';
-    c+='PRODUTOS.forEach(function(p,i){\n';
-    c+='if(!produtoAtivo(i))return;\n';
-    if(usaQtd)c+="lista.push({rotulo:p.nome+(p.quantidade?(' x'+qtdProd(i)):''),valor:p.preco*qtdProd(i),opcional:false});\n";
-    else c+='lista.push({rotulo:p.nome,valor:p.preco,opcional:false});\n';
-    c+='var sel=raiz.querySelectorAll(\'input[name="fcu-op-\'+i+\'"]:checked\');\n';
-    c+='for(var k=0;k<sel.length;k++){\n';
-    c+='var j=parseInt(sel[k].value,10);\n';
-    c+='var op=itensProd[i][j];\n';
-    c+='if(!op||op.nenhum)continue;\n';
-    if(usaQtd){
-      c+='if(qtdOp(i,j)<1)continue;\n';
-      c+="lista.push({rotulo:op.nome+(op.qtd?(' x'+qtdOp(i,j)):''),valor:op.preco*qtdOp(i,j),opcional:true});\n";
-    }else{
-      c+='lista.push({rotulo:op.nome,valor:op.preco,opcional:true});\n';
-    }
-    c+='}\n});\n';
-    c+='return lista;\n}\n\n';
+  /* AGORA INCONDICIONAL, e agora com nome/qtd/unit (13/09/2026). Duas razoes, e a segunda e
+     a que importa: o pedido ao PayPal passou a ler os itens daqui (ppDetalhar), e
+     nomesSelecionados() TAMBEM -- esta e a unica enumeracao do carrinho deste bloco. Enquanto
+     ela era condicional e nomesSelecionados tinha o proprio laco, existiam duas leituras da
+     mesma escolha que hoje concordam: a descricao da ordem sairia de uma e os itens de outra,
+     e bastava uma ganhar uma regra que a outra nao ganhasse.
+     'rotulo' e 'valor' continuam como estavam (o resumo copiavel e o WhatsApp leem os dois);
+     'nome' e o nome CRU e 'qtd' a quantidade separada, porque no PayPal a quantidade e campo
+     proprio e mandar "Album x3" com quantity 3 diria a mesma coisa duas vezes; 'unit' e o
+     preco unitario, que e o que unit_amount pede -- 'valor' ja vem multiplicado. */
+  c+='function itensEscolhidos(){\n';
+  c+='var lista=[];\n';
+  c+='PRODUTOS.forEach(function(p,i){\n';
+  c+='if(!produtoAtivo(i))return;\n';
+  if(usaQtd)c+="lista.push({rotulo:p.nome+(p.quantidade?(' x'+qtdProd(i)):''),valor:p.preco*qtdProd(i),opcional:false,nome:p.nome,qtd:qtdProd(i),unit:p.preco});\n";
+  else c+="lista.push({rotulo:p.nome,valor:p.preco,opcional:false,nome:p.nome,qtd:1,unit:p.preco});\n";
+  c+='var sel=raiz.querySelectorAll(\'input[name="fcu-op-\'+i+\'"]:checked\');\n';
+  c+='for(var k=0;k<sel.length;k++){\n';
+  c+='var j=parseInt(sel[k].value,10);\n';
+  c+='var op=itensProd[i][j];\n';
+  c+='if(!op||op.nenhum)continue;\n';
+  if(usaQtd){
+    c+='if(qtdOp(i,j)<1)continue;\n';
+    c+="lista.push({rotulo:op.nome+(op.qtd?(' x'+qtdOp(i,j)):''),valor:op.preco*qtdOp(i,j),opcional:true,nome:op.nome,qtd:qtdOp(i,j),unit:op.preco});\n";
+  }else{
+    c+="lista.push({rotulo:op.nome,valor:op.preco,opcional:true,nome:op.nome,qtd:1,unit:op.preco});\n";
   }
+  c+='}\n});\n';
+  c+='return lista;\n}\n\n';
   if(usaResumo){
     c+='function textoResumo(){\n';
     c+='var L=[],li=itensEscolhidos(),z;\n';
@@ -15394,16 +15627,21 @@ function uBloco(cfg){
     c+="}else{ta.select();document.execCommand('copy');ok();}\n}\n";
     c+="raiz.querySelector('.fcu-resumo-b').addEventListener('click',copiarResumo);\n\n";
   }
+  /* UMA enumeracao so (13/09/2026): os nomes saem de itensEscolhidos(), que e a mesma lista
+     que o pedido ao PayPal usa. O laco proprio que morava aqui produzia exatamente estes
+     mesmos rotulos -- e era por isso que precisava sair: copia que hoje concorda e a que
+     amanha diverge sem erro nenhum na tela.
+     SO OS PRODUTOS, como sempre foi: este texto e a descricao da ordem, um resumo de 127
+     caracteres, e os opcionais agora tem linha propria no relatorio. */
   c+='function nomesSelecionados(){\n';
-  c+='var ns=[];\n';
-  if(usaQtd)c+="PRODUTOS.forEach(function(p,i){if(produtoAtivo(i))ns.push(p.nome+(p.quantidade?(' x'+qtdProd(i)):''));});\n";
-  else c+='PRODUTOS.forEach(function(p,i){if(produtoAtivo(i))ns.push(p.nome);});\n';
+  c+='var ns=[],li=itensEscolhidos(),z;\n';
+  c+='for(z=0;z<li.length;z++)if(!li[z].opcional)ns.push(li[z].rotulo);\n';
   c+='return ns;\n}\n\n';
   if(usaPP){
     c+='function msg(txt,ok){\n';
     c+="var m=raiz.querySelector('.fcu-msg');\n";
     c+="m.textContent=txt;m.className='fcu-msg '+(ok?'ok':'erro');\n}\n\n";
-    c+=fcPpBotoesSrc('fcu',ppcor,usaSinal,true,fcUpsellChamada(cfg.upsell));
+    c+=fcPpBotoesSrc('fcu',ppcor,usaSinal,true,fcUpsellChamada(cfg.upsell),true);
   }
   if(usaPix){
     c+='/* ===== Pix ===== */\n';
@@ -19703,10 +19941,16 @@ function aBlocoObrigado(cfg){
      (op.qtd), como as irmas fazem. O PACOTE nao ganha sufixo porque nao tem quantidade
      nenhuma aqui: aPacotesSrc nao emite o campo, somaProdutos() devolve PAC.preco sem
      multiplicar, e aQtdLigada so olha os opcionais (14717+). */
-  c+='/* Nomes do que foi escolhido -- o pacote sempre, os opcionais marcados por cima. Usado so\n';
-  c+='   pelo nome do item que o cartao mostra ao cliente (secao 3d); NUNCA pelo identificador. */\n';
-  c+='function nomesSelecionados(){\n';
-  c+='  var ns=[PAC.nome];\n';
+  /* A ENUMERACAO UNICA DO PEDIDO desta pagina (13/09/2026). Ate aqui existia so
+     nomesSelecionados(), que devolvia NOMES; o pedido ao PayPal passou a precisar tambem da
+     quantidade e do preco unitario de cada linha, e escrever um segundo laco para isso seria
+     a copia que este projeto vem desfazendo nas outras duas abas. Entao a enumeracao passa a
+     devolver objetos -- os mesmos campos das irmas (rotulo, valor, opcional, nome, qtd, unit),
+     para ppDetalhar nao precisar saber de qual aba veio a lista -- e nomesSelecionados() sai
+     dela. O PACOTE nao tem quantidade (aPacotesSrc nao emite o campo e somaProdutos() devolve
+     PAC.preco sem multiplicar), entao ele entra sempre com qtd 1. */
+  c+='function itensEscolhidos(){\n';
+  c+='  var lista=[{rotulo:PAC.nome,valor:PAC.preco,opcional:false,nome:PAC.nome,qtd:1,unit:PAC.preco}];\n';
   c+='  (PAC.ops||[]).forEach(function(op,j){\n';
   /* Quantidade zero equivale a opcional nao escolhido -- a mesma regra das duas irmas
      (produtoAtivo: 'if(qtdProd(i)<1)return false'; itensEscolhidos: 'if(qtdOp(i,j)<1)
@@ -19717,9 +19961,18 @@ function aBlocoObrigado(cfg){
      com a MESMA guarda, escrita ao lado em zapMsgPago --, entao barrar aqui basta. subtotal() nao
      ganha guarda pelo mesmo motivo que a irma nao tem: multiplicar por zero ja soma zero. */
   if(usaQtd)c+='    if(qtdOp(j)<1)return;\n';
-  if(usaQtd)c+="    if(opChecks[j]&&opChecks[j].checked)ns.push(op.nome+(op.qtd?(' x'+qtdOp(j)):''));\n";
-  else c+='    if(opChecks[j]&&opChecks[j].checked)ns.push(op.nome);\n';
+  c+='    if(!(opChecks[j]&&opChecks[j].checked))return;\n';
+  if(usaQtd)c+="    lista.push({rotulo:op.nome+(op.qtd?(' x'+qtdOp(j)):''),valor:op.preco*qtdOp(j),opcional:true,nome:op.nome,qtd:qtdOp(j),unit:op.preco});\n";
+  else c+="    lista.push({rotulo:op.nome,valor:op.preco,opcional:true,nome:op.nome,qtd:1,unit:op.preco});\n";
   c+='  });\n';
+  c+='  return lista;\n';
+  c+='}\n\n';
+  c+='/* Nomes do que foi escolhido -- o pacote sempre, os opcionais marcados por cima. Usado so\n';
+  c+='   pelo nome do item que o cartao mostra ao cliente (secao 3d); NUNCA pelo identificador.\n';
+  c+='   Sai da enumeracao acima: os rotulos sao os mesmos que o laco proprio produzia. */\n';
+  c+='function nomesSelecionados(){\n';
+  c+='  var ns=[],li=itensEscolhidos(),z;\n';
+  c+='  for(z=0;z<li.length;z++)ns.push(li[z].rotulo);\n';
   c+='  return ns;\n';
   c+='}\n\n';
 
@@ -20103,7 +20356,7 @@ function aBlocoObrigado(cfg){
   c+='  var m=document.createElement("div");m.className="fca-ob-msg";b.appendChild(m);\n';
   c+='  cartao.appendChild(b);\n';
   c+='  function msg(txt,ok){m.textContent=txt;m.className="fca-ob-msg "+(ok?"ok":"erro");}\n';
-  c+=fcPpBotoesSrc('fca-ob',cfg.ppcor,usaSinal,true,fcUpsellChamada(cfg.upsell));
+  c+=fcPpBotoesSrc('fca-ob',cfg.ppcor,usaSinal,true,fcUpsellChamada(cfg.upsell),true);
   c+='}\n\n';
   }
 
@@ -22769,45 +23022,18 @@ function pJson(v){return JSON.stringify(String(v==null?'':v)).replace(/</g,'\\u0
    createOrder do proprio bloco -- com actions.order.create devolvendo o objeto recebido --,
    entao a previa mostra, medido no bloco, o valor que iria na ordem. E assim que se prova que
    o valor do PayPal e o mesmo da tela: os dois saem do campo 54 do codigo Pix. */
+/* A SONDA DESTA ABA E A MESMA DAS OUTRAS TRES (13/09/2026). Ate aqui estas quarenta linhas
+   eram uma copia manuscrita de fcPvSondaPP -- quase identica, e concordando com ela. Quando
+   o relatorio do PayPal entrou nas previas, essa concordancia virou conta a pagar: escrever
+   o mesmo relatorio duas vezes e garantir que um dia um dos dois deixe de dizer a verdade.
+   As duas diferencas reais viraram parametro da fonte compartilhada: esta aba chama
+   render('#fcpg-pp') com um SELETOR EM TEXTO, e o shim dela confere a marca
+   fcPvSemPayPal no appendChild. raizId e msgSel ficam de fora: a cobranca desta pagina vem
+   do endereco e nao muda enquanto a pagina existe, e o bloco dela nao tem onClick nenhum
+   para exercitar -- a sonda omite a linha do clique quando nao ha o que clicar. */
 function pPvPayPal(cfg){
-  var s='';
-  if(!cfg.usapp)return s;
-  s+="  var DESENHO_PP='"+escJs(mockPP(cfg.ppcor))+"';\n";
-  s+='  var inserir=document.head.appendChild;\n';
-  s+='  document.head.appendChild=function(n){\n';
-  s+="    if(n&&n.tagName==='SCRIPT'&&/paypal\\.com/.test(String(n.src||''))){\n";
-  s+='      window.paypal={Buttons:function(bt){return {render:function(sel){\n';
-  s+="        var alvo=(typeof sel==='string')?document.querySelector(sel):sel;\n";
-  s+='        if(!alvo)return;\n';
-  s+="        var caixa=document.createElement('div');\n";
-  s+="        caixa.id='p-pv-pp';\n";
-  s+='        caixa.setAttribute(\'style\',\'border:1px dashed #b9b3a4;border-radius:8px;padding:6px 8px 10px\');\n';
-  s+="        alvo.innerHTML='';alvo.appendChild(caixa);\n";
-  s+="        var valor='',descricao='';\n";
-  s+='        try{\n';
-  s+='          var ped=bt.createOrder(null,{order:{create:function(o){return o;}}});\n';
-  s+='          var am=ped.purchase_units[0].amount;\n';
-  s+="          valor=am.value+' '+am.currency_code;\n";
-  s+='          descricao=ped.purchase_units[0].description;\n';
-  s+="        }catch(e){valor='(erro: '+String(e&&e.message||e)+')';}\n";
-  s+="        var eti=document.createElement('div');\n";
-  s+='        eti.setAttribute(\'style\',\'font:600 10px/1.4 -apple-system,BlinkMacSystemFont,sans-serif;color:#8a8375;text-align:center;text-transform:uppercase;letter-spacing:.06em\');\n';
-  s+="        eti.textContent='desenho: o SDK do PayPal não roda na prévia';\n";
-  s+='        caixa.appendChild(eti);\n';
-  s+="        var des=document.createElement('div');des.innerHTML=DESENHO_PP;caixa.appendChild(des);\n";
-  s+="        var med=document.createElement('div');\n";
-  s+="        med.id='p-pv-pp-valor';\n";
-  s+='        med.setAttribute(\'style\',\'margin-top:8px;border-top:1px dashed #d8d2c4;padding-top:7px;font:12px/1.5 -apple-system,BlinkMacSystemFont,sans-serif;color:#555;text-align:left\');\n';
-  s+="        med.textContent='Medido no próprio bloco -- valor que iria na ordem: '+valor+(descricao?(' | descricao: '+descricao):'');\n";
-  s+='        caixa.appendChild(med);\n';
-  s+='      }};}};\n';
-  s+='      setTimeout(function(){if(n.onload)n.onload();},0);\n';
-  s+='      return n;\n';
-  s+='    }\n';
-  s+='    return inserir.call(document.head,n);\n';
-  s+='  };\n';
-  s+='  document.head.appendChild.fcPvSemPayPal=true;\n';
-  return s;
+  if(!cfg.usapp)return '';
+  return fcPvSondaPP({ppcor:cfg.ppcor,raizId:'',msgSel:'',caixaId:'p-pv-pp',marca:true});
 }
 function pPvShim(busca,cfg){
   return fcPvShim({pref:'p',
@@ -24996,15 +25222,32 @@ function mBlocoPagar(cfg,usaPP,usaPix,usaQtd,usaSinal,usaResumo,descpix,zap,usaC
   /* Enumeracao UNICA dos itens do carrinho: ela alimenta o resumo copiavel E a mensagem do
      WhatsApp. Dois lacos poderiam discordar sobre a mesma compra, e foi assim que o Checkout
      imprimiu um resumo que as duas pontas de pagamento recusavam. */
+  /* nome/qtd/unit acrescentados em 13/09/2026 pelo mesmo motivo do Checkout: o pedido ao
+     PayPal le os itens daqui, e no PayPal a quantidade e campo proprio (quantity) e o preco
+     e o UNITARIO (unit_amount) -- 'valor' ja vem multiplicado e 'rotulo' ja traz o " x3". */
+  /* A GUARDA DE QUANTIDADE ZERO, que faltava SO AQUI (13/09/2026, achado ao medir os itens
+     do PayPal). As duas irmas ja barravam: o Checkout em produtoAtivo ('if(qtdProd(i)<1)
+     return false') e no proprio laco dos opcionais ('if(qtdOp(i,j)<1)continue'), e a pagina de
+     obrigado em nomesSelecionados ('if(qtdOp(j)<1)return'). Esta nao barrava em lugar nenhum:
+     guardarNoCarrinho grava {j,n,q} com o q que estiver no seletor, inclusive ZERO, e um
+     opcional marcado e depois zerado no proprio seletor continuava aparecendo no resumo
+     copiavel e na mensagem do WhatsApp -- uma linha anunciando um item que ninguem comprou,
+     por R$ 0,00. Medido: com o opcional em zero, o pedido do PayPal caia inteiro para a linha
+     unica (ppDetalhar recusa quantity 0, que o PayPal nao aceita) e os opcionais sumiam do
+     relatorio -- exatamente o que esta rodada existe para consertar.
+     A conta nao muda: multiplicar por zero ja somava zero em subtotal(). O que muda e a LISTA,
+     nos tres lugares que a leem -- e sao tres porque agora ha uma enumeracao so. */
   c+='function itensEscolhidos(){\n';
   c+='var lista=[],i,k,it,p,op;\n';
   c+='for(i=0;i<CARRINHO.length;i++){\n';
   c+='it=CARRINHO[i];p=PRODUTOS[it.p];\n';
-  c+="lista.push({rotulo:p.nome+(it.q>1?(' x'+it.q):''),valor:p.preco*it.q,opcional:false});\n";
+  c+='if(!(it.q>=1))continue;   /* linha zerada = item nao escolhido, como nas duas irmas */\n';
+  c+="lista.push({rotulo:p.nome+(it.q>1?(' x'+it.q):''),valor:p.preco*it.q,opcional:false,nome:p.nome,qtd:it.q,unit:p.preco});\n";
   c+='for(k=0;k<it.ops.length;k++){\n';
   c+='op=(p.opcionais||[])[it.ops[k].j];\n';
   c+='if(!op)continue;\n';
-  c+="lista.push({rotulo:op.nome+(it.ops[k].q>1?(' x'+it.ops[k].q):''),valor:op.preco*it.ops[k].q,opcional:true});\n";
+  c+='if(!(it.ops[k].q>=1))continue;   /* opcional zerado no seletor = nao escolhido */\n';
+  c+="lista.push({rotulo:op.nome+(it.ops[k].q>1?(' x'+it.ops[k].q):''),valor:op.preco*it.ops[k].q,opcional:true,nome:op.nome,qtd:it.ops[k].q,unit:op.preco});\n";
   c+='}\n}\n';
   c+='return lista;\n}\n\n';
   if(usaResumo){
@@ -25041,9 +25284,12 @@ function mBlocoPagar(cfg,usaPP,usaPix,usaQtd,usaSinal,usaResumo,descpix,zap,usaC
     c+="}else{ta.select();document.execCommand('copy');ok();}\n}\n";
     c+="raiz.querySelector('.fcm-resumo-b').addEventListener('click',copiarResumo);\n\n";
   }
+  /* UMA enumeracao so (13/09/2026), como no Checkout: os nomes saem de itensEscolhidos(),
+     que e a mesma lista que vai para o relatorio do PayPal. O laco proprio produzia estes
+     mesmos rotulos, e era essa concordancia por coincidencia que precisava virar estrutura. */
   c+='function nomesSelecionados(){\n';
-  c+='var ns=[],i;\n';
-  c+="for(i=0;i<CARRINHO.length;i++)ns.push(PRODUTOS[CARRINHO[i].p].nome+(CARRINHO[i].q>1?(' x'+CARRINHO[i].q):''));\n";
+  c+='var ns=[],li=itensEscolhidos(),z;\n';
+  c+='for(z=0;z<li.length;z++)if(!li[z].opcional)ns.push(li[z].rotulo);\n';
   c+='return ns;\n}\n\n';
   if(usaPP){
     c+='function msg(txt,ok){\n';
@@ -25051,7 +25297,7 @@ function mBlocoPagar(cfg,usaPP,usaPix,usaQtd,usaSinal,usaResumo,descpix,zap,usaC
     c+="m.textContent=txt;m.className='fcm-msg '+(ok?'ok':'erro');\n}\n\n";
     /* A ORDEM: cestaLimpar() ANTES do upsell. Invertido, o cliente sairia da pagina com a
        cesta ainda cheia e voltaria a ela cheia depois de ter pago. */
-    c+=fcPpBotoesSrc('fcm',cfg.ppcor,usaSinal,false,'cestaLimpar();'+fcUpsellChamada(cfg.upsell));
+    c+=fcPpBotoesSrc('fcm',cfg.ppcor,usaSinal,false,'cestaLimpar();'+fcUpsellChamada(cfg.upsell),true);
   }
   if(usaPix){
     c+='/* ===== Pix ===== */\n';

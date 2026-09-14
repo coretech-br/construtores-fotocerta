@@ -107,7 +107,8 @@ const SONDA = '<scr'+'ipt>(function(){\n'
 const pedido = pg => pg.evaluate(() => {
   const p = window.__pp.createOrder(null, {order:{create:o => o}});
   const u = p.purchase_units[0];
-  return {name:u.items[0].name, descricao:u.description, valor:u.amount.value, sku:u.items[0].sku};
+  return {name:u.items[0].name, descricao:u.description, valor:u.amount.value, sku:u.items[0].sku,
+          itens:(u.items||[]).map(it => ({name:it.name, quantity:it.quantity, unit:it.unit_amount.value}))};
 });
 
 const naTela = pg => pg.$eval('.fca-ob-preco-valor', el => el.textContent.trim());
@@ -184,13 +185,39 @@ for(const caso of CASOS){
     }
   });
   chk(caso.rotulo+': bloco rodou sem erro proprio', errosReais(r.erros).length===0, errosReais(r.erros).join(' | '));
+  /* ATE 13/09/2026 (leva 3) ESTAS DUAS LINHAS LIAM items[0].name, e a segunda cobrava que
+     description e name fossem a MESMA cadeia. Era verdade enquanto o pedido tinha UM item
+     so, com os nomes concatenados dentro dele. A leva 3 separou as duas coisas de proposito:
+     'description' continua sendo o resumo concatenado (e e ele que este arquivo sempre quis
+     medir -- a composicao do nome, o sufixo de quantidade, o sumico do opcional zerado), e
+     agora existe uma LINHA POR ITEM, com o nome cru e a quantidade em campo proprio.
+     Entao a intencao nao muda de lugar: o que era cobrado do 'name' passa a ser cobrado do
+     'description', e a lista de itens ganha cobranca PROPRIA logo abaixo -- o teste fica
+     mais forte, nao mais fraco. */
   const esperado = caso.nome+' (cod: '+r.ped.sku+')';
-  chk(caso.rotulo+': name da ordem', r.ped.name===esperado, 'saiu: '+r.ped.name+' | esperado: '+esperado);
-  chk(caso.rotulo+': description = name', r.ped.descricao===r.ped.name, r.ped.descricao);
+  chk(caso.rotulo+': description da ordem', r.ped.descricao===esperado,
+      'saiu: '+r.ped.descricao+' | esperado: '+esperado);
+  /* A LISTA DE ITENS DERIVADA DO MESMO caso.nome, e nao de uma segunda tabela: se as duas
+     descricoes da mesma escolha pudessem divergir, este arquivo teria o defeito que ele
+     existe para caçar. O sufixo ' xN' e separado do nome porque no PayPal a quantidade e
+     campo proprio -- e o ' x' com espaco e o que distingue o sufixo de um nome que ja tem
+     'x' no meio, como "Album 20x30". */
+  const esperadosItens = caso.nome.split(' + ').map(rot => {
+    const m = rot.match(/^(.*) x(\d+)$/);
+    return m ? {name:m[1], quantity:m[2]} : {name:rot, quantity:'1'};
+  });
+  chk(caso.rotulo+': a lista de itens tem uma linha por item escolhido',
+      r.ped.itens.length===esperadosItens.length,
+      'saiu '+r.ped.itens.length+': '+JSON.stringify(r.ped.itens));
+  chk(caso.rotulo+': cada item leva o nome CRU e a quantidade em campo proprio',
+      JSON.stringify(r.ped.itens.map(i=>({name:i.name,quantity:i.quantity})))===JSON.stringify(esperadosItens),
+      'saiu '+JSON.stringify(r.ped.itens.map(i=>({name:i.name,quantity:i.quantity})))+
+      ' | esperado '+JSON.stringify(esperadosItens));
   chk(caso.rotulo+': valor da ordem', r.ped.valor===caso.valor, 'saiu: '+r.ped.valor+' | esperado: '+caso.valor);
   chk(caso.rotulo+': valor na tela bate com o da ordem',
     r.tela.replace(/[^0-9]/g,'')===caso.valor.replace(/[^0-9]/g,''), 'tela: '+r.tela);
-  console.log('    -> PayPal receberia: '+JSON.stringify(r.ped.name)+'  ('+r.ped.valor+')');
+  console.log('    -> PayPal receberia: '+JSON.stringify(r.ped.descricao)+'  ('+r.ped.valor+')');
+  console.log('       itens: '+JSON.stringify(r.ped.itens));
 }
 
 /* O CORTE EM 127. O sufixo novo acrescenta bytes a um campo que ja tinha teto, entao o
@@ -209,11 +236,23 @@ for(const caso of CASOS){
   const inteiro = LONGO_PAC+' + '+LONGO_OP+' x3 (cod: '+r.ped.sku+')';
   chk('corte 127: bloco rodou sem erro proprio', errosReais(r.erros).length===0, errosReais(r.erros).join(' | '));
   chk('corte 127: o nome inteiro passaria do teto', inteiro.length>127, 'inteiro tem '+inteiro.length);
-  chk('corte 127: o name saiu com 127 caracteres', r.ped.name.length===127, 'saiu com '+r.ped.name.length);
-  chk('corte 127: o name e o comeco exato do nome inteiro', r.ped.name===inteiro.slice(0,127), r.ped.name);
-  chk('corte 127: o name nao saiu vazio', r.ped.name.length>0);
+  /* O TETO ATRAVESSOU A LEVA 3 INTEIRO, so mudou de campo: o resumo concatenado, que e o
+     que estoura, agora mora em 'description' -- e o PayPal trunca esse campo nos mesmos
+     127. O que se cobra continua sendo o mesmo: corta, corta no lugar certo, e nunca sai
+     vazio (item sem name derruba o pedido). */
+  chk('corte 127: a description saiu com 127 caracteres', r.ped.descricao.length===127,
+      'saiu com '+r.ped.descricao.length);
+  chk('corte 127: a description e o comeco exato do nome inteiro',
+      r.ped.descricao===inteiro.slice(0,127), r.ped.descricao);
+  chk('corte 127: nenhuma description vazia', r.ped.descricao.length>0);
+  /* E O TETO VALE TAMBEM POR ITEM: 'name' e obrigatorio e limitado a 127 em CADA linha --
+     um catalogo com nome mais longo que isso derrubaria o pedido inteiro se passasse cru. */
+  chk('corte 127: nenhum name de item passa de 127, e nenhum sai vazio',
+      r.ped.itens.every(i => i.name.length>0 && i.name.length<=127),
+      JSON.stringify(r.ped.itens.map(i=>i.name.length)));
   chk('corte 127: valor da ordem (900 + 250x3)', r.ped.valor==='1650.00', 'saiu: '+r.ped.valor);
-  console.log('    -> PayPal receberia: '+JSON.stringify(r.ped.name)+'  ('+r.ped.valor+')');
+  console.log('    -> PayPal receberia: '+JSON.stringify(r.ped.descricao)+'  ('+r.ped.valor+')');
+  console.log('       itens: '+JSON.stringify(r.ped.itens));
 }
 
 process.exit(resumo());
