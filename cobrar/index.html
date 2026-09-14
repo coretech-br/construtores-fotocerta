@@ -111,6 +111,75 @@
   #cb-parado{background:var(--vermelho);color:#fff;border-radius:12px;padding:16px;
     margin:16px auto;max-width:560px;font-size:16px;line-height:1.55;white-space:pre-wrap}
 
+
+  /* ===== A PRÉVIA DESTA COBRANÇA: coluna ao lado, empilhada no celular =====
+     Coluna DE VERDADE não cabe em 375px, e esta página é usada no celular, em pé, entre uma
+     coisa e outra. Então a "coluna adicional" existe onde há largura para ela e vira uma seção
+     recolhível abaixo do link onde não há — com a MESMA mecânica do "Mais opções desta
+     cobrança" que já existia aqui, e não uma segunda inventada ao lado.
+     O ponto de corte é 1080px porque a coluna da esquerda é fixa em 560px: abaixo disso a
+     prévia ficaria estreita demais para mostrar a página de pagamento de forma útil, e uma
+     prévia ilegível é pior que nenhuma. */
+  .cb-col-p{min-width:0}
+  .cb-col-v{min-width:0}
+  @media (min-width:1080px){
+    .faixa{max-width:1180px;display:grid;grid-template-columns:560px minmax(0,1fr);
+      gap:28px;align-items:start}
+    /* Gruda no alto: o dono rola a coluna da esquerda para conferir a cobrança e a prévia
+       continua à vista, que é o motivo de ela ser uma coluna. */
+    .cb-col-v{position:sticky;top:16px;padding-top:calc(18px + env(safe-area-inset-top,0px))}
+    .rodape{max-width:1180px}
+  }
+
+  /* O quadro que carrega a página de pagamento de verdade. 'pointer-events:none' é o que o
+     torna SOMENTE LEITURA — sem ele o dono pagaria sem querer a própria cobrança, dentro de
+     uma tela que existe só para conferir. Quem quiser interagir usa "Abrir em outra aba". */
+  /* QUEM ROLA E A CAIXA, e nao o quadro. Com 'pointer-events:none' o dedo e a roda nao chegam
+     ao <iframe> -- e e essa a intencao --, mas eles chegam ao elemento de baixo, que e esta
+     caixa. Dando ao quadro uma altura folgada e a ESTA caixa a altura da tela, a pagina inteira
+     do dono fica alcancavel sem que um unico toque entre nela. Quadro com a altura da caixa
+     mostraria so o comeco do cartao, e o que fica de fora e justamente o PayPal. */
+  #cb-pv-quadro{border:1px solid var(--linha);border-radius:10px;overflow-y:auto;overflow-x:hidden;
+    -webkit-overflow-scrolling:touch;background:#fff;margin:0 0 10px;min-height:120px;max-height:520px}
+  #cb-pv-quadro iframe{display:block;width:100%;height:1100px;border:0;background:#fff;
+    pointer-events:none}
+  @media (min-width:1080px){ #cb-pv-quadro{max-height:620px} }
+  .cb-pv-recado{background:#FDECEA;border-left:5px solid var(--vermelho);
+    padding:14px;color:var(--vermelho);font-size:15px;line-height:1.55}
+  .cb-pv-recado button{margin-top:10px}
+  .cb-pv-esperando{padding:26px 14px;color:var(--tinta-suave);font-size:15px;text-align:center}
+  #cb-previa h3{margin:18px 0 4px;font-size:15px;font-weight:800}
+
+  /* A tabela do PayPal. Ela rola por dentro em vez de vazar: a página inteira nunca rola de
+     lado, e essa é a regra que o <html> com overflow-x:clip defende lá em cima. */
+  #cb-pv-pp{font-size:13px;line-height:1.5;overflow-x:auto}
+  /* AS LARGURAS SAO MEDIDAS, e nao escolhidas: o cabecalho e de nome de campo do PayPal e nao
+     pode quebrar, entao as quatro colunas foram dimensionadas pelo nome mais longo de cada uma
+     em 10,5px mono (~6,3px por caractere) -- items[].name 76, items[].sku 80, quantity 52,
+     unit_amount 82, mais os tres vaos de 6. Da 308px, e cabe nos 309px uteis de um cartao desta
+     pagina numa tela de 375 -- MEDIDO no navegador, e nao estimado. Numa tela menor a caixa rola
+     de lado; a PAGINA continua nunca rolando, que e a regra do overflow-x:clip la em cima. */
+  .cb-pp-lin{display:flex;gap:6px;padding:2px 0;min-width:308px}
+  /* A LINHA DE CAMPO PODE QUEBRAR, e a de item nao. Sao formas diferentes: a de campo e um par
+     (nome do campo, valor) e, sem espaco, o valor desce para a linha de baixo e continua
+     legivel; a de item e uma tabela, e quebrar uma coluna dela desalinharia todas. */
+  .cb-pp-lin-campo{flex-wrap:wrap}
+  .cb-pp-cab{font-weight:700;border-bottom:1px solid var(--linha);padding-bottom:3px;margin-bottom:2px}
+  /* NOME DE CAMPO NAO QUEBRA. "quantity" partido em "quantit / y" deixa de ser o nome que o
+     dono vai procurar no relatorio do PayPal; quem rola, se precisar, e a caixa. */
+  .cb-pp-campo{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10.5px;
+    font-weight:700;color:var(--tinta);white-space:nowrap}
+  .cb-pp-nome{flex:1 1 auto;min-width:0;word-break:break-word}
+  .cb-pp-sku{width:80px;flex:0 0 auto;word-break:break-word}
+  .cb-pp-qtd{width:52px;flex:0 0 auto;text-align:right}
+  .cb-pp-unit{width:82px;flex:0 0 auto;text-align:right}
+  .cb-pp-val{flex:1 1 auto;min-width:90px;text-align:right;font-weight:700}
+  .cb-pp-nota{color:var(--tinta-suave);font-size:12px;margin:0 0 3px}
+  .cb-pp-ausente{color:var(--tinta-suave)}
+  .cb-pp-sep{border-top:1px solid var(--linha);margin-top:6px;padding-top:5px}
+  .cb-pp-ok{color:var(--ok);font-weight:700;margin-top:5px}
+  .cb-pp-mau{color:var(--vermelho);font-weight:700;margin-top:5px}
+
   /* Acima de 560px a coluna para de crescer e ganha respiro; nada muda de forma. */
   @media (min-width:600px){
     body{padding-left:24px;padding-right:24px}
@@ -121,6 +190,8 @@
 <body>
 
 <div class="faixa" id="cb-tudo">
+
+<div class="cb-col-p">
 
   <div class="topo">
     <svg viewBox="0 0 32 38" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -304,6 +375,37 @@
     <p id="cb-copiado"></p>
   </div>
 
+</div><!-- cb-col-p -->
+
+<div class="cb-col-v">
+
+  <!-- ===== A PRÉVIA DESTA COBRANÇA =====
+       Nasce escondida: sem link gerado não há o que prever, e um quadro vazio em cima do
+       botão de gerar só empurraria a tela para baixo. Ela aparece junto com o link e vence
+       junto com ele — mesma regra do cbVencer, e pelo mesmo motivo: prévia da cobrança
+       ANTERIOR seria pior que prévia nenhuma. -->
+  <div class="cartao" id="cb-previa" style="display:none">
+    <h2>Como vai ficar</h2>
+    <p class="nota">Esta é a <b>sua página de pagamento de verdade</b>, carregada do seu site com o link que você acabou de gerar. Não é um desenho parecido: é a página, com o código que está colado lá.</p>
+    <div class="campo">
+      <button type="button" class="botao claro mini" id="cb-previa-bt">Ver a prévia desta cobrança</button>
+    </div>
+    <div id="cb-previa-corpo" style="display:none">
+      <div id="cb-pv-quadro"></div>
+      <p class="dica" id="cb-pv-estado"></p>
+      <p class="dica"><b>O quadro é só para olhar</b> — o toque não passa por ele, para você não pagar sem querer a sua própria cobrança. <b>Role dentro dele</b> para ver a página inteira; para mexer de verdade, abra em outra aba.</p>
+      <p class="dica"><b>Se aparecer uma recusa aqui, é o aviso que você precisava:</b> quer dizer que o código colado na sua página de pagamento é anterior a esta cobrança e não entende algum parâmetro dela. Gere de novo o <b>Código 1</b> na ferramenta completa e recole no site — depois disso a prévia mostra o cartão normalmente.</p>
+      <p class="dica"><b>Esta é a única parte desta página que precisa de internet.</b> O link em si é montado no próprio aparelho, e continua sendo mesmo sem conexão.</p>
+      <a class="botao claro mini" id="cb-pv-abrir" target="_blank" rel="noopener noreferrer" href="#">Abrir em outra aba</a>
+
+      <h3>O que vai para o PayPal</h3>
+      <p class="dica">Os campos do pedido, como o seu relatório do PayPal vai registrar. Em destaque, o nome do campo no PayPal; em cinza, explicação nossa.</p>
+      <div id="cb-pv-pp"></div>
+    </div>
+  </div>
+
+</div><!-- cb-col-v -->
+
 </div>
 
 <div class="rodape" id="cb-rodape">
@@ -321,7 +423,7 @@
      construção, porque quem declara a versão é o próprio arquivo cuja atualidade está em
      dúvida. Quem confere é scripts/conferir-versoes.sh, que compara o CONTEÚDO com a versão
      declarada e falha quando o arquivo mudou sem o troco. -->
-<script src="../fc-compartilhado.js?v=2026-09-14a"></script>
+<script src="../fc-compartilhado.js?v=2026-09-14b"></script>
 <script>
 'use strict';
 (function(){
@@ -368,7 +470,7 @@
    pior: esta página selaria o link com uma conta e a /pagar conferiria com
    outra, sem um sinal na tela. Então ou a versão pedida chegou, ou a página diz
    o que houve e não faz mais nada. */
-var FC_COMPART_ESPERADA='2026-09-14a';
+var FC_COMPART_ESPERADA='2026-09-14b';
 if(!window.FCCOMPART||FCCOMPART.versao!==FC_COMPART_ESPERADA){
   cbParar(FC_COMPART_ESPERADA,window.FCCOMPART?FCCOMPART.versao:null);
   return;
@@ -710,6 +812,10 @@ function cbVencer(){
   if(ta&&ta.value){ta.value='';}
   $('cb-saida').style.display='none';
   $('cb-copiado').style.display='none';
+  /* A PREVIA VENCE COM O LINK, e pelo mesmo motivo: ela mostra a pagina de pagamento COM
+     aquele link dentro. Deixada na tela depois de o dono trocar o valor, ela exibiria a
+     cobranca ANTERIOR com cara de atual -- e o quadro e justamente onde ele confere. */
+  cbPvLimpar();
 }
 function cbRecusar(msg){
   var el=$('cb-recusa');
@@ -823,10 +929,15 @@ function cbGerarLink(){
   if(r){cbRecusar(r);return;}
   var codigo=C.pPayload(cfg),erro=C.pConferir(cfg,codigo);
   if(erro){cbRecusar(erro);return;}
-  $('cb-out').value=C.pLinkDe(cfg,codigo);
+  var link=C.pLinkDe(cfg,codigo);
+  $('cb-out').value=link;
   $('cb-saida').style.display='block';
   $('cb-copiado').style.display='none';
   try{$('cb-saida').scrollIntoView(true);}catch(e){}
+  /* A PREVIA E O ULTIMO PASSO, e so existe com link na mao: ela carrega a /pagar COM este
+     endereco. Nada dela pode impedir o link de aparecer -- o link e o que o dono veio
+     buscar, e ele nao depende de internet nenhuma. */
+  cbPvRender(cfg,codigo,link);
 }
 
 /* ---- copiar, com confirmação VISÍVEL ----
@@ -865,6 +976,272 @@ function cbCopiarPlanoB(ta){
   try{ta.setAttribute('readonly','readonly');}catch(e){}
   if(ok)cbAvisoCopia('Link copiado. Agora é só colar no WhatsApp.',false);
   else cbAvisoCopia('Não consegui copiar sozinho. O link já está selecionado acima: copie na mão.',true);
+}
+
+/* ============================================================================
+   A PRÉVIA DESTA COBRANÇA — as duas metades, e elas são independentes
+   ============================================================================
+   PEDIDO DO DONO (14/09/2026): "hoje a /cobrar não me mostra uma prévia de como ficará na
+   página Pagar e também não mostra como os campos são enviados para o PayPal".
+
+   METADE 1 — "COMO VAI FICAR": A PÁGINA REAL, NÃO UM DESENHO.
+   O quadro carrega a /pagar PUBLICADA do dono, com o link recém-gerado. Fiel por construção:
+   é a página de verdade, com o bloco que ele colou, lendo o link que ele acabou de fazer.
+   Desenhar o cartão aqui seria a segunda implementação do que o bloco faz — e esta página não
+   tem o gerador do bloco (ele é pJs, e vive só no index.html), então "imitar" seria escrever
+   uma terceira versão da página de pagamento. Regra da casa: prévia RODA o gerador, nunca o
+   imita.
+     - Medido antes de desenhar: a /pagar publicada não manda X-Frame-Options nem
+       frame-ancestors, então ela aceita ser exibida em quadro.
+     - Ela é de OUTRO domínio: o navegador não deixa esta página ler o conteúdo dela, e isso
+       está certo — a prévia MOSTRA, não inspeciona. Nada aqui tenta olhar para dentro.
+     - O EFEITO COLATERAL É A MAIOR VANTAGEM, e está dito na tela: se o bloco colado estiver
+       desatualizado, a prévia mostra A RECUSA — que é exatamente o aviso que o dono precisa,
+       na hora em que ele precisa. Hoje ele só descobriria pelo cliente.
+     - PRECISA DE INTERNET, ao contrário de todo o resto desta página. A falha é tratada com
+       recado, NUNCA com quadro branco: um quadro em branco pareceria defeito da cobrança, e
+       ele mandaria o dono procurar no lugar errado.
+     - O endereço sai da configuração que já existe (cbUrlVigente, dentro de cbCfg), e nunca
+       é digitado de novo.
+
+   METADE 2 — "O QUE VAI PARA O PAYPAL": FONTE ÚNICA, NÃO SEGUNDA CONTA.
+   Recalcular o pedido aqui seria a segunda implementação de DINHEIRO — a classe onde este
+   projeto já mediu 60.097 divergências. Então o pedido sai do MESMO TEXTO que o bloco da
+   /pagar leva dentro: P_PP_PEDIDO_SRC e fcPpItensSrc, em fc-compartilhado.js, avaliados por
+   C.pPpPedidoApi(). Mesmo padrão de FC_PIX_SRC/fcPixApi. Se a extração tivesse mudado um byte
+   do bloco entregue, a extração estaria errada — e a regressão byte a byte é a prova.
+
+   O QUE NÃO FOI COMPARTILHADO, e a medição: o DESENHO da tabela. O da ferramenta é texto JS
+   emitido por fcPvSondaPP para rodar DENTRO do iframe da prévia, com estilos em linha e um
+   cel() próprio; o daqui é DOM desta página, com as classes desta página e largura de celular.
+   Forçar uma fonte só pediria tantos parâmetros quanto linhas. O que se compartilha é o que
+   as duas têm de dizer igual: o PEDIDO (acima) e os NOVE NOMES DE CAMPO (C.FC_PP_CAMPOS).
+   A prova de que não divergiram é scripts/verificar/previa-cobrar.mjs, que compara as duas
+   tabelas campo a campo, com itens e sem itens.
+   ============================================================================ */
+var cbPvTimer=null, cbPvLink='';
+var CB_PV_ESPERA=15000;   /* quanto se espera pelo quadro antes de chamar de falha de rede */
+
+/* A LARGURA DECIDE SE A PRÉVIA NASCE ABERTA, e é a mesma medida do @media lá em cima: onde
+   existe coluna ao lado, ela já vem aberta (é para isso que a coluna existe); no celular ela
+   nasce recolhida, abaixo do link, e o dono abre quando quiser. Um número só nos dois lugares
+   não dá para escrever em CSS e em JS ao mesmo tempo -- então ele é conferido pela própria
+   consulta de mídia, e não por um segundo número copiado. */
+function cbPvTemColuna(){
+  try{ return !!(window.matchMedia && window.matchMedia('(min-width:1080px)').matches); }
+  catch(e){ return false; }
+}
+function cbPvAbrir(abrir){
+  var el=$('cb-previa-corpo'), bt=$('cb-previa-bt');
+  if(!el||!bt)return;
+  if(abrir===undefined)abrir=(el.style.display==='none');
+  el.style.display=abrir?'block':'none';
+  bt.textContent=abrir?'Esconder a prévia':'Ver a prévia desta cobrança';
+}
+function cbPvEstadoDiz(txt,erro){
+  var el=$('cb-pv-estado');
+  if(!el)return;
+  el.textContent=txt;
+  el.style.display=txt?'block':'none';
+  el.style.color=erro?'#8C1D18':'';
+  el.style.fontWeight=erro?'700':'';
+}
+/* O RECADO NO LUGAR DO QUADRO, e não atrás dele: quadro branco com um aviso ao lado ainda é
+   quadro branco, e é ele que o dono olha. Aqui o quadro some e o recado ocupa o espaço. */
+function cbPvRecado(txt){
+  var cx=$('cb-pv-quadro');
+  if(!cx)return;
+  if(cbPvTimer){clearTimeout(cbPvTimer);cbPvTimer=null;}
+  cx.innerHTML='';
+  var d=cbTexto('div','cb-pv-recado',txt);
+  var bt=document.createElement('button');
+  bt.type='button';bt.className='botao claro mini';bt.textContent='Tentar de novo';
+  bt.addEventListener('click',function(){cbPvQuadro(cbPvLink);});
+  d.appendChild(document.createElement('br'));
+  d.appendChild(bt);
+  cx.appendChild(d);
+  cbPvEstadoDiz('',false);
+}
+/* "ESTE QUADRO CHEGOU A CARREGAR ALGUMA COISA?" -- a pergunta que impede os dois defeitos
+   opostos. Sem ela, a espera ou derrubaria uma prévia que está lá (a /pagar carrega o PayPal e
+   a biblioteca do QR Code, e o evento 'load' só chega quando TUDO termina: numa rede lenta ele
+   demora, e a página já está desenhada muito antes), ou deixaria um quadro branco quando não
+   chegou nada.
+   A MEDIÇÃO é a regra de mesma origem virada do avesso, e ela é exata: se contentDocument pode
+   ser lido e ainda é a página em branco do navegador, o quadro NÃO navegou para lugar nenhum;
+   se a leitura lança (ou volta nula), ele navegou para o site do dono -- que é de outra origem,
+   e é por isso que o navegador fecha a porta. Não há palpite aqui: a porta fechada É a prova. */
+function cbPvQuadroVazio(f){
+  try{
+    var d=f.contentDocument;
+    if(!d)return false;                       /* outra origem: navegou */
+    return !d.body||!d.body.firstChild;       /* about:blank: nao navegou */
+  }catch(e){ return false; }                  /* outra origem: navegou */
+}
+function cbPvQuadro(link){
+  var cx=$('cb-pv-quadro');
+  if(!cx)return;
+  if(cbPvTimer){clearTimeout(cbPvTimer);cbPvTimer=null;}
+  cx.innerHTML='';
+  cbPvLink=link;
+  cbPvEstadoDiz('',false);
+  if(!link)return;
+  /* NAVEGAÇÃO SEM REDE É SABIDA ANTES DE TENTAR: navigator.onLine falso é certeza de que não
+     há rede, e nesse caso nem se cria o quadro. O contrário não vale (onLine verdadeiro não
+     promete nada), e é por isso que existe também a espera abaixo. */
+  if(window.navigator&&navigator.onLine===false){
+    cbPvRecado('Sem conexão com a internet, e só este quadro precisa dela. O seu link foi gerado e está inteiro na caixa acima — pode copiar e mandar. Quando a conexão voltar, toque em "Tentar de novo" para ver a página.');
+    return;
+  }
+  /* O AVISO DE "CARREGANDO" FICA DENTRO DA CAIXA, acima do quadro, e some quando a página
+     termina de carregar. É ele que impede o quadro branco de parecer defeito da cobrança
+     enquanto a página do dono ainda está vindo. */
+  cx.appendChild(cbTexto('div','cb-pv-esperando','Carregando a sua página de pagamento…'));
+  var f=document.createElement('iframe');
+  f.setAttribute('title','Prévia da sua página de pagamento');
+  f.setAttribute('referrerpolicy','no-referrer');
+  function pronto(){
+    var esp=cx.querySelector('.cb-pv-esperando');
+    if(esp&&esp.parentNode)esp.parentNode.removeChild(esp);
+  }
+  f.addEventListener('load',function(){
+    if(cbPvTimer){clearTimeout(cbPvTimer);cbPvTimer=null;}
+    pronto();
+    cbPvEstadoDiz('',false);
+  });
+  f.src=link;
+  cx.appendChild(f);
+  cbPvTimer=setTimeout(function(){
+    cbPvTimer=null;
+    /* QUADRO COM CONTEUDO NÃO É DERRUBADO. Trocar por um recado uma prévia que já está na tela
+       seria esconder do dono exatamente o que ele veio ver -- e numa rede lenta isso
+       aconteceria toda vez. O que sobra é o aviso de que ainda não terminou. */
+    if(!cbPvQuadroVazio(f)){
+      pronto();
+      cbPvEstadoDiz('A página ainda está terminando de carregar aqui dentro (o PayPal e o QR Code vêm de fora). O que já apareceu acima é a sua página de verdade.',false);
+      return;
+    }
+    cbPvRecado('A sua página de pagamento não respondeu em ' + Math.round(CB_PV_ESPERA/1000) + ' segundos, e nada chegou ao quadro. Costuma ser a conexão — este quadro é a única parte desta página que precisa de internet. O seu link foi gerado e está inteiro na caixa acima: ele não depende disto. Toque em "Tentar de novo", ou abra o link em outra aba.');
+  },CB_PV_ESPERA);
+}
+/* Ficar sem rede COM a prévia na tela também vira recado: o quadro já carregado continuaria
+   lá, mas "Tentar de novo" a partir daqui é o que o dono vai querer quando a rede voltar. */
+window.addEventListener('offline',function(){
+  if(cbPvLink&&$('cb-previa')&&$('cb-previa').style.display!=='none')
+    cbPvRecado('A conexão caiu. O seu link continua inteiro na caixa acima e não depende da internet — só este quadro depende. Toque em "Tentar de novo" quando a rede voltar.');
+});
+
+/* ---- o pedido do PayPal desta cobrança ----
+   OS CINCO VALORES são exatamente os que o bloco da /pagar tem em mãos quando o cliente
+   clica, e cada um sai de função COMPARTILHADA — nenhuma conta é escrita aqui:
+     valor   o TOTAL da cobrança. É cfg.valor nos TRÊS ramos, e isto foi medido lendo o bloco:
+             sem desconto e sem sinal o bloco usa o campo 54, que é cfg.valor; com desconto ele
+             reatribui valor=t, e t é cfg.valor; com sinal reatribui valor=n, e n é cfg.valor.
+     desc    o parâmetro d do endereço, que é cfg.desc sem transformação nenhuma (pBusca só o
+             passa por encodeURIComponent, e o bloco o decodifica de volta).
+     txid    o identificador LIDO DO PRÓPRIO CÓDIGO PIX, pela mesma pixLer que o bloco roda.
+             Sem identificador ele é '***' (o que a especificação do Pix manda), e o pedido sai
+             sem sku e sem custom_id — que é o que o texto compartilhado decide, não esta página.
+     sinal   o campo 54 quando o link carrega n, e zero quando não carrega. A pergunta "este
+             link carrega n?" é C.pSinalCod, a mesma que monta o endereço.
+     itens   o parâmetro i, lido pelo MESMO itensLer que a /pagar vai rodar. */
+function cbPvPedido(cfg,codigo){
+  var lido=C.fcPixApi().pixLer(codigo);
+  if(!lido.ok)return null;
+  var itens=C.pItensApi().itensLer(C.pItensCod(cfg))||[];
+  var ped=C.pPpPedidoApi().pedidoDe(cfg.valor,String(cfg.desc),lido.txid,
+    C.pSinalCod(cfg)?lido.valor:0,itens);
+  return (ped&&ped.purchase_units&&ped.purchase_units[0])||null;
+}
+function cbPvLin(cls,celulas){
+  var l=document.createElement('div'),i;
+  l.className='cb-pp-lin'+(cls?(' '+cls):'');
+  for(i=0;i<celulas.length;i++)l.appendChild(cbTexto('div',celulas[i][1],celulas[i][0]));
+  return l;
+}
+function cbPvDin(o){return o?(String(o.value)+' '+String(o.currency_code)):null;}
+function cbPvCampo(cx,campo,valor,nota){
+  cx.appendChild(cbPvLin('cb-pp-lin-campo',[[campo,'cb-pp-campo'],[valor==null?'—':String(valor),'cb-pp-val']]));
+  if(nota)cx.appendChild(cbTexto('div','cb-pp-nota',nota));
+}
+function cbPvPayPal(cfg,codigo){
+  var cx=$('cb-pv-pp'),blo=cbBloco(),K=C.FC_PP_CAMPOS,pu,its,z,it,br,somaC,itC,dsC,amC,fecha;
+  if(!cx)return;
+  cx.innerHTML='';
+  /* AS TRÊS SITUAÇÕES EM QUE NÃO HÁ PEDIDO A MOSTRAR, e cada uma diz por quê. Mostrar uma
+     tabela aqui seria inventar um pedido que o cliente nunca vai ver. */
+  if(blo.usapp==='nao'||cfg.ppmodo==='nao'){
+    cx.appendChild(cbTexto('div','cb-pp-nota','Esta cobrança não leva PayPal, então nenhum pedido é criado: o cliente paga só por Pix, e o valor viaja dentro do código copia e cola.'));
+    return;
+  }
+  if(cfg.ppmodo==='link'){
+    cx.appendChild(cbTexto('div','cb-pp-nota','Esta cobrança usa um link de cobrança criado dentro do PayPal. Os campos do pedido são os que você definiu lá, e não saem desta página — por isso não há o que mostrar aqui. O que a página de pagamento faz é levar o cliente para esse link.'));
+    return;
+  }
+  pu=cbPvPedido(cfg,codigo);
+  if(!pu){
+    cx.appendChild(cbTexto('div','cb-pp-mau','Não foi possível montar o pedido do PayPal para esta cobrança.'));
+    return;
+  }
+  its=pu.items||[];
+  cx.appendChild(cbPvLin('cb-pp-cab',[[K.nome,'cb-pp-campo cb-pp-nome'],[K.sku,'cb-pp-campo cb-pp-sku'],
+    [K.qtd,'cb-pp-campo cb-pp-qtd'],[K.unit,'cb-pp-campo cb-pp-unit']]));
+  somaC=0;
+  for(z=0;z<its.length;z++){
+    it=its[z]||{};
+    var uc=Math.round(parseFloat((it.unit_amount||{}).value)*100),qn=parseInt(it.quantity,10);
+    if(!isNaN(uc)&&!isNaN(qn))somaC+=uc*qn;
+    /* O TRAÇO, e não a célula vazia: célula em branco se lê como "a prévia não sabe", e a
+       AUSÊNCIA do campo é justamente o que precisa aparecer. Mesma decisão da prévia da
+       ferramenta. */
+    cx.appendChild(cbPvLin('',[
+      [String(it.name==null?'':it.name),'cb-pp-nome'],
+      [it.sku==null?'—':String(it.sku),'cb-pp-sku'+(it.sku==null?' cb-pp-ausente':'')],
+      [String(it.quantity),'cb-pp-qtd'],
+      [String((it.unit_amount||{}).value)+' '+String((it.unit_amount||{}).currency_code),'cb-pp-unit']]));
+  }
+  if(!its.length)cx.appendChild(cbTexto('div','cb-pp-nota','(nenhum item — o pedido não seria criado)'));
+  cx.appendChild(cbTexto('div','cb-pp-nota',K.sku+' é a coluna "ID do produto" do relatório, e é o SKU daquele item. Item sem SKU sai sem o campo (o traço), e nunca com o código do pedido: quem identifica o pedido inteiro é o '+K.conciliacao+', no fim.'));
+  br=(pu.amount||{}).breakdown||{};
+  cx.appendChild(cbTexto('div','cb-pp-sep',''));
+  cbPvCampo(cx,K.itemTotal,cbPvDin(br.item_total),'a soma dos itens acima');
+  if(br.discount)cbPvCampo(cx,K.desconto,'- '+cbPvDin(br.discount),'o PayPal subtrai este valor do item_total');
+  cbPvCampo(cx,K.valor,cbPvDin(pu.amount),'o que o cartão do cliente debita');
+  /* A CONFERÊNCIA é a única coisa que esta tela calcula, e ela não remonta nada: soma o que o
+     texto compartilhado montou e compara com o que ele escreveu. Existe para a prévia poder
+     dizer "NÃO FECHA" em vez de exibir números errados com cara de certos — o PayPal recusa o
+     pedido inteiro quando a conta não fecha, e o cliente fica sem meio de pagamento. */
+  itC=Math.round(parseFloat((br.item_total||{}).value)*100);
+  dsC=br.discount?Math.round(parseFloat(br.discount.value)*100):0;
+  amC=Math.round(parseFloat((pu.amount||{}).value)*100);
+  fecha=(!isNaN(itC)&&!isNaN(amC)&&somaC===itC&&(itC-dsC)===amC);
+  cx.appendChild(cbTexto('div',fecha?'cb-pp-ok':'cb-pp-mau',fecha
+    ?'Confere ao centavo: a soma dos itens é o item_total, e item_total menos desconto é o valor cobrado.'
+    :'NÃO FECHA: o PayPal recusaria este pedido inteiro e o cliente ficaria sem meio de pagamento.'));
+  cx.appendChild(cbTexto('div','cb-pp-sep',''));
+  cbPvCampo(cx,K.descricao,pu.description,'o resumo do pedido, no extrato do cliente');
+  cbPvCampo(cx,K.conciliacao,pu.custom_id,'o campo de conciliação: aparece no relatório, não para o cliente');
+}
+/* ---- vence junto com o link ---- */
+function cbPvLimpar(){
+  if(cbPvTimer){clearTimeout(cbPvTimer);cbPvTimer=null;}
+  cbPvLink='';
+  var el=$('cb-previa');
+  if(el)el.style.display='none';
+  el=$('cb-pv-quadro');
+  if(el)el.innerHTML='';
+  el=$('cb-pv-pp');
+  if(el)el.innerHTML='';
+  cbPvEstadoDiz('',false);
+}
+function cbPvRender(cfg,codigo,link){
+  var el=$('cb-previa'),a=$('cb-pv-abrir');
+  if(!el)return;
+  el.style.display='block';
+  if(a)a.setAttribute('href',link);
+  cbPvAbrir(cbPvTemColuna());
+  cbPvQuadro(link);
+  cbPvPayPal(cfg,codigo);
 }
 
 /* ---- ligação dos eventos ----
@@ -931,6 +1308,7 @@ function cbMaisAbrir(){
   if(!aberto){try{el.scrollIntoView(true);}catch(e){}}
 }
 liga('cb-mais',cbMaisAbrir);
+liga('cb-previa-bt',function(){cbPvAbrir();});
 liga('cb-gerar',cbGerarLink);
 liga('cb-copiar',cbCopiar);
 cbAjuste('cb-valor',cbValorAjustar);

@@ -49,7 +49,7 @@
    ============================================================================ */
 'use strict';
 var FCCOMPART=(function(){
-var FC_COMPART_VERSAO='2026-09-14a';
+var FC_COMPART_VERSAO='2026-09-14b';
 
 /* Limpeza compartilhada pelos DOIS validadores de endereco -- cUrlOk (botao de acao da
    Contagem regressiva) e tUrlOk (pagina intermediaria do TidyCal). Ela faz o que o NAVEGADOR
@@ -712,6 +712,186 @@ function pPpHostOk(v){
   return pPpFn(v);
 }
 
+/* ===== O PEDIDO QUE VAI PARA O PAYPAL: fonte unica das DUAS paginas =====
+   ATE 14/09/2026 esta maquinaria morava so no index.html, e isso bastava enquanto uma pagina
+   so precisava dela. A /cobrar passou a precisar: ela mostra, ao lado do link, os campos que
+   o PayPal vai registrar naquela cobranca. Recalcular ali seria a SEGUNDA implementacao de
+   dinheiro -- a classe onde este projeto ja mediu 60.097 divergencias.
+   O padrao e o de FC_PIX_SRC/fcPixApi, e nao muda: o que se compartilha e o TEXTO que escreve
+   o pedaco do bloco (P_PP_PEDIDO_SRC, fcPpItensSrc). O bloco entregue continua autossuficiente
+   -- a ferramenta EMITE esse texto dentro dele --, e a /cobrar AVALIA o mesmo texto
+   (pPpPedidoApi). Nao existe segunda implementacao nem por descuido.
+   A PROVA de que a extracao esta certa e a regressao byte a byte: se ela mudar um byte de
+   qualquer saida ja existente, a extracao esta errada -- nao o teste. */
+/* O SEGUNDO teto da descricao da cobranca. A recusa de P_DESC_MAX e do LINK; o PayPal ve so os
+   FC_LIM_PP primeiros caracteres nos campos name e description do item. Sao dois tetos
+   diferentes no MESMO campo, e o operador precisa de saber dos dois. O numero mora aqui e e
+   daqui que os tres geradores o escrevem -- unifica-se a fonte que escreve, e por isso a saida
+   nao muda um byte. */
+var FC_LIM_PP=127;
+/* O TETO DE ITENS DO PEDIDO, lido da especificacao OpenAPI do PayPal (checkout_orders_v2,
+   info.version 2.32) e nao de memoria: purchase_units[].items[] declara maxItems 32767
+   (minItems 0). Nao e um teto que um catalogo desta ferramenta alcance -- esta aqui porque a
+   guarda tem de existir com o numero CERTO: inventar um teto baixo desitemizaria pedidos que
+   o PayPal aceitaria, e nao ter guarda nenhuma deixaria o unico caso que ele recusa passar.
+   Outros dois numeros da mesma leitura, usados logo abaixo em ppDetalhar:
+     items[].quantity  string, padrao ^[1-9][0-9]{0,9}$ -- inteiro de 1 a 9999999999. "0" NAO
+                       e aceito, e e por isso que o opcional zerado nao pode virar quantity 0;
+     items[].sku       maxLength 127, o mesmo teto do name (que o PayPal trunca em 127). */
+var FC_PP_MAX_ITENS=32767;
+var FC_PP_MAX_QTD=9999999999;
+/* OS NOVE NOMES DE CAMPO DO PAYPAL, escritos uma vez so. Eles aparecem em DOIS lugares que
+   tem de dizer a mesma coisa: a previa das quatro abas da ferramenta (fcPvSondaPP, que emite
+   o texto da sonda) e a tabela da /cobrar. Sao nomes de campo de uma especificacao de fora --
+   o operador confere o relatorio do PayPal por eles --, entao duas copias seriam duas
+   oportunidades de o dono ler um nome que o PayPal nao conhece. */
+var FC_PP_CAMPOS={
+  nome:'items[].name', sku:'items[].sku', qtd:'quantity', unit:'unit_amount',
+  itemTotal:'amount.breakdown.item_total', desconto:'amount.breakdown.discount',
+  valor:'amount.value', descricao:'description', conciliacao:'custom_id'
+};
+/* ===== OS ITENS QUE O RELATORIO DO PAYPAL VAI MOSTRAR: fonte unica =====
+   PEDIDO DO DONO (13/09/2026): "verifica se todos os construtores com pagamento no PayPal
+   estao levando o produto e seus opcionais para o PayPal". Nao estavam. Ate aqui as tres
+   abas com catalogo mandavam UM item so, com os nomes concatenados num campo de 127
+   caracteres, e os opcionais do Checkout e da Mini loja nao apareciam em lugar nenhum do
+   relatorio -- entravam no valor e sumiam. Agora cada item vai numa linha, com quantidade e
+   preco unitario, que e a forma que o dono escolheu.
+
+   A ARMADILHA, e ela recusa o pedido INTEIRO (nao e aviso): a especificacao do PayPal diz
+   que, havendo breakdown, "the amount equals item_total plus tax_total plus shipping" menos
+   os descontos. Se a conta nao fechar ao centavo o pedido nao e criado e o cliente fica sem
+   meio de pagamento.
+
+   O DESENHO QUE FECHA A CONTA POR CONSTRUCAO -- e o porque de cada linha dele:
+     1. cada item leva o preco CHEIO em unit_amount e a quantidade real em quantity;
+     2. item_total e a SOMA DOS ITENS, somada aqui em CENTAVOS INTEIROS -- nunca lida de
+        subtotal(). Os precos do catalogo saem do gerador com duas casas exatas
+        (preco:<n>.toFixed(2)), entao Math.round(preco*100) e exato e a soma nao tem residuo
+        binario. Ler subtotal() somaria os mesmos numeros em OUTRA ordem (produtos primeiro,
+        depois os opcionais) e um centavo de diferenca ja recusaria o pedido;
+     3. discount e a DIFERENCA item_total - amount, e jamais o percentual do cupom recalculado.
+        Esta e a linha que sustenta o desenho: recomputar o percentual reintroduziria o
+        arredondamento de meio centavo que este projeto ja mediu (60.097 divergencias em
+        2.002.000 combinacoes preco x cupom). Pela diferenca, amount = item_total - discount e
+        uma identidade aritmetica -- vale para o cupom percentual, para o de valor fixo, para
+        o minimo do pedido e para qualquer regra que venha depois, porque nenhuma delas e
+        consultada aqui.
+
+   O PISO. Toda duvida faz a funcao voltar SEM MEXER, e o pedido sai com a linha unica que
+   esta aba sempre mandou: lista vazia, lista longa demais, quantidade que nao e inteiro
+   positivo, preco negativo, nome vazio, ou uma diferenca NEGATIVA (que seria um "desconto"
+   de sinal trocado). Degradar para o que ja funcionava e sempre melhor que arriscar um
+   pedido que o PayPal recusa.
+
+   COM SINAL, ITEMIZAR SERIA MENTIR, e por isso o chamador nem chama: o cliente paga uma
+   fracao e o formato do PayPal nao tem conceito de entrada. Forcar a diferenca para
+   'discount' faria o recibo chamar de DESCONTO o saldo que o cliente ainda deve -- num
+   valor grande e visivel, no documento que ele guarda. A linha unica de hoje diz "(sinal -
+   cod: ...)" no nome e continua honesta.
+
+   O CONTRATO E POR NOME, como o do motor de dinheiro: o bloco hospedeiro declara
+   itensEscolhidos(), que devolve, por item escolhido, {nome, qtd, unit} -- o nome cru (sem
+   o sufixo " x3" do rotulo, que aqui viraria quantidade repetida), a quantidade e o preco
+   unitario. As tres abas com catalogo ja tinham essa enumeracao ou ganharam a sua nesta
+   rodada, e nas tres ela e a UNICA -- nomesSelecionados() passou a sair dela. */
+function fcPpItensSrc(temSku){
+  return '/* Os itens do pedido, do jeito que o relatorio do PayPal vai mostrar: um por linha,\n'+
+    '   com quantidade e preco unitario. A conta fecha por CONSTRUCAO -- item_total e a soma\n'+
+    '   dos itens em centavos inteiros e o desconto e a DIFERENCA para o valor cobrado --,\n'+
+    '   porque o PayPal recusa o pedido inteiro se ela nao fechar ao centavo.\n'+
+    '   Em qualquer duvida esta funcao volta sem mexer, e o pedido sai com a linha unica. */\n'+
+    'function ppDetalhar(pu,v){\n'+
+    'var li=itensEscolhidos(),itens=[],cent=0,z,q,uc,nome,novo;\n'+
+    'if(!li.length||li.length>'+FC_PP_MAX_ITENS+')return;   /* '+FC_PP_MAX_ITENS+' e o maxItems declarado pelo PayPal */\n'+
+    'for(z=0;z<li.length;z++){\n'+
+    'q=li[z].qtd;\n'+
+    'if(!(q>=1)||q!==Math.round(q)||q>'+FC_PP_MAX_QTD+')return;   /* quantity: ^[1-9][0-9]{0,9}$ */\n'+
+    'uc=Math.round(li[z].unit*100);\n'+
+    'if(!(uc>=0))return;\n'+
+    '/* O ITEM DE PRECO ZERO FICA DE FORA DA LISTA, e isto foi MEDIDO, nao presumido. A\n'+
+    '   especificacao do PayPal permite unit_amount "0.00" (o unico limite escrito e "can not\n'+
+    '   be a negative number") -- mas a lista de erros 422 traz um CANNOT_BE_ZERO_OR_NEGATIVE\n'+
+    '   ("Must be greater than zero") sem dizer a que campos ele se aplica. Mandar o item\n'+
+    '   zerado e apostar num comportamento NAO DOCUMENTADO com o pedido inteiro em jogo: se o\n'+
+    '   PayPal recusar, o cliente fica sem meio de pagamento. Deixa-lo de fora nao mexe em\n'+
+    '   dinheiro nenhum (ele soma zero centavo, e item_total continua exato) e custa uma linha\n'+
+    '   no relatorio. Quando houver um pedido de verdade provando que o zero passa, trocar\n'+
+    '   este "continue" por nada e uma edicao de uma linha -- e a previa ao lado declara a\n'+
+    '   omissao em cada montagem, para ela nunca ser silenciosa. */\n'+
+    'if(uc===0)continue;\n'+
+    'nome=String(li[z].nome==null?\'\':li[z].nome).substring(0,'+FC_LIM_PP+');\n'+
+    'if(!nome)return;   /* name e obrigatorio: item sem nome derruba o pedido */\n'+
+    'cent+=uc*q;\n'+
+    'novo={name:nome,quantity:String(q),unit_amount:{value:(uc/100).toFixed(2),currency_code:MOEDA}};\n'+
+    (temSku?'if(li[z].sku)novo.sku=String(li[z].sku).substring(0,'+FC_LIM_PP+');   /* o SKU DAQUELE item: a coluna "ID do produto" do relatorio */\n':'')+
+    'itens.push(novo);\n'+
+    '}\n'+
+    'if(!itens.length)return;   /* so itens zerados: nao ha pedido itemizado a montar */\n'+
+    '/* A DIFERENCA, e nunca o percentual recalculado: e ela que faz amount = item_total -\n'+
+    '   discount ser identidade, qualquer que seja a regra que produziu o total. */\n'+
+    'var descC=cent-Math.round(parseFloat(v)*100);\n'+
+    'if(descC<0)return;   /* os itens somam MENOS que o cobrado: nao ha desconto que explique */\n'+
+    'pu.items=itens;\n'+
+    'pu.amount.breakdown.item_total={value:(cent/100).toFixed(2),currency_code:MOEDA};\n'+
+    'if(descC>0)pu.amount.breakdown.discount={value:(descC/100).toFixed(2),currency_code:MOEDA};\n'+
+    '}\n\n';
+}
+var P_PP_PEDIDO_SRC=
+  /* O QUE O PAYPAL COBRA. Com sinal e o SINAL, e nao o total: e o valor que o cartao
+     debita naquele momento, e cobrar o total aqui seria a tela dizer uma coisa e o cartao
+     fazer outra. O numero e calculado UMA vez, na variavel v, e usado nos tres lugares do
+     pedido (amount, item_total, unit_amount) -- a armadilha do breakdown, ja registrada
+     acima, recusa o pedido inteiro se os tres divergirem num centavo. */
+  '          var v=(SINAL_AGORA>0?SINAL_AGORA:valor).toFixed(2);\n'+
+  "          var ref=(txid&&txid!=='***')?String(txid).substring(0,"+FC_LIM_PP+"):'';\n"+
+  '          var item={name:String(desc).substring(0,'+FC_LIM_PP+'),quantity:"1",\n'+
+  '            unit_amount:{value:v,currency_code:"BRL"}};\n'+
+  '          if(ref)item.sku=ref;\n'+
+  '          var pu={\n'+
+  '            amount:{value:v,currency_code:"BRL",\n'+
+  '              breakdown:{item_total:{value:v,currency_code:"BRL"}}},\n'+
+  '            description:String(desc).substring(0,'+FC_LIM_PP+'),\n'+
+  '            items:[item]\n'+
+  '          };\n'+
+  '          if(ref)pu.custom_id=ref;\n'+
+  /* ITEMIZA SO SEM SINAL, e a decisao ja esta medida em fcPpItensSrc: com sinal o cliente
+     paga uma fracao, o formato do PayPal nao tem conceito de entrada, e a diferenca viraria
+     um "desconto" do tamanho do saldo no recibo que o cliente guarda. A geracao do link ja
+     recusa itens junto de sinal, e este bloco recusa um link que traga os dois -- esta
+     linha e a terceira rede, e ela e a que sobreviveria a um link montado a mao. */
+  '          if(SINAL_AGORA===0)ppDetalhar(pu,v);\n'+
+  '          return actions.order.create({purchase_units:[pu]});\n';
+/* O LADO QUE AVALIA, para a /cobrar. Mesma mecanica de fcPixApi: as funcoes saem do MESMO
+   texto que o bloco entregue leva dentro, montadas aqui num ambiente que imita o do bloco --
+   MOEDA, itensEscolhidos() e o 'actions' do PayPal devolvendo o proprio objeto, que e como a
+   previa da ferramenta ja sonda o createOrder do bloco de verdade.
+   OS CINCO PARAMETROS sao exatamente o que o bloco da /pagar tem em maos quando o cliente
+   clica: o valor (o TOTAL da cobranca, ja reatribuido nos ramos do desconto e do sinal), a
+   descricao (o parametro d), o identificador (o txid lido do proprio codigo Pix), o sinal (o
+   campo 54, quando o link traz n; zero quando nao traz) e os itens (o parametro i, lidos pelo
+   mesmo itensLer). Quem os junta e a pagina que chama. */
+var pPpPedFn=null;
+function pPpPedidoApi(){
+  if(!pPpPedFn){
+    pPpPedFn=(new Function(
+      /* O AMBIENTE E O MESMO DO BLOCO DA /pagar, e a ordem importa: la ITENS e uma variavel
+         do bloco e itensEscolhidos() e declarada ao lado de ppDetalhar -- que a chama POR NOME.
+         Declarar itensEscolhidos dentro de pedidoDe deixaria ppDetalhar sem enxerga-la. */
+      'var MOEDA="BRL";\n'+
+      'var ITENS=[];\n'+
+      'function itensEscolhidos(){return ITENS;}\n'+
+      fcPpItensSrc(true)+
+      'function pedidoDe(valor,desc,txid,SINAL_AGORA,itens){\n'+
+      'ITENS=itens||[];\n'+
+      'var actions={order:{create:function(o){return o;}}};\n'+
+      P_PP_PEDIDO_SRC+
+      '}\n'+
+      'return {pedidoDe:pedidoDe};'))();
+  }
+  return pPpPedFn;
+}
+
 /* ===== O SELO DO LINK, E O PRAZO =====
    O QUE O SELO E. Uma conta sobre TODOS os parametros do endereco, na ordem em que eles saem
    nele. Alterar qualquer um faz a conta nao fechar e a pagina recusa. E OBRIGATORIO: se ele
@@ -1340,6 +1520,11 @@ return {
   fcTotalPixSrc:fcTotalPixSrc, fcPixDesc:fcPixDesc,
   P_DESC_PCT_MAX:P_DESC_PCT_MAX, fcDescNum:fcDescNum,
   pDescPct:pDescPct, pValorPix:pValorPix, pTotCod:pTotCod, pDescCod:pDescCod,
+  /* pSinalCod e pItensCod deixaram de ser internos em 14/09/2026: a previa da /cobrar
+     precisa das MESMAS duas perguntas que a /pagar faz ao endereco -- "este link traz n?"
+     e "quais itens ele traz?". Reescrever qualquer uma delas ali seria a segunda leitura
+     do mesmo parametro. */
+  pSinalCod:pSinalCod, pItensCod:pItensCod,
   /* Do sinal POR COBRANCA sai daqui SO a correcao a vista dos dois campos -- que e o
      unico pedaco que as duas paginas chamam. A conta (pSinalValor), as faixas e as
      recusas sao chamadas DENTRO deste arquivo, e apelido que ninguem chama nao
@@ -1352,6 +1537,11 @@ return {
   P_VAL_NADA:P_VAL_NADA, fcValDia:fcValDia, pValCod:pValCod, pValTexto:pValTexto,
   /* PayPal */
   P_PP_HOSTS:P_PP_HOSTS, P_PP_SRC:P_PP_SRC, pPpHostOk:pPpHostOk,
+  /* o pedido do PayPal: os tetos, os nomes de campo, a fonte que ESCREVE o pedaco do bloco
+     (as duas), e o lado que AVALIA esse mesmo texto (so a /cobrar) */
+  FC_LIM_PP:FC_LIM_PP, FC_PP_MAX_ITENS:FC_PP_MAX_ITENS, FC_PP_MAX_QTD:FC_PP_MAX_QTD,
+  FC_PP_CAMPOS:FC_PP_CAMPOS, fcPpItensSrc:fcPpItensSrc,
+  P_PP_PEDIDO_SRC:P_PP_PEDIDO_SRC, pPpPedidoApi:pPpPedidoApi,
   /* selo e prazo (a fonte parametrizada + o avaliador) */
   pSeloSrc:pSeloSrc, pSeloApi:pSeloApi,
   /* as recusas e a montagem do link -- o coracao do invariante */
