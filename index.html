@@ -3041,6 +3041,24 @@
       <p class="ajuda">O endereço é conferido <b>pela mesma regra que a página publicada usa</b>: só <code>https://</code> de um domínio do próprio PayPal, e sem espaço, quebra de linha, tabulação ou barra invertida no meio — que costumam vir invisíveis ao colar de um PDF ou de um e-mail. Se a ferramenta recusar um endereço que parece certo, apague o campo e digite de novo.</p>
       </fieldset>
       <fieldset>
+      <legend>Detalhar em itens <small>(opcional)</small></legend>
+      <label for="p-itens">Itens desta cobrança <small>(um por linha; vazio = o link sai exatamente como saía antes)</small></label>
+      <textarea id="p-itens" rows="4" placeholder="Ensaio de gestante | ENS01 | 900,00&#10;Álbum 20x20 | ALB20 | 300,50"></textarea>
+      <p class="ajuda">Uma linha por item, no formato <code>nome | SKU | preço</code>. O <b>SKU é opcional</b>: <code>nome | preço</code> também vale — o último pedaço é sempre o preço. Opcionais entram como itens, uma linha cada. Até 20 itens.</p>
+      <p class="ajuda"><b>Isto não muda um centavo do que é cobrado.</b> O valor continua sendo o do campo acima, e o Pix continua carregando um número só. Os itens servem à <b>tela</b> (o cliente lê de que o valor é feito) e ao seu <b>relatório do PayPal</b>, que passa a mostrar uma linha por item com o SKU na coluna "ID do produto" — em vez de uma linha única. Por isso a soma dos itens tem de bater, <b>ao centavo</b>, com o valor: se não bater, a ferramenta recusa e diz os dois números.</p>
+      <p class="ajuda">O <b>SKU não aparece na página</b> que o cliente vê: ele é o seu código de referência, e vai só para o relatório.</p>
+      <p class="ajuda alerta"><b>Itens e sinal não convivem</b>, e a ferramenta recusa os dois juntos. Com sinal o PayPal cobra só o sinal, e detalhar em itens faria o recibo chamar de <b>desconto</b> o saldo que o cliente ainda deve — no documento que ele guarda.</p>
+      <p class="ajuda">A barra vertical separa os pedaços, então ela não pode fazer parte do nome nem do SKU. Qualquer outro caractere pode, inclusive acento e símbolo.</p>
+      </fieldset>
+      <fieldset>
+      <legend>Upsell só desta cobrança <small>(opcional)</small></legend>
+      <label for="p-upsellcob">Endereço da página, só para esta cobrança <small>(vazio = vale o endereço da página, lá na seção 1)</small></label>
+      <input type="text" id="p-upsellcob" value="" placeholder="https://www.fotocerta.com.br/oferta-de-natal">
+      <p class="ajuda"><b>O específico vence o geral.</b> Preenchendo aqui, <i>esta</i> cobrança leva o cliente para <i>este</i> endereço depois do pagamento; deixando vazio, vale o endereço fixo da página, configurado na seção 1. Assim dá para ter uma oferta diferente por campanha sem recolar nada no site.</p>
+      <p class="ajuda alerta"><b>O interruptor mestre continua mandando.</b> Se "Levar o cliente para essa página?" estiver em <b>não levar</b> (seção 1), o endereço daqui <b>não leva a lugar nenhum</b> — nem este, nem o da página. O interruptor é a variável <code>UPSELL_ATIVO</code> no topo do código 1, e você pode ligá-la direto no site, sem regerar nada.</p>
+      <p class="ajuda">São aceitos uma âncora (<code>#oferta</code>), um caminho do site (<code>/oferta-especial</code>) ou um endereço <code>http(s)</code> inteiro — a mesma regra do campo da seção 1.</p>
+      </fieldset>
+      <fieldset>
       <legend>Gerar o link</legend>
       <div class="acoes"><button class="botao" type="button" id="p-gerarlink">Gerar link desta cobrança</button></div>
       <p class="ajuda"><b>Mande o link individualmente</b>, nunca em grupo: a pré-visualização de link mostra a descrição e o valor para todo mundo que estiver na conversa.</p>
@@ -4365,7 +4383,7 @@
      nova para a outra, e o resultado seriam links que a propria /pagar recusa -- sem
      erro nenhum na tela. Ao mexer no arquivo, troque a versao AQUI, em cobrar/index.html
      e no FC_COMPART_VERSAO de dentro dele. -->
-<script src="fc-compartilhado.js?v=2026-09-13b"></script>
+<script src="fc-compartilhado.js?v=2026-09-14a"></script>
 <script>
 'use strict';
 (function(){
@@ -4414,7 +4432,7 @@ var FC_PUBLICADO='2026-09-14 03:44';   /* America/Sao_Paulo -- escrito pelo cari
    OS APELIDOS ABAIXO NAO SAO COPIA: sao o mesmo objeto, com o nome que o resto
    deste arquivo sempre usou. Trocar os nomes em cem lugares so para dizer
    FCCOMPART.x mudaria muito codigo para nao mudar comportamento nenhum. */
-var FC_COMPART_ESPERADA='2026-09-13b';
+var FC_COMPART_ESPERADA='2026-09-14a';
 if(!window.FCCOMPART||FCCOMPART.versao!==FC_COMPART_ESPERADA){
   fcCompartParar(FC_COMPART_ESPERADA,window.FCCOMPART?FCCOMPART.versao:null);
   return;
@@ -4424,6 +4442,11 @@ var FC_PIX_SRC=C.FC_PIX_SRC, fcPixApi=C.fcPixApi;
 var PRECO_MOEDAS=C.PRECO_MOEDAS, PRECO_PADRAO=C.PRECO_PADRAO, precoFmt=C.precoFmt;
 var PIX_CHAVE_MAX=C.PIX_CHAVE_MAX, pixLimpar=C.pixLimpar, pixChaveErro=C.pixChaveErro;
 var urlLimpa=C.urlLimpa, pUrlOk=C.pUrlOk, fcUrlRelativo=C.fcUrlRelativo;
+/* cUrlOk mudou para o arquivo compartilhado em 14/09/2026: a /cobrar passou a precisar
+   dela (o endereco do upsell viaja no link, e as duas paginas geram o mesmo link).
+   FC_ITENS_SRC e o leitor dos itens como TEXTO LITERAL -- o bloco da /pagar o leva
+   dentro, e a ferramenta avalia o MESMO texto para conferir a ida e volta. */
+var cUrlOk=C.cUrlOk, FC_ITENS_SRC=C.FC_ITENS_SRC;
 var FC_URL_EXEMPLO=C.FC_URL_EXEMPLO, pUrlRecusa=C.pUrlRecusa, fcUrlAvisoMigracao=C.fcUrlAvisoMigracao;
 var FCI_CHAVE=C.FCI_CHAVE, FCI_CAMPOS=C.FCI_CAMPOS, FCI_PADRAO=C.FCI_PADRAO;
 var FCI_APONTA=C.FCI_APONTA, fciRecusa=C.fciRecusa, fciPrimeiroProblema=C.fciPrimeiroProblema;
@@ -5290,6 +5313,7 @@ var FCR_ROTULOS={novo:'novo',corrigido:'corr',melhorado:'melh',atencao:'aten',ex
 /* A lista, da versao mais recente para a mais antiga. NAO reordenar: o agrupamento por
    dia assume que versoes do mesmo dia estao juntas, e o desenho respeita esta ordem. */
 var FCR_NOTAS=[
+ {v:"2026-09-14f",d:"14 de setembro de 2026",itens:[["Novo","Link de cobrança: cada cobrança pode ser **detalhada em itens** — nome, SKU e preço, um por linha. O cliente passa a ler na página de que o valor é feito, e o seu **relatório do PayPal** mostra uma linha por item com o SKU na coluna \"ID do produto\", em vez de uma linha única. Está na aba e também na página `/cobrar`, em \"Mais opções desta cobrança\"."],["Novo","Isso **não muda um centavo** do que é cobrado: o valor continua sendo um só, e a soma dos itens tem de bater com ele ao centavo. Se não bater, a ferramenta recusa e diz os dois números."],["Novo","Link de cobrança: o endereço do **upsell** (a página para onde o cliente vai depois de pagar) pode ser escolhido **por cobrança**, e não só uma vez para a página inteira. Dá para ter uma oferta diferente por campanha sem recolar nada no site."],["Atenção","O interruptor mestre continua mandando: com o redirecionamento **desligado** no código da página, o endereço escrito na cobrança não leva a lugar nenhum. A `/cobrar` diz isso na tela, ao lado do campo."],["Exige uma ação sua, uma única vez","Gere de novo o **Código 1** da aba Link de cobrança e recole no componente da sua página de pagamento, publicando em seguida. **Este recolar cobre tudo de uma vez**: o sinal (de 13/09), os itens e o upsell por cobrança. Sem ele, a página recusa os links novos que tiverem sinal, itens ou upsell — ela não conhece esses parâmetros. Links **sem** nenhum deles continuam funcionando como sempre."],["Atenção","Itens e sinal não convivem na mesma cobrança, e a ferramenta recusa os dois juntos. Com sinal o PayPal cobra só o sinal, e detalhar em itens faria o recibo chamar de **desconto** o saldo que o cliente ainda deve — no documento que ele guarda."]]},
  {v:"2026-09-14e",d:"14 de setembro de 2026",itens:[["Novo","O **tamanho do QR Code** do Pix passou a ser ajustável também no Checkout, na Mini loja e no Agendamento por Pacote — até agora só o Link de cobrança tinha esse ajuste. Quem não mexer no campo continua com o tamanho de sempre."]]},
  {v:"2026-09-14d",d:"14 de setembro de 2026",itens:[["Novo","Nasceu esta lista. O botão **Novidades**, na barra do topo, conta o que mudou em cada versão publicada, da mais recente para a mais antiga."],["Novo","Cada dia abre e fecha: a lista nasce com o dia mais recente aberto e o resto recolhido."],["Novo","**A partir daqui, toda alteração publicada entra nesta lista** — correção ou novidade, sempre. E se alguma versão ficar de fora, a ferramenta **avisa sozinha**: uma barra vermelha no alto da tela diz qual versão foi publicada sem descrição. Antes disso, quem esquecesse não teria como saber."]]},
  {v:"2026-09-14c",d:"14 de setembro de 2026",itens:[["Novo","Checkout, Mini loja e Agendamento por Pacote: cada produto e cada item opcional pode ter o seu próprio **SKU** — o código de referência que aparece linha por linha no seu relatório do PayPal. São seis campos novos."],["Corrigido","Todas as linhas do relatório do PayPal levavam o mesmo código: o do pedido. Agora cada linha leva o seu."],["Melhorado","SKU em branco sai sem o campo, em vez de cair no código do pedido. SKU repetido em dois itens é recusado, nomeando os dois."],["Atenção","O pacote não reaproveita o código do TidyCal, e SKU vazio não herda nada de ninguém: são códigos com significados diferentes, e herdar em silêncio seria pior que deixar em branco."]]},
@@ -6197,8 +6221,15 @@ function fcUpsellUrl(cfg){return String((cfg&&cfg.url)||'').trim();}
 /* O criterio de emissao, num lugar so: havendo endereco, as duas variaveis saem. */
 function fcUpsellEmite(cfg){return fcUpsellUrl(cfg)!=='';}
 /* As duas recusas, no formato de uRecusa/mRecusa/aRecusa: '' quando nao ha o que recusar. */
-function fcUpsellRecusa(cfg){
+/* 'doLink' liga o caso que so a aba Link de cobranca tem desde 14/09/2026: ali o endereco
+   pode chegar POR COBRANCA, no proprio link, e entao "interruptor ligado com o endereco da
+   PAGINA vazio" deixou de ser o estado que nao faz nada -- ele passou a significar "o
+   endereco vem de cada cobranca". Nas outras tres abas nao ha link, e a recusa continua
+   inteira: ligado sem destino la continua sendo um estado que nao faz nada e parece que faz.
+   Um parametro, e nao uma segunda funcao: duas recusas do mesmo campo divergiriam. */
+function fcUpsellRecusa(cfg,doLink){
   var u=fcUpsellUrl(cfg);
+  if(!u&&doLink)return '';
   if(!u)return (cfg&&cfg.ativo)?'O redirecionamento depois do pagamento está ligado, mas o endereço da página está vazio. Assim ele não leva o cliente a lugar nenhum e parece que leva. Preencha o endereço da página, ou desligue o interruptor "Levar o cliente para essa página?".':'';
   if(!cUrlOk(u))return 'O endereço da página para onde levar o cliente depois do pagamento ("'+u+'") precisa ser uma âncora (#oferta), um caminho do site (/oferta-especial) ou um endereço http(s). Outros esquemas, como javascript:, não são aceitos.';
   return '';
@@ -6207,12 +6238,25 @@ function fcUpsellRecusa(cfg){
    ("variaveis de customizacao no topo"), aqui com uso concreto: ligar e desligar o upsell no
    site publicado, sem voltar a ferramenta e sem recolar nada. "ind" e a indentacao (a /pagar
    escreve com dois espacos, aninhada dentro da IIFE dela). */
-function fcUpsellVarsSrc(ind,cfg){
-  if(!fcUpsellEmite(cfg))return '';
+/* 'sempre' faz as duas variaveis sairem mesmo com o endereco da pagina VAZIO, e existe por
+   um motivo so: na /pagar o endereco pode vir no LINK, e um bloco que so carrega a maquinaria
+   quando o campo da aba esta preenchido faria o dono gerar um link com upsell no celular e a
+   pagina nao saber o que fazer com ele. E a MESMA regra que o sinal e o desconto ja seguem
+   nesta aba, e pela mesma razao medida: o bloco nao pode depender do que estava configurado
+   no dia em que foi gerado. Nas outras tres abas 'sempre' fica falso e a saida nao muda um
+   byte. */
+function fcUpsellVarsSrc(ind,cfg,sempre){
+  if(!sempre&&!fcUpsellEmite(cfg))return '';
   var c='';
   c+=ind+'/* ===== DEPOIS DO PAGAMENTO APROVADO: levar o cliente a outra pagina (upsell) ===== */\n';
   c+=ind+'var UPSELL_ATIVO='+((cfg&&cfg.ativo)?'true':'false')+';   /* true = leva | false = nao leva. Trocar aqui liga e desliga sem regerar o codigo */\n';
-  c+=ind+"var UPSELL_URL='"+escJs(fcUpsellUrl(cfg))+"';   /* endereco da pagina de upsell */\n\n";
+  c+=ind+"var UPSELL_URL='"+escJs(fcUpsellUrl(cfg))+"';   /* endereco da pagina de upsell */\n";
+  if(sempre){
+    c+=ind+'/* A PRECEDENCIA, e ela e desta pagina: o endereco que vier NO LINK da cobranca\n';
+    c+=ind+'   (parametro u) vence este. O especifico vence o geral. Sem ele, vale o daqui.\n';
+    c+=ind+'   UPSELL_ATIVO manda nos DOIS: desligado, nem o do link leva a lugar nenhum. */\n';
+  }
+  c+='\n';
   return c;
 }
 /* A funcao que leva. Emitida junto com as variaveis, e nunca sem elas.
@@ -6221,13 +6265,23 @@ function fcUpsellVarsSrc(ind,cfg){
    que nada acontece. As duas guardas que ela tem sao as que evitam acao ESTRANHA: desligado
    nao navega, e endereco vazio nao navega -- um UPSELL_URL='' apagado a mao levaria a pagina
    para o endereco dela mesma, recarregando em silencio. */
-function fcUpsellFnSrc(ind,cfg){
-  if(!fcUpsellEmite(cfg))return '';
+/* 'fonte' e uma EXPRESSAO JS (texto) que devolve o endereco vindo do link, ou vazio. So a
+   /pagar a passa -- ela e a unica aba cujo bloco recebe a cobranca pelo endereco. Uma funcao
+   so para as quatro abas, com a decisao do "quem vence" escrita num lugar unico: duas
+   upsellIr diferentes acabariam respondendo coisas diferentes a mesma pergunta. */
+function fcUpsellFnSrc(ind,cfg,sempre,fonte){
+  if(!sempre&&!fcUpsellEmite(cfg))return '';
   var c='';
   c+=ind+'function upsellIr(){\n';
   c+=ind+'  if(!UPSELL_ATIVO)return;\n';
-  c+=ind+'  if(!UPSELL_URL)return;\n';
-  c+=ind+'  window.location.href=UPSELL_URL;\n';
+  if(fonte){
+    c+=ind+'  var alvo='+fonte+'||UPSELL_URL;   /* o do link vence o da pagina */\n';
+    c+=ind+'  if(!alvo)return;\n';
+    c+=ind+'  window.location.href=alvo;\n';
+  }else{
+    c+=ind+'  if(!UPSELL_URL)return;\n';
+    c+=ind+'  window.location.href=UPSELL_URL;\n';
+  }
   c+=ind+'}\n\n';
   return c;
 }
@@ -7391,9 +7445,15 @@ var ABAS=[
    guarda:'tudo o que está configurado nesta aba — modo e duração da contagem, o código da campanha, as <b>mensagens cadastradas</b>, aparência, posição, extras, coruja, efeitos, movimento, urgência, entrada e os <b>textos</b> da seção 5.'},
   {id:'cob',  nome:'Link de cobrança',    chaves:['p'],         coleta:pColeta,restaura:pRestaura,gerar:pGerar,
    pref:'p',fora:[],resumo:pPresetResumo,redesenhar:pPresetDepois,antesDeSalvar:pPresetAntes,
-   naoEmite:['url','desc','valor','txid','validade','descpix','sinal','sinaltipo','sinalpct','sinalfixo','ppmodo','pplink'],
+   /* 'itens' e 'upsellcob' entram aqui pelo mesmo criterio do 'descpix' e dos quatro do
+      sinal: eles mudam so o LINK, nunca o codigo 1 -- a maquinaria dos itens e a do upsell
+      entram no bloco SEMPRE, e a prova byte a byte disso esta na parte 9 de
+      scripts/verificar/itens-upsell.mjs. Deixa-los de fora faria o painel consolidado
+      anunciar "o codigo e mais velho que a aba" a cada item digitado, sobre um codigo 1
+      identico -- o aviso falso que ja custou a correcao do 'p-url' e do 'p-descpix'. */
+   naoEmite:['url','desc','valor','txid','validade','descpix','sinal','sinaltipo','sinalpct','sinalfixo','itens','upsellcob','ppmodo','pplink'],
    exemplo:'ex.: Foto Certa - página /pagar',
-   guarda:'tudo o que está configurado nesta aba — o endereço da página, o <b>meio prioritário</b>, a aparência, os textos, e também a <b>cobrança que está na tela</b> (descrição, valor, identificador, a data de validade, o desconto no Pix e a <b>cobrança de sinal</b>). Aplicar um preset troca também essa cobrança: ele é a fotografia da aba inteira. Os dados de quem recebe <b>não</b> estão aqui: eles saíram desta aba para o painel Identidade, e nenhum preset os toca.'},
+   guarda:'tudo o que está configurado nesta aba — o endereço da página, o <b>meio prioritário</b>, a aparência, os textos, e também a <b>cobrança que está na tela</b> (descrição, valor, identificador, a data de validade, o desconto no Pix, a <b>cobrança de sinal</b>, os <b>itens</b> e o <b>upsell desta cobrança</b>). Aplicar um preset troca também essa cobrança: ele é a fotografia da aba inteira. Os dados de quem recebe <b>não</b> estão aqui: eles saíram desta aba para o painel Identidade, e nenhum preset os toca.'},
   {id:'loja', nome:'Mini loja',           chaves:['m'],         coleta:mColeta,restaura:mRestaura,gerar:mGerar,
    pref:'m',fora:[],formulario:['edops','editidx','form'],resumo:mPresetResumo,redesenhar:mPresetDepois,antesDeSalvar:mPresetAntes,
    listas:[['m.edops',{nome:'',desc:'',preco:0,qtd:false},'nome'],
@@ -22166,30 +22226,9 @@ function cCfg(){
    HTML presente de um lado e ausente do outro; urgencia sem ramo "else" no gerado). Agora a
    previa executa o bloco que cBloco() monta, dentro de um iframe. Ver cPvMontar. */
 
-/* escAttr protege a ESTRUTURA do atributo (aspas), nao o esquema: href="javascript:..."
-   continua sendo um atributo bem formado e executa ao clique. Aceita ancora, caminho
-   relativo e http(s); recusa qualquer outro esquema. Os caracteres de controle e o espaco
-   sao removidos antes do teste, por urlLimpa, porque o navegador tambem os ignora ao resolver
-   a URL. A mesma urlLimpa normaliza a barra invertida, que o navegador tambem trata como
-   barra: sem isso, "/\evil.com/x" chegava ao href como endereco de outro host. */
-function cUrlOk(v){
-  /* mesma limpeza do tUrlOk, pela mesma funcao: as duas abas tem de recusar o mesmo conjunto */
-  var limpo=urlLimpa(v);
-  if(!limpo)return false;
-  if(limpo.charAt(0)==='#')return true;
-  if(/^https?:\/\//i.test(limpo))return true;
-  if(/^[a-zA-Z][a-zA-Z0-9+.\-]*:/.test(limpo))return false;
-  /* caminho do proprio site: UMA barra. O criterio e o mesmo do tUrlOk da aba TidyCal, e por um
-     motivo medido: a versao anterior terminava em "return true" e recusava so o que tivesse
-     ESQUEMA, entao "//evil.exemplo.com/x" passava sem aviso e saia no href. Duas barras nao sao
-     caminho do site -- o endereco e protocol-relative e resolve para OUTRO host, herdando so o
-     esquema da pagina --, enquanto o alerta da cGerar promete ancora, caminho do site ou
-     http(s). Duas abas com a mesma decisao nao podem responder coisas opostas. Caminho sem
-     barra inicial ("natal-2026") tambem passa a ser recusado, pelo mesmo motivo: o alerta nunca
-     o ofereceu, e ele muda de destino conforme a pasta da pagina onde o bloco for colado. */
-  if(limpo.charAt(0)==='/'&&limpo.charAt(1)!=='/')return true;
-  return false;
-}
+/* cUrlOk MUDOU DE CASA em 14/09/2026: ela vive em fc-compartilhado.js, porque a /cobrar
+   passou a aplicar a mesma regra ao endereco de upsell que viaja no link. Aqui ficou so o
+   apelido (ver o bloco de apelidos, logo depois da guarda de versao). */
 function cGerar(){
   /* Os catorze campos numericos se corrigem na tela ANTES de qualquer conferencia -- assim o
      que o operador esta lendo e o que vai ser conferido e gerado. Mesmo passo que as demais
@@ -23267,6 +23306,11 @@ function pCfg(){
     sinalpct:$('p-sinalpct').value, sinalfixo:$('p-sinalfixo').value,
     txid:pTxidLimpo($('p-txid').value),
     valdia:pValDia(), valbruto:$('p-validade').value,
+    /* OS ITENS E O UPSELL DESTA COBRANCA (14/09/2026). Os dois entram CRUS, como os quatro do
+       sinal: quem le, normaliza e recusa sao as funcoes compartilhadas (pItensLidos,
+       pItensRecusa, pUpsellRecusa), exatamente como a /cobrar faz de outra tela -- e e por
+       isso que as duas paginas caem no mesmo link, caractere por caractere. */
+    itens:$('p-itens').value, upsellcob:$('p-upsellcob').value,
     ppmodo:(usapp?ppmodo:'nao'), pplink:$('p-pplink').value.trim()
   };
   /* Os textos configuraveis (ver P_TXT_DEFS): lidos direto do DOM, como t1..t9 acima -- pCfg()
@@ -23317,6 +23361,12 @@ function pCss(cfg){
      (ver "o desconto nao e mais uma escolha do bloco", em pJs). Quem decide se a linha aparece
      e o par t/x do endereco, em tempo de execucao. */
   s+='.fcpg-pixlinha{font-size:15px;font-weight:700;color:'+cfg.c1+';margin:0 0 4px}\n';
+  /* A LISTA DE ITENS entra SEMPRE no CSS, pelo mesmo motivo da linha do desconto e das duas
+     do sinal: quem decide se ela aparece e o parametro i do endereco, em tempo de execucao.
+     Ela e um DETALHE do valor que ja esta em destaque logo acima, entao vem menor e com a
+     mesma opacidade do saldo -- o numero grande continua sendo o unico protagonista. */
+  s+='.fcpg-itens{margin:0 0 10px}\n';
+  s+='.fcpg-item{font-size:13px;opacity:.75;margin:0 0 2px;word-wrap:break-word;overflow-wrap:break-word}\n';
   /* As duas linhas do sinal entram SEMPRE no CSS, pelo mesmo motivo da linha do desconto:
      quem decide se elas aparecem e o parametro n do endereco, em tempo de execucao. O sinal
      leva o peso do destaque (e o numero que sera cobrado agora) e o saldo vem menor, para o
@@ -23454,12 +23504,19 @@ function pJs(cfg){
   j+="  var TXT_SINAL='"+escJs(cfg.txtSinal)+"';   /* CADA {valor} vira o sinal */\n";
   j+="  var TXT_SALDO='"+escJs(cfg.txtSaldo)+"';   /* CADA {valor} vira o saldo */\n";
   if(cfg.zap)j+="  var TXT_ZAP_SINAL='"+escJs(cfg.txtZapSinal)+"';  /* {sinal} e {saldo} */\n";
-  /* O UPSELL: FIXO DA PAGINA. Ele nasce aqui, no codigo 1, e nao no link -- ver pColeta.
+  /* O UPSELL. Ate 13/09/2026 ele era so da PAGINA e so saia quando o campo da aba estava
+     preenchido. Desde 14/09/2026 o endereco tambem pode viajar NO LINK (parametro u), e por
+     isso as duas variaveis saem SEMPRE -- 'sempre' ligado. A razao e a mesma que ja vale para
+     o desconto e para o sinal: o bloco nao pode depender do que estava configurado no dia em
+     que foi gerado, senao o dono manda um link com upsell pela /cobrar e a pagina nao sabe o
+     que fazer com ele. O que fica aqui continua sendo o PADRAO da pagina; o do link vence.
      A linha em branco do fim e aparada porque o marcador "Daqui para baixo" desta aba ja
      comeca com uma: somadas, sairiam duas linhas vazias no meio do bloco entregue. */
-  j+=fcUpsellVarsSrc('  ',cfg.upsell).replace(/\n$/,'');
+  j+=fcUpsellVarsSrc('  ',cfg.upsell,true).replace(/\n$/,'');
   j+='\n  /* ============================================================\n     Daqui para baixo nao precisa mexer\n     ============================================================ */\n\n';
-  j+=fcUpsellFnSrc('  ',cfg.upsell);
+  /* upsellIr consulta o parametro u ANTES da variavel da pagina. Ela e emitida da mesma
+     fonte das outras tres abas: a decisao de "quem vence" existe num lugar so. */
+  j+=fcUpsellFnSrc('  ',cfg.upsell,true,"param('u')");
   /* A maquinaria do BR Code vem da FONTE UNICA. Aqui ela e usada ao contrario do Checkout: em
      vez de montar um payload para o carrinho, o bloco LE o payload que chegou no endereco --
      e depois remonta, para exigir igualdade. Por isso as cinco pecas entram: montarPayload e a
@@ -23507,6 +23564,17 @@ function pJs(cfg){
   j+='    if(d<0)d=0;\n';
   j+='    return Math.round(d*100)/100;\n';
   j+='  }\n\n';
+  /* ===== OS ITENS DESTA COBRANCA (14/09/2026) =====
+     A maquinaria entra SEMPRE, com ou sem itens na cobranca aberta agora -- mesma regra do
+     desconto, do sinal e do upsell, e pela mesma razao medida. Quem decide se ha itens e o
+     parametro i do endereco, em tempo de execucao.
+     itensEscolhidos() e o CONTRATO POR NOME que fcPpItensSrc espera, o mesmo que as tres
+     abas com catalogo declaram. Aqui a lista nao sai de um carrinho: ela chega pronta pelo
+     endereco, e por isso a quantidade e sempre 1 -- esta pagina cobra um valor, e os itens
+     explicam de que ele e feito. */
+  j+='  var ITENS=[];   /* os itens desta cobranca, lidos do parametro i */\n';
+  j+=pInd(FC_ITENS_SRC);
+  j+='  function itensEscolhidos(){return ITENS;}\n\n';
   j+=pInd(FC_PARAM_SRC);
   j+='  /* texto sempre por no de texto, nunca por innerHTML: a descricao vem do ENDERECO, que e\n';
   j+='     entrada de fora, e nenhuma marcacao dela pode virar marcacao desta pagina */\n';
@@ -23523,6 +23591,11 @@ function pJs(cfg){
     j+='     quem monta o link: igualdade exata da autoridade inteira, nunca sufixo. Este e o\n';
     j+='     MESMO texto que a ferramenta avalia para conferir o campo -- ver P_PP_SRC */\n';
     j+=pInd(P_PP_SRC);
+    /* A MESMA fonte que as tres abas com catalogo usam (fcPpItensSrc), com SKU. O contrato
+       dela e por nome: ela chama itensEscolhidos(), declarada acima. Aqui a lista nunca traz
+       desconto a explicar -- a geracao exige que os itens somem, ao centavo, o valor cobrado
+       --, entao o 'discount' que ela sabe montar simplesmente nao aparece neste bloco. */
+    j+=pInd(fcPpItensSrc(true));
   }
   if(cfg.coruja.ativo){
     j+='  function coruja(){\n';
@@ -23574,13 +23647,13 @@ function pJs(cfg){
   j+='       impede a EDICAO de um link existente; ele nao e seguranca, e as conferencias 2 e 3\n';
   j+='       abaixo continuam sendo o que impede o dinheiro de ir para outra conta. */\n';
   j+="    var selo=param('s');\n";
-  /* A conta passa os SETE, sempre. Ela e um SUPERCONJUNTO da de quatro e da de seis -- com t,
+  /* A conta passa os NOVE, sempre. Ela e um SUPERCONJUNTO da de quatro e da de seis -- com t,
      x e n vazios a lista e a mesma e o selo sai igual --, e e por isso que este bloco aceita,
      sem excecao, todos os links gerados antes do desconto E antes do sinal existirem.
      O contrario NAO vale, e e o preco declarado desta rodada: um bloco gerado ANTES do sinal
      conta seis e ignora o n, entao ele RECUSA um link novo com sinal. Uma regeracao do codigo
      1, uma vez so, e o que corrige -- e e o mesmo passo que o desconto ja pediu uma vez. */
-  j+="    if(!selo||seloDe(codigo,param('d'),param('pp'),pv,param('t'),param('x'),param('n'))!==selo){recado(TXT_CODIGO_RUIM);return;}\n";
+  j+="    if(!selo||seloDe(codigo,param('d'),param('pp'),pv,param('t'),param('x'),param('n'),param('i'),param('u'))!==selo){recado(TXT_CODIGO_RUIM);return;}\n";
   j+='    /* 2. forma e verificacao interna (CRC) */\n';
   j+='    var lido=pixLer(codigo);\n';
   j+='    if(!lido.ok){recado(TXT_CODIGO_RUIM);return;}\n';
@@ -23636,6 +23709,27 @@ function pJs(cfg){
   j+='         mostra em destaque. O que as duas pontas cobram continua em SINAL_AGORA. */\n';
   j+='      valor=TOTAL_COBRADO;\n';
   j+='    }\n';
+  j+='    /* 4d. OS ITENS, quando este link traz uns -- a SEGUNDA REDE, atras do selo.\n';
+  j+='       Eles nao mudam um centavo do que e cobrado: o valor continua saindo do campo 54\n';
+  j+='       (ou do total, nos ramos acima). Os itens explicam de que o valor e feito, na tela\n';
+  j+='       e no relatorio do PayPal. As conferencias sao tres:\n';
+  j+='         - a FORMA: itensLer devolve null quando a lista nao fecha, e a cobranca e\n';
+  j+='           recusada. Meia lista na tela seria pior que recusar.\n';
+  j+='         - i e n JUNTOS: estado que nenhum gerador produz (com sinal a ferramenta recusa\n';
+  j+='           itemizar -- o recibo chamaria de desconto o saldo que o cliente ainda deve).\n';
+  j+='         - a SOMA: os itens somam, ao centavo, o valor que esta sendo cobrado. Se nao\n';
+  j+='           somarem, o PayPal recusaria o pedido inteiro e o cliente ficaria sem meio de\n';
+  j+='           pagamento -- entao a pagina recusa aqui, com o recado, em vez de la, em\n';
+  j+='           silencio.\n';
+  j+='       SEM i, nada disto acontece e o cartao sai como sempre saiu. */\n';
+  j+="    var pi=param('i'),icent=0,zi;\n";
+  j+='    if(pi){\n';
+  j+='      if(pn){recado(TXT_CODIGO_RUIM);return;}\n';
+  j+='      ITENS=itensLer(pi);\n';
+  j+='      if(!ITENS||!ITENS.length){ITENS=[];recado(TXT_CODIGO_RUIM);return;}\n';
+  j+='      for(zi=0;zi<ITENS.length;zi++)icent+=Math.round(ITENS[zi].unit*100);\n';
+  j+='      if(icent!==Math.round(valor*100)){ITENS=[];recado(TXT_CODIGO_RUIM);return;}\n';
+  j+='    }\n';
   j+="    var desc=param('d');\n";
   j+='    /* 5. o prazo, se este link tiver um. Sem parametro v, nada disto acontece e a pagina\n';
   j+='       nao menciona prazo nenhum. O instante comparado vem do relogio do APARELHO do\n';
@@ -23665,6 +23759,17 @@ function pJs(cfg){
   }else{
     j+="    if(DESCONTO_PIX>0)c.appendChild(novo('div','fcpg-pixlinha',TXT_PIX_ROTULO.replace(/\\{pct\\}/gi,DESCONTO_PIX)+': '+moedaFmt(totalPix())));\n";
   }
+  /* A LISTA DE ITENS, logo abaixo do valor (e da linha do Pix, quando ha desconto) e ANTES
+     das linhas do sinal -- que nunca convivem com ela, porque a geracao recusa as duas juntas.
+     O SKU NAO APARECE na tela, de proposito: ele e o codigo de referencia do DONO, a coluna
+     "ID do produto" do relatorio do PayPal. Poe-lo ao lado do nome encheria o cartao do
+     cliente com uma informacao que nao e dele. */
+  j+='    if(ITENS.length){\n';
+  j+="      var bi=novo('div','fcpg-itens'),zj;\n";
+  j+='      for(zj=0;zj<ITENS.length;zj++)\n';
+  j+="        bi.appendChild(novo('div','fcpg-item',ITENS[zj].nome+': '+moedaFmt(ITENS[zj].unit)));\n";
+  j+='      c.appendChild(bi);\n';
+  j+='    }\n';
   /* AS DUAS LINHAS DO SINAL, logo abaixo do valor em destaque e ANTES do prazo e dos botoes.
      O numero grande continua sendo o TOTAL -- e ele que diz quanto o trabalho custa, e e assim
      que as abas com carrinho tambem fazem (total em cima, sinal e saldo nas linhas de baixo).
@@ -23836,6 +23941,12 @@ function pJs(cfg){
     j+='            items:[item]\n';
     j+='          };\n';
     j+='          if(ref)pu.custom_id=ref;\n';
+    /* ITEMIZA SO SEM SINAL, e a decisao ja esta medida em fcPpItensSrc: com sinal o cliente
+       paga uma fracao, o formato do PayPal nao tem conceito de entrada, e a diferenca viraria
+       um "desconto" do tamanho do saldo no recibo que o cliente guarda. A geracao do link ja
+       recusa itens junto de sinal, e este bloco recusa um link que traga os dois -- esta
+       linha e a terceira rede, e ela e a que sobreviveria a um link montado a mao. */
+    j+='          if(SINAL_AGORA===0)ppDetalhar(pu,v);\n';
     j+='          return actions.order.create({purchase_units:[pu]});\n';
     j+='        },\n';
     j+='        onApprove:function(d,actions){\n';
@@ -23846,7 +23957,11 @@ function pJs(cfg){
        um token, e forcar as tres a compartilhar pediria tantos parametros quanto linhas. O que
        e compartilhado e o que ESCREVE a chamada (fcUpsellChamada), nao o onApprove inteiro --
        assim nao existe segunda decisao sobre quando o upsell entra. */
-    if(fcUpsellEmite(cfg.upsell))j+='            upsellIr();\n';
+    /* SEM CONDICAO desde 14/09/2026: upsellIr existe SEMPRE neste bloco (o endereco pode vir
+       no link), e e ela quem decide se leva -- interruptor mestre, depois endereco. Condicionar
+       aqui devolveria a decisao para o dia da geracao, que e exatamente o que esta rodada
+       desfez. */
+    j+='            upsellIr();\n';
     j+='          });\n';
     j+='        }\n';
     j+="      }).render('#fcpg-pp');\n";
@@ -23883,7 +23998,7 @@ function pJs(cfg){
     /* O CAMINHO C. Aqui o botao e uma ANCORA com target=_blank (e nao um window.open, como no
        Checkout e na Mini loja), entao o upsell entra num ouvinte de clique -- ver a medicao em
        scripts/verificar/upsell-janela.mjs. */
-    if(fcUpsellEmite(cfg.upsell))j+="    a.addEventListener('click',function(){upsellIr();});\n";
+    j+="    a.addEventListener('click',function(){upsellIr();});\n";
     j+='    return a;\n';
     j+='  }\n';
   }
@@ -23915,7 +24030,7 @@ function pInd(t){
    Os tres do recebedor moram no painel Identidade desde que a identidade saiu das abas, e por
    isso aparecem aqui com o prefixo 'fci-': o campo mudou de lugar, o efeito dele sobre o link
    nao mudou nada. */
-var P_LINK_CAMPOS=['fci-chave','fci-nomer','fci-cidade','p-url','p-desc','p-valor','p-txid','p-validade','p-descpix','p-sinal','p-sinaltipo','p-sinalpct','p-sinalfixo','p-ppmodo','p-pplink'];
+var P_LINK_CAMPOS=['fci-chave','fci-nomer','fci-cidade','p-url','p-desc','p-valor','p-txid','p-validade','p-descpix','p-sinal','p-sinaltipo','p-sinalpct','p-sinalfixo','p-itens','p-upsellcob','p-ppmodo','p-pplink'];
 function pSaidaVence(alvo){
   var i,ta=$('p-out2');
   if(!ta||!ta.value)return;
@@ -23953,7 +24068,10 @@ function pGerar(){
   var cfg=pCfg(),r=pRecusaBloco(cfg);
   /* A recusa do upsell fica AQUI, e nao em pRecusaBloco: aquela funcao mora em
      fc-compartilhado.js e serve tambem a /cobrar, que nao tem estes dois campos. */
-  if(!r)r=fcUpsellRecusa(cfg.upsell);
+  /* 'true' = esta aba aceita o interruptor LIGADO com o endereco da pagina vazio, porque
+     desde 14/09/2026 o endereco pode chegar por cobranca, no proprio link. Nas outras tres
+     abas nao ha link e a recusa continua inteira. */
+  if(!r)r=fcUpsellRecusa(cfg.upsell,true);
   if(r){alert(r);fciApontarSe(r);return;}
   $('p-out1').value=pBloco(cfg);
   fccMarcar('cob');
@@ -23994,6 +24112,7 @@ function pLimpar(){
      o dono o deixou enquanto as duas frases do separador voltavam a fabrica da OUTRA ordem. */
   fcOrdRestaurar('p','');
   $('p-desc').value='';$('p-valor').value='';$('p-txid').value='';$('p-pplink').value='';
+  $('p-itens').value='';$('p-upsellcob').value='';
   $('p-validade').value='';$('p-descpix').value='0';
   setRadio('p-sinal','nao');setRadio('p-sinaltipo','pct');
   $('p-sinalpct').value='30';$('p-sinalfixo').value='100';
@@ -24219,6 +24338,9 @@ function pColeta(){
     validade:$('p-validade').value,descpix:$('p-descpix').value,
     sinal:radio('p-sinal'),sinaltipo:radio('p-sinaltipo'),
     sinalpct:$('p-sinalpct').value,sinalfixo:$('p-sinalfixo').value,
+    /* Os dois de 14/09/2026 sao DESTA COBRANCA, como a descricao e o valor -- e por isso
+       entram no preset junto deles. */
+    itens:$('p-itens').value,upsellcob:$('p-upsellcob').value,
     ppmodo:radio('p-ppmodo'),pplink:$('p-pplink').value};
   /* Os textos configuraveis (ver P_TXT_DEFS, logo antes de pCfg). */
   fcTxtLer(P_TXT_DEFS,r);
@@ -24269,6 +24391,10 @@ function pRestaura(st){
   setRadio('p-sinaltipo',(P.sinaltipo==='fixo')?'fixo':'pct');
   $('p-sinalpct').value=(P.sinalpct!=null&&P.sinalpct!=='')?P.sinalpct:30;
   $('p-sinalfixo').value=(P.sinalfixo!=null&&P.sinalfixo!=='')?P.sinalfixo:100;
+  /* Estado gravado antes de 14/09/2026 nao tem estas duas chaves, e o padrao das duas e
+     vazio -- sem item e sem upsell por cobranca, que e como o link sempre saiu. */
+  $('p-itens').value=P.itens||'';
+  $('p-upsellcob').value=P.upsellcob||'';
   if(P.ppmodo)setRadio('p-ppmodo',P.ppmodo);
   if(P.pplink!==undefined)$('p-pplink').value=P.pplink;
   /* O aviso do endereco e redesenhado aqui porque restaurar escreve nos campos SEM disparar

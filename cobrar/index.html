@@ -269,6 +269,28 @@
 
     <p class="dica" id="cb-pp-nota" style="display:none"></p>
 
+    <!-- MAIS OPCOES: recolhido de fabrica, e de proposito. O pedido do dono foi "simples por
+         padrao, itens quando eu quiser" -- a tela do dia a dia continua sendo valor +
+         descricao, e o link so cresce quando ele usa. Os dois campos moram aqui porque os
+         dois sao excecao, nao rotina. -->
+    <div class="campo">
+      <button type="button" class="botao claro mini" id="cb-mais">Mais opções desta cobrança</button>
+    </div>
+    <div id="cb-mais-campos" style="display:none">
+      <div class="campo">
+        <label class="rot" for="cb-itens">Detalhar em itens <span class="opc">— opcional; uma linha por item</span></label>
+        <textarea id="cb-itens" rows="3" placeholder="Ensaio de gestante | ENS01 | 900,00&#10;Álbum 20x20 | ALB20 | 300,50" autocapitalize="sentences" spellcheck="false"></textarea>
+        <p class="dica">Formato: <b>nome | SKU | preço</b>. O SKU é opcional — <b>nome | preço</b> também vale. Isto <b>não muda o valor cobrado</b>: serve à tela do cliente e ao seu relatório do PayPal, que passa a mostrar uma linha por item. A soma dos itens tem de bater, ao centavo, com o valor acima.</p>
+        <p class="dica"><b>Itens e sinal não convivem.</b> Com sinal o PayPal cobra só o sinal, e o recibo chamaria de desconto o saldo que o cliente ainda deve.</p>
+      </div>
+      <div class="campo">
+        <label class="rot" for="cb-upsell">Levar a outra página depois do pagamento <span class="opc">— opcional</span></label>
+        <input type="text" id="cb-upsell" value="" placeholder="https://www.fotocerta.com.br/oferta-de-natal" autocapitalize="off" autocorrect="off" spellcheck="false">
+        <p class="dica">Vale só para <b>esta</b> cobrança, e vence o endereço fixo da página. Vazio = vale o da página (ou nenhum).</p>
+        <p class="dica"><b>O interruptor mestre continua mandando.</b> Se o redirecionamento estiver <b>desligado</b> no código da página de pagamento (a variável <b>UPSELL_ATIVO</b>, no topo do código 1), o endereço escrito aqui <b>não leva a lugar nenhum</b> — o link é gerado, o cliente paga e continua onde estava. Para ligar, troque <b>false</b> por <b>true</b> nessa linha do código já colado no site: não precisa regerar nada.</p>
+      </div>
+    </div>
+
     <button type="button" class="botao" id="cb-gerar">Gerar link</button>
   </div>
 
@@ -299,7 +321,7 @@
      construção, porque quem declara a versão é o próprio arquivo cuja atualidade está em
      dúvida. Quem confere é scripts/conferir-versoes.sh, que compara o CONTEÚDO com a versão
      declarada e falha quando o arquivo mudou sem o troco. -->
-<script src="../fc-compartilhado.js?v=2026-09-13b"></script>
+<script src="../fc-compartilhado.js?v=2026-09-14a"></script>
 <script>
 'use strict';
 (function(){
@@ -346,7 +368,7 @@
    pior: esta página selaria o link com uma conta e a /pagar conferiria com
    outra, sem um sinal na tela. Então ou a versão pedida chegou, ou a página diz
    o que houve e não faz mais nada. */
-var FC_COMPART_ESPERADA='2026-09-13b';
+var FC_COMPART_ESPERADA='2026-09-14a';
 if(!window.FCCOMPART||FCCOMPART.versao!==FC_COMPART_ESPERADA){
   cbParar(FC_COMPART_ESPERADA,window.FCCOMPART?FCCOMPART.versao:null);
   return;
@@ -530,6 +552,11 @@ function cbCfg(){
     sinalpct:$('cb-sinalpct').value, sinalfixo:$('cb-sinalfixo').value,
     txid:C.pTxidLimpo($('cb-txid').value),
     valdia:C.fcValDia($('cb-validade').value), valbruto:$('cb-validade').value,
+    /* Os dois de 14/09/2026, CRUS -- exatamente como pCfg os entrega. Quem lê, normaliza e
+       recusa são as funções compartilhadas (pItensLidos, pItensRecusa, pUpsellRecusa), e é
+       por isso que o link desta página continua sendo, caractere por caractere, o da aba.
+       Uma leitura escrita aqui seria a segunda interpretação do mesmo campo. */
+    itens:$('cb-itens').value, upsellcob:$('cb-upsell').value,
     ppmodo:(usapp?ppmodo:'nao'), pplink:cbTrim($('cb-pplink').value)
   };
 }
@@ -845,7 +872,7 @@ function cbCopiarPlanoB(ta){
    identidade vigente é a que está na tela, mexer na chave, no nome, na cidade ou no endereço
    muda o link — e um link antigo parado na caixa seria um link com a identidade anterior. */
 var CB_VENCEM=['cb-desc','cb-valor','cb-txid','cb-validade','cb-descpix','cb-pplink',
-               'cb-sinalpct','cb-sinalfixo',
+               'cb-sinalpct','cb-sinalfixo','cb-itens','cb-upsell',
                'cb-chave','cb-nomer','cb-cidade','cb-client','cb-zapnum','cb-url'];
 var CB_PAINEL=['cb-chave','cb-nomer','cb-cidade','cb-client','cb-zapnum','cb-url'];
 /* "O operador mexeu no painel desde que ele foi enchido?" — a única coisa que separa um painel
@@ -892,6 +919,18 @@ function cbAjuste(id,fn){
 
 liga('cb-abrir',function(){cbConfigAbrir(undefined,true);});
 liga('cb-salvar',cbConfigSalvar);
+/* O bloco de mais opções abre e fecha, e não guarda estado: ele nasce fechado a cada
+   abertura da página, porque os campos que ele contém também nascem vazios a cada abertura --
+   nada aqui é lembrado de uma cobrança para a seguinte. */
+function cbMaisAbrir(){
+  var el=$('cb-mais-campos'),bt=$('cb-mais');
+  if(!el||!bt)return;
+  var aberto=(el.style.display!=='none');
+  el.style.display=aberto?'none':'block';
+  bt.textContent=aberto?'Mais opções desta cobrança':'Menos opções';
+  if(!aberto){try{el.scrollIntoView(true);}catch(e){}}
+}
+liga('cb-mais',cbMaisAbrir);
 liga('cb-gerar',cbGerarLink);
 liga('cb-copiar',cbCopiar);
 cbAjuste('cb-valor',cbValorAjustar);

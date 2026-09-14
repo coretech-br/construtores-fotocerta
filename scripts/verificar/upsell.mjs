@@ -31,8 +31,11 @@
         em duas larguras de tela. Ele existe de DUAS formas, e as duas sao medidas: window.open
         no Checkout e na Mini loja; ANCORA com target=_blank na /pagar e -- desde 13/09/2026 --
         na Agendamento por pacote, que ate entao nao tinha o botao.
-     7. O LINK de cobranca: nenhum byte muda com o upsell configurado -- e o CODIGO 1 muda, que
-        e o outro lado da mesma medida (sem ele, "o link nao mudou" poderia ser "nada mudou").
+     7. O LINK de cobranca: nenhum byte muda com o upsell DA PAGINA configurado -- e o CODIGO 1
+        muda, que e o outro lado da mesma medida (sem ele, "o link nao mudou" poderia ser "nada
+        mudou"). Desde 14/09/2026 existe um SEGUNDO campo de upsell naquela aba, o DESTA
+        COBRANCA, e esse VIAJA no link de proposito; ele e medido em itens-upsell.mjs, e o que
+        esta parte continua cobrando e que o campo da PAGINA nao vaza para o endereco.
      8. O endereco INVALIDO escrito a mao no codigo publicado: MEDICAO, nao assercao. O bloco
         nao reconfere de proposito, e o que se quer saber e se ele quebra feio.
 
@@ -146,6 +149,25 @@ const ESTADOS = [
   {rot:'vazio + LIGADO',        url:'',        ligado:true,  emite:false, ativo:null,  recusa:true}
 ];
 
+/* A ABA LINK DE COBRANCA DEIXOU DE SEGUIR A TABELA ACIMA em 14/09/2026 (leva 10), e SO ELA.
+   Nas outras tres o endereco do upsell so pode vir da aba, e por isso "endereco vazio" ainda
+   quer dizer "nao ha upsell nenhum": nada e emitido, e ligar o interruptor sem destino e um
+   estado que nao faz nada e parece que faz -- recusa.
+   Na /pagar passou a existir uma segunda fonte de endereco: o LINK de cada cobranca (parametro
+   u). Dai as duas consequencias que esta funcao declara:
+     - as duas variaveis saem SEMPRE, mesmo com o campo da aba vazio, porque o bloco nao pode
+       depender do que estava configurado no dia em que foi gerado (a mesma regra que o
+       desconto e o sinal ja seguem nesta aba, e pela mesma razao medida);
+     - "ligado com o endereco da pagina vazio" deixou de ser incoerente: ele significa "o
+       endereco vem de cada cobranca", e por isso deixou de ser recusado.
+   O que NAO mudou, e continua cobrado logo abaixo: UPSELL_ATIVO segue o interruptor, as
+   variaveis ficam no topo, e ligado x desligado diferem so no valor do interruptor.
+   A precedencia em si (link vence pagina, mestre desliga os dois) e medida EXECUTANDO em
+   scripts/verificar/itens-upsell.mjs, parte 5 -- aqui se mede o TEXTO. */
+const esperadoDe = (aba, e) => aba.pref !== 'p'
+  ? {emite:e.emite, ativo:e.ativo, recusa:e.recusa, temUrl:e.emite}
+  : {emite:true, ativo:e.ligado?'true':'false', recusa:false, temUrl:!!e.url};
+
 /* A saida de cada [aba][estado], guardada para as partes seguintes nao regerarem. */
 const saidas = {};
 for(const aba of ABAS){
@@ -156,8 +178,9 @@ for(const aba of ABAS){
     const t = r.valores[aba.saida] || '';
     saidas[aba.pref][e.rot] = {texto:t, link:r.valores['p-out2']||'', alertas:r.alertas, erros:r.erros};
     const tag = aba.nome + ' / ' + e.rot + ': ';
+    const esp = esperadoDe(aba, e);
 
-    if(e.recusa){
+    if(esp.recusa){
       chk(tag+'a ferramenta RECUSOU gerar', r.alertas.length>0 && t==='', 'alertas='+r.alertas.length+' bytes='+t.length);
       continue;
     }
@@ -166,11 +189,13 @@ for(const aba of ABAS){
     const temVars = /var UPSELL_ATIVO=/.test(t) && /var UPSELL_URL=/.test(t);
     const temFn = /function upsellIr\(\)/.test(t);
     const temChamada = /upsellIr\(\);/.test(t);
-    if(e.emite){
+    if(esp.emite){
       chk(tag+'as DUAS variaveis sairam', temVars, 'ATIVO='+/var UPSELL_ATIVO=/.test(t)+' URL='+/var UPSELL_URL=/.test(t));
-      chk(tag+'UPSELL_ATIVO='+e.ativo, new RegExp('var UPSELL_ATIVO='+e.ativo+';').test(t),
+      chk(tag+'UPSELL_ATIVO='+esp.ativo, new RegExp('var UPSELL_ATIVO='+esp.ativo+';').test(t),
         (t.match(/var UPSELL_ATIVO=\w+;/)||['(nenhuma)'])[0]);
-      chk(tag+'o endereco saiu inteiro', t.indexOf("var UPSELL_URL='"+URL_TESTE+"'")>=0);
+      chk(tag+(esp.temUrl?'o endereco saiu inteiro':'o endereco saiu VAZIO (o da cobranca vem no link)'),
+        t.indexOf("var UPSELL_URL='"+(esp.temUrl?URL_TESTE:'')+"'")>=0,
+        (t.match(/var UPSELL_URL='[^']*';/)||['(nenhuma)'])[0]);
       chk(tag+'a funcao upsellIr saiu junto', temFn);
       chk(tag+'alguem CHAMA upsellIr', temChamada);
       chk(tag+'as variaveis estao ANTES da funcao (topo do bloco)',
@@ -187,6 +212,18 @@ for(const aba of ABAS){
   const ligado = saidas[aba.pref]['preenchido + ligado'].texto;
   const desligado = saidas[aba.pref]['preenchido + DESLIGADO'].texto;
   chk(aba.nome+': o estado vazio difere do preenchido', vazio!==ligado && vazio.length<ligado.length);
+  /* SO NA /pagar: o quarto estado deixou de ser recusa e virou um estado legitimo -- e ele
+     tem de emitir o interruptor LIGADO com o endereco VAZIO, esperando o do link. Sem esta
+     linha, a mudanca de regra sumiria da suite em vez de ser medida. */
+  if(aba.pref === 'p'){
+    const vl = saidas['p']['vazio + LIGADO'].texto;
+    chk(aba.nome+': "vazio + LIGADO" deixou de ser recusa e emite ATIVO=true com URL vazia',
+      /var UPSELL_ATIVO=true;/.test(vl) && vl.indexOf("var UPSELL_URL='';")>=0,
+      (vl.match(/var UPSELL_(ATIVO|URL)=[^;]*;/g)||['(nenhuma)']).join(' '));
+    chk(aba.nome+': e ele difere do "vazio + desligado" SO no valor do interruptor',
+      vl.replace('var UPSELL_ATIVO=true;','var UPSELL_ATIVO=false;')===vazio,
+      'ligado='+vl.length+'B  desligado='+vazio.length+'B');
+  }
   /* ligado x desligado: UMA palavra de diferenca, e ela e o valor do interruptor. */
   chk(aba.nome+': ligado e desligado diferem SO no valor do interruptor',
     ligado.replace('var UPSELL_ATIVO=true;','var UPSELL_ATIVO=false;')===desligado,
@@ -198,6 +235,14 @@ for(const aba of ABAS){
    ============================================================================ */
 console.log('\n== 2. A recusa do estado incoerente (ligado sem destino) ==');
 for(const aba of ABAS){
+  /* A /pagar SAIU desta parte em 14/09/2026, e a razao esta na parte 1: la o endereco pode vir
+     do link, entao "ligado sem endereco da pagina" e um estado que FAZ alguma coisa. Deixar a
+     assercao rodando produziria tres falhas por dia sem defeito nenhum por tras, e vermelho
+     que e sempre vermelho esconde o proximo. O estado dela e medido na parte 1, positivamente. */
+  if(aba.pref === 'p'){
+    console.log('    -> '+aba.nome+': NAO SE APLICA -- desde a leva 10 o endereco pode vir no link.');
+    continue;
+  }
   const al = saidas[aba.pref]['vazio + LIGADO'].alertas;
   const frase = al.join(' | ');
   chk(aba.nome+': a recusa aconteceu', al.length>0);
@@ -674,7 +719,7 @@ for(const ca of C_ABAS){
 /* ============================================================================
    PARTE 7 -- O LINK de cobranca nao muda um byte
    ============================================================================ */
-console.log('\n== 7. O link de cobranca: nenhum byte muda ==');
+console.log('\n== 7. O link de cobranca: o upsell DA PAGINA nao muda um byte dele ==');
 {
   const semU = saidas['p']['vazio + desligado'];
   const comU = saidas['p']['preenchido + ligado'];

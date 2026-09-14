@@ -1547,3 +1547,56 @@ de cores. Única mudança de texto de interface fora dos campos, declarada por i
 
 **Primeira rodada sob a regra das release notes:** a entrada foi escrita antes do carimbo, e
 `conferir-versoes.sh` a exigiu.
+
+## Entregue em 14/09/2026 — itens com SKU e upsell por cobrança, no link
+
+Duas decisões do dono na mesma rodada **de propósito**: as duas acrescentam parâmetro ao link, e
+juntas custam **um** recolar do código 1 em vez de dois. O que destravou a segunda foi ele informar
+que **não tem links pendentes de pagamento**.
+
+### A forma no endereço: tamanho-ponto-valor, e não separador
+
+`18.Ensaio de gestante5.ENS016.900.00`. Com separador, um nome que o contivesse precisaria ser
+**proibido** ou **escapado** — e o escape teria de sobreviver ao `encodeURIComponent` que embrulha o
+parâmetro inteiro, que é onde defeito silencioso mora. Com o tamanho na frente, o leitor nunca
+procura separador **dentro** de um valor: nenhum caractere é proibido e o preço pode ter o próprio
+ponto. É o idioma que o selo já usa, e o `.` não custa bytes ao ser codificado.
+
+### O selo: `i` e `u` entram EM PAR, e isso não é enfeite
+
+Com serialização por comprimento, empurrar só o preenchido faria **"i sem u" e "u sem i" produzirem
+a mesma lista** — um link com itens poderia ser re-selado como um link com upsell, **com a conta
+fechando**. É o mesmo defeito que fez `t` e `x` entrarem juntos. A suíte **forja essa troca** e
+exige recusa.
+
+**O padrão condicional ficou, e o motivo mudou:** deixou de ser "não quebrar o que já foi enviado"
+(não há) e passou a ser **"permitir que o próximo parâmetro entre sem quebrar nada"** — e no dia do
+próximo pode haver cobrança em aberto.
+
+### Duas recusas que valem mais que a funcionalidade
+
+- **A soma dos itens tem de bater ao centavo** com o valor da cobrança, senão a ferramenta recusa
+  dizendo os dois números. Não há cupom nem carrinho aqui: sobrar diferença faria o relatório do
+  PayPal chamar de **desconto** um número que ninguém descontou.
+- **Itens e sinal não convivem, e a ferramenta recusa** em vez de emitir e deixar o bloco ignorar.
+  Emitir seria pior: o dono veria o link crescer e o relatório continuar com a linha única, **sem
+  uma palavra**.
+
+### As variáveis do upsell passaram a sair SEMPRE na `/pagar`
+
+Antes só saíam com o campo preenchido. Mesma razão medida do desconto e do sinal: **o bloco não pode
+depender do que estava configurado no dia em que foi gerado** — senão o dono manda um link com
+upsell pela `/cobrar` e a página não sabe o que fazer com ele.
+
+### 11 divergências, todas a mesma
+
+`p-out1` (25.612 → 32.335 bytes) e as nove fotografias dela nos cenários. **Nenhum dos 9 links
+mudou** — `p-out2` continua em 231 bytes. As 24 outras saídas, mesmo hash.
+
+Tamanho do link, medido: 231 simples · 259 um item · 362 cinco itens · 365 itens + upsell.
+
+### Três suítes envelheceram e foram consertadas, não silenciadas
+
+`sinal-cobranca` fixava o **texto inteiro** da assinatura do selo e passou a medir a **propriedade**
+(sobrevive ao próximo parâmetro); `upsell` exigia um comportamento que deixou de valer **só numa
+aba** e passou a pular aquela **dizendo por quê**; `textos-migrados` ganhou as duas chaves novas.

@@ -701,8 +701,16 @@ console.log('\n=== PARTE 7 -- a maquinaria entra SEMPRE no bloco, com ou sem sin
   const b = novo.bloco;
   chk('  o bloco declara SINAL_AGORA', b.indexOf('var SINAL_AGORA=0;') >= 0);
   chk('  o bloco tem saldoAgora()', b.indexOf('function saldoAgora()') >= 0);
-  chk('  a seloDe do bloco tem os SETE parametros', b.indexOf('function seloDe(pc,pd,pp,pv,pt,px,pn)') >= 0);
-  chk('  a chamada do selo passa o n', b.indexOf("param('x'),param('n'))") >= 0);
+  /* A PROPRIEDADE, e nao a aridade. Ate 14/09/2026 estas duas linhas fixavam o
+     TEXTO INTEIRO da assinatura -- 'seloDe(pc,pd,pp,pv,pt,px,pn)' e
+     "param('x'),param('n'))" com o parentese final --, e a leva 10 acrescentou
+     dois parametros ao selo (i e u). As duas ficaram vermelhas sem nenhum defeito
+     por tras, que e exatamente o envelhecimento que a regra de 13/09/2026 manda
+     detectar em vez de sofrer. O que esta suite precisa cobrar e "o n entra na
+     conta, e a chamada o passa" -- e isso sobrevive ao proximo parametro. */
+  chk('  a seloDe do bloco recebe o n', /function seloDe\(pc,pd,pp,pv,pt,px,pn[,)]/.test(b),
+      (b.match(/function seloDe\([^)]*\)/) || ['(nenhuma)'])[0]);
+  chk('  a chamada do selo passa o n', /param\('x'\),param\('n'\)/.test(b));
   chk('  existe UMA e so uma definicao de totalPix', (b.match(/function totalPix\(/g) || []).length === 1,
       'achei ' + (b.match(/function totalPix\(/g) || []).length);
   chk('  totalPix NAO foi alterada: ela continua sendo a conta do desconto',

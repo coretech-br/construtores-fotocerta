@@ -49,7 +49,7 @@
    ============================================================================ */
 'use strict';
 var FCCOMPART=(function(){
-var FC_COMPART_VERSAO='2026-09-13b';
+var FC_COMPART_VERSAO='2026-09-14a';
 
 /* Limpeza compartilhada pelos DOIS validadores de endereco -- cUrlOk (botao de acao da
    Contagem regressiva) e tUrlOk (pagina intermediaria do TidyCal). Ela faz o que o NAVEGADOR
@@ -65,6 +65,39 @@ var FC_COMPART_VERSAO='2026-09-13b';
    -- e, quando o teste recusa, nada sai. */
 function urlLimpa(v){
   return String(v).replace(/[\u0000-\u0020]/g,'').replace(/\\/g,'/');
+}
+
+/* ===== O ENDERECO DE UMA PAGINA DO SITE: a regra, num lugar so =====
+   Ela nasceu no botao de acao da Contagem regressiva (cGerar) e morava no index.html. Desde
+   14/09/2026 a /cobrar tambem precisa dela -- o endereco do upsell passou a poder viajar no
+   link, e as DUAS paginas geram o MESMO link --, entao ela mudou para ca, que e a regra deste
+   arquivo: extrai-se o que as duas paginas EXECUTAM. Escreve-la de novo do lado da /cobrar
+   seria a segunda implementacao que este projeto recusa por padrao -- as duas concordariam
+   hoje e divergiriam amanha, e o buraco ficaria justamente num campo de endereco.
+
+   escAttr protege a ESTRUTURA do atributo (aspas), nao o esquema: href="javascript:..."
+   continua sendo um atributo bem formado e executa ao clique. Aceita ancora, caminho
+   relativo e http(s); recusa qualquer outro esquema. Os caracteres de controle e o espaco
+   sao removidos antes do teste, por urlLimpa, porque o navegador tambem os ignora ao resolver
+   a URL. A mesma urlLimpa normaliza a barra invertida, que o navegador tambem trata como
+   barra: sem isso, "/\evil.com/x" chegava ao href como endereco de outro host. */
+function cUrlOk(v){
+  /* mesma limpeza do tUrlOk, pela mesma funcao: as duas abas tem de recusar o mesmo conjunto */
+  var limpo=urlLimpa(v);
+  if(!limpo)return false;
+  if(limpo.charAt(0)==='#')return true;
+  if(/^https?:\/\//i.test(limpo))return true;
+  if(/^[a-zA-Z][a-zA-Z0-9+.\-]*:/.test(limpo))return false;
+  /* caminho do proprio site: UMA barra. O criterio e o mesmo do tUrlOk da aba TidyCal, e por um
+     motivo medido: a versao anterior terminava em "return true" e recusava so o que tivesse
+     ESQUEMA, entao "//evil.exemplo.com/x" passava sem aviso e saia no href. Duas barras nao sao
+     caminho do site -- o endereco e protocol-relative e resolve para OUTRO host, herdando so o
+     esquema da pagina --, enquanto o alerta da cGerar promete ancora, caminho do site ou
+     http(s). Duas abas com a mesma decisao nao podem responder coisas opostas. Caminho sem
+     barra inicial ("natal-2026") tambem passa a ser recusado, pelo mesmo motivo: o alerta nunca
+     o ofereceu, e ele muda de destino conforme a pasta da pagina onde o bloco for colado. */
+  if(limpo.charAt(0)==='/'&&limpo.charAt(1)!=='/')return true;
+  return false;
 }
 
 /* ===== maquinaria do Pix (BR Code): fonte unica =====
@@ -789,12 +822,27 @@ function pPpHostOk(v){
    produziriam a MESMA lista, e por isso os dois entram juntos; um parametro sozinho nao tem
    como colidir consigo mesmo. E ele nunca convive com t/x -- com sinal o desconto do Pix e
    zerado na origem (pDescPct), e o bloco recusa um link que traga os dois. */
+/* OS DOIS DE 14/09/2026 -- i (os itens) e u (o upsell desta cobranca) -- entram DEPOIS de
+   t/x/n, e entram EM PAR, como t e x. O par nao e enfeite: com length-prefix, empurrar so o
+   que vem preenchido faria "i sem u" e "u sem i" produzirem a MESMA lista, e um link com
+   itens poderia ser re-selado como um link com upsell (e vice-versa) sem a conta mudar. E o
+   MESMO motivo medido que fez t e x entrarem juntos; o n nao tem par porque ele nunca
+   convive com t/x e nao tem com quem colidir.
+   As cinco propriedades do comentario acima continuam valendo, agora com sete itens
+   opcionais: link sem nenhum deles sela EXATAMENTE como antes, byte a byte, e por isso este
+   bloco aceita todo link ja gerado. O contrario nao vale -- um bloco anterior a esta rodada
+   conta ate o n e IGNORA i e u, entao ele recusa um link novo que os traga. Isso e
+   propriedade, nao acidente: um selo que ignorasse o i deixaria trocar a lista de itens
+   exibida, e um que ignorasse o u deixaria trocar a pagina para onde o cliente e levado
+   depois de pagar -- que e a mais grave das duas. */
 function pSeloDeSrc(){
-  return "function seloDe(pc,pd,pp,pv,pt,px,pn){\n"+
-    "  var ps=[pc,pd,pp,pv],t='',i,s,a,b,g;\n"+
+  return "function seloDe(pc,pd,pp,pv,pt,px,pn,pi,pu){\n"+
+    "  var ps=[pc,pd,pp,pv],t='',i,s,a,b,g,h,k;\n"+
     "  a=String(pt==null?'':pt);b=String(px==null?'':px);g=String(pn==null?'':pn);\n"+
+    "  h=String(pi==null?'':pi);k=String(pu==null?'':pu);\n"+
     "  if(a!==''||b!==''){ps.push(a);ps.push(b);}\n"+
     "  if(g!=='')ps.push(g);\n"+
+    "  if(h!==''||k!==''){ps.push(h);ps.push(k);}\n"+
     "  for(i=0;i<ps.length;i++){s=String(ps[i]==null?'':ps[i]);t+=s.length+':'+s+'|';}\n"+
     "  return crc16(seloBytes(t));\n"+
     "}\n";
@@ -944,6 +992,14 @@ function pRecusaCobranca(cfg){
      pagina do dono recusaria -- a divergencia "a ferramenta diz sim e a pagina diz nao" que
      esta aba ja pagou uma vez, no endereco do PayPal. */
   if(cfg.valdia!==P_VAL_NADA&&pSeloApi().prazoDia(pValCod(cfg))!==cfg.valdia)return 'A data "Válido até" ('+pValTexto(cfg)+') está longe demais: a página de pagamento só sabe ler prazos até 31/12/2099, e recusaria este link. Confira se não sobrou um dígito no ano. Escolha uma data mais próxima, ou apague o campo para gerar um link sem prazo.';
+  /* OS ITENS E O UPSELL DESTA COBRANCA (14/09/2026). Vem DEPOIS das recusas do valor e do
+     sinal de proposito: as duas dependem deles -- a soma dos itens e comparada com o valor, e
+     itens com sinal e o estado que nao convive. Recusar antes de saber se o valor existe
+     mandaria o operador conferir o numero errado. As duas paginas chamam esta mesma funcao. */
+  var erroItens=pItensRecusa(cfg);
+  if(erroItens)return erroItens;
+  var erroUp=pUpsellRecusa(cfg);
+  if(erroUp)return erroUp;
   if(cfg.ppmodo==='link'&&!cfg.pplink)return 'Cole o endereço do link de cobrança criado no PayPal, ou escolha outro modo de PayPal para esta cobrança.';
   if(cfg.ppmodo==='link'&&!pEncOk(cfg.pplink))return 'O endereço do PayPal tem um caractere que o link não consegue carregar, e ele pode estar invisível na tela. Apague o campo e cole o endereço de novo. Nenhum link foi gerado.';
   if(cfg.ppmodo==='link'&&!pPpHostOk(cfg.pplink))return 'O link de cobrança do PayPal precisa começar com https:// e ser de um endereço do próprio PayPal ('+P_PP_HOSTS.join(', ')+'). Um link de pagamento apontando para outro lugar é dinheiro indo para outro lugar.\n\nEspaço, quebra de linha, tabulação ou barra invertida NO MEIO do endereço também são recusados, e podem estar invisíveis: costumam vir junto ao copiar de um PDF ou de um e-mail. Se o endereço parece certo, apague e digite de novo. Esta é a mesma conferência que a página publicada faz -- se ela passasse aqui e falhasse lá, o cliente é que ficaria sem o botão.';
@@ -1021,6 +1077,193 @@ function pConferir(cfg,codigo){
   if(Math.abs(lido.valor-alvo)>0.0001)return 'O valor dentro do código Pix ('+precoFmt('BRL',lido.valor)+') não bate com o valor que esta cobrança cobra no Pix ('+precoFmt('BRL',alvo)+'). Nenhum link foi gerado.';
   return '';
 }
+/* ============================================================================
+   OS ITENS DESTA COBRANCA, E O UPSELL DESTA COBRANCA (14/09/2026)
+   ============================================================================
+   AS DUAS COISAS ENTRAM NA MESMA RODADA DE PROPOSITO: as duas acrescentam parametro ao
+   endereco, e juntas custam UM recolar do codigo 1 em vez de dois.
+
+   --- PARTE A: OS ITENS ---
+   SIMPLES POR PADRAO. A tela continua sendo valor + descricao; os itens sao um caminho a
+   mais. Campo vazio = link byte a byte igual ao de antes desta rodada -- mesmo criterio do
+   desconto, do sinal e dos tres textos do sinal.
+
+   O VALOR COBRADO CONTINUA SENDO UM. O Pix carrega um numero so (o campo 54), e a
+   itemizacao serve a TELA e ao RELATORIO do PayPal -- exatamente o desenho da leva 3. Por
+   isso a soma dos itens tem de bater, AO CENTAVO, com o valor da cobranca: nao existe
+   "desconto" a explicar aqui, porque nao ha cupom nem carrinho. Se sobrasse diferenca, o
+   relatorio do PayPal chamaria de desconto um numero que ninguem descontou.
+
+   COM SINAL NAO SE ITEMIZA, e a ferramenta RECUSA em vez de emitir e ignorar. A razao ja
+   esta medida em fcPpItensSrc: com sinal o cliente paga uma fracao, o formato do PayPal nao
+   tem conceito de entrada, e forcar a diferenca para 'discount' faria o recibo chamar de
+   DESCONTO o saldo que o cliente ainda deve -- num numero grande, no documento que ele
+   guarda. Emitir o parametro e deixar o bloco ignorar seria pior que recusar: o operador
+   veria o link crescer e o relatorio continuar com a linha unica, sem uma palavra.
+
+   O FORMATO NO ENDERECO: tamanho, ponto, valor -- tres vezes por item (nome, SKU, preco),
+   um item colado no outro. "18.Ensaio de gestante5.ENS016.420.00".
+   POR QUE ASSIM, e nao "nome|sku|preco" separado por um caractere: com separador, um nome
+   que contenha aquele caractere ou precisaria ser PROIBIDO (recusa por um til) ou precisaria
+   ser ESCAPADO (e o escape teria de sobreviver ao encodeURIComponent que embrulha o
+   parametro inteiro -- duas camadas, que e onde defeito silencioso mora). Com o tamanho na
+   frente, o leitor nunca procura um separador DENTRO do valor: nenhum caractere e proibido,
+   nenhum e escapado, e o preco pode ter o proprio ponto sem ambiguidade. E o mesmo idioma
+   que o SELO ja usa para serializar a lista dele (comprimento, dois-pontos, valor).
+   O '.' nao e escapado por encodeURIComponent, entao ele nao custa bytes.
+
+   O TAMANHO, MEDIDO e nao estimado: ver scripts/verificar/itens-upsell.mjs, que imprime o
+   comprimento de cada link do catalogo. O teto de 20 itens existe para o link nao virar um
+   campo de texto sem fim -- nao por limite de navegador, que aceita muito mais.
+
+   --- PARTE B: O UPSELL ---
+   O endereco passa a poder viajar no link, e a regra de precedencia e esta, escrita tambem
+   DENTRO do bloco entregue:
+     - UPSELL_ATIVO e o INTERRUPTOR MESTRE, editavel no codigo sem regerar (pedido do dono
+       em 13/09/2026, e nao muda);
+     - o ENDERECO e o do link quando ele vier; senao, o da pagina. O especifico vence o geral;
+     - endereco no link com o mestre DESLIGADO nao leva a lugar nenhum. A tela da /cobrar diz
+       isso, porque um dono que gera um link com upsell e nao entende por que ele nao funciona
+       e o defeito silencioso desta parte.
+   O endereco passa pela MESMA regra de esquema do botao de acao da Contagem regressiva
+   (cUrlOk, logo acima, que passa por urlLimpa): ancora, caminho do site ou http(s), e nenhum
+   outro. Um campo de endereco que aceitasse "javascript:" seria um buraco que o dono cola no
+   proprio site -- e aqui ele viajaria no link que ele manda ao cliente.
+   ============================================================================ */
+var P_ITENS_MAX=20;
+/* Nome e SKU tem o teto do PayPal (items[].name e items[].sku, maxLength 127), o mesmo que
+   as outras tres abas ja usam. Nao ha teto proprio desta aba: dois tetos para a mesma coisa
+   e a divergencia de amanha. */
+function pItemLim(){return 127;}
+/* O TEXTO CRU do campo, e a leitura dele. Uma linha por item, "nome | SKU | preco"; o SKU e
+   opcional, e "nome | preco" tambem vale -- o ULTIMO pedaco e sempre o preco, o que torna as
+   duas formas nao ambiguas. Devolve {itens, erro}: erro vazio quer dizer que a lista esta
+   pronta para virar endereco. A BARRA VERTICAL e o unico caractere proibido aqui, e ela e
+   proibida na TELA (com recusa que diz a linha), nao no endereco -- no endereco nada e
+   proibido, ver o comentario do formato acima. */
+function pItensTexto(cfg){return String((cfg&&cfg.itens)||'');}
+function pItensLidos(cfg){
+  var linhas=pItensTexto(cfg).split(/\r?\n/),itens=[],i,l,ps,nome,sku,pr,n=0,lim=pItemLim();
+  for(i=0;i<linhas.length;i++){
+    l=fcTrim(linhas[i]);
+    if(!l)continue;
+    n++;
+    ps=l.split('|');
+    if(ps.length<2||ps.length>3)return {itens:itens,erro:'A linha '+n+' dos itens ("'+l+'") não está no formato. Escreva "nome | SKU | preço", ou "nome | preço" quando o item não tiver SKU. A barra vertical separa os pedaços, e por isso ela não pode fazer parte do nome nem do SKU.'};
+    nome=fcTrim(ps[0]);
+    sku=(ps.length===3)?fcTrim(ps[1]):'';
+    pr=pValorNum(ps[ps.length-1]);
+    if(!nome)return {itens:itens,erro:'A linha '+n+' dos itens está sem o nome do item. O nome é o que o cliente lê na página e o que vai para a coluna "Nome do produto" do seu relatório do PayPal.'};
+    if(nome.length>lim)return {itens:itens,erro:'O nome do item da linha '+n+' tem '+nome.length+' caracteres e o limite é '+lim+' — é o limite do próprio PayPal, e o nome viaja inteiro dentro do link.'};
+    if(sku.length>lim)return {itens:itens,erro:'O SKU do item da linha '+n+' tem '+sku.length+' caracteres e o limite é '+lim+' — é o limite do próprio PayPal.'};
+    if(isNaN(pr))return {itens:itens,erro:'Não entendi o preço "'+ps[ps.length-1]+'" na linha '+n+' dos itens. Escreva só o número, com vírgula ou ponto nos centavos: 420 ou 420,00.'};
+    if(pr<0.01)return {itens:itens,erro:'O preço do item da linha '+n+' arredonda para zero. O mínimo é R$ 0,01: um item de preço zero não entra no relatório do PayPal e a soma dos itens deixaria de bater com o valor da cobrança.'};
+    if(pr>P_VALOR_MAX)return {itens:itens,erro:'O preço do item da linha '+n+' passa de '+precoFmt('BRL',P_VALOR_MAX)+'. Confira se não sobrou um zero.'};
+    itens.push({nome:nome,sku:sku,preco:pr});
+    if(itens.length>P_ITENS_MAX)return {itens:itens,erro:'Esta cobrança tem mais de '+P_ITENS_MAX+' itens. Eles viajam inteiros dentro do link, e uma lista sem fim transforma o link num texto que não cabe numa conversa. Agrupe os itens menores numa linha só.'};
+  }
+  return {itens:itens,erro:''};
+}
+/* LISTA COM ERRO E LISTA VAZIA, e nao meia lista. pItensLidos devolve o que conseguiu ler
+   ate a linha ruim, porque a recusa precisa dizer QUAL linha -- mas quem monta o endereco
+   e quem desenha a previa nao pode receber metade: a previa mostraria itens que o link
+   nunca vai carregar (a geracao recusa antes), e previa que mente e o defeito que este
+   projeto ja pagou duas vezes na Contagem regressiva. */
+function pItens(cfg){var r=pItensLidos(cfg);return r.erro?[]:r.itens;}
+/* A soma dos itens, em CENTAVOS INTEIROS -- nunca em reais. Os precos ja sao arredondados a
+   centavos por pValorNum, entao Math.round(preco*100) e exato e a soma nao tem residuo
+   binario. E a mesma decisao que fcPpItensSrc tomou para o item_total, e pela mesma razao:
+   somar em reais e comparar com o valor produziria diferenca de meio centavo sozinha. */
+function pItensCent(cfg){
+  var li=pItens(cfg),c=0,i;
+  for(i=0;i<li.length;i++)c+=Math.round(li[i].preco*100);
+  return c;
+}
+/* Uma peca do endereco: tamanho, ponto, valor. */
+function pItemPeca(s){s=String(s==null?'':s);return s.length+'.'+s;}
+/* O parametro i, na forma EXATA em que viaja no endereco -- e a mesma que entra na conta do
+   selo. Vazio sem itens, e e por isso que o link sem itens continua sendo o de antes. */
+function pItensCod(cfg){
+  var li=pItens(cfg),i,t='';
+  for(i=0;i<li.length;i++)t+=pItemPeca(li[i].nome)+pItemPeca(li[i].sku)+pItemPeca(li[i].preco.toFixed(2));
+  return t;
+}
+/* O LEITOR, como TEXTO LITERAL: e ele que o bloco entregue leva dentro, e e ele que a
+   ferramenta AVALIA (pItensApi) para conferir, na hora de gerar, que o que ela acabou de
+   serializar volta identico. Nao existe uma segunda implementacao nem por descuido -- mesma
+   decisao de FC_PIX_SRC e do selo. */
+var FC_ITENS_SRC=
+"/* Os itens desta cobranca, lidos do parametro i do endereco: tamanho, ponto, valor, tres\n"+
+"   vezes por item (nome, SKU, preco). Nenhum caractere e proibido nem escapado, porque este\n"+
+"   leitor nunca procura um separador DENTRO de um valor -- ele conta.\n"+
+"   Devolve null quando a forma nao fecha, e quem chama RECUSA a cobranca: um i malformado\n"+
+"   que chegou aqui passou pelo selo, entao ou o gerador esta quebrado ou o link foi montado\n"+
+"   a mao -- nos dois casos exibir metade da lista seria pior que recusar. */\n"+
+"function itensLer(s){\n"+
+"  s=String(s||'');\n"+
+"  var out=[],i=0,campos,k,n,p,v;\n"+
+"  if(!s)return out;\n"+
+"  while(i<s.length){\n"+
+"    campos=[];\n"+
+"    for(k=0;k<3;k++){\n"+
+"      p=s.indexOf('.',i);\n"+
+"      if(p<0||p===i)return null;\n"+
+"      n=s.substring(i,p);\n"+
+"      if(!/^[0-9]{1,3}$/.test(n))return null;\n"+
+"      n=parseInt(n,10);\n"+
+"      if(p+1+n>s.length)return null;\n"+
+"      campos.push(s.substr(p+1,n));\n"+
+"      i=p+1+n;\n"+
+"    }\n"+
+"    if(!campos[0])return null;   /* name e obrigatorio no PayPal, e vazio na tela nao diz nada */\n"+
+"    v=campos[2];\n"+
+"    if(!/^[0-9]{1,10}\\.[0-9]{2}$/.test(v))return null;\n"+
+"    out.push({nome:campos[0],sku:campos[1],unit:parseFloat(v),qtd:1});\n"+
+"    if(out.length>"+P_ITENS_MAX+")return null;\n"+
+"  }\n"+
+"  return out;\n"+
+"}\n\n";
+var pItensFn=null;
+function pItensApi(){
+  if(!pItensFn)pItensFn=(new Function(FC_ITENS_SRC+"return {itensLer:itensLer};"))();
+  return pItensFn;
+}
+/* O endereco do upsell DESTA cobranca, na forma em que viaja. Vazio = o link nao o carrega, e
+   vale o endereco da pagina (ou nenhum). */
+function pUpsellCod(cfg){return fcTrim((cfg&&cfg.upsellcob)||'');}
+var P_UPSELL_MAX=200;
+/* As recusas das duas partes, no formato das outras: '' quando nao ha o que recusar. Elas
+   moram AQUI, e nao no index.html, porque a /cobrar as aplica tambem -- as duas paginas geram
+   o mesmo link, entao elas tem de recusar exatamente o mesmo conjunto. */
+function pItensRecusa(cfg){
+  var r=pItensLidos(cfg),cod,volta,i;
+  if(r.erro)return r.erro;
+  if(!r.itens.length)return '';
+  if(pSinalOn(cfg))return 'Esta cobrança pede sinal e está detalhada em itens, e as duas coisas não convivem. Com sinal o PayPal cobra só o sinal, e itemizar chamaria de DESCONTO o saldo que o cliente ainda deve — no recibo que ele guarda. Apague os itens, ou volte a cobrar o valor cheio nesta cobrança.';
+  if(pItensCent(cfg)!==Math.round(cfg.valor*100))return 'Os itens somam '+precoFmt('BRL',pItensCent(cfg)/100)+' e o valor desta cobrança é '+precoFmt('BRL',cfg.valor)+'. Os dois números têm de bater ao centavo: o Pix cobra um valor só, e o relatório do PayPal recusa o pedido inteiro quando a soma dos itens não fecha com o valor cobrado. Ajuste os itens ou o valor.';
+  cod=pItensCod(cfg);
+  if(!pEncOk(cod))return 'Um dos itens tem um caractere que o link não consegue carregar. Costuma ser um emoji que chegou pela metade ao copiar de outro aplicativo, e ele pode estar invisível na tela. Apague a linha e digite de novo. Nenhum link foi gerado.';
+  /* A IDA E VOLTA pela MESMA leitura que a pagina publicada vai rodar. Sem ela, um caso que
+     esta serializacao nao previsse sairia daqui num link que a propria /pagar recusaria --
+     a divergencia "a ferramenta diz sim e a pagina diz nao" que esta aba ja pagou duas vezes
+     (o endereco do PayPal e a data longe demais). */
+  volta=pItensApi().itensLer(cod);
+  if(!volta||volta.length!==r.itens.length)return 'A lista de itens não sobreviveu à ida e volta pelo link, e por isso nada foi gerado. Simplifique os nomes dos itens e tente de novo.';
+  for(i=0;i<volta.length;i++){
+    if(volta[i].nome!==r.itens[i].nome||volta[i].sku!==r.itens[i].sku||Math.round(volta[i].unit*100)!==Math.round(r.itens[i].preco*100))
+      return 'O item "'+r.itens[i].nome+'" não sobreviveu à ida e volta pelo link, e por isso nada foi gerado. Simplifique o nome ou o SKU e tente de novo.';
+  }
+  return '';
+}
+function pUpsellRecusa(cfg){
+  var u=pUpsellCod(cfg);
+  if(!u)return '';
+  if(u.length>P_UPSELL_MAX)return 'O endereço da página de upsell tem '+u.length+' caracteres e o limite é '+P_UPSELL_MAX+'. Ele viaja inteiro dentro do link.';
+  if(!pEncOk(u))return 'O endereço da página de upsell tem um caractere que o link não consegue carregar, e ele pode estar invisível na tela. Apague o campo e digite de novo. Nenhum link foi gerado.';
+  if(!cUrlOk(u))return 'O endereço da página de upsell ("'+u+'") precisa ser uma âncora (#oferta), um caminho do site (/oferta-especial) ou um endereço http(s). Outros esquemas, como javascript:, não são aceitos — é a mesma regra que a ferramenta já aplica ao botão de ação da Contagem regressiva.';
+  return '';
+}
+
 /* ===== a consulta do link: UMA montagem =====
    Ate o selo existir, esta consulta era montada em DOIS lugares -- pLinkDe (o link entregue) e
    pPvBusca (o endereco simulado da previa) --, com uma diferenca miuda entre eles no campo pp.
@@ -1043,6 +1286,7 @@ function pEncOk(s){
 }
 function pBusca(cfg,codigo){
   var pp=pPpParam(cfg),v=pValCod(cfg),t=pTotCod(cfg),x=pDescCod(cfg),n=pSinalCod(cfg);
+  var it=pItensCod(cfg),up=pUpsellCod(cfg);
   var q='?c='+encodeURIComponent(codigo)+'&d='+encodeURIComponent(cfg.desc);
   if(pp)q+='&pp='+encodeURIComponent(pp);
   if(v)q+='&v='+encodeURIComponent(v);
@@ -1055,7 +1299,14 @@ function pBusca(cfg,codigo){
      ha n, e a conta do selo volta a ser exatamente a de antes desta rodada. t/x e n nunca
      aparecem juntos: com sinal, pDescPct devolve zero e os dois primeiros saem vazios. */
   if(n)q+='&n='+encodeURIComponent(n);
-  q+='&s='+pSeloApi().seloDe(codigo,cfg.desc,pp,v,t,x,n);
+  /* i e u entram DEPOIS do n, e so quando vem preenchidos -- mesma regra, mesmo motivo. Sem
+     item e sem upsell nao ha i nem u, a conta do selo volta a ser exatamente a de antes desta
+     rodada, e o endereco inteiro sai byte a byte igual. Este e o padrao que permite o PROXIMO
+     parametro entrar sem quebrar nada: o dono nao tem link pendente HOJE, mas no dia do
+     proximo ele pode ter. */
+  if(it)q+='&i='+encodeURIComponent(it);
+  if(up)q+='&u='+encodeURIComponent(up);
+  q+='&s='+pSeloApi().seloDe(codigo,cfg.desc,pp,v,t,x,n,it,up);
   return q;
 }
 function pLinkDe(cfg,codigo){
@@ -1073,7 +1324,7 @@ return {
   PIX_CHAVE_MAX:PIX_CHAVE_MAX, pixLimpar:pixLimpar, pixChaveErro:pixChaveErro,
   pixChaveFormato:pixChaveFormato,
   /* endereco da pagina de pagamento: inteiro, e a migracao do que estava guardado */
-  urlLimpa:urlLimpa, pUrlOk:pUrlOk, fcUrlRelativo:fcUrlRelativo,
+  urlLimpa:urlLimpa, pUrlOk:pUrlOk, fcUrlRelativo:fcUrlRelativo, cUrlOk:cUrlOk,
   FC_URL_EXEMPLO:FC_URL_EXEMPLO, pUrlRecusa:pUrlRecusa, fcUrlAvisoMigracao:fcUrlAvisoMigracao,
   /* identidade guardada */
   FCI_CHAVE:FCI_CHAVE, FCI_CAMPOS:FCI_CAMPOS, FCI_PADRAO:FCI_PADRAO,
@@ -1106,6 +1357,14 @@ return {
   /* as recusas e a montagem do link -- o coracao do invariante */
   pRecusaBloco:pRecusaBloco, pRecusaCobranca:pRecusaCobranca,
   pPayload:pPayload, pConferir:pConferir,
-  pPpParam:pPpParam, pEncOk:pEncOk, pBusca:pBusca, pLinkDe:pLinkDe
+  pPpParam:pPpParam, pEncOk:pEncOk, pBusca:pBusca, pLinkDe:pLinkDe,
+  /* itens e upsell desta cobranca: a leitura do campo (as duas paginas), a fonte do leitor
+     que o bloco leva dentro (so a ferramenta a emite), e as duas recusas. pItensCod e
+     pUpsellCod NAO sao exportados -- eles so sao chamados DENTRO deste arquivo, por pBusca, e
+     apelido que ninguem chama nao documenta dependencia nenhuma. Mesma decisao ja tomada com
+     pTotCod, pDescCod e pSinalCod. */
+  P_ITENS_MAX:P_ITENS_MAX, pItemLim:pItemLim, pItensLidos:pItensLidos, pItens:pItens,
+  FC_ITENS_SRC:FC_ITENS_SRC, pItensApi:pItensApi,
+  pItensRecusa:pItensRecusa, pUpsellRecusa:pUpsellRecusa
 };
 })();

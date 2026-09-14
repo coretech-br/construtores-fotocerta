@@ -472,7 +472,17 @@ console.log('\n--- o formato gravado, contra '+REF+' ---');
          divergencia. */
       {nome:'o tamanho do QR Code nas tres abas que o emitiam fixo (14/09/2026)',
        chaves:{u:['qr'], m:['qr'], a:['qr']},
-       esperado:() => '200'}
+       esperado:() => '200'},
+      /* OS ITENS E O UPSELL POR COBRANCA (14/09/2026, leva 10). Duas chaves novas, as duas SO
+         na aba Link de cobranca, porque as duas sao DESTA COBRANCA e viajam no LINK -- e nao
+         ha link nas outras tres. A fabrica das duas e a STRING VAZIA, e com ela o link sai
+         byte a byte como saia antes da rodada: mesmo criterio do desconto, do sinal, dos tres
+         textos do sinal e do upsell da pagina, logo acima.
+         AS DUAS ESTAO NA 'naoEmite' da aba, como os quatro do sinal: elas mudam so o link,
+         nunca o codigo 1 -- a maquinaria dos itens e a do upsell entram no bloco SEMPRE. */
+      {nome:'os itens e o upsell por cobranca no Link de cobranca (14/09/2026)',
+       chaves:{p:['itens','upsellcob']},
+       esperado:() => ''}
     ];
     /* FABRICA TROCADA e outra coisa de CHAVE NOVA, e a diferenca importa: a chave ja existia
        nos dois lados e o que mudou foi o PADRAO dela. Entao os dois valores sao declarados, e
