@@ -1216,3 +1216,63 @@ o DOM em vez do `cfg`, contra o que o próprio cabeçalho dela promete; `mTotalM
 trocar vírgula por ponto; `FC_LIM_CAMPOS` ignora `m-cod`/`a-pcod`/`a-prefixo`; o `max` de
 `sinalfixo` está nas tabelas e em nenhum `<input>`; e **todas as recusas do Link de cobrança saem
 sem acento**, contra a norma registrada.
+
+## Entregue em 13/09/2026 — PayPal item a item, a prévia do relatório, e o centavo do desconto
+
+Pedido do dono: *"que cada construtor que tem pagamento via PayPal me mostre uma prévia de como
+ficará no relatório do PayPal os campos que são levados para lá. Verifica se todos os construtores
+estão levando o produto e seus opcionais."* Decisões em
+`docs/decisoes-2026-09-13-paypal-e-centavo.md`.
+
+### O que ia ao PayPal, medido
+
+**Uma linha só**, com os nomes concatenados e cortados em 127 caracteres. E `nomesSelecionados()`
+divergia: Checkout e Mini loja mandavam **só produtos** — os opcionais entravam no valor e **não
+apareciam**; só o Agendamento os incluía. Mais uma da família do "Já paguei": peça que a aba nova
+ganhou e as duas antigas não.
+
+### O desenho: a conta fecha por construção
+
+`items` com preço cheio e quantidade real; `item_total` é a **soma dos itens em centavos inteiros**
+(nunca `subtotal()`, que soma os mesmos números em outra ordem); `discount` é a **diferença**
+`item_total − amount`, **nunca o percentual recalculado**.
+
+A diferença importa porque o PayPal **recusa o pedido inteiro** se a conta não bater ao centavo — o
+cliente fica sem botão para pagar. Recomputar o percentual reintroduziria o arredondamento; pela
+diferença, a identidade `amount = item_total − discount` é aritmética.
+
+**Com sinal, mantida a linha única:** não há conceito de entrada no formato do PayPal, e forçar a
+diferença para `discount` faria o recibo chamar de **desconto** o saldo que o cliente ainda deve.
+
+**Item de R$ 0,00 fica de fora** — a spec permite valor zero, mas a lista de erros 422 traz
+`CANNOT_BE_ZERO_OR_NEGATIVE` **sem dizer a que campos se aplica**. Apostar em comportamento não
+documentado custaria o pedido inteiro. Decisão do dono: aceitar a ausência.
+
+**A sonda manuscrita da aba Link de cobrança (~40 linhas quase iguais) foi apagada** — a prévia das
+quatro abas agora lê do `createOrder` do próprio bloco.
+
+### O centavo do desconto
+
+`descontoAtual()` multiplicava em ponto flutuante e arredondava depois. Medido antes de mexer, em
+**79.200.000** combinações: **133.476 divergiam da conta exata (0,169%), e em TODAS o cliente pagava
+a mais.** Em nenhuma pagava a menos — viés, não ruído. Em centavos inteiros: **zero divergências nas
+mesmas 79.200.000.**
+
+**Não era incoerência entre tela e cobrança** — tela, Pix e PayPal mostravam e cobravam o mesmo
+número. Por isso nenhuma suíte o pegou: todas comparam as pontas entre si, e as pontas concordavam.
+Quem o pega é comparar com uma conta **exata**, e é o que `centavo-do-desconto.mjs` faz.
+
+### Duas coisas que o conserto revelou no próprio arnês
+
+1. **A transcrição de `sinal.mjs` repetia a forma antiga.** Ela existe para ser segunda opinião —
+   e **transcrição que repete o erro do original não é segunda opinião, é eco.** Passou a fazer a
+   conta exata.
+2. **O caso B+D saiu da família do meio centavo** por causa do conserto (o total foi de 333,95 para
+   333,94). Trocado por A+B+D, que a varredura mostra ainda nela. O que o teste protege é o
+   **comportamento** no meio centavo, não aquele subconjunto.
+
+### Um defeito no teste novo, meu
+
+A primeira versão de `centavo-do-desconto.mjs` chamava `new Function()` **dentro do laço** — 79
+milhões de compilações, mais de dez minutos, e o custo era todo do compilador. Compilado uma vez:
+**4 segundos**, medindo exatamente o mesmo.
