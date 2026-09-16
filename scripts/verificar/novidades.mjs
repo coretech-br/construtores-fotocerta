@@ -122,7 +122,15 @@ else mal(`entradas que não correspondem a nenhuma versão publicada: ${semGit.j
 eq('a lista está em ordem decrescente',
    tudo.vers.every((v,i) => i === 0 || v < tudo.vers[i-1]), 'true');
 eq('a versão que o navegador executa está descrita', naLista.has(tudo.versao), 'true');
-eq('uma seção por dia, mais a de antes da numeração', tudo.secoes, 11);
+/* O NUMERO SAI DOS DADOS, e nao de uma constante (15/09/2026). Ele estava cravado em 11,
+   e por isso esta prova ficava vermelha no dia em que uma versao de um dia NOVO era
+   publicada -- ou seja, exatamente nas rodadas que ela existe para conferir. Vermelho que
+   e sempre vermelho esconde o proximo, que seria de verdade: e a mesma regra que o
+   CLAUDE.md escreve sobre numero de abas, "nao se escreve em frase nenhuma".
+   A conta: um cabecalho por DIA distinto das versoes numeradas, mais o da secao "antes da
+   numeração", que existe sempre. */
+const diasDistintos = new Set(tudo.vers.map(v => v.slice(0,10))).size;
+eq('uma seção por dia, mais a de antes da numeração', tudo.secoes, diasDistintos + 1);
 eq('só a mais recente nasce aberta', tudo.abertasAntes, 1);
 eq('a versão mais recente é a primeira da tela', tudo.vers[0], git[0] === tudo.vers[0] ? git[0] : tudo.vers[0]);
 eq('a mais recente é a primeira VISÍVEL antes de expandir nada', tudo.versDobrado[0], tudo.vers[0]);
