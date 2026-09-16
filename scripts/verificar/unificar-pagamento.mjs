@@ -519,27 +519,38 @@ console.log('\n== 5. As cinco decisoes, uma medicao cada ==');
 /* ---- 5.2, 5.3 e 5.5: o que a ferramenta recem-aberta mostra ---- */
 {
   const r = await gerarNaFerramenta(async pg => {
-    for(const aba of ['aba-uni','aba-loja','aba-pac','aba-cob']){ await clicar(pg,aba); await pg.waitForTimeout(40); }
+    for(const aba of ['aba-uni','aba-loja','aba-pac','aba-cob','aba-alb']){ await clicar(pg,aba); await pg.waitForTimeout(40); }
     globalThis.__f = await pg.evaluate(()=>({
-      resumo: ['u','m'].map(p=>p+'='+((document.querySelector('input[name="'+p+'-resumo"]:checked')||{}).value)),
-      descpix: ['u','m','a','p'].map(p=>p+'='+document.getElementById(p+'-descpix').value),
-      ou: ['u','m','a','p'].map(p=>p+'='+document.getElementById(p+'-txt-ou').value),
-      ouDesc: ['u','m'].map(p=>p+'='+document.getElementById(p+'-txt-ou-desc').value),
-      passo: ['u','m','a','p'].map(p=>p+'='+document.getElementById(p+'-sinalpct').step),
+      resumo: ['u','m','v'].map(p=>p+'='+((document.querySelector('input[name="'+p+'-resumo"]:checked')||{}).value)),
+      descpix: ['u','m','a','p','v'].map(p=>p+'='+document.getElementById(p+'-descpix').value),
+      ou: ['u','m','a','p','v'].map(p=>p+'='+document.getElementById(p+'-txt-ou').value),
+      ouDesc: ['u','m','v'].map(p=>p+'='+document.getElementById(p+'-txt-ou-desc').value),
+      passo: ['u','m','a','p','v'].map(p=>p+'='+document.getElementById(p+'-sinalpct').step),
       barra: (document.getElementById('fc-falhas')||{textContent:''}).textContent.trim()
     }));
   }, [], {porta: FER++});
   const f = globalThis.__f;
-  chk('5.2 o resumo copiavel nasce LIGADO nas duas que o tem',
-    JSON.stringify(f.resumo)===JSON.stringify(['u=sim','m=sim']), JSON.stringify(f.resumo));
-  chk('5.3 o desconto do Pix de fabrica e 5% nas tres de catalogo, e 0 no Link de cobranca',
-    JSON.stringify(f.descpix)===JSON.stringify(['u=5','m=5','a=5','p=0']), JSON.stringify(f.descpix));
-  chk('5.4 o separador de fabrica e NEUTRO ("OU") nas quatro',
-    JSON.stringify(f.ou)===JSON.stringify(['u=OU','m=OU','a=OU','p=OU']), JSON.stringify(f.ou));
-  chk('5.4 e o segundo separador (com desconto) tambem e neutro',
-    JSON.stringify(f.ouDesc)===JSON.stringify(['u=OU','m=OU']), JSON.stringify(f.ouDesc));
-  chk('5.5 o passo do percentual do sinal e 0,5 nas quatro',
-    JSON.stringify(f.passo)===JSON.stringify(['u=0.5','m=0.5','a=0.5','p=0.5']), JSON.stringify(f.passo));
+  /* AS CINCO DECISOES VIRARAM REGRA, e nao lista de valores esperados (16/09/2026).
+     Ate aqui cada uma comparava com um array escrito a mao ('u=5','m=5','a=5','p=0'). Quando
+     a Calculadora de album chegou, as CINCO ficaram vermelhas de uma vez -- e as cinco
+     medicoes dela estavam CERTAS: ela nasce com resumo ligado, 5% no Pix, separador neutro
+     e passo de 0,5, exatamente como a decisao do dono manda. Vermelho que nao tem defeito
+     atras esconde o proximo, que teria. Agora cada uma cobra a REGRA, e aba nova entra
+     sozinha: quem tem o controle obedece, e a unica excecao declarada e a do desconto, que
+     e do Link de cobranca (la nao existe segundo preco para descontar contra).
+     'todos' guarda a lista medida na mensagem, entao a falha continua dizendo QUAL aba
+     divergiu, e nao so que alguma divergiu. */
+  const todos = (v,reg) => v.filter(x => !reg.test(x));
+  chk('5.2 o resumo copiavel nasce LIGADO em todas as abas que o tem ('+f.resumo.length+')',
+    todos(f.resumo,/=sim$/).length===0, JSON.stringify(f.resumo));
+  chk('5.3 o desconto do Pix de fabrica e 5% nas de catalogo, e 0 no Link de cobranca',
+    todos(f.descpix,/^p=0$|=5$/).length===0, JSON.stringify(f.descpix));
+  chk('5.4 o separador de fabrica e NEUTRO ("OU") em todas ('+f.ou.length+')',
+    todos(f.ou,/=OU$/).length===0, JSON.stringify(f.ou));
+  chk('5.4 e o segundo separador (com desconto) tambem e neutro em todas que o tem',
+    todos(f.ouDesc,/=OU$/).length===0, JSON.stringify(f.ouDesc));
+  chk('5.5 o passo do percentual do sinal e 0,5 em todas ('+f.passo.length+')',
+    todos(f.passo,/=0\.5$/).length===0, JSON.stringify(f.passo));
   chk('e a barra vermelha da fabrica divergente NAO acende', f.barra==='', JSON.stringify(f.barra));
   chk('sem alerta e sem erro de console ao abrir', r.alertas.length===0 && r.erros.length===0,
     JSON.stringify(r.alertas).slice(0,120)+' '+r.erros.slice(0,2).join(' | '));

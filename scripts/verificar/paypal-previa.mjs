@@ -316,4 +316,82 @@ console.log('\n== Link de cobranca: a previa contra o proprio createOrder ==');
   if(telaCob && b.ped.pu) comparar('[Cobranca] ', telaCob, comoATelaEscreveria(b.ped.pu));
 }
 
+/* ===========================================================================
+   3) CALCULADORA DE ALBUM -- a terceira forma da sonda (16/09/2026)
+   ===========================================================================
+   POR QUE ELA ENTRA. As duas pontas acima cobrem o render(elemento) com onClick e o
+   render(seletor em texto) sem onClick. A calculadora traz uma terceira diferenca, e
+   nao e de sonda: o CARRINHO DELA NAO E UMA ESCOLHA, E UMA CONTA. Nas outras abas o
+   item entra no pedido porque alguem marcou uma caixa; aqui ele e calculado a partir
+   do tamanho, do numero de fotos e dos acabamentos, e o preco unitario do album muda
+   a cada movimento da barra. Uma previa que remontasse esse numero por conta propria
+   divergiria no primeiro arredondamento -- e e exatamente esse o risco que este
+   arquivo existe para vigiar.
+
+   O SINAL FICA DESLIGADO: com sinal o PayPal cobra em linha unica (o formato nao tem
+   campo para entrada), e nao haveria lista de itens para comparar. A outra metade --
+   que com sinal a lista NAO sai -- ja e medida em calculadora-album.mjs.
+   =========================================================================== */
+console.log('\n== Calculadora de album: a previa contra o proprio createOrder ==');
+{
+  const srv = await servir(RAIZ, 8805);
+  const br  = await navegador();
+  let saida = '', telaAlbum = null;
+
+  /* O MESMO carrinho dos dois lados, num lugar so: se as duas montagens divergirem, a
+     comparacao acusaria uma diferenca que e do roteiro, e nao da previa. */
+  const montarCarrinho = async alvo => {
+    await alvo.locator('.fcal-tam').first().click();
+    await alvo.evaluate(() => {
+      const r = document.querySelector('.fcal-range');
+      r.value = String(Math.round((parseInt(r.max,10) + parseInt(r.min,10)) / 2));
+      r.dispatchEvent(new Event('input', {bubbles:true}));
+    });
+    const cx = alvo.locator('.fcal-acab').first();
+    if(await cx.count()) await cx.click();
+  };
+
+  try{
+    const pg = await abrir(br, 'http://127.0.0.1:8805');
+    for(const [k,v] of Object.entries(IDENT)) await set(pg,'fci-'+k,v);
+    await clicar(pg,'aba-alb');
+    await set(pg,'v-cod','ALB26');
+    await radio(pg,'v-sinal','nao');
+    /* um tamanho com SKU e um acabamento com SKU: as duas linhas que o relatorio mostra */
+    await set(pg,'v-tam-cm','50'); await set(pg,'v-tam-media','5');
+    await set(pg,'v-tam-minfotos','50'); await set(pg,'v-tam-sku','ALB-50');
+    await clicar(pg,'v-tam-add');
+    await set(pg,'v-ac-nome','Mini-réplica'); await set(pg,'v-ac-valor','390');
+    await set(pg,'v-ac-sku','MINI-REP');
+    await clicar(pg,'v-ac-add');
+    await clicar(pg,'v-gerar');
+    saida = (await ler(pg,'v-out')) || '';
+    chk('[Album] a ferramenta gerou o bloco', saida.length > 1000);
+
+    await pg.waitForTimeout(900);
+    let alvo = null;
+    for(const f of pg.frames()){ if(f !== pg.mainFrame() && await f.$('.fcal-raiz')){ alvo = f; break; } }
+    chk('[Album] a previa desenhou o bloco dentro do iframe', !!alvo);
+    if(alvo){
+      await montarCarrinho(alvo);
+      await pg.waitForTimeout(400);
+      chk('[Album] o quadro do PayPal existe dentro da previa', !!(await alvo.$('#v-pv-pp')));
+      telaAlbum = interpretar(await lerQuadro(alvo, 'v-pv-pp'));
+    }
+    await pg.close();
+  } finally { await br.close(); srv.close(); }
+
+  const b = await comBlocoNaPagina({
+    bloco: saida, cabeca: CABECA, porta: 8806,
+    medir: async pg => {
+      await pg.waitForTimeout(400);
+      await montarCarrinho(pg);
+      await pg.waitForTimeout(250);
+      return {ped: await pedidoDoBloco(pg)};
+    }
+  });
+  chk('[Album] o bloco montou o pedido no lado B', !b.ped.erro, b.ped.erro);
+  if(telaAlbum && b.ped.pu) comparar('[Album] ', telaAlbum, comoATelaEscreveria(b.ped.pu));
+}
+
 process.exit(resumo());

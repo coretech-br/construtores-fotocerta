@@ -82,6 +82,7 @@ ausência de um lugar onde o histórico esteja em ordem, com o tempo ao lado.
 - **58. A documentação volta a dizer a verdade — 16/09/2026** · `2026-09-16d`
 - **59. A lista de novidades deixa de ser só cronológica — 16/09/2026** · `2026-09-16e`
 - **60. A quinta aba entra nas provas transversais, e o cartão dela estava quebrado — 16/09/2026** · `2026-09-16f`
+- **61. A quinta aba entra nas OITO provas transversais, e quatro redes novas — 16/09/2026** · `2026-09-16g`
 
 <!-- FIM DO INDICE GERADO -->
 
@@ -1512,6 +1513,66 @@ que fica gravado — foi levado ao dono, que aprovou; sai na versão seguinte.
 | Estimativa | Tempo real |
 |---|---|
 | 3 h (item 8) + 20 min (item 10) + 2 h 30 (item 9b inteiro) | **1 min 18 s** (item 8) · **4 min 34 s** (item 9a) · **1 min 23 s** (item 10) · **1 h 13** para as duas primeiras do 9b, de 09:58:22 a 11:11:51 — a maior parte gasta consertando os três defeitos que as provas acharam, e não escrevendo as provas |
+
+---
+
+### 61. A quinta aba entra nas OITO provas transversais, e quatro redes novas — 16/09/2026
+
+Versão `2026-09-16g`. Fecha o item **9b** e os itens **11**, **12** e **13** da fila da auditoria,
+mais o igualar dos controles, aprovado pelo dono no meio da rodada.
+
+**As seis provas transversais restantes.** A Calculadora de álbum passou a ser medida por
+`meio-prio-migracao`, `aparencia`, `qr-configuravel`, `unificar-pagamento`, `sku-por-item` e
+`paypal-previa`. Nenhum defeito novo de produto: ela obedece as cinco decisões do dono e recusa
+SKU repetido com a MESMA frase das irmãs, sem reescrever a saída.
+
+**Os controles igualados.** Três interruptores (`v-upsellon`, `v-zap`, `v-resumo`) eram caixa de
+marcar contra o par de radios das quatro irmãs. A troca mexe no formato do que fica gravado — foi
+levada ao dono antes, e `vSimNao` aceita as duas formas, com as três situações medidas: o novo
+atravessa a recarga, o backup antigo abre com os valores que guardava, e o que nunca foi gravado
+nasce no padrão da aba.
+
+**As quatro redes novas** (itens 11 e 12, por subagentes): `exportar-sem-dados.mjs` (58),
+`painel-orfas.mjs` (29) e `chave-pix-formatos.mjs` (258). A primeira provou-se contra uma cópia
+adulterada — 24 das 58 falham quando a exportação vaza. A segunda viu `fccOrfas` acender pela
+primeira vez desde que foi escrita, em 23/08/2026.
+
+**Um defeito real, achado pela rede recém-escrita:** `pGerarLink` terminava em `pPreview(true)` e
+não chamava o painel. A saída que ele escreve ficava na tela sem o painel ter olhado para ela.
+Inócuo hoje (`p-out2` está em `FCC_FORA`), e exatamente a cegueira que `fccOrfas` fecha — medido,
+porque a primeira versão de `painel-orfas.mjs` clicava esse botão por último e a adulteração ficava
+em silêncio.
+
+#### O que a rodada ensinou sobre método
+
+**A lista escrita à mão é o vermelho permanente de amanhã, e ela reaparece em toda forma.** Esta
+rodada desfez OITO ocorrências do mesmo padrão, em quatro arquivos: três contagens contra o literal
+`4` em `aparencia.mjs`, cinco arrays de valores esperados em `unificar-pagamento.mjs`. Todas ficaram
+vermelhas de uma vez quando a quinta aba chegou, e **todas as medições estavam certas**. A correção
+nunca é atualizar o literal: é derivar da fonte — `Object.keys(ASPECTOS)`, `FC_PAG_PREFS`, uma
+expressão regular que descreve a regra em vez de enumerar o resultado.
+
+**Igualdade entre abas é um PROXY, e proxy quebra quando um padrão legítimo diverge.**
+`aparencia.mjs` usava "as cores são todas iguais" como sinal de que ninguém cravou cor. O padrão de
+texto da calculadora é `#23221E` contra o `#333333` das irmãs — duas cores, nenhuma cravada — e a
+prova acusava defeito onde não havia. Pior: igualar a cor na entrada revelou que Checkout e Mini
+loja **não seguem** a cor configurada dentro do arnês, porque ela viaja na saída de CSS Customizado,
+colada em outro campo do Prosite. A pergunta mensurável não era nenhuma das duas: é *o aviso herda a
+cor da raiz do seu bloco?*, e essa vale para as cinco.
+
+**Uma asserção verde pode estar defendendo o defeito** (repetida da rodada 60, agora em outra forma):
+`calculadora-album.mjs` afirmava que "as duas variáveis do upsell entram mesmo desligado". Escrita
+olhando a saída, herdou o `sempre` copiado errado da Link de cobrança.
+
+**Subagente que mede bateria longa não fecha dentro da própria vez.** O agente do item 13 parou duas
+vezes no meio da cronometragem, e na segunda descartou — corretamente — os números que já tinha,
+porque a árvore mudou durante a corrida. Medição sobre árvore que não existe mais não é medição.
+A lição: trabalho de subagente cujo custo é TEMPO DE ESPERA, e não raciocínio, é melhor executado
+por quem pode deixar rodando; o subagente escreve o instrumento, e a corrida fica com quem fica.
+
+| Estimativa | Tempo real |
+|---|---|
+| 2 h 30 (9b) + 1 h (11) + 2 h 30 (12) + 1 h (13) + 30 min (igualar) | **3 h 00** para o 9b, de 09:58:22 a 12:58:40 no relógio · **3 min** o igualar · ~3 min e ~8 min os itens 11 e 12, pelo relógio dos próprios subagentes · o item 13 fechou com a bateria medida à parte |
 
 ---
 

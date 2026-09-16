@@ -75,8 +75,8 @@ const BUSCA_PAC = '?pac=ENS&data=' + encodeURIComponent('10/05/2030')
 
 /* O tamanho pedido em cada aba na passagem "trocado". Tres numeros DIFERENTES entre si e
    diferentes do padrao: com um numero so, um bloco lendo o campo da aba errada passaria. */
-const TROCADO = {u:'140', m:'260', a:'320'};
-const PADRAO  = {u:200,   m:200,   a:200,   p:180};
+const TROCADO = {u:'140', m:'260', a:'320', v:'240'};
+const PADRAO  = {u:200,   m:200,   a:200,   p:180,  v:200};
 
 /* ===========================================================================
    a passagem pela ferramenta -- as quatro abas, com Pix ligado
@@ -124,12 +124,23 @@ async function gerar(qr, porta){
     await clicar(pg, 'a-pac-salvar');
     if(qr) await set(pg, 'a-qr', TROCADO.a);
     await clicar(pg, 'a-gerar');
-  }, ['u-out', 'm-out', 'p-out1', 'p-out2', 'a-out3'], {porta});
+
+    /* ---------- Calculadora de album (a quinta aba que cobra, 16/09/2026) ----------
+       O SINAL E DESLIGADO: ligado, o Pix desta aba cobra o sinal, e o QR continua sendo
+       desenhado do mesmo jeito -- mas o bloco pede um valor de sinal valido antes, e um
+       caminho a mais entre o clique e o canvas so aumentaria a chance de a parte 1 falhar
+       por motivo que nao e o tamanho do QR, que e o que ela mede. */
+    await clicar(pg, 'aba-alb');
+    await set(pg, 'v-cod', 'ALB26');
+    await radio(pg, 'v-sinal', 'nao');
+    if(qr) await set(pg, 'v-qr', TROCADO.v);
+    await clicar(pg, 'v-gerar');
+  }, ['u-out', 'm-out', 'p-out1', 'p-out2', 'a-out3', 'v-out'], {porta});
 
   const id = qr ? 'trocado' : 'fabrica';
   chk('[' + id + '] a ferramenta gerou sem alerta', r.alertas.length === 0, JSON.stringify(r.alertas));
   chk('[' + id + '] a ferramenta gerou sem erro de console', r.erros.length === 0, r.erros.slice(0, 2).join(' | '));
-  for(const s of ['u-out', 'm-out', 'p-out1', 'a-out3'])
+  for(const s of ['u-out', 'm-out', 'p-out1', 'a-out3', 'v-out'])
     chk('[' + id + '] ' + s + ' saiu', (r.valores[s] || '').length > 1000);
   return r.valores;
 }
@@ -149,14 +160,20 @@ async function abrirPix(pg, aba){
     await pg.click('.fcm-gerar');
   }else if(aba === 'a'){
     await pg.locator('.fca-ob-bt', {hasText: /Pix|Gerar/i}).first().click();
+  }else if(aba === 'v'){
+    /* A calculadora abre com um tamanho escolhido; clicar em um deles deixa a medicao
+       independente do que for o padrao de fabrica amanha. */
+    await pg.locator('.fcal-tam').first().click();
+    await pg.waitForTimeout(150);
+    await pg.click('.fcal-gerar');
   }else{
     await pg.locator('.fcpg-bt').first().click();
   }
   await pg.waitForTimeout(450);
 }
 
-const SELETOR = {u: '.fcu-qr', m: '.fcm-qr', a: '.fca-ob-qr', p: '.fcpg-qr'};
-const SAIDA   = {u: 'u-out',   m: 'm-out',   a: 'a-out3',     p: 'p-out1'};
+const SELETOR = {u: '.fcu-qr', m: '.fcm-qr', a: '.fca-ob-qr', p: '.fcpg-qr', v: '.fcal-qr'};
+const SAIDA   = {u: 'u-out',   m: 'm-out',   a: 'a-out3',     p: 'p-out1',  v: 'v-out'};
 
 /* A MEDIDA: o <canvas> que a qrcodejs desenhou. A REDE EXTERNA E ABERTA PARA UM HOST SO
    (cdnjs), e o motivo e o mesmo ja aceito em aparencia.mjs: quem decide o tamanho do canvas
@@ -193,7 +210,7 @@ blocos.trocado = await gerar(true,  9162);
 console.log('\n=== 1. o campo muda o QR no bloco EXECUTANDO (canvas.width, com a biblioteca de verdade) ===');
 {
   let pt = 9170;
-  for(const aba of ['u', 'm', 'a', 'p']){
+  for(const aba of ['u', 'm', 'a', 'p', 'v']){
     const m = await medirCanvas(blocos.fabrica, aba, pt++);
     chk('[fabrica] ' + aba + ': o QR desenhou (a biblioteca chegou)', !!(m && m.temCanvas),
         JSON.stringify(m));
@@ -201,7 +218,7 @@ console.log('\n=== 1. o campo muda o QR no bloco EXECUTANDO (canvas.width, com a
       chk('[fabrica] ' + aba + ': o canvas mede ' + PADRAO[aba] + 'px', m.largura === PADRAO[aba],
           'mediu ' + m.largura + 'x' + m.altura + ' (caixa ' + m.caixa + 'px)');
   }
-  for(const aba of ['u', 'm', 'a']){
+  for(const aba of ['u', 'm', 'a', 'v']){
     const m = await medirCanvas(blocos.trocado, aba, pt++);
     chk('[trocado] ' + aba + ': o QR desenhou', !!(m && m.temCanvas), JSON.stringify(m));
     if(m && m.temCanvas)

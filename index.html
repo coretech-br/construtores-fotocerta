@@ -4594,20 +4594,26 @@
         <legend>Depois do pagamento aprovado: levar o cliente a outra página</legend>
         <label for="v-upsell">Endereço da página (upsell) <small>(vazio = o código sai exatamente como saía antes)</small></label>
         <input type="url" id="v-upsell" value="" placeholder="https://www.fotocerta.com.br/oferta-especial">
+        <label>Levar o cliente para essa página?</label>
         <div class="radios">
-          <label><input type="checkbox" id="v-upsellon"><span>Levar o cliente para essa página</span></label>
+          <label><input type="radio" name="v-upsellon" value="sim"><span>Sim, levar</span></label>
+          <label><input type="radio" name="v-upsellon" value="nao" checked><span>Não levar por enquanto</span></label>
         </div>
-        <p class="ajuda"><b>Com o endereço preenchido, as duas variáveis saem no código mesmo com a chave desmarcada.</b> Elas ficam no topo do bloco, inertes, esperando um <code>true</code>: assim você liga e desliga o upsell direto na página publicada, <b>sem voltar aqui e sem recolar nada</b>. Com o endereço vazio nada disso é escrito. Endereço vazio com a chave marcada é recusado na hora de gerar — ligado sem destino não faz nada e parece que faz.</p>
+        <p class="ajuda"><b>Com o endereço preenchido, as duas variáveis saem no código mesmo com a chave em "não levar".</b> Elas ficam no topo do bloco, inertes, esperando um <code>true</code>: assim você liga e desliga o upsell direto na página publicada, <b>sem voltar aqui e sem recolar nada</b>. Com o endereço vazio nada disso é escrito. Endereço vazio com a chave em "sim, levar" é recusado na hora de gerar — ligado sem destino não faz nada e parece que faz.</p>
         <p class="ajuda"><b>No cartão o cliente é levado assim que o pagamento é aprovado</b> — houve confirmação de verdade. <b>No Pix não existe aviso nenhum para a página</b> quando o dinheiro cai, então quem leva é o botão “Já paguei”, e quem clica nele pode ainda não ter pago.</p>
       </fieldset>
       <fieldset>
         <legend>WhatsApp e resumo do pedido</legend>
+        <label>Oferecer o orçamento no WhatsApp?</label>
         <div class="radios">
-          <label><input type="checkbox" id="v-zap" checked><span>Oferecer o orçamento no WhatsApp</span></label>
+          <label><input type="radio" name="v-zap" value="sim" checked><span>Sim, oferecer</span></label>
+          <label><input type="radio" name="v-zap" value="nao"><span>Não oferecer</span></label>
         </div>
         <p class="ajuda">O botão abre o WhatsApp com o resumo do álbum já escrito — tamanho, fotos, lâminas e valor. O número sai do painel <b>Identidade</b>. <span class="acoes"><button type="button" class="botao mini claro fci-ir">Abrir Identidade</button></span></p>
+        <label>Mostrar o resumo do pedido, com botão de copiar?</label>
         <div class="radios">
-          <label><input type="checkbox" id="v-resumo" checked><span>Mostrar o resumo do pedido, com botão de copiar</span></label>
+          <label><input type="radio" name="v-resumo" value="sim" checked><span>Incluir resumo copiável</span></label>
+          <label><input type="radio" name="v-resumo" value="nao"><span>Não incluir</span></label>
         </div>
         <p class="ajuda">O resumo lista o tamanho, a quantidade de fotos, as lâminas, os acabamentos, o desconto e o total, com um botão de copiar — é o que o cliente manda para você quando quiser combinar alguma coisa antes de pagar.</p>
       </fieldset>
@@ -4905,8 +4911,8 @@
    QUEM IMPEDE QUE ELE MINTA: scripts/conferir-versoes.sh, que recusa index.html
    alterado sem a versao mudar junto -- a mesma disciplina do fc-compartilhado.js,
    e pela mesma razao: carimbo que ninguem confere e o defeito de amanha. */
-var FC_VERSAO='2026-09-16f';
-var FC_PUBLICADO='2026-09-16 11:14';   /* America/Sao_Paulo -- escrito pelo carimbador */
+var FC_VERSAO='2026-09-16g';
+var FC_PUBLICADO='2026-09-16 13:21';   /* America/Sao_Paulo -- escrito pelo carimbador */
 (function(){
   var el=document.getElementById('fc-versao');
   if(!el) return;
@@ -5870,6 +5876,7 @@ var FCR_ROTULOS={novo:'novo',corrigido:'corr',melhorado:'melh',atencao:'aten',ex
 /* A lista, da versao mais recente para a mais antiga. NAO reordenar: o agrupamento por
    dia assume que versoes do mesmo dia estao juntas, e o desenho respeita esta ordem. */
 var FCR_NOTAS=[
+ {v:"2026-09-16g",d:"16 de setembro de 2026",itens:[["Melhorado","Calculadora de álbum: três configurações que eram **caixinhas de marcar** viraram **Sim / Não**, como nas outras quatro abas que cobram — levar o cliente à página de oferta, oferecer o orçamento no WhatsApp e mostrar o resumo do pedido. Era a mesma pergunta com duas caras. **Nada que você já configurou se perde**: o que estava guardado continua valendo, inclusive nos seus arquivos de backup."],["Corrigido","Link de cobrança: o botão **Gerar link** escrevia o link sem o painel da direita olhar para ele. Não dava problema hoje, porque esse link já é declarado como algo que não vai para campo nenhum do Prosite — mas era justamente o tipo de ponto cego que o aviso vermelho do painel existe para fechar."],["","O resto foi rede de proteção, sem mudança na tela: a Calculadora de álbum entrou nas **oito conferências** que comparam as abas de pagamento entre si, e passou em todas. Mais quatro provas novas — que a exportação **sem os dados** não leva chave Pix, Client ID nem WhatsApp; que o aviso vermelho do painel realmente acende quando falta uma saída no mapa; e que o código Pix fecha com chave em **CPF, CNPJ, telefone e chave aleatória**, e não só em e-mail, nas cinco abas que cobram."]]},
  {v:"2026-09-16f",d:"16 de setembro de 2026",itens:[["Corrigido","**Calculadora de álbum: quem pagasse no cartão pagava e não via a confirmação.** O pagamento era cobrado normalmente, e no instante seguinte a tela travava — a mensagem \"Pagamento aprovado\" era procurada por um nome que essa aba nunca escreveu. O cliente ficava olhando para uma tela parada depois de pagar, e quem tivesse a página de oferta ligada nunca chegava nela. **Só a calculadora tinha esse defeito**; as outras três abas que cobram no cartão sempre estiveram certas. Se você já publicou a calculadora nova, **gere o código de novo e recole**."],["Corrigido","Calculadora de álbum: escolher **Pix em destaque** não colocava o Pix em destaque. Mudava a ordem e a cor, mas o valor do Pix continuava menor que o do cartão. Agora os dois tamanhos trocam de lugar junto com a escolha, como no Checkout."],["Melhorado","O código da calculadora ficou mais enxuto: saíam dele duas variáveis de \"página depois do pagamento\" mesmo sem nenhuma configurada, um comentário descrevendo um mecanismo que essa aba não tem, e regras de estilo para partes que não existiam no bloco."],["","O resto foi rede de proteção, sem mudança na tela: duas conferências que só olhavam as quatro abas antigas passaram a olhar a calculadora também — e foi exatamente isso que achou o defeito do cartão acima, que nenhuma prova anterior teria pego."]]},
  {v:"2026-09-16e",d:"16 de setembro de 2026",itens:[["Novo","Esta lista ganhou **filtros**. Uma fileira de botões por aba — Mini loja, Checkout, Calculadora de álbum… — e outra por tipo: Novo, Corrigido, Melhorado, Atenção, e o que exige uma ação sua. Para ver só o que mudou na Mini loja era preciso abrir onze dias e ler tudo; agora é um clique."],["Novo","E um botão **Só o que é novo para mim**: a ferramenta guarda a última versão que você viu e marca as que chegaram depois. Quem abre a lista a cada duas semanas para de ter de adivinhar onde parar de ler."],["Melhorado","O contador diz quantas novidades sobraram com os filtros escolhidos, para \"nenhuma\" nunca parecer tela quebrada."]]},
  {v:"2026-09-16d",d:"16 de setembro de 2026",itens:[["","Só documentação e conferências internas, sem nenhuma mudança na tela: quinze afirmações da documentação do projeto estavam erradas e foram corrigidas, cinco regras que só existiam dentro do código foram escritas, e seis frases do próprio código citavam \"as quatro abas de pagamento\" quando já são cinco."]]},
@@ -24823,6 +24830,17 @@ function pGerarLink(){
   var codigo=pPayload(cfg),erro=pConferir(cfg,codigo);
   if(erro){alert(erro);return;}
   $('p-out2').value=pLinkDe(cfg,codigo);
+  /* O PAINEL PRECISA OLHAR PARA A CAIXA QUE ACABOU DE SER ESCRITA (16/09/2026).
+     Todo gerador desta ferramenta termina em fccMarcar(...) -- o pGerar, oito linhas acima,
+     faz isso. Este terminava em pPreview(true) e mais nada, entao a saida que ele escreve
+     ficava na tela SEM o painel consolidado ter passado por ela. Hoje nao machuca, porque
+     'p-out2' esta declarado em FCC_FORA e nao haveria orfa a mostrar -- mas a cegueira e
+     exatamente a que fccOrfas existe para fechar, e ela foi MEDIDA: a primeira versao de
+     scripts/verificar/painel-orfas.mjs clicava este botao por ultimo, e a adulteracao que
+     tira 'p-out2' do FCC_FORA ficava em silencio. E fccAgendar, e nao fccMarcar('cob'):
+     marcar reassinaria a aba, e este botao nao gera o BLOCO da pagina -- so o link de uma
+     cobranca, que nao muda o que esta colado no site. */
+  fccAgendar();
   pPreview(true);
 }
 function pLimpar(){
@@ -27739,6 +27757,14 @@ var vEditTam=-1,vEditFaixa=-1,vEditAcab=-1;
 
 /* Mesma guarda de aElVal (aba pac): vColeta roda a cada tecla, em QUALQUER aba, e sem ela
    lancaria com o painel ainda nao desenhado -- a barra vermelha acenderia o tempo todo. */
+/* 'sim'/'nao' a partir do que estiver gravado -- string nova, booleano antigo, ou nada.
+   Ela existe para a troca dos tres interruptores nao invalidar backup nenhum. */
+function vSimNao(v,padrao){
+  if(v==='sim'||v==='nao')return v;
+  if(v===true)return 'sim';
+  if(v===false)return 'nao';
+  return padrao?'sim':'nao';
+}
 function vElVal(id,def){var el=$(id);return el?el.value:def;}
 /* Numero vindo de campo: aceita virgula, como o resto da ferramenta. */
 function vNum(x,def){var n=parseFloat(String(x).replace(',','.'));return isNaN(n)?def:n;}
@@ -27933,9 +27959,9 @@ function vCfg(){
     parcelas:vPreso('v-parcelas'), qr:vPreso('v-qr'),
     larg:vPreso('v-larg'), vira:vPreso('v-vira'),
     c1:vElVal('v-c1-t','#9A7B4F'), c2:vElVal('v-c2-t','#FBFAF7'), c3:vElVal('v-c3-t','#23221E'),
-    zap:!!($('v-zap')&&$('v-zap').checked),
-    resumo:!!($('v-resumo')&&$('v-resumo').checked),
-    upsell:{url:fcTrim(vElVal('v-upsell','')),ativo:!!($('v-upsellon')&&$('v-upsellon').checked)},
+    zap:radio('v-zap')==='sim',
+    resumo:radio('v-resumo')==='sim',
+    upsell:{url:fcTrim(vElVal('v-upsell','')),ativo:radio('v-upsellon')==='sim'},
     /* A identidade mora num lugar so: a aba LE, e nunca cria campo proprio. */
     /* pixLimpar(fciBruto(...)) e NAO fciVal: fciVal faz so o trim, e trim nao tira ZWSP,
        hifen mole nem BOM. E a mesma limpeza das quatro irmas, e ela existe por um defeito
@@ -27997,9 +28023,8 @@ function vColeta(){
     cod:vElVal('v-cod',''),descpix:vElVal('v-descpix',''),parcelas:vElVal('v-parcelas',''),
     qr:vElVal('v-qr',''),larg:vElVal('v-larg',''),vira:vElVal('v-vira',''),
     c1:vElVal('v-c1-t','#9A7B4F'),c2:vElVal('v-c2-t','#FBFAF7'),c3:vElVal('v-c3-t','#23221E'),
-    zap:!!($('v-zap')&&$('v-zap').checked),
-    resumo:!!($('v-resumo')&&$('v-resumo').checked),
-    upsell:vElVal('v-upsell',''),upsellon:!!($('v-upsellon')&&$('v-upsellon').checked),
+    zap:radio('v-zap'),resumo:radio('v-resumo'),
+    upsell:vElVal('v-upsell',''),upsellon:radio('v-upsellon'),
     sinal:radio('v-sinal'),sinaltipo:radio('v-sinaltipo'),
     sinalpct:vElVal('v-sinalpct',''),sinalfixo:vElVal('v-sinalfixo',''),
     /* o formulario de cadastro inacabado: entra no estado para nao se perder na recarga,
@@ -28024,9 +28049,16 @@ function vRestaura(st){
   num('v-qr',V.qr,200);num('v-larg',V.larg,960);num('v-vira',V.vira,760);
   num('v-sinalpct',V.sinalpct,50);num('v-sinalfixo',V.sinalfixo,100);
   num('v-upsell',V.upsell,'');
-  el=$('v-upsellon');if(el)el.checked=!!V.upsellon;
-  el=$('v-zap');if(el)el.checked=(V.zap==null)?true:!!V.zap;
-  el=$('v-resumo');if(el)el.checked=(V.resumo==null)?true:!!V.resumo;
+  /* OS TRES INTERRUPTORES: 'sim'/'nao', como nas quatro abas irmas (16/09/2026).
+     ATE AQUI eles eram CAIXA DE MARCAR e o que ficava gravado era true/false. A troca foi
+     aprovada pelo dono, e ela mexe no formato do que fica guardado -- inclusive nos arquivos
+     de "Exportar tudo" que ele ja tenha salvo. Por isso 'vSimNao' aceita as DUAS formas: o
+     booleano antigo e a string nova. Backup de ontem abre certo, e o de hoje tambem.
+     O terceiro argumento e o padrao de quem nunca gravou nada: o WhatsApp e o resumo nascem
+     LIGADOS nesta aba, e o upsell nasce desligado. */
+  setRadio('v-upsellon',vSimNao(V.upsellon,false));
+  setRadio('v-zap',     vSimNao(V.zap,true));
+  setRadio('v-resumo',  vSimNao(V.resumo,true));
   /* FABRICA LIGADO nesta aba (decisao do dono, 15/09/2026): a pagina de albuns ja promete
      "PIX de 50% na confirmacao do pedido". Ausente cai em 'sim'; 'nao' e escolha dele. */
   setRadio('v-sinal',V.sinal==='nao'?'nao':'sim');

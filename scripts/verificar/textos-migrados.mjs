@@ -533,7 +533,18 @@ console.log('\n--- o formato gravado, contra '+REF+' ---');
       ['m','txtPixCopiado', ['Código copiado!'], 'Código copiado! Cole no aplicativo do seu banco.'],
       ['a','txtPixManual',
        ['O Pix não avisa a gente automaticamente. Assim que você pagar, me avise para eu conferir e confirmar a sua reserva.'],
-       'O Pix não avisa a gente automaticamente. Assim que você pagar, toque em "Já paguei" para eu conferir e confirmar.']
+       'O Pix não avisa a gente automaticamente. Assim que você pagar, toque em "Já paguei" para eu conferir e confirmar.'],
+      /* OS TRES INTERRUPTORES DA CALCULADORA DE ALBUM (16/09/2026, aprovado pelo dono).
+         Eles eram CAIXA DE MARCAR e gravavam booleano; viraram PAR DE RADIOS, como nas quatro
+         abas irmas, e gravam 'sim'/'nao'. A chave e a MESMA dos dois lados e so o formato do
+         valor mudou -- que e exatamente o caso que esta lista descreve.
+         O booleano antigo continua sendo aceito na LEITURA (vSimNao, no index.html), senao um
+         arquivo de "Exportar tudo" salvo ontem abriria os tres no padrao e ligaria ou
+         desligaria coisas que o dono nao pediu. As duas formas sao medidas em
+         calculadora-album.mjs, parte 6. */
+      ['v','zap',      [true],  'sim'],
+      ['v','resumo',   [true],  'sim'],
+      ['v','upsellon', [false], 'nao']
     ];
     const mau = [];
     for(const [aba,ch,velhos,novoV] of TROCADAS){

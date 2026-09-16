@@ -89,6 +89,9 @@ const BUSCA_PAC = '?pac=ENS&data='+encodeURIComponent(A_DATA)
 /* AS TRES RESPOSTAS DO SINAL precisam estar PREENCHIDAS: com os tres vazios nem a regra de
    CSS nem a div sao emitidas (e a fabrica), e medir o vazio nao diria nada sobre a aparencia
    delas. */
+/* A cor de texto que as cinco abas recebem no cenario. Distinta dos dois padroes de
+   fabrica (#333333 e #23221E) de proposito: assim ela nao passa por acidente. */
+const COR_TEXTO = '#1155AA';
 const R1 = 'O sinal garante o seu horario agendado';
 const R2 = 'Cancelamento nao ha devolucao do sinal';
 const R3 = 'O saldo deve ser pago ate 1 dia antes do seu ensaio';
@@ -150,6 +153,18 @@ async function gerar(cfg){
     }
     await clicar(pg,'m-gerar');
 
+    /* A COR DO TEXTO, IGUAL NAS CINCO -- e o que torna a pergunta desta suite mensuravel.
+       Ate 16/09/2026 a prova comparava as cores entre as abas e exigia que fossem iguais,
+       usando isso como sinal de que ninguem cravou cor por cima da cor configuravel. O proxy
+       quebrou quando a Calculadora de album chegou: o padrao de texto dela e #23221E, um
+       escuro morno que combina com a pagina de albuns, contra o #333333 das outras quatro.
+       Duas cores diferentes, nenhuma delas cravada -- e a prova acusava defeito onde nao
+       havia. Igualando a cor na ENTRADA, a igualdade na saida volta a significar o que ela
+       deve significar, e ainda diz mais: a cor medida tem de ser ESTA, e nao so a mesma. */
+    for(const id of ['u-c3-t','m-c3-t','a-c3-t','p-c3-t','v-c3-t']){
+      if(await pg.$('#'+id)) await set(pg, id, COR_TEXTO);
+    }
+
     /* ---------- Link de cobranca ---------- */
     await clicar(pg,'aba-cob');
     await set(pg,'p-url','https://fotocerta.com.br/pagar');
@@ -186,10 +201,37 @@ async function gerar(cfg){
       await set(pg,'a-txt-sinal-saldo',R3);
     }
     await clicar(pg,'a-gerar');
-  }, ['u-out','m-out','p-out1','p-out2','a-out3'], {porta: cfg.porta, raiz: cfg.raiz});
+
+    /* ---------- Calculadora de album (a quinta aba que cobra, 16/09/2026) ----------
+       O SINAL DELA NASCE LIGADO em 50% e os tres textos nascem PREENCHIDOS -- e a unica aba
+       assim, e a razao esta no CLAUDE.md (a pagina de albuns do dono ja publica essa
+       politica). Aqui os tres sao SOBRESCRITOS pelos mesmos R1/R2/R3 das irmas: o que esta
+       passagem compara e a APARENCIA das linhas, e textos diferentes dariam alturas
+       diferentes por motivo que nao e aparencia nenhuma. */
+    /* ABA QUE NAO EXISTE NA REFERENCIA E PULADA. Esta suite gera DUAS vezes: na arvore de
+       hoje e numa copia do commit de referencia, que nao tem esta aba. Sem a guarda, clicar()
+       lanca, o processo MORRE e NENHUMA verificacao e medida -- nem falha, nem "NAO MEDIU":
+       silencio com codigo de saida 1, que e a forma mais severa da armadilha. */
+    if(await pg.$('#aba-alb')){
+    await clicar(pg,'aba-alb');
+    await set(pg,'v-cod','ALB26');
+    await radio(pg,'v-metodo','ambos');
+    await set(pg,'v-descpix', cfg.sinal ? '0' : '10');
+    await radio(pg,'v-sinal', cfg.sinal ? 'sim' : 'nao');
+    if(cfg.sinal){
+      await radio(pg,'v-sinaltipo','pct'); await set(pg,'v-sinalpct','50');
+      await set(pg,'v-txt-sinal-garante',R1);
+      await set(pg,'v-txt-sinal-desistir',R2);
+      await set(pg,'v-txt-sinal-saldo',R3);
+    }
+    await clicar(pg,'v-gerar');
+    }
+  }, ['u-out','m-out','p-out1','p-out2','a-out3','v-out'], {porta: cfg.porta, raiz: cfg.raiz});
 
   chk('['+cfg.id+'] a ferramenta gerou sem alerta', r.alertas.length===0, JSON.stringify(r.alertas));
   chk('['+cfg.id+'] a ferramenta gerou sem erro de console', r.erros.length===0, r.erros.slice(0,2).join(' | '));
+  /* 'v-out' fica de fora desta conferencia de tamanho porque ela tambem roda sobre a
+     referencia, onde a aba nao existe e a saida e vazia -- e vazia ali e o certo. */
   for(const s of ['u-out','m-out','p-out1','a-out3'])
     chk('['+cfg.id+'] '+s+' saiu', (r.valores[s]||'').length > 1000);
   return r.valores;
@@ -215,6 +257,12 @@ async function abrirPix(pg, aba){
     await pg.click('.fcm-gerar');
   }else if(aba === 'a'){
     await pg.locator('.fca-ob-bt', {hasText:/Pix|Gerar/i}).first().click();
+  }else if(aba === 'v'){
+    /* A calculadora ja abre com um tamanho escolhido; clicar em um deles torna a medicao
+       independente do padrao de fabrica de amanha. */
+    await pg.locator('.fcal-tam').first().click();
+    await pg.waitForTimeout(150);
+    await pg.click('.fcal-gerar');
   }else{
     await pg.locator('.fcpg-bt').first().click();
   }
@@ -256,20 +304,38 @@ const ASPECTOS = {
   u: {sinalAviso:'.fcu-sinal-aviso', pixManual:'.fcu-pixmanual', pixLinha:'.fcu-pixlinha',
       zap:'.fcu-zap', cola:'.fcu-cola', qr:'.fcu-qr', instrucao:'.fcu-instrucao',
       nota:'.fcu-nota', copiado:'.fcu-copiado', pixArea:'.fcu-pixarea',
-      saldo:'.fcu-saldo', sinalTxt:'.fcu-sinal-txt-l', total:'.fcu-total'},
+      saldo:'.fcu-saldo', sinalTxt:'.fcu-sinal-txt-l', total:'.fcu-total',
+      raiz:'.fcuni'},
   m: {sinalAviso:'.fcm-sinal-aviso', pixManual:'.fcm-pixmanual', pixLinha:'.fcm-pixlinha',
       zap:'.fcm-zap', cola:'.fcm-cola', qr:'.fcm-qr', instrucao:'.fcm-instrucao',
       nota:'.fcm-nota', copiado:'.fcm-copiado', pixArea:'.fcm-pixarea',
-      saldo:'.fcm-saldo', sinalTxt:'.fcm-sinal-txt-l', total:'.fcm-total'},
+      saldo:'.fcm-saldo', sinalTxt:'.fcm-sinal-txt-l', total:'.fcm-total',
+      raiz:'.fcmloja'},
   a: {sinalAviso:'.fca-ob-sinal-aviso', pixManual:'.fca-ob-pixmanual', pixLinha:null,
       zap:'.fca-ob-zap', cola:'.fca-ob-cod', qr:'.fca-ob-qr', instrucao:null,
       nota:null, copiado:null, pixArea:'.fca-ob-pixarea',
-      saldo:'.fca-ob-saldo', sinalTxt:'.fca-ob-sinal-txt-l', total:null},
+      saldo:'.fca-ob-saldo', sinalTxt:'.fca-ob-sinal-txt-l', total:null,
+      raiz:'.fca-ob-cartao'},
+  v: {sinalAviso:'.fcal-sinal-aviso', pixManual:'.fcal-pixmanual', pixLinha:'.fcal-pixlinha',
+      zap:'.fcal-zap', cola:'.fcal-cola', qr:'.fcal-qr', instrucao:'.fcal-instrucao',
+      nota:'.fcal-nota', copiado:'.fcal-copiado', pixArea:'.fcal-pixarea',
+      saldo:'.fcal-saldo', sinalTxt:'.fcal-sinal-txt-l', total:'.fcal-total-v',
+      raiz:'.fcal-raiz'},
   p: {sinalAviso:null, pixManual:'.fcpg-pixmanual', pixLinha:'.fcpg-pixlinha',
       zap:null, cola:'.fcpg-cod', qr:'.fcpg-qr', instrucao:null,
       nota:null, copiado:null, pixArea:null,
-      saldo:'.fcpg-saldo', sinalTxt:'.fcpg-sinal-txt-l', total:null}
+      saldo:'.fcpg-saldo', sinalTxt:'.fcpg-sinal-txt-l', total:null,
+      raiz:'.fcpg-cartao'}
 };
+
+/* QUANTAS ABAS TEM CADA ASPECTO -- derivado de ASPECTOS, nunca escrito por extenso.
+   Ate 16/09/2026 tres assercoes aqui diziam "as quatro abas" e comparavam com o literal 4.
+   No dia em que a quinta aba de pagamento chegou, as tres ficaram vermelhas sem nenhum
+   defeito por tras -- e vermelho que e sempre vermelho esconde o proximo, que seria de
+   verdade. E a mesma regra que ABAS.length ja impoe do lado da ferramenta. */
+const ABAS_PAG = Object.keys(ASPECTOS);
+const quantasTem = k => ABAS_PAG.filter(a => ASPECTOS[a][k]).length;
+const porExtenso = n => ['nenhuma','uma','duas','tres','quatro','cinco','seis','sete'][n] || String(n);
 
 async function medir(bloco, aba, largura, porta){
   const mapa = ASPECTOS[aba];
@@ -306,7 +372,7 @@ for(const [nomePass, blocos] of Object.entries(passagens)){
   /* O link sai do p-out2 daquela mesma passagem: e a consulta que a /pagar le. */
   LINK_P = '?' + ((blocos['p-out2']||'').split('?')[1] || '');
   for(const largura of [1024, 375]){
-    for(const [aba, saida] of [['u','u-out'],['m','m-out'],['a','a-out3'],['p','p-out1']]){
+    for(const [aba, saida] of [['u','u-out'],['m','m-out'],['a','a-out3'],['p','p-out1'],['v','v-out']]){
       const r = await medir(blocos[saida], aba, largura, porta++);
       const reais = (r.erros||[]).filter(e => !EXTERNO.test(e));
       chk('['+nomePass+'/'+largura+'] '+aba+': o bloco rodou sem erro proprio',
@@ -335,28 +401,46 @@ if(DUMP){
    lado da regra, no index.html -- aqui so entra o que a leva de fato alinhou,
    porque assercao sobre o que nao mudou e assercao que passa para sempre e
    nao mede nada. */
+/* '#1155AA' como o navegador devolve em getComputedStyle. */
+const CFG_RGB = 'rgb(17, 85, 170)';
 const q = (p,l,a,k) => (tabela[p+'/'+l+'/'+a]||{})[k];
 
 console.log('\n=== item 2: o aviso "o Pix nao confirma sozinho", uma aparencia so ===');
 for(const l of [1024,375]){
-  const vs = ['u','m','a','p'].map(a => q('descpix',l,a,'pixManual')).filter(Boolean);
-  chk('['+l+'] as quatro abas emitem o aviso', vs.length === 4, 'achei '+vs.length);
-  if(vs.length === 4){
-    chk('['+l+'] as quatro caixas tem o MESMO veu de fundo',
+  const esperado = quantasTem('pixManual');
+  const vs = ABAS_PAG.map(a => q('descpix',l,a,'pixManual')).filter(Boolean);
+  chk('['+l+'] as '+porExtenso(esperado)+' abas emitem o aviso', vs.length === esperado, 'achei '+vs.length);
+  if(vs.length === esperado){
+    chk('['+l+'] as '+porExtenso(esperado)+' caixas tem o MESMO veu de fundo',
         new Set(vs.map(v=>v.background)).size === 1,
         vs.map(v=>v.background).join(' | '));
-    chk('['+l+'] nenhuma delas fixa a cor do texto por cima da cor configuravel',
-        new Set(vs.map(v=>v.color)).size === 1, vs.map(v=>v.color).join(' | '));
+    /* A PERGUNTA CERTA E "O AVISO HERDA A COR DO BLOCO?", e nao "as cinco tem a mesma cor".
+       Medido em 16/09/2026: o Checkout e a Mini loja pintam o texto com var(--fcu-texto,#333)
+       / var(--fcm-texto,#333) -- a cor que o dono escolhe viaja na saida de CSS Customizado,
+       que e colada em OUTRO campo do Prosite e nao acompanha o bloco no arnes. Ali dentro a
+       variavel nao existe e vale o alternativo, #333. Isso e arquitetura declarada dessas duas
+       abas, e nao defeito; a Calculadora de album, a Link de cobranca e o Agendamento por
+       pacote escrevem a cor direto no bloco. Comparar com a cor configurada acusaria as duas
+       primeiras para sempre, e comparar as cinco entre si voltou a mentir no dia em que uma
+       aba nasceu com outro padrao. O que continua valendo para TODAS e a propriedade original:
+       nenhuma delas crava cor propria no aviso -- ele herda a cor da RAIZ do seu bloco. */
+    for(const a of ABAS_PAG){
+      const av = q('descpix',l,a,'pixManual'), rz = q('descpix',l,a,'raiz');
+      if(!av || !rz) continue;
+      chk('['+l+'] '+a+': o aviso herda a cor da raiz do bloco, em vez de cravar a sua',
+          av.color === rz.color, 'aviso=' + av.color + ' raiz=' + rz.color);
+    }
   }
 }
 
 console.log('\n=== item 5: a caixa do Copia e Cola ===');
 for(const l of [1024,375]){
-  const vs = ['u','m','a','p'].map(a => [a, q('descpix',l,a,'cola')]).filter(x=>x[1]);
-  chk('['+l+'] as quatro abas tem a caixa', vs.length === 4, 'achei '+vs.length);
-  chk('['+l+'] a mesma altura nas quatro',
+  const esperado = quantasTem('cola');
+  const vs = ABAS_PAG.map(a => [a, q('descpix',l,a,'cola')]).filter(x=>x[1]);
+  chk('['+l+'] as '+porExtenso(esperado)+' abas tem a caixa', vs.length === esperado, 'achei '+vs.length);
+  chk('['+l+'] a mesma altura nas '+porExtenso(esperado),
       new Set(vs.map(x=>x[1].height)).size === 1, vs.map(x=>x[0]+'='+x[1].height).join(' '));
-  chk('['+l+'] o mesmo tamanho de fonte nas quatro',
+  chk('['+l+'] o mesmo tamanho de fonte em todas',
       new Set(vs.map(x=>x[1].fontSize)).size === 1, vs.map(x=>x[0]+'='+x[1].fontSize).join(' '));
   chk('['+l+'] nenhuma delas e redimensionavel (ninguem le esse texto, so copia)',
       vs.every(x=>x[1].resize === 'none'), vs.map(x=>x[0]+'='+x[1].resize).join(' '));
@@ -377,8 +461,9 @@ for(const l of [1024,375]){
 
 console.log('\n=== item 10: o saldo sem negrito nas quatro ===');
 for(const l of [1024,375]){
-  const vs = ['u','m','a','p'].map(a => [a, q('sinal',l,a,'saldo')]).filter(x=>x[1]);
-  chk('['+l+'] as quatro abas mostram o saldo', vs.length === 4, 'achei '+vs.length);
+  const esperado = quantasTem('saldo');
+  const vs = ABAS_PAG.map(a => [a, q('sinal',l,a,'saldo')]).filter(x=>x[1]);
+  chk('['+l+'] as '+porExtenso(esperado)+' abas mostram o saldo', vs.length === esperado, 'achei '+vs.length);
   chk('['+l+'] nenhuma delas poe o saldo em negrito',
       vs.every(x => Number(x[1].fontWeight) < 700),
       vs.map(x=>x[0]+'='+x[1].fontWeight).join(' '));

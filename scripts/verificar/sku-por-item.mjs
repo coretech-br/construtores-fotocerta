@@ -1047,4 +1047,85 @@ console.log('\n=== [8] texto hostil no SKU ===');
       JSON.stringify(porNome(OPS[0].nome).sku));
 }
 
+/* ===========================================================================
+   PARTE 9 -- A CALCULADORA DE ALBUM, a quinta aba que cobra (16/09/2026)
+   ===========================================================================
+   POR QUE ELA ENTRA EM SEPARADO, e nao dentro das partes acima. As tres abas de
+   catalogo tem a mesma forma -- um PRODUTO com seus OPCIONAIS --, e as partes 1 a 8
+   sao escritas em cima dessa forma. A calculadora tem outra: os itens que carregam SKU
+   sao os TAMANHOS do album e os ACABAMENTOS, e nao ha produto nenhum no meio. Forcar a
+   forma antiga sobre ela produziria um roteiro torto e assercoes que so parecem medir.
+
+   O QUE IMPORTA AQUI E TRANSVERSAL, e e isto: ela usa a MESMA maquinaria das irmas
+   (fcSkuLimpo, fcSkuRecusa) ou reimplementou a propria? Reimplementacao e o defeito que
+   este projeto ja nomeou -- duas copias que concordam hoje e divergem amanha. A prova
+   nao le o codigo para responder: ela exercita a aba e cobra o MESMO comportamento
+   observavel que as tres irmas entregam.
+   =========================================================================== */
+console.log('\n=== PARTE 9 -- a Calculadora de album ===');
+{
+  const foraA = {};
+  await gerarNaFerramenta(async pg => {
+    await identidade(pg);
+    await clicar(pg,'aba-alb');
+    await set(pg,'v-cod','ALB26');
+
+    /* --- 9a. SKUs distintos: gera, sem alerta, e os dois chegam ao bloco --- */
+    await set(pg,'v-tam-cm','50'); await set(pg,'v-tam-media','5');
+    await set(pg,'v-tam-minfotos','50'); await set(pg,'v-tam-sku','ALB-50');
+    await clicar(pg,'v-tam-add');
+    await set(pg,'v-ac-nome','Mini-replica'); await set(pg,'v-ac-valor','390');
+    await set(pg,'v-ac-sku','MINI-REP');
+    await clicar(pg,'v-ac-add');
+    await zerarAlertas(pg);
+    await clicar(pg,'v-gerar');
+    foraA.alertasOk = await alertas(pg);
+    foraA.blocoOk = await ler(pg,'v-out');
+
+    /* --- 9b. SKU REPETIDO entre um tamanho e um acabamento --- */
+    await set(pg,'v-ac-nome','Caixa de madeira'); await set(pg,'v-ac-valor','250');
+    await set(pg,'v-ac-sku','ALB-50');
+    await clicar(pg,'v-ac-add');
+    await zerarAlertas(pg);
+    await clicar(pg,'v-gerar');
+    foraA.alertasRep = await alertas(pg);
+    foraA.blocoRep = await ler(pg,'v-out');
+
+    /* --- 9c. SKU com espaco nas pontas: a limpeza e a MESMA das irmas ---
+       'fcSkuLimpo' apara as pontas e corta no limite do PayPal; ela NAO poe em maiuscula
+       nem tira espaco do meio, e nem o campo se corrige sozinho na tela -- nas tres irmas
+       tambem nao. O que se cobra aqui e o que de fato acontece nelas: o que ENTRA NA LISTA
+       ja vai aparado. Medir o campo na tela mediria uma limpeza que esta ferramenta nunca
+       fez, em aba nenhuma. */
+    await set(pg,'v-ac-nome','Estojo'); await set(pg,'v-ac-valor','120');
+    await set(pg,'v-ac-sku','   EST-01   ');
+    await clicar(pg,'v-ac-add');
+    foraA.naLista = await pg.evaluate(() => {
+      const t = document.getElementById('v-ac-lista');
+      return t ? t.textContent : '';
+    });
+  }, [], {porta: 8661});
+
+  chk('[album] com SKUs distintos, gera sem alerta nenhum',
+      (foraA.alertasOk||[]).length === 0, JSON.stringify(foraA.alertasOk));
+  chk('[album] e os dois SKUs chegam ao bloco entregue',
+      (foraA.blocoOk||'').indexOf('ALB-50') >= 0 && (foraA.blocoOk||'').indexOf('MINI-REP') >= 0);
+
+  const msg = (foraA.alertasRep||[])[0] || '';
+  chk('[album] SKU repetido entre um tamanho e um acabamento RECUSA',
+      (foraA.alertasRep||[]).length === 1, JSON.stringify(foraA.alertasRep));
+  /* A MESMA FRASE das irmas, e nao uma parecida: frase propria aqui seria o sinal de
+     que a recusa foi reimplementada nesta aba. */
+  provarRecusa('[album] ', msg, '50 cm', 'Caixa de madeira', 'ALB-50');
+  /* E o mais importante: a saida FICOU COMO ESTAVA. Recusa que alerta e grava mesmo
+     assim e pior que nenhuma -- o operador le o aviso, fecha, e cola o bloco recusado. */
+  chk('[album] e a saida NAO foi reescrita pela geracao recusada',
+      foraA.blocoRep === foraA.blocoOk,
+      'antes ' + (foraA.blocoOk||'').length + ' · depois ' + (foraA.blocoRep||'').length);
+  chk('[album] o SKU entra na lista APARADO, como nas tres irmas',
+      (foraA.naLista||'').indexOf('SKU EST-01') >= 0
+      && (foraA.naLista||'').indexOf('SKU    EST-01') < 0,
+      JSON.stringify(String(foraA.naLista||'').slice(0,200)));
+}
+
 process.exit(resumo());

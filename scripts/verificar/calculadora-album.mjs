@@ -38,7 +38,7 @@
    ROTEIRO: node scripts/verificar/calculadora-album.mjs
    ============================================================================ */
 import { comBlocoNaPagina, gerarNaFerramenta, chk, resumo } from './pagina.mjs';
-import { set } from './lib.mjs';
+import { set, ligar, lerLigado } from './lib.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -423,4 +423,69 @@ await comBlocoNaPagina({bloco: blocoDesc, cabeca: CABECA, porta: 8957, medir: as
    estava FALHANDO e anunciando sucesso. Qualquer script que rode a bateria e olhe o
    codigo de saida a via verde. E pior que vermelho permanente: vermelho que ninguem
    olha ainda esta la; verde falso apaga o defeito. */
+/* ===========================================================================
+   PARTE 6 -- OS TRES INTERRUPTORES VIRARAM "SIM/NAO", E O BACKUP ANTIGO ABRE
+   ===========================================================================
+   Ate 16/09/2026 "levar ao upsell", "oferecer no WhatsApp" e "mostrar o resumo" eram CAIXA DE
+   MARCAR nesta aba e PAR DE RADIOS nas quatro irmas -- a mesma pergunta com duas caras, e o
+   que ficava gravado era true/false de um lado e 'sim'/'nao' do outro. O dono aprovou igualar.
+
+   O RISCO DA TROCA nao e a tela: e o que ja esta GRAVADO. O estado do navegador dele e os
+   arquivos de "Exportar tudo" que ele tenha salvo trazem o booleano antigo, e um restaurador
+   que so entendesse a string nova abriria os tres no padrao -- ligando o upsell de quem o
+   tinha desligado, ou desligando o WhatsApp de quem o queria. Por isso 'vSimNao' aceita as
+   duas formas, e as duas metades sao medidas aqui: a nova sobrevive a recarga, e a ANTIGA,
+   escrita a mao no armazenamento como num backup de ontem, abre com o valor que ela dizia.
+   =========================================================================== */
+console.log('\n=== PARTE 6 -- os tres interruptores, e o backup antigo ===');
+/* A RECARGA APAGA O GANCHO DOS ALERTAS que o molde instala no carregamento, e
+   gerarNaFerramenta le window.__alertas DEPOIS do roteiro -- sem reinstalar, o processo morre
+   sem medir nada, que e a pior forma de falhar (16/09/2026, e ja documentada em cenario.mjs). */
+const repor = async p => { await p.evaluate(() => {
+  window.__alertas = window.__alertas || [];
+  window.alert = m => { window.__alertas.push(String(m)); };
+  window.confirm = () => true; window.open = () => null;
+}); };
+await gerarNaFerramenta(async (p) => {
+  /* 6a. a forma NOVA atravessa a recarga */
+  await p.evaluate(() => { try{ localStorage.clear(); }catch(e){} });
+  await p.reload(); await p.waitForTimeout(700); await repor(p);
+  await p.click('#aba-alb'); await p.waitForTimeout(150);
+  await ligar(p,'v-upsellon',true); await ligar(p,'v-zap',false); await ligar(p,'v-resumo',false);
+  await p.waitForTimeout(250);
+  await p.reload(); await p.waitForTimeout(900); await repor(p);
+  await p.click('#aba-alb'); await p.waitForTimeout(150);
+  const novo = {up:await lerLigado(p,'v-upsellon'), zap:await lerLigado(p,'v-zap'), res:await lerLigado(p,'v-resumo')};
+  chk('[6] os tres sao par de radios, como nas quatro irmas',
+      await p.evaluate(() => ['v-upsellon','v-zap','v-resumo']
+        .every(n => document.querySelectorAll('input[type="radio"][name="'+n+'"]').length === 2)));
+  chk('[6] o que foi escolhido atravessa a recarga',
+      novo.up==='sim' && novo.zap==='nao' && novo.res==='nao', JSON.stringify(novo));
+
+  /* 6b. o BACKUP ANTIGO: booleanos no armazenamento, como estavam ate ontem */
+  await p.evaluate(() => {
+    let st={}; try{ st=JSON.parse(localStorage.getItem('fcConstrutores')||'{}'); }catch(e){}
+    st.v = st.v || {};
+    st.v.upsellon = false; st.v.zap = true; st.v.resumo = true;
+    try{ localStorage.setItem('fcConstrutores', JSON.stringify(st)); }catch(e){}
+  });
+  await p.reload(); await p.waitForTimeout(900); await repor(p);
+  await p.click('#aba-alb'); await p.waitForTimeout(150);
+  const velho = {up:await lerLigado(p,'v-upsellon'), zap:await lerLigado(p,'v-zap'), res:await lerLigado(p,'v-resumo')};
+  chk('[6] backup no formato ANTIGO (true/false) abre com os valores que ele guardava',
+      velho.up==='nao' && velho.zap==='sim' && velho.res==='sim', JSON.stringify(velho));
+
+  /* 6c. e o que NUNCA foi gravado nasce no padrao desta aba */
+  await p.evaluate(() => {
+    let st={}; try{ st=JSON.parse(localStorage.getItem('fcConstrutores')||'{}'); }catch(e){}
+    if(st.v){ delete st.v.upsellon; delete st.v.zap; delete st.v.resumo; }
+    try{ localStorage.setItem('fcConstrutores', JSON.stringify(st)); }catch(e){}
+  });
+  await p.reload(); await p.waitForTimeout(900); await repor(p);
+  await p.click('#aba-alb'); await p.waitForTimeout(150);
+  const vazio = {up:await lerLigado(p,'v-upsellon'), zap:await lerLigado(p,'v-zap'), res:await lerLigado(p,'v-resumo')};
+  chk('[6] sem nada gravado, nascem no padrao da aba (WhatsApp e resumo ligados, upsell nao)',
+      vazio.up==='nao' && vazio.zap==='sim' && vazio.res==='sim', JSON.stringify(vazio));
+}, [], {porta:8958});
+
 process.exit(resumo());

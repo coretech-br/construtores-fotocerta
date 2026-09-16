@@ -228,7 +228,7 @@ console.log('\n== 4. byte a byte contra a referencia ==');
 async function saidasCom(raiz, porta, prio){
   const r = await gerarNaFerramenta(async pg => {
     await preparar(pg); await conteudo(pg); await cobranca(pg,{descpix:'10', valor:'450,00'});
-    if(prio) for(const [aba,pref] of [['aba-uni','u'],['aba-loja','m'],['aba-pac','a']]){
+    if(prio) for(const [aba,pref] of [['aba-uni','u'],['aba-loja','m'],['aba-pac','a'],['aba-alb','v']]){
       if(!(await pg.$('#'+aba))) continue;
       await clicar(pg,aba); await pg.waitForTimeout(40);
       await radio(pg, pref+'-prio', prio);
@@ -331,7 +331,9 @@ console.log('\n== 5. com um meio so, a escolha nao muda a saida ==');
 async function umMeioSo(metodo, prio, porta){
   const r = await gerarNaFerramenta(async pg => {
     await preparar(pg); await conteudo(pg); await cobranca(pg,{descpix:'10', valor:'450,00'});
-    for(const [aba,pref] of [['aba-uni','u'],['aba-loja','m'],['aba-pac','a']]){
+    /* A CALCULADORA DE ALBUM entra nas tres que tem as tres formas (16/09/2026): ela tambem
+       tem 'v-metodo' com pix / paypal / ambos, ao contrario do Link de cobranca. */
+    for(const [aba,pref] of [['aba-uni','u'],['aba-loja','m'],['aba-pac','a'],['aba-alb','v']]){
       await clicar(pg,aba); await pg.waitForTimeout(40);
       await radio(pg, pref+'-prio', prio);
       await radio(pg, pref+'-metodo', metodo);
@@ -342,7 +344,7 @@ async function umMeioSo(metodo, prio, porta){
     await gerarTodas(pg);
     globalThis.__off = await pg.evaluate(() => {
       const o = {};
-      for(const pref of ['u','m','a','p']){
+      for(const pref of ['u','m','a','p','v']){
         o[pref] = {
           desligado: !!(document.querySelector('input[name="'+pref+'-prio"]')||{}).disabled,
           aviso: ((document.getElementById(pref+'-prio-so1')||{}).style||{}).display
@@ -350,16 +352,16 @@ async function umMeioSo(metodo, prio, porta){
       }
       return o;
     });
-  }, ['u-out','m-out','a-out1','a-out3','p-out1'], {porta});
+  }, ['u-out','m-out','a-out1','a-out3','p-out1','v-out'], {porta});
   return {v:r.valores, off:globalThis.__off};
 }
 for(const metodo of ['pix','paypal']){
   const a = await umMeioSo(metodo, 'pix', 8901);
   const b = await umMeioSo(metodo, 'pp',  8902);
-  for(const saida of ['u-out','m-out','a-out1','a-out3','p-out1'])
+  for(const saida of ['u-out','m-out','a-out1','a-out3','p-out1','v-out'])
     chk('"somente '+metodo+'": '+saida+' sai igual nas duas escolhas', a.v[saida] === b.v[saida],
         'tamanhos '+a.v[saida].length+' x '+b.v[saida].length);
-  for(const pref of ['u','m','a','p'])
+  for(const pref of ['u','m','a','p','v'])
     chk('"somente '+metodo+'": o campo de '+pref+' fica DESLIGADO e com o porque na tela',
         a.off[pref].desligado === true && a.off[pref].aviso === 'block', JSON.stringify(a.off[pref]));
 }
