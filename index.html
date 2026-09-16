@@ -564,6 +564,12 @@
   .fcr-acoes-tit{font-size:12px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;
     color:#6B5210;margin-bottom:8px}
   .fcr-acoes .fcr-et{background:#fff}
+  .fcr-superada{margin-top:4px;font-size:11.5px;font-weight:600;color:#6b6257;
+    background:#F2EFE7;border-radius:6px;padding:4px 8px;display:inline-block}
+  /* Esmaece a linha inteira, menos a propria marca -- o texto nao tem involucro proprio
+     (fcrTexto escreve direto no item), entao quem cede opacidade e o item. */
+  .fcr-item[data-resolvida]{opacity:.7}
+  .fcr-item[data-resolvida] .fcr-superada{opacity:1}
   .fcr-quando{display:inline-block;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
     font-size:10.5px;font-weight:700;background:#fff;color:#6B5210;border:1px solid #E3B23C;
     border-radius:5px;padding:1px 6px;margin-right:7px;vertical-align:1px;white-space:nowrap}
@@ -4501,7 +4507,7 @@
         <input type="number" id="v-parcelas" value="12" min="1" max="12" step="1">
         <p class="ajuda">Este número é uma promessa sobre o que o cliente vai encontrar no cartão, e quem decide isso é a operadora — a ferramenta não tem como conferir. Confira no PayPal quantas parcelas a sua conta oferece. O valor da parcela é calculado dividindo o preço, e afirma parcelamento sem juros.</p>
         <label for="v-cod">Código do pedido <small>(identifica a transação no PayPal, vira o txid do Pix e entra na mensagem do WhatsApp)</small></label>
-        <input type="text" id="v-cod" value="" placeholder="ex.: ALBUM26">
+        <input type="text" id="v-cod" value="ALB26" placeholder="ex.: ALBUM26">
         <label for="v-qr">Tamanho do QR Code <small>(px, de 120 a 320)</small></label>
         <input type="number" id="v-qr" value="200" min="120" max="320" step="10">
       </fieldset>
@@ -4871,8 +4877,8 @@
    QUEM IMPEDE QUE ELE MINTA: scripts/conferir-versoes.sh, que recusa index.html
    alterado sem a versao mudar junto -- a mesma disciplina do fc-compartilhado.js,
    e pela mesma razao: carimbo que ninguem confere e o defeito de amanha. */
-var FC_VERSAO='2026-09-15a';
-var FC_PUBLICADO='2026-09-15 23:50';   /* America/Sao_Paulo -- escrito pelo carimbador */
+var FC_VERSAO='2026-09-16a';
+var FC_PUBLICADO='2026-09-16 00:41';   /* America/Sao_Paulo -- escrito pelo carimbador */
 (function(){
   var el=document.getElementById('fc-versao');
   if(!el) return;
@@ -5521,6 +5527,23 @@ function fcSinalTxtDiverge(){
    esta na lista ficaria sem o aviso dos textos do sinal, sem a conferencia de fabrica dos
    doze campos e sem a memoria da ordem dos meios -- tudo em silencio. Ela nao conserta: faz
    o buraco aparecer, como fccOrfas e fcTxtFabricaDiverge. */
+/* ===== A ORDEM DO REGISTRO NAO E A ORDEM DA BARRA, e inverter apaga configuracao =====
+   A ordem de ABAS e a ordem em que restaurarEstado devolve as abas. Uma aba que grava estado
+   de dentro do proprio restaura (restauraGrava:true) precisa ser a ULTIMA: qualquer aba depois
+   dela ainda nao foi restaurada quando o salvarEstado dispara, e o coleta dela devolve os
+   padroes -- que e o que fica gravado. O dono perde a configuracao e nao ha erro na tela.
+   Ate 16/09/2026 a unica protecao era um comentario dentro de um array de 125 linhas. */
+function fcOrdemAbasConferir(){
+  var r=[],i,j;
+  for(i=0;i<ABAS.length;i++){
+    if(!ABAS[i].restauraGrava)continue;
+    if(i===ABAS.length-1)continue;
+    for(j=i+1;j<ABAS.length;j++)
+      r.push('"'+ABAS[i].nome+'" grava estado durante a restauração e vem ANTES de "'+
+             ABAS[j].nome+'", cuja configuração seria sobrescrita');
+  }
+  return r;
+}
 function fcPagPrefsConferir(){
   var decl={},lista={},r=[],i,a;
   for(i=0;i<ABAS.length;i++){a=ABAS[i];if(a.pagamento)decl[a.pref]=a.nome;}
@@ -5819,6 +5842,7 @@ var FCR_ROTULOS={novo:'novo',corrigido:'corr',melhorado:'melh',atencao:'aten',ex
 /* A lista, da versao mais recente para a mais antiga. NAO reordenar: o agrupamento por
    dia assume que versoes do mesmo dia estao juntas, e o desenho respeita esta ordem. */
 var FCR_NOTAS=[
+ {v:"2026-09-16a",d:"16 de setembro de 2026",itens:[["Corrigido","A caixa **O que ainda depende de você** — a que abre sozinha no alto desta lista — estava desatualizada: faltavam as duas ações mais recentes, e o que ela mostrava era uma versão antiga e mais estreita da mesma instrução. Ela era uma segunda lista, escrita à parte. Agora ela **sai das próprias novidades**, e não tem como divergir."],["Novo","Ação que já foi superada por uma versão posterior agora aparece marcada na lista — **Substituída em…** — em vez de ficar lá parecendo pendente. A primeira delas é o recolar do Código 1 de 13/09, que a versão de 14/09 substituiu por um recolar que cobre três coisas de uma vez."],["Corrigido","Calculadora de álbum: o **código do pedido** nascia vazio, e a geração era recusada até você preencher. Agora nasce com um exemplo, como nas outras abas."],["","O resto foi rede de proteção, sem mudança na tela: a calculadora entrou na conferência que compara todos os códigos gerados antes e depois de cada mudança, os textos novos dela entraram junto, e a ferramenta passou a avisar sozinha se a ordem interna das abas for quebrada — o que apagaria configuração sua em silêncio. Mais o histórico das 57 versões publicadas desde 25 de agosto, que não existia em lugar nenhum."]]},
  {v:"2026-09-15a",d:"15 de setembro de 2026",itens:[["Novo","Nasceu a aba **Calculadora de álbum**, a décima primeira. Ela faz o que a calculadora da sua página de álbuns já fazia — o cliente escolhe o tamanho, a quantidade de fotos e os acabamentos, e vê o valor na hora — só que agora tudo é **configurável por você**, sem mexer em código."],["Novo","Viraram campo: o **preço por foto**, os **tamanhos** (cada um com a média de fotos por lâmina, o mínimo de fotos e o seu SKU), as **faixas de desconto** por quantidade de lâminas, os **acabamentos opcionais** e **todos os textos da tela**, inclusive os dos botões."],["Novo","O cliente pode **pagar ali mesmo**, sem sair da página: Pix com QR Code e copia e cola, ou cartão pelo PayPal. Vem com o mesmo pacote das outras quatro abas que cobram — sinal com os três textos que o explicam, escolha de qual meio aparece primeiro, desconto no Pix, \"Já paguei\" avisando no seu WhatsApp, e a página de destino depois do pagamento."],["Novo","O **sinal já nasce ligado em 50%**, e os três textos nascem preenchidos com o que a sua página de álbuns já promete. Nas outras abas eles nascem vazios de propósito; aqui a política já estava escrita, então o padrão repete o que você já diz em vez de inventar."],["Novo","Um **resumo do pedido copiável**, que o cliente pode enviar para você: tamanho, fotos, lâminas, valor por foto, desconto, acabamentos, total, sinal e saldo."],["Melhorado","A calculadora **se distribui** conforme o espaço: no computador, escolhas de um lado e orçamento do outro, com os tamanhos em três por linha; no celular, uma coluna só. A antiga era travada numa moldura estreita e ficava na vertical em qualquer tela."],["Atenção","O valor cobrado é **o mesmo** da calculadora que está no ar — conferido em todas as 2.760 combinações de tamanho, quantidade de fotos e acabamentos, uma a uma, e não por amostragem."],["Exige uma ação sua, uma única vez","Para trocar a calculadora da sua página de álbuns: gere o código na aba nova e **substitua** o componente que está lá hoje. Enquanto você não fizer isso, a página continua com a calculadora antiga, funcionando como sempre."],["Atenção","**Uma calculadora por página.** Dois blocos desta aba na mesma página não funcionam — é a mesma limitação do Checkout e da Mini loja."]]},
  {v:"2026-09-14i",d:"14 de setembro de 2026",itens:[["Corrigido","A prévia **O que o PayPal vai registrar** ficava ilegível em tela estreita: a coluna do nome do produto era espremida a ponto de sair quase uma letra por linha. Quando não há largura para a tabela, a lista passa a sair **um item por bloco**, com o nome de cada campo ao lado do valor — a mesma forma que os totais logo abaixo já usavam."],["Melhorado","As colunas dessa tabela foram estreitadas para as larguras que a página `/cobrar` já usava, então sobra mais espaço para o nome do produto antes de precisar empilhar. Nas prévias do computador nada muda de forma."],["Melhorado","A mesma tabela na página `/cobrar` passou a empilhar em telas menores que 375 pontos, onde antes era preciso arrastar de lado para ler as últimas colunas."],["","O resto da versão foi conferência interna, sem mudança na tela."]]},
  {v:"2026-09-14g",d:"14 de setembro de 2026",itens:[["Novo","A página `/cobrar` ganhou uma **prévia**. Depois de gerar o link, ela mostra num quadro a **sua própria página de pagamento**, já com esta cobrança dentro — é a página de verdade, carregada do seu site, e não um desenho parecido."],["Novo","Logo abaixo dela, uma tabela diz **o que vai para o PayPal** nesta cobrança: cada item com nome, SKU, quantidade e preço, mais a soma dos itens, o valor cobrado, a descrição e o código de conciliação. São os mesmos campos que a ferramenta completa já mostrava, lidos da mesma fonte."],["Novo","No computador a prévia fica numa **coluna ao lado**, que acompanha a rolagem. No celular ela fica **abaixo do link, recolhida** — um toque abre."],["Atenção","O quadro é **só para olhar**: o toque não passa por ele, para você não pagar sem querer a sua própria cobrança. Para mexer de verdade, use **Abrir em outra aba**."],["Atenção","Se aparecer uma **recusa** dentro do quadro, é o aviso que faltava: o código colado na sua página de pagamento é anterior a esta cobrança. Gere de novo o **Código 1** e recole no site — até agora isso só apareceria com o cliente na frente."],["Atenção","Esta é a **única parte da `/cobrar` que precisa de internet**. Sem conexão aparece um recado dizendo isso, e nunca um quadro em branco — que pareceria defeito da cobrança. O link continua sendo montado no próprio aparelho, com ou sem rede."]]},
@@ -5836,7 +5860,7 @@ var FCR_NOTAS=[
  {v:"2026-09-13g",d:"13 de setembro de 2026",itens:[["Novo","Checkout, Mini loja e Agendamento por Pacote: cada item opcional pode ter uma descrição própria. Ela aparece em cinza claro na hora de escolher, não no carrinho, e texto longo quebra em várias linhas em vez de ser cortado."]]},
  {v:"2026-09-13f",d:"13 de setembro de 2026",itens:[["Corrigido","No celular, o valor saía partido ao meio nas linhas de preço — o \"R$\" numa linha e o número na outra. Agora o número nunca quebra; quem cede é o rótulo. Vale para as quatro abas de pagamento."]]},
  {v:"2026-09-13e",d:"13 de setembro de 2026",itens:[["Novo","Nas quatro abas de pagamento: três textos livres para explicar o sinal antes de o cliente pagar — o que o sinal garante, o que acontece se ele desistir e como pagar o restante. Nascem vazios de propósito: uma política de cancelamento inventada pela ferramenta seria pior que nenhuma. Vazio não aparece na página."],["Melhorado","Com o sinal ligado e os três textos em branco, a ferramenta acende um aviso âmbar na aba."]]},
- {v:"2026-09-13d",d:"13 de setembro de 2026",itens:[["Novo","Link de cobrança: cada cobrança pode pedir um sinal, em valor fixo ou em percentual, com o restante combinado para depois."],["Exige uma ação sua, uma única vez","Gere de novo o Código 1 da aba Link de cobrança e recole no componente da sua página de pagamento, publicando em seguida. Sem isso ela recusa os links novos que tiverem sinal. Nenhum link já enviado deixa de funcionar."],["Corrigido","Havia um aviso ao lado do Código 1 dizendo que recolar derrubaria os links já enviados. Deixou de ser verdade há tempos, e você leria isso justamente no passo que precisa executar."]]},
+ {v:"2026-09-13d",d:"13 de setembro de 2026",itens:[["Novo","Link de cobrança: cada cobrança pode pedir um sinal, em valor fixo ou em percentual, com o restante combinado para depois."],["Exige uma ação sua, uma única vez","Gere de novo o Código 1 da aba Link de cobrança e recole no componente da sua página de pagamento, publicando em seguida. Sem isso ela recusa os links novos que tiverem sinal. Nenhum link já enviado deixa de funcionar.",{resolvida:"2026-09-14f"}],["Corrigido","Havia um aviso ao lado do Código 1 dizendo que recolar derrubaria os links já enviados. Deixou de ser verdade há tempos, e você leria isso justamente no passo que precisa executar."]]},
  {v:"2026-09-13c",d:"13 de setembro de 2026",itens:[["Novo","Agendamento por Pacote: o cliente pode reservar pagando um sinal, com o restante no dia do ensaio. O parcelamento no cartão passou a ser calculado sobre o sinal, e não sobre um valor que ninguém está cobrando."],["Corrigido","Com o carrinho zerado, a tela mostrava três números que não fechavam: \"Total R$ 0,00 · Sinal R$ 100,00 · Saldo R$ 0,00\". Essas linhas somem quando não há o que pagar, no Checkout, na Mini loja e no Agendamento por Pacote."],["Corrigido","A segunda linha de preço (\"ou X no cartão\") repetia o mesmo número de cima quando não havia desconto no Pix, na vitrine e na página de obrigado."]]},
  {v:"2026-09-13b",d:"13 de setembro de 2026",itens:[["Corrigido","Quem tinha personalizado o rótulo do saldo via a mensagem de WhatsApp voltar ao texto de fábrica, sem aviso. A personalização passou a ser preservada."],["Corrigido","Mini loja: o campo de desconto no Pix passou a ficar desabilitado com o sinal ligado, como no Checkout."],["Melhorado","Mini loja: o aviso âmbar sobre o sinal passou a aparecer nas mesmas situações que no Checkout."],["","O resto da versão foi conferência interna da conta do sinal, sem mudança na tela."]]},
  {v:"2026-09-13a",d:"13 de setembro de 2026",itens:[["Novo","Nas quatro abas de pagamento: você escolhe qual meio aparece primeiro e com o preço em destaque, Pix ou cartão. De fábrica, Pix — que é como as páginas já publicadas saem."]]},
@@ -5897,15 +5921,35 @@ var FCR_ANTES=[
 
 /* O que ainda depende de uma acao do dono. Fica ABERTO no topo do painel: e a unica parte
    da lista que pede alguma coisa dele, e recolhe-la seria esconder justamente isso. */
-var FCR_ACOES=[
- ["2026-09-13d","Gerar de novo o **Código 1 da aba Link de cobrança** e recolar no componente da página de pagamento, publicando em seguida. Sem isso ela recusa os links novos que tiverem sinal. Nenhum link já enviado deixa de funcionar. **Uma vez só.**"],
- ["2026-09-11d","Se o seu **preset geral** aparecer como \"alterado\" sem você ter mudado nada, salve-o uma vez. Resolve para sempre."],
- ["2026-09-03b","Com domínio próprio no TidyCal, conferir no botão de teste da aba deixou de ser opcional. A ferramenta recusa um endereço escrito errado, mas não sabe se o domínio é o seu."],
- ["2026-09-03c","Se o formulário \"Confirme a reserva\" aparecer **cortado** na página publicada, ligar a altura fixa na aba e regerar o código."],
- ["2026-09-02a","Colar os **três códigos** do Agendamento por Pacote e criar os tipos de agendamento no TidyCal, cada um com o endereço de redirecionamento que a ferramenta gera."],
+/* ===== A CAIXA "O QUE AINDA DEPENDE DE VOCE" =====
+   Ate 16/09/2026 ela era uma SEGUNDA LISTA, escrita a mao, sem nenhuma ligacao com o rotulo
+   "Exige uma acao sua" das entradas. Ela divergiu, e a auditoria mediu o custo: as duas acoes
+   mais recentes -- o recolar que cobre sinal, itens e upsell (14f) e a troca da calculadora
+   da pagina de albuns (15a) -- NAO estavam nela, e o que ela mostrava era a versao antiga e
+   mais estreita da mesma instrucao (13d). E a caixa que NASCE ABERTA: era a parte mais lida
+   do painel, dizendo a coisa errada.
+   Agora ela SAI das proprias entradas. Item cujo rotulo comeca por "Exige" e uma acao, e a
+   versao dele e a versao da entrada -- nao ha o que divergir, porque nao ha segunda lista.
+   COMO APOSENTAR UMA ACAO: acrescente um TERCEIRO elemento ao item, {resolvida:'<versao>'},
+   apontando a versao que a superou. Ela some da caixa e continua no historico, onde ela
+   aconteceu. fcrItem ignora o terceiro elemento, entao nada muda no desenho da lista. */
+var FCR_ACOES_ANTES=[
  ["Aberto desde 23/08","A **Tag Head da landing de Natal** pode ainda ter a regra antiga que mata as animações daquela página para quem pede menos movimento. Quem a substitui é o Código 1 da aba Bordas com efeito: gerar com o efeito em uso e colar no lugar do bloco antigo. Não é urgente, e vale para uma página só."]
 ];
-
+/* As acoes vivas, na ordem da lista (mais recente primeiro), mais as anteriores a numeracao. */
+function fcrAcoes(){
+  var r=[],i,j,n,it;
+  for(i=0;i<FCR_NOTAS.length;i++){
+    n=FCR_NOTAS[i];
+    for(j=0;j<n.itens.length;j++){
+      it=n.itens[j];
+      if(fcrChaveRotulo(it[0])!=='exige')continue;
+      if(it[2]&&it[2].resolvida)continue;
+      r.push([n.v,it[1]]);
+    }
+  }
+  return r.concat(FCR_ACOES_ANTES);
+}
 /* ---- desenho ----------------------------------------------------------------
    Tudo por createElement + textContent, e nunca por innerHTML: o texto das notas e
    escrito a mao e pode conter <, & ou aspas (ja contem `/cobrar` e {prazo}), e montar
@@ -5938,16 +5982,33 @@ function fcrDiv(cls){var e=document.createElement('div');if(cls)e.className=cls;
 /* Uma linha "rotulo + texto". O rotulo e olhado sem acento e em caixa baixa, entao o dado
    pode escrever 'Atencao' com til sem que a chave da tabela precise de acento. Item sem
    rotulo (existem alguns, que sao observacao e nao mudanca) sai so com o texto. */
-function fcrItem(rot,txt){
-  var li=fcrDiv('fcr-item'),et,k;
+/* A PRIMEIRA PALAVRA DO ROTULO, sem acento e em caixa baixa -- e ela que decide a cor do item
+   e, desde 16/09/2026, tambem se aquele item e uma ACAO do dono. Escrita uma vez: duas leituras
+   da mesma coisa e onde a divergencia nasce. */
+function fcrChaveRotulo(rot){return fcSemAcento(String(rot||'')).toLowerCase().split(/[ ,]/)[0];}
+/* 'extra' e o terceiro elemento opcional do item. Hoje ele carrega uma coisa so:
+   {resolvida:'<versao>'} -- a versao que SUPEROU esta acao. A auditoria de 16/09/2026 mediu o
+   custo de nao ter isso: uma nota de 14/09 dizia que o tamanho do QR "espera a sua palavra", e
+   a palavra tinha sido dada e entregue 24 horas depois. Numa lista de 64 versoes, frase vencida
+   e campo minado -- quem cair nela por outro caminho fica esperando ser perguntado sobre algo
+   ja decidido. A marca aparece NA TELA, e nao so nos dados: e isso que impede a lista de
+   envelhecer em silencio, e e isso que a prova consegue ler. */
+function fcrItem(rot,txt,extra){
+  var li=fcrDiv('fcr-item'),et,k,sup;
   if(rot){
-    k=FCR_ROTULOS[fcSemAcento(String(rot)).toLowerCase().split(/[ ,]/)[0]]||'outro';
+    k=FCR_ROTULOS[fcrChaveRotulo(rot)]||'outro';
     et=document.createElement('span');
     et.className='fcr-et fcr-'+k;
     et.textContent=rot;
     li.appendChild(et);
   }
   fcrTexto(li,txt);
+  if(extra&&extra.resolvida){
+    li.setAttribute('data-resolvida',extra.resolvida);
+    sup=fcrDiv('fcr-superada');
+    sup.textContent='Substituída em '+extra.resolvida.slice(8)+' — não precisa mais fazer.';
+    li.appendChild(sup);
+  }
   return li;
 }
 
@@ -5971,7 +6032,7 @@ function fcrVersao(n){
   h.setAttribute('data-v',n.v);
   c.appendChild(h);
   if(n.nota)c.appendChild(fcrTexto(fcrDiv('fcr-nota'),n.nota));
-  for(i=0;i<n.itens.length;i++)c.appendChild(fcrItem(n.itens[i][0],n.itens[i][1]));
+  for(i=0;i<n.itens.length;i++)c.appendChild(fcrItem(n.itens[i][0],n.itens[i][1],n.itens[i][2]));
   return c;
 }
 
@@ -6034,10 +6095,11 @@ function fcrDesenhar(){
   raiz.appendChild(p);
 
   /* As acoes do dono ficam ABERTAS: e a unica parte que pede alguma coisa dele. */
-  if(FCR_ACOES.length){
+  var acoes=fcrAcoes();
+  if(acoes.length){
     cx=fcrDiv('fcr-acoes');
     p=fcrDiv('fcr-acoes-tit');p.textContent='O que ainda depende de você';cx.appendChild(p);
-    for(i=0;i<FCR_ACOES.length;i++)cx.appendChild(fcrAcao(FCR_ACOES[i][0],FCR_ACOES[i][1]));
+    for(i=0;i<acoes.length;i++)cx.appendChild(fcrAcao(acoes[i][0],acoes[i][1]));
     raiz.appendChild(cx);
   }
 
@@ -7967,7 +8029,13 @@ var ABAS=[
            ['v.acabs',{nome:'',desc:'',valor:0,sku:''},'nome']],
    exemplo:'ex.: Natal 2026 - álbuns',
    guarda:'tudo o que está configurado nesta aba — o <b>preço por foto</b>, os limites de lâminas, os <b>tamanhos cadastrados</b> (com a média de fotos por lâmina, o mínimo de fotos e o SKU de cada um), as <b>faixas de desconto</b>, os <b>acabamentos opcionais</b>, as formas de pagamento, o meio prioritário, o sinal e os três textos que o explicam, o desconto no Pix, o código do pedido, o tamanho do QR Code, o upsell, os <b>textos</b> e as cores. Não guarda o <b>formulário de cadastro</b> pela metade, e aplicar um preset <b>esvazia</b> esse formulário: ele descreve um item que ainda não existe na lista que está chegando.'},
+  /* 'restauraGrava' DECLARA o que hoje so vivia num comentario: esta aba chama salvarEstado()
+     de dentro do proprio restaura, quando uma migracao acontece. Aba restaurada DEPOIS dela
+     teria o fragmento sobrescrito pelos padroes, porque o coleta dela roda com o painel ainda
+     vazio -- e sem erro nenhum na tela. fcOrdemAbasConferir, na partida, exige que quem
+     declara isto seja a ULTIMA do registro. */
   {id:'pac', nome:'Agendamento por pacote', chaves:['a'],       coleta:aColeta,restaura:aRestaura,gerar:aGerar,
+   restauraGrava:true,
    pagamento:true,
    pref:'a',fora:[],formulario:['edops','editidx','form'],resumo:aPresetResumo,redesenhar:aPresetDepois,antesDeSalvar:aPresetAntes,
    /* A chave essencial de 'a.familias' e o 'id', e nao o 'nome': e o id que o 'fam' de cada
@@ -27758,7 +27826,7 @@ function vRestaura(st){
   setRadio('v-ppcor',V.ppcor||'gold');
   function num(id,val,def){el=$(id);if(el)el.value=(val!=null&&val!=='')?val:def;}
   num('v-preco',V.preco,30);num('v-lam-min',V.lammin,10);num('v-lam-max',V.lammax,45);
-  num('v-cod',V.cod,'ALBUM');num('v-descpix',V.descpix,5);num('v-parcelas',V.parcelas,12);
+  num('v-cod',V.cod,'ALB26');num('v-descpix',V.descpix,5);num('v-parcelas',V.parcelas,12);
   num('v-qr',V.qr,200);num('v-larg',V.larg,960);num('v-vira',V.vira,760);
   num('v-sinalpct',V.sinalpct,50);num('v-sinalfixo',V.sinalfixo,100);
   num('v-upsell',V.upsell,'');
@@ -29645,6 +29713,8 @@ prep('Textos configuraveis','slide leads tidy uni bor cnt cob loja pac alb',func
   if(ds.length)throw new Error('o rótulo ou o exemplo destes campos discorda entre o HTML e FC_SINAL_TXT: '+ds.join(', '));
   var dp=fcPagPrefsConferir();
   if(dp.length)throw new Error('a lista das abas que cobram (FC_PAG_PREFS) discorda de ABAS: '+dp.join('; '));
+  var doa=fcOrdemAbasConferir();
+  if(doa.length)throw new Error('a ordem do registro ABAS perde configuração: '+doa.join('; '));
 },'preparar as seções de texto e conferir os padrões de fábrica');
 /* Passo proprio, e antes dos contadores: se a contagem do identificador divergir da limpeza
    do payload, as recusas das duas abas compostas passariam a citar um orcamento errado. */

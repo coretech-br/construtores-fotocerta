@@ -140,6 +140,47 @@ eq('o cabeçalho do dia mais recente é o primeiro da lista',
    tudo.primeiroCab.indexOf(tudo.vers.filter(v=>v.slice(0,10)===tudo.vers[0].slice(0,10)).length + ' vers') >= 0, 'true');
 eq('o aviso vermelho de versão não descrita está ausente', tudo.orfa, 'false');
 eq('as ações do dono aparecem abertas', tudo.acoes > 0, 'true');
+/* ===== A CAIXA DIZ A VERDADE, e nao so existe (16/09/2026) =====
+   Ate aqui a unica assercao sobre ela era "tudo.acoes > 0" -- ela media que a caixa EXISTE, e
+   nunca que ela esta CERTA. Era uma segunda lista escrita a mao, e divergiu: as duas acoes mais
+   recentes nao estavam nela, e o que ela mostrava era a versao antiga e mais estreita da mesma
+   instrucao. Agora a caixa e DERIVADA das entradas, e o que se cobra e a derivacao:
+   todo item marcado "Exige" e sem 'resolvida' aparece, e nenhum outro. */
+{
+  /* Lido da TELA, e nunca de variavel global: o codigo da ferramenta nao expoe FCR_NOTAS em
+     window, e uma prova que dependesse disso mediria o que ninguem ve. Item marcado "Exige"
+     esta na lista; item superado carrega data-resolvida, posto por fcrItem. */
+  const daLista = await pg.evaluate(() => {
+    const vivas = [], mortas = [];
+    [].slice.call(document.querySelectorAll('#fcr-lista .fcr-vcab[data-v]')).forEach(cab => {
+      const v = cab.getAttribute('data-v');
+      /* O cabecalho e IRMAO dos itens, dentro do mesmo .fcr-v -- e nao o irmao anterior de um
+         container. Ver fcrVersao: ela monta um .fcr-v e pendura o cabecalho e os itens nele. */
+      const c = cab.parentElement;
+      if(!c) return;
+      [].slice.call(c.querySelectorAll(':scope > .fcr-item')).forEach(it => {
+        const et = it.querySelector('.fcr-et');
+        if(!et || et.textContent.trim().toLowerCase().indexOf('exige') !== 0) return;
+        (it.hasAttribute('data-resolvida') ? mortas : vivas).push(v);
+      });
+    });
+    return {vivas, mortas};
+  });
+  const naCaixa = await pg.evaluate(() =>
+    [].slice.call(document.querySelectorAll('#fcr-lista .fcr-acoes .fcr-quando'))
+      .map(e => e.textContent.trim()));
+  eq('toda ação viva aparece na caixa',
+     daLista.vivas.filter(v => naCaixa.indexOf(v) < 0).join(', ') || 'nenhuma faltando',
+     'nenhuma faltando');
+  eq('nenhuma ação superada continua na caixa',
+     daLista.mortas.filter(v => naCaixa.indexOf(v) >= 0).join(', ') || 'nenhuma sobrando',
+     'nenhuma sobrando');
+  eq('há pelo menos uma ação superada, e ela é visível como tal', daLista.mortas.length > 0, true);
+  /* A caixa tambem carrega o que e ANTERIOR a numeracao e nao vem de versao nenhuma: essas
+     linhas nao tem data no formato de versao. A conta separa as duas familias. */
+  const semVersao = naCaixa.filter(x => !/^\d{4}-\d{2}-\d{2}/.test(x)).length;
+  eq('a caixa não inventa nem esconde linha', naCaixa.length - semVersao, daLista.vivas.length);
+}
 eq('todo rótulo de item tem cor declarada', tudo.semCor, 0);
 eq('o cabeçalho de seção é alcançável pelo teclado', tudo.papel, 'button');
 

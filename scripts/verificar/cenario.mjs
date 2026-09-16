@@ -68,6 +68,19 @@ export async function conteudo(pg){
   await set(pg,'u-pnome','Foto extra'); await set(pg,'u-ppreco','35'); await clicar(pg,'u-prod-salvar');
   await cupons(pg,'u');
   await clicar(pg,'aba-cnt'); await set(pg,'c-cod','NATAL26');
+  /* ===== Calculadora de album (v) =====
+     A aba nasce com os seis tamanhos, as cinco faixas e os dois acabamentos de fabrica -- os
+     mesmos da calculadora publicada --, entao o cenario NAO recadastra nada: ele acrescenta o
+     que a fabrica nao tem (um SKU em cada ponta, para o pedido do PayPal sair itemizado) e
+     troca o codigo do pedido. Recadastrar os treze itens aqui seria escrever a fabrica duas
+     vezes, e a segunda copia divergiria da primeira no dia em que a fabrica mudasse. */
+  await clicar(pg,'aba-alb'); await set(pg,'v-cod','ALB26');
+  await set(pg,'v-tam-cm','50'); await set(pg,'v-tam-media','5');
+  await set(pg,'v-tam-minfotos','50'); await set(pg,'v-tam-sku','ALB-50');
+  await clicar(pg,'v-tam-add');
+  await set(pg,'v-ac-nome','Mini-réplica'); await set(pg,'v-ac-valor','390');
+  await set(pg,'v-ac-sku','MINI-REP'); await set(pg,'v-ac-desc','Uma cópia menor do mesmo álbum');
+  await clicar(pg,'v-ac-add');
   await clicar(pg,'aba-loja');
   await set(pg,'m-pnome','Album 30x30'); await set(pg,'m-pdesc','Capa dura, 20 paginas');
   await set(pg,'m-ppreco','890'); await set(pg,'m-pcat','Albuns');
@@ -193,6 +206,20 @@ export const TEXTOS = [
    'escape DUPLO, escJs(escAttr(...)): atributo dentro de uma string JS'],
   ['l-txt-rotulo-codigo',' (cód Zx05: *{cod}*) </script>',
    'marcador {cod}, acento e </script juntos, no literal partido por aTplJs'],
+  /* ----- Calculadora de album (v) -----
+     A aba nasceu com 71 campos de texto e nenhum deles era exercitado na passagem configurada.
+     Estes cinco cobrem as quatro formas de risco que existem nela: marcador montado em tempo
+     de execucao, marcador montado por aTplJs, atributo HTML, texto de botao e o </script> cru. */
+  ['v-txt-laminas','Zx40 Dá "cerca de" {n} lâminas </script>',
+   'marcador {n} em tempo de execucao, com aspas e </script no mesmo texto'],
+  ['v-txt-base-sub','Zx41 ({n} fotos \\ a {valor})',
+   'DOIS marcadores no mesmo texto, mais barra invertida'],
+  ['v-txt-aria-menos','Zx42 Tirar uma foto "do" álbum',
+   'atributo HTML por setAttribute: aspas duplas dentro de aria-label'],
+  ['v-txt-botao-pix','Zx43 Pagar & garantir <!-- agora',
+   'texto de BOTAO com & e <!-- : a sequencia que leva o parser ao estado escapado'],
+  ['v-txt-limite-max','Zx44 No máximo {n} fotos em {cm} cm ({lam} lâminas)',
+   'TRES marcadores no mesmo texto, todos em tempo de execucao'],
   /* ----- Agendamento TidyCal (t) ----- */
   ['t-txt-iframe-titulo','Zx06 Agenda "oficial" </script> — não é aqui',
    'title do iframe: escAttr precisa comer as aspas duplas E o "<" do </script'],
@@ -364,7 +391,7 @@ export async function cobranca(pg,c){
    de ser uma linha em um lugar so. */
 export const ABAS = [['aba-slide','s-gerar'],['aba-leads','l-gerar'],['aba-tidy','t-gerar'],
   ['aba-uni','u-gerar'],['aba-bor','b-gerar'],['aba-cnt','c-gerar'],['aba-cob','p-gerar'],
-  ['aba-loja','m-gerar'],['aba-efe','e-gerar'],['aba-pac','a-gerar']];
+  ['aba-loja','m-gerar'],['aba-efe','e-gerar'],['aba-pac','a-gerar'],['aba-alb','v-gerar']];
 
 /* Clica em gerar nas dez abas, e devolve as que NAO EXISTEM naquela arvore.
    ABA QUE NAO EXISTE NA ARVORE E PULADA, e nao derruba a captura. Sem isto, acrescentar uma

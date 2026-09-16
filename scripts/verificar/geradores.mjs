@@ -70,7 +70,7 @@ if(!ARV || !PORTA || !SAIDA){
    um dia um campo de texto vazar para o payload, o link muda entre as duas passagens e a
    comparacao acusa -- sem isso, a unica cobertura do link seriam as nove cobrancas abaixo,
    todas com os textos de fabrica. */
-const SAIDAS = ['s-out','l-out','t-out1','t-out2','t-out3','t-out4','t-out5','u-out','b-out1','b-out2','b-out3','b-out4','b-out5','b-out6','b-out7','c-out1','p-out1','p-out2','m-out','e-out1','e-out2','a-out1','a-out2','a-out3'];
+const SAIDAS = ['s-out','l-out','t-out1','t-out2','t-out3','t-out4','t-out5','u-out','b-out1','b-out2','b-out3','b-out4','b-out5','b-out6','b-out7','c-out1','p-out1','p-out2','m-out','e-out1','e-out2','a-out1','a-out2','a-out3','v-out'];
 
 /* O CENARIO -- o que se preenche na ferramenta antes de gerar -- mora em cenario.mjs desde
    03/09/2026, porque o teste que EXECUTA os blocos com os textos de escape
