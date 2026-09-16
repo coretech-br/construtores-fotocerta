@@ -163,7 +163,28 @@ else
   n=$(grep -o "$v_index" "$ledger" | wc -l | tr -d " ")
   if [ "$n" = "0" ]; then
     erro "a versao \"$v_index\" esta carimbada e NAO tem linha no ledger ($(basename "$ledger")). Acrescente a rodada la -- o que ela entregou, o que ensinou sobre metodo, e a tabela de estimativa e tempo real (relogio, marcado no inicio e no fim). Desde 16/09/2026 toda rodada publicada escreve a linha dela."
+  else
+    # A ENTRADA TEM DE SER UTIL, e nao so existir. Sem esta conferencia, uma linha solta com o
+    # numero da versao satisfaria a de cima -- e o ledger voltaria a ser uma lista de titulos
+    # sem o custo ao lado, que e a unica coisa que ele tem e mais ninguem tem.
+    # O INDICE GERADO tambem cita a versao, e vem ANTES das secoes -- sem pula-lo, a busca
+    # comecaria nele e mediria a linha errada. Medido em 16/09/2026, na primeira execucao.
+    sec=$(awk -v v="$v_index" '
+      /INDICE GERADO/ { noIndice=1 }
+      /FIM DO INDICE GERADO/ { noIndice=0; next }
+      noIndice { next }
+      /^### [0-9]+\./ { dentro=0; secao=$0; corpo="" ; achouNaSecao=0 }
+      { if (secao != "") { corpo = corpo $0 "\n"; if (index($0,v)) achouNaSecao=1 } }
+      /^---$/ { if (secao != "" && achouNaSecao) { printf "%s", corpo; exit } ; secao="" }
+      END { if (secao != "" && achouNaSecao) printf "%s", corpo }
+    ' "$ledger")
+    printf '%s' "$sec" | grep -q '| Estimativa | Tempo real |' ||
+      erro "a entrada da versao \"$v_index\" no ledger nao tem a tabela de estimativa e tempo real. Ela e a unica coisa que o ledger tem e mais nenhum documento tem -- sem ela a entrada e um titulo."
   fi
+  # O INDICE E DERIVADO dos titulos, e tem de estar atual: indice escrito a mao e uma segunda
+  # lista, que concorda hoje e diverge amanha.
+  sh "$raiz/scripts/ledger-indice.sh" --conferir >/dev/null 2>&1 ||
+    erro "o indice do ledger esta desatualizado. Rode 'sh scripts/ledger-indice.sh'."
 fi
 
 if [ -n "$falhas" ]; then

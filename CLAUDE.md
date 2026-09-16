@@ -139,9 +139,20 @@ adiaria a mesma morte.
 entregou, o que ela ensinou sobre método (quando houver lição real — **não se inventa lição**)
 e a tabela de **estimativa contra tempo real**.
 
-**A rede:** `conferir-versoes.sh` **recusa carimbo sem linha no ledger**, do mesmo jeito que já
-recusa carimbo sem release note. Ele acha o volume corrente sozinho, então abrir um volume novo
-não exige mexer no script, e um volume fechado não passa a ser cobrado para sempre.
+**A rede, em três camadas** (`conferir-versoes.sh`), porque rede que só confere presença não
+confere nada:
+
+1. **recusa carimbo sem linha no ledger**, como já recusa sem release note;
+2. **recusa entrada sem a tabela de estimativa e tempo real** — uma linha solta citando a versão
+   satisfaria a camada 1, e o ledger voltaria a ser uma lista de títulos. A tabela de custo é a
+   única coisa que ele tem e mais nenhum documento tem;
+3. **recusa índice desatualizado.** O índice é **gerado** dos próprios títulos
+   (`sh scripts/ledger-indice.sh`) e nunca escrito à mão — índice à mão é uma segunda lista, que
+   concorda hoje e diverge amanhã. É o mesmo defeito já eliminado em `FCR_ACOES`, em
+   `FC_PAG_PREFS` e nas três listas de prefixo.
+
+Ele acha o volume corrente sozinho (o de maior sufixo), então abrir um volume novo não exige
+mexer no script, e um volume fechado não passa a ser cobrado para sempre.
 
 **As duas obrigações não são a mesma.** A release note é para o **dono**, no tom dele, dizendo o
 efeito. O ledger é o **histórico do projeto**, com o custo ao lado e a lição de método. Uma não

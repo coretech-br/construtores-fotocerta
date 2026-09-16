@@ -319,12 +319,24 @@ console.log('\n[4] as OUTRAS TRES abas de pagamento: o mesmo descompasso existe 
   const idx = fs.readFileSync(path.join(RAIZ, 'index.html'), 'utf8');
   const emiteChave = [...idx.matchAll(/CHAVE_PIX='"\+escJs\(([^)]*)\)/g)].map(m => m[1]);
   const cfgChave = (idx.match(/chave:pixLimpar\(fciBruto\('chave'\)\)/g) || []).length;
-  chk('as QUATRO abas emitem CHAVE_PIX, e todas a partir de cfg.chave',
-      emiteChave.length === 4 && emiteChave.every(x => x === 'cfg.chave' || x === 'chave'),
-      JSON.stringify(emiteChave));
+  /* O NUMERO SAI DA LISTA UNICA DAS ABAS QUE COBRAM, e nao de um 4 cravado (16/09/2026). Com
+     a chegada da 11a aba esta assertiva ficou vermelha sem defeito por tras -- e, pior, a
+     vizinha CONTINUOU VERDE pelo motivo errado: quatro abas usavam pixLimpar e a quinta usava
+     fciVal (so o trim), entao o 4 fechava e a divergencia passava. Vermelho que e sempre
+     vermelho esconde o proximo; numero cravado que por acaso fecha esconde o de hoje. */
+  const nPag = (/var FC_PAG_PREFS=\[([^\]]*)\]/.exec(idx) || [,''])[1]
+    .split(',').filter(x => x.trim()).length;
+  chk('a lista das abas que cobram foi lida do fonte', nPag > 0, String(nPag));
+  /* MEDIDO, e nao suposto: as CINCO emitem, inclusive o Link de cobranca -- o bloco da /pagar
+     leva a chave dentro, e o que viaja no link e o valor. 'chave' (sem o cfg.) e o alias local
+     do Checkout, e por isso as duas grafias sao aceitas. */
+  chk('toda aba que cobra emite CHAVE_PIX a partir de cfg.chave',
+      emiteChave.length === nPag && emiteChave.every(x => x === 'cfg.chave' || x === 'chave'),
+      JSON.stringify(emiteChave) + ' para ' + nPag + ' abas que cobram');
   chk('nenhum gerador emite a chave por fciVal (que passa por fcTrim)',
       idx.indexOf("escJs(fciVal('chave'))") < 0);
-  chk('as QUATRO abas montam cfg.chave com pixLimpar', cfgChave === 4, String(cfgChave));
+  chk('toda aba que cobra monta cfg.chave com pixLimpar', cfgChave === nPag,
+      cfgChave + ' para ' + nPag + ' abas que cobram');
   /* A /cobrar e a quinta ponta, e ela ja usava a mesma limpeza nas duas -- medido aqui para
      a afirmacao nao ficar por conta da memoria de quem leu o arquivo uma vez. */
   const cob = fs.readFileSync(path.join(RAIZ, 'cobrar', 'index.html'), 'utf8');

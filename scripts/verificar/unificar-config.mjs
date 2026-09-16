@@ -101,7 +101,13 @@ function medirNoArquivo(){
     if(g('max')!==l.max) ruins.push(l.id+' max='+g('max')+' tabela='+l.max);
     if(g('value')!==l.pad) ruins.push(l.id+' value='+g('value')+' tabela='+l.pad);
   }
-  chk('as dez tabelas numericas foram encontradas', Object.keys(tabs).length===10, Object.keys(tabs).join(','));
+  /* UMA TABELA POR ABA, e o numero sai de ABAS -- nao de um 10 cravado, que ficou vermelho
+     na chegada da 11a aba sem nenhum defeito por tras (16/09/2026). */
+  const blocoAbas = (/var ABAS=\[[\s\S]*?\n\];/.exec(src) || [''])[0];
+  const nAbas = (blocoAbas.match(/\{id:'[a-z]+',/g) || []).length;
+  chk('a contagem de abas foi lida do fonte', nAbas > 0, String(nAbas));
+  chk('ha uma tabela numerica por aba', Object.keys(tabs).length===nAbas,
+      Object.keys(tabs).length + ' tabelas para ' + nAbas + ' abas: ' + Object.keys(tabs).join(','));
   chk('e elas somam mais de setenta campos', linhas.length>=70, String(linhas.length));
   chk('TODO campo numerico diz a mesma faixa na tabela e no HTML', ruins.length===0, ruins.join(' | '));
   chk('a guarda de partida existe e esta ligada como passo proprio',
@@ -121,7 +127,13 @@ function medirNoArquivo(){
   chk('as dez linhas do WhatsApp deixaram de ser escritas a mao em tres tabelas',
       zap===1 && /function fcZapTxtDefs\(pref,o\)/.test(src), zap+' ocorrencias (esperado: so a da fonte unica)');
   const chamadas = (src.match(/\.concat\(fcZapTxtDefs\(/g)||[]).length;
-  chk('e as tres abas chamam a fonte unica', chamadas===3, String(chamadas));
+  /* Quem chama fcZapTxtDefs sao as abas que oferecem o aviso no WhatsApp. O numero sai da
+     lista unica das abas que cobram, menos a do Link de cobranca, que nao tem carrinho.
+     Derivado em 16/09/2026 pelo mesmo motivo das outras: 3 cravado ficou vermelho sozinho. */
+  const nPag = (/var FC_PAG_PREFS=\[([^\]]*)\]/.exec(src) || [,''])[1]
+    .split(',').filter(x => x.trim()).length;
+  chk('toda aba com aviso no WhatsApp chama a fonte unica', chamadas===nPag-1,
+      chamadas + ' chamadas para ' + nPag + ' abas que cobram (menos o Link de cobranca)');
 
   /* A.3 -- aRecusa deixou de ler o DOM. A recusa em si e medida no navegador,
      na parte 5; isto aqui mede a AUSENCIA da segunda fonte de leitura. */

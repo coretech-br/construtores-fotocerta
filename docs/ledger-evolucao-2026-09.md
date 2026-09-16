@@ -16,6 +16,71 @@ ausência de um lugar onde o histórico esteja em ordem, com o tempo ao lado.
 
 ## Como o tempo foi medido
 
+<!-- INDICE GERADO -- nao edite a mao: sh scripts/ledger-indice.sh -->
+
+## Índice
+
+> Gerado por `sh scripts/ledger-indice.sh`. Uma linha por rodada, na ordem em que saíram.
+
+- **1. Acabamento da aba Efeitos de página — 25/08/2026**
+- **2. O formato da data da página de obrigado — 25/08/2026** · `2026-08-25c`
+- **3. O marcador `{prazo}` na barra de contagem — 25/08/2026** · `2026-08-25d`
+- **4. "Gerar todos os códigos" no painel consolidado — 25/08/2026**
+- **5. O pedido que chega ao painel do PayPal — 27/08/2026** · `2026-08-27a`
+- **6. A validade do cupom na linha do desconto — 01/09/2026** · `2026-09-01a`
+- **7. "Válido até" com os dois acentos — 01/09/2026** · `2026-09-01b`
+- **8. Todo texto que uma pessoa lê passa a sair acentuado — 01/09/2026** · `2026-09-01c`
+- **9. WhatsApp acentuado e a frase da loja unificada — 01/09/2026** · `2026-09-01d`
+- **10. A frase única do pedido zerado no Checkout — 01/09/2026** · `2026-09-01e`
+- **11. A décima aba: Agendamento por pacote — 02/09/2026** · `2026-09-02a`
+- **12. A v2 da décima aba — 02/09/2026** · `2026-09-02b`
+- **13. Os consertos da revisão pós-v2, e o seletor de forma de pagamento — 02/09/2026** · `2026-09-02c`
+- **14. Rodada única: os textos configuráveis e as famílias de pacotes — 02/09/2026**
+- **15. Valor mínimo do pedido para o cupom valer — 02/09/2026** · `2026-09-02g`
+- **16. A leva dos achados — 02/09/2026** · `2026-09-02h`
+- **17. Aplicar um preset zera o formulário de cadastro — 03/09/2026** · `2026-09-03a`
+- **18. O endereço completo do TidyCal — 03/09/2026** · `2026-09-03b`
+- **19. A altura do calendário, e o ouvinte que era código morto — 03/09/2026** · `2026-09-03c`
+- **20. Um calendário só: os três caminhos com a mesma implementação — 03/09/2026** · `2026-09-03d`
+- **21. Os dois interruptores do calendário viram campo — 03/09/2026** · `2026-09-03e`
+- **22. Duplicar pacote e duplicar opcional — 03/09/2026** · `2026-09-03f`
+- **23. O formulário de cadastro sobrevive à recarga por inteiro — 03/09/2026** · `2026-09-03g`
+- **24. Cupom com código repetido recusado nas três abas — 03/09/2026** · `2026-09-03h`
+- **25. Duplicar nas demais listas, e a família com o conteúdo dela — 03/09/2026** · `2026-09-03i`
+- **26. O calendário aquecido antes do clique — 04/09/2026** · `2026-09-04a`
+- **27. Aquecer o calendário com a largura real — 04/09/2026** · `2026-09-04b`
+- **28. Pré-carga dos calendários, com três opções e um quadro por pacote — 04/09/2026** · `2026-09-04c`
+- **29. A corrida entre o `embed.js` do TidyCal e o nosso aperto de mão — 04/09/2026** · `2026-09-04d`
+- **30. Limites visíveis nos campos que alimentam API — 11/09/2026** · `2026-09-11a`
+- **31. Recusa dos identificadores com orçamento composto — 11/09/2026** · `2026-09-11b`
+- **32. Achar um texto, e os 58 que estavam fora da rede — 11/09/2026** · `2026-09-11c`
+- **33. Os nove textos reserva, e a migração que os deixou entrar — 11/09/2026** · `2026-09-11d`
+- **34. O meio de pagamento prioritário — 12/09/2026** · `2026-09-13a`
+- **35. A prova do sinal, e três dívidas — 13/09/2026** · `2026-09-13b`
+- **36. Sinal no Agendamento por pacote, e o pedido em zero — 13/09/2026** · `2026-09-13c`
+- **37. Sinal por cobrança no Link de cobrança — 13/09/2026** · `2026-09-13d`
+- **38. Os três textos que explicam o sinal — 13/09/2026** · `2026-09-13e`
+- **39. O número de dinheiro não quebra ao meio — 13/09/2026** · `2026-09-13f`
+- **40. Descrição em cada item opcional — 13/09/2026** · `2026-09-13g`
+- **41. Upsell depois do pagamento — 13/09/2026** · `2026-09-13h`
+- **42. "Já paguei" no Agendamento por pacote — 13/09/2026** · `2026-09-13i`
+- **43. Unificar as abas de pagamento, leva 2 — 13/09/2026** · `2026-09-13j`
+- **44. PayPal item a item, a prévia do relatório, e o centavo do desconto — 13/09/2026** · `2026-09-13k`
+- **45. Unificar as abas de pagamento, leva 4 — 13/09/2026** · `2026-09-13l`
+- **46. Unificar as abas de pagamento, leva 5 — 14/09/2026** · `2026-09-14a`
+- **47. As três decisões do dono — 14/09/2026** · `2026-09-14b`
+- **48. SKU próprio por produto e por item opcional — 14/09/2026** · `2026-09-14c`
+- **49. Novidades: as release notes dentro da ferramenta — 14/09/2026** · `2026-09-14d`
+- **50. Tamanho do QR configurável nas quatro abas — 14/09/2026** · `2026-09-14e`
+- **51. Itens com SKU e upsell por cobrança, no link — 14/09/2026** · `2026-09-14f`
+- **52. Prévia na página `/cobrar` — 14/09/2026** · `2026-09-14g`
+- **53. A prévia do PayPal em tela estreita — 14/09/2026** · `2026-09-14i`
+- **54. A décima primeira aba: Calculadora de álbum — 15/09/2026** · `2026-09-15a`
+- **55. Auditoria: a rede cobre a aba nova, e duas redes no lugar de dois comentários — 16/09/2026** · `2026-09-16a`
+- **56. O ledger vira útil, e o arnês para de contar abas na mão — 16/09/2026** · `2026-09-16b`
+
+<!-- FIM DO INDICE GERADO -->
+
 Diferente de agosto. Naquele volume as fases commitavam por etapa, então o relógio dos commits
 media o trabalho. Em setembro quase toda rodada chega à `main` **espremida em um ou dois
 commits feitos no fim** — o relógio dos commits mediria só o ato de commitar.
@@ -1248,6 +1313,45 @@ o próprio agente devolvera 5 min 20 s. A regra e o caso estão no `CLAUDE.md`.
 | Estimativa | Tempo real |
 |---|---|
 | 2 h 10 (itens 1 e 2) · 2 h (item 4) | Itens 1 e 2: **≤ 49 min os dois juntos**, sem marca por item — a janela contém a auditoria e as conversas. Item 4: **5 min 20 s**, medido pelo relógio do próprio subagente. |
+
+---
+
+### 56. O ledger vira útil, e o arnês para de contar abas na mão — 16/09/2026
+
+Versão `2026-09-16b`. Pedido do dono, no meio da fila: *"precisamos garantir que o ledger seja
+realmente útil e sempre atualizado com o que se precisa. Isso é regra."*
+
+O volume tinha nascido no dia anterior e **já estava uma rodada atrás**. Ganhou três coisas: um
+**índice gerado dos próprios títulos** (`scripts/ledger-indice.sh`), a declaração de que é o
+volume **corrente**, e rede em `conferir-versoes.sh` — que agora recusa carimbo sem linha no
+ledger, **recusa entrada sem a tabela de estimativa e tempo real**, e recusa índice
+desatualizado.
+
+Junto veio o que a quarta varredura da auditoria mediu: quatro provas com contagem de abas
+cravada à mão, e duas que morriam sem medir nada.
+
+#### O que a rodada ensinou sobre método
+
+**Rede que só confere presença não confere nada.** A primeira versão da conferência aceitava
+qualquer linha que citasse a versão — uma linha solta satisfaria. A tabela de custo é a única
+coisa que o ledger tem e mais nenhum documento tem; sem ela a entrada é um título.
+
+**O índice é gerado porque índice escrito à mão é uma segunda lista.** É o mesmo defeito que
+esta semana já eliminou em `FCR_ACOES`, em `FC_PAG_PREFS` e nas três listas de prefixo.
+
+**Eu quebrei duas provas e a varredura as encontrou.** Ao pôr a aba nova no cenário compartilhado,
+as suítes presas a um commit anterior passaram a morrer com exceção — nem falha, nem `NÃO MEDIU`:
+processo morto, zero verificações. É a forma mais severa da armadilha de referência congelada.
+A guarda que faltava é a que `gerarTodas` já tinha: **aba que não existe na árvore é pulada.**
+
+**Número cravado que por acaso fecha esconde mais que número cravado que falha.** Em
+`chave-pix-limpeza`, a assertiva "as QUATRO abas montam a chave com `pixLimpar`" continuava
+verde: quatro abas usavam `pixLimpar` e a quinta usava só o trim — o 4 fechava, e a divergência
+passava. O vermelho da assertiva vizinha é que denunciou.
+
+| Estimativa | Tempo real |
+|---|---|
+| — (pedido no meio da fila, sem estimativa dada antes) | **3 min 39 s** — de 00:54:17 a 00:57:56, relógio |
 
 ---
 

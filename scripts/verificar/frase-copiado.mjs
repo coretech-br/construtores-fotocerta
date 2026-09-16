@@ -196,10 +196,20 @@ console.log('\n[4] o fonte de hoje: UMA entrada de fabrica, e nao duas');
   const idx = fs.readFileSync(path.join(RAIZ, 'index.html'), 'utf8');
   chk('FC_TXT_FABRICA.pixCopiado e a frase longa', idx.indexOf("pixCopiado:'" + LONGA + "'") >= 0);
   chk("a segunda entrada ('pixCopiadoCola') deixou de existir", idx.indexOf('pixCopiadoCola') < 0);
+  /* O NUMERO SAI DOS DADOS, e nao de um 4 cravado (16/09/2026). Ele era 4 quando havia quatro
+     abas de pagamento; a quinta chegou em 15/09 e esta assertiva ficou vermelha sem nenhum
+     defeito por tras -- vermelho permanente esconde o proximo, que seria de verdade. E e a
+     mesma regra que o CLAUDE.md impoe ao codigo da ferramenta: numero de abas nao se escreve
+     em frase nenhuma. A fonte e FC_PAG_PREFS, a lista unica das abas que cobram. */
+  const nPag = (/var FC_PAG_PREFS=\[([^\]]*)\]/.exec(idx) || [,''])[1]
+    .split(',').filter(x => x.trim()).length;
+  chk('a lista das abas que cobram foi lida do fonte', nPag > 0, String(nPag));
   const usos = (idx.match(/FC_TXT_FABRICA\.pixCopiado\b/g) || []).length;
-  chk('as QUATRO tabelas de texto leem essa unica entrada', usos === 4, String(usos));
+  chk('toda tabela de texto de aba que cobra le essa unica entrada', usos === nPag,
+      usos + ' usos para ' + nPag + ' abas que cobram');
   const html = (idx.match(/value="Código copiado! Cole no aplicativo do seu banco\."/g) || []).length;
-  chk('e os QUATRO <input> do HTML trazem o mesmo value=', html === 4, String(html));
+  chk('e o <input> de cada uma traz o mesmo value=', html === nPag,
+      html + ' campos para ' + nPag + ' abas que cobram');
 }
 
 resumo();

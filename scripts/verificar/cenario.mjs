@@ -74,13 +74,22 @@ export async function conteudo(pg){
      que a fabrica nao tem (um SKU em cada ponta, para o pedido do PayPal sair itemizado) e
      troca o codigo do pedido. Recadastrar os treze itens aqui seria escrever a fabrica duas
      vezes, e a segunda copia divergiria da primeira no dia em que a fabrica mudasse. */
-  await clicar(pg,'aba-alb'); await set(pg,'v-cod','ALB26');
-  await set(pg,'v-tam-cm','50'); await set(pg,'v-tam-media','5');
-  await set(pg,'v-tam-minfotos','50'); await set(pg,'v-tam-sku','ALB-50');
-  await clicar(pg,'v-tam-add');
-  await set(pg,'v-ac-nome','Mini-réplica'); await set(pg,'v-ac-valor','390');
-  await set(pg,'v-ac-sku','MINI-REP'); await set(pg,'v-ac-desc','Uma cópia menor do mesmo álbum');
-  await clicar(pg,'v-ac-add');
+  /* ABA QUE NAO EXISTE NA ARVORE E PULADA -- a mesma defesa que gerarTodas ja tinha, e pelo
+     mesmo motivo, agora medido: as suites presas a um commit ANTERIOR a esta aba (frase-copiado
+     e chaves-renomeadas, em 7e2baec) rodam este mesmo cenario na arvore de REFERENCIA. Sem a
+     guarda, clicar() lanca 'sem botao aba-alb', o processo MORRE e nenhuma verificacao e
+     medida -- nem falha, nem NAO MEDIU: silencio com codigo de saida 1. Foi o que aconteceu
+     entre 00:42 e 01:00 de 16/09/2026, e e a forma mais severa da armadilha que o CLAUDE.md
+     descreve em "prenda o commit e DETECTE o envelhecimento". */
+  if(await pg.$('#aba-alb')){
+    await clicar(pg,'aba-alb'); await set(pg,'v-cod','ALB26');
+    await set(pg,'v-tam-cm','50'); await set(pg,'v-tam-media','5');
+    await set(pg,'v-tam-minfotos','50'); await set(pg,'v-tam-sku','ALB-50');
+    await clicar(pg,'v-tam-add');
+    await set(pg,'v-ac-nome','Mini-réplica'); await set(pg,'v-ac-valor','390');
+    await set(pg,'v-ac-sku','MINI-REP'); await set(pg,'v-ac-desc','Uma cópia menor do mesmo álbum');
+    await clicar(pg,'v-ac-add');
+  }
   await clicar(pg,'aba-loja');
   await set(pg,'m-pnome','Album 30x30'); await set(pg,'m-pdesc','Capa dura, 20 paginas');
   await set(pg,'m-ppreco','890'); await set(pg,'m-pcat','Albuns');
