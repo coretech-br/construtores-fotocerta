@@ -4,7 +4,7 @@ Este projeto mantém o site fotocerta.com.br (Alboom Prosite) e a ferramenta de 
 
 ## Antes de responder
 
-Consulte a `docs/documentacao-fotocerta.md` — especialmente o **Manual do Prosite**, cujas regras são obrigatórias em todo código gerado: `addEventListener` em vez de `onclick`; tags `<script>/<style>/<iframe>` blindadas com concatenação (`'<scr'+'ipt>'`) dentro de strings JS; apenas `<div>` (nunca tags semânticas HTML5); todo script em IIFE; marcadores de seleção desenhados (radios/checkboxes nativos são ocultados pelo tema); `text-align:left` forçado nos cards; at-rules (`@keyframes`, `@media`) apenas em `<style>` no head ou body — nunca no campo CSS Customizado do componente, que só aceita propriedades soltas (aplicadas direto no elemento raiz, sem precisar de seletor); sem acentos em código.
+Consulte a `docs/documentacao-fotocerta.md` — especialmente o **Manual do Prosite**, cujas regras são obrigatórias em todo código gerado: `addEventListener` em vez de `onclick`; tags `<script>/<style>/<iframe>` blindadas com concatenação (`'<scr'+'ipt>'`) dentro de strings JS; nada de tags semânticas HTML5 (`<section>`, `<header>`, `<nav>`, `<article>`) — o sanitizador remove a tag e deixa o conteúdo solto, então `<div>` no lugar delas; isso **não** proíbe `<button>`, `<input>`, `<label>` e `<a>`, que atravessam e são usados em todos os geradores; todo script em IIFE; marcadores de seleção desenhados (radios/checkboxes nativos são ocultados pelo tema); `text-align:left` forçado nos cards; at-rules (`@keyframes`, `@media`, `@container`) apenas em `<style>` no head ou body — nunca no campo CSS Customizado do componente, que só aceita propriedades soltas (aplicadas direto no elemento raiz, sem precisar de seletor); sem acentos em código.
 
 ## Estrutura do repositório
 
@@ -14,9 +14,9 @@ Repositório **público**, servido pelo GitHub Pages em **prosite.fotocerta.com.
 |---|---|
 | `index.html` | A ferramenta geradora — **~30.000 linhas** (11 abas: slideshow, captação de leads, agendamento TidyCal, checkout, bordas com efeito, contagem regressiva, link de cobrança, mini loja, efeitos de página, agendamento por pacote, calculadora de álbum) mais o **painel consolidado** na faixa à direita, que monta a Tag Head e a Tag Body da página selecionada no preset geral. É a página servida pelo Pages. |
 | `fc-compartilhado.js` | A fonte que as **duas** páginas executam: BR Code (`FC_PIX_SRC`), selo e prazo (`P_SELO_SRC`), PayPal (`P_PP_SRC`), as recusas da cobrança, a montagem do link e a leitura da identidade guardada. Carregado com endereço **versionado** pelas duas. |
-| `cobrar/index.html` | A página `/cobrar`: uso diário, mobile-first, gera o link de uma cobrança. Não reimplementa nada — chama as mesmas funções da aba. |
+| `cobrar/index.html` | A página `/cobrar`: uso diário, mobile-first, gera o link de uma cobrança. **Ela tem código próprio, e bastante**: 61 funções nomeadas, 58 delas com o prefixo `cb` — a interface inteira, a prévia e a tabela do pedido do PayPal. O que ela **não** escreve de novo é o que decide o resultado: a montagem do link e o selo (`pLinkDe`, `pBusca`, `pPayload`), as recusas (`pRecusaCobranca`, `pUrlRecusa`), as regras que corrigem cada campo (`fcValorCorrigido` e família — os `cb*Ajustar` são invólucros de DOM em volta delas), a maquinaria do Pix (`fcPixApi`) e o pedido do PayPal (`pPpPedidoApi`) vêm todos de `fc-compartilhado.js`. E o que impede as duas de divergirem **não é ausência de código próprio** — é o invariante da linha seguinte: o link sai idêntico, caractere por caractere, ao da aba. |
 | `cobrar/manifest.json` + `cobrar/icone-{180,192,512}.png` | Manifesto e ícones da tela de início. **Sem service worker**, por decisão registrada. |
-| `previa.html` | Três linhas, **sem comportamento nenhum**. Existe só para ser um endereço de mesma origem que aceita `?pac=` — a prévia da página de obrigado precisa de consulta na URL, e um iframe escrito por `document.write` herda a URL da ferramenta, sem consulta. Não é versionado com `?v=` de propósito: o arquivo não muda, então cópia velha em cache é idêntica à nova. |
+| `previa.html` | **Uma linha, 59 bytes**, sem comportamento nenhum. Existe só para ser um endereço de mesma origem que aceita `?pac=` — a prévia da página de obrigado precisa de consulta na URL, e um iframe escrito por `document.write` herda a URL da ferramenta, sem consulta. Não é versionado com `?v=` de propósito: o arquivo não muda, então cópia velha em cache é idêntica à nova. |
 | `CNAME` | Domínio próprio do Pages: `prosite.fotocerta.com.br`. |
 | `.nojekyll` | Impede o Pages de processar o repositório como Jekyll. |
 | `docs/documentacao-fotocerta.md` | Contexto completo: arquitetura, manual do Prosite, decisões, estado atual. Fonte da verdade. |
@@ -24,7 +24,7 @@ Repositório **público**, servido pelo GitHub Pages em **prosite.fotocerta.com.
 | `scripts/carimbar-publicacao.sh` | Escreve no `index.html` a **versão e a hora da publicação** que aparecem embaixo do título, e re-registra só a linha dele em `versoes.txt`. Rodar **uma vez, logo antes do commit que vai ao ar**. |
 | `scripts/sha-index.sh` | O sha256 do `index.html` **ignorando as duas linhas do carimbo** — a regra que os dois scripts acima compartilham, para o carimbo não mudar o hash sozinho. |
 | `scripts/versoes.txt` | O registro que o script compara: `<arquivo> <versão declarada> <sha256 do conteúdo>`. |
-| `scripts/verificar/` | O **arnês de verificação**, versionado. `regressao.sh` compara o que a árvore gera com o que uma referência gera (`main` por padrão) — um comando; `geradores.mjs` fotografa as 12 saídas e as 9 cobranças; `pagina.mjs` é o **molde para executar um bloco gerado numa página que imita o Prosite** (rede externa bloqueada, relógio controlável, medição por conta do chamador), com as duas armadilhas de medição registradas dentro dele; `lib.mjs` traz as peças comuns; `README.md` diz quando usar cada um. Precisa de Node e Playwright; a falha diz o que instalar. |
+| `scripts/verificar/` | O **arnês de verificação**, versionado. `regressao.sh` compara o que a árvore gera com o que uma referência gera (`main` por padrão) — um comando; `geradores.mjs` fotografa as **26 saídas** — as 25 declaradas em `SAIDAS` mais a `t-out1-direta`, cada uma em duas passagens, a de fábrica e a configurada — e as **9 cobranças**; `pagina.mjs` é o **molde para executar um bloco gerado numa página que imita o Prosite** (rede externa bloqueada, relógio controlável, medição por conta do chamador), com as duas armadilhas de medição registradas dentro dele; `lib.mjs` traz as peças comuns; `README.md` diz quando usar cada um. Precisa de Node e Playwright; a falha diz o que instalar. |
 | `docs/specs/` | Specs de design das funcionalidades, um arquivo por feature, nomeados `AAAA-MM-DD-topico-design.md`. |
 | `docs/pendencias.md` | A lista **viva** do que ficou combinado e ainda não foi feito. Ler antes de propor a próxima rodada; atualizar ao fim de cada uma. |
 | `docs/ledger-evolucao-2026-08.md` | O histórico das rodadas entregues **até 24/08/2026**, com os tempos reais. |
@@ -43,17 +43,21 @@ O repositório é público. **WhatsApp, chave Pix e Client ID do PayPal nunca s�
 
 Ao criar campo novo que receba esse tipo de dado, siga a mesma regra: `value=""` mais `placeholder`, e fallback `|| ''` em `restaurarEstado`. Nome da marca e cidade (`Foto Certa`, `Vitória`) continuam nos padrões — são identidade pública, não credencial.
 
-**Esses dados moram num lugar só, e não numa aba.** Desde ago/2026 a chave Pix, o nome e a cidade do recebedor, o Client ID do PayPal e o WhatsApp ficam no painel **Identidade** da barra do topo (`fci-*`, chave `fcConstrutoresIdentidade`), acima das oito abas e acima do preset geral. Aba nova que precise de um deles **lê** de lá (`fciVal` / `fciBruto` / `fciDigitos`) e **não cria campo próprio**: sem segunda cópia não há como divergir. Aba nova não declara `operacionais` — a lista foi removida do registro `ABAS`. Recusa por identidade vazia usa `fciRecusa(...)` e, depois do `alert`, `fciApontarSe(msg)`, que abre o painel e leva o foco ao campo. Cor nova que signifique **exatamente** destaque, fundo do cartão, texto ou coruja entra em `FCI_PALETA`; cor com significado próprio da aba **não entra** — na Captação de leads `c1` é o fundo do cabeçalho, não destaque.
+**Esses dados moram num lugar só, e não numa aba.** Desde ago/2026 a chave Pix, o nome e a cidade do recebedor, o Client ID do PayPal e o WhatsApp ficam no painel **Identidade** da barra do topo (`fci-*`, chave `fcConstrutoresIdentidade`), acima de todas as abas e acima do preset geral. Aba nova que precise de um deles **lê** de lá (`fciVal` / `fciBruto` / `fciDigitos`) e **não cria campo próprio**: sem segunda cópia não há como divergir. Aba nova não declara `operacionais` — a lista foi removida do registro `ABAS`. Recusa por identidade vazia usa `fciRecusa(...)` e, depois do `alert`, `fciApontarSe(msg)`, que abre o painel e leva o foco ao campo. Cor nova que signifique **exatamente** destaque, fundo do cartão, texto ou coruja entra em `FCI_PALETA`; cor com significado próprio da aba **não entra** — na Captação de leads `c1` é o fundo do cabeçalho, não destaque.
 
 ## Padrão de todo código novo
 
-**No código gerado:** variáveis de customização no topo, comentadas com os valores permitidos; seção "Daqui para baixo nao precisa mexer"; prefixos próprios (classes `fc-` no slideshow, `fcw-` na captação de leads, `fcu-` no checkout, `fcb-` na contagem regressiva, `fcpg-` no link de cobrança, `fcm-` na mini loja; animações `fc-borda-*` nas bordas). **Prefixo diferente por bloco não é enfeite:** dois blocos desta ferramenta podem acabar na mesma página, e classes iguais se pisam. O prefixo do código gerado nunca pode coincidir com um prefixo da própria ferramenta (`fcp-`, `fcg-`, `fcx-`, `fcc-`): um grep traria as duas coisas misturadas.
+**No código gerado:** variáveis de customização no topo, comentadas com os valores permitidos; seção "Daqui para baixo nao precisa mexer"; prefixos próprios, **um por gerador**: `fc-` no Slideshow, `fcw-` na Captação de leads, `fcu-` no Checkout, `fcb-` na Contagem regressiva, `fcpg-` no Link de cobrança, `fcm-` na Mini loja, `fcef-` nos Efeitos de página, `fca-` no Agendamento por pacote e `fcal-` na Calculadora de álbum — mais as animações `fc-borda-*` e as variáveis `--fcn-*` das Bordas. O Agendamento TidyCal não aparece nesta lista porque o bloco dele não emite classe nenhuma: ele só troca marcadores dentro do texto da página.
 
-**No layout das abas da ferramenta** (obrigatório também para abas novas — detalhes na seção 4 da documentação): descrição no topo → **seções numeradas** de configuração (`<div class="secao"><span class="secao-n">N</span> Título</div>` + `<div class="grade">` com **duas caixas** de fieldsets, agrupadas por tema — duas colunas quando há espaço, uma só quando não há, por conta do `auto-fit`, que mede o container e não a janela; formulário de cadastro à esquerda e lista à direita quando houver, e lista que cresce sem limite **fora da grade**, em largura inteira) → **última seção "Prévia e código gerado"**, com os botões de ação, a prévia à esquerda e as saídas de código à direita → **instruções de uso ao final**, em largura total. Campos e funções levam o prefixo da aba (`s-`, `l-`, `t-`, `u-`, `b-`, `c-`, `p-`, `m-`).
+**Prefixo diferente por bloco não é enfeite:** dois blocos desta ferramenta podem acabar na mesma página, e classes iguais se pisam. O prefixo do código gerado nunca pode coincidir com um prefixo da própria ferramenta — hoje `fcp-` (biblioteca de presets), `fcg-` (preset geral), `fcx-` (backup em arquivo), `fcc-` (painel consolidado), `fci-` (identidade e paleta), `fcs-` (achar um texto), `fcr-` (novidades), `fcd-` (seções recolhíveis), `fcl-` (limites visíveis), `fcaj-` (ajuda) e `fcord-` (ordem dos meios): um grep traria as duas coisas misturadas. **As duas listas envelhecem uma contra a outra, e já quase colidiram:** o painel Novidades ficou com `fcr-` porque `fcn-` já estava tomado pelas variáveis que as Bordas escrevem no código gerado (`--fcn-h`, `--fcn-v`, `--fcn-c`) — está registrado no próprio `index.html`, junto da escolha. Prefixo novo se confere contra as duas listas antes de ser usado.
+
+**No layout das abas da ferramenta** (obrigatório também para abas novas — detalhes na seção 4 da documentação): descrição no topo → **seções numeradas** de configuração (`<div class="secao" data-sec="<chave>"><span class="secao-n">N</span> Título</div>` + `<div class="grade">` com **duas caixas** de fieldsets, agrupadas por tema — duas colunas quando há espaço, uma só quando não há, por conta do `auto-fit`, que mede o container e não a janela; formulário de cadastro à esquerda e lista à direita quando houver, e lista que cresce sem limite **fora da grade**, em largura inteira) → **última seção "Prévia e código gerado"**, com os botões de ação, a prévia à esquerda e as saídas de código à direita → **instruções de uso ao final**, em largura total. Campos e funções levam o prefixo da aba, que é o `pref` do registro `ABAS` — hoje `s-` (Slideshow), `l-` (Captação de leads), `t-` (TidyCal), `u-` (Checkout), `b-` (Bordas), `c-` (Contagem regressiva), `p-` (Link de cobrança), `m-` (Mini loja), `e-` (Efeitos de página), `a-` (Agendamento por pacote) e `v-` (Calculadora de álbum).
+
+**O número da seção sai da POSIÇÃO, e texto que cita seção aponta por chave.** Na partida, `fcSecoesNumerar()` reescreve o `<span class="secao-n">` de cada `.secao` com a posição dela dentro do painel. O número continua escrito no HTML — a fonte fica legível para quem lê o arquivo, e a página nasce certa antes de o script rodar —, mas quem manda é a função: número errado no HTML é corrigido ali em vez de mentir na tela. Toda seção leva `data-sec="<chave>"`, e **todo texto que cita uma seção aponta por essa chave, nunca pelo número**: em HTML, `<span class="sec-ref" data-sec="..."></span>`, que nasce vazio e é preenchido na partida; em JavaScript, `fcSecN('...')`. É a mesma armadilha que `ABAS.length` já fechou para a contagem de abas, e ela foi medida em 03/09/2026: partir em duas a seção 2 do Agendamento por pacote obrigou a renumerar **cinco cabeçalhos e sete textos** que citavam seção por número — e o que ficasse para trás apontaria para o lugar errado, sem erro nenhum.
 
 **Prévia roda o gerador, não imita o gerador.** Prévia que redesenha o resultado com código próprio é uma segunda implementação, e duas implementações divergem: na aba Contagem regressiva divergiram duas vezes antes de a duplicação ser removida (escape de HTML num lado só; urgência que entrava e nunca saía no código gerado). Em aba nova com prévia dinâmica, isolar a montagem do bloco numa função única (padrão `cBloco(cfg)`) e fazer a prévia **executar o retorno dela** dentro de um `<iframe>` de mesma origem, escrito por `document.write`. Junto vêm quatro obrigações: injetar antes do bloco um shim que troque `localStorage`/`sessionStorage` por objetos em memória (senão a prévia suja as chaves reais e nasce vencida na segunda abertura — o bloco entregue não muda, o shim é do ambiente), **conferindo depois se a troca pegou e avisando visivelmente se não pegou**, porque `setItem` no Storage real não lança e a falha seria muda; pôr enchimento cinzento abaixo para haver o que rolar; debounce de ~400 ms com **timer único**, cancelado antes de reagendar; e montar a prévia **só quando a aba é aberta**, nunca no carregamento da ferramenta. Campo numérico que alimenta uma `@media` tem de ser preso à faixa declarada dentro da própria função de configuração — prender só a largura da prévia deixa o iframe num valor e o CSS gerado em outro, e a prévia volta a mentir. E o campo tem de **se corrigir na interface** (no `change`/`blur`, nunca no `input`): clamp que só acontece por baixo conserta a saída mas muda em silêncio um número que o operador está lendo na tela — trocar defeito visível por invisível é o que este projeto já recusou no limiar de urgência. O `<p class="ajuda">` da prévia deixa de listar o que falta e passa a declarar o que ainda difere da página publicada.
 
-**Fonte única, mesmo quando as cópias concordam.** Trecho escrito duas vezes que hoje produz o mesmo resultado não é defeito — é o defeito de amanhã, quando um lado for alterado e o outro não, sem erro e sem aviso. Ao encontrar um, unifica-se a **fonte que escreve**, nunca a saída: o bloco colado no site é autossuficiente e continua levando a própria cópia dentro dele (o desenho da coruja e a `moedaFmt` do checkout são os exemplos vivos — `CORUJA_PECAS`/`corujaJs` e `PRECO_MOEDAS`/`uMoedaFmtGer`). Se a unificação levar o bloco gerado a chamar algo de fora, parou no lugar errado. E como isto é refatoração, a prova é a saída dos seis geradores continuar **byte a byte idêntica**: as duas versões servidas em portas separadas de `localhost`, o mesmo roteiro nas duas (com `localStorage.clear()` **e recarga** antes de cada uma) e comparação por hash.
+**Fonte única, mesmo quando as cópias concordam.** Trecho escrito duas vezes que hoje produz o mesmo resultado não é defeito — é o defeito de amanhã, quando um lado for alterado e o outro não, sem erro e sem aviso. Ao encontrar um, unifica-se a **fonte que escreve**, nunca a saída: o bloco colado no site é autossuficiente e continua levando a própria cópia dentro dele (o desenho da coruja e a `moedaFmt` do checkout são os exemplos vivos — `CORUJA_PECAS`/`corujaJs` e `PRECO_MOEDAS`/`fcMoedaFmtGer`). Se a unificação levar o bloco gerado a chamar algo de fora, parou no lugar errado. E como isto é refatoração, a prova é a saída de **todos os geradores** — um por aba, hoje onze — continuar **byte a byte idêntica**: as duas versões servidas em portas separadas de `localhost`, o mesmo roteiro nas duas (com `localStorage.clear()` **e recarga** antes de cada uma) e comparação por hash.
 
 **Saída que vai para um campo do Prosite tem de aparecer no painel consolidado. Sem exceção.** O painel é o principal recurso de usabilidade do dono: ele existe para que nenhum código gerado fique para trás na hora de montar a página. A regra, que vale para todo construtor daqui para frente:
 
@@ -64,7 +68,7 @@ Ao criar campo novo que receba esse tipo de dado, siga a mesma regra: `value=""`
 
 **A rede que torna o esquecimento visível.** O mapa (`fccDaAba`) é escrito à mão, e em 23/08/2026 a Tag Body da página de obrigado foi gerada e não entrou nele — silenciosamente. Agora `fccOrfas` compara, a cada desenho do painel, **toda caixa de saída com conteúdo** contra o plano mais o `FCC_FORA`, e o que sobrar aparece em vermelho no painel, nomeando a saída. Ela não conserta o mapa; ela faz o buraco aparecer. Ao acrescentar uma saída nova, rodar a varredura de combinações antes de fechar a rodada.
 
-**Presets são fotografia do `coleta()` da aba, nunca uma segunda leitura de campos.** As seis abas compartilham uma mecânica só (`fcPreset*`, no bloco “biblioteca de presets por aba”): salvar copia o fragmento que o `coleta()` devolve, aplicar chama o `restaura()` da própria aba, e por isso “Aplicar” devolve a aba inteira e passa pelas travas que já existem (`corValida` no restaura, `fcAjustarTodos` no `redesenhar`). Aba nova declara em `ABAS`: `pref`, `fora` (campos que descrevem outro componente e não entram no preset), `operacionais` (contato/pagamento — fonte única do aviso na tela e do “sem dados” da exportação), `resumo`, `redesenhar`, `antesDeSalvar`. Cada preset guarda `carimbo` (data de modificação; regravar valores iguais não avança o carimbo, comparação por `fcValoresIguais`) — é o que o preset geral vai usar para avisar “veio de X, que mudou depois”. O resumo da lista nunca mostra dado operacional.
+**Presets são fotografia do `coleta()` da aba, nunca uma segunda leitura de campos.** **Todas** as abas compartilham uma mecânica só (`fcPreset*`, no bloco “biblioteca de presets por aba”; a seção é montada num laço sobre `ABAS`, um `prep` por aba): salvar copia o fragmento que o `coleta()` devolve, aplicar chama o `restaura()` da própria aba, e por isso “Aplicar” devolve a aba inteira e passa pelas travas que já existem (`corValida` no restaura, `fcAjustarTodos` no `redesenhar`). Aba nova declara no registro `ABAS` as chaves da seção seguinte — e **não** declara `operacionais`, que saiu do registro em ago/2026, quando a identidade foi recolhida num lugar só. Cada preset guarda `carimbo` (data de modificação; regravar valores iguais não avança o carimbo, comparação por `fcValoresIguais`) — é o que o preset geral vai usar para avisar “veio de X, que mudou depois”. O resumo da lista nunca mostra dado operacional.
 
 **Nada que dois geradores precisem é escrito duas vezes.** O que se unifica é **a fonte que escreve**, nunca a saída: o bloco entregue continua autossuficiente e nunca depende da ferramenta. Já são fonte única `CORUJA_PECAS`/`corujaJs`, `PRECO_MOEDAS`/`fcMoedaFmtGer`, `corSegura`/`CORES_LIVRES`, as tabelas numéricas (`fcPreso`/`fcAjustar`), os escapes, o shim das prévias (`fcPvShim`) e a maquinaria do Pix (`FC_PIX_SRC` — `tlv`, `crc16`, `semAcento`, `montarPayload`, `lerTlv`, `pixLer`). Quando a **própria ferramenta** também precisa executar o que ela escreve, ela **avalia a mesma fonte** (`fcPixApi`, via `new Function` sobre texto literal do arquivo) em vez de reimplementar — assim não existe segunda implementação nem por descuido. Provar a unificação é comparar as saídas byte a byte com as de `main`.
 
@@ -78,9 +82,101 @@ Ao criar campo novo que receba esse tipo de dado, siga a mesma regra: `value=""`
 2. **Extrair só o que as DUAS páginas executam.** Mover código compartilhado já tem custo (ele passa a ter dois donos); mover o que só um lado usa troca duplicação por acoplamento, que não é melhor, é diferente. Invólucro que toca o DOM fica na página; a parte pura vai para o arquivo (`pValDia` → `fcValDia`, `fciLerBruto` → `fcLerJson`).
 3. **Ao publicar mudança no arquivo compartilhado, troque a versão nos QUATRO lugares:** `FC_COMPART_VERSAO` dentro dele, o `?v=` do `<script>` **e** o `FC_COMPART_ESPERADA` no `index.html`, e o `?v=` mais o `FC_COMPART_ESPERADA` em `cobrar/index.html`. **Eram "três" nesta documentação até 13/09/2026, e o quarto — o `FC_COMPART_ESPERADA` do próprio `index.html` — estava faltando na lista.** Esquecê-lo faz a ferramenta **parar inteira, em silêncio**: a guarda funciona, mas quem estiver medindo vê a suíte ficar verde **sem medir nada**, porque a página nem chega a carregar. Medido nesse dia, com 30 verificações passando sobre uma ferramenta parada. Sem isso o navegador pode servir uma cópia velha para uma página e a nova para a outra, e o resultado são **links que a própria `/pagar` recusa**, sem erro na tela. As duas páginas conferem ao carregar e **param com aviso** se as versões não baterem. Confira com `grep -c "fc-compartilhado.js?v=<versao>" index.html cobrar/index.html` e com `grep -n "FC_COMPART_ESPERADA=" index.html cobrar/index.html`.
 
-**A prova de que uma página nova não divergiu da aba: o invariante byte a byte.** Para a mesma entrada, o link que a `/cobrar` gera é idêntico, caractere por caractere, ao que a aba gera — se diferisse em um, o selo não fecharia e a `/pagar` recusaria. Toda mudança que toque a montagem do link refaz essa comparação, e junto a regressão dos **oito geradores**, também byte a byte.
+**A prova de que uma página nova não divergiu da aba: o invariante byte a byte.** Para a mesma entrada, o link que a `/cobrar` gera é idêntico, caractere por caractere, ao que a aba gera — se diferisse em um, o selo não fecharia e a `/pagar` recusaria. Toda mudança que toque a montagem do link refaz essa comparação, e junto a regressão de **todos os geradores**, também byte a byte.
+
+**O número de geradores não se escreve à mão, e a razão é esta seção.** Até 16/09/2026 este arquivo dizia *seis*, *oito* e *doze* para a mesma coisa, em três frases diferentes — nenhuma certa. Há **um gerador por aba**, e quantas abas existem sai de `ABAS.length` (`fcAbasTxt`), como manda a regra logo acima. Quando a prosa precisar do número, ele é medido na hora e dito com a fonte ao lado; quando não precisar, escreve-se *todos*.
 
 **CSS gerado programaticamente:** nunca emitir uma segunda regra para um seletor que outra função já declarou. Propriedades shorthand (`transition`, `background`, `animation`) não se fundem entre duas regras do mesmo seletor com a mesma especificidade — a que vier depois no CSS vence por inteiro e apaga a primeira. Acumular tudo (transições, camadas de background, animações) numa única regra existente para aquele seletor.
+
+## O registro `ABAS`: o que cada chave faz, e o que quebra sem ela
+
+O registro é o único lugar que sabe o que pertence a qual aba — estado gravado, preset,
+importação, geração e painel consolidado saem todos dele. O comentário no topo do array, no
+`index.html`, traz a razão de cada chave e continua sendo a fonte; esta tabela é o resumo, com
+**o que acontece quando a chave falta**, que é a pergunta que uma aba nova faz.
+
+**Treze chaves estão em todas as entradas de hoje**, e nenhuma é decorativa:
+
+| Chave | O que faz | O que acontece se faltar |
+|---|---|---|
+| `id` | identificador curto da aba (`slide`, `cob`, `alb`…); é o sufixo de `aba-<id>` e `painel-<id>` e a chave da biblioteca de presets | `fcAbasIds()` não a devolve, e `trocarAba` nunca mostra nem esconde o painel dela — a aba fica inalcançável |
+| `nome` | **texto de interface, com acento**: barra vermelha de falhas, perguntas do preset geral, rótulo do interruptor | as três mensagens passam a dizer `undefined`. A grafia tem de bater com a dos `prep()` da aba, senão a barra de falhas fala de duas abas onde há uma |
+| `chaves` | as chaves do estado gravado que pertencem a esta aba (`['imgs','s']`) | `restaurarEstado` lê `a.chaves.length` **fora** do `try` que isola aba por aba: a leitura estoura e a restauração das abas seguintes não acontece |
+| `coleta` | devolve o fragmento de configuração da aba | `fcEstadoAtual` não tem o que gravar — a configuração do dono não sobrevive à recarga, e o backup sai sem a aba |
+| `restaura` | recebe o estado e devolve a aba à tela | a aba abre sempre nos padrões, e "Aplicar preset" não faz nada |
+| `gerar` | a função do botão *Gerar código* | "Gerar todos os códigos" **recusa nomeando a aba** (*"esta aba não tem gerador declarado no registro"*) — esta é a única cujo buraco já aparece na tela |
+| `pref` | o prefixo dos campos (`s-`, `v-`…). É **também** a chave do fragmento e o lugar onde a biblioteca fica gravada (`<pref>.presets`) — as três coisas sempre coincidiram | a biblioteca de presets da aba não é lida nem gravada, e `fcPagPrefsConferir` não consegue casá-la com `FC_PAG_PREFS` |
+| `fora` | campos que descrevem **outro componente** e não entram em preset (hoje só `b.consol`). Ao aplicar, eles conservam o que está na tela | o padrão é lista vazia, então nada quebra — o preset passa a mandar num componente que não é este |
+| `resumo` | a linha curta que descreve o preset na lista. **Nunca mostra dado operacional** | a linha do preset sai vazia |
+| `redesenhar` | o que a aba refaz depois de um preset aplicado — o mesmo passo que a partida já executa | o estado muda e a tela não: prévia e listas ficam mostrando a configuração anterior |
+| `antesDeSalvar` | devolve texto de recusa (ou `''`) antes de congelar a configuração num preset | preset é salvo sobre configuração que a aba recusaria gerar |
+| `exemplo` | o `placeholder` do campo "nome do preset" | cai no genérico `ex.: Natal 2026` |
+| `guarda` | o parágrafo *"O que o preset guarda"*, na própria seção de presets | sai a palavra `undefined` na tela, sem fallback |
+
+E as **oito opcionais**, cada uma com a pergunta que a faz existir:
+
+| Chave | Quando declarar | O que ela muda |
+|---|---|---|
+| `listas` | a aba tem lista cadastrável | `[caminho, molde de UM item, chave essencial]` de cada lista, para a conferência do arquivo importado. Sem ela, lista vazia na tela deixa a conferência sem item de exemplo e **qualquer coisa** entra na lista, sem ser contada |
+| `pagamento` | a aba cobra | é o que `fcPagPrefsConferir` compara com `FC_PAG_PREFS` (ver logo abaixo) |
+| `formulario` | a aba cadastra item com opcionais | os campos do **formulário inacabado** (`edops`/`editidx`/`form`). Gravados no estado, para o dono não perder o que digitou; fora do preset, porque não são configuração de campanha. Aplicar um preset os **zera** |
+| `presetOk` | o formato guardado precisa de conferência extra | preset com formato estranho é recusado antes de ser aplicado |
+| `importar` | valores vindos de **arquivo** precisam de limpeza que só a aba sabe fazer | hoje o Slideshow (`sImportarLimpar`) e a Mini loja (`mImportarLimpar`) têm uma — as duas por causa de endereço de foto |
+| `naoEmite` | a aba tem campo que **viaja no preset e não muda o que ela emite** — na Link de cobrança, a descrição, o valor e o identificador daquela cobrança, que vão para o LINK e nunca para o bloco | é o que o painel consolidado desconta da assinatura do código. Sem ela, digitar a descrição de uma cobrança nova faz o painel anunciar que o bloco da página está velho **sobre um bloco byte a byte idêntico** — aviso falso, e aviso falso é o começo de o operador parar de ler os verdadeiros. O critério é *"o gerador lê este campo?"*, nunca *"o campo parece de aparência?"* |
+| `aposPresets` | a aba precisa de um passo depois de a lista de presets ser desenhada | hoje só as Bordas |
+| `restauraGrava` | **a aba chama `salvarEstado()` de dentro do próprio `restaura`** | ver a seção seguinte — é a única cuja ausência custa a configuração do dono |
+
+### A ordem do registro não é a ordem da barra, e inverter apaga configuração
+
+A ordem de `ABAS` é a ordem em que `restaurarEstado` devolve as abas. Uma aba que grava estado
+**de dentro do próprio `restaura`** declara `restauraGrava:true` e **precisa ser a última do
+array**: qualquer aba depois dela ainda não foi restaurada quando aquele `salvarEstado()`
+dispara, então o `coleta()` delas devolve os padrões — e é isso que fica gravado. O dono perde a
+configuração e **não há erro nenhum na tela**. Hoje a aba nessa condição é a Agendamento por
+pacote.
+
+A ordem em si é livre no resto: restaurar lê por chave, e uma cópia com a ordem visual foi
+testada e devolveu os mesmos campos. O que a ordem atual compra é diff limpo nas comparações de
+regressão, porque o texto gravado sai idêntico ao da versão anterior.
+
+**A rede:** `fcOrdemAbasConferir()`, na partida, acende a barra vermelha nomeando as duas abas
+("X grava estado durante a restauração e vem ANTES de Y, cuja configuração seria sobrescrita").
+Ela não conserta; faz o buraco aparecer, como `fccOrfas` e `fcTxtFabricaDiverge`. Até
+16/09/2026 a única proteção era um comentário dentro de um array de mais de cem linhas. A prova
+de que ela dispara mesmo — nos dois sentidos, silêncio na árvore sã e barra vermelha numa cópia
+adulterada de propósito — é `scripts/verificar/redes-da-partida.mjs`.
+
+### As abas que cobram: `pagamento:true` e `FC_PAG_PREFS`
+
+`FC_PAG_PREFS` é a lista dos prefixos das abas que cobram, escrita à mão em um lugar só. Ela
+alimenta **três** máquinas: o aviso dos textos do sinal, a conferência de fábrica dos campos do
+sinal (três por aba de pagamento — **quinze** hoje; o comentário no `index.html` ainda diz
+*doze*, de quando eram quatro abas) e a memória da ordem dos meios de pagamento. Eram três listas cravadas em três
+lugares que ninguém ligava um ao outro, e uma aba de pagamento nova entrava em silêncio nas
+três.
+
+Aba que cobre dinheiro declara `pagamento:true` **e** entra em `FC_PAG_PREFS` — as duas coisas.
+**A rede:** `fcPagPrefsConferir()`, na partida, compara as duas listas nos dois sentidos e acende
+a barra vermelha quando discordam ("X cobra e não está em `FC_PAG_PREFS`"; "o prefixo Y está em
+`FC_PAG_PREFS` e nenhuma aba o declara com `pagamento:true`"). Também medida em
+`redes-da-partida.mjs`.
+
+### Os três textos do sinal, e a única aba que os traz preenchidos
+
+Os três textos que o cliente lê antes de pagar — o que o sinal garante, o que acontece se ele
+desistir, o que fazer com o saldo — nascem de `FC_SINAL_TXT` e entram na tabela de cada aba por
+`fcSinalTxtDefs(pref, padroes)`. Sem o segundo parâmetro eles **nascem vazios**, e essa é a
+decisão da maioria: os três são **declarações de política comercial**, e um padrão de fábrica
+afirmaria, para um cliente prestes a pagar, uma política que o dono pode não ter. Linha vazia não
+aparece no bloco, então a saída de fábrica fica byte a byte como seria sem eles.
+
+**A Calculadora de álbum é a exceção, e ela é declarada:** os três nascem preenchidos
+(`V_SINAL_TXT_FABRICA`) e o sinal nasce **ligado em 50%**, contra 30% desligado nas outras. A
+razão está no código e não é preferência: a página de álbuns do dono **já publica** essa política
+(*"PIX de 50% na confirmação do pedido e saldo na aprovação do design"*), então o padrão repete o
+que ele já diz em vez de inventar. Aba nova que cobre segue a regra da maioria — padrão vazio —
+a menos que exista uma política já publicada para repetir, e nesse caso a razão vai escrita ao
+lado do `padroes`.
 
 ## Método de execução: econômico por padrão (combinado em 22/08/2026)
 

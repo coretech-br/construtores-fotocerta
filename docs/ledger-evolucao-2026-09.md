@@ -79,6 +79,7 @@ ausência de um lugar onde o histórico esteja em ordem, com o tempo ao lado.
 - **55. Auditoria: a rede cobre a aba nova, e duas redes no lugar de dois comentários — 16/09/2026** · `2026-09-16a`
 - **56. O ledger vira útil, e o arnês para de contar abas na mão — 16/09/2026** · `2026-09-16b`
 - **57. As explicações que param de poluir o dia a dia — 16/09/2026** · `2026-09-16c`
+- **58. A documentação volta a dizer a verdade — 16/09/2026** · `2026-09-16d`
 
 <!-- FIM DO INDICE GERADO -->
 
@@ -1392,6 +1393,42 @@ e de `FCR_ACOES` terem deixado de ser listas paralelas nesta mesma semana.
 | Estimativa | Tempo real |
 |---|---|
 | 7 h 30 | **2 min 07 s** — de 01:02:00 a 01:04:07 no relógio. A marca cobre a implementação; o desenho e a medição das 433 caixas aconteceram antes dela, na conversa em que o dono escolheu a alternativa, e não foram cronometrados. |
+
+---
+
+### 58. A documentação volta a dizer a verdade — 16/09/2026
+
+Versão `2026-09-16d`. Itens **3 e 5** da fila, executados juntos em faixa própria porque mexem
+nos mesmos documentos. Só documentação: **nenhuma mudança na tela**.
+
+**Item 3 — quinze afirmações falsas, quinze corrigidas.** Nenhuma se desmentiu ao medir, mas
+cinco mediram **diferente do que a auditoria dizia**: as saídas fotografadas são 26 e não 12
+(e a frase errada aparecia em *dois* lugares, não um); a `/cobrar` define **58** funções `cb*`
+e não 61, e os clamps dela **não** são reimplementação — são invólucros de DOM sobre a fonte
+compartilhada; as versões sem registro eram **32** e não 26; as datas erradas eram **treze** e
+não sete.
+
+**Item 5 — as cinco regras que só viviam no código.** A ordem do registro `ABAS` e o
+`restauraGrava`; as cinco abas que cobram e a rede que confere a lista; o `@container`; os
+números de seção que saem da posição; e a exceção dos textos do sinal da Calculadora.
+
+#### O que a rodada ensinou sobre método
+
+**A lista de achados de uma auditoria também envelhece, e em horas.** Cinco dos quinze itens
+mediram diferente do que a auditoria registrara poucas horas antes — porque a árvore andou no
+meio. Quem executa tem de **medir de novo**, não confiar na lista.
+
+**Dois números errados não se desmentiram: eles se multiplicaram.** A frase "as 12 saídas"
+existia em dois lugares, e "sete datas erradas" eram treze. Achado que se mede pela primeira
+vez tende a ser o piso, não o teto.
+
+**Contradição que não se resolve, se declara.** Uma dívida está datada de 03/09 e o commit que
+a registra é de 04/09. Pode ter sido notada num dia e escrita no outro; não há como decidir, e
+inventar a decisão seria pior que registrar a dúvida.
+
+| Estimativa | Tempo real |
+|---|---|
+| 4 h (itens 3 e 5) | **9 min 00 s** — relógio do próprio subagente, em faixa paralela |
 
 ---
 

@@ -1,7 +1,7 @@
 /* ============================================================================
    A FOTOGRAFIA DOS GERADORES
    ============================================================================
-   Exercita as dez abas na ARVORE indicada e grava, num JSON, o hash de cada saida
+   Exercita as onze abas na ARVORE indicada e grava, num JSON, o hash de cada saida
    e o link completo de cada cobranca. Duas fotografias comparadas dizem, sem opiniao,
    se uma rodada mexeu no que ela nao devia.
 
@@ -15,7 +15,7 @@
    ---------------------------------------------------------------------------
    Ate 03/09/2026 este arquivo tinha UMA passagem, e ela nao escrevia em NENHUM campo
    de texto (nenhum '*-txt-*'). Naquele dia a rodada dos textos configuraveis criou 162
-   campos desses -- todo texto que o cliente final le nas dez abas passou a ser
+   campos desses -- todo texto que o cliente final le nas onze abas passou a ser
    editavel --, e a fotografia continuou provando apenas o CAMINHO DE FABRICA: com os
    textos no padrao, ela dizia que a saida nao mudou, e nao dizia nada sobre o que
    acontece quando o dono escreve o texto dele.
@@ -113,7 +113,7 @@ async function passagem(comTextos, pasta){
   if(comTextos) await ramoSinal(pg);
   const pulou = await gerarTodas(pg);
   /* t-out2 e t-out3 so existem no modo "pagina intermediaria embutida": sem esta segunda
-     passagem, duas das doze saidas ficariam vazias e a regressao nao as cobriria. */
+     passagem, duas das 26 saidas ficariam vazias e a regressao nao as cobriria. */
   const tDireta = await ler(pg,'t-out1');
   await clicar(pg,'aba-tidy'); await radio(pg,'t-arq','embutida'); await clicar(pg,'t-gerar');
   await pg.waitForTimeout(60);

@@ -78,7 +78,7 @@ cobertura. **Se ela trouxer conserto, ele vira item 8 em diante, para o dono dec
 
 ---
 
-Atualizado em 03/09/2026. Este arquivo é a lista viva; o histórico do que já foi entregue está no `docs/ledger-evolucao-2026-08.md` e nas specs.
+Atualizado em 16/09/2026. Este arquivo é a lista viva; o histórico do que já foi entregue está nos ledgers (`docs/ledger-evolucao-2026-08.md` até 24/08, `docs/ledger-evolucao-2026-09.md` de 25/08 em diante) e nas specs.
 
 ---
 
@@ -129,15 +129,15 @@ Entregue em 01/09/2026, fechando a acentuação: a **mensagem do WhatsApp passou
 
 **Opção registrada, não implementada:** mandar tambem o `invoice_id` ao PayPal. Ele apareceria no histórico e nos e-mails do comprador, mas é **único por conta** — a segunda cobrança com o mesmo identificador seria recusada. Serve como trava contra pagamento em duplicidade; é decisão do dono.
 
-Entregue em 02–03/09/2026: a **décima aba, Agendamento por pacote** (`docs/specs/2026-09-02-agendamento-por-pacote-design.md`, doze decisões em `docs/decisoes-2026-09-02-agendamento-por-pacote.md`) — vitrine de dois passos com iframe único sob demanda, os N endereços de redirecionamento e a página de obrigado com pagamento e prazo de reserva. A rodada foi partida em duas entregas; a verificação final (Tarefa 11) unificou `precoPix`/`parcelaDe`/o texto da linha do cartão/a serialização do catálogo entre os dois geradores (prova byte a byte das três saídas, antes e depois), colocou a aba na fotografia da regressão (`scripts/verificar/geradores.mjs`, com dois pacotes de propósito para exercitar o arredondamento da parcela nas duas direções) e corrigiu, ao rodar as varreduras de sanidade, dois defeitos deixados por rodadas anteriores: um `<script>` cru dentro de um comentário de `aBlocoObrigado` e uma palavra acentuada dentro de outro comentário — nenhum dos dois mexia em lógica, e a regressão das 21 saídas antigas continuou idêntica à `main`. O que ficou de fora está nas duas seções abaixo.
+Entregue em 02/09/2026: a **décima aba, Agendamento por pacote** (`docs/specs/2026-09-02-agendamento-por-pacote-design.md`, doze decisões em `docs/decisoes-2026-09-02-agendamento-por-pacote.md`) — vitrine de dois passos com iframe único sob demanda, os N endereços de redirecionamento e a página de obrigado com pagamento e prazo de reserva. A rodada foi partida em duas entregas; a verificação final (Tarefa 11) unificou `precoPix`/`parcelaDe`/o texto da linha do cartão/a serialização do catálogo entre os dois geradores (prova byte a byte das três saídas, antes e depois), colocou a aba na fotografia da regressão (`scripts/verificar/geradores.mjs`, com dois pacotes de propósito para exercitar o arredondamento da parcela nas duas direções) e corrigiu, ao rodar as varreduras de sanidade, dois defeitos deixados por rodadas anteriores: um `<script>` cru dentro de um comentário de `aBlocoObrigado` e uma palavra acentuada dentro de outro comentário — nenhum dos dois mexia em lógica, e a regressão das 21 saídas antigas continuou idêntica à `main`. O que ficou de fora está nas duas seções abaixo.
 
-Entregue em 03/09/2026: a **v2 da décima aba**, a revisão do dono sobre a v1 já publicada (`docs/specs/2026-09-02-agendamento-por-pacote-design.md` §0, quatro decisões revisadas + duas novas em `docs/decisoes-2026-09-02-agendamento-por-pacote.md`; plano: `docs/superpowers/plans/2026-09-03-agendamento-por-pacote-v2.md`). O bloco de pagamento passou a espelhar o **Checkout** em vez da `/pagar` (com opcionais, quantidade e cupom, e o link do TidyCal virou **caminho**, não URL inteira); duas fontes únicas foram extraídas **antes** da aba nova, para cada uma ser provada isoladamente — o pedido do PayPal (Checkout e Mini loja, `u-out`/`m-out`/`p-out1` byte a byte idênticos antes e depois) e o desenho do QR Code (molde da `/pagar`, consumido por Checkout, Mini loja, `/pagar` e a aba `pac` — **esta muda `u-out`/`m-out` de propósito**, corrigindo dois defeitos reais do Checkout: `new QRCode(...)` sem `try/catch` e a corrida do `qrPronto`). Cupom repetido passou a ser recusado também no Checkout e na Mini loja, e a quantidade dos opcionais passou a funcionar de verdade no pagamento (antes, a marcação existia e não fazia nada). A prévia não precisou de nenhuma linha nova — ela executa `aBlocoObrigado` diretamente, então herdou opcionais/quantidade/cupom no mesmo commit que os criou. Verificação final (Tarefa 7): o cenário da regressão passou a cadastrar um opcional com quantidade e um cupom com validade na aba `pac` — sem isso, os caminhos novos ficavam fora da fotografia byte a byte; `scripts/verificar/regressao.sh` contra a `main` (que já tem a v1): 4 divergências, todas explicadas (`u-out`, `m-out`, `a-out1`, `a-out3`), as outras 20 saídas e as 9 cobranças idênticas. O que ficou de fora está nas duas seções abaixo.
+Entregue em 02/09/2026: a **v2 da décima aba**, a revisão do dono sobre a v1 já publicada (`docs/specs/2026-09-02-agendamento-por-pacote-design.md` §0, quatro decisões revisadas + duas novas em `docs/decisoes-2026-09-02-agendamento-por-pacote.md`; plano: `docs/superpowers/plans/2026-09-03-agendamento-por-pacote-v2.md`). O bloco de pagamento passou a espelhar o **Checkout** em vez da `/pagar` (com opcionais, quantidade e cupom, e o link do TidyCal virou **caminho**, não URL inteira); duas fontes únicas foram extraídas **antes** da aba nova, para cada uma ser provada isoladamente — o pedido do PayPal (Checkout e Mini loja, `u-out`/`m-out`/`p-out1` byte a byte idênticos antes e depois) e o desenho do QR Code (molde da `/pagar`, consumido por Checkout, Mini loja, `/pagar` e a aba `pac` — **esta muda `u-out`/`m-out` de propósito**, corrigindo dois defeitos reais do Checkout: `new QRCode(...)` sem `try/catch` e a corrida do `qrPronto`). Cupom repetido passou a ser recusado também no Checkout e na Mini loja, e a quantidade dos opcionais passou a funcionar de verdade no pagamento (antes, a marcação existia e não fazia nada). A prévia não precisou de nenhuma linha nova — ela executa `aBlocoObrigado` diretamente, então herdou opcionais/quantidade/cupom no mesmo commit que os criou. Verificação final (Tarefa 7): o cenário da regressão passou a cadastrar um opcional com quantidade e um cupom com validade na aba `pac` — sem isso, os caminhos novos ficavam fora da fotografia byte a byte; `scripts/verificar/regressao.sh` contra a `main` (que já tem a v1): 4 divergências, todas explicadas (`u-out`, `m-out`, `a-out1`, `a-out3`), as outras 20 saídas e as 9 cobranças idênticas. O que ficou de fora está nas duas seções abaixo.
 
-Entregue em 03/09/2026: **todo texto que o cliente final lê virou campo**, nas oito abas que têm texto que o cliente lê — Bordas com efeito e Efeitos de página não têm nenhum (documentação: `docs/documentacao-fotocerta.md` §4, "Todo texto que o cliente lê virou campo"; plano: `docs/superpowers/plans/2026-09-03-rodada-unica-textos-e-familias.md`; as decisões sobre os 17 duvidosos: `docs/decisoes-2026-09-03-textos-configuraveis.md`). São **157 campos** em oito tabelas `*_TXT_DEFS`, uma por aba, cada uma servindo ao mesmo tempo o `cfg()`, a persistência e o padrão de preset antigo; o texto de fábrica das frases repetidas entre abas passou a sair de uma tabela só (`FC_TXT_FABRICA`), com um campo por aba para o dono poder divergir de propósito. Junto vieram `aTplJs`/`escJsD` (que reconstroem em tempo de geração a concatenação que o texto fixo já escrevia, para o bloco entregue não engordar na configuração de fábrica), a seção recolhida por padrão (`.secao dobra`/`fcdLigar`) e `fcTxtFabricaDiverge`, a guarda que acende a barra vermelha quando o `value=` do HTML e a tabela da aba discordam sobre o padrão.
+Entregue em 02/09/2026: **todo texto que o cliente final lê virou campo**, nas oito abas que têm texto que o cliente lê — Bordas com efeito e Efeitos de página não têm nenhum (documentação: `docs/documentacao-fotocerta.md` §4, "Todo texto que o cliente lê virou campo"; plano: `docs/superpowers/plans/2026-09-03-rodada-unica-textos-e-familias.md`; as decisões sobre os 17 duvidosos: `docs/decisoes-2026-09-03-textos-configuraveis.md`). São **157 campos** em oito tabelas `*_TXT_DEFS`, uma por aba, cada uma servindo ao mesmo tempo o `cfg()`, a persistência e o padrão de preset antigo; o texto de fábrica das frases repetidas entre abas passou a sair de uma tabela só (`FC_TXT_FABRICA`), com um campo por aba para o dono poder divergir de propósito. Junto vieram `aTplJs`/`escJsD` (que reconstroem em tempo de geração a concatenação que o texto fixo já escrevia, para o bloco entregue não engordar na configuração de fábrica), a seção recolhida por padrão (`.secao dobra`/`fcdLigar`) e `fcTxtFabricaDiverge`, a guarda que acende a barra vermelha quando o `value=` do HTML e a tabela da aba discordam sobre o padrão.
 
 O que cada parte provou: **a regressão byte a byte** (`scripts/verificar/regressao.sh`) foi rodada ao fim de cada etapa contra a referência anterior, e toda divergência está nomeada no commit correspondente, ligada à decisão que a autorizou — D-1 (`{PCT}` → `{pct}`, com a leitura aceitando as duas grafias), D-2 e D-3 (a frase inteira no campo, em vez do sufixo colado por fora), D-5 (`{n}` nos avisos de carrinho), D-11 (`Próxima foto` acentuado), o aviso do Pix novo nas quatro abas, o `c-out1` da correção de D-13 e os dois rótulos de seção da `/pagar`. Fora dessas, as demais saídas e as 9 cobranças saíram **byte a byte idênticas**, que é o invariante que a rodada existia para não quebrar. Na Etapa 1, o mesmo invariante foi conferido também **nos cenários que a fotografia não exercita** (a vitrine no modo "somente PayPal"). A **prévia da vitrine ganhou o alternador computador/celular** (Etapa 6, mesclada de `pac-previa-celular`), com as 24 saídas byte a byte idênticas — mexer na prévia não pode mudar um byte do que a ferramenta gera, e não mudou. E um ponto foi provado **com o bloco rodando de verdade**, porque a regressão não alcançaria: depois da separação entre a identidade da unidade e o sufixo visível (D-12), o marcador do relógio continua se remontando ao cruzar 24h **com os sufixos de fábrica, vazios e repetidos** — se o dono tivesse ficado com a identidade, dois sufixos iguais parariam a remontagem em silêncio.
 
-Entregue em 03/09/2026, fechando a mesma rodada: as **famílias de pacotes na aba `pac`** (documentação: `docs/documentacao-fotocerta.md` §4, "Famílias de pacotes na aba `pac`"; desenho: `docs/superpowers/plans/2026-09-03-rodada-unica-textos-e-familias.md`, item 7 e a revisão do desenho; commits `f393dea` e `540ab53`). A família virou o **passo 1** da vitrine — o caso real é o aluguel do estúdio para fotógrafos parceiros, com pacotes por duração separados entre dias úteis e fins de semana/feriados, estes mais caros. `aFamilias` é lista irmã de `aPacotes`, e cada pacote aponta para a família **pelo `id`**, nunca pelo nome; o `id` é determinístico (`'F'+(maior+1)`).
+Entregue em 02/09/2026, fechando a mesma rodada: as **famílias de pacotes na aba `pac`** (documentação: `docs/documentacao-fotocerta.md` §4, "Famílias de pacotes na aba `pac`"; desenho: `docs/superpowers/plans/2026-09-03-rodada-unica-textos-e-familias.md`, item 7 e a revisão do desenho; commits `f393dea` e `540ab53`). A família virou o **passo 1** da vitrine — o caso real é o aluguel do estúdio para fotógrafos parceiros, com pacotes por duração separados entre dias úteis e fins de semana/feriados, estes mais caros. `aFamilias` é lista irmã de `aPacotes`, e cada pacote aponta para a família **pelo `id`**, nunca pelo nome; o `id` é determinístico (`'F'+(maior+1)`).
 
 O que cada parte provou:
 
@@ -152,11 +152,11 @@ A próxima rodada sai do que o dono encontrar no uso.
 
 ## O que depende só do dono
 
-Em 23/08/2026 o dono fechou os **sete** itens desta lista. Dois itens novos entraram em 02–03/09/2026, com a décima aba.
+Em 23/08/2026 o dono fechou os itens desta lista. **Seis estão nomeados** — os cinco abaixo mais o do espelho, no parágrafo seguinte. O texto dizia *sete* desde a primeira versão desta seção (commit `ffd8a29`), e o sétimo nunca foi nomeado aqui, em versão nenhuma do arquivo: era a contagem que estava errada, não a lista. Dois itens novos entraram em 02/09/2026, com a décima aba.
 
-O sétimo dos antigos — atualizar o espelho da Tag Body da hospedeira — foi resolvido **eliminando a causa**: os espelhos deixaram de existir. Ao classificar o que havia em `prosite/`, tudo era reproduzível pelos construtores, inclusive a âncora inteligente e o plano B. Ver a decisão registrada na `CLAUDE.md` e na documentação.
+O do espelho — atualizar o espelho da Tag Body da hospedeira — foi resolvido **eliminando a causa**: os espelhos deixaram de existir. Ao classificar o que havia em `prosite/`, tudo era reproduzível pelos construtores, inclusive a âncora inteligente e o plano B. Ver a decisão registrada na `CLAUDE.md` e na documentação.
 
-### Novo em 02–03/09/2026, décima aba
+### Novo em 02/09/2026, décima aba
 
 - **Colar os três códigos gerados e criar os tipos de agendamento no TidyCal**, cada um com o endereço de redirecionamento que a saída 2 (`a-out2`) gera para ele — a aba não sabe fazer isso sozinha, porque o cadastro dos tipos é do lado do TidyCal.
 - **Confirmar como o modal do TidyCal se comporta dentro do bloco novo, numa página já publicada.** É a única incógnita que não se responde daqui: o bloco cria o iframe com as próprias mãos (ao contrário da aba TidyCal, que usa o `embed.js` deles), herdando só a origem e o prefixo dos sinais que eles emitem — mas o comportamento real do modal, num navegador de verdade, só se vê publicado. Se o modal aparecer **cortado**, a saída é ligar `ALTURA_SEMPRE=true` no topo do bloco (comentário explicando o custo: um vão vazio embaixo do calendário) e regerar.
@@ -216,7 +216,7 @@ cliente troca de pacote, e o `embed.js` cria o iframe uma vez só).
 
 ---
 
-## Entregue em 03/09/2026 — a leva dos achados
+## Entregue em 02/09/2026 — a leva dos achados
 
 Sob a regra nova do dono (*"o que for identificado pelo caminho, registra, resolve e publica
 na nova versão"*), a lista de dívidas pequenas foi **zerada** nesta leva, com uma exceção
@@ -257,28 +257,34 @@ duas mudanças intencionais do recibo do PayPal. As outras 23 saídas e as 9 cob
 byte idênticas, nas duas passagens. Mais as cinco suítes de navegador (`cupom-minimo` 68,
 `textos-escape` 51, `lista-cupons` 51, `pac-quantidade` 44, `acentos` limpo).
 
-### O que ficou, e é decisão do dono
+### ~~O que ficou, e é decisão do dono~~ — FECHADO em 03/09/2026
 
-**Aplicar um preset com um item em edição** deixa o formulário apontando para a posição N do
-catálogo **novo** — o botão diz "Salvar alterações" e gravaria por cima de outro produto. É
-anterior a esta rodada, e a mudança do formulário inacabado já **melhora** o caminho (índice
-fora da faixa vira "item novo"). Zerar o formulário ao aplicar um preset é uma decisão sobre o
-que "aplicar preset" significa — e a resposta provável é sim, porque preset já é declarado
-como *fotografia da aba inteira*. Fica para a palavra do dono.
+**Aplicar um preset com um item em edição** deixava o formulário apontando para a posição N do
+catálogo **novo** — o botão dizia "Salvar alterações" e gravaria por cima de outro produto.
+A resposta do dono foi a prevista: **aplicar um preset zera o formulário de cadastro**, porque
+preset é a *fotografia da aba inteira* e um formulário meio preenchido, herdado do catálogo
+anterior, não pertence à fotografia que está chegando.
+
+Fechado no código (commit `c55f9de`, 03/09/2026): `fcPresetZerarForm(a,frag)` roda tanto no
+`fcPresetAplicar` da aba quanto no `fcgAplicarAba` do preset geral, sobre os campos declarados
+em `formulario`. **Recarregar continua devolvendo** o formulário inacabado — são caminhos
+diferentes que chamam o mesmo `restaura()`.
 
 ---
 
 ## Dívidas registradas, pequenas, sem dono
 
-Em 23/08/2026 o dono pediu que **todas** fossem feitas. Ficou uma, e ela é dele:
+Em 23/08/2026 o dono pediu que **todas** as dívidas de então fossem feitas, e ficou **uma** — a de número 1, e ela é dele. As outras **sete** entraram depois, em 02/09/2026, agrupadas por rodada; a numeração é contínua porque a lista é uma só.
+
+**Situação em 16/09/2026, medida no código:** das oito, **uma está fechada** (a 7, que o próprio texto já declara) e a cauda da 3 também — ver a nota dentro dela. As demais seguem abertas, e as de número 4, 5 e 6 seguem abertas **por decisão registrada**, não por esquecimento.
 
 1. **A Tag Head da landing de Natal pode ainda ter a regra antiga de movimento reduzido** (`[style], * { animation-duration: 0.01ms !important }`), que mata toda animação **daquela página** para quem pede menos movimento. Quem a substitui é o **código 1 da aba Bordas com efeito**: gerar com o efeito em uso e colar no lugar do bloco antigo. Não é urgente, e o alcance é de uma página só — não do site, porque **o Prosite não tem cabeçalho global**.
 
-### Novas em 03/09/2026, décima aba v2
+### Novas em 02/09/2026, décima aba v2
 
 2. **A `/pagar` continua com a própria cópia do pedido do PayPal (`actions.order.create`)**, e isso é decisão, não esquecimento — medida ao extrair a fonte única (Task 1 do plano v2): o Checkout e a Mini loja montam o item a partir de um carrinho (`subtotal()`/`somaProdutos()`/`cupomAtivo`); a `/pagar` monta de um item único vindo do link, sem carrinho nenhum. O esqueleto comum aos três (SDK, `style` dos botões, guarda de total zero, `purchase_units`, `onApprove`, `onError`) foi extraído e é consumido pelo Checkout e pela Mini loja; puxar a `/pagar` para dentro também exigiria mexer numa saída que já está publicada cobrando, fora do escopo desta rodada — e o ganho seria pequeno, porque a `/pagar` já é a mais simples das quatro. Extração completa fica registrada aqui, não forçada.
 3. ~~**Dois defeitos pré-existentes do Checkout**~~ — **FECHADOS, e a dívida era do registro, não do código.**
-   Ao ir consertá-los em 03/09/2026, a medição mostrou que os dois já tinham sido corrigidos no
+   Ao ir consertá-los em 02/09/2026, a medição mostrou que os dois já tinham sido corrigidos no
    dia anterior, pelo commit `cc5aaae`: `uProdRender` já troca a palavra inteira
    (`ops.length>1?' opcionais':' opcional'`), `uProdSalvar` já diz `'Informe o preço do
    produto.'` e `uCpPctErro` já é a versão acentuada e **sem a marca** ("o pagamento recusa a
@@ -291,28 +297,43 @@ Em 23/08/2026 o dono pediu que **todas** fossem feitas. Ficou uma, e ela é dele
 
    **A lição, e ela é a mesma da dívida 7:** registro que descreve como pendente o que já foi
    feito é pior que registro ausente — ele **manda procurar no lugar errado**, e quem o lê
-   confia. Duas vezes em dois dias. Ao fechar um item, fechá-lo em **todos** os lugares que o
+   confia. Duas vezes na mesma rodada — e, medido em 16/09/2026, três. Ao fechar um item, fechá-lo em **todos** os lugares que o
    descrevem: a lista, e os comentários do código que apontam para ele.
 
-   Sobrou uma **terceira cópia da mesma família**, essa de verdade: `mCpPctErro` (Mini loja)
-   ainda tem a mensagem sem acento que o Checkout já perdeu. E, ao lado dela, `mCpRender` não
-   mostra a validade na lista de cupons — o Checkout e a `pac` mostram — e os seus campos de
-   código e valor não chamam `salvarEstado()`/`mPreview()`.
+   Sobrava uma **terceira cópia da mesma família**: `mCpPctErro` (Mini loja) com a mensagem sem
+   acento que o Checkout já tinha perdido; `mCpRender` sem mostrar a validade na lista de cupons;
+   e os campos de código e valor dela sem chamar `salvarEstado()`/`mPreview()`.
 
-### Novas em 03/09/2026, rodada dos textos configuráveis
+   **FECHADA também — e este registro repetiu, ele mesmo, o defeito que denuncia.** Os três já
+   estavam corrigidos quando este parágrafo foi escrito: commit `25ac34c`, *"As tres dividas da
+   lista de cupons da Mini loja, e a varredura das irmas"*, de **02/09/2026 às 21:26**. Medido em
+   16/09/2026: `mCpPctErro` emite hoje a frase acentuada e idêntica à do Checkout; `mCpRender`
+   desenha o campo de validade, com o comentário *"A VALIDADE APARECE NA LISTA, como no Checkout
+   (uCpRender) e na aba pac (aCpRender)"* ao lado; e os dois campos chamam
+   `salvarEstado();mPreview();` no `input`. **Terceira vez em duas semanas** que um registro deste
+   arquivo descreveu como pendente algo já feito.
+
+### Novas em 02/09/2026, rodada dos textos configuráveis
 
 Três textos que o cliente final lê **continuam cravados**, e as três exclusões são decisão registrada, com a razão — não esquecimento. As duas primeiras estão em `docs/decisoes-2026-09-03-textos-configuraveis.md` (D-6 e D-14).
 
 4. **A descrição do pedido que chega ao PayPal** não virou campo. O critério de 03/09 pega (o cliente lê essa descrição no PayPal e no recibo), mas ali não é tela do bloco e sim **payload de pagamento**: edição errada só aparece numa cobrança de verdade, com dinheiro no meio, e a rodada já era grande. **Dívida consciente.**
 5. **Os nomes de mês e de dia da semana** (três tabelas, doze e sete itens) não viraram campo porque são **tradução, não customização** — ninguém troca "janeiro" por flexibilidade. Se um dia o site for para outra língua, é aqui que se mexe, e aí a rodada é essa, com as três tabelas juntas.
 6. **Os dois `aria-label` do seletor de quantidade** — `Diminuir a quantidade` e `Aumentar a quantidade` — moram na fonte única `fcFazQtdSrc`, que serve **três** abas ao mesmo tempo (Checkout, Mini loja e Agendamento por pacote). Torná-los configuráveis por aba exigiria parametrizar a fonte e mexer nos três geradores; um campo só para as três seria a fábrica única sem a liberdade por aba, que é justamente o oposto da regra desta rodada. Fica como está, declarado.
-7. **O cenário da regressão não preenche nenhum campo de texto.** Medido na árvore em 03/09/2026: `scripts/verificar/geradores.mjs` não escreve em nenhum `*-txt-*`, então a fotografia byte a byte prova **o caminho de fábrica** e nada diz sobre o caminho configurado — um texto que o gerador deixasse de emitir, ou emitisse escapado errado, passaria pela regressão sem acusar. É a mesma armadilha já registrada três vezes neste arquivo (o cupom da Mini loja em 01/09, `t-out4`/`t-out5`, a própria aba `pac` na v1): **cenário que não exercita um caminho não prova nada sobre ele.** **FECHADA na mesma rodada, algumas horas depois de registrada** (commit `bff63ba`): o cenário ganhou uma **segunda passagem, a configurada**, com 28 textos escolhidos por critério — um por aba (Bordas e Efeitos de página não têm campo de texto), todos os tipos de marcador, e os quatro caminhos de escape, incluindo um texto com `</script` para provar que a blindagem do manual do Prosite resiste ao que o dono digitar. Cada valor leva um selo que o arnês procura nas saídas; texto sem vestígio é tratado como defeito, e os **quatro** presos a ramo que o cenário não percorre estão declarados com o motivo, conferidos nos dois sentidos. **Achou de primeira o defeito que existia para achar:** os quatro avisos de item sumido da Mini loja concatenavam o número em vez de trocar o marcador, e o cliente leria `2 {n} itens do seu carrinho saíram do catálogo` — marcador cru na tela.
+7. **O cenário da regressão não preenche nenhum campo de texto.** Medido na árvore em 02/09/2026: `scripts/verificar/geradores.mjs` não escreve em nenhum `*-txt-*`, então a fotografia byte a byte prova **o caminho de fábrica** e nada diz sobre o caminho configurado — um texto que o gerador deixasse de emitir, ou emitisse escapado errado, passaria pela regressão sem acusar. É a mesma armadilha já registrada três vezes neste arquivo (o cupom da Mini loja em 01/09, `t-out4`/`t-out5`, a própria aba `pac` na v1): **cenário que não exercita um caminho não prova nada sobre ele.** **FECHADA na mesma rodada, algumas horas depois de registrada** (commit `bff63ba`): o cenário ganhou uma **segunda passagem, a configurada**, com 28 textos escolhidos por critério — um por aba (Bordas e Efeitos de página não têm campo de texto), todos os tipos de marcador, e os quatro caminhos de escape, incluindo um texto com `</script` para provar que a blindagem do manual do Prosite resiste ao que o dono digitar. Cada valor leva um selo que o arnês procura nas saídas; texto sem vestígio é tratado como defeito, e os **quatro** presos a ramo que o cenário não percorre estão declarados com o motivo, conferidos nos dois sentidos. **Achou de primeira o defeito que existia para achar:** os quatro avisos de item sumido da Mini loja concatenavam o número em vez de trocar o marcador, e o cliente leria `2 {n} itens do seu carrinho saíram do catálogo` — marcador cru na tela.
 
-### Novas em 03/09/2026, rodada das famílias
+### Novas em 02/09/2026, rodada das famílias
 
-8. **Os campos numéricos da aba `pac` são gravados como TEXTO, e a conferência da importação recusa por tipo — achado ao medir o conserto do `link`, e NÃO consertado.** `aColeta()` lê cada numérico por `aElVal(id, padrão)`, que devolve `el.value` — sempre uma **string**, mesmo o `<input type="number">`. São `prazoh`, `descpix`, `parcelas`, `altdesk`, `altmob`, `largmob` e `qtdmax`: **sete** antes desta rodada, **oito** com o `largcards` que ela acrescentou. Como o molde da conferência é uma fotografia do próprio `aColeta()` (`fcxMolde` chama `fcPresetCapturar`), o molde diz "string" para os oito; e `fcxConformar` compara `typeof` e recusa quando não bate (`index.html`, `if(typeof v!==t)return {ok:false}` dentro do ramo `string|number|boolean`). Consequência: um arquivo de "Exportar tudo" **gerado por outra ferramenta, ou editado à mão** com os números crus (`"prazoh": 24` em vez de `"prazoh": "24"`) perde os oito campos **em silêncio** — eles somem do fragmento, a aba volta aos padrões, e a única pista é o contador dizendo *"N item(ns) do arquivo NÃO foram reconhecidos e ficam de fora"*, **sem dizer quais**. O número foi medido nas duas árvores ao escrever o teste da migração: sete descartes que nada têm a ver com famílias.
+8. **Os campos numéricos da aba `pac` são gravados como TEXTO, e a conferência da importação recusa por tipo — achado ao medir o conserto do `link`, e NÃO consertado.** `aColeta()` lê cada numérico por `aElVal(id, padrão)`, que devolve `el.value` — sempre uma **string**, mesmo o `<input type="number">`. São `prazoh`, `descpix`, `parcelas`, `altdesk`, `altmob`, `largmob` e `qtdmax`: **sete** antes desta rodada, **oito** com o `largcards` que ela acrescentou — e **nove** desde 14/09/2026, quando o `a-qr` entrou pelo mesmo `aElVal` (medido em 16/09/2026). A dívida cresce sozinha a cada campo numérico novo nesta aba, e sem erro nenhum. Como o molde da conferência é uma fotografia do próprio `aColeta()` (`fcxMolde` chama `fcPresetCapturar`), o molde diz "string" para os oito; e `fcxConformar` compara `typeof` e recusa quando não bate (`index.html`, `if(typeof v!==t)return {ok:false}` dentro do ramo `string|number|boolean`). Consequência: um arquivo de "Exportar tudo" **gerado por outra ferramenta, ou editado à mão** com os números crus (`"prazoh": 24` em vez de `"prazoh": "24"`) perde os oito campos **em silêncio** — eles somem do fragmento, a aba volta aos padrões, e a única pista é o contador dizendo *"N item(ns) do arquivo NÃO foram reconhecidos e ficam de fora"*, **sem dizer quais**. O número foi medido nas duas árvores ao escrever o teste da migração: sete descartes que nada têm a ver com famílias.
 
    **Existe igual antes desta rodada** — é a forma como `aColeta` sempre gravou, e o mesmo padrão vale para os numéricos das outras abas —, e por isso não foi consertado aqui: a rodada era das famílias, e mexer no tipo do que `aColeta` grava muda o **formato do arquivo de backup** de todas as abas de uma vez, com a compatibilidade dos backups já existentes junto. Os dois consertos possíveis, para quando houver rodada: converter no `aColeta` (`parseFloat`), que muda o formato gravado, ou fazer `fcxConformar` aceitar a string que representa o número do molde, que não muda. O terceiro conserto, independente dos dois e mais barato, é a mensagem **dizer quais** chaves ficaram de fora, em vez de só contá-las — o contador existe para o operador confiar no número, e um número sem nome não dá o que conferir.
+
+> **Correção de data (16/09/2026).** Todo o bloco acima — a v2 da décima aba, a rodada dos
+> textos configuráveis, a das famílias, a leva dos achados e os três itens combinados — estava
+> datado de **03/09/2026** e aconteceu em **02/09/2026**. Medido commit a commit, em horário
+> local: `cc5aaae` 12:18, `5fc8db4` 16:35, `204af5e` 17:10, `f393dea` 17:54, `bff63ba` 18:30,
+> `1d39467` 18:32, `87d5352` 22:45 — nenhum perto da meia-noite, então não é artefato de fuso.
+> Data errada num arquivo que serve para achar o que foi feito manda procurar no dia errado.
 
 ### Fechadas em 23/08/2026
 
@@ -327,12 +348,12 @@ Junto delas, uma correção que não era dívida e sim **texto falso**: a ferram
 
 ---
 
-## Combinado em 03/09/2026 — os três itens, todos entregues
+## Combinado em 02/09/2026 — os três itens, todos entregues
 
-Os três itens combinados em 03/09/2026 saíram na mesma rodada e estão descritos acima, na lista de entregues:
+Os três itens combinados em 02/09/2026 saíram na mesma rodada e estão descritos acima, na lista de entregues:
 
 - **O aviso de que o Pix não confirma sozinho, nas quatro abas de pagamento** (item 1) — configurável, dentro da área do Pix e logo acima do "Já paguei", com o texto próprio da aba `pac` (aquela página não tem esse botão) e sem emissão nenhuma onde o botão do WhatsApp está desligado.
-- **As famílias de pacotes na aba `pac`** (item 2) — opção A dos mockups: a família é o passo 1, e quem tiver uma família só continua vendo dois passos, sem passo vazio. Mockups apresentados em 03/09/2026 (quatro opções, celular, com a troca de pacote em foco): https://claude.ai/code/artifact/a83e1f73-53d9-4868-a8c6-243cf591963b
+- **As famílias de pacotes na aba `pac`** (item 2) — opção A dos mockups: a família é o passo 1, e quem tiver uma família só continua vendo dois passos, sem passo vazio. Mockups apresentados em 02/09/2026 (quatro opções, celular, com a troca de pacote em foco): https://claude.ai/code/artifact/a83e1f73-53d9-4868-a8c6-243cf591963b
 - **O subtítulo opcional da vitrine, com `{pct}`** (item 3) — vazio, que é o padrão, não emite regra de CSS, `div` nem variável: a vitrine de fábrica sai byte a byte como antes.
 
 ---
@@ -701,11 +722,13 @@ página com marcador de fim, e exige raiz desenhada, zero erro de console e o te
 chegando à tela, à ficha do produto e à URL do WhatsApp. Um `escJs` esquecido quebra o bloco e o
 marcador não aparece.
 
-### Aberto, esperando decisão do dono
+### ~~Aberto, esperando decisão do dono~~ — RESPONDIDO em 11/09/2026
 
-- **Os nove textos reserva dos marcadores.** Trazê-los para a tabela muda o formato do que fica
-  gravado. A conversão automática faria backup antigo continuar abrindo; o risco é o inverso e é
-  pequeno — backup feito **depois**, aberto numa versão **antiga** da ferramenta, perderia os nove.
+- **Os nove textos reserva dos marcadores.** Trazê-los para a tabela mudava o formato do que fica
+  gravado. **O dono disse sim**, e a rodada saiu na sequência — está descrita na seção
+  imediatamente abaixo. No código de hoje: `fcObFbMigrar` converte o formato antigo na abertura
+  (chamada em `tRestaura` e em `aRestaura`), os nove campos `t-ob-fb-*`/`a-ob-fb-*` existem, e a
+  prova é `scripts/verificar/textos-reserva.mjs`.
 
 ## Entregue em 11/09/2026 — os nove textos reserva, e a migração que os deixou entrar
 
@@ -863,9 +886,15 @@ derivada de outra é uma migração, não um acréscimo — e é da família que
   o que se via (o aviso mora dentro de um campo que já some fora de "ambos"); o que ela criava era
   divergência de **regra** entre abas que a fonte declara gêmeas.
 
-### Achado registrado, sem ação — decisão do dono
+### ~~Achado registrado, sem ação — decisão do dono~~ — FECHADO em 13/09/2026
 
-**Pedido em zero com sinal FIXO mostra três números que não fecham:** `Total R$ 0,00 · Sinal R$
+> **Fechado no mesmo dia, mais tarde** (commit `3a5a1b5`, *"Pedido em zero: as linhas do sinal e
+> do saldo so existem quando ha o que pagar"*), com a autorização do dono registrada na seção
+> "F — o pedido em zero". No código de hoje o bloco calcula `var haPagar=total()>=0.01;` e as
+> linhas do sinal e do saldo só aparecem quando há o que pagar. O registro abaixo fica como está
+> porque descreve o defeito e a razão de ele ser de **leitura**, não de cobrança.
+
+**Pedido em zero com sinal FIXO mostrava três números que não fecham:** `Total R$ 0,00 · Sinal R$
 100,00 · Saldo R$ 0,00`, e no Checkout o resumo copiável repete isso. Vem da primeira guarda de
 `sinalRecusa()`, que devolve vazio de propósito quando o total é zero (para não haver dois avisos).
 **Ninguém chega a pagar esse número** — as duas pontas recusam pela recusa de total zero, e a prova
@@ -1232,6 +1261,15 @@ desenho o que era falta manda procurar no lugar errado, e quem lê confia.**
 5. A Mini loja guarda a linha do cupom com `if(usaCupom)` e o Checkout não.
 6. Só a Mini loja dá retorno visual depois do clique (`TXT_PEDIDO_ENVIADO`) e esvazia a cesta.
 
+**Situação em 16/09/2026, medida no código.** Duas destas seis já foram fechadas pelas levas
+seguintes e não devem ser reprocuradas: a **2** (existe `fcZapTxtDefs(pref)`, consumido pelo
+Checkout, pela Mini loja, pela Agendamento por pacote e pela Calculadora de álbum — sobra só a
+`/pagar`, que é a divergência 1) e a **3** (a aba `pac` ganhou o interruptor de "Já paguei",
+commit `26d431e`). A **4** deixou de ser dívida e virou **divergência justificada por medição**,
+com a razão escrita ao lado do código. A **5** não é mais localizável: `if(usaCupom)` não existe
+mais no `index.html`, e não ficou registrado se foi unificação deliberada ou renome — quem mexer
+ali mede de novo. Seguem abertas a **1** e a **6**.
+
 ## Entregue em 13/09/2026 — unificar as abas de pagamento, leva 2
 
 Pedido do dono: *"Todos os construtores que têm pagamento devem ter as mesmas regras, mesmas
@@ -1297,6 +1335,15 @@ o DOM em vez do `cfg`, contra o que o próprio cabeçalho dela promete; `mTotalM
 trocar vírgula por ponto; `FC_LIM_CAMPOS` ignora `m-cod`/`a-pcod`/`a-prefixo`; o `max` de
 `sinalfixo` está nas tabelas e em nenhum `<input>`; e **todas as recusas do Link de cobrança saem
 sem acento**, contra a norma registrada.
+
+**O cabeçalho diz nove e o parágrafo nomeia sete** (duas da mesma classe mais cinco) — a
+contagem estava errada desde que foi escrita; as sete são estas, e não há registro de mais duas.
+
+**Situação em 16/09/2026, medida no código: as sete estão fechadas.** `aRecusa` recusa prefixo com
+caractere que o Pix não carrega e opera sobre o `cfg`; o WhatsApp deixou de ser obrigatório na `a`;
+`mTotalMaximo` troca vírgula por ponto, com o comentário da leva 4 ao lado; `m-cod`, `a-prefixo` e
+`a-pcod` entraram em `FC_LIM_CAMPOS`; os cinco `<input>` de `sinalfixo` têm `max`; e as recusas do
+Link de cobrança saem acentuadas em `fc-compartilhado.js`.
 
 ## Entregue em 13/09/2026 — PayPal item a item, a prévia do relatório, e o centavo do desconto
 
@@ -1408,7 +1455,16 @@ entradas de `FC_TXT_FABRICA`. *Cópia que concorda hoje é a que diverge amanhã
 E o contador de limite podia **mentir** quando o valor chega sem teclado (limpar, editar, duplicar
 pacote, aplicar preset da aba e preset geral): cinco chamadas que faltavam.
 
-### PARADO — precisa da palavra do dono
+### ~~PARADO — precisa da palavra do dono~~ — OS TRÊS RESPONDIDOS em 14/09/2026
+
+> O dono respondeu aos três, e a rodada saiu no commit `fb00017` (*"Leva 6: a chave Pix da aba
+> pac, dois renomes com conversao e a frase do copiado"*), descrita na seção "Entregue em
+> 14/09/2026 — as três decisões do dono". Medido em 16/09/2026: (1) `aCfg` monta `chave` por
+> `pixLimpar(fciBruto('chave'))`, a mesma limpeza que governa o payload e que `aRecusa` confere —
+> validação e cobrança passaram a ler a mesma string; (2) o renome saiu **com conversão**
+> (`fcTxtChaveMigrar(A,'txtPixRotulo','txtSecaoPix')`), então quem já tinha customizado o campo
+> não o perdeu; (3) a frase mora em `FC_TXT_FABRICA.pixCopiado` e é consumida pelas cinco abas
+> que cobram. O registro abaixo fica como está porque descreve o defeito que a rodada fechou.
 
 1. **`CHAVE_PIX` da aba `pac`.** Quatro das cinco linhas passaram a ler do `cfg` (byte a byte
    idênticas). A quinta não: `cfg.chave` passa por `pixLimpar` e `fciVal` por `fcTrim`, que aparam
@@ -1461,11 +1517,14 @@ A área do Pix do Checkout **nunca abria**, e 30 valores foram lidos de elemento
 entrar a guarda "a área do Pix abriu de verdade". **Teste que não alcança o estado não prova nada
 sobre aquele estado** — de novo.
 
-### PARADO — precisa da palavra do dono
+### ~~PARADO — precisa da palavra do dono~~ — RESPONDIDO em 14/09/2026
 
-O **campo configurável de tamanho do QR** existe só no Link de cobrança. Dá-lo às outras três cria
+O **campo configurável de tamanho do QR** existia só no Link de cobrança. Dá-lo às outras cria
 chave nova no estado, no preset e no "Exportar tudo" — formato do que fica gravado, que atinge
-backups em arquivo. Alinhado só o número fixo (220 → 200 nas quatro).
+backups em arquivo, e por isso a pergunta foi ao dono antes. **Ele disse sim**, e o campo saiu no
+commit `60c0924` (*"Tamanho do QR Code configuravel nas quatro abas (leva 9)"*), descrito adiante.
+Medido em 16/09/2026: `u-qr`, `p-qr`, `m-qr`, `a-qr` e `v-qr` existem, e as cinco abas gravam a
+chave `qr`.
 
 ## Entregue em 14/09/2026 — as três decisões do dono
 

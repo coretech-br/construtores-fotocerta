@@ -1,6 +1,6 @@
 # Documentação — Foto Certa: Site Prosite e Construtores
 
-> Documento de contexto para a base de conhecimento do projeto. Resume tudo que foi construído e as regras técnicas aprendidas. Última atualização: 22/08/2026.
+> Documento de contexto para a base de conhecimento do projeto. Resume tudo que foi construído e as regras técnicas aprendidas. Última atualização: 16/09/2026.
 
 ## 1. Visão geral
 
@@ -28,7 +28,7 @@
 | Intermediária → Tag Body | script `ajustarAltura` (usa `window.frameElement.style.height = scrollHeight`, com load/resize/ResizeObserver + reforços em 300/1000/2500ms) |
 | Intermediária → componente HTML | embed TidyCal + style transição + script dos sinais do modal |
 | prosite.fotocerta.com.br | `index.html` do repositório, servido pelo GitHub Pages |
-| Componentes com destaque visual → campo CSS Customizado | propriedades da borda com efeito / fundo em degradê (ver `bordas-css-componentes.md`) |
+| Componentes com destaque visual → campo CSS Customizado | propriedades da borda com efeito / fundo em degradê — **geradas pela aba Bordas com efeito (código 2)**; não há arquivo de referência no repositório, e não deve haver: o `bordas-css-componentes.md` que esta linha citava vivia na pasta `prosite/`, removida em 23/08/2026 junto com os espelhos (ver o fim desta documentação) |
 
 Os códigos completos estão nos arquivos anexos do projeto e podem ser regenerados pela ferramenta.
 
@@ -47,16 +47,21 @@ Os códigos completos estão nos arquivos anexos do projeto e podem ser regenera
 4. **A página publicada carrega jQuery da Alboom que sobrescreve `$` global** → embrulhar todo script em IIFE `(function(){...})()`.
 5. **Editor ≠ publicado**: sempre publicar para testar. Console do Safari (Cmd+Option+C) é a ferramenta de diagnóstico.
 6. **Componentes HTML vivem em iframe do mesmo domínio** → scripts atravessam via `contentDocument`/`frameElement`.
-7. **O CSS do tema esconde radios/checkboxes nativos** dentro de componentes → desenhar marcadores próprios (input invisível + span estilizado com `:checked + span`).
+7. **O CSS do tema esconde radios/checkboxes nativos** dentro de componentes. O requisito, e não a implementação: **o bloco não pode depender do desenho que o navegador faz do `<input type="radio">` ou `type="checkbox">`** — o marcador tem de ser desenhado pelo próprio bloco, e o estado (marcado / não marcado) tem de ser legível para quem enxerga **e** para o leitor de tela. Duas implementações atendem, e as duas estão no ar:
+    - **Input escondido + marcador próprio** (Checkout, Mini loja, Agendamento por pacote): o `<input>` continua lá, invisível, e uma caixa irmã é pintada por `input:checked + .fcu-mark`. Quem carrega a semântica é o input nativo.
+    - **Elemento com papel declarado** (Calculadora de álbum, 15/09/2026): `<button role="radio">` e `<div role="checkbox">` com `aria-checked` trocado no clique, e o CSS pintando por `[aria-checked="true"]`. Não há input nenhum. Quem carrega a semântica é o papel ARIA, e é obrigação do bloco mantê-lo em dia — `aria-checked` esquecido deixa o marcador certo na tela e errado no leitor de tela, sem erro nenhum.
+
+    Nenhuma das duas é preferida; o que não vale é a terceira, confiar no marcador nativo.
 8. **O tema centraliza textos** dentro de componentes → forçar `text-align:left` no card e nos elementos. Vale para **qualquer** HTML que entre num componente, **inclusive a própria ferramenta** quando publicada em `/prosite-custom` (ago/2026: ela saía inteira centralizada porque nunca declarava o alinhamento dela). O envoltório do editor é uma `<div>` de classe gerada (hoje `.llleLo`) com `text-align:center`, e ele é **ancestral, não concorrente**: declaração direta na raiz vence a herança **sem `!important` e sem seletor forte**.
-9. **At-rules (`@keyframes`, `@media`) só funcionam em `<style>`** — na **Tag Head da página**, na Tag Body ou dentro de um componente HTML. **Nunca no campo CSS Customizado do componente**, que aceita apenas propriedades soltas. **Não existe cabeçalho global do site** (confirmado pelo dono em 23/08/2026: a Alboom só oferece head e body **por página**, e é lá que ele sempre colou — e tudo funcionou). Consequência prática: uma página nova que use borda animada precisa do código 1 no head **dela**; sem isso o CSS do componente fica lá, a animação não existe, e a borda não se mexe, sem erro nenhum. A exceção que permanece: animar **elementos de texto do editor** do Prosite (reconstruídos na publicação) — considerar inviável.
+9. **At-rules (`@keyframes`, `@media`, `@container`) só funcionam em `<style>`** — na **Tag Head da página**, na Tag Body ou dentro de um componente HTML. **Nunca no campo CSS Customizado do componente**, que aceita apenas propriedades soltas. **Não existe cabeçalho global do site** (confirmado pelo dono em 23/08/2026: a Alboom só oferece head e body **por página**, e é lá que ele sempre colou — e tudo funcionou). Consequência prática: uma página nova que use borda animada precisa do código 1 no head **dela**; sem isso o CSS do componente fica lá, a animação não existe, e a borda não se mexe, sem erro nenhum. A exceção que permanece: animar **elementos de texto do editor** do Prosite (reconstruídos na publicação) — considerar inviável.
+    - **`@container` entrou na lista em 15/09/2026, com a Calculadora de álbum**, e a mesma restrição vale para ela. A escolha entre `@media` e `@container` **não é estilística**: o bloco vive numa **coluna** do Prosite, que pode ser bem mais estreita que a janela, então uma virada medida na largura da tela deixaria as duas colunas espremidas uma sobre a outra dentro de uma coluna estreita numa tela grande. Medido no mockup: encolher a coluna não mudava nada. A raiz do bloco declara `container-type:inline-size` e a virada mede o **bloco**. Navegador sem suporte a `@container` fica na **coluna única**, que é o estado seguro — nada some, e por isso a degradação não precisa de aviso. Campo que alimenta a virada (`v-vira`) segue a regra dos campos numéricos: preso à faixa declarada dentro da própria função de configuração, e corrigido à vista no `change`/`blur`.
     - **Campo CSS Customizado do componente**: as propriedades soltas são aplicadas direto no elemento raiz daquele componente — **não precisa de ID Html, classe nem seletor**. Se algum componente exigir regra completa, inspecionar o elemento publicado, pegar a classe gerada pela Alboom e levar a regra (com seletor) para o head.
 10. **Sem acentos/emojis em código colado** (precaução com o validador); textos visíveis com acento OK.
 11. Tag Body aceita `<style>` + `<script>`.
 
 ## 4. Ferramenta de construtores (arquivo `index.html`, em prosite.fotocerta.com.br)
 
-Ferramenta de geração de códigos com **10 abas**, estado persistido em localStorage (chave `fcConstrutores`, por navegador/domínio). Cada aba tem também uma **biblioteca de presets** — configurações salvas com nome, para aplicar depois (ago/2026, fase 2 da evolução). Acima das abas há a barra do **preset geral**, que agrupa a configuração das **dez** abas para uma página de uma campanha, em chave própria (`fcConstrutoresGerais`, ago/2026, fase 3). Tudo isso **sai e entra em arquivo `.json`**, pelo painel de detalhes do preset geral (ago/2026, fase 4). À direita das abas fica o **painel consolidado**, que junta num campo só tudo o que vai para a Tag Head e para a Tag Body da página selecionada e lista, sem juntar, as saídas que vão para componentes (ago/2026, fase 5).
+Ferramenta de geração de códigos com **11 abas**, estado persistido em localStorage (chave `fcConstrutores`, por navegador/domínio). Cada aba tem também uma **biblioteca de presets** — configurações salvas com nome, para aplicar depois (ago/2026, fase 2 da evolução). Acima das abas há a barra do **preset geral**, que agrupa a configuração das **onze** abas para uma página de uma campanha, em chave própria (`fcConstrutoresGerais`, ago/2026, fase 3). Tudo isso **sai e entra em arquivo `.json`**, pelo painel de detalhes do preset geral (ago/2026, fase 4). À direita das abas fica o **painel consolidado**, que junta num campo só tudo o que vai para a Tag Head e para a Tag Body da página selecionada e lista, sem juntar, as saídas que vão para componentes (ago/2026, fase 5).
 
 ### Isolamento por aba (ago/2026) — cada aba salva, restaura e parte sozinha
 
@@ -79,7 +84,7 @@ O arquivo continua único (a separação em vários arquivos foi avaliada e recu
 
 Cada aba tem a sua biblioteca: salvar a configuração da tela com um nome, aplicar um preset salvo, remover. A aba Bordas tinha isso desde a fase 5 anterior, com mecânica própria; a mecânica agora é **uma só, compartilhada**, e a das Bordas foi removida — duas implementações do mesmo recurso é o defeito que este projeto mais pagou para aprender.
 
-**A costura é o registro `ABAS`.** Um preset guarda o que o `coleta()` daquela aba devolve, e aplicar chama o `restaura()` dela — o mesmo caminho do estado gravado. Não existe um segundo caminho de leitura ou de escrita de campos, e é isso que garante que "Aplicar" devolva a aba **inteira**: campo que entra no estado entra no preset pela mesma linha. Cada entrada de `ABAS` ganhou:
+**A costura é o registro `ABAS`.** Um preset guarda o que o `coleta()` daquela aba devolve, e aplicar chama o `restaura()` dela — o mesmo caminho do estado gravado. Não existe um segundo caminho de leitura ou de escrita de campos, e é isso que garante que "Aplicar" devolva a aba **inteira**: campo que entra no estado entra no preset pela mesma linha. Cada entrada de `ABAS` ganhou, **nesta fase**, os campos abaixo — o registro cresceu desde então, e a lista completa das chaves de hoje, com o que quebra na ausência de cada uma, está no `CLAUDE.md`, em *"O registro `ABAS`"*:
 
 | Campo | Para que serve |
 |---|---|
@@ -211,7 +216,7 @@ Dois botões de exportar e um de importar, no painel **Detalhes** da barra do pr
 **O arquivo importado é entrada NÃO CONFIÁVEL — a mais perigosa que esta ferramenta já teve**, porque um JSON vira configuração e a configuração vira código publicado no site do cliente. Ele não pode ser tratado como o `localStorage`, que é do próprio operador. Três camadas, nesta ordem:
 
 1. **Forma** (`fcxSanear` / `fcxConformar`): tipo, tamanho de texto, comprimento de lista, profundidade, quantidade de chaves e nome de chave. **`__proto__`, `constructor` e `prototype` ficam de fora antes de tudo** — este bloco copia valores por atribuição de chave, e atribuir `__proto__` num objeto comum troca o protótipo em vez de criar um campo. **O molde do que se conhece é o `coleta()` da própria aba** (`fcPresetCapturar`), não uma segunda lista de campos: chave que não existe na aba não entra, e é contada. **Lista vazia não abre buraco no molde**: cada lista das abas declara em `ABAS` um `[caminho, molde de um item, chave essencial]`, e `fcxSemearListas` planta o item de exemplo onde a lista do operador está vazia — sem ele a conferência caía no saneamento genérico, que só sabe de forma e por isso aceitava `null`, número, objeto e lista dentro de uma lista de textos, **sem contar nada**. O caminho atravessa lista (`u.prods.ops`) porque um produto sem opcionais deixa o molde de dentro vazio pelo mesmo motivo.
-2. **Regra da aba**: o gancho `importar` do registro `ABAS`. Hoje só o Slideshow tem uma — endereço de foto que não passa em `sUrlOk` **não entra na lista**, porque `url` é o único campo que vira `src` e sai dentro de `IMAGENS[].url` no bloco entregue. O cadastro manual recusa isso desde a fase 4 anterior; o arquivo não podia ser a porta dos fundos. **O gancho não é mais o único lugar que conta descarte de lista**: `fcxPodarListas` roda antes dele, em todas as abas, pelos mesmos caminhos declarados.
+2. **Regra da aba**: o gancho `importar` do registro `ABAS`. Hoje **duas** abas têm uma, e pelo mesmo motivo — endereço de foto: o Slideshow (`sImportarLimpar`, sobre `imgs[].url`) e a Mini loja (`mImportarLimpar`, sobre `prods[].img`). Endereço que não passa em `sUrlOk` **não entra na lista**, porque é o único campo que vira `src` no bloco entregue. O cadastro manual recusa isso desde a fase 4 anterior; o arquivo não podia ser a porta dos fundos. **O gancho não é mais o único lugar que conta descarte de lista**: `fcxPodarListas` roda antes dele, em todas as abas, pelos mesmos caminhos declarados.
 3. **Travas que já existem**: aplicar passa pelo `restaura()` da aba (`corValida`) e pelo `redesenhar()` (`fcAjustarTodos`); gerar passa por `corSegura`, `urlLimpa`, `escHtml`, `escAttr` e `escJs`. **A importação não cria caminho novo de escrita de campo.**
 
 **A data do arquivo é ecoada na confirmação, então ela é texto de arquivo aparecendo na tela.** Vai por nó de texto (a pergunta de três saídas nunca usa `innerHTML`), o que fecha a marcação — mas não fecha o resto: um arquivo hostil poria ali uma **frase**, e uma frase no meio de uma confirmação que o operador está lendo para decidir é capaz de mentir. Medido com `geradoEm: "ATENCAO: nenhum preset sera substituido, pode confirmar"`. O campo passou a ser aceito só na forma de data ISO; qualquer outra coisa vira *"em data desconhecida"*. **O arquivo pode escolher a data, nunca o texto.**
@@ -308,12 +313,26 @@ Toda aba tem o mesmo fluxo linear, de cima para baixo:
 
 0. **Interruptor do preset geral** (`<div class="fcg-int">`, montado por `fcgIntMontar`) — só existe quando há preset geral selecionado, e nesse caso é o **primeiro** elemento do painel, antes da descrição. Diz se a aba faz parte da página e permite ligar/desligar. Não é uma seção numerada: é o cabeçalho de contexto da aba, e some no Rascunho.
 1. **Descrição** (`<p class="descricao">`) — o que o construtor faz, em um parágrafo.
-2. **Seções numeradas de configuração** — cada uma abre com `<div class="secao"><span class="secao-n">N</span> Título</div>` (a primeira leva `class="secao primeira"`, que remove a linha divisória do topo) e é seguida por `<div class="grade">` com **duas caixas** de `<fieldset>` — que viram duas colunas quando há espaço e uma só quando não há, por conta do `auto-fit` (ver "A faixa da ferramenta e o número de colunas"). Agrupar por tema, distribuindo os fieldsets entre as duas caixas para equilibrar a altura; quando houver formulário de cadastro + lista (produtos, cupons), o formulário fica à esquerda e a lista à direita. **Lista que cresce sem limite** — hoje só a de imagens do Slideshow — fica **fora da grade**, em largura inteira, abaixo dos parâmetros da seção.
+2. **Seções numeradas de configuração** — cada uma abre com `<div class="secao" data-sec="<chave>"><span class="secao-n">N</span> Título</div>` (a primeira leva `class="secao primeira"`, que remove a linha divisória do topo; o `data-sec` é obrigatório e explicado logo abaixo, em "O número da seção sai da posição") e é seguida por `<div class="grade">` com **duas caixas** de `<fieldset>` — que viram duas colunas quando há espaço e uma só quando não há, por conta do `auto-fit` (ver "A faixa da ferramenta e o número de colunas"). Agrupar por tema, distribuindo os fieldsets entre as duas caixas para equilibrar a altura; quando houver formulário de cadastro + lista (produtos, cupons), o formulário fica à esquerda e a lista à direita. **Lista que cresce sem limite** — hoje só a de imagens do Slideshow — fica **fora da grade**, em largura inteira, abaixo dos parâmetros da seção.
 3. **Penúltima seção: "Biblioteca de presets"** — só o cabeçalho e um `<div class="grade" id="fcp-<pref>-box"></div>` vazio ficam no HTML; os dois fieldsets são montados por `fcPresetsMontar`, igual em todas as abas (ver a seção seguinte). O `fcp-` não é enfeite: é o espaço de nomes que impede a biblioteca de colidir com campo de aba (ver "Esquema de ID" na seção anterior).
 4. **Última seção: "Prévia e código gerado"** — botões de ação (`Gerar código` e afins) numa `<div class="acoes">` logo abaixo do cabeçalho da seção, depois uma `grade` com a prévia (`<div class="pv-area">`) à esquerda e a(s) saída(s) (`<div class="saida">` com textarea + botão Copiar) à direita. Abas sem prévia (TidyCal) usam a mesma seção só com as saídas.
 5. **Instruções ao final** (`<div class="instrucoes">`), em largura total: onde colar, pré-requisitos, como funciona e o que fazer depois de publicar.
 
-Dentro dos fieldsets: `radios` para valores de lista fechada, campos com `<small>` explicando unidade/limites, e `<p class="ajuda">` para orientações. Prefixo de ID por aba (`s-`, `l-`, `t-`, `u-`, `b-`, `c-`, `p-`) em todos os campos, e o mesmo prefixo nas funções JS correspondentes.
+Dentro dos fieldsets: `radios` para valores de lista fechada, campos com `<small>` explicando unidade/limites, e `<p class="ajuda">` para orientações. **Prefixo de ID por aba em todos os campos, e o mesmo prefixo nas funções JS correspondentes** — o prefixo é o `pref` do registro `ABAS`, e não uma segunda convenção.
+
+**Os três conjuntos de prefixo, escritos juntos porque é assim que a colisão aparece.** São listas que envelhecem uma contra a outra: prefixo novo se confere contra as três antes de ser usado.
+
+| Conjunto | Regra | Hoje |
+|---|---|---|
+| **Campo de aba** | **uma letra** mais hífen; é o `pref` do registro `ABAS` | `s-` Slideshow · `l-` Captação de leads · `t-` Agendamento TidyCal · `u-` Checkout · `b-` Bordas com efeito · `c-` Contagem regressiva · `p-` Link de cobrança · `m-` Mini loja · `e-` Efeitos de página · `a-` Agendamento por pacote · `v-` Calculadora de álbum |
+| **Peça da ferramenta** | `fc` + letras; nunca de uma letra só, para não colidir com campo de aba nem ser alcançada pelos listeners de "mudou alguma coisa nesta aba" | `fcp-` biblioteca de presets · `fcg-` preset geral · `fcx-` backup em arquivo · `fcc-` painel consolidado · `fci-` identidade e paleta · `fcs-` achar um texto · `fcr-` novidades · `fcd-` seções recolhíveis · `fcl-` limites visíveis · `fcaj-` ajuda · `fcord-` ordem dos meios. Na página `/cobrar`, `cb-` |
+| **Classe do código gerado** | um por gerador, porque dois blocos desta ferramenta podem acabar na mesma página e classes iguais se pisam | `fc-` Slideshow · `fcw-` Captação de leads · `fcu-` Checkout · `fcb-` Contagem regressiva · `fcpg-` Link de cobrança · `fcm-` Mini loja · `fcef-` Efeitos de página · `fca-` Agendamento por pacote · `fcal-` Calculadora de álbum. Mais as animações `fc-borda-*` e as variáveis `--fcn-*` das Bordas. O Agendamento TidyCal não aparece porque o bloco dele não emite classe nenhuma — só troca marcadores no texto da página |
+
+A segunda e a terceira listas **já quase colidiram**: o painel Novidades ficou com `fcr-` porque `fcn-` estava tomado pelas variáveis que as Bordas escrevem no código gerado. Está registrado no `index.html`, junto da escolha. Pelo mesmo motivo a fase 4 escolheu `fcx-` e não `fcb-`, e o Link de cobrança escolheu `fcpg-` e não `fcp-`.
+
+**O número da seção sai da posição, e texto que cita seção aponta por chave.** Na partida, `fcSecoesNumerar()` percorre cada `.painel`, numera os `<span class="secao-n">` pela posição da seção dentro dele e depois preenche todo `<span class="sec-ref" data-sec="…">` com o número da seção daquela chave. O número continua escrito no HTML — a fonte fica legível e a página nasce certa antes de o script rodar —, mas **quem manda é a função**: número errado no HTML é corrigido ali, em vez de mentir na tela. Em JavaScript, a mesma consulta é `fcSecN('<chave>')`, e é assim que as mensagens de recusa citam seção.
+
+Escrever o número à mão é a armadilha que `ABAS.length` já tinha fechado para a contagem de abas, e ela foi **medida** em 03/09/2026: partir em duas a seção 2 do Agendamento por pacote obrigou a renumerar **cinco cabeçalhos e sete textos** que citavam seção por número — e o que ficasse para trás apontaria para o lugar errado, sem erro nenhum.
 
 **Lista de dezenas de itens: quatro regras que a fase 2.5 (ago/2026) firmou.** O importador de galeria tornou comum a lista de 46 fotos, e o layout que nunca tinha sido desenhado para isso apareceu inteiro numa captura do dono.
 
@@ -353,6 +372,8 @@ O `<p class="ajuda">` abaixo da prévia continua obrigatório, mas muda de conte
 9. **Efeitos de página** (ago/2026) — efeitos de ambiente para a página inteira ou presos a um bloco: **neve**, **confete**, **fundo animado (aurora)** e **luzes piscando**. Prévia de celular e proporção do tamanho no celular. O floco entra como a fuga CSS `\2744`, então o bloco sai **100 % ASCII**. *(Esta entrada faltava na lista: a aba existe desde 24/08/2026 e tinha seção própria mais adiante, mas o inventário parou no 8 — corrigido em 02/09/2026, junto com a entrada da décima.)*
 
 10. **Agendamento por pacote** (set/2026) — agrupa **N tipos de agendamento do TidyCal** numa página só, resolvendo a limitação de o TidyCal não ter duração flexível. O cliente vê cartões com **nome, duração, o que inclui e preço** (o preço do Pix com o desconto na frente, e a linha do cartão com as parcelas), escolhe um, e só então o calendário daquele pacote aparece — **um iframe, criado sob demanda**, nunca N escondidos. Gera três saídas: o componente da vitrine, os **N endereços de redirecionamento** para colar no TidyCal (cada um com o código fixo do pacote), e o componente da **página de obrigado**, que lê `?pac=` da URL, acha o pacote no catálogo embutido e cobra por Pix ou cartão, com prazo de reserva e identificador de conciliação. Spec: `docs/specs/2026-09-02-agendamento-por-pacote-design.md`.
+
+11. **Calculadora de álbum** (15/09/2026) — o cliente escolhe o **tamanho** do álbum (maior lado, em cm), a **quantidade de fotos** e os **acabamentos opcionais**, e vê o valor na hora. Substitui a calculadora escrita à mão que vivia num `<iframe srcdoc>` travado em 560 px na página de álbuns — fora do painel consolidado e sem um parâmetro configurável sequer. Viraram campo: o preço por foto, os tamanhos (cada um com a média de fotos por lâmina, o mínimo de fotos e o SKU), as faixas de desconto por quantidade de lâminas, os acabamentos e **todos** os textos da tela. Traz o mesmo pacote de pagamento das quatro abas irmãs — Pix com QR Code, cartão pelo PayPal, sinal, meio prioritário, desconto no Pix, "Já paguei" pelo WhatsApp e página de destino depois do pagamento —, com **duas exceções declaradas**: o sinal nasce **ligado em 50%** (contra desligado e 30% nas outras) e os três textos do sinal nascem **preenchidos**, porque a política já está publicada na página de álbuns do dono. A virada para duas colunas mede o **bloco** e não a janela (`@container`). Prova: as **2.760 combinações** lidas da tela dos dois lados, contra a calculadora publicada, sem amostragem — zero divergências. Spec: `docs/specs/2026-09-15-aba-calculadora-de-album-design.md`. *(Esta entrada faltava, pelo mesmo motivo da 9: o inventário parou na 10 enquanto a décima primeira aba estava no ar desde 15/09. **É a segunda vez que este inventário envelhece em silêncio** — acrescentar aba e não acrescentar a linha aqui não dá erro nenhum. A entrada nova entra no mesmo commit que a aba.)*
 
 > Histórico: até ago/2026 existiam abas separadas de Checkout PayPal e Checkout Pix; foram unificadas na aba Checkout, que passou a ter seletor de formas de pagamento e múltiplos produtos. Nada se perdeu — o modo "somente PayPal" preserva a escolha de moeda, e o "somente Pix", o carrinho sem PayPal.
 
@@ -1359,6 +1380,80 @@ No formulário do pacote entrou o `<select>` `a-pfam`, repopulado a cada mudanç
 
 **O que ficou de fora, declarado.** `{{familia}}` como marcador da página de obrigado (seria coerente — `CAMPOS` já leva `pacote`, `duracao` e `valor` —, mas mudaria `a-out3`, que é uma das provas byte a byte desta rodada) e agrupar `a-out2` por família (a saída 2 é uma lista de conferência indexada pelo código; agrupá-la é cosmético e custaria a prova byte a byte dela). Os dois estão em `docs/pendencias.md`.
 
+### De 04/09 a 16/09/2026 — as 32 versões que este documento não descrevia
+
+Até 16/09/2026 esta documentação parava em 03/09: **32 versões publicadas** (`2026-09-04a` a
+`2026-09-16c`) sem uma linha aqui, e o cabeçalho ainda dizia *"última atualização: 22/08/2026"*
+com uma seção de 03/09 dentro. O histórico rodada a rodada, com estimativa contra tempo real,
+está em **`docs/ledger-evolucao-2026-09.md`** — 57 rodadas, uma entrada cada. O que segue é o
+resumo por assunto, para quem precisa do mapa e não do diário.
+
+**O calendário do TidyCal deixou de chegar frio** (04/09, quatro versões). Pré-conexão,
+aquecimento por intenção antes do clique, aquecimento com a **largura real** — e não dentro de
+um `display:none`, que media errado —, um quadro por pacote e a escolha de pré-carga em três
+valores. No fim, a corrida entre o `embed.js` deles e o nosso aperto de mão, que era real e
+está medida em `scripts/verificar/corrida-calendario.mjs`.
+
+**Os limites do que chega à API passaram a aparecer na tela** (11/09). Os campos que alimentam
+o BR Code e o PayPal têm tetos (25 para o nome, 15 para a cidade, 25 para o identificador, 200
+e 127 para a descrição), e o contador conta **o que sobra depois da limpeza**, não o que foi
+digitado. Junto veio a recusa dos identificadores com orçamento composto, que passavam do teto
+e chegavam cortados ao extrato — dois pagamentos indistinguíveis.
+
+**"Achar um texto"** (11/09). A busca nasceu de o dono querer mudar um texto que o cliente lê,
+procurar na ferramenta e não achar — sendo que o campo existia. Ela varre **os campos da tela**,
+e não as tabelas, justamente para não dar negativa falsa sobre coisa que existe; e cada rótulo
+passou a **ecoar o texto atual** do campo. Na mesma data entraram os nove textos reserva dos
+marcadores da página de obrigado, com a migração que os deixou entrar.
+
+**O meio de pagamento prioritário** (12/09). Um campo só decide a **ordem** dos meios no bloco e
+**qual preço fica em destaque** — com dois campos existiria "Pix em cima com o preço do cartão
+grande", que é o estado incoerente que ninguém quer publicar sem perceber. O separador entre os
+dois virou neutro (`OU`) nas abas que cobram.
+
+**O sinal, em quatro rodadas** (13/09). Cobrar parte agora e o saldo depois passou a existir nas
+abas de pagamento, com o total viajando no selo do link e o **sinal dentro do campo 54** do
+código Pix. Vieram junto os **três textos que o explicam** — o que ele garante, o que acontece se
+o cliente desistir, o que fazer com o saldo —, que nascem **vazios** de propósito: são
+declarações de política comercial, e um padrão de fábrica afirmaria, para um cliente prestes a
+pagar, uma política que o dono pode não ter. E o **número de dinheiro deixou de quebrar ao
+meio**: o meio centavo passou a ter regra única, medida em 39 milhões de combinações.
+
+**O upsell depois do pagamento** (13/09). Quem pagou pode ser levado a outra página. A regra de
+emissão não é "o interruptor manda": quem decide se as variáveis saem é o **endereço**, e é isso
+que permite ao dono ligar o recurso **editando o código já publicado**, sem regerar — pedido
+dele, em pessoa.
+
+**A unificação das abas de pagamento, em cinco levas** (13–14/09). Cinco abas cobram dinheiro, e
+o que elas têm em comum — a conta, a recusa, os textos, a ordem dos meios, a mensagem do
+WhatsApp — passou a ser escrito **uma vez**. O que se unifica é sempre a **fonte que escreve**,
+nunca a saída: o bloco entregue continua autossuficiente, e a prova da unificação é a regressão
+byte a byte não mudar um caractere.
+
+**O PayPal item a item, e o SKU** (13–14/09). O pedido que chega ao painel do PayPal deixou de
+ser uma linha só e passou a levar cada produto e cada opcional, com **SKU próprio** por item —
+conciliação sem adivinhação. O link de cobrança passou a carregar itens e o endereço do upsell
+por cobrança.
+
+**A `/cobrar` ganhou prévia** (14/09). A página de uso diário passou a mostrar como a cobrança
+vai chegar ao cliente, inclusive a tabela do pedido do PayPal, e a se comportar em tela estreita.
+O invariante continua valendo e é o que sustenta as duas: o link sai idêntico, caractere por
+caractere, ao que a aba gera.
+
+**Novidades: as release notes dentro da ferramenta** (14/09). A lista do que mudou passou a
+morar num painel da barra do topo, escrita no tom do dono, e a regra passou a ser obrigatória —
+com rede na partida, na publicação e no arnês (ver o `CLAUDE.md`).
+
+**A décima primeira aba, Calculadora de álbum** (15/09) — descrita no inventário acima.
+
+**Auditoria, redes e histórico** (16/09). A regressão passou a cobrir a aba nova; dois
+comentários que eram a única proteção contra defeito silencioso viraram **redes que acendem a
+barra vermelha** (`fcOrdemAbasConferir` e `fcPagPrefsConferir`, descritas no `CLAUDE.md`); e o
+ledger de evolução foi reaberto num segundo volume, depois de **22 dias** sem uma linha de
+histórico.
+
+---
+
 ## 5. Decisões de arquitetura registradas
 
 - **Toda saída que vai para um campo do Prosite aparece no painel consolidado** (23/08/2026). O painel é o principal recurso de usabilidade do dono, e uma saída que não chega nele é código que ele vai esquecer de colar. A regra alcança Tag Head, Tag Body e o CSS que incide sobre um componente customizado por outra aba. O que **não** vai para campo do Prosite é declarado com o motivo, nunca omitido. E como o mapa é escrito à mão, existe uma rede: o painel compara as saídas com conteúdo contra o plano e **denuncia em vermelho** a que sobrar.
@@ -1368,7 +1463,7 @@ No formulário do pacote entrou o `<select>` `a-pfam`, repopulado a cada mudanç
 - **Ferramenta de medição mora no repositório** (22/08/2026). A regressão byte a byte é o que sustenta o invariante deste projeto — mexer numa aba não muda um byte do que as outras produzem —, e ela exige uma fotografia de referência e um comparador. Enquanto o arnês era reescrito a cada sessão numa pasta temporária, ele **sumiu duas vezes no meio de uma rodada**, e cada perda custou recapturar tudo. Agora ele é `scripts/verificar/`, versionado, com um comando só. A regra que sai daí: **medição que depende de ser recriada não é medição, é ritual** — e vale para o que vier depois (o arnês que executa os blocos entregues ainda é por rodada, e é o próximo candidato).
 - **O que o gerador consegue provar sozinho, ele prova — e recusa antes de entregar** (22/08/2026). A ferramenta aceitava qualquer texto como chave Pix desde que coubesse e não tivesse caractere estranho; o resultado foi um bloco publicado com `CHAVE_PIX='contato'` e um cliente lendo *"a instituição recebedora não conseguiu processar"* no aplicativo do banco. **Erro que a geração consegue detectar não pode chegar ao cliente.** O critério que separa o que dá para conferir do que não dá é se a resposta está no próprio dado: o formato da chave está (cinco desenhos, dígitos verificadores inclusive); a **existência** dela não está, e continua sendo a cobrança de um centavo que responde. Onde a conferência não decide, ela declara o limite em vez de fingir.
 - **O bloco entregue não depende de decisão que é por cobrança** (22/08/2026). O gerador da página de cobrança emitia a maquinaria do desconto só quando havia desconto configurado no momento de gerar — e o preço foi um campo que aparecia num aparelho e não no outro, porque a `/cobrar` lê essa configuração do armazenamento **local**. A regra que saiu daí: **o que muda por cobrança viaja no link; o que o bloco carrega não pode depender disso.** Se uma capacidade é do bloco, ela sai sempre, e quem a liga em cada cobrança é o parâmetro. O teste que separa os dois casos é barato e virou obrigatório: **o código 1 tem de sair com o mesmo hash com a capacidade ligada e desligada.** Corolário registrado: um campo que deixou de mudar o bloco tem de entrar na `naoEmite`, senão o painel consolidado passa a mentir sobre um código idêntico.
-- **Identidade é global; aparência é por campanha** (ago/2026): chave Pix, recebedor, Client ID e WhatsApp vivem num lugar só, acima das dez abas e acima do preset geral — sem segunda cópia não há como divergir. As cores ficam globais **com botão**, nunca amarradas: uma campanha pode precisar de cor própria, e propagação silenciosa é o que este projeto recusa desde o R3 do preset geral. Consequência registrada: o aviso de divergência entre as duas páginas de uma campanha **deixou de poder acontecer** para esses campos, e o código que o produzia saiu em vez de virar código morto.
+- **Identidade é global; aparência é por campanha** (ago/2026): chave Pix, recebedor, Client ID e WhatsApp vivem num lugar só, acima de todas as abas e acima do preset geral — sem segunda cópia não há como divergir. As cores ficam globais **com botão**, nunca amarradas: uma campanha pode precisar de cor própria, e propagação silenciosa é o que este projeto recusa desde o R3 do preset geral. Consequência registrada: o aviso de divergência entre as duas páginas de uma campanha **deixou de poder acontecer** para esses campos, e o código que o produzia saiu em vez de virar código morto.
 - **Sem servidor, sem segredos**: tudo roda client-side. Client ID do PayPal e chave Pix são públicos por definição; Secret do PayPal nunca é usado.
 - **Stripe**: descartado como checkout próprio (valor dinâmico exige chave secreta em servidor). Permanece só como processador interno do TidyCal.
 - **Boleto PayPal**: descartado (exige webhook/servidor; assíncrono não combina com reserva).
@@ -1513,21 +1608,25 @@ No formulário do pacote entrou o `<select>` `a-pfam`, repopulado a cada mudanç
 
 Repositório público servido pelo GitHub Pages. A raiz é o que o Pages publica.
 
-- `index.html` — a ferramenta de 10 abas mais o painel consolidado à direita, servida em prosite.fotocerta.com.br
+- `index.html` — a ferramenta de 11 abas mais o painel consolidado à direita, servida em prosite.fotocerta.com.br
 - `fc-compartilhado.js` — a fonte que as **duas** páginas executam (BR Code, selo, prazo, recusas da cobrança, montagem do link, leitura da identidade). Carregado com endereço versionado; os blocos gerados continuam autossuficientes
 - `cobrar/index.html` — a página de uso diário, mobile-first, que gera o link de uma cobrança
 - `cobrar/manifest.json`, `cobrar/icone-180.png`, `cobrar/icone-192.png`, `cobrar/icone-512.png` — o manifesto e os ícones da tela de início (sem service worker, por decisão)
+- `previa.html` — uma linha, 59 bytes, sem comportamento nenhum. Existe só para ser um endereço de mesma origem que aceita `?pac=`: a prévia da página de obrigado precisa de consulta na URL, e um iframe escrito por `document.write` herda a URL da ferramenta, sem consulta. Não é versionado com `?v=` de propósito — o arquivo não muda, então cópia velha em cache é idêntica à nova
 - `CNAME`, `.nojekyll` — configuração do GitHub Pages (domínio próprio e desligamento do Jekyll)
 - `docs/documentacao-fotocerta.md` — este documento (fonte da verdade do contexto)
-- `scripts/verificar/` — o **arnês de verificação**, versionado: `regressao.sh` (a regressão byte a byte, um comando), `geradores.mjs` (a fotografia das saídas), `pagina.mjs` (o **molde** para executar um bloco gerado numa página que imita o Prosite) e `lib.mjs`. Um comando compara o que a árvore de trabalho gera com o que uma referência gera: as 12 saídas dos oito geradores e as 9 cobranças (bloco e link). Existe versionado desde 22/08/2026, porque enquanto morava numa pasta temporária foi perdido duas vezes no meio de uma rodada — e cada perda custou recapturar a referência inteira
+- `scripts/verificar/` — o **arnês de verificação**, versionado: `regressao.sh` (a regressão byte a byte, um comando), `geradores.mjs` (a fotografia das saídas), `pagina.mjs` (o **molde** para executar um bloco gerado numa página que imita o Prosite) e `lib.mjs`. Um comando compara o que a árvore de trabalho gera com o que uma referência gera: as **26 saídas** — uma por caixa de código das onze abas, em duas passagens, a de fábrica e a configurada — e as **9 cobranças** (bloco e link). Existe versionado desde 22/08/2026, porque enquanto morava numa pasta temporária foi perdido duas vezes no meio de uma rodada — e cada perda custou recapturar a referência inteira
 - `scripts/conferir-versoes.sh`, `scripts/versoes.txt` — a conferência **mecânica** das versões: `fc-compartilhado.js`, `cobrar/manifest.json` e o `index.html` (pelo carimbo de publicação). Compara o conteúdo com a versão declarada e falha quando um mudou sem o outro. Existe porque a guarda de versão das duas páginas é cega por construção
 - `scripts/carimbar-publicacao.sh`, `scripts/sha-index.sh` — escrevem o **carimbo de versão e hora** que a ferramenta mostra embaixo do título, e a regra de hash que ignora o próprio carimbo. Rodar `carimbar-publicacao.sh` uma vez antes do commit que vai ao ar
 - `docs/specs/` — specs de design das funcionalidades, um arquivo por feature
 - `docs/pendencias.md` — a lista **viva** do que ficou combinado e ainda não foi feito. Consultar antes de propor a próxima rodada; atualizar ao fim de cada uma
-- `docs/ledger-evolucao-2026-08.md` — o histórico de estimado versus real das fases já entregues, com os tempos medidos pelo relógio dos commits
+- `docs/ledger-evolucao-2026-08.md` — o histórico de estimado versus real **até 24/08/2026**, com os tempos medidos pelo relógio dos commits
+- `docs/ledger-evolucao-2026-09.md` — o segundo volume, de **25/08 a 15/09/2026**: 57 rodadas, com o tempo real lido do **carimbo de publicação** commit a commit, e não do relógio dos commits — em setembro as rodadas chegam espremidas em um ou dois commits do fim. O índice dele é **gerado** por `scripts/ledger-indice.sh`, nunca escrito à mão
+- `scripts/ledger-indice.sh` — gera o índice do ledger corrente a partir dos próprios títulos. Índice escrito à mão é uma segunda lista, que concorda hoje e diverge amanhã
 - `docs/superpowers/plans/` — os planos de implementação, um arquivo por rodada, referenciados a partir da spec e da seção correspondente deste documento
 - `docs/decisoes-2026-09-02-agendamento-por-pacote.md` — o diário de decisões tomadas durante a execução da décima aba (o que apareceu, as opções, o que foi decidido e o custo de desfazer), quando o dono autorizou seguir sem parar para aprovação a cada uma
 - `docs/decisoes-2026-09-03-textos-configuraveis.md` — as decisões sobre os 17 casos duvidosos do levantamento de textos (o que virou campo, o que ficou de fora e por quê), mais a regra que governa as frases repetidas entre abas. Onde uma decisão muda a saída byte a byte, está dito ali — e a divergência que a regressão acusar tem de bater com essa lista
+- `docs/decisoes-2026-09-13-paypal-e-centavo.md` — as decisões da rodada do PayPal item a item e do arredondamento do meio centavo
 - `CLAUDE.md` — instruções do projeto e fluxo de manutenção (carregado automaticamente pelo Claude Code)
 
 **Não há mais espelho do Prosite** (23/08/2026). A pasta `prosite/` foi removida depois de se constatar que **tudo** nela era reproduzível pelos construtores — inclusive a âncora inteligente e o plano B, que saem da aba Captação de leads. Espelho de código gerado envelhece a cada regeração e parece autoritativo, o que é a pior combinação: um arquivo velho lido como se fosse o publicado leva a diagnóstico errado com confiança (a dívida sobre o `bordas-css-componentes.md` já registrava exatamente isso). Quem precisa saber o que está no ar **lê a página publicada**; quem precisa recuperar um bloco **regera na aba**; e a rede de segurança da configuração é o **backup do dono**, não um arquivo no repositório.

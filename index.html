@@ -4892,8 +4892,8 @@
    QUEM IMPEDE QUE ELE MINTA: scripts/conferir-versoes.sh, que recusa index.html
    alterado sem a versao mudar junto -- a mesma disciplina do fc-compartilhado.js,
    e pela mesma razao: carimbo que ninguem confere e o defeito de amanha. */
-var FC_VERSAO='2026-09-16c';
-var FC_PUBLICADO='2026-09-16 01:04';   /* America/Sao_Paulo -- escrito pelo carimbador */
+var FC_VERSAO='2026-09-16d';
+var FC_PUBLICADO='2026-09-16 01:11';   /* America/Sao_Paulo -- escrito pelo carimbador */
 (function(){
   var el=document.getElementById('fc-versao');
   if(!el) return;
@@ -5296,8 +5296,8 @@ function fcTxtPadrao(defs,chave){
 /* ===== OS TRES TEXTOS QUE EXPLICAM O SINAL (rodada E, 13/09/2026) =====
    Pedido do dono: "para ficar claro isso ANTES de o cliente fazer o pagamento do sinal", tres
    textos configuraveis que respondam tres perguntas -- o que o sinal garante, e se ele
-   desistir, o que fazer com o saldo. Eles valem para as QUATRO abas de pagamento, e por isso a
-   tabela e UMA: os doze campos nascem daqui, com o mesmo rotulo, o mesmo exemplo e a mesma
+   desistir, o que fazer com o saldo. Eles valem para as CINCO abas de pagamento, e por isso a
+   tabela e UMA: os quinze campos nascem daqui, com o mesmo rotulo, o mesmo exemplo e a mesma
    chave. Doze campos escritos a mao em quatro lugares e o convite ao erro de digitacao que
    FC_TXT_FABRICA ja existe para recusar.
 
@@ -5540,7 +5540,7 @@ function fcSinalTxtDiverge(){
 /* A REDE DA LISTA UNICA. FC_PAG_PREFS e escrita a mao (uma aba de pagamento nova entra ali),
    e esta funcao compara a lista com quem declara pagamento:true em ABAS. Aba que cobra e nao
    esta na lista ficaria sem o aviso dos textos do sinal, sem a conferencia de fabrica dos
-   doze campos e sem a memoria da ordem dos meios -- tudo em silencio. Ela nao conserta: faz
+   quinze campos e sem a memoria da ordem dos meios -- tudo em silencio. Ela nao conserta: faz
    o buraco aparecer, como fccOrfas e fcTxtFabricaDiverge. */
 /* ===== A ORDEM DO REGISTRO NAO E A ORDEM DA BARRA, e inverter apaga configuracao =====
    A ordem de ABAS e a ordem em que restaurarEstado devolve as abas. Uma aba que grava estado
@@ -5857,6 +5857,7 @@ var FCR_ROTULOS={novo:'novo',corrigido:'corr',melhorado:'melh',atencao:'aten',ex
 /* A lista, da versao mais recente para a mais antiga. NAO reordenar: o agrupamento por
    dia assume que versoes do mesmo dia estao juntas, e o desenho respeita esta ordem. */
 var FCR_NOTAS=[
+ {v:"2026-09-16d",d:"16 de setembro de 2026",itens:[["","Só documentação e conferências internas, sem nenhuma mudança na tela: quinze afirmações da documentação do projeto estavam erradas e foram corrigidas, cinco regras que só existiam dentro do código foram escritas, e seis frases do próprio código citavam \"as quatro abas de pagamento\" quando já são cinco."]]},
  {v:"2026-09-16c",d:"16 de setembro de 2026",itens:[["Novo","Um botão **Explicações**, na barra do topo, recolhe as caixas de orientação dos campos. No lugar de cada grupo fica uma linha discreta com uma lâmpada; **um clique abre** a explicação ali mesmo, e outro fecha. São 433 caixas na ferramenta — ótimas no começo, e ruído depois que você já sabe."],["Atenção","**Nada muda até você apertar o botão.** Ele nasce em \"mostrar sempre\", exatamente como a ferramenta está hoje. A sua escolha fica guardada neste navegador."],["Atenção","**Os avisos âmbar nunca somem** — são os que dizem que um campo não vale naquela configuração. Também ficam sempre à vista as caixas que têm botão dentro e as que a própria ferramenta mostra e esconde conforme o que você configurou. Ao todo, 98 das 433 nunca recolhem."],["Melhorado","É clique, e não passar o mouse. Texto que aparece ao passar o mouse some no instante em que você leva o mouse para o campo que ia preencher — que é justamente quando você precisa dele."]]},
  {v:"2026-09-16b",d:"16 de setembro de 2026",itens:[["Melhorado","O **histórico das rodadas** ganhou índice e passou a ser cobrado: nenhuma versão pode mais ser publicada sem a linha dela lá, com o que entregou e quanto custou. O arquivo anterior tinha parado em 24 de agosto e ninguém percebeu por 22 dias."],["Corrigido","Calculadora de álbum: a chave Pix passou a ser limpa do mesmo jeito que nas outras quatro abas. Não havia efeito visível hoje — o campo da Identidade já limpa antes —, mas era a única aba sem essa segunda defesa, e foi exatamente a falta dela que, no Agendamento por Pacote, fez a mesma chave gerar dois códigos Pix diferentes."],["","O resto foi conferência interna, sem mudança na tela: quatro provas que contavam \"as quatro abas\" ficaram vermelhas sozinhas quando a quinta chegou, e agora tiram o número da lista em vez de cravá-lo; e duas que morriam sem medir nada voltaram a medir."]]},
  {v:"2026-09-16a",d:"16 de setembro de 2026",itens:[["Corrigido","A caixa **O que ainda depende de você** — a que abre sozinha no alto desta lista — estava desatualizada: faltavam as duas ações mais recentes, e o que ela mostrava era uma versão antiga e mais estreita da mesma instrução. Ela era uma segunda lista, escrita à parte. Agora ela **sai das próprias novidades**, e não tem como divergir."],["Novo","Ação que já foi superada por uma versão posterior agora aparece marcada na lista — **Substituída em…** — em vez de ficar lá parecendo pendente. A primeira delas é o recolar do Código 1 de 13/09, que a versão de 14/09 substituiu por um recolar que cobre três coisas de uma vez."],["Corrigido","Calculadora de álbum: o **código do pedido** nascia vazio, e a geração era recusada até você preencher. Agora nasce com um exemplo, como nas outras abas."],["","O resto foi rede de proteção, sem mudança na tela: a calculadora entrou na conferência que compara todos os códigos gerados antes e depois de cada mudança, os textos novos dela entraram junto, e a ferramenta passou a avisar sozinha se a ordem interna das abas for quebrada — o que apagaria configuração sua em silêncio. Mais o histórico das 57 versões publicadas desde 25 de agosto, que não existia em lugar nenhum."]]},
@@ -5916,7 +5917,7 @@ var FCR_NOTAS=[
  {v:"2026-08-25d",d:"25 de agosto de 2026",itens:[["Novo","Contagem regressiva: o marcador `{prazo}` mostra a data limite ao lado do tempo que falta, com o mesmo destaque do contador."]]},
  {v:"2026-08-25c",d:"25 de agosto de 2026",itens:[["Novo","Agendamento TidyCal: o formato da data na página de obrigado virou selecionável, com quatro opções."]]},
  {v:"2026-08-25b",d:"25 de agosto de 2026",itens:[["Melhorado","Efeitos de página: as partículas e o fundo animado passaram a exigir bem menos do aparelho do cliente — o desenho da tela ficou cerca de sessenta vezes mais leve."]]},
- {v:"2026-08-25a",d:"25 de agosto de 2026",itens:[["Corrigido","Efeitos de página: os botões e os doze campos de cor dessa aba podiam parar de funcionar por causa de uma falha em outra aba — e o aviso vermelho acusaria a aba errada."]]},
+ {v:"2026-08-25a",d:"25 de agosto de 2026",itens:[["Corrigido","Efeitos de página: os botões e os quinze campos de cor dessa aba podiam parar de funcionar por causa de uma falha em outra aba — e o aviso vermelho acusaria a aba errada."]]},
  {v:"2026-08-24h",d:"24 de agosto de 2026",itens:[["Novo","Efeitos de página: mais três efeitos — confete caindo, fundo animado (aurora) e luzes piscando."],["Novo","Efeitos de página: prévia de celular, e o tamanho do efeito proporcional no celular."]]},
  {v:"2026-08-24g",d:"24 de agosto de 2026",itens:[["Novo","Nasceu a aba Efeitos de página, com o primeiro efeito: neve caindo, na página inteira ou presa a um bloco."]]},
  {v:"2026-08-24f",d:"24 de agosto de 2026",itens:[["Novo","O painel da direita passou a montar a página com até cinco outros componentes seus além dos construtores, com uma saída numerada para cada."]]},
@@ -6779,7 +6780,7 @@ function fcMoedaFmtGer(soReal){
    parametros quanto linhas, o que nao e extracao, e template. Mantida como quarta copia,
    separada, no proprio gerador da /pagar. Precedente: a extracao parcial da Mini loja. */
 /* ===== UPSELL: a pagina para onde o cliente vai depois do pagamento aprovado =====
-   Pedido do dono em 13/09/2026, nas QUATRO abas de pagamento. Duas exigencias puxam para
+   Pedido do dono em 13/09/2026, nas CINCO abas de pagamento. Duas exigencias puxam para
    lados opostos, e o desenho tem de respeitar as duas:
 
    1. CAMPO VAZIO NAO PODE MUDAR UM BYTE do que a aba ja produzia -- mesmo criterio dos tres
@@ -22715,7 +22716,7 @@ function cUsaPrazo(msgs){
    ser presa numa faixa e o campo mostrar outra.
    Esta aba foi a primeira a exigir "corrigir a vista, nunca em silencio" (o c-mob) e foi a
    ultima a aplicar a regra a si mesma: durante tres fases so o c-mob e o teto da coruja tinham
-   faixa, e os outros doze campos passavam por um cNum que trocava NaN pelo padrao e nada mais.
+   faixa, e os outros quinze campos passavam por um cNum que trocava NaN pelo padrao e nada mais.
    Medido antes desta correcao, tudo sem aviso e com o campo continuando a exibir o que foi
    digitado: c-largmax=0 gerava max-width:0px (barra de largura zero), c-tam=0 gerava
    font-size:0px, c-vel=0 gerava "animation:fcb-rola 0s" (a rolagem configurada nunca acontece)
