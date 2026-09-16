@@ -214,9 +214,213 @@ chk('[4] com sinal, o PayPal cobra em linha unica (o formato nao tem campo para 
     blocoPag.indexOf('function ppDetalhar') < 0);
 chk('[4] o resumo copiavel entra', blocoPag.indexOf('function textoResumo') >= 0);
 chk('[4] o botao do WhatsApp entra', blocoPag.indexOf('function avisarZap') >= 0);
-chk('[4] as duas variaveis do upsell entram mesmo desligado',
-    /UPSELL_URL/.test(blocoPag) && /UPSELL_ATIVO=false/.test(blocoPag));
+/* SEM UPSELL CONFIGURADO, NADA DE UPSELL SAI -- corrigido em 16/09/2026, e a assercao aqui
+   estava DEFENDENDO o defeito. Ela vinha de quando esta aba chamava fcUpsellVarsSrc com o
+   'sempre', copiado da Link de cobranca; la ele existe porque o endereco do upsell pode vir
+   NO LINK da cobranca, e o bloco tem de saber lidar com ele mesmo com o campo da pagina
+   vazio. Esta aba nao tem link: o 'sempre' so punha duas variaveis mortas e um comentario
+   sobre uma precedencia inexistente em todo bloco entregue. Agora ela segue as tres irmas
+   sem link, e a prova mede as DUAS metades -- o que sai quando ha upsell, e o silencio
+   quando nao ha. Achado por upsell.mjs, que passou a cobrir esta aba. */
+chk('[4] SEM upsell configurado, nenhuma variavel de upsell sai',
+    !/UPSELL_URL/.test(blocoPag) && !/UPSELL_ATIVO/.test(blocoPag));
 chk('[4] com sinal, o Pix cobra o SINAL e nao o total',
     blocoPag.indexOf('function totalPix(){return sinalAgora();}') >= 0);
 
-resumo();
+/* ===========================================================================
+   PARTE 5 -- O PAGAMENTO EXECUTADO, e nao procurado por nome de funcao
+   ===========================================================================
+   Ate 16/09/2026 as partes acima provavam a CONTA (2.760 combinacoes, zero
+   divergencia) e conferiam o pagamento por PRESENCA DE TEXTO: procuravam
+   'function montarPayload' dentro do bloco. O bloco chegava a rodar, mas so
+   para ler preco na tela. Sinal calculado sobre a base errada, desconto
+   aplicado duas vezes ou QR com o valor do total em vez do sinal passariam
+   na bateria inteira -- a unica testemunha era uma busca por nome.
+
+   Aqui o bloco RODA e o dinheiro e lido de volta:
+     - o BR Code do Pix, relido por um leitor TLV escrito NESTE arquivo, com o
+       CRC refeito aqui tambem. Transcrever a conta do original seria eco, e
+       nao segunda opiniao -- entao o que se compara e o campo 54 contra o
+       numero que o CLIENTE LE NA TELA, que e a promessa de verdade;
+     - o pedido do PayPal, pedido ao createOrder do proprio bloco;
+     - a mensagem do WhatsApp, lida do endereco que o bloco manda abrir.
+
+   OS DOIS ESTADOS que mudam quem e cobrado: com sinal (o Pix cobra o SINAL) e
+   sem sinal com desconto no Pix (o Pix cobra o total DESCONTADO). Sao os dois
+   ramos de fcTotalPixSrc, e errar entre eles cobra o valor errado do cliente.
+   =========================================================================== */
+console.log('\n=== PARTE 5 -- o pagamento executado ===');
+
+/* O leitor TLV e o CRC, escritos aqui: id de 2, tamanho de 2, valor. */
+function crcTeste(s){
+  let crc = 0xFFFF;
+  for (let i = 0; i < s.length; i++) {
+    crc ^= (s.charCodeAt(i) & 0xFF) << 8;
+    for (let b = 0; b < 8; b++)
+      crc = (crc & 0x8000) ? ((crc << 1) ^ 0x1021) & 0xFFFF : (crc << 1) & 0xFFFF;
+  }
+  return ('000' + crc.toString(16).toUpperCase()).slice(-4);
+}
+function lerPix(codigo){
+  const campos = {};
+  let i = 0;
+  while (i + 4 <= codigo.length) {
+    const id = codigo.substr(i, 2);
+    const n = parseInt(codigo.substr(i + 2, 2), 10);
+    if (!isFinite(n)) return {erro: 'tamanho ilegível em ' + i};
+    campos[id] = codigo.substr(i + 4, n);
+    i += 4 + n;
+  }
+  return {
+    crcOk: codigo.slice(-4) === crcTeste(codigo.slice(0, -4)),
+    valor: campos['54'], chave: (campos['26'] || ''), campos
+  };
+}
+const soNum = s => String(s || '').replace(/[^0-9,]/g, '').replace(',', '.');
+
+/* A sonda do SDK do PayPal precisa estar de pe ANTES do bloco. */
+const CABECA = '<scr' + 'ipt>(function(){\n'
+  + 'var ins=document.head.appendChild;\n'
+  + 'document.head.appendChild=function(n){\n'
+  + '  if(n&&n.tagName==="SCRIPT"&&/paypal\\.com/.test(String(n.src||""))){\n'
+  + '    window.paypal={Buttons:function(bt){window.__pp=bt;return {render:function(){}};}};\n'
+  + '    setTimeout(function(){if(n.onload)n.onload();},0);\n'
+  + '    return n;\n'
+  + '  }\n'
+  + '  return ins.call(document.head,n);\n'
+  + '};\n'
+  + 'window.__alertas=[];window.alert=function(m){window.__alertas.push(String(m));};\n'
+  + 'window.__abriu=[];window.open=function(u){window.__abriu.push(String(u));return null;};\n'
+  + '})();</scr' + 'ipt>';
+
+/* Monta o carrinho na tela do bloco e devolve tudo o que o cliente LE. */
+const MEXER = async (p, cm, fotos, acabs) => p.evaluate(([cm, fotos, acabs]) => {
+  const bs = [].slice.call(document.querySelectorAll('.fcal-tam'));
+  const b = bs.filter(x => (x.textContent || '').indexOf(String(cm) + ' ') === 0)[0];
+  if (b) b.click();
+  const cx = [].slice.call(document.querySelectorAll('.fcal-acab'));
+  acabs.forEach((quer, i) => {
+    if (!cx[i]) return;
+    if ((cx[i].getAttribute('aria-checked') === 'true') !== !!quer) cx[i].click();
+  });
+  const r = document.querySelector('.fcal-range');
+  r.value = String(fotos);
+  r.dispatchEvent(new Event('input', {bubbles: true}));
+  const q = s => { const e = document.querySelector(s); return e ? e.textContent.trim() : null; };
+  return {total: q('.fcal-total-v'), sinal: q('.fcal-sinal-v'), saldo: q('.fcal-saldo-v'),
+          pix: q('.fcal-pixlinha-v'), fotos: document.querySelector('.fcal-campo').value};
+}, [cm, fotos, acabs]);
+
+/* ---- 5a. COM SINAL (a fábrica): o Pix cobra o sinal ---- */
+await comBlocoNaPagina({bloco: blocoPag, cabeca: CABECA, porta: 8955, medir: async (p) => {
+  await p.waitForTimeout(500);
+  const tela = await MEXER(p, 30, 60, [true, false]);
+  chk('[5a] a tela montou o pedido', tela.total !== null, JSON.stringify(tela));
+  const pix = await p.evaluate(() => {
+    document.querySelector('.fcal-gerar').click();
+    return {cola: (document.querySelector('.fcal-cola') || {}).value || '',
+            mostrado: (document.querySelector('.fcal-pixval-v') || {}).textContent || ''};
+  });
+  const d = lerPix(pix.cola);
+  chk('[5a] o código Pix foi gerado', pix.cola.length > 60, String(pix.cola.length));
+  chk('[5a] e o CRC fecha, refeito por este arquivo', d.crcOk === true, JSON.stringify(d).slice(0, 180));
+  chk('[5a] o valor DENTRO do código é o SINAL, e não o total',
+      d.valor === soNum(tela.sinal),
+      'campo54=' + d.valor + ' · sinal na tela=' + tela.sinal + ' · total=' + tela.total);
+  chk('[5a] e é o mesmo que o bloco mostra ao lado do QR',
+      soNum(pix.mostrado) === d.valor, pix.mostrado + ' x ' + d.valor);
+  /* o PayPal, com sinal, cobra o sinal e em LINHA UNICA */
+  const ped = await p.evaluate(() => {
+    if (!window.__pp || !window.__pp.createOrder) return {erro: 'sem createOrder'};
+    try { return {pu: window.__pp.createOrder(null, {order: {create: x => x}}).purchase_units[0]}; }
+    catch (e) { return {erro: String(e && e.message || e)}; }
+  });
+  chk('[5a] o PayPal montou o pedido', !ped.erro, JSON.stringify(ped).slice(0, 160));
+  chk('[5a] e o cartão cobra o SINAL, o mesmo do Pix',
+      ped.pu && ped.pu.amount.value === soNum(tela.sinal),
+      (ped.pu ? ped.pu.amount.value : '?') + ' x ' + tela.sinal);
+  chk('[5a] em linha única — o formato do PayPal não tem campo para entrada',
+      !!(ped.pu && ped.pu.items && ped.pu.items.length === 1),
+      ped.pu ? String((ped.pu.items || []).length) : '?');
+  /* o WhatsApp leva os mesmos numeros */
+  const zap = await p.evaluate(() => {
+    const b = document.querySelector('.fcal-zap');
+    if (!b) return {erro: 'sem botão'};
+    b.click();
+    return {url: (window.__abriu || [])[0] || ''};
+  });
+  const msg = decodeURIComponent(String(zap.url).split('text=')[1] || '');
+  chk('[5a] o WhatsApp abre com a mensagem', msg.length > 20, JSON.stringify(zap).slice(0, 160));
+  chk('[5a] e ela leva o sinal e o saldo que estão na tela',
+      msg.indexOf(tela.sinal) >= 0 && msg.indexOf(tela.saldo) >= 0,
+      'sinal=' + tela.sinal + ' saldo=' + tela.saldo);
+  chk('[5a] sem erro de console próprio do bloco',
+      (p.erros || []).filter(x => !/paypal\.com|cdnjs|ERR_|Failed to load/i.test(x)).length === 0,
+      (p.erros || []).slice(0, 2).join(' | '));
+}});
+
+/* ---- 5b. SEM SINAL, COM DESCONTO NO PIX: o Pix cobra o total descontado ---- */
+const blocoDesc = await blocoDaAba(async (p) => {
+  await p.evaluate(() => {
+    const r = document.querySelector('input[name="v-sinal"][value="nao"]');
+    if (r) { r.checked = true; r.dispatchEvent(new Event('change', {bubbles: true})); }
+  });
+  await p.waitForTimeout(300);
+  /* UM SKU EM CADA PONTA. A fabrica nasce SEM SKU -- e o bloco, corretamente, nao emite o
+     campo quando nao ha nenhum. Cadastrar aqui e o que torna a assercao do SKU possivel;
+     sem isso ela mediria a ausencia e passaria por engano (foi o que aconteceu na primeira
+     execucao, e a falha era do teste, nao do bloco). */
+  await set(p, 'v-tam-cm', '60'); await set(p, 'v-tam-media', '6');
+  await set(p, 'v-tam-minfotos', '60'); await set(p, 'v-tam-sku', 'ALB-60');
+  await p.click('#v-tam-add');
+  await set(p, 'v-ac-nome', 'Luva de linho'); await set(p, 'v-ac-valor', '250');
+  await set(p, 'v-ac-sku', 'LUVA-LN');
+  await p.click('#v-ac-add');
+  await p.waitForTimeout(200);
+}, 8956);
+await comBlocoNaPagina({bloco: blocoDesc, cabeca: CABECA, porta: 8957, medir: async (p) => {
+  await p.waitForTimeout(500);
+  const tela = await MEXER(p, 60, 120, [true, false, true]);
+  chk('[5b] a linha do desconto no Pix aparece', !!tela.pix, JSON.stringify(tela));
+  const cola = await p.evaluate(() => {
+    document.querySelector('.fcal-gerar').click();
+    return (document.querySelector('.fcal-cola') || {}).value || '';
+  });
+  const d = lerPix(cola);
+  chk('[5b] o CRC fecha', d.crcOk === true, String(d.crcOk));
+  chk('[5b] o valor dentro do código é o total DESCONTADO, e não o cheio',
+      d.valor === soNum(tela.pix) && d.valor !== soNum(tela.total),
+      'campo54=' + d.valor + ' · no Pix=' + tela.pix + ' · total=' + tela.total);
+  const ped = await p.evaluate(() => {
+    if (!window.__pp || !window.__pp.createOrder) return {erro: 'sem createOrder'};
+    try { return {pu: window.__pp.createOrder(null, {order: {create: x => x}}).purchase_units[0]}; }
+    catch (e) { return {erro: String(e && e.message || e)}; }
+  });
+  /* O CARTAO COBRA O CHEIO, e o Pix o descontado -- os dois numeros existem ao mesmo
+     tempo na tela de proposito, e trocar um pelo outro cobra errado. */
+  chk('[5b] e o cartão cobra o valor CHEIO, não o do Pix',
+      ped.pu && ped.pu.amount.value === soNum(tela.total),
+      (ped.pu ? ped.pu.amount.value : '?') + ' x total=' + tela.total + ' x pix=' + tela.pix);
+  chk('[5b] sem sinal, o pedido do PayPal vai ITEMIZADO',
+      !!(ped.pu && ped.pu.items && ped.pu.items.length >= 2),
+      ped.pu ? String((ped.pu.items || []).length) : '?');
+  chk('[5b] e a soma dos itens bate com o cobrado, ao centavo',
+      !!(ped.pu && Math.round(ped.pu.items.reduce((s, it) =>
+          s + Math.round(parseFloat(it.unit_amount.value) * 100) * parseInt(it.quantity, 10), 0))
+          === Math.round(parseFloat(ped.pu.amount.breakdown.item_total.value) * 100)),
+      ped.pu ? JSON.stringify(ped.pu.amount.breakdown) : '?');
+  chk('[5b] o álbum leva o SKU do TAMANHO escolhido, e o acabamento o dele',
+      !!(ped.pu && ped.pu.items.some(i => i.sku === 'ALB-60')
+                && ped.pu.items.some(i => i.sku === 'LUVA-LN')),
+      ped.pu ? JSON.stringify(ped.pu.items.map(i => ({n: i.name, sku: i.sku}))) : '?');
+  chk('[5b] sem erro de console próprio do bloco',
+      (p.erros || []).filter(x => !/paypal\.com|cdnjs|ERR_|Failed to load/i.test(x)).length === 0,
+      (p.erros || []).slice(0, 2).join(' | '));
+}});
+
+/* O CODIGO DE SAIDA E O RESULTADO, e nao um zero por descuido (16/09/2026). Nove suites
+   chamavam resumo() e saiam com 0 aconteca o que acontecesse -- e chave-pix-limpeza
+   estava FALHANDO e anunciando sucesso. Qualquer script que rode a bateria e olhe o
+   codigo de saida a via verde. E pior que vermelho permanente: vermelho que ninguem
+   olha ainda esta la; verde falso apaga o defeito. */
+process.exit(resumo());

@@ -81,6 +81,7 @@ ausência de um lugar onde o histórico esteja em ordem, com o tempo ao lado.
 - **57. As explicações que param de poluir o dia a dia — 16/09/2026** · `2026-09-16c`
 - **58. A documentação volta a dizer a verdade — 16/09/2026** · `2026-09-16d`
 - **59. A lista de novidades deixa de ser só cronológica — 16/09/2026** · `2026-09-16e`
+- **60. A quinta aba entra nas provas transversais, e o cartão dela estava quebrado — 16/09/2026** · `2026-09-16f`
 
 <!-- FIM DO INDICE GERADO -->
 
@@ -1459,6 +1460,58 @@ parece defeito — e o contador diz quantas sobraram, para "nenhuma" nunca parec
 | Estimativa | Tempo real |
 |---|---|
 | 3 h | **1 h 40** — de 01:04:07 a 02:44:32 no relógio, incluindo a integração refeita depois de o bloco de código não ter entrado na primeira tentativa |
+
+---
+
+### 60. A quinta aba entra nas provas transversais, e o cartão dela estava quebrado — 16/09/2026
+
+Versão `2026-09-16f`. Itens **8**, **9a**, **10** e as duas primeiras das sete provas do **9b**.
+
+A Calculadora de álbum nasceu na véspera com prova própria — 2.760 combinações de conta, sem uma
+divergência. O que ela **não** tinha era presença nas provas **transversais**, as que perguntam
+"as abas que cobram fazem todas a mesma coisa?". Pôr a quinta aba nelas achou, em duas suítes,
+três defeitos que a prova própria não tinha como pegar.
+
+**O grave: `TXT_SUCESSO` não existia nesta aba.** Quem escreve o botão do cartão é a fonte
+compartilhada `fcPpBotoesSrc`, e ela chama `msg(TXT_SUCESSO,true)` depois de `capture()`. As três
+irmãs declaram esse nome; esta declarava `TXT_OK`, que ninguém lia. O pagamento era **capturado**
+e o bloco então lançava `ReferenceError`: o cliente pagava e a tela não mudava, e o upsell nunca
+disparava. Achado por `upsell.mjs`, que **aprova um pagamento de verdade** — nenhuma busca por
+nome de função o teria encontrado, porque o nome procurado estava lá, do outro lado.
+
+**O meio prioritário que não priorizava.** `meio-prioritario.mjs` cobra das irmãs que o número em
+**destaque** seja o do meio escolhido, medido por `getComputedStyle`. Aqui o total saía com 26px
+fixos e a linha do Pix com 20px: escolher "Pix em destaque" mudava a ordem e a cor e deixava o
+número do Pix **menor** que o do cartão. A configuração existia e não fazia o que diz.
+
+**O `sempre` copiado de quem tem link.** `fcUpsellVarsSrc(...,true)` existe para a Link de
+cobrança, cujo bloco recebe a cobrança pelo endereço. Esta aba não tem link: o `sempre` punha duas
+variáveis mortas e um comentário sobre uma precedência inexistente em todo bloco entregue. Junto
+saíram duas regras de CSS para `.fcal-destaque` — que nunca foi classe de elemento nenhum, e sim o
+nome da variável de cor.
+
+#### O que a rodada ensinou sobre método
+
+**Prova própria e prova transversal respondem perguntas diferentes, e a segunda não é opcional.**
+A aba tinha 40 verificações próprias, incluindo o pagamento executado, e passava em todas — com o
+cartão quebrado. A pergunta que faltava não era "esta aba funciona?", era "esta aba funciona **do
+mesmo jeito que as irmãs**?". Aba nova que cobra entra nas doze transversais **na mesma rodada em
+que nasce**, e não na seguinte.
+
+**Uma asserção verde pode estar defendendo o defeito.** `calculadora-album.mjs` afirmava que "as
+duas variáveis do upsell entram mesmo desligado" — escrita no dia anterior a partir do que o
+código fazia, e não do que ele devia fazer. Ela ficou verde o tempo todo, guardando o `sempre`
+copiado errado. Asserção escrita olhando a saída herda o defeito da saída.
+
+**Interruptor de sim/não tem duas formas nesta ferramenta, e a prova não pode escolher uma.** As
+quatro abas antigas desenham "levar ao upsell", "avisar no WhatsApp" e "mostrar o resumo" como par
+de radios; a calculadora desenha os três como caixa de marcar. `lib.mjs` ganhou `ligar` e
+`lerLigado`, que olham o DOM e usam o que encontrarem. Uniformizar os controles mexe no formato do
+que fica gravado — foi levado ao dono, que aprovou; sai na versão seguinte.
+
+| Estimativa | Tempo real |
+|---|---|
+| 3 h (item 8) + 20 min (item 10) + 2 h 30 (item 9b inteiro) | **1 min 18 s** (item 8) · **4 min 34 s** (item 9a) · **1 min 23 s** (item 10) · **1 h 13** para as duas primeiras do 9b, de 09:58:22 a 11:11:51 — a maior parte gasta consertando os três defeitos que as provas acharam, e não escrevendo as provas |
 
 ---
 

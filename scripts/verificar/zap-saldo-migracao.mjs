@@ -138,4 +138,9 @@ console.log('\n[3] a migracao NAO mexe em estado que ja tem a chave nova');
   chk('a escolha do dono ficou intocada (m)', globalThis.__dep.mzap === 'Combinado: *{valor}*', String(globalThis.__dep.mzap));
 }
 
-resumo();
+/* O CODIGO DE SAIDA E O RESULTADO, e nao um zero por descuido (16/09/2026). Nove suites
+   chamavam resumo() e saiam com 0 aconteca o que acontecesse -- e chave-pix-limpeza
+   estava FALHANDO e anunciando sucesso. Qualquer script que rode a bateria e olhe o
+   codigo de saida a via verde. E pior que vermelho permanente: vermelho que ninguem
+   olha ainda esta la; verde falso apaga o defeito. */
+process.exit(resumo());

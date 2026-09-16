@@ -42,6 +42,7 @@
    ============================================================================ */
 import { navegador, servir, abrir, set, clicar, ler } from './lib.mjs';
 import { chk, resumo } from './pagina.mjs';
+import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -291,6 +292,36 @@ try{
   /* =======================================================================
      O que a tela nao pode ter feito: erro no console.
      ======================================================================= */
+  /* =======================================================================
+     TODO CAMPO DA TABELA TEM CONTADOR NA TELA -- varrido da propria tabela
+     =======================================================================
+     Ate 16/09/2026 esta prova media campos ESCOLHIDOS A MAO (fci-nomer, p-txid,
+     u-cod...). Campo novo entrava na tabela e nao entrava aqui: os tres da
+     Calculadora de album (v-cod, v-tam-sku, v-ac-sku) ficaram de fora sem uma
+     linha vermelha. A varredura sai de FC_LIM_CAMPOS, lida do fonte -- assim o
+     campo da proxima aba entra sozinho, e nao existe segunda lista para
+     divergir. fcLimIniciar ja derruba a partida se o campo nao existir ou nao
+     tiver rotulo; o que faltava era provar que o CONTADOR chega a ser desenhado. */
+  {
+    const fonte = fs.readFileSync(path.join(RAIZ, 'index.html'), 'utf8');
+    const bloco = (/var FC_LIM_CAMPOS=\[[\s\S]*?\n\];/.exec(fonte) || [''])[0];
+    const ids = (bloco.match(/\{id:'([^']+)'/g) || []).map(s => s.slice(5, -1));
+    chk('a tabela de limites foi lida do fonte', ids.length > 10, String(ids.length));
+    const semContador = await pg.evaluate((ids) => ids.filter(id => {
+      const campo = document.getElementById(id);
+      if (!campo) return true;                    /* campo sumiu da tela */
+      const max = campo.getAttribute('maxlength');
+      /* entrada sem 'max' na tabela nao ganha contador, de proposito (b-selo-txt) */
+      if (!max) return false;
+      return !document.getElementById('fcl-' + id);
+    }), ids);
+    chk('todo campo da tabela de limites tem contador na tela',
+        semContador.length === 0, semContador.join(', '));
+    chk('e os três da Calculadora de álbum estão entre eles',
+        ids.indexOf('v-cod') >= 0 && ids.indexOf('v-tam-sku') >= 0 && ids.indexOf('v-ac-sku') >= 0,
+        ids.filter(x => x.indexOf('v-') === 0).join(', '));
+  }
+
   chk('nenhum erro de console na passagem inteira', pg.erros.length === 0, pg.erros.join(' | '));
 } finally {
   await pg.close();

@@ -74,7 +74,7 @@ const CAMPOS = [
   {id:'desistir', rot:'E se o cliente desistir', ex:'ex.: Cancelamento não há devolução do sinal'},
   {id:'saldo',    rot:'O que fazer com o saldo', ex:'ex.: O saldo deve ser pago até 1 dia antes do seu ensaio'}
 ];
-const PREFS = ['u','a','p','m'];
+const PREFS = ['u','a','p','m','v'];
 const campoId = (p,i) => p+'-txt-sinal-'+CAMPOS[i].id;
 
 /* OS TEXTOS HOSTIS, um por pergunta e todos distintos: cada assercao aponta para
@@ -130,7 +130,13 @@ const ABAS = {
          existem depois do cartao. */
       antes:['.fca-ob-sinal','.fca-ob-saldo'], pagar:['.fca-ob-botoes','.fca-ob-pixarea']},
   p: {nome:'Cobrança',  saida:'p-out1', linha:'.fcpg-sinal-txt-l',
-      antes:['.fcpg-sinal','.fcpg-saldo'], pagar:['.fcpg-bloco','.fcpg-sep']}
+      antes:['.fcpg-sinal','.fcpg-saldo'], pagar:['.fcpg-bloco','.fcpg-sep']},
+  /* A QUINTA ABA QUE COBRA (16/09/2026). Ela e a unica cujos tres textos nascem PREENCHIDOS
+     -- a politica ja esta publicada na pagina de albuns do dono --, entao a parte que mede o
+     aviso ambar com os tres vazios precisa esvazia-los primeiro. Ver 'nasceVazio'. */
+  v: {nome:'Calculadora de álbum', saida:'v-out', linha:'.fcal-sinal-txt-l',
+      antes:['.fcal-sinal','.fcal-saldo'], pagar:['.fcal-botoes','.fcal-gerar','.fcal-sep'],
+      nasceVazio:false, sinalNasceLigado:true}
 };
 
 /* ===========================================================================
@@ -198,7 +204,20 @@ async function gerar(rot, {txt, sinal, porta}){
     await pg.waitForTimeout(60);
     await clicar(pg,'p-gerarlink');
     await pg.waitForTimeout(120);
-  }, ['u-out','m-out','a-out3','p-out1','p-out2'], {porta});
+
+    /* ===== A QUINTA ABA QUE COBRA (16/09/2026) =====
+       Ela e a UNICA cujos tres textos nascem preenchidos -- a politica ja esta publicada na
+       pagina de albuns do dono --, entao 'tres' precisa passar por cima deles em todos os
+       estados, inclusive no estado "vazio". Sem isso, o estado vazio mediria os padroes de
+       fabrica e a prova do aviso ambar nunca falharia. */
+    await clicar(pg,'aba-alb');
+    await pg.waitForTimeout(200);
+    await radio(pg,'v-sinal',sinal?'sim':'nao');
+    if(sinal){ await radio(pg,'v-sinaltipo','pct'); await set(pg,'v-sinalpct','30'); }
+    await tres('v');
+    await clicar(pg,'v-gerar');
+    await pg.waitForTimeout(120);
+  }, ['u-out','m-out','a-out3','p-out1','p-out2','v-out'], {porta});
 
   chk('['+rot+'] a ferramenta gerou sem alerta', r.alertas.length===0, JSON.stringify(r.alertas));
   chk('['+rot+'] a ferramenta gerou sem erro de console', r.erros.length===0, r.erros.slice(0,2).join(' | '));
@@ -354,9 +373,26 @@ let LINK_BUSCA = '';
     }
 
     /* 4. O AVISO AMBAR, aba por aba, nos quatro estados. */
-    const abaDe = {u:'aba-uni', a:'aba-pac', p:'aba-cob', m:'aba-loja'};
+    const abaDe = {u:'aba-uni', a:'aba-pac', p:'aba-cob', m:'aba-loja', v:'aba-alb'};
     for(const p of PREFS){
       await clicar(pg, abaDe[p]); await pg.waitForTimeout(60);
+      /* ESVAZIA ANTES, onde os tres nao nascem vazios. A Calculadora de album e a unica aba
+         cujos tres textos nascem PREENCHIDOS -- a politica ja esta publicada na pagina de
+         albuns do dono, entao o padrao repete o que ele ja diz em vez de inventar. Sem isto,
+         o estado chamado "os tres vazios" mediria os padroes de fabrica, e a prova do aviso
+         ambar nunca falharia: ela passaria a dizer "o aviso nao apareceu" sobre um bloco em
+         que ele CERTAMENTE nao devia aparecer. */
+      if(ABAS[p].nasceVazio === false){
+        for(let i=0;i<3;i++) await set(pg, campoId(p,i), '');
+        await pg.waitForTimeout(80);
+      }
+      /* E DESLIGA O SINAL onde ele nasce ligado -- so a Calculadora de album, porque a pagina
+         de albuns do dono ja promete "PIX de 50% na confirmacao". Sem isto, a leitura chamada
+         "sem sinal" seria feita com o sinal LIGADO e os tres vazios, que e exatamente o estado
+         em que o aviso DEVE aparecer. */
+      if(ABAS[p].sinalNasceLigado){
+        await radio(pg, p+'-sinal', 'nao'); await pg.waitForTimeout(80);
+      }
       const semSinal = await olhar(p);
       await radio(pg, p+'-sinal', 'sim'); await pg.waitForTimeout(80);
       const comSinalVazio = await olhar(p);

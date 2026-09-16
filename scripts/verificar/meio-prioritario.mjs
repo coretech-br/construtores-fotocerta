@@ -34,9 +34,9 @@
    ============================================================================ */
 import { comBlocoNaPagina, gerarNaFerramenta, chk, resumo } from './pagina.mjs';
 import { preparar, conteudo, cobranca, gerarTodas } from './cenario.mjs';
-import { radio, clicar } from './lib.mjs';
+import { radio, clicar, set } from './lib.mjs';
 
-const SAIDAS = ['u-out','m-out','p-out1','p-out2','a-out1','a-out2','a-out3'];
+const SAIDAS = ['u-out','m-out','p-out1','p-out2','a-out1','a-out2','a-out3','v-out'];
 
 /* Erro de rede nao e erro do bloco -- mesma lista curta das outras suites. */
 const EXTERNO = /cdnjs\.cloudflare\.com|paypal\.com|alboom\.ninja|tidycal|ERR_FAILED|Failed to load resource|net::ERR/i;
@@ -67,6 +67,19 @@ async function gerarCom(prio, porta){
     for(const [aba,pref] of [['aba-uni','u'],['aba-loja','m'],['aba-cob','p'],['aba-pac','a']]){
       await clicar(pg,aba); await pg.waitForTimeout(40);
       await radio(pg,pref+'-prio',prio);
+    }
+    /* A CALCULADORA DE ALBUM entra como QUINTA aba (16/09/2026). Ela chega aqui com duas
+       diferencas de NASCENCA em relacao as outras quatro: o sinal nasce LIGADO e o desconto
+       no Pix nasce zerado. Sinal ligado zera o desconto na origem (o mesmo 'if(sinalOn)' das
+       irmas), e sem desconto nao existem os DOIS numeros que a parte 3 mede -- entao aqui ela
+       e posta no mesmo estado das outras: sinal desligado e 10% no Pix. O estado de fabrica
+       dela, com o sinal ligado, e medido na parte 6, junto com as irmas. */
+    chk('['+prio+'] a aba da calculadora de album existe', !!(await pg.$('#aba-alb')));
+    if(await pg.$('#aba-alb')){
+      await clicar(pg,'aba-alb'); await pg.waitForTimeout(40);
+      await radio(pg,'v-sinal','nao'); await pg.waitForTimeout(40);
+      await set(pg,'v-descpix','10');
+      await radio(pg,'v-prio',prio);
     }
     await gerarTodas(pg);
   }, SAIDAS, {porta});
@@ -143,6 +156,25 @@ const CASOS = [
    selPix:'.fca-ob-cod', selPP:'.fca-ob-botoes', selSep:'.fca-ob-sep',
    /* aqui os dois numeros sao o preco grande e a linha 2 -- o desenho de referencia */
    selGrande:'.fca-ob-preco-valor', selSegundo:'.fca-ob-preco-linha2'},
+
+  /* A CALCULADORA DE ALBUM mede como o Checkout: os dois numeros sao linhas do proprio
+     orcamento. A diferenca e ONDE a fonte e declarada -- nas irmas o tamanho esta no
+     CONTAINER da linha, e aqui esta no SPAN do valor ('.fcal-final .fcal-linha-v'). Medir o
+     container devolveria 14,5px dos dois lados e a prova passaria sempre, sem olhar nada. */
+  {aba:'Calculadora de álbum', saida:'v-out', porta:8875, busca:'',
+   selPix:'.fcal-gerar', selPP:'.fcal-botoes', selSep:'.fcal-sep',
+   selCheio:'.fcal-total-v', selPixVal:'.fcal-pixlinha-v',
+   fonteCheio:'.fcal-total-v', fontePixVal:'.fcal-pixlinha-v', selSepTxt:'.fcal-sep-t',
+   /* a calculadora abre com um tamanho escolhido e um numero de fotos; mexer nos dois deixa
+      a medicao independente do que for o padrao de fabrica amanha */
+   antes: async pg => {
+     await pg.locator('.fcal-tam').first().click();
+     await pg.evaluate(() => {
+       const r = document.querySelector('.fcal-range');
+       r.value = String(Math.round((parseInt(r.max,10) + parseInt(r.min,10)) / 2));
+       r.dispatchEvent(new Event('input', {bubbles:true}));
+     });
+   }},
 
   {aba:'Link de cobrança', saida:'p-out1', porta:8874, buscaDe:'p-out2',
    selPix:'.fcpg-cod', selPP:'#fcpg-pp', selSep:'.fcpg-sep',
@@ -274,6 +306,15 @@ for(const caso of CASOS){
    Elas so aparecem na tela quando o SDK do cartao falha, e forcar essa falha em cada uma
    das oito combinacoes custaria mais do que vale: o que importa provar e que a frase que
    VIAJA no bloco e a da ordem daquele bloco. */
+/* A CALCULADORA DE ALBUM NAO ENTRA AQUI, e isso e medido e nao suposto: ela tem UMA frase de
+   erro ('v-txt-erro-pagamento'), neutra, em vez do par acima/abaixo que o Agendamento por
+   pacote e o Link de cobranca carregam. Frase que nao aponta para lado nenhum nao tem como
+   apontar para o lado errado -- que e o que esta parte vigia. A asserção logo abaixo prende
+   esse motivo: no dia em que a aba ganhar o par, ela falha e manda incluir a aba aqui. */
+chk('[5b] a calculadora de álbum tem frase de erro NEUTRA, e por isso fica fora desta parte',
+    vPix['v-out'].indexOf('Use o Pix acima') < 0 && vPix['v-out'].indexOf('Use o Pix abaixo') < 0
+    && vPP['v-out'].indexOf('Use o Pix acima') < 0 && vPP['v-out'].indexOf('Use o Pix abaixo') < 0);
+
 for(const [prio, v] of [['pix', vPix], ['pp', vPP]]){
   const acima = (prio === 'pix');
   chk('['+prio+'] pac: "Use o Pix '+(acima?'acima':'abaixo')+'" no bloco entregue',
@@ -303,19 +344,23 @@ console.log('\n== 6. com sinal ligado (desconto do Pix zerado na origem) ==');
 async function comSinal(prio, porta){
   const r = await gerarNaFerramenta(async pg => {
     await preparar(pg); await conteudo(pg); await cobranca(pg,{descpix:'10', valor:'450,00'});
-    for(const [aba,pref] of [['aba-uni','u'],['aba-loja','m']]){
+    for(const [aba,pref] of [['aba-uni','u'],['aba-loja','m'],['aba-alb','v']]){
       await clicar(pg,aba); await pg.waitForTimeout(40);
       await radio(pg, pref+'-prio', prio);
+      /* A CALCULADORA DE ALBUM nasce com desconto no Pix (5%) e com o sinal LIGADO -- e o
+         unico jeito de provar que o zeramento acontece na ORIGEM e por um desconto la e
+         ligar o sinal por cima dele. Deixar o campo como veio provaria menos. */
+      await set(pg, pref+'-descpix', '10');
       await radio(pg, pref+'-sinal', 'sim');
     }
     await gerarTodas(pg);
-  }, ['u-out','m-out'], {porta});
+  }, ['u-out','m-out','v-out'], {porta});
   chk('[sinal/'+prio+'] a ferramenta gerou sem alerta', r.alertas.length === 0, JSON.stringify(r.alertas));
   return r.valores;
 }
 const sinalPix = await comSinal('pix', 8883);
 const sinalPP  = await comSinal('pp',  8884);
-for(const [saida, pref] of [['u-out','fcu'],['m-out','fcm']]){
+for(const [saida, pref] of [['u-out','fcu'],['m-out','fcm'],['v-out','fcal']]){
   for(const [prio, v] of [['pix', sinalPix], ['pp', sinalPP]]){
     chk('[sinal/'+prio+'] '+saida+': a linha do Pix nao e emitida', v[saida].indexOf(pref+'-pixlinha') < 0);
     chk('[sinal/'+prio+'] '+saida+': nenhum "-0%" no bloco', v[saida].indexOf('-0%') < 0);
@@ -333,7 +378,7 @@ for(const [saida, pref] of [['u-out','fcu'],['m-out','fcm']]){
 }
 /* E no DOM, com o bloco rodando: a ordem obedece, e a linha do Pix realmente nao existe. */
 for(const [prio, v] of [['pix', sinalPix], ['pp', sinalPP]]){
-  for(const caso of CASOS.filter(c => c.saida === 'u-out' || c.saida === 'm-out')){
+  for(const caso of CASOS.filter(c => ['u-out','m-out','v-out'].indexOf(c.saida) >= 0)){
     const r = await medirCaso(caso, 'sinal/'+prio, v);
     const o = r.ordem || {};
     chk('[sinal/'+prio+'] '+caso.aba+': ordem no DOM (filhos '+o.ia+' e '+o.ib+')',

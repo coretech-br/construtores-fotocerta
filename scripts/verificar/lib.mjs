@@ -150,6 +150,36 @@ export async function radio(pg, nome, valor){
     el.dispatchEvent(new Event('change',{bubbles:true}));
   },[nome,valor]);
 }
+/* UM INTERRUPTOR DE SIM/NAO, seja ele par de radios ou caixa de marcar.
+   POR QUE EXISTE (16/09/2026). As quatro abas de pagamento mais antigas desenham "levar ao
+   upsell", "mandar pelo WhatsApp" e "mostrar o resumo" como PAR DE RADIOS ('sim'/'nao'); a
+   Calculadora de album desenha os tres como CAIXA DE MARCAR. As duas formas dizem a mesma
+   coisa ao dono, e a divergencia esta anotada em docs/pendencias.md para ele decidir -- trocar
+   o controle mexe no FORMATO DO QUE FICA GRAVADO, que e a classe que espera uma palavra dele.
+   Enquanto ele nao decide, as provas transversais nao podem ficar de fora da quinta aba: esta
+   funcao OLHA O DOM e usa o que encontrar. Ela nao esconde a diferenca -- 'lerLigado' devolve
+   o mesmo 'sim'/'nao' dos dois lados, e quem quiser medir a diferenca mede o DOM direto. */
+export async function ligar(pg, nome, ligado){
+  await pg.evaluate(([nome,ligado])=>{
+    const r = document.querySelector('input[type="radio"][name="'+nome+'"][value="'+(ligado?'sim':'nao')+'"]');
+    if(r){ r.checked = true; r.dispatchEvent(new Event('change',{bubbles:true})); return; }
+    const c = document.getElementById(nome);
+    if(c && c.type === 'checkbox'){
+      c.checked = !!ligado;
+      c.dispatchEvent(new Event('change',{bubbles:true}));
+      c.dispatchEvent(new Event('input',{bubbles:true}));
+      return;
+    }
+    throw new Error('sem interruptor '+nome+' (nem par de radios, nem caixa)');
+  },[nome,ligado]);
+}
+export const lerLigado = (pg,nome) => pg.evaluate(nome=>{
+  const r = document.querySelector('input[type="radio"][name="'+nome+'"]:checked');
+  if(r) return r.value;
+  const c = document.getElementById(nome);
+  if(c && c.type === 'checkbox') return c.checked ? 'sim' : 'nao';
+  return '(sem interruptor)';
+}, nome);
 export async function clicar(pg, id){
   await pg.evaluate(id=>{
     const el = document.getElementById(id);

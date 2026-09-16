@@ -62,7 +62,7 @@
    Nao precisa de internet.
    ============================================================================ */
 import { comBlocoNaPagina, gerarNaFerramenta, chk, resumo } from './pagina.mjs';
-import { set, radio, clicar, alertas } from './lib.mjs';
+import { set, radio, clicar, alertas, ligar, lerLigado } from './lib.mjs';
 
 const IDENT = {chave:'ensaio@fotocerta.com.br', nomer:'Foto Certa', cidade:'Vitoria',
   client:'AbCdEf123456789ClientIdDeTeste', zapnum:'5527999998888'};
@@ -83,7 +83,9 @@ async function ident(pg){
 }
 async function upsellCampos(pg, pref, up){
   await set(pg, pref+'-upsell', up.url || '');
-  await radio(pg, pref+'-upsellon', up.ligado ? 'sim' : 'nao');
+  /* 'ligar' em vez de 'radio': a Calculadora de album desenha este interruptor como caixa de
+     marcar, e as outras quatro como par de radios. Ver o comentario de lib.mjs. */
+  await ligar(pg, pref+'-upsellon', up.ligado);
 }
 async function abaCheckout(pg, up){
   await ident(pg);
@@ -128,11 +130,26 @@ async function abaCobranca(pg, up){
   await clicar(pg,'p-gerarlink');
 }
 
+/* A CALCULADORA DE ALBUM (16/09/2026). Ela ja nasce com tamanhos de fabrica, entao aqui so
+   entram o codigo da campanha e os dois campos do upsell -- o resto e o padrao, que e
+   exatamente o que se quer medir. O SINAL E DESLIGADO de proposito: ligado, o bloco cobra
+   sinal e o caminho do cartao na parte 4 passa a aprovar a ENTRADA, nao o pedido; o upsell
+   nao muda com isso, mas o teste passaria a medir outra coisa sem dizer. */
+async function abaAlbum(pg, up){
+  await ident(pg);
+  await clicar(pg,'aba-alb');
+  await set(pg,'v-cod','ALB26');
+  await radio(pg,'v-sinal','nao');
+  await upsellCampos(pg,'v',up);
+  await clicar(pg,'v-gerar');
+}
+
 const ABAS = [
   {nome:'Checkout',              pref:'u', saida:'u-out',   cfg:abaCheckout},
   {nome:'Mini loja',             pref:'m', saida:'m-out',   cfg:abaLoja},
   {nome:'Agendamento por pacote',pref:'a', saida:'a-out3',  cfg:abaPacote},
-  {nome:'Link de cobranca',      pref:'p', saida:'p-out1',  cfg:abaCobranca}
+  {nome:'Link de cobranca',      pref:'p', saida:'p-out1',  cfg:abaCobranca},
+  {nome:'Calculadora de album',  pref:'v', saida:'v-out',   cfg:abaAlbum}
 ];
 
 const URL_TESTE = 'https://www.fotocerta.com.br/oferta-especial';
@@ -358,7 +375,7 @@ async function aprovar(pg){
   }catch(e){ /* execution context destroyed = navegou */ }
 }
 
-const BUSCA = {u:'', m:'', a:'?pac=MINI&data=2027-01-10&hora=10:00', p:''};
+const BUSCA = {u:'', m:'', a:'?pac=MINI&data=2027-01-10&hora=10:00', p:'', v:''};
 
 /* Para a /pagar o bloco so monta com uma cobranca no endereco. Ela vem do proprio link que a
    aba gerou na passagem correspondente -- assim o que se executa e o par real. */
@@ -791,9 +808,10 @@ console.log('\n== 8. Endereco invalido editado A MAO no codigo publicado (medica
    afirmacao sobre o codigo de restauracao, e ela se mede: apagar as duas chaves do
    armazenamento e exatamente o que um backup anterior a esta rodada tem. */
 console.log('\n== 9. O que fica gravado: recarga, estado antigo e preset ==');
-const leRadio = (pg,nome) => pg.evaluate(n=>{
-  const r=document.querySelector('input[name="'+n+'"]:checked');return r?r.value:'(nenhum marcado)';
-}, nome);
+/* 'lerLigado' e nao um leitor de radios: a Calculadora de album desenha este interruptor como
+   caixa de marcar, e um leitor so de radios devolvia "(nenhum marcado)" para ela em toda
+   leitura -- tres vermelhos que nao eram defeito da ferramenta, e sim da prova. */
+const leRadio = (pg,nome) => lerLigado(pg,nome);
 const leCampo = (pg,id) => pg.evaluate(i=>{const e=document.getElementById(i);return e?e.value:null;}, id);
 
 for(const aba of ABAS){
@@ -820,11 +838,11 @@ for(const aba of ABAS){
 
     /* 9c. PRESET DE ABA: salvar com um endereco, trocar na tela, aplicar o preset */
     await set(pg, aba.pref+'-upsell', 'https://www.fotocerta.com.br/oferta-A');
-    await radio(pg, aba.pref+'-upsellon','sim');
+    await ligar(pg, aba.pref+'-upsellon', true);
     await set(pg, 'fcp-'+aba.pref+'-nome', 'upsell A');
     await clicar(pg, 'fcp-'+aba.pref+'-salvar');
     await set(pg, aba.pref+'-upsell', 'https://www.fotocerta.com.br/oferta-B');
-    await radio(pg, aba.pref+'-upsellon','nao');
+    await ligar(pg, aba.pref+'-upsellon', false);
     await pg.evaluate(p=>{
       const bs=document.querySelectorAll('#fcp-'+p+'-lista [data-fc-aplicar]');
       if(!bs.length) throw new Error('sem preset na biblioteca de '+p);

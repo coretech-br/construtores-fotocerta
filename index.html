@@ -4905,8 +4905,8 @@
    QUEM IMPEDE QUE ELE MINTA: scripts/conferir-versoes.sh, que recusa index.html
    alterado sem a versao mudar junto -- a mesma disciplina do fc-compartilhado.js,
    e pela mesma razao: carimbo que ninguem confere e o defeito de amanha. */
-var FC_VERSAO='2026-09-16e';
-var FC_PUBLICADO='2026-09-16 02:44';   /* America/Sao_Paulo -- escrito pelo carimbador */
+var FC_VERSAO='2026-09-16f';
+var FC_PUBLICADO='2026-09-16 11:14';   /* America/Sao_Paulo -- escrito pelo carimbador */
 (function(){
   var el=document.getElementById('fc-versao');
   if(!el) return;
@@ -5870,6 +5870,7 @@ var FCR_ROTULOS={novo:'novo',corrigido:'corr',melhorado:'melh',atencao:'aten',ex
 /* A lista, da versao mais recente para a mais antiga. NAO reordenar: o agrupamento por
    dia assume que versoes do mesmo dia estao juntas, e o desenho respeita esta ordem. */
 var FCR_NOTAS=[
+ {v:"2026-09-16f",d:"16 de setembro de 2026",itens:[["Corrigido","**Calculadora de álbum: quem pagasse no cartão pagava e não via a confirmação.** O pagamento era cobrado normalmente, e no instante seguinte a tela travava — a mensagem \"Pagamento aprovado\" era procurada por um nome que essa aba nunca escreveu. O cliente ficava olhando para uma tela parada depois de pagar, e quem tivesse a página de oferta ligada nunca chegava nela. **Só a calculadora tinha esse defeito**; as outras três abas que cobram no cartão sempre estiveram certas. Se você já publicou a calculadora nova, **gere o código de novo e recole**."],["Corrigido","Calculadora de álbum: escolher **Pix em destaque** não colocava o Pix em destaque. Mudava a ordem e a cor, mas o valor do Pix continuava menor que o do cartão. Agora os dois tamanhos trocam de lugar junto com a escolha, como no Checkout."],["Melhorado","O código da calculadora ficou mais enxuto: saíam dele duas variáveis de \"página depois do pagamento\" mesmo sem nenhuma configurada, um comentário descrevendo um mecanismo que essa aba não tem, e regras de estilo para partes que não existiam no bloco."],["","O resto foi rede de proteção, sem mudança na tela: duas conferências que só olhavam as quatro abas antigas passaram a olhar a calculadora também — e foi exatamente isso que achou o defeito do cartão acima, que nenhuma prova anterior teria pego."]]},
  {v:"2026-09-16e",d:"16 de setembro de 2026",itens:[["Novo","Esta lista ganhou **filtros**. Uma fileira de botões por aba — Mini loja, Checkout, Calculadora de álbum… — e outra por tipo: Novo, Corrigido, Melhorado, Atenção, e o que exige uma ação sua. Para ver só o que mudou na Mini loja era preciso abrir onze dias e ler tudo; agora é um clique."],["Novo","E um botão **Só o que é novo para mim**: a ferramenta guarda a última versão que você viu e marca as que chegaram depois. Quem abre a lista a cada duas semanas para de ter de adivinhar onde parar de ler."],["Melhorado","O contador diz quantas novidades sobraram com os filtros escolhidos, para \"nenhuma\" nunca parecer tela quebrada."]]},
  {v:"2026-09-16d",d:"16 de setembro de 2026",itens:[["","Só documentação e conferências internas, sem nenhuma mudança na tela: quinze afirmações da documentação do projeto estavam erradas e foram corrigidas, cinco regras que só existiam dentro do código foram escritas, e seis frases do próprio código citavam \"as quatro abas de pagamento\" quando já são cinco."]]},
  {v:"2026-09-16c",d:"16 de setembro de 2026",itens:[["Novo","Um botão **Explicações**, na barra do topo, recolhe as caixas de orientação dos campos. No lugar de cada grupo fica uma linha discreta com uma lâmpada; **um clique abre** a explicação ali mesmo, e outro fecha. São 433 caixas na ferramenta — ótimas no começo, e ruído depois que você já sabe."],["Atenção","**Nada muda até você apertar o botão.** Ele nasce em \"mostrar sempre\", exatamente como a ferramenta está hoje. A sua escolha fica guardada neste navegador."],["Atenção","**Os avisos âmbar nunca somem** — são os que dizem que um campo não vale naquela configuração. Também ficam sempre à vista as caixas que têm botão dentro e as que a própria ferramenta mostra e esconde conforme o que você configurou. Ao todo, 98 das 433 nunca recolhem."],["Melhorado","É clique, e não passar o mouse. Texto que aparece ao passar o mouse some no instante em que você leva o mouse para o campo que ia preencher — que é justamente quando você precisa dele."]]},
@@ -28159,21 +28160,52 @@ function vBloco(cfg){
   c+='.fcal-linha-v{flex:none;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}\n';
   c+='.fcal-risca{border-top:1px solid rgba(0,0,0,.1);margin:10px 0 4px}\n';
   c+='.fcal-final{padding-top:4px}\n';
-  c+='.fcal-final .fcal-linha-k{font-size:20px;font-weight:700;opacity:1}\n';
-  c+='.fcal-final .fcal-linha-v{font-size:26px;color:var(--fcal-destaque,'+cfg.c1+');font-weight:800}\n';
+  /* O NUMERO GRANDE E O DO MEIO PRIORITARIO, e nao o total por decreto (16/09/2026).
+     ACHADO ao por esta aba na prova meio-prioritario.mjs, que ja cobrava das quatro irmas
+     que o numero em DESTAQUE fosse o do meio escolhido -- medido por getComputedStyle, e
+     nao por nome de classe. Aqui ele nunca era: o total saia com 26px fixos e a linha do
+     Pix com 20px, entao escolher "Pix em destaque" mudava a ORDEM e a cor, e deixava o
+     numero do Pix menor que o do cartao -- a configuracao existia e nao fazia o que diz.
+     Agora os dois tamanhos TROCAM DE LUGAR junto com a escolha, como no Checkout (17/20).
+     So vale quando ha desconto no Pix: sem ele existe um numero so, e nada a priorizar. */
+  var totalDest=!(descpix>0&&prio==='pix');
+  c+='.fcal-final .fcal-linha-k{font-size:'+(totalDest?20:15)+'px;font-weight:700;opacity:1}\n';
+  c+='.fcal-final .fcal-linha-v{font-size:'+(totalDest?26:20)+'px;color:var(--fcal-destaque,'+cfg.c1+');font-weight:800}\n';
   /* A LINHA DE DINHEIRO NAO QUEBRA (conserto de 13/09/2026): quem cede e o rotulo. */
-  c+=fcLinhaValorCss('.fcal-raiz',['fcal-linha','fcal-sinal','fcal-saldo','fcal-pixlinha','fcal-destaque']);
+  /* A LISTA E CONDICIONAL, como no Checkout -- e por dois motivos medidos em 16/09/2026 ao
+     por esta aba na prova do meio prioritario:
+       1. com o sinal ligado o desconto do Pix e zerado na origem e a linha do Pix NAO e
+          desenhada; citar 'fcal-pixlinha' aqui assim mesmo deixava a palavra no bloco, e as
+          provas que garantem a ausencia dessa linha falhavam sobre um bloco que estava certo.
+          E a MESMA licao que o Checkout ja tinha aprendido, sete linhas acima do 'uLin' dele;
+       2. 'fcal-destaque' nunca foi classe de elemento nenhum -- e o nome da VARIAVEL de cor
+          ('--fcal-destaque'). Duas regras de CSS para um seletor que nao existe viajavam
+          dentro de todo bloco entregue. */
+  var alLin=['fcal-linha'];
+  if(usaSinal)alLin.push('fcal-sinal','fcal-saldo');
+  if(descpix>0)alLin.push('fcal-pixlinha');
+  c+=fcLinhaValorCss('.fcal-raiz',alLin);
   if(usaSinal){
     c+='.fcal-raiz .fcal-sinal{display:flex;justify-content:space-between;gap:10px;padding:6px 0 0;font-size:16px;font-weight:700;color:var(--fcal-destaque,'+cfg.c1+')}\n';
     c+='.fcal-raiz .fcal-saldo{display:flex;justify-content:space-between;gap:10px;padding:2px 0 0;font-size:13px;opacity:.7}\n';
-    c+='.fcal-sinal-txt-l{font-size:12px;line-height:1.45;opacity:.7;margin-top:4px}\n';
+    /* AS TRES RESPOSTAS SOBRE O SINAL: a regra so entra quando HA alguma preenchida. Com as
+       tres vazias nem a regra de CSS, nem a div, nem uma linha de JS aparecem -- mesma escolha
+       das quatro irmas. Medido em 16/09/2026: sem esta guarda, o nome da classe sobrava no CSS
+       e a prova que procura "nenhuma letra de fcal-sinal-txt-l no bloco vazio" falhava sobre um
+       bloco que estava certo -- e, pior, ela passaria a mentir no dia em que estivesse errado. */
+    if(fcSinalTxtLista(cfg).length)
+      c+='.fcal-sinal-txt-l{font-size:12px;line-height:1.45;opacity:.7;margin-top:4px}\n';
     c+='.fcal-sinal-aviso{display:none;font-size:12px;font-weight:600;color:#c0392b;padding:7px 0 0}\n';
     c+='.fcal-sinal-aviso.on{display:block}\n';
   }
   if(descpix>0){
     c+='.fcal-raiz .fcal-pixlinha{display:none;justify-content:space-between;gap:10px;'+
-       ((prio==='pix')?('padding:8px 0 0;font-size:20px;font-weight:800;color:var(--fcal-destaque,'+cfg.c1+')')
+       ((prio==='pix')?('padding:8px 0 0;font-size:15px;font-weight:800;color:var(--fcal-destaque,'+cfg.c1+')')
                       :'padding:4px 0 0;font-size:14px;color:#1e7e34;font-weight:700')+'}\n';
+    /* O VALOR em 26px, o rotulo em 15px -- o mesmo desenho que o total usa quando e ele o
+       destaque. Regra propria para o span, e nao font-size maior no pai, senao o rotulo
+       ("No Pix (10% de desconto)") cresceria junto e viraria uma frase de 26px. */
+    if(prio==='pix')c+='.fcal-raiz .fcal-pixlinha .fcal-linha-v{font-size:26px}\n';
     c+='.fcal-raiz .fcal-pixlinha.on{display:flex}\n';
   }
   c+='.fcal-bt{display:block;width:100%;margin-top:10px;border:none;border-radius:12px;background:var(--fcal-destaque,'+cfg.c1+');color:#fff;font-family:inherit;font-size:15px;font-weight:700;padding:15px 16px;cursor:pointer}\n';
@@ -28238,7 +28270,13 @@ function vBloco(cfg){
   c+="var COR_DESTAQUE='"+escJs(cfg.c1)+"';\n";
   c+="var COR_FUNDO='"+escJs(cfg.c2)+"';\n";
   c+="var COR_TEXTO='"+escJs(cfg.c3)+"';\n";
-  c+=fcUpsellVarsSrc('',cfg.upsell,true);
+  /* SEM o 'sempre' (conserto de 16/09/2026). Ele existe para a Link de cobranca, cujo bloco
+     recebe a cobranca PELO ENDERECO e por isso precisa das duas variaveis mesmo com o campo
+     da pagina vazio -- o endereco do upsell pode vir no link. Esta aba nao tem link nenhum:
+     com 'sempre' ela punha duas variaveis mortas em TODO bloco entregue, mais um comentario
+     descrevendo uma precedencia de parametro que este bloco nao le. Agora ela segue as tres
+     irmas sem link: sem upsell configurado, nada e emitido. */
+  c+=fcUpsellVarsSrc('',cfg.upsell);
   c+='\n';
   /* Os textos, um por linha, na ordem em que o cliente os le. */
   var TX=[
@@ -28262,7 +28300,14 @@ function vBloco(cfg){
     ['TXT_PIXVAL','txtPixVal'],['TXT_PIX_COPIAR','txtPixCopiar'],['TXT_PIX_COPIADO','txtPixCopiado'],
     ['TXT_NOTA','txtNota']]);
   if(usaPix&&zap)TX.push(['TXT_PIX_MANUAL','txtPixManual']);
-  if(usaPP)TX=TX.concat([['TXT_ERRO','txtErroPagamento'],['TXT_OK','txtPagoOk']]);
+  /* O NOME E 'TXT_SUCESSO', e nao 'TXT_OK' (conserto de 16/09/2026). Quem escreve o botao do
+     cartao e a fonte compartilhada 'fcPpBotoesSrc', e ela chama msg(TXT_SUCESSO,true) depois
+     de capturar o pagamento -- as outras tres abas de cartao declaram esse nome. Aqui saia
+     'TXT_OK', que ninguem lia, e 'TXT_SUCESSO' nao existia: o pagamento no cartao era
+     capturado e entao o bloco lancava ReferenceError -- o cliente PAGAVA e nao via a
+     confirmacao, e quem tivesse upsell ligado nunca chegava na pagina de oferta. Achado ao
+     por esta aba na prova upsell.mjs, que aprova um pagamento de verdade. */
+  if(usaPP)TX=TX.concat([['TXT_ERRO','txtErroPagamento'],['TXT_SUCESSO','txtPagoOk']]);
   if(usaPix&&usaPP)TX=TX.concat([['TXT_OU','txtOu'],['TXT_OU_DESC','txtOuDesc']]);
   if(descpix>0)TX.push(['TXT_PIX_ROTULO','txtPixRotulo']);
   if(usaResumo)TX=TX.concat([['TXT_RESUMO','txtResumo'],['TXT_RESUMO_BOTAO','txtResumoBotao'],
@@ -28275,7 +28320,7 @@ function vBloco(cfg){
   c+='\n/* ============================================================\n   Daqui para baixo nao precisa mexer\n   ============================================================ */\n\n';
 
   c+=fcMoedaFmtGer(true);
-  c+=fcUpsellFnSrc('',cfg.upsell,true);
+  c+=fcUpsellFnSrc('',cfg.upsell);
   if(usaPix){
     c+=FC_PIX_SRC.semAcento;
     c+=FC_PIX_SRC.tlv;
