@@ -1,9 +1,12 @@
-# Ledger da evolução — 25/08/2026 a 15/09/2026
+# Ledger da evolução — 25/08/2026 em diante
 
 Segundo volume do histórico das rodadas. O primeiro, `docs/ledger-evolucao-2026-08.md`, vai
-até 24/08/2026 e para ali. Este cobre o que veio depois: **57 versões publicadas**, de
-`2026-08-25a` a `2026-09-15a`, em **54 rodadas** — sete no fim de agosto e cinquenta em
-setembro.
+até 24/08/2026 e para ali. Este cobre o que veio depois, a partir de `2026-08-25a`.
+
+**Este volume é o corrente: toda rodada publicada escreve a linha dela aqui, no mesmo commit
+que vai ao ar.** Sem essa regra ele morre como o primeiro morreu — o de agosto parou em 24/08
+e ninguém notou por 22 dias, 57 versões. A regra está no `CLAUDE.md`, ao lado da release note,
+e pelo mesmo motivo: compromisso que depende de alguém lembrar já falhou aqui.
 
 ## O que este arquivo é
 
@@ -1209,6 +1212,42 @@ padrão repete o que ele já diz em vez de inventar.
 | Estimativa | Tempo real |
 |---|---|
 | — | Não recuperável. A rodada chega num commit só; a publicação anterior é de 14/09 às 12:48. |
+
+### 55. Auditoria: a rede cobre a aba nova, e duas redes no lugar de dois comentários — 16/09/2026
+
+Versão `2026-09-16a`. Primeira rodada saída da **auditoria de documentação, código e release
+notes** que o dono pediu em 16/09 — quatro varreduras, sete itens aprovados por ele, executados
+em três faixas. O mapa dos achados está no relatório entregue a ele; a fila viva está na seção
+"EM EXECUÇÃO AGORA" de `docs/pendencias.md`.
+
+Entregou os itens **1, 2 e 4** da fila: a calculadora de álbum entrou na regressão byte a byte
+(26 saídas) e os textos dela na passagem configurada (de 24 para 29); a ordem do registro de
+abas e a caixa "o que ainda depende de você" ganharam rede em vez de comentário; e este arquivo
+nasceu, com as 57 versões que não tinham histórico.
+
+#### O que a rodada ensinou sobre método
+
+**A rede principal estava cega para a aba mais nova, e o verde escondia isso.** A regressão dizia
+`OK` sem exercitar a única aba que cobra sem estar na fotografia — e ela consome exatamente a
+maquinaria de dinheiro que o invariante existe para proteger. Verde que não mede não é verde.
+
+**Uma caixa que "existe" não é uma caixa que está certa.** A única asserção sobre a caixa de ações
+era `acoes > 0`. Ela passou por meses enquanto a caixa mostrava a instrução errada. Medir a
+existência de um elemento é o jeito mais fácil de escrever uma prova que nunca falha.
+
+**A marca "Substituída em…" entrou por necessidade da prova, e virou melhoria do produto.** Para
+a prova distinguir ação viva de ação superada, a diferença precisava existir no DOM — e, existindo
+no DOM, existe na tela. O que era testabilidade virou a resposta ao outro achado da auditoria: a
+nota que dizia "espera a sua palavra" sobre algo entregue no dia seguinte.
+
+**O tempo real passou a ser relógio, por ordem do dono, depois de eu inventar a coluna.** Reportei
+48 min e 1h22 para dois itens; medido, os dois juntos couberam em 49 min, numa janela que ainda
+continha a auditoria inteira. Um terceiro, executado por subagente, foi reportado como 1h04 quando
+o próprio agente devolvera 5 min 20 s. A regra e o caso estão no `CLAUDE.md`.
+
+| Estimativa | Tempo real |
+|---|---|
+| 2 h 10 (itens 1 e 2) · 2 h (item 4) | Itens 1 e 2: **≤ 49 min os dois juntos**, sem marca por item — a janela contém a auditoria e as conversas. Item 4: **5 min 20 s**, medido pelo relógio do próprio subagente. |
 
 ---
 

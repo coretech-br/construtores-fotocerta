@@ -126,6 +126,27 @@ falhas por dia, outra três, e ninguém olhava mais para elas.
 Isto **não** enfraquece a regressão byte a byte de `regressao.sh`: lá a referência é escolhida a
 cada execução e o invariante é "esta mudança não alterou as saídas", que é outra pergunta.
 
+## Toda rodada que publica escreve a linha dela no LEDGER (regra de 16/09/2026)
+
+O ledger de agosto parou em 24/08/2026 e ninguém notou por **22 dias** — 57 versões publicadas
+sem uma linha de histórico, e **nenhuma rodada de setembro** com estimado contra realizado, que
+é justamente a tabela que o dono pediu para ser regra do projeto. O segundo volume
+(`docs/ledger-evolucao-2026-09.md`) nasceu para fechar esse buraco; reabri-lo sem rede só
+adiaria a mesma morte.
+
+**A regra:** a rodada escreve a linha dela no ledger **corrente** — o de maior sufixo em
+`docs/ledger-evolucao-*.md` — no mesmo commit que vai ao ar. A entrada traz o que a rodada
+entregou, o que ela ensinou sobre método (quando houver lição real — **não se inventa lição**)
+e a tabela de **estimativa contra tempo real**.
+
+**A rede:** `conferir-versoes.sh` **recusa carimbo sem linha no ledger**, do mesmo jeito que já
+recusa carimbo sem release note. Ele acha o volume corrente sozinho, então abrir um volume novo
+não exige mexer no script, e um volume fechado não passa a ser cobrado para sempre.
+
+**As duas obrigações não são a mesma.** A release note é para o **dono**, no tom dele, dizendo o
+efeito. O ledger é o **histórico do projeto**, com o custo ao lado e a lição de método. Uma não
+substitui a outra, e é por isso que são duas redes.
+
 ## Toda rodada que publica ESCREVE a release note da versão (regra de 14/09/2026)
 
 Fixada pelo dono: *"A partir de agora, sempre que alterar algo no projeto, seja melhoria, seja

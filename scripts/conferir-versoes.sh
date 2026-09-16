@@ -150,6 +150,22 @@ elif [ "$n" != "1" ]; then
   erro "a versao \"$v_index\" aparece $n vezes em FCR_NOTAS (index.html). Deveria aparecer uma so -- duas entradas fazem o painel mostrar a mesma versao duas vezes."
 fi
 
+# ---- 4. a versao carimbada tem linha no ledger? (regra de 16/09/2026) ----
+# O ledger de agosto parou em 24/08 e ninguem notou por 22 dias -- 57 versoes sem historico.
+# Reabri-lo sem rede so adiaria a mesma morte. A conferencia e a mesma da release note, e
+# pelo mesmo motivo: compromisso que depende de alguem lembrar ja falhou aqui.
+# O ledger CORRENTE e o de maior sufixo em docs/ledger-evolucao-*.md -- assim abrir um volume
+# novo nao exige mexer neste script, e um volume fechado nao passa a ser cobrado para sempre.
+ledger=$(ls "$raiz"/docs/ledger-evolucao-*.md 2>/dev/null | sort | tail -1)
+if [ -z "$ledger" ]; then
+  erro "nao achei nenhum docs/ledger-evolucao-*.md -- o historico das rodadas nao existe."
+else
+  n=$(grep -o "$v_index" "$ledger" | wc -l | tr -d " ")
+  if [ "$n" = "0" ]; then
+    erro "a versao \"$v_index\" esta carimbada e NAO tem linha no ledger ($(basename "$ledger")). Acrescente a rodada la -- o que ela entregou, o que ensinou sobre metodo, e a tabela de estimativa e tempo real (relogio, marcado no inicio e no fim). Desde 16/09/2026 toda rodada publicada escreve a linha dela."
+  fi
+fi
+
 if [ -n "$falhas" ]; then
   echo "CONFERENCIA DE VERSOES: FALHOU$falhas"
   exit 1
