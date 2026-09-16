@@ -575,6 +575,19 @@
   .fcaj-bt:hover{border-color:#9A7B4F;color:#3d3830}
   .fcaj-bt:focus-visible{outline:2px solid #9A7B4F;outline-offset:2px}
   .fcaj-bt .fcaj-n{opacity:.6;font-weight:500}
+  /* ===== os filtros das novidades ===== */
+  .fcf-barra{border:1px solid #E7E2D8;border-radius:10px;padding:10px 12px;margin:0 0 12px;background:#FBFAF7}
+  .fcf-linha{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:0 0 6px}
+  .fcf-linha:last-child{margin-bottom:0}
+  .fcf-chip{border:1px solid #DED8C8;background:#fff;color:#5f5a50;border-radius:99px;
+    padding:4px 11px;font:600 11.5px/1.4 inherit;cursor:pointer}
+  .fcf-chip:hover{border-color:#9A7B4F;color:#3d3830}
+  .fcf-chip:focus-visible{outline:2px solid #9A7B4F;outline-offset:2px}
+  .fcf-chip.fcf-on{background:#9A7B4F;border-color:#9A7B4F;color:#fff}
+  .fcf-conta{margin-left:auto;font-size:11.5px;color:#8a8375}
+  .fcr-vcab.fcr-nova::after{content:'novo para você';margin-left:8px;font-size:10px;
+    font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#1e7e34;
+    background:#E7F4EC;border-radius:5px;padding:3px 6px;vertical-align:1px}
   body.fcaj-off .fcaj-linha{display:block}
   body.fcaj-off .fcaj-grupo{display:none}
   body.fcaj-off .fcaj-grupo.fcaj-aberto{display:block}
@@ -4892,8 +4905,8 @@
    QUEM IMPEDE QUE ELE MINTA: scripts/conferir-versoes.sh, que recusa index.html
    alterado sem a versao mudar junto -- a mesma disciplina do fc-compartilhado.js,
    e pela mesma razao: carimbo que ninguem confere e o defeito de amanha. */
-var FC_VERSAO='2026-09-16d';
-var FC_PUBLICADO='2026-09-16 01:11';   /* America/Sao_Paulo -- escrito pelo carimbador */
+var FC_VERSAO='2026-09-16e';
+var FC_PUBLICADO='2026-09-16 02:44';   /* America/Sao_Paulo -- escrito pelo carimbador */
 (function(){
   var el=document.getElementById('fc-versao');
   if(!el) return;
@@ -5857,6 +5870,7 @@ var FCR_ROTULOS={novo:'novo',corrigido:'corr',melhorado:'melh',atencao:'aten',ex
 /* A lista, da versao mais recente para a mais antiga. NAO reordenar: o agrupamento por
    dia assume que versoes do mesmo dia estao juntas, e o desenho respeita esta ordem. */
 var FCR_NOTAS=[
+ {v:"2026-09-16e",d:"16 de setembro de 2026",itens:[["Novo","Esta lista ganhou **filtros**. Uma fileira de botões por aba — Mini loja, Checkout, Calculadora de álbum… — e outra por tipo: Novo, Corrigido, Melhorado, Atenção, e o que exige uma ação sua. Para ver só o que mudou na Mini loja era preciso abrir onze dias e ler tudo; agora é um clique."],["Novo","E um botão **Só o que é novo para mim**: a ferramenta guarda a última versão que você viu e marca as que chegaram depois. Quem abre a lista a cada duas semanas para de ter de adivinhar onde parar de ler."],["Melhorado","O contador diz quantas novidades sobraram com os filtros escolhidos, para \"nenhuma\" nunca parecer tela quebrada."]]},
  {v:"2026-09-16d",d:"16 de setembro de 2026",itens:[["","Só documentação e conferências internas, sem nenhuma mudança na tela: quinze afirmações da documentação do projeto estavam erradas e foram corrigidas, cinco regras que só existiam dentro do código foram escritas, e seis frases do próprio código citavam \"as quatro abas de pagamento\" quando já são cinco."]]},
  {v:"2026-09-16c",d:"16 de setembro de 2026",itens:[["Novo","Um botão **Explicações**, na barra do topo, recolhe as caixas de orientação dos campos. No lugar de cada grupo fica uma linha discreta com uma lâmpada; **um clique abre** a explicação ali mesmo, e outro fecha. São 433 caixas na ferramenta — ótimas no começo, e ruído depois que você já sabe."],["Atenção","**Nada muda até você apertar o botão.** Ele nasce em \"mostrar sempre\", exatamente como a ferramenta está hoje. A sua escolha fica guardada neste navegador."],["Atenção","**Os avisos âmbar nunca somem** — são os que dizem que um campo não vale naquela configuração. Também ficam sempre à vista as caixas que têm botão dentro e as que a própria ferramenta mostra e esconde conforme o que você configurou. Ao todo, 98 das 433 nunca recolhem."],["Melhorado","É clique, e não passar o mouse. Texto que aparece ao passar o mouse some no instante em que você leva o mouse para o campo que ia preencher — que é justamente quando você precisa dele."]]},
  {v:"2026-09-16b",d:"16 de setembro de 2026",itens:[["Melhorado","O **histórico das rodadas** ganhou índice e passou a ser cobrado: nenhuma versão pode mais ser publicada sem a linha dela lá, com o que entregou e quanto custou. O arquivo anterior tinha parado em 24 de agosto e ninguém percebeu por 22 dias."],["Corrigido","Calculadora de álbum: a chave Pix passou a ser limpa do mesmo jeito que nas outras quatro abas. Não havia efeito visível hoje — o campo da Identidade já limpa antes —, mas era a única aba sem essa segunda defesa, e foi exatamente a falta dela que, no Agendamento por Pacote, fez a mesma chave gerar dois códigos Pix diferentes."],["","O resto foi conferência interna, sem mudança na tela: quatro provas que contavam \"as quatro abas\" ficaram vermelhas sozinhas quando a quinta chegou, e agora tiram o número da lista em vez de cravá-lo; e duas que morriam sem medir nada voltaram a medir."]]},
@@ -6121,6 +6135,10 @@ function fcrDesenhar(){
     raiz.appendChild(cx);
   }
 
+  /* A BARRA DE FILTROS entra DEPOIS da caixa de acoes e ANTES dos dias: a acao e o que ele
+     precisa fazer, e nao se filtra. */
+  raiz.appendChild(fcfBarra());
+
   dias=fcrDias();
   for(i=0;i<dias.length;i++){
     sec=fcrSecao('fcr-d'+i,dias[i].d,fcrPlural(dias[i].vers.length,'versão','versões'),i===0);
@@ -6148,7 +6166,150 @@ function fcrDesenhar(){
      cabecalhos recem-criados e nao duplica os das abas -- ligar duas vezes faria o clique
      alternar duas vezes, e a secao nao abriria mais. */
   fcdLigar();
+  fcfAplicar();
 }
+/* ============================================================================
+   OS FILTROS DAS NOVIDADES -- item 6 da fila, 16/09/2026
+   ============================================================================
+   O QUE A AUDITORIA MEDIU. A lista tem 66 versoes e ~150 itens, e e CRONOLOGICA
+   E SO CRONOLOGICA -- enquanto as perguntas do dono quase nunca sao cronologicas.
+   Medido: o Agendamento por Pacote aparece em 25 das versoes, a Mini loja em 20,
+   o Checkout em 16. Para juntar as 20 da Mini loja ele abria onze sanfonas e lia
+   a lista inteira.
+
+   TRES EIXOS, e os tres saem DOS DADOS:
+     - por ABA: os nomes vem de ABAS, nunca de uma lista escrita a mao -- aba nova
+       ganha o filtro dela sozinha, e nao existe segunda lista para divergir;
+     - por ROTULO: as chaves vem de FCR_ROTULOS, pelo mesmo motivo;
+     - o que e NOVO PARA ELE: a ultima versao que ele viu fica guardada, e o que
+       chegou depois nasce marcado.
+
+   O FILTRO ESCONDE ITEM, e esconde a versao que ficou sem nenhum item visivel --
+   senao sobrariam cabecalhos de versao vazios, que parecem defeito. E o contador
+   diz quantos itens restaram, para "nenhum" nunca parecer tela quebrada.
+
+   A ULTIMA VERSAO VISTA e gravada quando o painel ABRE, e nao quando ele fecha:
+   fechar por engano nao pode apagar a marca do que ele ainda nao leu.
+   ============================================================================ */
+var FCF_CHAVE='fcConstrutoresNovidadesVistas';
+var fcfAba='', fcfRot='', fcfSoNovas=false, fcfUltimaVista='';
+
+function fcfLerVista(){
+  try{return localStorage.getItem(FCF_CHAVE)||'';}catch(e){return '';}
+}
+function fcfGravarVista(v){
+  try{localStorage.setItem(FCF_CHAVE,v);}catch(e){}
+}
+
+/* Um item pertence a uma aba quando o texto dele NOMEIA a aba. E heuristica, e
+   por isso ela nao esconde nada por conta propria: item que nao nomeia aba
+   nenhuma aparece em "Todas", que e o estado inicial. */
+function fcfAbaDoTexto(txt){
+  var i,n,r=[];
+  for(i=0;i<ABAS.length;i++){
+    n=ABAS[i].nome;
+    if(txt.toLowerCase().indexOf(n.toLowerCase())>=0)r.push(ABAS[i].id);
+  }
+  return r;
+}
+
+function fcfChip(rot,valor,atual,aoClicar){
+  var b=document.createElement('button');
+  b.type='button';
+  b.className='fcf-chip'+(valor===atual?' fcf-on':'');
+  b.setAttribute('aria-pressed',valor===atual?'true':'false');
+  b.textContent=rot;
+  b.addEventListener('click',function(){aoClicar(valor===atual?'':valor);});
+  return b;
+}
+
+function fcfBarra(){
+  var cx=fcrDiv('fcf-barra'),i,rots={},k;
+  var lin1=fcrDiv('fcf-linha');
+  /* REFAZER a barra, e nao so aplicar: o chip guarda o estado no proprio className, montado
+     na criacao. Sem refazer, o filtro funcionava e o chip escolhido continuava apagado --
+     medido em 16/09/2026, na primeira fotografia. */
+  function porAba(v){fcfAba=v;fcfBarraRefazer();}
+  lin1.appendChild(fcfChip('Todas as abas','',fcfAba,porAba));
+  for(i=0;i<ABAS.length;i++)
+    lin1.appendChild(fcfChip(ABAS[i].nome,ABAS[i].id,fcfAba,porAba));
+  cx.appendChild(lin1);
+
+  var lin2=fcrDiv('fcf-linha');
+  function porRot(v){fcfRot=v;fcfBarraRefazer();}
+  lin2.appendChild(fcfChip('Tudo','',fcfRot,porRot));
+  /* Os rotulos saem de FCR_ROTULOS, com o nome bonito da primeira ocorrencia real
+     na lista -- assim "Exige uma acao sua" nao vira "exige" na tela. */
+  for(i=0;i<FCR_NOTAS.length;i++){
+    var it=FCR_NOTAS[i].itens,j;
+    for(j=0;j<it.length;j++){
+      k=fcrChaveRotulo(it[j][0]);
+      if(!k||!FCR_ROTULOS[k])continue;
+      if(!rots[k])rots[k]=it[j][0];
+    }
+  }
+  for(k in rots)if(Object.prototype.hasOwnProperty.call(rots,k))
+    lin2.appendChild(fcfChip(rots[k],k,fcfRot,porRot));
+  cx.appendChild(lin2);
+
+  var lin3=fcrDiv('fcf-linha');
+  var bn=document.createElement('button');
+  bn.type='button';
+  bn.className='fcf-chip fcf-novas'+(fcfSoNovas?' fcf-on':'');
+  bn.setAttribute('aria-pressed',fcfSoNovas?'true':'false');
+  bn.textContent='Só o que é novo para mim';
+  bn.addEventListener('click',function(){fcfSoNovas=!fcfSoNovas;fcfAplicar();fcfBarraRefazer();});
+  lin3.appendChild(bn);
+  var cont=fcrDiv('fcf-conta');
+  cont.id='fcf-conta';
+  lin3.appendChild(cont);
+  cx.appendChild(lin3);
+  return cx;
+}
+
+function fcfBarraRefazer(){
+  var velha=document.querySelector('#fcr-lista .fcf-barra');
+  if(!velha)return;
+  var nova=fcfBarra();
+  velha.parentNode.replaceChild(nova,velha);
+  fcfAplicar();
+}
+
+function fcfAplicar(){
+  var vs=document.querySelectorAll('#fcr-lista .fcr-v'),i,j,visiveis=0;
+  for(i=0;i<vs.length;i++){
+    var cab=vs[i].querySelector('.fcr-vcab[data-v]');
+    var versao=cab?cab.getAttribute('data-v'):'';
+    var nova=!!(fcfUltimaVista&&versao&&versao>fcfUltimaVista);
+    if(cab)cab.className='fcr-vcab'+(nova?' fcr-nova':'');
+    var itens=vs[i].querySelectorAll(':scope > .fcr-item'),ok=0;
+    for(j=0;j<itens.length;j++){
+      var it=itens[j];
+      var txt=it.textContent||'';
+      var passa=true;
+      if(fcfRot&&fcrChaveRotulo((it.querySelector('.fcr-et')||{}).textContent||'')!==fcfRot)passa=false;
+      if(passa&&fcfAba&&fcfAbaDoTexto(txt).indexOf(fcfAba)<0)passa=false;
+      if(passa&&fcfSoNovas&&!nova)passa=false;
+      it.style.display=passa?'':'none';
+      if(passa)ok++;
+    }
+    vs[i].style.display=ok?'':'none';
+    visiveis+=ok;
+  }
+  /* O dia inteiro some quando nenhuma versao dele sobrou. */
+  var dias=document.querySelectorAll('#fcr-lista .secao.dobra');
+  for(i=0;i<dias.length;i++){
+    var corpo=$(dias[i].getAttribute('aria-controls'));
+    if(!corpo)continue;
+    var vivas=corpo.querySelectorAll('.fcr-v:not([style*="display: none"])').length;
+    dias[i].style.display=vivas?'':'none';
+  }
+  var c=$('fcf-conta');
+  if(c)c.textContent=visiveis
+    ? (visiveis===1?'1 novidade':visiveis+' novidades')
+    : 'Nenhuma novidade com esses filtros.';
+}
+
 function fcrTemVersao(v){var i;for(i=0;i<FCR_NOTAS.length;i++)if(FCR_NOTAS[i].v===v)return true;return false;}
 
 /* ---- o painel ---- */
@@ -6156,7 +6317,15 @@ function fcrPainelAbrir(abrir){
   var el=$('fcr-painel'),b=$('fcr-botao');
   if(!el)return;
   if(abrir===undefined)abrir=!el.classList.contains('aberto');
-  if(abrir&&!FCR.montado){FCR.montado=true;fcrDesenhar();}
+  /* A ULTIMA VERSAO VISTA e lida ANTES de desenhar (para a marca "novo" aparecer nesta
+     abertura) e gravada DEPOIS (para a proxima abertura ja nao marcar o que ele acabou de
+     ler). Gravar ao fechar perderia a marca de quem fecha o painel por engano. */
+  if(abrir&&!FCR.montado){
+    FCR.montado=true;
+    fcfUltimaVista=fcfLerVista();
+    fcrDesenhar();
+    fcfGravarVista(FC_VERSAO);
+  }
   el.classList.toggle('aberto',!!abrir);
   if(b)b.setAttribute('aria-expanded',abrir?'true':'false');
   /* Os TRES paineis da barra sao o mesmo lugar da tela e nunca ficam abertos juntos. */

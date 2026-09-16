@@ -181,6 +181,41 @@ eq('as ações do dono aparecem abertas', tudo.acoes > 0, 'true');
   const semVersao = naCaixa.filter(x => !/^\d{4}-\d{2}-\d{2}/.test(x)).length;
   eq('a caixa não inventa nem esconde linha', naCaixa.length - semVersao, daLista.vivas.length);
 }
+/* ===== OS FILTROS (item 6 da fila, 16/09/2026) =====
+   A lista tem 68 versoes e ~200 itens, e era cronologica e so cronologica -- enquanto as
+   perguntas do dono quase nunca sao. Os tres eixos saem DOS DADOS: as abas de ABAS, os
+   rotulos de FCR_ROTULOS, e o "novo para voce" da ultima versao vista. Aqui se cobra que
+   eles filtrem de verdade, que o chip escolhido FIQUE marcado (o filtro funcionava e o chip
+   ficava apagado -- medido na primeira fotografia) e que "Tudo" devolva a lista inteira. */
+{
+  const f = await pg.evaluate(() => {
+    const chips = [].slice.call(document.querySelectorAll('.fcf-chip'));
+    const visiveis = () => document.querySelectorAll('#fcr-lista .fcr-v > .fcr-item:not([style*="none"])').length;
+    const todos = visiveis();
+    const alvo = chips.filter(c => c.textContent === 'Mini loja')[0];
+    if (!alvo) return {erro: 'sem chip da Mini loja'};
+    alvo.click();
+    const depois = visiveis();
+    const marcado = [].slice.call(document.querySelectorAll('.fcf-chip'))
+      .filter(c => c.textContent === 'Mini loja')[0];
+    const conta = (document.getElementById('fcf-conta') || {}).textContent || '';
+    /* e "Todas as abas" devolve tudo */
+    [].slice.call(document.querySelectorAll('.fcf-chip'))
+      .filter(c => c.textContent === 'Todas as abas')[0].click();
+    return {
+      chips: chips.length, todos, depois, conta,
+      marcado: marcado ? marcado.className.indexOf('fcf-on') >= 0 : false,
+      aria: marcado ? marcado.getAttribute('aria-pressed') : null,
+      voltou: visiveis()
+    };
+  });
+  eq('a barra de filtros existe', (f.chips || 0) > 0, true);
+  eq('filtrar por aba reduz a lista (' + f.depois + ' de ' + f.todos + ')',
+     f.depois > 0 && f.depois < f.todos, true);
+  eq('e o chip escolhido fica marcado', f.marcado === true && f.aria === 'true', true);
+  eq('o contador diz quantas sobraram (' + f.conta + ')', /novidade/.test(f.conta || ''), true);
+  eq('e "Todas as abas" devolve a lista inteira', f.voltou, f.todos);
+}
 eq('todo rótulo de item tem cor declarada', tudo.semCor, 0);
 eq('o cabeçalho de seção é alcançável pelo teclado', tudo.papel, 'button');
 

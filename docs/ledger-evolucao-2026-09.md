@@ -80,6 +80,7 @@ ausência de um lugar onde o histórico esteja em ordem, com o tempo ao lado.
 - **56. O ledger vira útil, e o arnês para de contar abas na mão — 16/09/2026** · `2026-09-16b`
 - **57. As explicações que param de poluir o dia a dia — 16/09/2026** · `2026-09-16c`
 - **58. A documentação volta a dizer a verdade — 16/09/2026** · `2026-09-16d`
+- **59. A lista de novidades deixa de ser só cronológica — 16/09/2026** · `2026-09-16e`
 
 <!-- FIM DO INDICE GERADO -->
 
@@ -1429,6 +1430,35 @@ inventar a decisão seria pior que registrar a dúvida.
 | Estimativa | Tempo real |
 |---|---|
 | 4 h (itens 3 e 5) | **9 min 00 s** — relógio do próprio subagente, em faixa paralela |
+
+---
+
+### 59. A lista de novidades deixa de ser só cronológica — 16/09/2026
+
+Versão `2026-09-16e`. Item **6** da fila, o último dela. A lista tem 68 versões e cerca de 200
+itens, e respondia só à pergunta cronológica — enquanto as perguntas do dono quase nunca são.
+Medido na auditoria: o Agendamento por Pacote aparece em 25 versões, a Mini loja em 20, o
+Checkout em 16; para juntar as 20 da Mini loja ele abria onze sanfonas.
+
+Três eixos, e os três saem dos dados: **por aba** (os nomes vêm de `ABAS`), **por rótulo** (as
+chaves vêm de `FCR_ROTULOS`) e **o que é novo para ele** (a última versão vista fica guardada).
+
+#### O que a rodada ensinou sobre método
+
+**Filtro que funciona e não se mostra é defeito, não meia-entrega.** A primeira fotografia
+mostrou a lista corretamente filtrada e o chip escolhido **apagado**: o estado vivia no
+`className`, montado na criação, e aplicar o filtro não refazia a barra. Quem olhasse não
+saberia por que a lista encolheu.
+
+**A última versão vista é gravada ao ABRIR, não ao fechar.** Fechar o painel por engano não
+pode apagar a marca do que ele ainda não leu.
+
+**O filtro esconde a versão que ficou sem item, e o dia que ficou sem versão.** Cabeçalho vazio
+parece defeito — e o contador diz quantas sobraram, para "nenhuma" nunca parecer tela quebrada.
+
+| Estimativa | Tempo real |
+|---|---|
+| 3 h | **1 h 40** — de 01:04:07 a 02:44:32 no relógio, incluindo a integração refeita depois de o bloco de código não ter entrado na primeira tentativa |
 
 ---
 
