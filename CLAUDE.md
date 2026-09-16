@@ -178,8 +178,23 @@ acabou de mudar. Quatro colunas, sempre:
 
 - **Estado**: concluída / em andamento / não iniciada. As três aparecem, sempre.
 - **Estimativa**: o tempo previsto daquela etapa, dito **antes** de ela começar.
-- **Tempo real**: preenchido só no que já terminou. Em branco no resto — nunca preenchido
-  com previsão disfarçada de medição.
+- **Tempo real**: **TEMPO DE RELÓGIO, marcado no início e no fim da execução daquela
+  tarefa** (regra do dono, 16/09/2026). Não se deriva do carimbo anterior contra o atual —
+  essa janela contém conversa, auditoria e o que mais tenha acontecido no meio, e atribuí-la
+  à tarefa infla o número. Preenchido só no que já terminou; **sem a marca do relógio, a
+  célula fica com `—`**, nunca com número reconstruído de cabeça.
+
+**Por que esta regra existe, e o que ela custou.** Em 16/09/2026 reportei 48 min para um item
+e 1 h 22 para outro. Medido depois, a pedido do dono: os **dois juntos** couberam em 49 min,
+numa janela que ainda continha a auditoria inteira e várias conversas. E um terceiro item,
+executado por subagente, foi reportado como 1 h 04 quando o próprio agente havia devolvido
+**5 min 20 s**. Os números não vieram de lugar nenhum — vieram da vontade de ter o que
+mostrar. No mesmo commit em que isso foi escrito havia a frase *"estimativa fabricada depois
+do fato não é estimativa"*, na coluna ao lado.
+
+**As duas colunas medem coisas diferentes, e isso tem de estar dito.** A **estimativa** é de
+esforço de trabalho, na unidade em que o dono acompanha. O **tempo real** é relógio. Misturar
+as duas sem avisar faz a comparação parecer um ganho de produtividade que ela não mede.
 
 Fecha-se cada rodada com o comparativo entre as duas colunas.
 

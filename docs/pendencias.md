@@ -1,5 +1,83 @@
 # Pendências — o que ficou combinado e ainda não foi feito
 
+---
+
+## EM EXECUÇÃO AGORA — a fila de sete itens da auditoria de 16/09/2026
+
+> Esta seção é o **estado vivo** de uma fila em andamento. Ela existe para que a execução
+> sobreviva a uma troca de contexto: quem retomar lê daqui e continua, sem perguntar nada.
+> Ao fechar a fila, esta seção some e o que foi entregue desce para o histórico.
+
+**Origem.** Auditoria de documentação, código, git e release notes pedida pelo dono em
+16/09/2026. Quatro varreduras. O mapa completo, com evidência de cada achado, está no
+relatório entregue a ele (artefato "Auditoria de 16 de setembro"). O dono **aprovou os sete
+itens** e o plano de execução em três faixas.
+
+**Regra de execução fixada pelo dono:** nada começa sem a palavra dele; cada item fechado é
+reportado com a tabela completa; e o **tempo real é relógio**, marcado no início e no fim da
+tarefa (ver "Como reportar progresso ao dono", no `CLAUDE.md`).
+
+### Os sete itens
+
+| # | Item | Estado | Estimativa | Tempo real |
+|---|---|---|---|---|
+| 1 | Pôr a calculadora na regressão e os 71 textos novos no cenário configurado | ✅ publicado em `2026-09-16a` | 40 min | ≤ 49 min (1 e 2 juntos) |
+| 2 | Duas redes: ordem do registro de abas, e a caixa "o que depende de você" derivada | ✅ publicado em `2026-09-16a` | 1 h 30 | ≤ 49 min (1 e 2 juntos) |
+| 3 | Limpar as quinze afirmações falsas da documentação | ⏳ faixa C, **depois do item 7** | 2 h | — |
+| 4 | Reabrir o histórico: `docs/ledger-evolucao-2026-09.md` | ✅ publicado em `2026-09-16a` | 2 h | 5 min 20 s |
+| 5 | Escrever as regras que só vivem no código, mais três specs | ⏳ faixa C, **depois do item 7** | 2 h | — |
+| 6 | A lista de novidades como produto: filtros e "novo para você" | ⏳ faixa A, **depois do item 7** | 3 h | — |
+| 7 | As caixas de ajuda que não poluem o dia a dia | 🔄 **em andamento desde 16/09 00:47:47** | 7 h 30 | — |
+
+### As três faixas
+
+- **A — em série, não delegável** (decide comportamento): 1 → 2 → **7** → 6.
+- **B — agente, em paralelo:** item 4. **Concluída.**
+- **C — agente, depois do item 7:** itens 3 e 5 juntos, porque mexem nos mesmos documentos e
+  porque o item 7 muda o layout que eles descrevem.
+
+Os arnêses dos itens 6 e 7 vão para agentes, mas **depois** de o núcleo existir — delega-se
+contra contrato que existe, nunca contra um que será recriado.
+
+### Item 7 — o desenho já decidido com o dono
+
+Ele pediu uma de duas alternativas e escolheu a terceira, que eu sugeri depois de medir.
+
+**A medição que decidiu.** São **433 caixas** de ajuda no HTML da ferramenta: 367 explicativas,
+**62 âmbar de alerta**, 55 que o próprio código já mostra e esconde, e **15 com botão dentro**.
+Estruturalmente, só **106 de 423** vêm logo depois de um campo — **157 vêm depois de outra
+caixa** (são a segunda, terceira, quarta de uma pilha), 93 explicam um grupo e 31 um fieldset.
+É esse número que derruba a alternativa da lâmpada por campo: ela cobriria um quarto delas.
+
+**O que foi aprovado:**
+
+1. Um **interruptor na barra do topo** — *Explicações: mostrar sempre / só quando eu pedir* —
+   guardado como o resto da configuração.
+2. Desligado, **cada pilha vira uma linha só**, no lugar da pilha: lâmpada mais "o que este
+   campo faz".
+3. **Clique, nunca passar o mouse.** Hover some no instante em que o operador move o mouse
+   para o campo que vai preencher — que é quando ele precisa do texto — e não existe no toque.
+4. **Nunca recolhem:** os 62 alertas âmbar e as 15 caixas com botão dentro.
+5. **Nasce em "mostrar sempre"**: ao publicar, nada muda na tela do dono até ele virar a chave.
+   Padrão que muda o que está no ar sem ninguém pedir é o que a regressão existe para denunciar.
+
+**O que já foi verificado e abaixa o risco:** a busca do topo **não indexa** o texto de ajuda
+(ela procura no valor, no rótulo e no id), então recolher não a atrapalha; e isto é interface
+da ferramenta, não código gerado — a **regressão byte a byte não é afetada**.
+
+**Onde está o trabalho fino:** não quebrar quem já mora no rótulo — o contador de caracteres
+(`fcLimIniciar`), o eco do texto atual (`fcsEcoMontar`) e a busca que rola até um campo
+(`fcsIr`), que vai precisar **abrir a pilha recolhida** quando o campo estiver dentro de uma.
+
+### O que ficou pendente de medição
+
+A **quarta varredura** da auditoria — cobertura do arnês — ainda estava rodando quando esta
+seção foi escrita (52 min). O achado principal dela já foi corrigido (item 1). O que falta é
+secundário: README contra a realidade das suítes, a lista das que falham hoje, e os buracos de
+cobertura. **Se ela trouxer conserto, ele vira item 8 em diante, para o dono decidir.**
+
+---
+
 Atualizado em 03/09/2026. Este arquivo é a lista viva; o histórico do que já foi entregue está no `docs/ledger-evolucao-2026-08.md` e nas specs.
 
 ---
