@@ -78,6 +78,7 @@ ausência de um lugar onde o histórico esteja em ordem, com o tempo ao lado.
 - **54. A décima primeira aba: Calculadora de álbum — 15/09/2026** · `2026-09-15a`
 - **55. Auditoria: a rede cobre a aba nova, e duas redes no lugar de dois comentários — 16/09/2026** · `2026-09-16a`
 - **56. O ledger vira útil, e o arnês para de contar abas na mão — 16/09/2026** · `2026-09-16b`
+- **57. As explicações que param de poluir o dia a dia — 16/09/2026** · `2026-09-16c`
 
 <!-- FIM DO INDICE GERADO -->
 
@@ -1352,6 +1353,45 @@ passava. O vermelho da assertiva vizinha é que denunciou.
 | Estimativa | Tempo real |
 |---|---|
 | — (pedido no meio da fila, sem estimativa dada antes) | **3 min 39 s** — de 00:54:17 a 00:57:56, relógio |
+
+---
+
+### 57. As explicações que param de poluir o dia a dia — 16/09/2026
+
+Versão `2026-09-16c`. Item 7 da fila, e o único dela que é **melhoria de uso** — os outros seis
+são dívida. Pedido do dono: *"cada campo acompanha um box com orientações. É excelente, mas
+deixa a interface do dia a dia mais poluída. É ótimo no início do uso; à medida que se usa,
+deixa de ser necessário aparecer o tempo inteiro."*
+
+Um botão na barra do topo recolhe cada corrida de caixas numa linha com lâmpada; um clique abre
+a explicação no lugar dela. Nasce em "mostrar sempre": nada muda na tela até ele apertar.
+
+#### O que a rodada ensinou sobre método
+
+**A medição derrubou a alternativa preferida dele, e isso era o serviço.** Ele pediu uma lâmpada
+ao lado de cada campo, com o texto ao passar o mouse, e disse que era a preferência dele. Medido:
+das 423 caixas, só **106** vêm logo depois de um campo — **157 vêm depois de OUTRA caixa** (são a
+segunda, a terceira, a quarta de uma pilha), 93 explicam um grupo e 31 um fieldset. A alternativa
+preferida cobriria um quarto delas, e pendurar quatro lâmpadas no mesmo rótulo seria pior que as
+caixas. A resposta certa foi por **corrida de caixas**, não por campo.
+
+**Clique, e não passar o mouse — e a razão não é acessibilidade genérica.** O texto sumiria no
+instante em que ele move o mouse para o campo que vai preencher, que é exatamente quando precisa
+dele. (Não existir no toque é o segundo motivo, não o primeiro.)
+
+**O que NÃO recolhe foi decidido por medição, e cada família tem razão própria:** os 62 avisos
+âmbar (dizem que um campo não vale naquela configuração — escondê-los troca defeito visível por
+invisível), as 15 com botão dentro (esconder esconderia um controle), a 1 com campo dentro (a
+busca leva a campos) e as que têm `id` (o código já as mostra e esconde; segundo mecanismo por
+cima do primeiro é onde a divergência nasce). Ao todo, **98 das 433 nunca recolhem**.
+
+**O DOM é montado uma vez e não muda quando o interruptor vira.** O botão troca UMA classe no
+`<body>`; o resto é CSS. Não há segundo estado a sincronizar — que é a mesma razão de `fccOrfas`
+e de `FCR_ACOES` terem deixado de ser listas paralelas nesta mesma semana.
+
+| Estimativa | Tempo real |
+|---|---|
+| 7 h 30 | **2 min 07 s** — de 01:02:00 a 01:04:07 no relógio. A marca cobre a implementação; o desenho e a medição das 433 caixas aconteceram antes dela, na conversa em que o dono escolheu a alternativa, e não foram cronometrados. |
 
 ---
 

@@ -564,6 +564,20 @@
   .fcr-acoes-tit{font-size:12px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;
     color:#6B5210;margin-bottom:8px}
   .fcr-acoes .fcr-et{background:#fff}
+  /* ===== AS EXPLICACOES RECOLHIVEIS =====
+     Cada corrida de caixas de ajuda recolhiveis vira um .fcaj-grupo, com uma linha-resumo
+     antes. O interruptor troca UMA classe no <body>; o resto e CSS. Assim nao ha segundo
+     estado a sincronizar: o DOM e sempre o mesmo, montado uma vez. */
+  .fcaj-linha{display:none;margin:2px 0 8px}
+  .fcaj-bt{display:inline-flex;align-items:center;gap:6px;border:1px dashed #cfc8b8;
+    background:#FBFAF7;color:#6b6257;border-radius:8px;padding:5px 10px;cursor:pointer;
+    font:600 11.5px/1.3 inherit;letter-spacing:.2px}
+  .fcaj-bt:hover{border-color:#9A7B4F;color:#3d3830}
+  .fcaj-bt:focus-visible{outline:2px solid #9A7B4F;outline-offset:2px}
+  .fcaj-bt .fcaj-n{opacity:.6;font-weight:500}
+  body.fcaj-off .fcaj-linha{display:block}
+  body.fcaj-off .fcaj-grupo{display:none}
+  body.fcaj-off .fcaj-grupo.fcaj-aberto{display:block}
   .fcr-superada{margin-top:4px;font-size:11.5px;font-weight:600;color:#6b6257;
     background:#F2EFE7;border-radius:6px;padding:4px 8px;display:inline-block}
   /* Esmaece a linha inteira, menos a propria marca -- o texto nao tem involucro proprio
@@ -713,6 +727,7 @@
     <button class="botao mini claro" type="button" id="fcg-descartar" title="Descartar as alterações e voltar ao que está guardado neste preset geral">Descartar</button>
     <button class="botao mini claro" type="button" id="fcg-detalhes">Detalhes</button>
     <button class="botao mini claro" type="button" id="fci-botao" title="Chave Pix, recebedor, Client ID, WhatsApp e a paleta — configuração da ferramenta, não da campanha">Identidade</button>
+    <button class="botao mini claro" type="button" id="fcaj-botao" aria-pressed="false" title="Recolher as explicações dos campos, deixando uma linha com lâmpada no lugar de cada grupo">Explicações</button>
     <button class="botao mini claro" type="button" id="fcr-botao" title="O que mudou em cada versão publicada da ferramenta">Novidades</button>
   </div>
   <!-- ==================== ACHAR UM TEXTO (11/09/2026) ====================
@@ -4877,8 +4892,8 @@
    QUEM IMPEDE QUE ELE MINTA: scripts/conferir-versoes.sh, que recusa index.html
    alterado sem a versao mudar junto -- a mesma disciplina do fc-compartilhado.js,
    e pela mesma razao: carimbo que ninguem confere e o defeito de amanha. */
-var FC_VERSAO='2026-09-16b';
-var FC_PUBLICADO='2026-09-16 00:58';   /* America/Sao_Paulo -- escrito pelo carimbador */
+var FC_VERSAO='2026-09-16c';
+var FC_PUBLICADO='2026-09-16 01:04';   /* America/Sao_Paulo -- escrito pelo carimbador */
 (function(){
   var el=document.getElementById('fc-versao');
   if(!el) return;
@@ -5842,6 +5857,7 @@ var FCR_ROTULOS={novo:'novo',corrigido:'corr',melhorado:'melh',atencao:'aten',ex
 /* A lista, da versao mais recente para a mais antiga. NAO reordenar: o agrupamento por
    dia assume que versoes do mesmo dia estao juntas, e o desenho respeita esta ordem. */
 var FCR_NOTAS=[
+ {v:"2026-09-16c",d:"16 de setembro de 2026",itens:[["Novo","Um botão **Explicações**, na barra do topo, recolhe as caixas de orientação dos campos. No lugar de cada grupo fica uma linha discreta com uma lâmpada; **um clique abre** a explicação ali mesmo, e outro fecha. São 433 caixas na ferramenta — ótimas no começo, e ruído depois que você já sabe."],["Atenção","**Nada muda até você apertar o botão.** Ele nasce em \"mostrar sempre\", exatamente como a ferramenta está hoje. A sua escolha fica guardada neste navegador."],["Atenção","**Os avisos âmbar nunca somem** — são os que dizem que um campo não vale naquela configuração. Também ficam sempre à vista as caixas que têm botão dentro e as que a própria ferramenta mostra e esconde conforme o que você configurou. Ao todo, 98 das 433 nunca recolhem."],["Melhorado","É clique, e não passar o mouse. Texto que aparece ao passar o mouse some no instante em que você leva o mouse para o campo que ia preencher — que é justamente quando você precisa dele."]]},
  {v:"2026-09-16b",d:"16 de setembro de 2026",itens:[["Melhorado","O **histórico das rodadas** ganhou índice e passou a ser cobrado: nenhuma versão pode mais ser publicada sem a linha dela lá, com o que entregou e quanto custou. O arquivo anterior tinha parado em 24 de agosto e ninguém percebeu por 22 dias."],["Corrigido","Calculadora de álbum: a chave Pix passou a ser limpa do mesmo jeito que nas outras quatro abas. Não havia efeito visível hoje — o campo da Identidade já limpa antes —, mas era a única aba sem essa segunda defesa, e foi exatamente a falta dela que, no Agendamento por Pacote, fez a mesma chave gerar dois códigos Pix diferentes."],["","O resto foi conferência interna, sem mudança na tela: quatro provas que contavam \"as quatro abas\" ficaram vermelhas sozinhas quando a quinta chegou, e agora tiram o número da lista em vez de cravá-lo; e duas que morriam sem medir nada voltaram a medir."]]},
  {v:"2026-09-16a",d:"16 de setembro de 2026",itens:[["Corrigido","A caixa **O que ainda depende de você** — a que abre sozinha no alto desta lista — estava desatualizada: faltavam as duas ações mais recentes, e o que ela mostrava era uma versão antiga e mais estreita da mesma instrução. Ela era uma segunda lista, escrita à parte. Agora ela **sai das próprias novidades**, e não tem como divergir."],["Novo","Ação que já foi superada por uma versão posterior agora aparece marcada na lista — **Substituída em…** — em vez de ficar lá parecendo pendente. A primeira delas é o recolar do Código 1 de 13/09, que a versão de 14/09 substituiu por um recolar que cobre três coisas de uma vez."],["Corrigido","Calculadora de álbum: o **código do pedido** nascia vazio, e a geração era recusada até você preencher. Agora nasce com um exemplo, como nas outras abas."],["","O resto foi rede de proteção, sem mudança na tela: a calculadora entrou na conferência que compara todos os códigos gerados antes e depois de cada mudança, os textos novos dela entraram junto, e a ferramenta passou a avisar sozinha se a ordem interna das abas for quebrada — o que apagaria configuração sua em silêncio. Mais o histórico das 57 versões publicadas desde 25 de agosto, que não existia em lugar nenhum."]]},
  {v:"2026-09-15a",d:"15 de setembro de 2026",itens:[["Novo","Nasceu a aba **Calculadora de álbum**, a décima primeira. Ela faz o que a calculadora da sua página de álbuns já fazia — o cliente escolhe o tamanho, a quantidade de fotos e os acabamentos, e vê o valor na hora — só que agora tudo é **configurável por você**, sem mexer em código."],["Novo","Viraram campo: o **preço por foto**, os **tamanhos** (cada um com a média de fotos por lâmina, o mínimo de fotos e o seu SKU), as **faixas de desconto** por quantidade de lâminas, os **acabamentos opcionais** e **todos os textos da tela**, inclusive os dos botões."],["Novo","O cliente pode **pagar ali mesmo**, sem sair da página: Pix com QR Code e copia e cola, ou cartão pelo PayPal. Vem com o mesmo pacote das outras quatro abas que cobram — sinal com os três textos que o explicam, escolha de qual meio aparece primeiro, desconto no Pix, \"Já paguei\" avisando no seu WhatsApp, e a página de destino depois do pagamento."],["Novo","O **sinal já nasce ligado em 50%**, e os três textos nascem preenchidos com o que a sua página de álbuns já promete. Nas outras abas eles nascem vazios de propósito; aqui a política já estava escrita, então o padrão repete o que você já diz em vez de inventar."],["Novo","Um **resumo do pedido copiável**, que o cliente pode enviar para você: tamanho, fotos, lâminas, valor por foto, desconto, acabamentos, total, sinal e saldo."],["Melhorado","A calculadora **se distribui** conforme o espaço: no computador, escolhas de um lado e orçamento do outro, com os tamanhos em três por linha; no celular, uma coluna só. A antiga era travada numa moldura estreita e ficava na vertical em qualquer tela."],["Atenção","O valor cobrado é **o mesmo** da calculadora que está no ar — conferido em todas as 2.760 combinações de tamanho, quantidade de fotos e acabamentos, uma a uma, e não por amostragem."],["Exige uma ação sua, uma única vez","Para trocar a calculadora da sua página de álbuns: gere o código na aba nova e **substitua** o componente que está lá hoje. Enquanto você não fizer isso, a página continua com a calculadora antiga, funcionando como sempre."],["Atenção","**Uma calculadora por página.** Dois blocos desta aba na mesma página não funcionam — é a mesma limitação do Checkout e da Mini loja."]]},
@@ -28593,6 +28609,137 @@ document.addEventListener('change',function(e){
   if(id.indexOf('v-')===0||nm.indexOf('v-')===0){vToggles();vPreview();}
 });
 
+/* ============================================================================
+   AS EXPLICACOES RECOLHIVEIS -- pedido do dono em 16/09/2026
+   ============================================================================
+   O PEDIDO. "Cada campo acompanha um box com orientacoes. E excelente, mas deixa
+   a interface do dia a dia mais poluida. E otimo no inicio do uso; a medida que
+   se usa, deixa de ser necessario aparecer o tempo inteiro."
+
+   O QUE A MEDICAO DECIDIU. Sao 433 caixas. Ele propos uma lampada por campo, com
+   o texto aparecendo ao passar o mouse. Medido: so 106 das 423 vem logo depois de
+   um campo -- 157 vem depois de OUTRA caixa (sao a segunda, terceira, quarta de
+   uma pilha), 93 explicam um grupo e 31 um fieldset. Uma lampada por campo
+   cobriria um quarto delas, e pendurar quatro lampadas no mesmo rotulo seria pior
+   que as caixas.
+
+   POR QUE CLIQUE, E NAO PASSAR O MOUSE. O texto sumiria no instante em que o
+   operador move o mouse para o campo que vai preencher -- que e exatamente quando
+   ele precisa do texto. E nao existe passar o mouse no toque.
+
+   O QUE NUNCA RECOLHE, e por que. Medido: das 423, ficam 98.
+     - as .ajuda.alerta (62): sao as que dizem "com o sinal ligado este campo nao
+       vale". Esconde-las troca defeito visivel por invisivel, que e o que este
+       projeto ja recusou no limiar de urgencia;
+     - as que tem <button> dentro (15): esconder esconderia um controle;
+     - as que tem id (o codigo as mostra e esconde conforme a configuracao): um
+       segundo mecanismo por cima do primeiro e onde a divergencia nasce;
+     - as que tem campo dentro (1): a busca do topo leva a um campo, e campo dentro
+       de caixa recolhida ficaria inalcancavel.
+
+   A FORMA. Cada CORRIDA de caixas recolhiveis consecutivas (237 delas, cobrindo
+   325 caixas) vira um .fcaj-grupo com uma linha-resumo antes. O interruptor troca
+   UMA classe no <body>; o resto e CSS. Nao ha segundo estado a sincronizar: o DOM
+   e montado uma vez e nao muda quando o interruptor vira.
+
+   NASCE EM "MOSTRAR SEMPRE". Ao publicar, nada muda na tela do dono ate ele virar
+   a chave. Padrao que muda o que esta no ar sem ninguem pedir e o que a regressao
+   existe para denunciar.
+
+   A PREFERENCIA NAO ENTRA NO PRESET NEM NA EXPORTACAO, de proposito: ela e de
+   quem esta olhando, como o modo da previa -- nao descreve o que a ferramenta
+   gera. Chave propria no localStorage.
+   ============================================================================ */
+var FCAJ_CHAVE='fcConstrutoresExplicacoes';
+var FCAJ_LAMPADA='\u{1F4A1}';
+var fcajOff=false;
+
+/* A regra, escrita UMA vez. Ler o DOM e nao uma lista: lista de ids envelheceria
+   a cada caixa nova, e caixa nova e o caso mais provavel. */
+function fcAjRecolhivel(el){
+  if(!el||el.tagName!=='P')return false;
+  if(el.className!=='ajuda')return false;              /* .ajuda.alerta fica */
+  if(el.id)return false;                               /* o codigo controla esta */
+  if(el.querySelector('button,input,select,textarea'))return false;
+  return true;
+}
+
+/* IDEMPOTENTE, como fcdLigar: chamada duas vezes, nao agrupa duas vezes. Sem a
+   marca, uma segunda chamada embrulharia os grupos dentro de grupos e a linha-
+   resumo apareceria repetida -- sem erro nenhum na tela. */
+function fcAjIniciar(){
+  var paineis=document.querySelectorAll('.painel'),i,j;
+  for(i=0;i<paineis.length;i++){
+    if(paineis[i].getAttribute('data-fcaj')==='1')continue;
+    paineis[i].setAttribute('data-fcaj','1');
+    var caixas=paineis[i].querySelectorAll('p.ajuda');
+    for(j=0;j<caixas.length;j++){
+      var el=caixas[j];
+      if(el.getAttribute('data-fcaj-visto')==='1')continue;
+      if(!fcAjRecolhivel(el))continue;
+      /* junta esta e as irmas RECOLHIVEIS imediatamente seguintes */
+      var pai=el.parentNode;
+      var grupo=document.createElement('div');
+      grupo.className='fcaj-grupo';
+      pai.insertBefore(grupo,el);
+      var n=0,atual=el,prox;
+      while(atual&&fcAjRecolhivel(atual)){
+        prox=atual.nextElementSibling;
+        atual.setAttribute('data-fcaj-visto','1');
+        grupo.appendChild(atual);
+        n++;
+        atual=prox;
+      }
+      var linha=document.createElement('div');
+      linha.className='fcaj-linha';
+      var bt=document.createElement('button');
+      bt.type='button';
+      bt.className='fcaj-bt';
+      bt.setAttribute('aria-expanded','false');
+      bt.appendChild(document.createTextNode(FCAJ_LAMPADA+' Explicações'));
+      if(n>1){
+        var sp=document.createElement('span');
+        sp.className='fcaj-n';
+        sp.textContent=' ('+n+')';
+        bt.appendChild(sp);
+      }
+      (function(g,b){
+        b.addEventListener('click',function(){
+          var abriu=g.className.indexOf('fcaj-aberto')<0;
+          g.className='fcaj-grupo'+(abriu?' fcaj-aberto':'');
+          b.setAttribute('aria-expanded',abriu?'true':'false');
+        });
+      })(grupo,bt);
+      linha.appendChild(bt);
+      pai.insertBefore(linha,grupo);
+    }
+  }
+}
+
+function fcAjAplicar(){
+  var b=document.body,bt=$('fcaj-botao');
+  b.className=String(b.className||'').replace(/\s*fcaj-off/g,'')+(fcajOff?' fcaj-off':'');
+  if(bt){
+    bt.setAttribute('aria-pressed',fcajOff?'true':'false');
+    bt.className='botao mini'+(fcajOff?'':' claro');
+    bt.textContent=fcajOff?'Explicações recolhidas':'Explicações';
+    bt.title=fcajOff
+      ?'As explicações estão recolhidas. Clique numa lâmpada para abrir a do campo, ou aqui para mostrar todas de novo.'
+      :'Recolher as explicações dos campos, deixando uma linha com lâmpada no lugar de cada grupo';
+  }
+}
+function fcAjVirar(){
+  fcajOff=!fcajOff;
+  try{localStorage.setItem(FCAJ_CHAVE,fcajOff?'1':'0');}catch(e){}
+  fcAjAplicar();
+}
+function fcAjLigar(){
+  try{fcajOff=(localStorage.getItem(FCAJ_CHAVE)==='1');}catch(e){fcajOff=false;}
+  fcAjIniciar();
+  fcAjAplicar();
+  liga('fcaj-botao',fcAjVirar);
+}
+
 /* ============ painel consolidado (fase 5) ============ */
 /* O QUE E. Um so lugar que junta, para a pagina selecionada na barra do preset geral, tudo o
    que vai para a Tag Head e tudo o que vai para a Tag Body -- os dois campos DA PAGINA. O
@@ -29743,6 +29890,11 @@ prep('Achar um texto','',fcsIniciar,'ligar a busca e escrever o texto atual nos 
 /* Passo proprio, com rotulo proprio: a lista de novidades nao gera nada e nao mexe em aba
    nenhuma, entao se ela falhar a barra vermelha precisa dizer que foi ELA -- e todo o resto da
    ferramenta continua servindo. */
+/* DEPOIS da busca e do eco, e por um motivo medido: fcsEcoMontar percorre os rotulos e
+   fcsCampos varre os campos -- nenhum dos dois toca .ajuda, mas agrupar antes deixaria o
+   DOM mudando embaixo deles sem necessidade. Passo proprio, com rotulo proprio: se ele
+   falhar, a barra vermelha precisa dizer que foram as explicacoes, e nao a busca. */
+prep('Explicações recolhíveis','',fcAjLigar,'agrupar as explicações e ligar o interruptor');
 prep('Novidades','',fcrIniciar,'ligar o painel do que mudou em cada versão');
 prep('Preset geral','',fcgIniciar,'preparar a barra do preset geral');
 /* Passo proprio, com rotulo proprio: se ligar os botoes de backup falhar, a barra vermelha
