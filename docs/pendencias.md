@@ -2,79 +2,92 @@
 
 ---
 
-## EM EXECUÇÃO AGORA — a fila de sete itens da auditoria de 16/09/2026
+## A FILA DE 16/09/2026 — sete itens decididos, todos entregues
 
-> Esta seção é o **estado vivo** de uma fila em andamento. Ela existe para que a execução
-> sobreviva a uma troca de contexto: quem retomar lê daqui e continua, sem perguntar nada.
-> Ao fechar a fila, esta seção some e o que foi entregue desce para o histórico.
+> Origem: auditoria de documentação, código, git e release notes, pedida pelo dono em
+> 16/09/2026. Quatro varreduras. Ele aprovou os sete itens e o plano de execução em três
+> faixas. **Os sete estão feitos e no ar**, nas versões `2026-09-16a` a `2026-09-16e`.
+> O histórico de cada rodada, com o custo medido, está em `docs/ledger-evolucao-2026-09.md`
+> (rodadas 55 a 59).
 
-**Origem.** Auditoria de documentação, código, git e release notes pedida pelo dono em
-16/09/2026. Quatro varreduras. O mapa completo, com evidência de cada achado, está no
-relatório entregue a ele (artefato "Auditoria de 16 de setembro"). O dono **aprovou os sete
-itens** e o plano de execução em três faixas.
-
-**Regra de execução fixada pelo dono:** nada começa sem a palavra dele; cada item fechado é
-reportado com a tabela completa; e o **tempo real é relógio**, marcado no início e no fim da
-tarefa (ver "Como reportar progresso ao dono", no `CLAUDE.md`).
-
-### Os sete itens
-
-| # | Item | Estado | Estimativa | Tempo real |
+| # | Item | Versão | Estimativa | Tempo real (relógio) |
 |---|---|---|---|---|
-| 1 | Pôr a calculadora na regressão e os 71 textos novos no cenário configurado | ✅ publicado em `2026-09-16a` | 40 min | ≤ 49 min (1 e 2 juntos) |
-| 2 | Duas redes: ordem do registro de abas, e a caixa "o que depende de você" derivada | ✅ publicado em `2026-09-16a` | 1 h 30 | ≤ 49 min (1 e 2 juntos) |
-| 3 | Limpar as quinze afirmações falsas da documentação | ⏳ faixa C, **depois do item 7** | 2 h | — |
-| 4 | Reabrir o histórico: `docs/ledger-evolucao-2026-09.md` | ✅ publicado em `2026-09-16a` | 2 h | 5 min 20 s |
-| 5 | Escrever as regras que só vivem no código, mais três specs | ⏳ faixa C, **depois do item 7** | 2 h | — |
-| 6 | A lista de novidades como produto: filtros e "novo para você" | ⏳ faixa A, **depois do item 7** | 3 h | — |
-| 7 | As caixas de ajuda que não poluem o dia a dia | 🔄 **em andamento desde 16/09 00:47:47** | 7 h 30 | — |
+| 1 | A calculadora entrou na regressão, e os textos dela no cenário configurado | `16a` | 40 min | ≤ 49 min (1 e 2) |
+| 2 | Duas redes: ordem do registro de abas, e a caixa "o que depende de você" derivada | `16a` | 1 h 30 | ≤ 49 min (1 e 2) |
+| 3 | Quinze afirmações falsas da documentação | `16d` | 2 h | 9 min (com o 5) |
+| 4 | O histórico de setembro: 57 versões em 54 rodadas | `16a` | 2 h | 5 min 20 s |
+| 4b | O ledger útil e cobrado — índice gerado e rede em três camadas | `16b` | — | 3 min 39 s |
+| 5 | As cinco regras que só viviam no código | `16d` | 2 h | (com o 3) |
+| 6 | Os filtros das novidades, e o "novo para você" | `16e` | 3 h | 1 h 40 |
+| 7 | As explicações recolhíveis | `16c` | 7 h 30 | 2 min 07 s |
 
-### As três faixas
+**A estimativa é de esforço; o tempo real é relógio.** São unidades diferentes, e a regra de
+como medir está no `CLAUDE.md`, escrita depois de eu inventar essa coluna uma vez.
 
-- **A — em série, não delegável** (decide comportamento): 1 → 2 → **7** → 6.
-- **B — agente, em paralelo:** item 4. **Concluída.**
-- **C — agente, depois do item 7:** itens 3 e 5 juntos, porque mexem nos mesmos documentos e
-  porque o item 7 muda o layout que eles descrevem.
+---
 
-Os arnêses dos itens 6 e 7 vão para agentes, mas **depois** de o núcleo existir — delega-se
-contra contrato que existe, nunca contra um que será recriado.
+## ABERTO — seis itens da quarta varredura, esperando decisão do dono
 
-### Item 7 — o desenho já decidido com o dono
+> A quarta varredura da auditoria (cobertura do arnês) fechou depois do relatório: executou a
+> bateria inteira — **45 suítes, 5.132 verificações, 46 minutos**. O achado principal dela virou
+> o item 1 e está feito; quatro provas que contavam abas na mão foram corrigidas e duas que
+> morriam sem medir nada voltaram a medir, tudo na `2026-09-16b`. **O que sobrou está aqui, e
+> nada foi iniciado.**
 
-Ele pediu uma de duas alternativas e escolheu a terceira, que eu sugeri depois de medir.
+### 8. A calculadora tem pagamento completo e nenhuma prova de execução dele — ALTO, 3 h
 
-**A medição que decidiu.** São **433 caixas** de ajuda no HTML da ferramenta: 367 explicativas,
-**62 âmbar de alerta**, 55 que o próprio código já mostra e esconde, e **15 com botão dentro**.
-Estruturalmente, só **106 de 423** vêm logo depois de um campo — **157 vêm depois de outra
-caixa** (são a segunda, terceira, quarta de uma pilha), 93 explicam um grupo e 31 um fieldset.
-É esse número que derruba a alternativa da lâmpada por campo: ela cobriria um quarto delas.
+`calculadora-album.mjs` prova o invariante que importava (2.760 combinações de preço, zero
+divergência) e depois confere o pagamento **por presença de texto no código gerado**. O bloco
+chega a ser executado, mas só para ler preço na tela. **Nunca são executados:** o QR desenhado,
+o payload do Pix conferido por TLV e CRC, o `createOrder` do PayPal, a ordem dos meios, o
+WhatsApp, o "Já paguei", o upsell.
 
-**O que foi aprovado:**
+**Custo de não fazer:** sinal calculado sobre a base errada, desconto aplicado duas vezes ou QR
+com o valor do total em vez do sinal **passariam na bateria inteira**.
 
-1. Um **interruptor na barra do topo** — *Explicações: mostrar sempre / só quando eu pedir* —
-   guardado como o resto da configuração.
-2. Desligado, **cada pilha vira uma linha só**, no lugar da pilha: lâmpada mais "o que este
-   campo faz".
-3. **Clique, nunca passar o mouse.** Hover some no instante em que o operador move o mouse
-   para o campo que vai preencher — que é quando ele precisa do texto — e não existe no toque.
-4. **Nunca recolhem:** os 62 alertas âmbar e as 15 caixas com botão dentro.
-5. **Nasce em "mostrar sempre"**: ao publicar, nada muda na tela do dono até ele virar a chave.
-   Padrão que muda o que está no ar sem ninguém pedir é o que a regressão existe para denunciar.
+### 9. Doze provas transversais de pagamento cobrem quatro das cinco abas — ALTO, 2 h 30
 
-**O que já foi verificado e abaixa o risco:** a busca do topo **não indexa** o texto de ajuda
-(ela procura no valor, no rótulo e no id), então recolher não a atrapalha; e isto é interface
-da ferramenta, não código gerado — a **regressão byte a byte não é afetada**.
+`textos-sinal`, `meio-prioritario`, `meio-prio-migracao`, `upsell`, `paypal-previa`, `aparencia`,
+`qr-configuravel`, `unificar-config`, `unificar-pagamento`, `sku-por-item`, `limites-visiveis` e
+`frase-copiado` — todas com a lista de abas **escrita à mão**, nenhuma incluindo `v`. E a aba tem
+todos esses campos.
 
-**Onde está o trabalho fino:** não quebrar quem já mora no rótulo — o contador de caracteres
-(`fcLimIniciar`), o eco do texto atual (`fcsEcoMontar`) e a busca que rola até um campo
-(`fcsIr`), que vai precisar **abrir a pilha recolhida** quando o campo estiver dentro de uma.
+**Custo de não fazer:** cada uma dessas rodadas foi feita porque o defeito era mudo; na aba nova
+todos voltam a ser possíveis sem uma linha vermelha.
 
-### O que ficou pendente de medição
+### 10. Uma prova que falha e sai anunciando sucesso — ALTO, 20 min
 
-A **quarta varredura** da auditoria — cobertura do arnês — ainda estava rodando quando esta
-seção foi escrita (52 min). O achado principal dela já foi corrigido (item 1). O que falta é
-secundário: README contra a realidade das suítes, a lista das que falham hoje, e os buracos de
-cobertura. **Se ela trouxer conserto, ele vira item 8 em diante, para o dono decidir.**
+Nove suítes chamam `resumo()` sem devolver o resultado ao processo. **`chave-pix-limpeza` falha
+e sai com código 0.** Qualquer script que rode a bateria e olhe o código de saída a vê verde.
+
+**Custo de não fazer:** é pior que vermelho permanente — vermelho que ninguém olha ainda está
+lá; verde falso apaga o defeito.
+
+### 11. "Exportar tudo — sem os dados" nunca foi medido — MÉDIO, 1 h
+
+O modo promete deixar de fora a chave Pix, o Client ID e o WhatsApp. Nenhuma prova o exercita; a
+única que chega perto clica em "Com os dados".
+
+**Custo de não fazer:** o arquivo que o dono manda a terceiros pode levar a chave Pix e o Client
+ID. É a disciplina por causa da qual o repositório pode ser público, e o dano é irreversível.
+
+### 12. A rede do painel consolidado nunca foi vista acendendo, e o formato da chave Pix não tem prova — MÉDIO, 2 h 30
+
+`fccOrfas` é a resposta registrada ao dia em que uma Tag Body ficou fora do mapa em silêncio, e
+nunca foi vista disparando. E `pixChaveFormato` decide CPF e CNPJ pelos dígitos verificadores,
+telefone, e-mail e EVP — **toda suíte do arnês usa e-mail**.
+
+### 13. A bateria leva 46 minutos, e 65% são três suítes — BAIXO, 1 h
+
+Medido: 45,6 minutos para 45 suítes. Três delas, do calendário do TidyCal e dependentes de rede,
+somam 30 minutos; as outras 42 mais a regressão cabem em 16. Não existe em lugar nenhum a
+distinção entre "a bateria curta" e "a bateria com rede", nem o tempo de cada uma.
+
+---
+
+**Recomendação, se for para escolher:** os itens **8, 9 e 10** — 5 h 50 no total. Os dois
+primeiros são dívida criada ao entregar a aba nova; o terceiro é uma prova que mente, e mentira
+em prova contamina tudo que vier depois dela.
 
 ---
 
