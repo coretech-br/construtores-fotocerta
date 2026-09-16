@@ -26,68 +26,74 @@ como medir está no `CLAUDE.md`, escrita depois de eu inventar essa coluna uma v
 
 ---
 
-## ABERTO — seis itens da quarta varredura, esperando decisão do dono
+## A FILA DA QUARTA VARREDURA — seis itens decididos, todos entregues
 
-> A quarta varredura da auditoria (cobertura do arnês) fechou depois do relatório: executou a
-> bateria inteira — **45 suítes, 5.132 verificações, 46 minutos**. O achado principal dela virou
-> o item 1 e está feito; quatro provas que contavam abas na mão foram corrigidas e duas que
-> morriam sem medir nada voltaram a medir, tudo na `2026-09-16b`. **O que sobrou está aqui, e
-> nada foi iniciado.**
+> A quarta varredura da auditoria (cobertura do arnês) executou a bateria inteira — **45 suítes,
+> 5.132 verificações, 46 minutos**. O dono aprovou os seis itens em 16/09/2026 ("Vamos fazer
+> todos do item 8"). **Os seis estão feitos e no ar**, nas versões `2026-09-16f` e `2026-09-16g`.
+> O histórico, com o custo medido, está em `docs/ledger-evolucao-2026-09.md`, rodadas 60 e 61.
 
-### 8. A calculadora tem pagamento completo e nenhuma prova de execução dele — ALTO, 3 h
+| # | Item | Versão | Estimativa | Tempo real (relógio) |
+|---|---|---|---|---|
+| 8 | A calculadora com o pagamento EXECUTADO (Pix relido por TLV, `createOrder`, WhatsApp) | `16f` | 3 h | 1 min 18 s |
+| 9a | Cinco das doze provas transversais ganharam a quinta aba | `16f` | — | 4 min 34 s |
+| 9b | As oito restantes | `16g` | 2 h 30 | 3 h 00 |
+| 10 | Nove provas que falhavam anunciando sucesso | `16f` | 20 min | 1 min 23 s |
+| 11 | "Exportar tudo — sem os dados" medido | `16g` | 1 h | ~3 min (subagente) |
+| 12 | `fccOrfas` vista acendendo + os cinco formatos de chave Pix | `16g` | 2 h 30 | ~8 min (subagente) |
+| 13 | A bateria partida em curta e com rede | `16g` | 1 h | script pronto; README pendente |
 
-`calculadora-album.mjs` prova o invariante que importava (2.760 combinações de preço, zero
-divergência) e depois confere o pagamento **por presença de texto no código gerado**. O bloco
-chega a ser executado, mas só para ler preço na tela. **Nunca são executados:** o QR desenhado,
-o payload do Pix conferido por TLV e CRC, o `createOrder` do PayPal, a ordem dos meios, o
-WhatsApp, o "Já paguei", o upsell.
+**A estimativa é de esforço; o tempo real é relógio.** São unidades diferentes, e a regra de
+como medir está no `CLAUDE.md`, escrita depois de eu inventar essa coluna uma vez.
 
-**Custo de não fazer:** sinal calculado sobre a base errada, desconto aplicado duas vezes ou QR
-com o valor do total em vez do sinal **passariam na bateria inteira**.
+### O que a fila achou de defeito real, e que não estava previsto
 
-### 9. Doze provas transversais de pagamento cobrem quatro das cinco abas — ALTO, 2 h 30
-
-`textos-sinal`, `meio-prioritario`, `meio-prio-migracao`, `upsell`, `paypal-previa`, `aparencia`,
-`qr-configuravel`, `unificar-config`, `unificar-pagamento`, `sku-por-item`, `limites-visiveis` e
-`frase-copiado` — todas com a lista de abas **escrita à mão**, nenhuma incluindo `v`. E a aba tem
-todos esses campos.
-
-**Custo de não fazer:** cada uma dessas rodadas foi feita porque o defeito era mudo; na aba nova
-todos voltam a ser possíveis sem uma linha vermelha.
-
-### 10. Uma prova que falha e sai anunciando sucesso — ALTO, 20 min
-
-Nove suítes chamam `resumo()` sem devolver o resultado ao processo. **`chave-pix-limpeza` falha
-e sai com código 0.** Qualquer script que rode a bateria e olhe o código de saída a vê verde.
-
-**Custo de não fazer:** é pior que vermelho permanente — vermelho que ninguém olha ainda está
-lá; verde falso apaga o defeito.
-
-### 11. "Exportar tudo — sem os dados" nunca foi medido — MÉDIO, 1 h
-
-O modo promete deixar de fora a chave Pix, o Client ID e o WhatsApp. Nenhuma prova o exercita; a
-única que chega perto clica em "Com os dados".
-
-**Custo de não fazer:** o arquivo que o dono manda a terceiros pode levar a chave Pix e o Client
-ID. É a disciplina por causa da qual o repositório pode ser público, e o dano é irreversível.
-
-### 12. A rede do painel consolidado nunca foi vista acendendo, e o formato da chave Pix não tem prova — MÉDIO, 2 h 30
-
-`fccOrfas` é a resposta registrada ao dia em que uma Tag Body ficou fora do mapa em silêncio, e
-nunca foi vista disparando. E `pixChaveFormato` decide CPF e CNPJ pelos dígitos verificadores,
-telefone, e-mail e EVP — **toda suíte do arnês usa e-mail**.
-
-### 13. A bateria leva 46 minutos, e 65% são três suítes — BAIXO, 1 h
-
-Medido: 45,6 minutos para 45 suítes. Três delas, do calendário do TidyCal e dependentes de rede,
-somam 30 minutos; as outras 42 mais a regressão cabem em 16. Não existe em lugar nenhum a
-distinção entre "a bateria curta" e "a bateria com rede", nem o tempo de cada uma.
+1. **`TXT_SUCESSO` não existia na Calculadora de álbum** (`16f`). A fonte compartilhada
+   `fcPpBotoesSrc` chama `msg(TXT_SUCESSO,true)` depois de `capture()`; a aba declarava `TXT_OK`,
+   que ninguém lia. **O cliente pagava no cartão e o bloco lançava `ReferenceError`** — tela
+   parada depois do pagamento, e upsell que nunca disparava. Achado por `upsell.mjs`, que aprova
+   um pagamento de verdade.
+2. **O meio prioritário não priorizava** (`16f`): total com 26px fixos contra 20px da linha do
+   Pix, então "Pix em destaque" deixava o número do Pix menor que o do cartão.
+3. **`pGerarLink` não redesenhava o painel** (`16g`) — inócuo hoje, e exatamente a cegueira que
+   `fccOrfas` existe para fechar.
+4. **Uma asserção verde defendia o defeito 3 da lista acima** (o `sempre` do upsell copiado da
+   Link de cobrança): escrita olhando a saída, herdou o erro dela.
 
 ---
 
-**Recomendação, se for para escolher:** os itens **8, 9 e 10** — 5 h 50 no total. Os dois
-primeiros são dívida criada ao entregar a aba nova; o terceiro é uma prova que mente, e mentira
-em prova contamina tudo que vier depois dela.
+## ABERTO
+
+### 13b. O README ainda não documenta as duas baterias
+
+`scripts/verificar/bateria.sh` está no ar, com `curta` / `com-rede` / `tudo` / `--listar` e a
+guarda que confere a lista contra o diretório nos três sentidos. Falta a seção do README com o
+**tempo medido** de cada bateria, o que cada uma cobre, quando rodar e o critério que as separa
+(vai para a com-rede o arquivo que declara host em `permitir:` — são cinco: os três do TidyCal
+mais `aparencia.mjs` e `qr-configuravel.mjs`).
+
+E o README traz hoje uma afirmação **errada**, na seção "O que este arnês NÃO cobre": *"Três
+arquivos daqui falam com a internet, e só três"*. São cinco desde que `aparencia.mjs` e
+`qr-configuravel.mjs` passaram a desenhar o QR com a biblioteca de verdade.
+
+**As três suítes novas também não têm linha na tabela do README**: `exportar-sem-dados.mjs`,
+`painel-orfas.mjs` e `chave-pix-formatos.mjs`.
+
+---
+
+## DECIDIDO E FECHADO — não voltar a propor
+
+**A caixa "Outros códigos meus" pode levar credencial no arquivo "sem os dados", e isso fica
+como está.** A prova do item 11 mediu que `FCG.codigos.head/body` viaja nos dois tipos de
+arquivo — é comportamento declarado, e o texto do modal avisa. Se o dono colar ali um bloco que
+contenha a chave Pix dele, ela sai no arquivo que se diz sem dados. Perguntado em 16/09/2026 se
+queria um aviso na hora de exportar, ele respondeu: *"não precisa avisar se tiver chave PIX"*.
+**Decisão dele, registrada para não ser reaberta.**
+
+**Os três interruptores da Calculadora de álbum foram igualados às irmãs** (`16g`), com a
+autorização dele no mesmo dia: *"Sobre a calculadora, pode igualar."* Eram caixa de marcar e
+gravavam booleano; viraram par de radios e gravam `'sim'`/`'nao'`. A leitura aceita as duas
+formas (`vSimNao`), e as três situações estão medidas em `calculadora-album.mjs`, parte 6.
 
 ---
 

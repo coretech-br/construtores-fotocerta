@@ -1572,7 +1572,19 @@ por quem pode deixar rodando; o subagente escreve o instrumento, e a corrida fic
 
 | Estimativa | Tempo real |
 |---|---|
-| 2 h 30 (9b) + 1 h (11) + 2 h 30 (12) + 1 h (13) + 30 min (igualar) | **3 h 00** para o 9b, de 09:58:22 a 12:58:40 no relógio · **3 min** o igualar · ~3 min e ~8 min os itens 11 e 12, pelo relógio dos próprios subagentes · o item 13 fechou com a bateria medida à parte |
+| 2 h 30 (9b) + 1 h (11) + 2 h 30 (12) + 1 h (13) + 30 min (igualar) | **3 h 00** para o 9b, de 09:58:22 a 12:58:40 no relógio · **3 min** o igualar · ~3 min e ~8 min os itens 11 e 12, pelo relógio dos próprios subagentes · o item 13 fechou às 14:13, com as duas baterias medidas na árvore congelada do commit publicado |
+
+**As duas baterias, medidas** (16/09/2026, árvore do commit publicado, uma bateria por vez):
+**curta 17 min 19 s** (44 suítes, 44 verdes) e **com rede 34 min 31 s** (5 suítes, 5 verdes) —
+51 minutos somados, contra os 46 da medição de ontem, que tinha 45 suítes. O critério que as
+separa é mecânico: vai para a com-rede quem declara host em `permitir:`, e o próprio script
+confere isso contra o diretório antes de rodar, nos três sentidos.
+
+**Quatro medições foram perdidas antes de as duas fecharem**, e as três causas valem como regra:
+árvore editada no meio da corrida (o número descreve duas árvores somadas); corrida morta por
+fora; e **duas baterias ao mesmo tempo**, que disputam as portas fixas destas suítes e produzem
+`EADDRINUSE` — uma suíte cai em zero segundo e o vermelho não tem defeito nenhum atrás. Medir
+bateria exige máquina sozinha e árvore parada, e isso agora está escrito no README.
 
 ---
 
