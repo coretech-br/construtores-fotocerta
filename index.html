@@ -879,6 +879,7 @@
   <button class="aba" id="aba-loja" role="tab" aria-selected="false">Mini loja</button>
   <button class="aba" id="aba-efe" role="tab" aria-selected="false">Efeitos de página</button>
   <button class="aba" id="aba-pac" role="tab" aria-selected="false">Agendamento por pacote</button>
+  <button class="aba" id="aba-alb" role="tab" aria-selected="false">Calculadora de álbum</button>
 </div>
 
 <!-- ==================== CONSTRUTOR: SLIDESHOW ==================== -->
@@ -4357,6 +4358,472 @@
   </div>
 </div>
 
+<div class="painel" id="painel-alb" role="tabpanel">
+  <p class="descricao"><b>Calculadora de álbum</b> — o cliente escolhe o tamanho do álbum, quantas fotos quer e os acabamentos, e a página mostra na hora quantas lâminas dá, o desconto por quantidade e o valor a pagar, por Pix ou cartão. Substitui a calculadora antiga, que vivia travada num quadro estreito e ficava de fora do painel consolidado.</p>
+
+  <div class="secao primeira" data-sec="v-conta"><span class="secao-n">1</span> Como o álbum é orçado</div>
+  <div class="grade">
+    <div>
+      <fieldset>
+        <legend>O preço</legend>
+        <label for="v-preco">Preço por foto</label>
+        <input type="number" id="v-preco" value="30" min="0.01" max="99999" step="0.01">
+        <p class="ajuda">É deste número que sai o valor base do álbum: <b>quantidade de fotos × preço por foto</b>. O desconto por quantidade incide só sobre essa base; os acabamentos entram depois dela.</p>
+        <label for="v-lam-min">Mínimo de lâminas do álbum</label>
+        <input type="number" id="v-lam-min" value="10" min="1" max="200" step="1">
+        <label for="v-lam-max">Máximo de lâminas do álbum</label>
+        <input type="number" id="v-lam-max" value="45" min="1" max="200" step="1">
+        <p class="ajuda">Os dois limites valem para <b>todos</b> os tamanhos, e é a média de fotos por lâmina de cada tamanho que os transforma em mínimo e máximo de <b>fotos</b>. É por isso que o mesmo par de números dá faixas diferentes em cada tamanho.</p>
+      </fieldset>
+    </div>
+    <div>
+      <fieldset>
+        <legend>Tamanhos do álbum</legend>
+        <div class="caixa-editor">
+          <label for="v-tam-cm">Maior lado <small>(cm)</small></label>
+          <input type="number" id="v-tam-cm" placeholder="30" min="1" max="200" step="1">
+          <label for="v-tam-media">Fotos por lâmina <small>(média)</small></label>
+          <input type="number" id="v-tam-media" placeholder="2,5" min="0.1" max="50" step="0.1">
+          <p class="ajuda">É a <b>média</b> do seu projeto, não uma regra: num álbum grande cabem mais fotos por lâmina, e é esse número que converte fotos em lâminas na tela do cliente.</p>
+          <label for="v-tam-minfotos">Mínimo de fotos deste tamanho <small>(opcional)</small></label>
+          <input type="number" id="v-tam-minfotos" placeholder="25" min="1" max="9999" step="1">
+          <p class="ajuda">Em branco, o mínimo sai do <b>mínimo de lâminas</b> ao lado. Preencha só quando este tamanho precisar de um piso próprio.</p>
+          <label for="v-tam-sku">SKU deste tamanho <small>(opcional)</small></label>
+          <input type="text" id="v-tam-sku" placeholder="ALB-30">
+          <p class="ajuda">O <b>SKU</b> é o <b>seu</b> código de produto, e ele vai na coluna &ldquo;ID do produto&rdquo; do relatório do PayPal. Ele não é o <b>código do pedido</b>, que identifica o pedido inteiro no campo de conciliação — são dois campos com papéis diferentes.</p>
+          <div class="acoes">
+            <button class="botao" id="v-tam-add">Adicionar tamanho</button>
+            <button class="botao claro" id="v-tam-cancel" style="display:none">Cancelar edição</button>
+          </div>
+        </div>
+      </fieldset>
+    </div>
+  </div>
+  <div class="grade">
+    <div class="fcx-largo">
+      <fieldset>
+        <legend>Tamanhos cadastrados</legend>
+        <ul class="lista-imgs" id="v-tam-lista"></ul>
+        <p class="vazio" id="v-tam-vazio">Nenhum tamanho cadastrado ainda. Sem ao menos um, a calculadora não tem o que oferecer ao cliente.</p>
+      </fieldset>
+    </div>
+  </div>
+
+  <div class="secao" data-sec="v-desconto"><span class="secao-n">2</span> Desconto por quantidade</div>
+  <div class="grade">
+    <div>
+      <fieldset>
+        <legend>Cadastrar faixa de desconto</legend>
+        <div class="caixa-editor">
+          <label for="v-fx-laminas">A partir de quantas lâminas</label>
+          <input type="number" id="v-fx-laminas" placeholder="20" min="1" max="200" step="1">
+          <label for="v-fx-pct">Desconto <small>(percentual)</small></label>
+          <input type="number" id="v-fx-pct" placeholder="5" min="0" max="90" step="0.5">
+          <p class="ajuda">O desconto incide <b>só sobre o valor base</b> do álbum — os acabamentos ficam de fora dele. Vale a faixa de maior número de lâminas que o álbum alcançar.</p>
+          <div class="acoes">
+            <button class="botao" id="v-fx-add">Adicionar faixa</button>
+            <button class="botao claro" id="v-fx-cancel" style="display:none">Cancelar edição</button>
+          </div>
+        </div>
+      </fieldset>
+    </div>
+    <div>
+      <fieldset>
+        <legend>Faixas cadastradas</legend>
+        <ul class="lista-imgs" id="v-fx-lista"></ul>
+        <p class="vazio" id="v-fx-vazio">Nenhuma faixa. O álbum sai sempre pelo preço cheio, e a frase de incentivo não aparece para o cliente.</p>
+      </fieldset>
+    </div>
+  </div>
+
+  <div class="secao" data-sec="v-acab"><span class="secao-n">3</span> Acabamentos opcionais</div>
+  <div class="grade">
+    <div>
+      <fieldset>
+        <legend>Cadastrar acabamento</legend>
+        <div class="caixa-editor">
+          <label for="v-ac-nome">Nome</label>
+          <input type="text" id="v-ac-nome" placeholder="Caixa rígida">
+          <label for="v-ac-desc">Descrição <small>(opcional)</small></label>
+          <input type="text" id="v-ac-desc" placeholder="Caixa revestida em linho, com laço de cetim">
+          <label for="v-ac-valor">Valor</label>
+          <input type="number" id="v-ac-valor" placeholder="180" min="0" step="0.01">
+          <label for="v-ac-sku">SKU deste acabamento <small>(opcional)</small></label>
+          <input type="text" id="v-ac-sku" placeholder="CX-LINHO">
+          <p class="ajuda">Os acabamentos entram <b>depois</b> do desconto por quantidade: eles somam ao valor já descontado, e não recebem o desconto das lâminas.</p>
+          <div class="acoes">
+            <button class="botao" id="v-ac-add">Adicionar acabamento</button>
+            <button class="botao claro" id="v-ac-cancel" style="display:none">Cancelar edição</button>
+          </div>
+        </div>
+      </fieldset>
+    </div>
+    <div>
+      <fieldset>
+        <legend>Acabamentos cadastrados</legend>
+        <ul class="lista-imgs" id="v-ac-lista"></ul>
+        <p class="vazio" id="v-ac-vazio">Nenhum acabamento. A seção de acabamentos não aparece na página do cliente.</p>
+      </fieldset>
+    </div>
+  </div>
+
+  <div class="secao" data-sec="v-pagamento"><span class="secao-n">4</span> Pagamento</div>
+  <div class="grade">
+    <div>
+      <fieldset>
+        <legend>Como o cliente vai pagar</legend>
+        <div class="radios">
+          <label><input type="radio" name="v-metodo" value="ambos" checked><span>PayPal e Pix</span></label>
+          <label><input type="radio" name="v-metodo" value="paypal"><span>Somente PayPal</span></label>
+          <label><input type="radio" name="v-metodo" value="pix"><span>Somente Pix</span></label>
+        </div>
+        <p class="ajuda">O código gerado carrega apenas o necessário para a forma escolhida: com "somente Pix" o bloco não pede Client ID nem carrega o SDK do cartão; com "somente PayPal" ele não pede chave Pix nem carrega a maquinaria do Pix.</p>
+        <div id="v-prio-campo">
+          <label>Meio de pagamento prioritário</label>
+          <div class="radios">
+            <label><input type="radio" name="v-prio" value="pix" checked><span>Pix primeiro</span></label>
+            <label><input type="radio" name="v-prio" value="pp"><span>Cartão primeiro</span></label>
+          </div>
+          <p class="ajuda">Decide <b>as duas coisas juntas</b>: a ordem em que os meios aparecem no bloco <b>e</b> qual preço fica em destaque. É um campo só de propósito — separados, dava para publicar um Pix em cima com o preço do cartão grande. <b>O outro preço continua à vista</b>, na linha menor, para o cliente nunca ser surpreendido na hora de pagar.</p>
+          <p class="ajuda" id="v-prio-so1" style="display:none"><b>Com um meio só não há ordem a escolher.</b> A opção volta a valer quando você escolher os dois meios. O que você marcou aqui fica guardado.</p>
+          <p class="ajuda alerta" id="v-prio-manual" style="display:none"></p>
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend>Pagamento</legend>
+        <div id="v-descpix-campo">
+          <label for="v-descpix">Desconto no Pix <small>(percentual; 0 = sem desconto)</small></label>
+          <input type="number" id="v-descpix" value="5" min="0" max="90" step="0.5">
+          <p class="ajuda alerta" id="v-descpix-aviso" style="display:none"><b>Com a cobrança de sinal ligada este campo não vale.</b> O Pix passa a cobrar o sinal, e o desconto do Pix não se aplica sobre o sinal — seria desconto dobrado. O número acima fica guardado, mas <b>não entra no código gerado</b>. Para usar o desconto do Pix, volte a cobrar o valor cheio.</p>
+          <p class="ajuda">Só faz sentido havendo as duas formas: sem uma delas não existe outro preço para descontar contra, então este campo some com "somente Pix" ou "somente PayPal".</p>
+        </div>
+        <label for="v-parcelas">Parcelas no cartão</label>
+        <input type="number" id="v-parcelas" value="12" min="1" max="12" step="1">
+        <p class="ajuda">Este número é uma promessa sobre o que o cliente vai encontrar no cartão, e quem decide isso é a operadora — a ferramenta não tem como conferir. Confira no PayPal quantas parcelas a sua conta oferece. O valor da parcela é calculado dividindo o preço, e afirma parcelamento sem juros.</p>
+        <label for="v-cod">Código do pedido <small>(identifica a transação no PayPal, vira o txid do Pix e entra na mensagem do WhatsApp)</small></label>
+        <input type="text" id="v-cod" value="" placeholder="ex.: ALBUM26">
+        <label for="v-qr">Tamanho do QR Code <small>(px, de 120 a 320)</small></label>
+        <input type="number" id="v-qr" value="200" min="120" max="320" step="10">
+      </fieldset>
+      <fieldset>
+        <legend>Cobrança de sinal</legend>
+        <div class="radios">
+          <label><input type="radio" name="v-sinal" value="nao"><span>Cobrar o valor cheio</span></label>
+          <label><input type="radio" name="v-sinal" value="sim" checked><span>Cobrar sinal agora, saldo depois</span></label>
+        </div>
+        <div id="v-sinal-campos">
+          <label>Como calcular o sinal</label>
+          <div class="radios">
+            <label><input type="radio" name="v-sinaltipo" value="pct" checked><span>Percentual do total</span></label>
+            <label><input type="radio" name="v-sinaltipo" value="fixo"><span>Valor fixo</span></label>
+          </div>
+          <div id="v-sinalpct-campo">
+            <label for="v-sinalpct">Percentual do sinal <small>(de 1 a 99; fora da faixa o campo se corrige sozinho)</small></label>
+            <input type="number" id="v-sinalpct" value="50" min="1" max="99" step="0.5">
+          </div>
+          <div id="v-sinalfixo-campo">
+            <label for="v-sinalfixo">Valor fixo do sinal</label>
+            <input type="number" id="v-sinalfixo" value="100" min="0.01" max="999999" step="0.01">
+          </div>
+          <label for="v-txt-sinal-garante">O que o sinal garante</label>
+          <input type="text" id="v-txt-sinal-garante" value="O sinal garante a sua vaga na fila de produção e o início do projeto do seu álbum." placeholder="ex.: O sinal garante o seu horário agendado">
+          <label for="v-txt-sinal-desistir">E se o cliente desistir</label>
+          <input type="text" id="v-txt-sinal-desistir" value="Até o envio para a gráfica, o sinal pode ser transferido para outro projeto. Depois disso, ele não é devolvido." placeholder="ex.: Cancelamento não há devolução do sinal">
+          <label for="v-txt-sinal-saldo">O que fazer com o saldo</label>
+          <input type="text" id="v-txt-sinal-saldo" value="O saldo é combinado na aprovação do design, antes do envio para produção." placeholder="ex.: O saldo deve ser pago até 1 dia antes do seu ensaio">
+          <p class="ajuda alerta" id="v-sinal-txt-aviso" style="display:none"><b>Os três estão em branco, e o sinal está ligado.</b> Quem está encomendando o álbum vai ler quanto paga agora e quanto fica para depois — e não vai ler o que o sinal garante, o que acontece se ele desistir, nem quando o saldo vence. Preencher é opcional, e o que estiver em branco simplesmente não aparece; em branco é a única configuração em que nenhuma das três perguntas é respondida.</p>
+          <p class="ajuda">As três respostas aparecem <b>na tela do cliente</b>, logo abaixo das linhas de sinal e saldo e <b>antes dos botões de pagamento</b> — é ali que ele decide. Cada uma só aparece se estiver preenchida. Elas <b>não entram na mensagem do WhatsApp</b>, que é confirmação do que já foi pago.</p>
+          <p class="ajuda"><b>Nesta aba os três já nascem preenchidos</b>, e só nesta: a política deles já está publicada na sua página de álbuns, então o padrão não inventa nada — repete o que você já diz. Reescreva à vontade.</p>
+        </div>
+        <p class="ajuda">Ligado, o <b>Pix gera o QR do sinal</b>, o <b>cartão cobra o sinal</b> e o <b>parcelamento passa a ser sobre o sinal</b> — é o valor que a operadora cobra naquele momento. A ordem da conta é <b>desconto por lâminas sobre a base → acabamentos somam → o sinal sai do total</b>. Um <b>sinal maior que o total</b> é recusado: a página avisa e não deixa pagar.</p>
+      </fieldset>
+    </div>
+    <div>
+      <fieldset id="v-pix-campos">
+        <legend>Dados do recebedor (Pix)</legend>
+        <p class="ajuda"><b>A chave Pix, o nome e a cidade do recebedor não ficam nesta aba.</b> Eles são os mesmos aqui, no Checkout, no Link de cobrança, na Mini loja e no Agendamento por pacote, e por isso ficam num lugar só: o painel <b>Identidade</b>, no topo da página. <span class="acoes"><button type="button" class="botao mini claro fci-ir">Abrir Identidade</button></span></p>
+      </fieldset>
+      <fieldset id="v-pp-campos">
+        <legend>Conta PayPal</legend>
+        <p class="ajuda"><b>O Client ID não fica nesta aba</b> e está no painel <b>Identidade</b>, no topo da página, com a chave Pix, o recebedor e o WhatsApp. É a mesma conta em todas as abas de pagamento. <span class="acoes"><button type="button" class="botao mini claro fci-ir">Abrir Identidade</button></span></p>
+        <p class="ajuda"><b>A moeda aqui é sempre o real (BRL)</b>, e não há campo para trocá-la. O Pix só existe em reais, e o cartão cobra o mesmo pedido: um seletor de moeda faria o QR Code e o cartão pedirem valores diferentes.</p>
+        <label>Cor dos botões do PayPal</label>
+        <div class="radios">
+          <label><input type="radio" name="v-ppcor" value="gold" checked><span>Dourado</span></label>
+          <label><input type="radio" name="v-ppcor" value="blue"><span>Azul</span></label>
+          <label><input type="radio" name="v-ppcor" value="silver"><span>Prateado</span></label>
+          <label><input type="radio" name="v-ppcor" value="white"><span>Branco</span></label>
+          <label><input type="radio" name="v-ppcor" value="black"><span>Preto</span></label>
+        </div>
+      </fieldset>
+      <fieldset id="v-upsell-fieldset">
+        <legend>Depois do pagamento aprovado: levar o cliente a outra página</legend>
+        <label for="v-upsell">Endereço da página (upsell) <small>(vazio = o código sai exatamente como saía antes)</small></label>
+        <input type="url" id="v-upsell" value="" placeholder="https://www.fotocerta.com.br/oferta-especial">
+        <div class="radios">
+          <label><input type="checkbox" id="v-upsellon"><span>Levar o cliente para essa página</span></label>
+        </div>
+        <p class="ajuda"><b>Com o endereço preenchido, as duas variáveis saem no código mesmo com a chave desmarcada.</b> Elas ficam no topo do bloco, inertes, esperando um <code>true</code>: assim você liga e desliga o upsell direto na página publicada, <b>sem voltar aqui e sem recolar nada</b>. Com o endereço vazio nada disso é escrito. Endereço vazio com a chave marcada é recusado na hora de gerar — ligado sem destino não faz nada e parece que faz.</p>
+        <p class="ajuda"><b>No cartão o cliente é levado assim que o pagamento é aprovado</b> — houve confirmação de verdade. <b>No Pix não existe aviso nenhum para a página</b> quando o dinheiro cai, então quem leva é o botão “Já paguei”, e quem clica nele pode ainda não ter pago.</p>
+      </fieldset>
+      <fieldset>
+        <legend>WhatsApp e resumo do pedido</legend>
+        <div class="radios">
+          <label><input type="checkbox" id="v-zap" checked><span>Oferecer o orçamento no WhatsApp</span></label>
+        </div>
+        <p class="ajuda">O botão abre o WhatsApp com o resumo do álbum já escrito — tamanho, fotos, lâminas e valor. O número sai do painel <b>Identidade</b>. <span class="acoes"><button type="button" class="botao mini claro fci-ir">Abrir Identidade</button></span></p>
+        <div class="radios">
+          <label><input type="checkbox" id="v-resumo" checked><span>Mostrar o resumo do pedido, com botão de copiar</span></label>
+        </div>
+        <p class="ajuda">O resumo lista o tamanho, a quantidade de fotos, as lâminas, os acabamentos, o desconto e o total, com um botão de copiar — é o que o cliente manda para você quando quiser combinar alguma coisa antes de pagar.</p>
+      </fieldset>
+    </div>
+  </div>
+
+  <div class="secao" data-sec="v-aparencia"><span class="secao-n">5</span> Aparência</div>
+  <div class="grade">
+    <div>
+      <fieldset>
+        <legend>Cores</legend>
+        <label>Cor de destaque</label>
+        <div class="cor-linha"><input type="color" id="v-c1" value="#9A7B4F"><input type="text" id="v-c1-t" value="#9A7B4F"></div>
+        <label>Fundo do cartão</label>
+        <div class="cor-linha"><input type="color" id="v-c2" value="#FBFAF7"><input type="text" id="v-c2-t" value="#FBFAF7"></div>
+        <label>Cor do texto</label>
+        <div class="cor-linha"><input type="color" id="v-c3" value="#23221E"><input type="text" id="v-c3-t" value="#23221E"></div>
+      </fieldset>
+    </div>
+    <div>
+      <fieldset>
+        <legend>Medidas do bloco</legend>
+        <label for="v-larg">Largura máxima do bloco <small>(px, de 320 a 1600)</small></label>
+        <input type="number" id="v-larg" value="960" min="320" max="1600" step="10">
+        <label for="v-vira">Largura em que vira duas colunas <small>(px, de 480 a 1400)</small></label>
+        <input type="number" id="v-vira" value="760" min="480" max="1400" step="10">
+        <p class="ajuda">A segunda medida é lida <b>no espaço que o bloco ocupa</b>, e não na janela do navegador: num componente estreito dentro de uma página larga, o bloco continua numa coluna só — que é o que o cliente vê. Acima dela, o orçamento vai para o lado do seletor.</p>
+      </fieldset>
+    </div>
+  </div>
+
+  <div class="secao dobra" id="v-txt-cab" role="button" tabindex="0" aria-expanded="false" aria-controls="v-txt-corpo"><span class="secao-n">6</span> Textos que o cliente lê <span class="secao-dobra-seta">mostrar</span></div>
+  <div class="grade fcd-oculto" id="v-txt-corpo">
+    <div class="fcx-largo">
+      <p class="ajuda">Todos os campos desta seção já vêm com <b>exatamente o texto que a calculadora usa</b> — mexer neles muda só o que o cliente lê, nunca uma conta. A seção nasce recolhida porque são dezenas de campos que quase nunca se mexe; o uso diário está nas seções acima.</p>
+      <p class="ajuda">Os <b>marcadores</b> entre chaves são trocados pelo bloco na hora: <code>{n}</code> um número (fotos, lâminas ou parcelas, conforme a frase), <code>{valor}</code> um valor já formatado em reais, <code>{pct}</code> um percentual, <code>{min}</code> e <code>{max}</code> os extremos da faixa, <code>{cm}</code> o maior lado do tamanho escolhido, <code>{lam}</code> um número de lâminas, <code>{faltam}</code> quantas fotos faltam para a próxima faixa, <code>{prox}</code> o percentual dessa próxima faixa, <code>{cod}</code> o código do pedido e <code>{codigo}</code> o código do cupom. Marcador que você apagar simplesmente não aparece — a frase sai como você escreveu.</p>
+    </div>
+    <div>
+      <fieldset>
+        <legend>Cabeçalho</legend>
+        <label for="v-txt-olho">Olho <small>(a linha pequena acima do título)</small></label>
+        <input type="text" id="v-txt-olho" value="Álbum fotográfico">
+        <label for="v-txt-titulo">Título</label>
+        <input type="text" id="v-txt-titulo" value="Monte o seu álbum">
+        <label for="v-txt-chamada">Chamada</label>
+        <input type="text" id="v-txt-chamada" value="Escolha o tamanho, a quantidade de fotos e os acabamentos para ver o valor do seu álbum em tempo real.">
+        <label for="v-txt-rot-tamanho">Rótulo do passo do tamanho</label>
+        <input type="text" id="v-txt-rot-tamanho" value="Tamanho do álbum (maior lado)">
+        <label for="v-txt-rot-fotos">Rótulo do passo da quantidade</label>
+        <input type="text" id="v-txt-rot-fotos" value="Quantidade de fotos">
+        <label for="v-txt-rot-acab">Rótulo da seção de acabamentos</label>
+        <input type="text" id="v-txt-rot-acab" value="Acabamentos opcionais">
+        <label for="v-txt-rot-orcamento">Rótulo da seção do orçamento</label>
+        <input type="text" id="v-txt-rot-orcamento" value="O seu orçamento">
+      </fieldset>
+      <fieldset>
+        <legend>Seletor de tamanho e de quantidade</legend>
+        <label for="v-txt-cm">Unidade do tamanho <small>(o sufixo do maior lado)</small></label>
+        <input type="text" id="v-txt-cm" value="cm">
+        <label for="v-txt-faixa-dica">Faixa de fotos do tamanho escolhido</label>
+        <input type="text" id="v-txt-faixa-dica" value="{min}–{max} fotos">
+        <label for="v-txt-fotos-un">Unidade da quantidade</label>
+        <input type="text" id="v-txt-fotos-un" value="fotos">
+        <label for="v-txt-aria-menos">Leitor de tela: botão de diminuir</label>
+        <input type="text" id="v-txt-aria-menos" value="Diminuir uma foto">
+        <label for="v-txt-aria-mais">Leitor de tela: botão de aumentar</label>
+        <input type="text" id="v-txt-aria-mais" value="Adicionar uma foto">
+        <label for="v-txt-aria-barra">Leitor de tela: barra da quantidade</label>
+        <input type="text" id="v-txt-aria-barra" value="Quantidade de fotos">
+        <p class="ajuda">Os três campos acima não aparecem na tela: eles são lidos em voz alta por quem usa leitor de tela. Deixá-los em branco tira o nome do controle, e o cliente ouve só "botão".</p>
+        <label for="v-txt-laminas">Linha das lâminas</label>
+        <input type="text" id="v-txt-laminas" value="Equivale a {n} lâminas">
+        <label for="v-txt-media">Linha da média de fotos por lâmina</label>
+        <input type="text" id="v-txt-media" value="(média de {n} fotos por lâmina)">
+        <label for="v-txt-limite-max">Aviso de máximo alcançado</label>
+        <input type="text" id="v-txt-limite-max" value="O máximo para {cm} cm é {n} fotos ({lam} lâminas).">
+        <label for="v-txt-limite-min">Aviso de mínimo alcançado</label>
+        <input type="text" id="v-txt-limite-min" value="O mínimo para {cm} cm é {n} fotos ({lam} lâminas).">
+      </fieldset>
+      <fieldset>
+        <legend>Incentivo para a próxima faixa</legend>
+        <label for="v-txt-falta-uma">Quando falta uma foto só</label>
+        <input type="text" id="v-txt-falta-uma" value="1 foto">
+        <label for="v-txt-faltam-n">Quando faltam várias</label>
+        <input type="text" id="v-txt-faltam-n" value="{n} fotos">
+        <p class="ajuda">Os dois campos acima montam o trecho que entra no <code>{faltam}</code> das três frases abaixo — é o que faz a frase dizer "1 foto" em vez de "1 fotos".</p>
+        <label for="v-txt-incentivo-ate">Ainda sem desconto nenhum</label>
+        <input type="text" id="v-txt-incentivo-ate" value="Faltam {faltam} para alcançar {prox}% de desconto.">
+        <label for="v-txt-incentivo-ja">Já com desconto, e há mais adiante</label>
+        <input type="text" id="v-txt-incentivo-ja" value="Você conseguiu {pct}% de desconto. Faltam {faltam} para alcançar {prox}%.">
+        <label for="v-txt-incentivo-max">No desconto máximo</label>
+        <input type="text" id="v-txt-incentivo-max" value="Você atingiu o desconto máximo de {pct}%.">
+      </fieldset>
+      <fieldset>
+        <legend>O orçamento</legend>
+        <label for="v-txt-base">Linha do valor base</label>
+        <input type="text" id="v-txt-base" value="Valor base do álbum">
+        <label for="v-txt-base-sub">Detalhe do valor base</label>
+        <input type="text" id="v-txt-base-sub" value="({n} fotos × {valor})">
+        <label for="v-txt-desc-laminas">Linha do desconto por quantidade</label>
+        <input type="text" id="v-txt-desc-laminas" value="Desconto ({pct}%)">
+        <label for="v-txt-total">Linha do total</label>
+        <input type="text" id="v-txt-total" value="Total">
+        <label for="v-txt-pe">Rodapé do orçamento</label>
+        <input type="text" id="v-txt-pe" value="Valor por foto: {valor} · Álbuns de {min} a {max} lâminas.">
+      </fieldset>
+    </div>
+    <div>
+      <fieldset>
+        <legend>Pagamento</legend>
+        <label for="v-txt-rot-pagamento">Rótulo da seção de pagamento</label>
+        <input type="text" id="v-txt-rot-pagamento" value="Como você prefere pagar">
+        <label for="v-txt-sinal">Rótulo do sinal <small>(a linha do que se paga agora)</small></label>
+        <input type="text" id="v-txt-sinal" value="Sinal agora">
+        <label for="v-txt-saldo">Texto do saldo <small>(a linha do que fica para depois)</small></label>
+        <input type="text" id="v-txt-saldo" value="Restante na aprovação do design">
+        <label for="v-txt-sinal-maior">Sinal maior que o total</label>
+        <input type="text" id="v-txt-sinal-maior" value="O sinal deste álbum é maior que o total do pedido. Aumente a quantidade de fotos ou revise o percentual do sinal.">
+        <label for="v-txt-sinal-zero">Sinal arredonda para zero</label>
+        <input type="text" id="v-txt-sinal-zero" value="O sinal deste pedido arredonda para zero. Escolha mais itens ou aumente a quantidade.">
+        <label for="v-txt-sinal-recusado">Rótulo curto da recusa <small>(o que vai no lugar do valor)</small></label>
+        <input type="text" id="v-txt-sinal-recusado" value="pedido recusado">
+        <label for="v-txt-totalzero">Quando o pedido fica em zero</label>
+        <input type="text" id="v-txt-totalzero" value="Escolha ao menos um item: o pedido está em zero.">
+        <p class="ajuda">As frases acima só aparecem com a <b>cobrança de sinal</b> ligada (seção <span class="sec-ref" data-sec="v-pagamento"></span>). Elas explicam por que o pagamento está travado: reescrevê-las é livre, mas quem as lê está sem conseguir pagar — diga o que fazer.</p>
+        <label for="v-txt-ou">Separador entre os dois meios</label>
+        <input type="text" id="v-txt-ou" value="OU">
+        <label for="v-txt-ou-desc">Separador, com desconto no Pix</label>
+        <input type="text" id="v-txt-ou-desc" value="OU">
+        <label for="v-txt-botao-pix">Botão de gerar o Pix</label>
+        <input type="text" id="v-txt-botao-pix" value="Pagar com Pix">
+        <label for="v-txt-pix-instrucao">Instrução de pagamento pelo Pix</label>
+        <input type="text" id="v-txt-pix-instrucao" value="Abra o app do seu banco e pague pelo QR Code ou Pix Copia e Cola">
+        <label for="v-txt-pixval">Rótulo do valor no Pix</label>
+        <input type="text" id="v-txt-pixval" value="Valor no Pix">
+        <label for="v-txt-pix-copiar">Botão de copiar o código Pix</label>
+        <input type="text" id="v-txt-pix-copiar" value="Copiar código Pix">
+        <label for="v-txt-pix-copiado">Código copiado com sucesso</label>
+        <input type="text" id="v-txt-pix-copiado" value="Código copiado! Cole no aplicativo do seu banco.">
+        <label for="v-txt-pix-manual">Aviso de que o Pix não confirma sozinho</label>
+        <input type="text" id="v-txt-pix-manual" value="O Pix não avisa a gente automaticamente. Assim que você pagar, toque em &quot;Já paguei&quot; para eu conferir e confirmar.">
+        <label for="v-txt-pix-rotulo">Linha do valor com desconto no Pix</label>
+        <input type="text" id="v-txt-pix-rotulo" value="Pagando via Pix (-{pct}%)">
+        <label for="v-txt-nota">Aviso para conferir o recebedor</label>
+        <input type="text" id="v-txt-nota" value="Confira o nome do recebedor antes de confirmar o pagamento">
+        <label for="v-txt-pago-ok">Pagamento aprovado</label>
+        <input type="text" id="v-txt-pago-ok" value="Pagamento aprovado! Recebemos o seu pedido.">
+        <label for="v-txt-erro-pagamento">Quando o pagamento falha</label>
+        <input type="text" id="v-txt-erro-pagamento" value="Não foi possível concluir o pagamento. Tente novamente.">
+      </fieldset>
+      <fieldset>
+        <legend>Resumo do pedido</legend>
+        <label for="v-txt-resumo">Título do resumo</label>
+        <input type="text" id="v-txt-resumo" value="Resumo do pedido">
+        <label for="v-txt-resumo-botao">Botão de copiar o resumo</label>
+        <input type="text" id="v-txt-resumo-botao" value="Copiar o resumo">
+        <label for="v-txt-resumo-copiado">Resumo copiado com sucesso</label>
+        <input type="text" id="v-txt-resumo-copiado" value="Resumo copiado!">
+        <label for="v-txt-resumo-pedido">Rótulo do pedido, no resumo</label>
+        <input type="text" id="v-txt-resumo-pedido" value="Pedido">
+        <label for="v-txt-resumo-tamanho">Rótulo do tamanho, no resumo</label>
+        <input type="text" id="v-txt-resumo-tamanho" value="Tamanho">
+        <label for="v-txt-resumo-fotos">Rótulo das fotos, no resumo</label>
+        <input type="text" id="v-txt-resumo-fotos" value="Fotos">
+        <label for="v-txt-resumo-laminas">Rótulo das lâminas, no resumo</label>
+        <input type="text" id="v-txt-resumo-laminas" value="Lâminas">
+        <label for="v-txt-resumo-porfoto">Rótulo do valor por foto, no resumo</label>
+        <input type="text" id="v-txt-resumo-porfoto" value="Valor por foto">
+      </fieldset>
+      <fieldset>
+        <legend>WhatsApp</legend>
+        <label for="v-txt-rot-whats">Rótulo da seção do WhatsApp</label>
+        <input type="text" id="v-txt-rot-whats" value="Orçamento no WhatsApp">
+        <label for="v-txt-whats-dica">Recado abaixo do rótulo</label>
+        <input type="text" id="v-txt-whats-dica" value="Prefere conversar antes? O WhatsApp abre com o resumo pronto para enviar.">
+        <label for="v-txt-zap-botao">Texto do botão “Já paguei”</label>
+        <input type="text" id="v-txt-zap-botao" value="Já paguei - avisar no WhatsApp">
+        <label for="v-txt-zap-abertura">Primeira linha da mensagem</label>
+        <input type="text" id="v-txt-zap-abertura" value="Olá! Acabei de pagar via Pix.">
+        <label for="v-txt-zap-abertura-sinal">Primeira linha, com sinal ligado</label>
+        <input type="text" id="v-txt-zap-abertura-sinal" value="Olá! Acabei de pagar o SINAL via Pix.">
+        <label for="v-txt-zap-pedido">Linha do identificador do pedido</label>
+        <input type="text" id="v-txt-zap-pedido" value="Pedido cod: *{cod}*">
+        <label for="v-txt-zap-cupom">Linha do cupom</label>
+        <input type="text" id="v-txt-zap-cupom" value="Cupom: {codigo}">
+        <label for="v-txt-zap-descpix">Linha do desconto do Pix</label>
+        <input type="text" id="v-txt-zap-descpix" value="Desconto Pix: -{pct}%">
+        <label for="v-txt-zap-total">Linha do total <small>(só com sinal ligado)</small></label>
+        <input type="text" id="v-txt-zap-total" value="Total do pedido: {valor}">
+        <label for="v-txt-zap-sinal">Linha do sinal pago <small>(só com sinal ligado)</small></label>
+        <input type="text" id="v-txt-zap-sinal" value="Sinal pago agora: *{valor}*">
+        <label for="v-txt-zap-saldo">Linha do saldo <small>(só com sinal ligado)</small></label>
+        <input type="text" id="v-txt-zap-saldo" value="Restante na aprovação do design: *{valor}*">
+        <label for="v-txt-zap-valor">Linha do valor pago <small>(sem sinal)</small></label>
+        <input type="text" id="v-txt-zap-valor" value="Valor pago: *{valor}*">
+        <p class="ajuda">Marcadores: <code>{cod}</code> o identificador do pedido, <code>{codigo}</code> o código do cupom, <code>{pct}</code> o percentual do Pix e <code>{valor}</code> o valor já formatado. O <b>*asterisco*</b> é o negrito do WhatsApp.</p>
+        <p class="ajuda">Os <b>três textos que explicam o sinal</b> não estão aqui: eles ficam na seção <span class="sec-ref" data-sec="v-pagamento"></span>, junto da chave que os liga.</p>
+      </fieldset>
+    </div>
+  </div>
+
+  <div class="secao"><span class="secao-n">7</span> Biblioteca de presets</div>
+  <div class="grade" id="fcp-v-box"></div>
+
+  <div class="secao"><span class="secao-n">8</span> Prévia e código gerado</div>
+  <div class="acoes" style="margin-bottom:14px">
+    <button class="botao" id="v-gerar">Gerar código</button>
+    <button class="botao claro" id="v-atualizar">Atualizar prévia</button>
+  </div>
+  <div class="grade">
+    <div>
+      <div class="pv-area">
+      <div class="c-pv-modos">
+      <span class="rotulo">Ver como:</span>
+      <button type="button" class="botao mini" id="v-pv-desk" aria-pressed="true">Computador</button>
+      <button type="button" class="botao mini claro" id="v-pv-cel" aria-pressed="false">Celular</button>
+      </div>
+      <div id="v-pv-box"></div>
+      </div>
+      <p class="ajuda">A prévia <b>executa o código gerado de verdade</b>: é o mesmo bloco que sai na caixa ao lado, rodando dentro de um quadro isolado. Trocar o tamanho, arrastar a quantidade, marcar acabamentos e gerar o Pix funcionam aqui como funcionarão na página. O modo Celular usa <b>380 pixels</b> de largura lógica — abaixo do corte configurado na seção <span class="sec-ref" data-sec="v-aparencia"></span> no padrão de fábrica, então o bloco aparece numa coluna só. <b>O que ainda difere da página publicada:</b> o QR Code é desenhado por uma biblioteca baixada da internet, então só aparece depois que ela carrega; o botão do PayPal <b>não é o botão de verdade</b> — o SDK não roda aqui e ele sai como desenho, com o <b>valor que iria na ordem</b> medido dentro do próprio bloco; o botão "Já paguei" <b>não abre o WhatsApp</b> — o quadro desliga a abertura de abas, e avisa em vermelho se não conseguir desligar; e o quadro não carrega o CSS do tema do site. Mexer em qualquer campo remonta a prévia.</p>
+    </div>
+    <div>
+      <div class="saida">
+      <h3>Código da calculadora <small>(componente HTML)</small>
+      <button class="botao mini" id="v-copy" style="margin-left:8px">Copiar</button>
+      <span class="aviso-copiado" id="v-cop">Copiado!</span>
+      </h3>
+      <textarea id="v-out" readonly spellcheck="false" style="height:420px" placeholder="O código da calculadora aparece aqui."></textarea>
+      <p class="ajuda">Mudar tamanho, preço, faixa, acabamento ou aparência <b>não</b> apaga o que está nesta caixa: quem avisa que o código ficou velho é o <b>painel consolidado</b>, ao lado das abas. Clique em <b>Gerar código</b> de novo antes de colar.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="instrucoes">
+  <h3>Instrução de uso do código gerado</h3>
+  <p class="ajuda"><b>Onde colar:</b> na página de álbuns do Prosite, ponha um <b>componente HTML</b> e cole ali o código acima. Publique — e teste na página <b>publicada</b>, não no editor: o Prosite processa o código na publicação.</p>
+  <p class="ajuda"><b>Como o cliente usa:</b> ele escolhe o tamanho, arrasta a quantidade de fotos, marca os acabamentos que quiser e vê o valor mudar na hora, com o número de lâminas e o desconto que já alcançou. Depois paga por Pix ou cartão, ou leva o orçamento para o WhatsApp. Tudo acontece nesta página, sem navegação.</p>
+  <p class="ajuda"><b>Para atualizar preços, tamanhos ou faixas:</b> mude aqui, clique em <b>Gerar código</b> e cole por cima. É o mesmo fluxo de todas as outras abas — a tabela de preços vive dentro do código da página.</p>
+  <h3>O que esta calculadora não faz — leia antes de publicar</h3>
+  <p class="ajuda alerta"><b>Não há registro de pedidos.</b> Um pedido existe como três rastros: a mensagem que chega no seu WhatsApp, a transação no PayPal e o Pix na sua conta. Não existe uma lista de pedidos em lugar nenhum, e nenhuma tela para consultá-los.</p>
+  <p class="ajuda alerta"><b>Não há confirmação automática.</b> Nem o Pix estático nem o PayPal têm para onde avisar esta página quando o dinheiro cai. <b>Você confere e libera à mão</b>, pelo extrato.</p>
+  <p class="ajuda alerta"><b>Ela não envia as fotos nem monta o álbum.</b> O que a página faz é orçar e cobrar; a escolha das fotos, o design e a produção continuam acontecendo fora dela, como já acontecem hoje.</p>
+  <p class="ajuda alerta"><b>A média de fotos por lâmina é uma média.</b> O álbum que você diagramar pode fechar com uma lâmina a mais ou a menos que a conta desta página mostrou ao cliente. Se isso mudar o valor, é conversa a ter com ele — a página não tem como prever o seu projeto.</p>
+  <p class="ajuda alerta"><b>A tabela de preços não é secreta</b> — preço por foto, faixas de desconto e acabamentos estão dentro do código desta página, à vista de quem abrir o código-fonte.</p>
+  <p class="ajuda alerta"><b>O preço tem o mesmo limite das outras abas de pagamento.</b> Tela, Pix e PayPal desta página não divergem entre si — eles leem a mesma conta. Mas o valor do PayPal é montado no navegador do cliente, e alguém determinado monta um pagamento com outro valor. A garantia é de <b>coerência</b>, não de valor: <b>confira o extrato antes de produzir</b>.</p>
+  <p class="ajuda alerta"><b>Uma calculadora por página.</b> Dois blocos desta aba na mesma página do Prosite <b>não funcionam</b>: os dois procuram a mesma caixa, então o primeiro desenha o que é do segundo e o segundo não desenha nada. É a mesma limitação do Checkout e da Mini loja. Duas calculadoras, duas páginas.</p>
+  <p class="ajuda"><b>Depois de publicar:</b> abra a página em <b>aba anônima</b>, monte um álbum, gere o Pix e confira no aplicativo do banco que o valor lido do QR Code é o mesmo que a página mostra.</p>
+  </div>
+</div>
+
 </div>
 
 </div><!-- /app-esq -->
@@ -4404,8 +4871,8 @@
    QUEM IMPEDE QUE ELE MINTA: scripts/conferir-versoes.sh, que recusa index.html
    alterado sem a versao mudar junto -- a mesma disciplina do fc-compartilhado.js,
    e pela mesma razao: carimbo que ninguem confere e o defeito de amanha. */
-var FC_VERSAO='2026-09-14i';
-var FC_PUBLICADO='2026-09-14 12:48';   /* America/Sao_Paulo -- escrito pelo carimbador */
+var FC_VERSAO='2026-09-15a';
+var FC_PUBLICADO='2026-09-15 23:50';   /* America/Sao_Paulo -- escrito pelo carimbador */
 (function(){
   var el=document.getElementById('fc-versao');
   if(!el) return;
@@ -4831,15 +5298,31 @@ var FC_SINAL_TXT=[
   ['desistir','txtSinalDesistir','E se o cliente desistir','ex.: Cancelamento não há devolução do sinal'],
   ['saldo','txtSinalSaldo','O que fazer com o saldo','ex.: O saldo deve ser pago até 1 dia antes do seu ensaio']
 ];
+/* ===== OS PREFIXOS DAS ABAS QUE COBRAM, ESCRITOS UMA VEZ (15/09/2026) =====
+   Eram TRES listas cravadas a mao, em tres lugares que ninguem ligava um ao outro: a regex
+   do aviso dos textos do sinal, a lista 'abas' de fcSinalTxtDiverge e o objeto fcOrdAtual.
+   Uma aba de pagamento nova entrava em silencio nas tres -- e silencio e exatamente o que
+   este projeto escreve codigo para evitar (ver "Numero de abas nao se escreve em frase
+   nenhuma", no CLAUDE.md, e o caso de trocarAba).
+   A lista continua escrita a mao, mas agora e UMA -- e fcPagPrefsConferir, na partida,
+   compara esta lista com as abas que declaram pagamento:true em ABAS e acende a barra
+   vermelha se as duas discordarem. Ela nao conserta; ela faz o buraco APARECER. */
+var FC_PAG_PREFS=['u','a','p','m','v'];
 function fcSinalTxtId(pref,i){return pref+'-txt-sinal-'+FC_SINAL_TXT[i][0];}
 /* As tres linhas da tabela de textos da aba. Entrando em *_TXT_DEFS elas ganham de graca o eco
    do rotulo, a busca "Achar um texto", a persistencia, o preset e o "restaurar padroes" -- e
    entram na vigilancia de fcTxtFabricaDiverge, que compara o atributo value= com esta coluna.
    E por causa dessa comparacao que o <input> da tela precisa trazer value="" escrito: sem o
    atributo, getAttribute('value') devolve null, null !== '' e a barra vermelha acenderia. */
-function fcSinalTxtDefs(pref){
+/* 'padroes' e OPCIONAL e existe para uma aba so (Calculadora de album, 15/09/2026): ali os
+   tres nascem PREENCHIDOS, porque a pagina de albuns do dono ja publica a politica que eles
+   descrevem -- o padrao repete o que ele ja diz, em vez de inventar uma politica comercial.
+   Sem o parametro, o padrao continua vazio, que e a decisao das outras quatro e o motivo
+   dela esta escrito logo acima. */
+function fcSinalTxtDefs(pref,padroes){
   var r=[],i;
-  for(i=0;i<FC_SINAL_TXT.length;i++)r.push([FC_SINAL_TXT[i][1],fcSinalTxtId(pref,i),'']);
+  for(i=0;i<FC_SINAL_TXT.length;i++)
+    r.push([FC_SINAL_TXT[i][1],fcSinalTxtId(pref,i),(padroes&&padroes[i])?padroes[i]:'']);
   return r;
 }
 /* ===== AS DEZ LINHAS DA MENSAGEM DE WHATSAPP, escritas UMA vez (leva 4, 13/09/2026) =====
@@ -4921,8 +5404,9 @@ function fcSinalTxtAviso(pref,sinalOn){
    de 'change' de cada aba, que decide por e.target.name -- e campo de texto nao tem name. Sem
    esta linha o aviso so sumiria depois de o operador clicar fora do campo que ele acabou de
    preencher, que e o momento exato em que ele esta olhando para o aviso. */
+var FC_SINAL_TXT_RE=new RegExp('^(['+FC_PAG_PREFS.join('')+'])-txt-sinal-(garante|desistir|saldo)$');
 document.addEventListener('input',function(e){
-  var id=String((e.target&&e.target.id)||''),m=id.match(/^([ampu])-txt-sinal-(garante|desistir|saldo)$/);
+  var id=String((e.target&&e.target.id)||''),m=id.match(FC_SINAL_TXT_RE);
   if(m)fcSinalTxtAviso(m[1],radio(m[1]+'-sinal')==='sim');
 });
 /* ===== OS NOVE TEXTOS RESERVA DOS MARCADORES: uma chave por campo, e a migracao =====
@@ -5011,7 +5495,7 @@ function fcTxtFabricaDiverge(){
    Le o ATRIBUTO do placeholder e o texto do <label> ANTES de fcsEcoMontar mexer neles -- o passo
    'Achar um texto' vem depois deste na partida, de proposito. */
 function fcSinalTxtDiverge(){
-  var r=[],p,i,id,el,lab,abas=['u','a','p','m'];
+  var r=[],p,i,id,el,lab,abas=FC_PAG_PREFS;
   for(p=0;p<abas.length;p++)for(i=0;i<FC_SINAL_TXT.length;i++){
     id=fcSinalTxtId(abas[p],i);el=$(id);
     if(!el){r.push(id+' (campo não existe)');continue;}
@@ -5032,10 +5516,27 @@ function fcSinalTxtDiverge(){
    QUANTOS CAMPOS CADA TABELA TEM nao se escreve em frase nenhuma -- e o .length dela. Os
    comentarios que traziam o numero a mao mentiam em dezesseis lugares em 11/09/2026 (U dizia
    33 e tinha 36; A dizia 31 e tinha 40; P dizia 11 e tinha 12; M dizia 55 e tinha 58). */
+/* A REDE DA LISTA UNICA. FC_PAG_PREFS e escrita a mao (uma aba de pagamento nova entra ali),
+   e esta funcao compara a lista com quem declara pagamento:true em ABAS. Aba que cobra e nao
+   esta na lista ficaria sem o aviso dos textos do sinal, sem a conferencia de fabrica dos
+   doze campos e sem a memoria da ordem dos meios -- tudo em silencio. Ela nao conserta: faz
+   o buraco aparecer, como fccOrfas e fcTxtFabricaDiverge. */
+function fcPagPrefsConferir(){
+  var decl={},lista={},r=[],i,a;
+  for(i=0;i<ABAS.length;i++){a=ABAS[i];if(a.pagamento)decl[a.pref]=a.nome;}
+  for(i=0;i<FC_PAG_PREFS.length;i++)lista[FC_PAG_PREFS[i]]=true;
+  for(i=0;i<ABAS.length;i++){
+    a=ABAS[i];
+    if(a.pagamento&&!lista[a.pref])r.push(a.nome+' cobra e não está em FC_PAG_PREFS');
+  }
+  for(i=0;i<FC_PAG_PREFS.length;i++)
+    if(!decl[FC_PAG_PREFS[i]])r.push('o prefixo "'+FC_PAG_PREFS[i]+'" está em FC_PAG_PREFS e nenhuma aba o declara com pagamento:true');
+  return r;
+}
 function fcTxtTabelas(){
   return [['slide',S_TXT_DEFS],['leads',L_TXT_DEFS],['tidy',T_TXT_DEFS],['uni',U_TXT_DEFS],
           ['bor',B_TXT_DEFS],['cnt',C_TXT_DEFS],['cob',P_TXT_DEFS],['loja',M_TXT_DEFS],
-          ['pac',A_TXT_DEFS]];
+          ['pac',A_TXT_DEFS],['alb',V_TXT_DEFS]];
 }
 
 /* ===== O MEIO PRIORITARIO: um controle por aba, e as frases que ele vira =====
@@ -5113,7 +5614,7 @@ function fcTxtChaveMigrar(st,antiga,nova){
 /* A ORDEM QUE OS CAMPOS DA TELA REFLETEM AGORA. Nao se le do radio: no instante em que o
    change dispara o radio JA esta no valor novo, e virar de "novo" para "novo" nao viraria
    nada. Guardar a anterior aqui e o que torna a virada possivel. */
-var fcOrdAtual={u:FC_ORD_FABRICA,m:FC_ORD_FABRICA,a:FC_ORD_FABRICA,p:FC_ORD_FABRICA};
+var fcOrdAtual=(function(){var o={},i;for(i=0;i<FC_PAG_PREFS.length;i++)o[FC_PAG_PREFS[i]]=FC_ORD_FABRICA;return o;})();
 
 /* VIRA AS FRASES DE UMA ORDEM PARA A OUTRA -- e SO as que ainda estao exatamente no padrao de
    fabrica de uma das duas ordens. Valor igual a fabrica anterior: o dono nunca escreveu ali, e
@@ -5318,6 +5819,7 @@ var FCR_ROTULOS={novo:'novo',corrigido:'corr',melhorado:'melh',atencao:'aten',ex
 /* A lista, da versao mais recente para a mais antiga. NAO reordenar: o agrupamento por
    dia assume que versoes do mesmo dia estao juntas, e o desenho respeita esta ordem. */
 var FCR_NOTAS=[
+ {v:"2026-09-15a",d:"15 de setembro de 2026",itens:[["Novo","Nasceu a aba **Calculadora de álbum**, a décima primeira. Ela faz o que a calculadora da sua página de álbuns já fazia — o cliente escolhe o tamanho, a quantidade de fotos e os acabamentos, e vê o valor na hora — só que agora tudo é **configurável por você**, sem mexer em código."],["Novo","Viraram campo: o **preço por foto**, os **tamanhos** (cada um com a média de fotos por lâmina, o mínimo de fotos e o seu SKU), as **faixas de desconto** por quantidade de lâminas, os **acabamentos opcionais** e **todos os textos da tela**, inclusive os dos botões."],["Novo","O cliente pode **pagar ali mesmo**, sem sair da página: Pix com QR Code e copia e cola, ou cartão pelo PayPal. Vem com o mesmo pacote das outras quatro abas que cobram — sinal com os três textos que o explicam, escolha de qual meio aparece primeiro, desconto no Pix, \"Já paguei\" avisando no seu WhatsApp, e a página de destino depois do pagamento."],["Novo","O **sinal já nasce ligado em 50%**, e os três textos nascem preenchidos com o que a sua página de álbuns já promete. Nas outras abas eles nascem vazios de propósito; aqui a política já estava escrita, então o padrão repete o que você já diz em vez de inventar."],["Novo","Um **resumo do pedido copiável**, que o cliente pode enviar para você: tamanho, fotos, lâminas, valor por foto, desconto, acabamentos, total, sinal e saldo."],["Melhorado","A calculadora **se distribui** conforme o espaço: no computador, escolhas de um lado e orçamento do outro, com os tamanhos em três por linha; no celular, uma coluna só. A antiga era travada numa moldura estreita e ficava na vertical em qualquer tela."],["Atenção","O valor cobrado é **o mesmo** da calculadora que está no ar — conferido em todas as 2.760 combinações de tamanho, quantidade de fotos e acabamentos, uma a uma, e não por amostragem."],["Exige uma ação sua, uma única vez","Para trocar a calculadora da sua página de álbuns: gere o código na aba nova e **substitua** o componente que está lá hoje. Enquanto você não fizer isso, a página continua com a calculadora antiga, funcionando como sempre."],["Atenção","**Uma calculadora por página.** Dois blocos desta aba na mesma página não funcionam — é a mesma limitação do Checkout e da Mini loja."]]},
  {v:"2026-09-14i",d:"14 de setembro de 2026",itens:[["Corrigido","A prévia **O que o PayPal vai registrar** ficava ilegível em tela estreita: a coluna do nome do produto era espremida a ponto de sair quase uma letra por linha. Quando não há largura para a tabela, a lista passa a sair **um item por bloco**, com o nome de cada campo ao lado do valor — a mesma forma que os totais logo abaixo já usavam."],["Melhorado","As colunas dessa tabela foram estreitadas para as larguras que a página `/cobrar` já usava, então sobra mais espaço para o nome do produto antes de precisar empilhar. Nas prévias do computador nada muda de forma."],["Melhorado","A mesma tabela na página `/cobrar` passou a empilhar em telas menores que 375 pontos, onde antes era preciso arrastar de lado para ler as últimas colunas."],["","O resto da versão foi conferência interna, sem mudança na tela."]]},
  {v:"2026-09-14g",d:"14 de setembro de 2026",itens:[["Novo","A página `/cobrar` ganhou uma **prévia**. Depois de gerar o link, ela mostra num quadro a **sua própria página de pagamento**, já com esta cobrança dentro — é a página de verdade, carregada do seu site, e não um desenho parecido."],["Novo","Logo abaixo dela, uma tabela diz **o que vai para o PayPal** nesta cobrança: cada item com nome, SKU, quantidade e preço, mais a soma dos itens, o valor cobrado, a descrição e o código de conciliação. São os mesmos campos que a ferramenta completa já mostrava, lidos da mesma fonte."],["Novo","No computador a prévia fica numa **coluna ao lado**, que acompanha a rolagem. No celular ela fica **abaixo do link, recolhida** — um toque abre."],["Atenção","O quadro é **só para olhar**: o toque não passa por ele, para você não pagar sem querer a sua própria cobrança. Para mexer de verdade, use **Abrir em outra aba**."],["Atenção","Se aparecer uma **recusa** dentro do quadro, é o aviso que faltava: o código colado na sua página de pagamento é anterior a esta cobrança. Gere de novo o **Código 1** e recole no site — até agora isso só apareceria com o cliente na frente."],["Atenção","Esta é a **única parte da `/cobrar` que precisa de internet**. Sem conexão aparece um recado dizendo isso, e nunca um quadro em branco — que pareceria defeito da cobrança. O link continua sendo montado no próprio aparelho, com ou sem rede."]]},
  {v:"2026-09-14f",d:"14 de setembro de 2026",itens:[["Novo","Link de cobrança: cada cobrança pode ser **detalhada em itens** — nome, SKU e preço, um por linha. O cliente passa a ler na página de que o valor é feito, e o seu **relatório do PayPal** mostra uma linha por item com o SKU na coluna \"ID do produto\", em vez de uma linha única. Está na aba e também na página `/cobrar`, em \"Mais opções desta cobrança\"."],["Novo","Isso **não muda um centavo** do que é cobrado: o valor continua sendo um só, e a soma dos itens tem de bater com ele ao centavo. Se não bater, a ferramenta recusa e diz os dois números."],["Novo","Link de cobrança: o endereço do **upsell** (a página para onde o cliente vai depois de pagar) pode ser escolhido **por cobrança**, e não só uma vez para a página inteira. Dá para ter uma oferta diferente por campanha sem recolar nada no site."],["Atenção","O interruptor mestre continua mandando: com o redirecionamento **desligado** no código da página, o endereço escrito na cobrança não leva a lugar nenhum. A `/cobrar` diz isso na tela, ao lado do campo."],["Exige uma ação sua, uma única vez","Gere de novo o **Código 1** da aba Link de cobrança e recole no componente da sua página de pagamento, publicando em seguida. **Este recolar cobre tudo de uma vez**: o sinal (de 13/09), os itens e o upsell por cobrança. Sem ele, a página recusa os links novos que tiverem sinal, itens ou upsell — ela não conhece esses parâmetros. Links **sem** nenhum deles continuam funcionando como sempre."],["Atenção","Itens e sinal não convivem na mesma cobrança, e a ferramenta recusa os dois juntos. Com sinal o PayPal cobra só o sinal, e detalhar em itens faria o recibo chamar de **desconto** o saldo que o cliente ainda deve — no documento que ele guarda."]]},
@@ -7087,7 +7589,7 @@ function fcLigarFaixa(tabela,depois){
    foi escrito a mao com esse mesmo numero, e a razao de ele ficar de fora esta nesta frase. */
 function fcNumTabelas(){
   return [['slide',S_NUMS],['leads',L_NUMS],['tidy',T_NUMS],['uni',U_NUMS],['bor',B_NUMS],
-          ['efe',E_NUMS],['cnt',C_NUMS],['cob',P_NUMS],['loja',M_NUMS],['pac',A_NUMS]];
+          ['efe',E_NUMS],['cnt',C_NUMS],['cob',P_NUMS],['loja',M_NUMS],['pac',A_NUMS],['alb',V_NUMS]];
 }
 function fcNumConferir(){
   var ts=fcNumTabelas(),i,j,f,el,dec,ruins=[];
@@ -7400,6 +7902,7 @@ var ABAS=[
    exemplo:'ex.: Natal 2026 - hospedeira',
    guarda:'tudo o que está configurado nesta aba — modo de exibição, ícone, formato, cores e posição do botão, os quatro trechos da mensagem, os textos do pop-up, o cabeçalho (coruja, movimento e efeitos), o horário de atendimento, a pergunta de qualificação com as opções cadastradas, a âncora e os <b>textos</b> da seção 8.'},
   {id:'uni',  nome:'Checkout',            chaves:['u'],         coleta:uColeta,restaura:uRestaura,gerar:uGerar,
+   pagamento:true,
    pref:'u',fora:[],formulario:['edops','editidx','form'],resumo:uPresetResumo,redesenhar:uPresetDepois,antesDeSalvar:uPresetAntes,
    listas:[['u.edops',{nome:'',desc:'',preco:0,qtd:false},'nome'],
            ['u.prods',{nome:'',desc:'',preco:0,opsel:'unico',opnenhum:'nao',qtd:false,ops:[{nome:'',desc:'',preco:0,qtd:false}]},'nome'],
@@ -7418,6 +7921,7 @@ var ABAS=[
    exemplo:'ex.: Natal 2026 - barra do topo',
    guarda:'tudo o que está configurado nesta aba — modo e duração da contagem, o código da campanha, as <b>mensagens cadastradas</b>, aparência, posição, extras, coruja, efeitos, movimento, urgência, entrada e os <b>textos</b> da seção 5.'},
   {id:'cob',  nome:'Link de cobrança',    chaves:['p'],         coleta:pColeta,restaura:pRestaura,gerar:pGerar,
+   pagamento:true,
    pref:'p',fora:[],resumo:pPresetResumo,redesenhar:pPresetDepois,antesDeSalvar:pPresetAntes,
    /* 'itens' e 'upsellcob' entram aqui pelo mesmo criterio do 'descpix' e dos quatro do
       sinal: eles mudam so o LINK, nunca o codigo 1 -- a maquinaria dos itens e a do upsell
@@ -7429,6 +7933,7 @@ var ABAS=[
    exemplo:'ex.: Foto Certa - página /pagar',
    guarda:'tudo o que está configurado nesta aba — o endereço da página, o <b>meio prioritário</b>, a aparência, os textos, e também a <b>cobrança que está na tela</b> (descrição, valor, identificador, a data de validade, o desconto no Pix, a <b>cobrança de sinal</b>, os <b>itens</b> e o <b>upsell desta cobrança</b>). Aplicar um preset troca também essa cobrança: ele é a fotografia da aba inteira. Os dados de quem recebe <b>não</b> estão aqui: eles saíram desta aba para o painel Identidade, e nenhum preset os toca.'},
   {id:'loja', nome:'Mini loja',           chaves:['m'],         coleta:mColeta,restaura:mRestaura,gerar:mGerar,
+   pagamento:true,
    pref:'m',fora:[],formulario:['edops','editidx','form'],resumo:mPresetResumo,redesenhar:mPresetDepois,antesDeSalvar:mPresetAntes,
    listas:[['m.edops',{nome:'',desc:'',preco:0,qtd:false},'nome'],
            ['m.prods',{nome:'',desc:'',preco:0,cat:'',img:'',opsel:'unico',opnenhum:'nao',qtd:false,ops:[{nome:'',desc:'',preco:0,qtd:false}]},'nome'],
@@ -7442,7 +7947,28 @@ var ABAS=[
    presetOk:ePresetOk,
    exemplo:'ex.: Natal 2026 - neve na hospedeira',
    guarda:'tudo o que está configurado nesta aba — o efeito escolhido, o alcance (página inteira ou dentro de um bloco) com a altura, e os campos de <b>todos</b> os efeitos: quantidade, tamanho, deriva e cor das partículas, as quatro cores do confete, o tamanho, o desfoque e as três cores da aurora, a quantidade, o tamanho e as quatro cores das luzes, mais a duração do ciclo, a opacidade, a proporção no celular e o <b>fundo da prévia</b>.'},
+  /* A CALCULADORA DE ALBUM ENTRA ANTES DA pac, E NAO DEPOIS. A ordem deste array e a ordem
+     em que restaurarEstado devolve as abas, e aRestaura chama salvarEstado() de dentro dela
+     quando uma migracao acontece. Com 'alb' depois da 'pac', esse salvarEstado rodaria com o
+     painel da calculadora ainda por restaurar: vColeta devolveria os padroes (ela e defensiva
+     de proposito) e o que o dono tinha configurado seria SOBRESCRITO, sem erro nenhum na tela.
+     Antes da pac, vRestaura ja rodou e o que se grava e o que ele configurou. */
+  {id:'alb', nome:'Calculadora de álbum', chaves:['v'],        coleta:vColeta,restaura:vRestaura,gerar:vGerar,
+   pref:'v',fora:[],formulario:['ftam','ffx','fac','edtam','edfx','edac'],
+   /* 'pagamento' e a declaracao que FC_PAG_PREFS confere na partida: aba que cobra e nao
+      esta na lista (ou o contrario) acende a barra vermelha em vez de falhar em silencio. */
+   pagamento:true,
+   resumo:vPresetResumo,redesenhar:vPresetDepois,antesDeSalvar:vPresetAntes,
+   /* A chave essencial de cada lista e o que a torna um item: tamanho sem 'cm' nao e um
+      botao, faixa sem 'laminas' nao vale a partir de lugar nenhum, acabamento sem nome nao
+      tem o que mostrar ao cliente. fcxConformar recusa e CONTA os que chegarem sem ela. */
+   listas:[['v.tams',{cm:0,media:0,minfotos:0,sku:''},'cm'],
+           ['v.faixas',{laminas:0,pct:0},'laminas'],
+           ['v.acabs',{nome:'',desc:'',valor:0,sku:''},'nome']],
+   exemplo:'ex.: Natal 2026 - álbuns',
+   guarda:'tudo o que está configurado nesta aba — o <b>preço por foto</b>, os limites de lâminas, os <b>tamanhos cadastrados</b> (com a média de fotos por lâmina, o mínimo de fotos e o SKU de cada um), as <b>faixas de desconto</b>, os <b>acabamentos opcionais</b>, as formas de pagamento, o meio prioritário, o sinal e os três textos que o explicam, o desconto no Pix, o código do pedido, o tamanho do QR Code, o upsell, os <b>textos</b> e as cores. Não guarda o <b>formulário de cadastro</b> pela metade, e aplicar um preset <b>esvazia</b> esse formulário: ele descreve um item que ainda não existe na lista que está chegando.'},
   {id:'pac', nome:'Agendamento por pacote', chaves:['a'],       coleta:aColeta,restaura:aRestaura,gerar:aGerar,
+   pagamento:true,
    pref:'a',fora:[],formulario:['edops','editidx','form'],resumo:aPresetResumo,redesenhar:aPresetDepois,antesDeSalvar:aPresetAntes,
    /* A chave essencial de 'a.familias' e o 'id', e nao o 'nome': e o id que o 'fam' de cada
       pacote aponta. Uma familia {"nome":"X"} sem id e casca -- ninguem consegue pertencer a
@@ -8118,6 +8644,11 @@ var FC_LIM_CAMPOS=[
   {id:'m-op-sku', max:FC_LIM_PP},
   {id:'a-psku',   max:FC_LIM_PP},
   {id:'a-op-sku', max:FC_LIM_PP},
+  {id:'v-tam-sku',max:FC_LIM_PP},
+  {id:'v-ac-sku', max:FC_LIM_PP},
+  /* O codigo do pedido da calculadora vai para o custom_id do PayPal E para o txid do Pix --
+     mesma dupla funcao do 'm-cod' da Mini loja, e por isso o mesmo teto e a mesma limpeza. */
+  {id:'v-cod',    max:M_COD_MAX,     sobra:fcIdLimpo},
   {id:'b-selo-txt'},
   {id:'p-desc',     max:P_DESC_MAX,    nota:fcLimNotaPp},
   {id:'p-txid',     max:FC_TXID_MAX,   sobra:function(v){return pTxidLimpo(v);}, filtro:/[^A-Za-z0-9]/g}
@@ -26788,6 +27319,1205 @@ function mPesoRender(){
   el.innerHTML=t;
 }
 
+/* ============================================================================
+   CALCULADORA DE ALBUM -- aba 'alb', campos 'v-', classes geradas 'fcal-'
+   ============================================================================
+   O QUE ELA FAZ. O cliente escolhe o tamanho do album (maior lado), quantas fotos
+   quer e os acabamentos; a pagina mostra o numero de laminas, o desconto por
+   quantidade, o valor e as formas de pagar. Substitui a calculadora escrita a mao
+   que vivia num iframe na pagina de albuns -- travada em 560px e fora do painel
+   consolidado.
+
+   POR QUE 'fcal-' E NAO 'fcv-'. A propria ferramenta tem uma classe '.fcv' (a linha
+   da versao embaixo do titulo). Prefixo que colide faz um grep trazer as duas coisas
+   misturadas, que e a regra do CLAUDE.md. Medido: 'fcal' tem zero ocorrencias nos
+   tres arquivos.
+
+   A CONTA, e por que ela e feita em CENTAVOS INTEIROS. base = fotos x preco por foto;
+   o desconto por laminas incide SO na base; os acabamentos entram depois; o desconto
+   do Pix incide sobre o total ja com tudo. Medido contra a calculadora publicada, nas
+   2.760 combinacoes de tamanho x fotos x acabamentos: ZERO divergencias. A forma em
+   centavos inteiros nao muda um centavo com o preco de hoje (R$ 30, inteiro, e faixas
+   multiplas de 5) -- ela existe para quando o dono puser centavos no preco por foto:
+   varrendo preco de R$ 1,00 a R$ 60,00 de centavo em centavo, a forma antiga (ponto
+   flutuante) diverge da exata em 0,610% das combinacoes com desconto, e sempre dando
+   desconto MENOR. E o mesmo vies que custou 133.476 divergencias no cupom do Checkout.
+   ========================================================================== */
+
+/* A faixa de cada campo numerico. Os tres primeiros sao a conta do album; o resto e o
+   pacote de pagamento, com as MESMAS faixas das quatro abas irmas. */
+var V_NUMS=[['v-preco',30,0.01,99999,false],['v-lam-min',10,1,200,true],['v-lam-max',45,1,200,true],
+  ['v-descpix',5,0,90,false],
+  /* A faixa do sinal e a MESMA de U_NUMS/M_NUMS/A_NUMS: 1 a 99 no percentual (100% nao e
+     sinal, e o total) e um centavo de piso no valor fixo. O PADRAO aqui e 50, e nao 30:
+     a pagina de albuns do dono ja publica "PIX de 50% na confirmacao do pedido". */
+  ['v-sinalpct',50,1,99,false],['v-sinalfixo',100,0.01,999999,false],
+  ['v-parcelas',12,1,12,true],
+  ['v-larg',960,320,1600,true],
+  /* Mesma faixa e mesmo padrao das outras quatro (ver U_NUMS). */
+  ['v-qr',200,120,320,true],
+  /* A largura em que o bloco vira duas colunas. E medida no CONTAINER, nao na janela --
+     ver o comentario da @container em vBloco. */
+  ['v-vira',760,480,1400,true]];
+function vPreso(id){return fcPreso(V_NUMS,id);}
+
+/* Os tres textos do sinal NASCEM PREENCHIDOS nesta aba, e so nesta -- decisao do dono
+   (15/09/2026). Nas outras quatro eles nascem vazios de proposito, porque um padrao de
+   fabrica afirmaria, para um cliente prestes a pagar, uma politica comercial que o dono
+   pode nao ter. Aqui a politica ja esta escrita e publicada na propria pagina de albuns
+   ("PIX de 50% na confirmacao do pedido e saldo na aprovacao do design"), entao o padrao
+   nao inventa nada: ele repete o que o dono ja diz. */
+/* ===== O QUE A ABA JA SABE DE FABRICA =====
+   Sao os mesmos seis tamanhos, cinco faixas e dois acabamentos da calculadora que o dono ja
+   tem publicada -- lidos dela, e nao inventados. Existem por um motivo pratico: sem eles a aba
+   nasce vazia e o dono teria de recadastrar treze itens a mao so para reproduzir a pagina que
+   ja esta no ar. Isto NAO e dado operacional (chave, WhatsApp, Client ID continuam fora, no
+   painel Identidade): e a tabela de precos do negocio, que ja esta publica dentro do bloco que
+   qualquer visitante pode ler.
+   AUSENTE e diferente de VAZIO: quem apagar todos os tamanhos fica com nenhum, e nao volta
+   para estes -- so quem nunca configurou a aba comeca aqui. */
+var V_TAMS_FABRICA=[
+  {cm:20,media:2,minfotos:20,sku:''},{cm:25,media:2.5,minfotos:25,sku:''},
+  {cm:30,media:3,minfotos:30,sku:''},{cm:35,media:3.5,minfotos:35,sku:''},
+  {cm:40,media:4,minfotos:40,sku:''},{cm:45,media:4.5,minfotos:45,sku:''}];
+var V_FAIXAS_FABRICA=[{laminas:10,pct:0},{laminas:16,pct:5},{laminas:21,pct:10},
+  {laminas:26,pct:15},{laminas:31,pct:20}];
+var V_ACABS_FABRICA=[
+  {nome:'Estojo / Caixa do álbum',desc:'',valor:500,sku:''},
+  {nome:'Acabamento Personnalitè',desc:'',valor:650,sku:''}];
+
+var V_SINAL_TXT_FABRICA=[
+  'O sinal garante a sua vaga na fila de produção e o início do projeto do seu álbum.',
+  'Até o envio para a gráfica, o sinal pode ser transferido para outro projeto. Depois disso, ele não é devolvido.',
+  'O saldo é combinado na aprovação do design, antes do envio para produção.'
+];
+
+var V_TXT_DEFS=[
+  /* --- cabecalho --- */
+  ['txtOlho','v-txt-olho','Álbum fotográfico'],
+  ['txtTitulo','v-txt-titulo','Monte o seu álbum'],
+  ['txtChamada','v-txt-chamada','Escolha o tamanho, a quantidade de fotos e os acabamentos para ver o valor do seu álbum em tempo real.'],
+  /* --- rotulos das secoes --- */
+  ['txtRotTamanho','v-txt-rot-tamanho','Tamanho do álbum (maior lado)'],
+  ['txtRotFotos','v-txt-rot-fotos','Quantidade de fotos'],
+  ['txtRotAcab','v-txt-rot-acab','Acabamentos opcionais'],
+  ['txtRotOrcamento','v-txt-rot-orcamento','O seu orçamento'],
+  /* --- o seletor de tamanho e de quantidade --- */
+  ['txtCm','v-txt-cm','cm'],
+  ['txtFaixaDica','v-txt-faixa-dica','{min}–{max} fotos'],
+  ['txtFotosUn','v-txt-fotos-un','fotos'],
+  ['txtAriaMenos','v-txt-aria-menos','Diminuir uma foto'],
+  ['txtAriaMais','v-txt-aria-mais','Adicionar uma foto'],
+  ['txtAriaBarra','v-txt-aria-barra','Quantidade de fotos'],
+  ['txtLaminas','v-txt-laminas','Equivale a {n} lâminas'],
+  ['txtMedia','v-txt-media','(média de {n} fotos por lâmina)'],
+  /* --- o incentivo, em tres frases --- */
+  ['txtFaltaUma','v-txt-falta-uma','1 foto'],
+  ['txtFaltamN','v-txt-faltam-n','{n} fotos'],
+  ['txtIncentivoAte','v-txt-incentivo-ate','Faltam {faltam} para alcançar {prox}% de desconto.'],
+  ['txtIncentivoJa','v-txt-incentivo-ja','Você conseguiu {pct}% de desconto. Faltam {faltam} para alcançar {prox}%.'],
+  ['txtIncentivoMax','v-txt-incentivo-max','Você atingiu o desconto máximo de {pct}%.'],
+  /* --- os dois limites --- */
+  ['txtLimiteMax','v-txt-limite-max','O máximo para {cm} cm é {n} fotos ({lam} lâminas).'],
+  ['txtLimiteMin','v-txt-limite-min','O mínimo para {cm} cm é {n} fotos ({lam} lâminas).'],
+  /* --- o orcamento --- */
+  ['txtBase','v-txt-base','Valor base do álbum'],
+  ['txtBaseSub','v-txt-base-sub','({n} fotos × {valor})'],
+  ['txtDescLaminas','v-txt-desc-laminas','Desconto ({pct}%)'],
+  ['txtTotal','v-txt-total',FC_TXT_FABRICA.total],
+  ['txtPe','v-txt-pe','Valor por foto: {valor} · Álbuns de {min} a {max} lâminas.'],
+  /* --- pagamento: as frases compartilhadas com as quatro abas irmas --- */
+  ['txtRotPagamento','v-txt-rot-pagamento','Como você prefere pagar'],
+  ['txtSinal','v-txt-sinal',FC_TXT_FABRICA.sinalRotulo],
+  /* A unica linha do pacote de pagamento que NAO usa a fabrica compartilhada: as irmas
+     dizem "Restante na entrega", e num album nao ha entrega no ato -- ha aprovacao de
+     design. Mesma familia da divergencia ja declarada da aba pac ("no dia do ensaio"). */
+  ['txtSaldo','v-txt-saldo','Restante na aprovação do design'],
+  ['txtSinalMaior','v-txt-sinal-maior','O sinal deste álbum é maior que o total do pedido. Aumente a quantidade de fotos ou revise o percentual do sinal.'],
+  ['txtSinalZero','v-txt-sinal-zero',FC_TXT_FABRICA.sinalZero],
+  ['txtSinalRecusado','v-txt-sinal-recusado',FC_TXT_FABRICA.sinalRecusado],
+  ['txtTotalZero','v-txt-totalzero',FC_TXT_FABRICA.totalZero],
+  ['txtOu','v-txt-ou',FC_TXT_FABRICA.ou],
+  ['txtOuDesc','v-txt-ou-desc',FC_TXT_FABRICA.ouDesc],
+  ['txtBotaoPix','v-txt-botao-pix','Pagar com Pix'],
+  ['txtPixInstrucao','v-txt-pix-instrucao',FC_TXT_FABRICA.pixInstrucao],
+  ['txtPixVal','v-txt-pixval',FC_TXT_FABRICA.pixVal],
+  ['txtPixCopiar','v-txt-pix-copiar',FC_TXT_FABRICA.pixCopiar],
+  ['txtPixCopiado','v-txt-pix-copiado',FC_TXT_FABRICA.pixCopiado],
+  ['txtPixManual','v-txt-pix-manual',FC_TXT_FABRICA.pixManual],
+  ['txtPixRotulo','v-txt-pix-rotulo',FC_TXT_FABRICA.pixRotulo],
+  ['txtNota','v-txt-nota',FC_TXT_FABRICA.nota],
+  ['txtPagoOk','v-txt-pago-ok','Pagamento aprovado! Recebemos o seu pedido.'],
+  ['txtErroPagamento','v-txt-erro-pagamento',FC_TXT_FABRICA.erroPagamento],
+  /* --- o resumo copiavel (pedido do dono, 15/09/2026) --- */
+  ['txtResumo','v-txt-resumo','Resumo do pedido'],
+  ['txtResumoBotao','v-txt-resumo-botao',FC_TXT_FABRICA.resumoBotao],
+  ['txtResumoCopiado','v-txt-resumo-copiado',FC_TXT_FABRICA.resumoCopiado],
+  ['txtResumoPedido','v-txt-resumo-pedido',FC_TXT_FABRICA.resumoPedido],
+  ['txtResumoTamanho','v-txt-resumo-tamanho','Tamanho'],
+  ['txtResumoFotos','v-txt-resumo-fotos','Fotos'],
+  ['txtResumoLaminas','v-txt-resumo-laminas','Lâminas'],
+  ['txtResumoPorFoto','v-txt-resumo-porfoto','Valor por foto'],
+  /* --- o WhatsApp --- */
+  ['txtRotWhats','v-txt-rot-whats','Orçamento no WhatsApp'],
+  ['txtWhatsDica','v-txt-whats-dica','Prefere conversar antes? O WhatsApp abre com o resumo pronto para enviar.']
+/* As dez linhas da mensagem de WhatsApp saem da fonte unica, com a linha do saldo
+   trocada pela desta aba -- mesmo mecanismo que a aba pac ja usa. */
+].concat(fcZapTxtDefs('v',{saldo:'Restante na aprovação do design: *{valor}*'}))
+/* Os tres textos do sinal, com os padroes desta aba (ver V_SINAL_TXT_FABRICA). */
+ .concat(fcSinalTxtDefs('v',V_SINAL_TXT_FABRICA));
+
+/* ===== estado das tres listas da aba =====
+   Nascem NA FABRICA, e nao vazias: numa instalacao nova restaurarEstado nao chega a chamar
+   vRestaura (nao ha fragmento 'v' para restaurar), entao inicializar so la deixaria a aba
+   vazia no primeiro uso -- medido, e a geracao recusava com "Cadastre ao menos um tamanho". */
+function vFabCopia(fab){
+  return fab.map(function(o){
+    var r={},k;
+    for(k in o)if(Object.prototype.hasOwnProperty.call(o,k))r[k]=o[k];
+    return r;
+  });
+}
+var vTams=vFabCopia(V_TAMS_FABRICA),vFaixas=vFabCopia(V_FAIXAS_FABRICA),vAcabs=vFabCopia(V_ACABS_FABRICA);
+var vEditTam=-1,vEditFaixa=-1,vEditAcab=-1;
+
+/* Mesma guarda de aElVal (aba pac): vColeta roda a cada tecla, em QUALQUER aba, e sem ela
+   lancaria com o painel ainda nao desenhado -- a barra vermelha acenderia o tempo todo. */
+function vElVal(id,def){var el=$(id);return el?el.value:def;}
+/* Numero vindo de campo: aceita virgula, como o resto da ferramenta. */
+function vNum(x,def){var n=parseFloat(String(x).replace(',','.'));return isNaN(n)?def:n;}
+/* Mostra/esconde, no molde de 'ver' das outras abas. */
+function vVer(id,b){var el=$(id);if(el)el.style.display=b?'block':'none';}
+/* So para a LISTA da aba -- o bloco entregue tem a propria moedaFmt, de fcMoedaFmtGer. */
+function vBrl(n){return 'R$ '+Number(n).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});}
+function vNumBr(n){return String(n).replace('.',',');}
+
+/* ===== mostra/esconde conforme a forma de pagamento e o sinal =====
+   Mesmo molde de uToggles/mToggles/aToggles. */
+function vToggles(){
+  var m=radio('v-metodo'),sinal=radio('v-sinal')==='sim',tipo=radio('v-sinaltipo');
+  vVer('v-pix-campos',m!=='paypal');
+  vVer('v-pp-campos',m!=='pix');
+  vVer('v-descpix-campo',m==='ambos');
+  vVer('v-sinal-campos',sinal);
+  vVer('v-sinalpct-campo',sinal&&tipo!=='fixo');
+  vVer('v-sinalfixo-campo',sinal&&tipo==='fixo');
+  /* O desconto no Pix fica DESABILITADO com sinal ligado, e o aviso ambar diz por que:
+     com sinal o Pix cobra o sinal, e descontar ali seria desconto dobrado. Mesma regra
+     das quatro irmas -- quem zera na origem e vCfg. */
+  var el=$('v-descpix');
+  if(el)el.disabled=sinal;
+  vVer('v-descpix-aviso',sinal&&m==='ambos');
+  fcSinalTxtAviso('v',sinal);
+  fcOrdSo1('v',m!=='ambos');
+}
+
+/* ===== as tres listas: cadastro, edicao, ordem, duplicar =====
+   Molde das listas da aba pac. A copia de um acabamento sai de fcOpCopia, a fonte unica
+   que existe desde que a mesma expressao apareceu catorze vezes no arquivo. */
+function vTamLimpar(){
+  ['v-tam-cm','v-tam-media','v-tam-minfotos','v-tam-sku'].forEach(function(id){var el=$(id);if(el)el.value='';});
+  vEditTam=-1;
+  var b=$('v-tam-add');if(b)b.textContent='Adicionar tamanho';
+  vVer('v-tam-cancel',false);
+}
+function vTamAdd(){
+  var cm=vNum(vElVal('v-tam-cm',''),0),media=vNum(vElVal('v-tam-media',''),0),
+      minf=vNum(vElVal('v-tam-minfotos',''),0),sku=fcSkuLimpo(vElVal('v-tam-sku',''));
+  if(cm<=0)return alert('Informe o tamanho do álbum, em centímetros.');
+  if(media<=0)return alert('Informe quantas fotos, em média, entram numa lâmina deste tamanho.');
+  if(minf<=0)return alert('Informe a quantidade mínima de fotos deste tamanho.');
+  var i,item={cm:cm,media:media,minfotos:minf,sku:sku};
+  for(i=0;i<vTams.length;i++){
+    if(i!==vEditTam&&vTams[i].cm===cm)
+      return alert('Já existe um tamanho de '+cm+' cm. Dois tamanhos iguais fariam dois botões idênticos na tela do cliente.');
+  }
+  if(vEditTam>=0)vTams[vEditTam]=item;else vTams.push(item);
+  vTams.sort(function(a,b){return a.cm-b.cm;});
+  vTamLimpar();vTamRender();salvarEstado();vPreview();
+}
+function vTamEditar(i){
+  var t=vTams[i];if(!t)return;
+  vEditTam=i;
+  $('v-tam-cm').value=t.cm;$('v-tam-media').value=t.media;
+  $('v-tam-minfotos').value=t.minfotos;$('v-tam-sku').value=t.sku||'';
+  var b=$('v-tam-add');if(b)b.textContent='Salvar alterações';
+  vVer('v-tam-cancel',true);
+}
+function vTamDel(i){vTams.splice(i,1);if(vEditTam===i)vTamLimpar();vTamRender();salvarEstado();vPreview();}
+function vTamDuplicar(i){
+  var t=vTams[i];if(!t)return;
+  /* O SKU da copia deriva com -COPIA em vez de vir vazio ou intacto: intacto nasceria
+     recusada pela regra de SKU repetido, e vazia perderia o cadastro. Mesma decisao A6. */
+  vTams.push({cm:t.cm,media:t.media,minfotos:t.minfotos,sku:t.sku?fcSkuLimpo(t.sku+'-COPIA'):''});
+  vTamRender();salvarEstado();vPreview();
+}
+function vTamRender(){
+  var ul=$('v-tam-lista');if(!ul)return;
+  ul.innerHTML='';
+  vVer('v-tam-vazio',!vTams.length);
+  vTams.forEach(function(t,i){
+    var li=document.createElement('li');
+    var sp=document.createElement('span');
+    sp.textContent=t.cm+' cm · média '+vNumBr(t.media)+' fotos por lâmina · a partir de '+t.minfotos+' fotos'+(t.sku?(' · SKU '+t.sku):'');
+    li.appendChild(sp);
+    fcCtrl(li,[['⧉',function(){vTamDuplicar(i);},'Duplicar este tamanho',false],
+               ['✎',function(){vTamEditar(i);salvarEstado();},'Editar',false],
+               ['✕',function(){vTamDel(i);},'Remover',false]],true);
+    ul.appendChild(li);
+  });
+}
+
+function vFxLimpar(){
+  ['v-fx-laminas','v-fx-pct'].forEach(function(id){var el=$(id);if(el)el.value='';});
+  vEditFaixa=-1;
+  var b=$('v-fx-add');if(b)b.textContent='Adicionar faixa';
+  vVer('v-fx-cancel',false);
+}
+function vFxAdd(){
+  var lam=vNum(vElVal('v-fx-laminas',''),0),pct=vNum(vElVal('v-fx-pct',''),-1);
+  if(lam<=0)return alert('Informe a partir de quantas lâminas esta faixa vale.');
+  if(pct<0||pct>90)return alert('O desconto da faixa tem de estar entre 0 e 90 por cento.');
+  var i;
+  for(i=0;i<vFaixas.length;i++){
+    if(i!==vEditFaixa&&vFaixas[i].laminas===lam)
+      return alert('Já existe uma faixa a partir de '+lam+' lâminas. Duas faixas no mesmo ponto fariam uma delas nunca valer.');
+  }
+  var item={laminas:lam,pct:pct};
+  if(vEditFaixa>=0)vFaixas[vEditFaixa]=item;else vFaixas.push(item);
+  vFaixas.sort(function(a,b){return a.laminas-b.laminas;});
+  vFxLimpar();vFxRender();salvarEstado();vPreview();
+}
+function vFxEditar(i){
+  var f=vFaixas[i];if(!f)return;
+  vEditFaixa=i;$('v-fx-laminas').value=f.laminas;$('v-fx-pct').value=f.pct;
+  var b=$('v-fx-add');if(b)b.textContent='Salvar alterações';
+  vVer('v-fx-cancel',true);
+}
+function vFxDel(i){vFaixas.splice(i,1);if(vEditFaixa===i)vFxLimpar();vFxRender();salvarEstado();vPreview();}
+function vFxRender(){
+  var ul=$('v-fx-lista');if(!ul)return;
+  ul.innerHTML='';
+  vVer('v-fx-vazio',!vFaixas.length);
+  vFaixas.forEach(function(f,i){
+    var li=document.createElement('li');
+    var sp=document.createElement('span');
+    sp.textContent='a partir de '+f.laminas+' lâminas · '+vNumBr(f.pct)+'% de desconto';
+    li.appendChild(sp);
+    fcCtrl(li,[['✎',function(){vFxEditar(i);salvarEstado();},'Editar',false],
+               ['✕',function(){vFxDel(i);},'Remover',false]],true);
+    ul.appendChild(li);
+  });
+}
+
+function vAcLimpar(){
+  ['v-ac-nome','v-ac-desc','v-ac-valor','v-ac-sku'].forEach(function(id){var el=$(id);if(el)el.value='';});
+  vEditAcab=-1;
+  var b=$('v-ac-add');if(b)b.textContent='Adicionar acabamento';
+  vVer('v-ac-cancel',false);
+}
+function vAcAdd(){
+  var nome=fcTrim(vElVal('v-ac-nome','')),desc=fcTrim(vElVal('v-ac-desc','')),
+      valor=vNum(vElVal('v-ac-valor',''),-1),sku=fcSkuLimpo(vElVal('v-ac-sku',''));
+  if(!nome)return alert('Informe o nome do acabamento.');
+  if(valor<0)return alert('Informe o valor do acabamento.');
+  var item={nome:nome,desc:desc,valor:valor,sku:sku};
+  if(vEditAcab>=0)vAcabs[vEditAcab]=item;else vAcabs.push(item);
+  vAcLimpar();vAcRender();salvarEstado();vPreview();
+}
+function vAcEditar(i){
+  var a=vAcabs[i];if(!a)return;
+  vEditAcab=i;$('v-ac-nome').value=a.nome;$('v-ac-desc').value=a.desc||'';
+  $('v-ac-valor').value=a.valor;$('v-ac-sku').value=a.sku||'';
+  var b=$('v-ac-add');if(b)b.textContent='Salvar alterações';
+  vVer('v-ac-cancel',true);
+}
+function vAcDel(i){vAcabs.splice(i,1);if(vEditAcab===i)vAcLimpar();vAcRender();salvarEstado();vPreview();}
+function vAcMove(i,d){
+  var j=i+d;if(j<0||j>=vAcabs.length)return;
+  var t=vAcabs[i];vAcabs[i]=vAcabs[j];vAcabs[j]=t;
+  vAcRender();salvarEstado();vPreview();
+}
+function vAcDuplicar(i){
+  var a=vAcabs[i];if(!a)return;
+  var c=fcOpCopia(a);
+  c.valor=a.valor;c.sku=a.sku?fcSkuLimpo(a.sku+'-COPIA'):'';
+  vAcabs.splice(i+1,0,{nome:c.nome,desc:c.desc,valor:a.valor,sku:c.sku});
+  vAcRender();salvarEstado();vPreview();
+}
+function vAcRender(){
+  var ul=$('v-ac-lista');if(!ul)return;
+  ul.innerHTML='';
+  vVer('v-ac-vazio',!vAcabs.length);
+  vAcabs.forEach(function(a,i){
+    var li=document.createElement('li');
+    var sp=document.createElement('span');
+    sp.textContent=a.nome+' · '+vBrl(a.valor)+(a.sku?(' · SKU '+a.sku):'')+(a.desc?(' — '+a.desc):'');
+    li.appendChild(sp);
+    fcCtrl(li,[['↑',function(){vAcMove(i,-1);},'Subir',i===0],
+               ['↓',function(){vAcMove(i,1);},'Descer',i===vAcabs.length-1],
+               ['⧉',function(){vAcDuplicar(i);},'Duplicar este acabamento',false],
+               ['✎',function(){vAcEditar(i);salvarEstado();},'Editar',false],
+               ['✕',function(){vAcDel(i);},'Remover',false]],true);
+    ul.appendChild(li);
+  });
+}
+
+/* ===== a configuracao lida da tela, ja presa a faixa ===== */
+function vCfg(){
+  var m=radio('v-metodo')||'ambos';
+  var sinalOn=radio('v-sinal')==='sim';
+  var r={
+    metodo:m, usaPP:(m!=='pix'), usaPix:(m!=='paypal'),
+    prio:radio('v-prio')||FC_ORD_FABRICA,
+    ppcor:radio('v-ppcor')||'gold',
+    preco:vPreso('v-preco'), lamMin:vPreso('v-lam-min'), lamMax:vPreso('v-lam-max'),
+    tams:vTams.slice(), faixas:vFaixas.slice(), acabs:vAcabs.slice(),
+    cod:fcIdLimpo(vElVal('v-cod','')),
+    parcelas:vPreso('v-parcelas'), qr:vPreso('v-qr'),
+    larg:vPreso('v-larg'), vira:vPreso('v-vira'),
+    c1:vElVal('v-c1-t','#9A7B4F'), c2:vElVal('v-c2-t','#FBFAF7'), c3:vElVal('v-c3-t','#23221E'),
+    zap:!!($('v-zap')&&$('v-zap').checked),
+    resumo:!!($('v-resumo')&&$('v-resumo').checked),
+    upsell:{url:fcTrim(vElVal('v-upsell','')),ativo:!!($('v-upsellon')&&$('v-upsellon').checked)},
+    /* A identidade mora num lugar so: a aba LE, e nunca cria campo proprio. */
+    chave:fciVal('chave'), nomer:fciVal('nomer'), cidade:fciVal('cidade'),
+    client:fciVal('client'), zapnum:fciDigitos('zapnum'),
+    sinal:{ativo:sinalOn, tipo:radio('v-sinaltipo')||'pct',
+           valor:(radio('v-sinaltipo')==='fixo')?vPreso('v-sinalfixo'):vPreso('v-sinalpct')}
+  };
+  /* ZERADO NA ORIGEM, como nas quatro irmas: o desconto do Pix nao vale sem os dois meios
+     (nao ha "outro preco" a comparar) nem com sinal ligado (o Pix cobra o sinal, e descontar
+     ali seria desconto dobrado). O campo fica a vista e desabilitado -- quem avisa e vToggles. */
+  r.descpix=(m==='ambos'&&!sinalOn)?vPreso('v-descpix'):0;
+  fcTxtLer(V_TXT_DEFS,r);
+  return r;
+}
+
+/* ===== a recusa: uma so, consumida pelo gerar E pela previa ===== */
+function vRecusa(cfg){
+  if(!cfg.tams.length)return 'Cadastre ao menos um tamanho de álbum.';
+  if(cfg.lamMin>cfg.lamMax)return 'O mínimo de lâminas não pode ser maior que o máximo.';
+  var i,t;
+  for(i=0;i<cfg.tams.length;i++){
+    t=cfg.tams[i];
+    /* O MAXIMO DE FOTOS SAI DO MAXIMO DE LAMINAS: se o minimo cadastrado do tamanho passar
+       dele, aquele botao nasce com a faixa invertida e o cliente nunca consegue um valor
+       valido -- e o mesmo desenho da recusa do sinal maior que o pedido na aba pac. */
+    if(t.minfotos>Math.round(cfg.lamMax*t.media))
+      return 'O tamanho de '+t.cm+' cm começa em '+t.minfotos+' fotos, mas com '+cfg.lamMax+
+             ' lâminas o máximo dele é '+Math.round(cfg.lamMax*t.media)+' fotos. Reveja o mínimo, a média ou o máximo de lâminas.';
+  }
+  if(!cfg.faixas.length)return 'Cadastre ao menos uma faixa de desconto — use 0% se você não quiser dar desconto nenhum.';
+  var rsku=fcSkuRecusa(
+    cfg.tams.map(function(t){return {nome:t.cm+' cm',sku:t.sku};})
+      .concat(cfg.acabs.map(function(a){return {nome:a.nome,sku:a.sku};})),'item');
+  if(rsku)return rsku;
+  if(!cfg.cod)return 'Informe o código do pedido.';
+  var up=fcUpsellRecusa(cfg.upsell,false);
+  if(up)return up;
+  if(cfg.usaPix){
+    if(!cfg.chave||!cfg.nomer||!cfg.cidade)return fciRecusa('Preencha a chave Pix, o nome do recebedor e a cidade.');
+    var ec=pixChaveErro(cfg.chave);
+    if(ec)return fciRecusa(ec);
+  }
+  if(cfg.usaPP&&!cfg.client)return fciRecusa('Informe o Client ID do PayPal.');
+  if(cfg.zap&&!cfg.zapnum)return fciRecusa('Informe o WhatsApp de destino.');
+  return '';
+}
+
+/* ===== persistencia ===== */
+function vColeta(){
+  var r={
+    metodo:radio('v-metodo'),prio:radio('v-prio'),ppcor:radio('v-ppcor'),
+    preco:vElVal('v-preco',''),lammin:vElVal('v-lam-min',''),lammax:vElVal('v-lam-max',''),
+    tams:vTams,faixas:vFaixas,acabs:vAcabs,
+    cod:vElVal('v-cod',''),descpix:vElVal('v-descpix',''),parcelas:vElVal('v-parcelas',''),
+    qr:vElVal('v-qr',''),larg:vElVal('v-larg',''),vira:vElVal('v-vira',''),
+    c1:vElVal('v-c1-t','#9A7B4F'),c2:vElVal('v-c2-t','#FBFAF7'),c3:vElVal('v-c3-t','#23221E'),
+    zap:!!($('v-zap')&&$('v-zap').checked),
+    resumo:!!($('v-resumo')&&$('v-resumo').checked),
+    upsell:vElVal('v-upsell',''),upsellon:!!($('v-upsellon')&&$('v-upsellon').checked),
+    sinal:radio('v-sinal'),sinaltipo:radio('v-sinaltipo'),
+    sinalpct:vElVal('v-sinalpct',''),sinalfixo:vElVal('v-sinalfixo',''),
+    /* o formulario de cadastro inacabado: entra no estado para nao se perder na recarga,
+       e sai do preset por 'formulario' em ABAS */
+    ftam:{cm:vElVal('v-tam-cm',''),media:vElVal('v-tam-media',''),minfotos:vElVal('v-tam-minfotos',''),sku:vElVal('v-tam-sku','')},
+    ffx:{laminas:vElVal('v-fx-laminas',''),pct:vElVal('v-fx-pct','')},
+    fac:{nome:vElVal('v-ac-nome',''),desc:vElVal('v-ac-desc',''),valor:vElVal('v-ac-valor',''),sku:vElVal('v-ac-sku','')},
+    edtam:vEditTam,edfx:vEditFaixa,edac:vEditAcab
+  };
+  fcTxtLer(V_TXT_DEFS,r);
+  return {v:r};
+}
+function vRestaura(st){
+  if(!st.v)return;
+  var V=st.v,el,elc;
+  setRadio('v-metodo',V.metodo==='pix'||V.metodo==='paypal'?V.metodo:'ambos');
+  fcOrdRestaurar('v',V.prio);
+  setRadio('v-ppcor',V.ppcor||'gold');
+  function num(id,val,def){el=$(id);if(el)el.value=(val!=null&&val!=='')?val:def;}
+  num('v-preco',V.preco,30);num('v-lam-min',V.lammin,10);num('v-lam-max',V.lammax,45);
+  num('v-cod',V.cod,'ALBUM');num('v-descpix',V.descpix,5);num('v-parcelas',V.parcelas,12);
+  num('v-qr',V.qr,200);num('v-larg',V.larg,960);num('v-vira',V.vira,760);
+  num('v-sinalpct',V.sinalpct,50);num('v-sinalfixo',V.sinalfixo,100);
+  num('v-upsell',V.upsell,'');
+  el=$('v-upsellon');if(el)el.checked=!!V.upsellon;
+  el=$('v-zap');if(el)el.checked=(V.zap==null)?true:!!V.zap;
+  el=$('v-resumo');if(el)el.checked=(V.resumo==null)?true:!!V.resumo;
+  /* FABRICA LIGADO nesta aba (decisao do dono, 15/09/2026): a pagina de albuns ja promete
+     "PIX de 50% na confirmacao do pedido". Ausente cai em 'sim'; 'nao' e escolha dele. */
+  setRadio('v-sinal',V.sinal==='nao'?'nao':'sim');
+  setRadio('v-sinaltipo',V.sinaltipo==='fixo'?'fixo':'pct');
+  [['v-c1',V.c1,'#9A7B4F'],['v-c2',V.c2,'#FBFAF7'],['v-c3',V.c3,'#23221E']].forEach(function(p){
+    var v=(p[1]!=null&&p[1]!=='')?p[1]:p[2];
+    el=$(p[0]+'-t');if(el)el.value=v;
+    elc=$(p[0]);if(elc)elc.value=corValida(v)?v:p[2];
+  });
+  /* AUSENTE cai na fabrica; VAZIO continua vazio. Quem apagou todos os tamanhos escolheu
+     isso, e repor por cima desfaria a escolha dele sem aviso. */
+  vTams=Array.isArray(V.tams)?V.tams:vFabCopia(V_TAMS_FABRICA);
+  vFaixas=Array.isArray(V.faixas)?V.faixas:vFabCopia(V_FAIXAS_FABRICA);
+  vAcabs=Array.isArray(V.acabs)?V.acabs:vFabCopia(V_ACABS_FABRICA);
+  var f=V.ftam||{};num('v-tam-cm',f.cm,'');num('v-tam-media',f.media,'');num('v-tam-minfotos',f.minfotos,'');num('v-tam-sku',f.sku,'');
+  f=V.ffx||{};num('v-fx-laminas',f.laminas,'');num('v-fx-pct',f.pct,'');
+  f=V.fac||{};num('v-ac-nome',f.nome,'');num('v-ac-desc',f.desc,'');num('v-ac-valor',f.valor,'');num('v-ac-sku',f.sku,'');
+  vEditTam=(typeof V.edtam==='number')?V.edtam:-1;
+  vEditFaixa=(typeof V.edfx==='number')?V.edfx:-1;
+  vEditAcab=(typeof V.edac==='number')?V.edac:-1;
+  /* Os textos por ultimo, e com a guarda !=null de fcTxtRestaura: texto vazio e escolha do
+     dono, nao ausencia -- foi assim que os 'undefined' nasceram nas outras abas. */
+  fcTxtRestaura(V_TXT_DEFS,V);
+}
+
+/* ===== preset ===== */
+function vPresetResumo(v){
+  var t=(v&&v.tams)?v.tams.length:0,a=(v&&v.acabs)?v.acabs.length:0;
+  return t+(t===1?' tamanho':' tamanhos')+' · '+a+(a===1?' acabamento':' acabamentos')+
+         ' · R$ '+String((v&&v.preco)||'')+' por foto';
+}
+function vPresetAntes(){
+  if(vEditTam>=0||vEditFaixa>=0||vEditAcab>=0)
+    return 'Termine ou cancele a edição que está aberta antes de salvar o preset.';
+  return '';
+}
+function vPresetDepois(){
+  vTamRender();vFxRender();vAcRender();vToggles();
+  fcAjustarTodos(V_NUMS);
+  vPreview(true);
+}
+
+/* ===== o gerador ===== */
+function vGerar(){
+  if(fcPixChaveAjustar('fci-chave'))fciGravar();
+  if(fcAjustarTodos(V_NUMS))salvarEstado();
+  var cfg=vCfg();
+  var recusa=vRecusa(cfg);
+  if(recusa){alert(recusa);fciApontarSe(recusa);return;}
+  $('v-out').value=vBloco(cfg);
+  vPreview(true);
+  fccMarcar('alb');
+}
+
+/* ============================================================================
+   O BLOCO ENTREGUE -- fonte unica, consumida pelo gerar E pela previa
+   ============================================================================
+   Autossuficiente, como todo bloco desta ferramenta: nada aqui depende de a
+   ferramenta existir na pagina. O que se compartilha e o TEXTO que escreve cada
+   pedaco (FC_PIX_SRC, FC_CARRINHO_SRC, fcPpBotoesSrc, fcDesenharQrSrc,
+   fcMoedaFmtGer, fcSinalTxtSrc, fcUpsell*Src, fcTotalPixSrc), nunca a saida.
+   ========================================================================== */
+function vBloco(cfg){
+  var usaPix=cfg.usaPix,usaPP=cfg.usaPP,prio=cfg.prio||FC_ORD_FABRICA;
+  var usaSinal=cfg.sinal.ativo,descpix=cfg.descpix,zap=cfg.zap,usaResumo=cfg.resumo;
+  var temAcab=cfg.acabs.length>0;
+  var temSku=false,i;
+  for(i=0;i<cfg.tams.length;i++)if(cfg.tams[i].sku)temSku=true;
+  for(i=0;i<cfg.acabs.length;i++)if(cfg.acabs[i].sku)temSku=true;
+  var c='';
+
+  c+='<div class="fcal-raiz" id="fcal-raiz"></div>\n\n';
+
+  /* ===================== CSS ===================== */
+  c+='<sty'+'le>\n';
+  /* A VIRADA MEDE O BLOCO, E NAO A JANELA -- e esta e a decisao de desenho mais importante
+     deste bloco. Ele vive numa COLUNA da pagina do Prosite, que pode ser bem mais estreita
+     que a tela; com @media (largura da janela) uma coluna estreita numa tela grande sairia
+     com as duas colunas espremidas uma sobre a outra. Medido no mockup: encolher a coluna
+     nao mudava nada. container-type:inline-size na raiz e @container resolvem isso.
+     Navegador sem @container fica na coluna unica, que e o estado seguro -- nada some. */
+  c+='.fcal-raiz{container-type:inline-size;max-width:'+cfg.larg+'px;margin:0 auto;text-align:left;'+
+     'font-family:inherit;color:var(--fcal-texto,'+cfg.c3+')}\n';
+  c+='.fcal-cartao{background:var(--fcal-fundo,'+cfg.c2+');border:1px solid rgba(0,0,0,.08);border-radius:18px;padding:30px 28px 26px;box-sizing:border-box}\n';
+  c+='.fcal-olho{font-size:13px;letter-spacing:.22em;text-transform:uppercase;color:var(--fcal-destaque,'+cfg.c1+');font-weight:600;margin:0 0 8px}\n';
+  c+='.fcal-titulo{font-size:32px;line-height:1.1;font-weight:700;margin:0}\n';
+  c+='.fcal-lead{font-size:16px;opacity:.75;margin:8px 0 0;max-width:52ch}\n';
+  c+='.fcal-corpo{margin-top:22px}\n';
+  c+='.fcal-rot{font-size:13px;letter-spacing:.14em;text-transform:uppercase;opacity:.65;font-weight:600;margin:26px 0 12px}\n';
+  c+='.fcal-col>.fcal-rot:first-child{margin-top:0}\n';
+  /* tamanhos */
+  c+='.fcal-tams{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}\n';
+  c+='.fcal-tam{border:1px solid rgba(0,0,0,.12);background:#fff;border-radius:12px;padding:11px 6px 9px;cursor:pointer;text-align:center;font-family:inherit;color:inherit;font-size:14px}\n';
+  c+='.fcal-tam-cm{display:block;font-size:18px;font-weight:600;font-variant-numeric:tabular-nums}\n';
+  c+='.fcal-tam-un{font-size:12px;font-weight:500;opacity:.7}\n';
+  c+='.fcal-tam-dica{display:block;font-size:11px;opacity:.65;margin-top:2px}\n';
+  c+='.fcal-tam[aria-checked="true"]{border-color:var(--fcal-destaque,'+cfg.c1+');box-shadow:inset 0 0 0 1px var(--fcal-destaque,'+cfg.c1+')}\n';
+  /* quantidade */
+  c+='.fcal-qtd{display:flex;align-items:center;gap:14px}\n';
+  c+='.fcal-passo{width:48px;height:48px;flex:none;border:1px solid rgba(0,0,0,.12);background:#fff;border-radius:12px;font-size:25px;line-height:1;color:inherit;cursor:pointer;font-family:inherit}\n';
+  c+='.fcal-qtd-campo{flex:1 1 auto;text-align:center;min-width:0}\n';
+  c+='.fcal-qtd-campo input{width:100%;border:none;background:transparent;text-align:center;font-family:inherit;font-variant-numeric:tabular-nums;font-weight:700;font-size:52px;line-height:1;color:inherit;-moz-appearance:textfield}\n';
+  c+='.fcal-qtd-campo input::-webkit-outer-spin-button,.fcal-qtd-campo input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}\n';
+  c+='.fcal-qtd-un{font-size:14px;opacity:.7;margin-top:2px}\n';
+  c+='.fcal-barra{margin-top:18px}\n';
+  c+='.fcal-barra input[type=range]{width:100%}\n';
+  c+='.fcal-escala{display:flex;justify-content:space-between;font-size:12px;opacity:.65;margin-top:7px;font-variant-numeric:tabular-nums}\n';
+  c+='.fcal-incentivo{margin-top:14px;font-size:14px;color:var(--fcal-destaque,'+cfg.c1+');background:rgba(0,0,0,.04);border-radius:10px;padding:9px 12px}\n';
+  c+='.fcal-laminas{margin-top:12px;font-size:15px}\n';
+  c+='.fcal-aviso{display:none;margin-top:10px;font-size:13.5px;color:#c0392b;font-weight:600}\n';
+  c+='.fcal-aviso.on{display:block}\n';
+  /* acabamentos */
+  c+='.fcal-acabs{display:flex;flex-direction:column;gap:8px}\n';
+  c+='.fcal-acab{display:flex;align-items:flex-start;gap:11px;border:1px solid rgba(0,0,0,.12);background:#fff;border-radius:12px;padding:12px 14px;cursor:pointer}\n';
+  c+='.fcal-acab[aria-checked="true"]{border-color:var(--fcal-destaque,'+cfg.c1+')}\n';
+  /* MARCADOR DESENHADO, nunca o nativo: o tema do Prosite esconde checkbox e radio
+     (item 5 do Manual). O quadrado abaixo e desenhado a mao, como nas outras abas. */
+  c+='.fcal-marca{width:20px;height:20px;flex:none;border:1.5px solid rgba(0,0,0,.25);border-radius:6px;background:#fff;color:transparent;font-size:13px;line-height:17px;text-align:center;margin-top:1px}\n';
+  c+='.fcal-acab[aria-checked="true"] .fcal-marca{background:var(--fcal-destaque,'+cfg.c1+');border-color:var(--fcal-destaque,'+cfg.c1+');color:#fff}\n';
+  c+='.fcal-acab-txt{flex:1 1 auto;min-width:0}\n';
+  c+='.fcal-acab-nome{font-size:14.5px}\n';
+  /* A descricao do acabamento sai ABAIXO do nome, sem destaque -- o mesmo desenho que os
+     opcionais das outras tres abas ganharam em 13/09/2026. */
+  c+='.fcal-acab-desc{font-size:12.5px;opacity:.65;margin-top:2px;line-height:1.4}\n';
+  c+='.fcal-acab-preco{flex:none;font-size:14px;opacity:.8;white-space:nowrap;font-variant-numeric:tabular-nums}\n';
+  /* orcamento */
+  c+='.fcal-caixa{background:rgba(0,0,0,.04);border:1px solid rgba(0,0,0,.08);border-radius:14px;padding:18px 18px 16px}\n';
+  c+='.fcal-linha{display:flex;gap:10px;align-items:baseline;padding:5px 0;font-size:14.5px}\n';
+  c+='.fcal-linha-k{flex:1 1 auto;min-width:0;opacity:.8}\n';
+  c+='.fcal-sub{display:block;font-size:12px;opacity:.75}\n';
+  c+='.fcal-linha-v{flex:none;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}\n';
+  c+='.fcal-risca{border-top:1px solid rgba(0,0,0,.1);margin:10px 0 4px}\n';
+  c+='.fcal-final{padding-top:4px}\n';
+  c+='.fcal-final .fcal-linha-k{font-size:20px;font-weight:700;opacity:1}\n';
+  c+='.fcal-final .fcal-linha-v{font-size:26px;color:var(--fcal-destaque,'+cfg.c1+');font-weight:800}\n';
+  /* A LINHA DE DINHEIRO NAO QUEBRA (conserto de 13/09/2026): quem cede e o rotulo. */
+  c+=fcLinhaValorCss('.fcal-raiz',['fcal-linha','fcal-sinal','fcal-saldo','fcal-pixlinha','fcal-destaque']);
+  if(usaSinal){
+    c+='.fcal-raiz .fcal-sinal{display:flex;justify-content:space-between;gap:10px;padding:6px 0 0;font-size:16px;font-weight:700;color:var(--fcal-destaque,'+cfg.c1+')}\n';
+    c+='.fcal-raiz .fcal-saldo{display:flex;justify-content:space-between;gap:10px;padding:2px 0 0;font-size:13px;opacity:.7}\n';
+    c+='.fcal-sinal-txt-l{font-size:12px;line-height:1.45;opacity:.7;margin-top:4px}\n';
+    c+='.fcal-sinal-aviso{display:none;font-size:12px;font-weight:600;color:#c0392b;padding:7px 0 0}\n';
+    c+='.fcal-sinal-aviso.on{display:block}\n';
+  }
+  if(descpix>0){
+    c+='.fcal-raiz .fcal-pixlinha{display:none;justify-content:space-between;gap:10px;'+
+       ((prio==='pix')?('padding:8px 0 0;font-size:20px;font-weight:800;color:var(--fcal-destaque,'+cfg.c1+')')
+                      :'padding:4px 0 0;font-size:14px;color:#1e7e34;font-weight:700')+'}\n';
+    c+='.fcal-raiz .fcal-pixlinha.on{display:flex}\n';
+  }
+  c+='.fcal-bt{display:block;width:100%;margin-top:10px;border:none;border-radius:12px;background:var(--fcal-destaque,'+cfg.c1+');color:#fff;font-family:inherit;font-size:15px;font-weight:700;padding:15px 16px;cursor:pointer}\n';
+  c+='.fcal-bt-claro{background:#fff;color:inherit;border:1px solid rgba(0,0,0,.15)}\n';
+  c+='.fcal-sep{display:flex;align-items:center;gap:10px;margin:14px 0 4px;font-size:12px;letter-spacing:.12em;text-transform:uppercase;opacity:.6}\n';
+  c+='.fcal-sep::before,.fcal-sep::after{content:"";flex:1;height:1px;background:rgba(0,0,0,.12)}\n';
+  if(usaPix){
+    c+='.fcal-pixarea{display:none;margin-top:12px;background:#fff;border:1px solid rgba(0,0,0,.1);border-radius:12px;padding:14px;text-align:center}\n';
+    c+='.fcal-pixarea.on{display:block}\n';
+    c+='.fcal-instrucao{font-size:13px;opacity:.75;margin:0 0 8px}\n';
+    c+='.fcal-pixval{font-size:15px;font-weight:700;color:#1e7e34;margin:0 0 10px}\n';
+    c+='.fcal-qr{margin:0 auto 10px;line-height:0}\n';
+    c+='.fcal-qr img,.fcal-qr canvas{display:block;margin:0 auto}\n';
+    c+=fcPixManualCss('.fcal-raiz .fcal-pixmanual');
+    c+='.fcal-cola{width:100%;height:74px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;padding:8px;border:1px solid rgba(0,0,0,.12);border-radius:8px;resize:none;box-sizing:border-box;background:rgba(0,0,0,.03);color:inherit}\n';
+    c+='.fcal-copiado{display:none;font-size:12px;color:#1e7e34;font-weight:600;margin-top:6px}\n';
+    c+='.fcal-copiado.on{display:block}\n';
+    c+='.fcal-nota{font-size:12px;opacity:.65;margin:8px 0 0}\n';
+  }
+  if(usaPP)c+='.fcal-msg{font-size:13px;margin-top:8px}\n.fcal-msg.erro{color:#c0392b;font-weight:600}\n.fcal-msg.ok{color:#1e7e34;font-weight:600}\n';
+  if(usaResumo){
+    c+='.fcal-resumo{width:100%;height:150px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11.5px;padding:8px;border:1px solid rgba(0,0,0,.12);border-radius:8px;resize:none;box-sizing:border-box;background:rgba(0,0,0,.03);color:inherit}\n';
+    c+='.fcal-resumo-ok{display:none;font-size:12px;color:#1e7e34;font-weight:600;margin-top:6px}\n';
+    c+='.fcal-resumo-ok.on{display:block}\n';
+  }
+  c+='.fcal-pe{font-size:12.5px;opacity:.6;margin:22px 0 0;text-align:center}\n';
+  /* AS DUAS COLUNAS, medidas no proprio bloco */
+  c+='@container (min-width:'+cfg.vira+'px){\n';
+  c+='  .fcal-cartao{padding:34px 34px 28px}\n';
+  c+='  .fcal-corpo{display:grid;grid-template-columns:1.15fr .85fr;gap:34px;align-items:start}\n';
+  c+='  .fcal-tams{grid-template-columns:repeat(3,1fr)}\n';
+  c+='}\n';
+  c+='</sty'+'le>\n\n';
+
+  /* ===================== JS ===================== */
+  c+='<scr'+'ipt>\n(function(){\n';
+  c+='/* ============================================================\n   Personalize aqui\n   ============================================================ */\n';
+  c+='var PRECO_FOTO='+cfg.preco+';   /* preco de cada foto */\n';
+  c+='var LAMINA_MIN='+cfg.lamMin+', LAMINA_MAX='+cfg.lamMax+';   /* limites de laminas do album */\n';
+  c+='var TAMANHOS='+JSON.stringify(cfg.tams.map(function(t){
+        return {cm:t.cm,media:t.media,minfotos:t.minfotos,sku:fcSkuLimpo(t.sku)};}))+';\n';
+  c+='var FAIXAS='+JSON.stringify(cfg.faixas.map(function(f){return {laminas:f.laminas,pct:f.pct};}))+';\n';
+  c+='var ACABAMENTOS='+JSON.stringify(cfg.acabs.map(function(a){
+        return {nome:a.nome,desc:a.desc||'',valor:a.valor,sku:fcSkuLimpo(a.sku)};}))+';\n';
+  c+="var CODIGO_PEDIDO='"+escJs(cfg.cod)+"';\n";
+  c+="var MOEDA='BRL';\n";
+  if(usaPP){
+    c+="var PAYPAL_CLIENT_ID='"+escJs(cfg.client)+"';\n";
+    c+='var PARCELAS='+cfg.parcelas+';\n';
+  }
+  if(usaPix){
+    c+="var CHAVE_PIX='"+escJs(cfg.chave)+"';\n";
+    c+="var NOME_RECEBEDOR='"+escJs(cfg.nomer)+"';\n";
+    c+="var CIDADE='"+escJs(cfg.cidade)+"';\n";
+  }
+  if(zap)c+="var ZAP_NUMERO='"+escJs(cfg.zapnum)+"';\n";
+  if(usaSinal){
+    c+="var SINAL_TIPO='"+cfg.sinal.tipo+"';   /* 'pct' ou 'fixo' */\n";
+    c+='var SINAL_VALOR='+cfg.sinal.valor+';\n';
+  }
+  c+='var DESCONTO_PIX='+descpix+';\n';
+  c+="var COR_DESTAQUE='"+escJs(cfg.c1)+"';\n";
+  c+="var COR_FUNDO='"+escJs(cfg.c2)+"';\n";
+  c+="var COR_TEXTO='"+escJs(cfg.c3)+"';\n";
+  c+=fcUpsellVarsSrc('',cfg.upsell,true);
+  c+='\n';
+  /* Os textos, um por linha, na ordem em que o cliente os le. */
+  var TX=[
+    ['TXT_OLHO','txtOlho'],['TXT_TITULO','txtTitulo'],['TXT_CHAMADA','txtChamada'],
+    ['TXT_ROT_TAMANHO','txtRotTamanho'],['TXT_ROT_FOTOS','txtRotFotos'],
+    ['TXT_ROT_ORCAMENTO','txtRotOrcamento'],
+    ['TXT_CM','txtCm'],['TXT_FAIXA_DICA','txtFaixaDica'],['TXT_FOTOS_UN','txtFotosUn'],
+    ['TXT_ARIA_MENOS','txtAriaMenos'],['TXT_ARIA_MAIS','txtAriaMais'],['TXT_ARIA_BARRA','txtAriaBarra'],
+    ['TXT_LAMINAS','txtLaminas'],['TXT_MEDIA','txtMedia'],
+    ['TXT_FALTA_UMA','txtFaltaUma'],['TXT_FALTAM_N','txtFaltamN'],
+    ['TXT_INC_ATE','txtIncentivoAte'],['TXT_INC_JA','txtIncentivoJa'],['TXT_INC_MAX','txtIncentivoMax'],
+    ['TXT_LIMITE_MAX','txtLimiteMax'],['TXT_LIMITE_MIN','txtLimiteMin'],
+    ['TXT_BASE','txtBase'],['TXT_BASE_SUB','txtBaseSub'],['TXT_DESC_LAMINAS','txtDescLaminas'],
+    ['TXT_TOTAL','txtTotal'],['TXT_PE','txtPe'],['TXT_TOTAL_ZERO','txtTotalZero']
+  ];
+  if(temAcab)TX.push(['TXT_ROT_ACAB','txtRotAcab']);
+  if(usaPix||usaPP)TX.push(['TXT_ROT_PAGAMENTO','txtRotPagamento']);
+  if(usaSinal)TX=TX.concat([['TXT_SINAL','txtSinal'],['TXT_SALDO','txtSaldo'],
+    ['TXT_SINAL_MAIOR','txtSinalMaior'],['TXT_SINAL_ZERO','txtSinalZero'],['TXT_SINAL_RECUSADO','txtSinalRecusado']]);
+  if(usaPix)TX=TX.concat([['TXT_BOTAO_PIX','txtBotaoPix'],['TXT_PIX_INSTRUCAO','txtPixInstrucao'],
+    ['TXT_PIXVAL','txtPixVal'],['TXT_PIX_COPIAR','txtPixCopiar'],['TXT_PIX_COPIADO','txtPixCopiado'],
+    ['TXT_NOTA','txtNota']]);
+  if(usaPix&&zap)TX.push(['TXT_PIX_MANUAL','txtPixManual']);
+  if(usaPP)TX=TX.concat([['TXT_ERRO','txtErroPagamento'],['TXT_OK','txtPagoOk']]);
+  if(usaPix&&usaPP)TX=TX.concat([['TXT_OU','txtOu'],['TXT_OU_DESC','txtOuDesc']]);
+  if(descpix>0)TX.push(['TXT_PIX_ROTULO','txtPixRotulo']);
+  if(usaResumo)TX=TX.concat([['TXT_RESUMO','txtResumo'],['TXT_RESUMO_BOTAO','txtResumoBotao'],
+    ['TXT_RESUMO_COPIADO','txtResumoCopiado'],['TXT_RESUMO_PEDIDO','txtResumoPedido'],
+    ['TXT_RESUMO_TAMANHO','txtResumoTamanho'],['TXT_RESUMO_FOTOS','txtResumoFotos'],
+    ['TXT_RESUMO_LAMINAS','txtResumoLaminas'],['TXT_RESUMO_PORFOTO','txtResumoPorFoto']]);
+  if(zap)TX=TX.concat([['TXT_ROT_WHATS','txtRotWhats'],['TXT_WHATS_DICA','txtWhatsDica'],
+    ['TXT_ZAP','txtZapBotao']]);
+  for(i=0;i<TX.length;i++)c+='var '+TX[i][0]+"='"+escJs(cfg[TX[i][1]])+"';\n";
+  c+='\n/* ============================================================\n   Daqui para baixo nao precisa mexer\n   ============================================================ */\n\n';
+
+  c+=fcMoedaFmtGer(true);
+  c+=fcUpsellFnSrc('',cfg.upsell,true);
+  if(usaPix){
+    c+=FC_PIX_SRC.semAcento;
+    c+=FC_PIX_SRC.tlv;
+    c+=FC_PIX_SRC.crc16;
+    c+=FC_PIX_SRC.montarPayload;
+    c+=fcDesenharQrSrc('',cfg.qr);
+  }
+
+  /* ===== o estado e a conta ===== */
+  c+='var tamIdx=0,fotos=0,acabOn=[];\n';
+  c+='for(var zz=0;zz<ACABAMENTOS.length;zz++)acabOn[zz]=false;\n\n';
+  c+='function tamAtual(){return TAMANHOS[tamIdx]||TAMANHOS[0];}\n';
+  c+='function maxFotos(t){return Math.round(LAMINA_MAX*t.media);}\n';
+  c+='function minFotos(t){return t.minfotos;}\n';
+  c+='function laminas(){var t=tamAtual();return Math.round(fotos/t.media);}\n';
+  c+='function preso(n,lo,hi){return Math.max(lo,Math.min(hi,n));}\n';
+  c+='function faixaIdx(l){var i,k=0;for(i=0;i<FAIXAS.length;i++){if(l>=FAIXAS[i].laminas)k=i;}return k;}\n';
+  c+='function pctAtual(){return FAIXAS.length?FAIXAS[faixaIdx(laminas())].pct:0;}\n';
+  /* A MENOR QUANTIDADE DE FOTOS QUE ALCANCA L LAMINAS. laminas = round(fotos/media), entao
+     o alvo e o menor inteiro que arredonda para L: ceil(media*(L-0.5)). */
+  c+='function fotosPara(L){return Math.ceil(tamAtual().media*(L-0.5));}\n\n';
+  c+='function somaBase(){return fotos*PRECO_FOTO;}\n';
+  c+='function somaAcab(){var s=0,i;for(i=0;i<ACABAMENTOS.length;i++)if(acabOn[i])s+=ACABAMENTOS[i].valor;return s;}\n';
+  c+='function subtotal(){return somaBase()+somaAcab();}\n';
+  /* EM CENTAVOS INTEIROS, e so na BASE. O desconto por laminas premia a quantidade de FOTOS,
+     nao os acabamentos -- e e assim que a calculadora publicada ja fazia. A conta em centavos
+     inteiros (Math.round(base*100) antes do percentual) e a mesma que o cupom do Checkout
+     passou a usar em 13/09/2026: com preco inteiro ela da o mesmo numero, e com centavos no
+     preco ela e a unica que nao tira um centavo do desconto do cliente. */
+  c+='function descontoAtual(){\n';
+  c+='var pct=pctAtual();\n';
+  c+='if(!pct)return 0;\n';
+  c+='var b=Math.round(somaBase()*100);\n';
+  c+='return Math.round(b*pct/100)/100;\n}\n\n';
+  c+='var cupomAtivo=null;   /* esta calculadora nao tem cupom; a maquinaria de pagamento compartilhada le esta variavel */\n\n';
+  c+=FC_CARRINHO_SRC.total;
+  if(usaSinal)c+=FC_CARRINHO_SRC.sinal;
+  c+=fcTotalPixSrc(descpix,usaPix,usaSinal);
+
+  /* ===== a enumeracao UNICA do que foi escolhido ===== */
+  /* Uma leitura so alimenta o resumo copiavel, a mensagem do WhatsApp e o pedido ao PayPal.
+     Com tres lacos, um poderia esquecer uma regra e as tres listas discordariam caladas --
+     foi exatamente o defeito que o Checkout carregou ate 13/09/2026. */
+  c+='function nomeAlbum(){var t=tamAtual();return TXT_TITULO+" "+t.cm+" "+TXT_CM+" - "+fotos+" "+TXT_FOTOS_UN;}\n';
+  c+='function itensEscolhidos(){\n';
+  c+='var t=tamAtual(),lista=[{rotulo:nomeAlbum(),valor:somaBase(),opcional:false,nome:nomeAlbum(),qtd:1,unit:somaBase()'+(temSku?',sku:t.sku':'')+'}];\n';
+  c+='var i;for(i=0;i<ACABAMENTOS.length;i++){\n';
+  c+='if(!acabOn[i])continue;\n';
+  c+='var a=ACABAMENTOS[i];\n';
+  c+='lista.push({rotulo:a.nome,valor:a.valor,opcional:true,nome:a.nome,qtd:1,unit:a.valor'+(temSku?',sku:a.sku':'')+'});\n';
+  c+='}\nreturn lista;\n}\n\n';
+  c+='function nomesSelecionados(){return [nomeAlbum()];}\n\n';
+  return c+vBlocoTela(cfg,{usaPix:usaPix,usaPP:usaPP,prio:prio,usaSinal:usaSinal,
+    descpix:descpix,zap:zap,usaResumo:usaResumo,temAcab:temAcab,temSku:temSku});
+}
+
+/* A TELA do bloco, separada so para o gerador caber na cabeca de quem le. Ela continua
+   sendo a MESMA fonte unica: vBloco a chama e ninguem mais. */
+function vBlocoTela(cfg,o){
+  var usaPix=o.usaPix,usaPP=o.usaPP,prio=o.prio,usaSinal=o.usaSinal,descpix=o.descpix,
+      zap=o.zap,usaResumo=o.usaResumo,temAcab=o.temAcab,temSku=o.temSku;
+  var c='';
+
+  c+='function montar(){\n';
+  c+="var raiz=document.getElementById('fcal-raiz');\nif(!raiz)return;\n";
+  c+="raiz.style.setProperty('--fcal-destaque',COR_DESTAQUE);\n";
+  c+="raiz.style.setProperty('--fcal-fundo',COR_FUNDO);\n";
+  c+="raiz.style.setProperty('--fcal-texto',COR_TEXTO);\n\n";
+
+  /* ---- o esqueleto ---- */
+  c+="var h='<div class=\"fcal-cartao\">';\n";
+  c+="h+='<p class=\"fcal-olho\"></p><div class=\"fcal-titulo\"></div><p class=\"fcal-lead\"></p>';\n";
+  c+="h+='<div class=\"fcal-corpo\">';\n";
+  /* coluna da esquerda: as escolhas */
+  c+="h+='<div class=\"fcal-col\">';\n";
+  c+="h+='<p class=\"fcal-rot fcal-rot-tam\"></p><div class=\"fcal-tams\" role=\"radiogroup\"></div>';\n";
+  c+="h+='<p class=\"fcal-rot fcal-rot-fotos\"></p>';\n";
+  c+="h+='<div class=\"fcal-qtd\"><button type=\"button\" class=\"fcal-passo fcal-menos\">&#8722;</button>';\n";
+  c+="h+='<div class=\"fcal-qtd-campo\"><input type=\"number\" inputmode=\"numeric\" class=\"fcal-campo\"><div class=\"fcal-qtd-un\"></div></div>';\n";
+  c+="h+='<button type=\"button\" class=\"fcal-passo fcal-mais\">+</button></div>';\n";
+  c+="h+='<div class=\"fcal-barra\"><input type=\"range\" step=\"1\" class=\"fcal-range\">';\n";
+  c+="h+='<div class=\"fcal-escala\"><span class=\"fcal-esc-min\"></span><span class=\"fcal-esc-max\"></span></div></div>';\n";
+  c+="h+='<div class=\"fcal-incentivo\"></div>';\n";
+  c+="h+='<div class=\"fcal-laminas\"></div>';\n";
+  c+="h+='<div class=\"fcal-aviso\"></div>';\n";
+  if(temAcab)c+="h+='<p class=\"fcal-rot fcal-rot-acab\"></p><div class=\"fcal-acabs\"></div>';\n";
+  c+="h+='</div>';\n";
+  /* coluna da direita: o orcamento e o pagamento */
+  c+="h+='<div class=\"fcal-col\">';\n";
+  c+="h+='<p class=\"fcal-rot fcal-rot-orc\"></p><div class=\"fcal-caixa\">';\n";
+  c+="h+='<div class=\"fcal-linha\"><span class=\"fcal-linha-k fcal-base-k\"></span><span class=\"fcal-linha-v fcal-base-v\"></span></div>';\n";
+  c+="h+='<div class=\"fcal-desc-l\"></div>';\n";
+  c+="h+='<div class=\"fcal-acab-l\"></div>';\n";
+  c+="h+='<div class=\"fcal-risca\"></div>';\n";
+  c+="h+='<div class=\"fcal-linha fcal-final\"><span class=\"fcal-linha-k fcal-total-k\"></span><span class=\"fcal-linha-v fcal-total-v\"></span></div>';\n";
+  if(usaSinal){
+    c+="h+='<div class=\"fcal-sinal\"><span class=\"fcal-linha-k fcal-sinal-t\"></span><span class=\"fcal-linha-v fcal-sinal-v\"></span></div>';\n";
+    c+="h+='<div class=\"fcal-saldo\"><span class=\"fcal-linha-k fcal-saldo-t\"></span><span class=\"fcal-linha-v fcal-saldo-v\"></span></div>';\n";
+    if(fcSinalTxtLista(cfg).length)c+="h+='<div class=\"fcal-sinal-txt\"></div>';\n";
+    c+="h+='<div class=\"fcal-sinal-aviso\"></div>';\n";
+  }
+  if(descpix>0)c+="h+='<div class=\"fcal-pixlinha\"><span class=\"fcal-linha-k fcal-pixlinha-t\"></span><span class=\"fcal-linha-v fcal-pixlinha-v\"></span></div>';\n";
+  if(usaPix||usaPP)c+="h+='<p class=\"fcal-rot fcal-rot-pag\"></p>';\n";
+  /* A ORDEM DOS DOIS MEIOS sai de uma linha so, como nas quatro irmas: os dois blocos sao
+     montados em variaveis e concatenados na ordem escolhida. Com um meio so, um dos dois e
+     vazio e a concatenacao sai identica nas duas escolhas. */
+  var htmPix='',htmPP='',htmSep='';
+  if(usaPP)htmPP="h+='<div class=\"fcal-botoes\"></div><div class=\"fcal-msg\"></div>';\n";
+  if(usaPix){
+    htmPix+="h+='<button type=\"button\" class=\"fcal-bt fcal-gerar\"></button>';\n";
+    htmPix+="h+='<div class=\"fcal-pixarea\"><p class=\"fcal-instrucao\"></p><div class=\"fcal-pixval\"><span class=\"fcal-pixval-t\"></span> <span class=\"fcal-pixval-v\"></span></div><div class=\"fcal-qr\"></div>';\n";
+    htmPix+="h+='<textarea class=\"fcal-cola\" readonly></textarea>';\n";
+    htmPix+="h+='<button type=\"button\" class=\"fcal-bt fcal-bt-claro fcal-copiar\"></button><div class=\"fcal-copiado\"></div>';\n";
+    if(zap)htmPix+="h+='<div class=\"fcal-pixmanual\"></div><button type=\"button\" class=\"fcal-bt fcal-zap\"></button>';\n";
+    htmPix+="h+='<p class=\"fcal-nota\"></p></div>';\n";
+  }
+  if(usaPix&&usaPP)htmSep="h+='<div class=\"fcal-sep\"><span class=\"fcal-sep-t\"></span></div>';\n";
+  c+=(prio==='pix')?(htmPix+htmSep+htmPP):(htmPP+htmSep+htmPix);
+  if(usaResumo){
+    c+="h+='<p class=\"fcal-rot fcal-rot-resumo\"></p>';\n";
+    c+="h+='<textarea class=\"fcal-resumo\" readonly></textarea>';\n";
+    c+="h+='<button type=\"button\" class=\"fcal-bt fcal-bt-claro fcal-resumo-b\"></button><div class=\"fcal-resumo-ok\"></div>';\n";
+  }
+  if(zap&&!usaPix){
+    /* Sem Pix nao existe a area do Pix, e o botao do WhatsApp precisa de um lugar proprio. */
+    c+="h+='<p class=\"fcal-rot fcal-rot-whats\"></p><button type=\"button\" class=\"fcal-bt fcal-zap\"></button>';\n";
+  }
+  if(zap)c+="h+='<p class=\"fcal-nota fcal-whats-dica\"></p>';\n";
+  c+="h+='</div></div>';\n";
+  c+="h+='</div><p class=\"fcal-pe\"></p></div>';\n";
+  c+='raiz.innerHTML=h;\n\n';
+
+  /* ---- os textos fixos ---- */
+  c+="function q(s){return raiz.querySelector(s);}\n";
+  c+="q('.fcal-olho').textContent=TXT_OLHO;\n";
+  c+="q('.fcal-titulo').textContent=TXT_TITULO;\n";
+  c+="q('.fcal-lead').textContent=TXT_CHAMADA;\n";
+  c+="q('.fcal-rot-tam').textContent=TXT_ROT_TAMANHO;\n";
+  c+="q('.fcal-rot-fotos').textContent=TXT_ROT_FOTOS;\n";
+  c+="q('.fcal-rot-orc').textContent=TXT_ROT_ORCAMENTO;\n";
+  c+="q('.fcal-qtd-un').textContent=TXT_FOTOS_UN;\n";
+  c+="q('.fcal-menos').setAttribute('aria-label',TXT_ARIA_MENOS);\n";
+  c+="q('.fcal-mais').setAttribute('aria-label',TXT_ARIA_MAIS);\n";
+  c+="q('.fcal-range').setAttribute('aria-label',TXT_ARIA_BARRA);\n";
+  c+="q('.fcal-campo').setAttribute('aria-label',TXT_ROT_FOTOS);\n";
+  c+="q('.fcal-total-k').textContent=TXT_TOTAL;\n";
+  if(temAcab)c+="q('.fcal-rot-acab').textContent=TXT_ROT_ACAB;\n";
+  if(usaPix||usaPP)c+="q('.fcal-rot-pag').textContent=TXT_ROT_PAGAMENTO;\n";
+  if(usaSinal){
+    if(cfg.sinal.tipo==='pct')c+="q('.fcal-sinal-t').textContent=TXT_SINAL+' ('+SINAL_VALOR+'%)';\n";
+    else c+="q('.fcal-sinal-t').textContent=TXT_SINAL;\n";
+    c+="q('.fcal-saldo-t').textContent=TXT_SALDO;\n";
+    c+=fcSinalTxtSrc(cfg,'fcal-sinal-txt-l',"q('.fcal-sinal-txt')",'');
+  }
+  if(usaPix){
+    c+="q('.fcal-gerar').textContent=TXT_BOTAO_PIX;\n";
+    c+="q('.fcal-instrucao').textContent=TXT_PIX_INSTRUCAO;\n";
+    c+="q('.fcal-pixval-t').textContent=TXT_PIXVAL+':';\n";
+    c+="q('.fcal-copiar').textContent=TXT_PIX_COPIAR;\n";
+    c+="q('.fcal-copiado').textContent=TXT_PIX_COPIADO;\n";
+    c+="q('.fcal-nota').textContent=TXT_NOTA;\n";
+    if(zap){
+      c+="q('.fcal-pixmanual').textContent=TXT_PIX_MANUAL;\n";
+      c+="q('.fcal-zap').textContent=TXT_ZAP;\n";
+    }
+    if(usaPP)c+="q('.fcal-sep-t').textContent=(DESCONTO_PIX>0)?TXT_OU_DESC.replace(/\\{pct\\}/gi,DESCONTO_PIX):TXT_OU;\n";
+  }
+  if(zap&&!usaPix){
+    c+="q('.fcal-rot-whats').textContent=TXT_ROT_WHATS;\n";
+    c+="q('.fcal-zap').textContent=TXT_ZAP;\n";
+  }
+  if(zap)c+="q('.fcal-whats-dica').textContent=TXT_WHATS_DICA;\n";
+  if(usaResumo){
+    c+="q('.fcal-rot-resumo').textContent=TXT_RESUMO;\n";
+    c+="q('.fcal-resumo-b').textContent=TXT_RESUMO_BOTAO;\n";
+    c+="q('.fcal-resumo-ok').textContent=TXT_RESUMO_COPIADO;\n";
+  }
+  c+='\n';
+
+  /* ---- os botoes de tamanho ---- */
+  c+="var caixaTams=q('.fcal-tams'),botoesTam=[];\n";
+  c+='TAMANHOS.forEach(function(t,i){\n';
+  c+="var b=document.createElement('button');\n";
+  c+="b.type='button';b.className='fcal-tam';b.setAttribute('role','radio');\n";
+  c+="b.setAttribute('aria-checked','false');\n";
+  c+="var s1=document.createElement('span');s1.className='fcal-tam-cm';\n";
+  c+="s1.appendChild(document.createTextNode(String(t.cm)));\n";
+  c+="var s2=document.createElement('span');s2.className='fcal-tam-un';s2.textContent=' '+TXT_CM;\n";
+  c+='s1.appendChild(s2);\n';
+  c+="var s3=document.createElement('span');s3.className='fcal-tam-dica';\n";
+  c+="s3.textContent=TXT_FAIXA_DICA.replace(/\\{min\\}/g,minFotos(t)).replace(/\\{max\\}/g,maxFotos(t));\n";
+  c+='b.appendChild(s1);b.appendChild(s3);\n';
+  c+="b.addEventListener('click',function(){\n";
+  c+='tamIdx=i;\n';
+  c+='fotos=preso(fotos,minFotos(t),maxFotos(t));\n';
+  c+='limpaAviso();atualizar();\n';
+  c+='});\n';
+  c+='botoesTam.push(b);caixaTams.appendChild(b);\n';
+  c+='});\n\n';
+
+  /* ---- os acabamentos ---- */
+  if(temAcab){
+    c+="var caixaAcab=q('.fcal-acabs'),caixasAcab=[];\n";
+    c+='ACABAMENTOS.forEach(function(a,i){\n';
+    c+="var d=document.createElement('div');\n";
+    c+="d.className='fcal-acab';d.tabIndex=0;d.setAttribute('role','checkbox');\n";
+    c+="d.setAttribute('aria-checked','false');\n";
+    c+="var mk=document.createElement('span');mk.className='fcal-marca';mk.textContent='\\u2713';\n";
+    c+="var tx=document.createElement('div');tx.className='fcal-acab-txt';\n";
+    c+="var nm=document.createElement('div');nm.className='fcal-acab-nome';nm.textContent=a.nome;\n";
+    c+='tx.appendChild(nm);\n';
+    c+="if(a.desc){var ds=document.createElement('div');ds.className='fcal-acab-desc';ds.textContent=a.desc;tx.appendChild(ds);}\n";
+    c+="var pr=document.createElement('span');pr.className='fcal-acab-preco';pr.textContent='+ '+moedaFmt(a.valor);\n";
+    c+='d.appendChild(mk);d.appendChild(tx);d.appendChild(pr);\n';
+    c+='function vira(){acabOn[i]=!acabOn[i];atualizar();}\n';
+    c+="d.addEventListener('click',vira);\n";
+    c+="d.addEventListener('keydown',function(e){if(e.key===' '||e.key==='Enter'){e.preventDefault();vira();}});\n";
+    c+='caixasAcab.push(d);caixaAcab.appendChild(d);\n';
+    c+='});\n\n';
+  }
+
+  /* ---- a quantidade ---- */
+  c+="var campo=q('.fcal-campo'),barra=q('.fcal-range');\n";
+  c+="function limpaAviso(){var a=q('.fcal-aviso');a.textContent='';a.className='fcal-aviso';}\n";
+  c+='function porFotos(n,digitando){\n';
+  c+='var t=tamAtual(),lo=minFotos(t),hi=maxFotos(t),v=Math.round(n);\n';
+  c+='if(isNaN(v))v=lo;\n';
+  c+='var acima=v>hi,abaixo=v<lo;\n';
+  c+='v=preso(v,lo,hi);\n';
+  /* Enquanto o cliente digita nao se mostra o aviso: ele passaria por valores intermediarios
+     e a mensagem piscaria. A validacao aparece ao confirmar -- sair do campo, barra ou +/-. */
+  c+="var a=q('.fcal-aviso');\n";
+  c+='if(!digitando&&acima){\n';
+  c+="a.textContent=TXT_LIMITE_MAX.replace(/\\{cm\\}/g,t.cm).replace(/\\{n\\}/g,hi).replace(/\\{lam\\}/g,LAMINA_MAX);\n";
+  c+="a.className='fcal-aviso on';\n";
+  c+='}else if(!digitando&&abaixo){\n';
+  c+="a.textContent=TXT_LIMITE_MIN.replace(/\\{cm\\}/g,t.cm).replace(/\\{n\\}/g,lo).replace(/\\{lam\\}/g,LAMINA_MIN);\n";
+  c+="a.className='fcal-aviso on';\n";
+  c+='}else{limpaAviso();}\n';
+  c+='fotos=v;atualizar();\n}\n\n';
+
+  /* ---- o incentivo ---- */
+  c+='function textoIncentivo(){\n';
+  c+='var lam=laminas(),k=faixaIdx(lam),pct=FAIXAS[k].pct,prox=FAIXAS[k+1];\n';
+  c+='if(!prox)return TXT_INC_MAX.replace(/\\{pct\\}/g,pct);\n';
+  c+='var faltam=Math.max(1,fotosPara(prox.laminas)-fotos);\n';
+  c+='var qt=(faltam===1)?TXT_FALTA_UMA:TXT_FALTAM_N.replace(/\\{n\\}/g,faltam);\n';
+  c+='if(pct===0)return TXT_INC_ATE.replace(/\\{faltam\\}/g,qt).replace(/\\{prox\\}/g,prox.pct);\n';
+  c+='return TXT_INC_JA.replace(/\\{pct\\}/g,pct).replace(/\\{faltam\\}/g,qt).replace(/\\{prox\\}/g,prox.pct);\n}\n\n';
+
+  /* ---- o desenho de cada volta ---- */
+  c+='function atualizar(){\n';
+  c+='var t=tamAtual(),lo=minFotos(t),hi=maxFotos(t),i;\n';
+  c+="for(i=0;i<botoesTam.length;i++)botoesTam[i].setAttribute('aria-checked',(i===tamIdx)?'true':'false');\n";
+  c+='campo.min=lo;campo.max=hi;\n';
+  c+='if(document.activeElement!==campo)campo.value=fotos;\n';
+  c+='barra.min=lo;barra.max=hi;barra.value=fotos;\n';
+  c+="q('.fcal-esc-min').textContent=lo;q('.fcal-esc-max').textContent=hi;\n";
+  c+="q('.fcal-laminas').textContent=TXT_LAMINAS.replace(/\\{n\\}/g,laminas())+' '+TXT_MEDIA.replace(/\\{n\\}/g,String(t.media).replace('.',','));\n";
+  c+="q('.fcal-incentivo').textContent=textoIncentivo();\n";
+  if(temAcab)c+="for(i=0;i<caixasAcab.length;i++)caixasAcab[i].setAttribute('aria-checked',acabOn[i]?'true':'false');\n";
+  c+="q('.fcal-base-k').innerHTML='';\n";
+  c+="var bk=q('.fcal-base-k');\n";
+  c+='bk.appendChild(document.createTextNode(TXT_BASE));\n';
+  c+="var sb=document.createElement('span');sb.className='fcal-sub';\n";
+  c+="sb.textContent=TXT_BASE_SUB.replace(/\\{n\\}/g,fotos).replace(/\\{valor\\}/g,moedaFmt(PRECO_FOTO));\n";
+  c+='bk.appendChild(sb);\n';
+  c+="q('.fcal-base-v').textContent=moedaFmt(somaBase());\n";
+  /* A linha do desconto so existe havendo desconto: linha "Desconto (0%)" com valor zero e
+     ruido que o cliente tem de interpretar. */
+  c+="var dl=q('.fcal-desc-l');dl.innerHTML='';\n";
+  c+='if(descontoAtual()>0){\n';
+  c+="var ld=document.createElement('div');ld.className='fcal-linha';\n";
+  c+="var lk=document.createElement('span');lk.className='fcal-linha-k';\n";
+  c+="lk.textContent=TXT_DESC_LAMINAS.replace(/\\{pct\\}/g,pctAtual());\n";
+  c+="var lv=document.createElement('span');lv.className='fcal-linha-v';lv.textContent='\\u2212 '+moedaFmt(descontoAtual());\n";
+  c+='ld.appendChild(lk);ld.appendChild(lv);dl.appendChild(ld);\n}\n';
+  if(temAcab){
+    c+="var al=q('.fcal-acab-l');al.innerHTML='';\n";
+    c+='for(i=0;i<ACABAMENTOS.length;i++){\n';
+    c+='if(!acabOn[i])continue;\n';
+    c+="var la=document.createElement('div');la.className='fcal-linha';\n";
+    c+="var ak=document.createElement('span');ak.className='fcal-linha-k';ak.textContent=ACABAMENTOS[i].nome;\n";
+    c+="var av=document.createElement('span');av.className='fcal-linha-v';av.textContent=moedaFmt(ACABAMENTOS[i].valor);\n";
+    c+='la.appendChild(ak);la.appendChild(av);al.appendChild(la);\n}\n';
+  }
+  c+="q('.fcal-total-v').textContent=moedaFmt(total());\n";
+  if(usaSinal){
+    /* PEDIDO EM ZERO: as linhas do sinal e do saldo so existem havendo o que pagar -- com
+       total zero o cliente leria tres numeros que nao fecham. Mesma decisao de 13/09/2026. */
+    c+='var haPagar=total()>=0.01;\n';
+    c+="q('.fcal-sinal').style.display=haPagar?'':'none';\n";
+    c+="q('.fcal-saldo').style.display=haPagar?'':'none';\n";
+    if(fcSinalTxtLista(cfg).length)c+="q('.fcal-sinal-txt').style.display=haPagar?'':'none';\n";
+    c+="q('.fcal-sinal-v').textContent=moedaFmt(sinalAgora());\n";
+    c+="q('.fcal-saldo-v').textContent=moedaFmt(saldoDepois());\n";
+    c+='var rec=sinalRecusa();\n';
+    c+="q('.fcal-sinal-aviso').textContent=rec;\n";
+    c+="q('.fcal-sinal-aviso').className='fcal-sinal-aviso'+(rec?' on':'');\n";
+  }
+  if(descpix>0){
+    c+="q('.fcal-pixlinha-t').textContent=TXT_PIX_ROTULO.replace(/\\{pct\\}/gi,DESCONTO_PIX);\n";
+    c+="q('.fcal-pixlinha-v').textContent=moedaFmt(totalPix());\n";
+    c+="q('.fcal-pixlinha').className='fcal-pixlinha on';\n";
+  }
+  c+="q('.fcal-pe').textContent=TXT_PE.replace(/\\{valor\\}/g,moedaFmt(PRECO_FOTO)).replace(/\\{min\\}/g,LAMINA_MIN).replace(/\\{max\\}/g,LAMINA_MAX);\n";
+  if(usaResumo)c+="q('.fcal-resumo').value=textoResumo();\nq('.fcal-resumo-ok').className='fcal-resumo-ok';\n";
+  if(usaPix)c+="q('.fcal-pixarea').className='fcal-pixarea';\n";
+  c+='}\n\n';
+
+  /* ---- o resumo copiavel (pedido do dono, 15/09/2026) ---- */
+  if(usaResumo){
+    c+='function textoResumo(){\n';
+    c+='var t=tamAtual(),L=[],li=itensEscolhidos(),z;\n';
+    c+="L.push(TXT_RESUMO_PEDIDO+' '+CODIGO_PEDIDO);\n";
+    c+="L.push(TXT_RESUMO_TAMANHO+': '+t.cm+' '+TXT_CM);\n";
+    c+="L.push(TXT_RESUMO_FOTOS+': '+fotos);\n";
+    c+="L.push(TXT_RESUMO_LAMINAS+': '+laminas());\n";
+    c+="L.push(TXT_RESUMO_PORFOTO+': '+moedaFmt(PRECO_FOTO));\n";
+    c+="L.push(TXT_BASE+': '+moedaFmt(somaBase()));\n";
+    c+="if(descontoAtual()>0)L.push(TXT_DESC_LAMINAS.replace(/\\{pct\\}/g,pctAtual())+': - '+moedaFmt(descontoAtual()));\n";
+    c+="for(z=0;z<li.length;z++)if(li[z].opcional)L.push('+ '+li[z].rotulo+': '+moedaFmt(li[z].valor));\n";
+    c+="L.push(TXT_TOTAL+': '+moedaFmt(total()));\n";
+    if(usaSinal){
+      c+='var recR=sinalRecusa();\n';
+      c+='if(total()<0.01){\n}else if(recR){\n';
+      c+="L.push(TXT_SINAL_RECUSADO.toUpperCase()+': '+recR);\n";
+      c+='}else{\n';
+      c+="L.push(TXT_SINAL+': '+moedaFmt(sinalAgora()));\n";
+      c+="L.push(TXT_SALDO+': '+moedaFmt(saldoDepois()));\n";
+      c+='}\n';
+    }
+    if(descpix>0)c+="L.push(TXT_PIX_ROTULO.replace(/\\{pct\\}/gi,DESCONTO_PIX)+': '+moedaFmt(totalPix()));\n";
+    c+="return L.join('\\n');\n}\n\n";
+    c+='function copiarResumo(){\n';
+    c+="var ta=q('.fcal-resumo');\n";
+    c+="function ok(){q('.fcal-resumo-ok').className='fcal-resumo-ok on';}\n";
+    c+='if(navigator.clipboard&&navigator.clipboard.writeText){\n';
+    c+="navigator.clipboard.writeText(ta.value).then(ok,function(){ta.select();document.execCommand('copy');ok();});\n";
+    c+="}else{ta.select();document.execCommand('copy');ok();}\n}\n";
+    c+="q('.fcal-resumo-b').addEventListener('click',copiarResumo);\n\n";
+  }
+
+  /* ---- ouvintes da quantidade ---- */
+  c+="campo.addEventListener('input',function(){var r=parseInt(campo.value,10);if(isNaN(r))return;porFotos(r,true);});\n";
+  c+="campo.addEventListener('blur',function(){porFotos(parseInt(campo.value,10),false);campo.value=fotos;});\n";
+  c+="campo.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();campo.blur();}});\n";
+  c+="barra.addEventListener('input',function(){porFotos(parseInt(barra.value,10),false);});\n";
+  c+="q('.fcal-menos').addEventListener('click',function(){porFotos(fotos-1,false);});\n";
+  c+="q('.fcal-mais').addEventListener('click',function(){porFotos(fotos+1,false);});\n\n";
+
+  /* ---- PayPal ---- */
+  if(usaPP){
+    c+='function msg(txt,ok){\n';
+    c+="var m=q('.fcal-msg');\n";
+    c+="m.textContent=txt;m.className='fcal-msg '+(ok?'ok':'erro');\n}\n\n";
+    c+=fcPpBotoesSrc('fcal',cfg.ppcor,usaSinal,true,fcUpsellChamada(cfg.upsell),true,temSku);
+  }
+
+  /* ---- Pix ---- */
+  if(usaPix){
+    c+='/* ===== Pix ===== */\n';
+    c+="var payloadAtual='';\n\n";
+    c+='function gerarPix(){\n';
+    c+='var v=totalPix();\n';
+    if(usaSinal){
+      c+='if(total()<0.01){alert(TXT_TOTAL_ZERO);return;}\n';
+      c+='var rec=sinalRecusa();\nif(rec){alert(rec);return;}\n';
+    }else{
+      c+='if(v<0.01){alert(TXT_TOTAL_ZERO);return;}\n';
+    }
+    c+='payloadAtual=montarPayload(v);\n';
+    c+="var qr=q('.fcal-qr');\n";
+    c+="qr.innerHTML='';qr.style.display='';\n";
+    c+='desenharQr(qr,payloadAtual);\n';
+    c+="q('.fcal-pixval-v').textContent=moedaFmt(v);\n";
+    c+="q('.fcal-cola').value=payloadAtual;\n";
+    c+="q('.fcal-pixarea').className='fcal-pixarea on';\n}\n";
+    c+="q('.fcal-gerar').addEventListener('click',gerarPix);\n\n";
+    c+='function copiarPix(){\n';
+    c+="var ta=q('.fcal-cola');\n";
+    c+="function ok(){q('.fcal-copiado').className='fcal-copiado on';}\n";
+    c+='if(navigator.clipboard&&navigator.clipboard.writeText){\n';
+    c+="navigator.clipboard.writeText(payloadAtual).then(ok,function(){ta.select();document.execCommand('copy');ok();});\n";
+    c+="}else{ta.select();document.execCommand('copy');ok();}\n}\n";
+    c+="q('.fcal-copiar').addEventListener('click',copiarPix);\n\n";
+  }
+
+  /* ---- WhatsApp ---- */
+  if(zap){
+    c+='function avisarZap(){\n';
+    c+='var partes=[],li=itensEscolhidos(),z;\n';
+    if(usaSinal)c+="partes.push('"+escJs(cfg.txtZapAberturaSinal)+"');\n";
+    else c+="partes.push('"+escJs(cfg.txtZapAbertura)+"');\n";
+    c+="partes.push("+aTplJs("'",cfg.txtZapPedido,[['{cod}','CODIGO_PEDIDO']])+");\n";
+    c+="for(z=0;z<li.length;z++)partes.push(li[z].opcional?('   + '+li[z].rotulo+' '+moedaFmt(li[z].valor)):('- *'+li[z].rotulo+'* '+moedaFmt(li[z].valor)));\n";
+    if(descpix>0)c+="if(DESCONTO_PIX>0)partes.push("+aTplJs("'",cfg.txtZapDescPix,[['{pct}','DESCONTO_PIX']])+");\n";
+    if(usaSinal){
+      c+="partes.push("+aTplJs("'",cfg.txtZapTotal,[['{valor}','moedaFmt(total())']])+");\n";
+      c+="partes.push("+aTplJs("'",cfg.txtZapSinal,[['{valor}','moedaFmt(sinalAgora())']])+");\n";
+      c+="partes.push("+aTplJs("'",cfg.txtZapSaldo,[['{valor}','moedaFmt(saldoDepois())']])+");\n";
+    }else{
+      c+="partes.push("+aTplJs("'",cfg.txtZapValor,[['{valor}','moedaFmt('+(usaPix?'totalPix()':'total()')+')']])+");\n";
+    }
+    c+="var url='https://wa.me/'+ZAP_NUMERO+'?text='+encodeURIComponent(partes.join('\\n'));\n";
+    c+="window.open(url,'_blank');\n";
+    /* O upsell so entra DEPOIS da abertura do WhatsApp -- a ordem esta medida em
+       scripts/verificar/upsell-janela.mjs. */
+    if(fcUpsellEmite(cfg.upsell))c+='upsellIr();\n';
+    c+='}\n';
+    c+="q('.fcal-zap').addEventListener('click',avisarZap);\n\n";
+  }
+
+  /* ---- o comeco ---- */
+  /* Nasce no MENOR tamanho cadastrado e no minimo de fotos dele: e o unico estado que nao
+     depende de o dono ter cadastrado nada em particular, e nunca nasce em zero -- pedido
+     zerado era um dos caminhos que levavam total zero ao PayPal nas outras abas. */
+  c+='tamIdx=0;\nfotos=minFotos(tamAtual());\n';
+  c+='atualizar();\n';
+  c+='}\n\n';
+  c+="if(document.getElementById('fcal-raiz'))montar();\n";
+  c+="else document.addEventListener('DOMContentLoaded',montar);\n";
+  c+='})();\n</scr'+'ipt>';
+  return c;
+}
+
+/* ===== a previa: executa o RETORNO de vBloco, nunca um desenho proprio =====
+   Previa que redesenha o resultado com codigo proprio e uma segunda implementacao, e duas
+   implementacoes divergem -- ja custou duas divergencias na aba Contagem regressiva. */
+var vPvTimer=null,vPvModo='desk';
+
+function vPvShim(cfg){
+  var extras='';
+  /* Com PayPal, a sonda compartilhada desenha o que o SDK desenharia e o relatorio do que
+     vai para a ordem. E a MESMA das quatro abas irmas desde 13/09/2026. */
+  if(cfg.usaPP)extras+=fcPvSondaPP({ppcor:cfg.ppcor,raizId:'fcal-raiz',msgSel:'fcal-msg',caixaId:'v-pv-pp'});
+  return fcPvShim({pref:'v',extras:extras});
+}
+function vPvEnchimento(){
+  var s='',i;
+  for(i=0;i<4;i++)s+='<div style="height:220px;margin:14px 0;background:#eceae4;border-radius:10px"></div>\n';
+  return s;
+}
+function vPvRecusaDoc(motivo){
+  return '<!DOCTYPE html><html lang="pt-BR"><head><meta charset="utf-8">'+
+    '<meta name="viewport" content="width=device-width, initial-scale=1">'+
+    '<sty'+'le>body{margin:0;padding:26px;font:15px/1.5 -apple-system,BlinkMacSystemFont,sans-serif;background:#fbfaf7;color:#333}'+
+    '.cx{max-width:520px;margin:40px auto;border:1px dashed #c0392b;border-radius:12px;padding:22px;background:#fff}'+
+    '.t{color:#c0392b;font-weight:700;margin:0 0 8px}</sty'+'le></head><body>'+
+    '<div class="cx"><p class="t">A prévia não roda o que o gerador recusaria.</p><p>'+
+    escHtml(motivo)+'</p></div></body></html>';
+}
+function vPvDoc(cfg){
+  return '<!DOCTYPE html><html lang="pt-BR"><head><meta charset="utf-8">'+
+    '<meta name="viewport" content="width=device-width, initial-scale=1">'+
+    '<sty'+'le>body{margin:0;padding:18px;background:#fbfaf7;font:15px/1.5 -apple-system,BlinkMacSystemFont,sans-serif}</sty'+'le>'+
+    '</head><body>'+vPvShim(cfg)+vBloco(cfg)+vPvEnchimento()+'</body></html>';
+}
+function vPvLargura(){return (vPvModo==='cel')?380:1040;}
+function vPvMontar(){
+  var box=$('v-pv-box');if(!box)return;
+  var cfg;
+  try{cfg=vCfg();}catch(e){return;}
+  var recusa=vRecusa(cfg);
+  var larg=vPvLargura();
+  var disp=box.clientWidth||larg;
+  var k=Math.min(1,disp/larg);
+  box.innerHTML='';
+  var mold=document.createElement('div');
+  mold.style.cssText='width:'+Math.round(larg*k)+'px;height:'+Math.round(760*k)+'px;margin:0 auto;overflow:hidden;border:1px solid #d8d2c4;border-radius:10px;background:#fff';
+  var fr=document.createElement('iframe');
+  fr.id='v-pv-frame';
+  fr.setAttribute('title','Prévia da calculadora de álbum');
+  fr.style.cssText='width:'+larg+'px;height:760px;border:0;display:block;transform:scale('+k+');transform-origin:0 0';
+  mold.appendChild(fr);box.appendChild(mold);
+  var doc=fr.contentDocument||(fr.contentWindow&&fr.contentWindow.document);
+  if(!doc)return;
+  doc.open();
+  doc.write(recusa?vPvRecusaDoc(recusa):vPvDoc(cfg));
+  doc.close();
+}
+/* Timer UNICO, cancelado antes de reagendar -- a regra do projeto para toda previa. */
+function vPreview(imediato){
+  if(vPvTimer){clearTimeout(vPvTimer);vPvTimer=null;}
+  if(imediato){vPvMontar();return;}
+  vPvTimer=setTimeout(function(){vPvTimer=null;vPvMontar();},400);
+}
+function vPvModoSet(m){
+  vPvModo=(m==='cel')?'cel':'desk';
+  var a=$('v-pv-desk'),b=$('v-pv-cel');
+  if(a)a.className='botao mini'+(vPvModo==='desk'?'':' claro');
+  if(b)b.className='botao mini'+(vPvModo==='cel'?'':' claro');
+  vPreview(true);
+}
+document.addEventListener('input',function(e){
+  var id=String((e.target&&e.target.id)||''),nm=String((e.target&&e.target.name)||'');
+  if(id.indexOf('v-')===0||nm.indexOf('v-')===0)vPreview();
+});
+document.addEventListener('change',function(e){
+  var id=String((e.target&&e.target.id)||''),nm=String((e.target&&e.target.name)||'');
+  if(id.indexOf('v-')===0||nm.indexOf('v-')===0){vToggles();vPreview();}
+});
+
 /* ============ painel consolidado (fase 5) ============ */
 /* O QUE E. Um so lugar que junta, para a pagina selecionada na barra do preset geral, tudo o
    que vai para a Tag Head e tudo o que vai para a Tag Body -- os dois campos DA PAGINA. O
@@ -26937,6 +28667,10 @@ function fccDaAba(a,p,plano,vals){
     plano.body.push(fccItem(a,'l-out','Captação de leads','Tag Body'));
   }else if(a.id==='uni'){
     plano.comps.push(fccItem(a,'u-out','Checkout','Componente HTML desta página'));
+  }else if(a.id==='alb'){
+    /* Um componente HTML so, na pagina em que a calculadora vive -- mesmo destino do
+       Checkout e da Mini loja. Ela nao toca Tag Head nem Tag Body. */
+    plano.comps.push(fccItem(a,'v-out','Calculadora de álbum','Componente HTML desta página'));
   }else if(a.id==='bor'){
     plano.head.push(fccItem(a,'b-out1','Bordas com efeito — código 1','Tag Head',
       'O código 1 traz os <code>@keyframes</code> <b>desta página</b> — o Prosite não tem cabeçalho global. Se a página já tiver uma versão anterior deste bloco na Tag Head, <b>substitua</b> em vez de acrescentar: dois <code>@keyframes</code> de mesmo nome no mesmo campo colidem, e vale o último.'));
@@ -27437,6 +29171,9 @@ prep('Barra de abas','',function(){
   /* enquanto o painel esta escondido o box mede 0: a previa e remontada ao abrir a aba, ja com
      a largura real da coluna, senao o iframe nasceria na largura de emergencia. */
   liga('aba-pac',function(){trocarAba('pac');aPreview(true);});
+  /* A previa monta ao ABRIR a aba, nunca na carga: com o painel escondido clientWidth e 0 e
+     o iframe nasceria na largura de emergencia. Mesma razao da pac. */
+  liga('aba-alb',function(){trocarAba('alb');vPreview(true);});
 });
 /* O logotipo do topo deixou de ser SVG colado no corpo da pagina e passa a ser desenhado a
    partir de CORUJA_PECAS, a mesma fonte que alimenta os blocos gerados. Passo proprio, e nao
@@ -27864,6 +29601,29 @@ prep('Agendamento por pacote','pac',function(){
   parearCor('a-c1');parearCor('a-c2');parearCor('a-c3');
 },'desenhar a aba com o estado restaurado');
 
+prep('Calculadora de álbum','alb',function(){
+  /* As ligacoes desta aba moram no preparo DELA, no mesmo padrao das demais: cada aba se
+     prepara por conta propria, e o defeito de uma nao derruba as outras. */
+  /* Estado gravado antes desta regra pode trazer numero fora da faixa: prende na carga, para
+     o campo nunca exibir algo diferente do que vCfg vai usar. */
+  if(fcAjustarTodos(V_NUMS))salvarEstado();
+  vTamRender();vFxRender();vAcRender();
+  vToggles();
+  liga('v-tam-add',vTamAdd);
+  liga('v-tam-cancel',function(){vTamLimpar();salvarEstado();});
+  liga('v-fx-add',vFxAdd);
+  liga('v-fx-cancel',function(){vFxLimpar();salvarEstado();});
+  liga('v-ac-add',vAcAdd);
+  liga('v-ac-cancel',function(){vAcLimpar();salvarEstado();});
+  liga('v-gerar',vGerar);
+  liga('v-atualizar',function(){vPreview(true);});
+  liga('v-copy',function(){copiar('v-out','v-cop');});
+  liga('v-pv-desk',function(){vPvModoSet('desk');});
+  liga('v-pv-cel',function(){vPvModoSet('cel');});
+  fcLigarFaixa(V_NUMS,function(){vPreview(true);});
+  parearCor('v-c1');parearCor('v-c2');parearCor('v-c3');
+},'desenhar a aba com o estado restaurado');
+
 /* O preset geral e o ULTIMO passo da partida, e nao por acaso: fcgValoresDaAba le o que esta na
    tela, e a tela so termina de ser desenhada -- e de ter os numeros presos a faixa pelo
    fcAjustarTodos de cada aba -- depois dos passos "desenhar a aba com o estado restaurado".
@@ -27877,24 +29637,26 @@ prep('Agendamento por pacote','pac',function(){
    falha alcanca todas elas -- deixar 'uni loja' faria a barra apontar duas abas por um defeito
    que pode estar em qualquer uma. Cresceu duas vezes: com a Etapa 3 (03/09/2026) e com a leva
    2 (11/09/2026), quando as Bordas ganharam a propria tabela. */
-prep('Textos configuraveis','slide leads tidy uni bor cnt cob loja pac',function(){
+prep('Textos configuraveis','slide leads tidy uni bor cnt cob loja pac alb',function(){
   fcdLigar();
   var d=fcTxtFabricaDiverge();
   if(d.length)throw new Error('o padrao de fabrica destes campos discorda entre o value= do HTML e a tabela da aba: '+d.join(', '));
   var ds=fcSinalTxtDiverge();
   if(ds.length)throw new Error('o rótulo ou o exemplo destes campos discorda entre o HTML e FC_SINAL_TXT: '+ds.join(', '));
+  var dp=fcPagPrefsConferir();
+  if(dp.length)throw new Error('a lista das abas que cobram (FC_PAG_PREFS) discorda de ABAS: '+dp.join('; '));
 },'preparar as seções de texto e conferir os padrões de fábrica');
 /* Passo proprio, e antes dos contadores: se a contagem do identificador divergir da limpeza
    do payload, as recusas das duas abas compostas passariam a citar um orcamento errado. */
 /* Passo proprio, e antes dos contadores pela mesma razao do de cima: numero que o campo oferece
    e numero que a geracao prende tem de ser o mesmo, e a barra vermelha precisa dizer QUAL campo. */
-prep('Faixa dos campos numéricos','slide leads tidy uni bor efe cnt cob loja pac',fcNumConferir,'conferir a faixa declarada nos campos numéricos');
+prep('Faixa dos campos numéricos','slide leads tidy uni bor efe cnt cob loja pac alb',fcNumConferir,'conferir a faixa declarada nos campos numéricos');
 prep('Orçamento do identificador','loja pac',fcIdConferir,'conferir a conta do identificador de conciliação');
 /* Os limites visiveis entram DEPOIS das abas serem desenhadas com o estado restaurado e ANTES
    do preset geral: o contador tem de nascer sobre o valor que o operador vai ler na tela, e nao
    sobre um campo ainda vazio. Passo proprio, com rotulo proprio -- se ele falhar, a barra
    vermelha precisa dizer que foram os contadores, e nao o preset geral. */
-prep('Limites visíveis nos campos','uni bor cob loja pac',fcLimIniciar,'pôr o contador e o limite nos campos que alimentam API');
+prep('Limites visíveis nos campos','uni bor cob loja pac alb',fcLimIniciar,'pôr o contador e o limite nos campos que alimentam API');
 /* A busca e o eco entram DEPOIS de as abas serem desenhadas com o estado restaurado: o eco
    tem de nascer sobre o texto que o operador vai ler na tela, e nao sobre o valor de fabrica.
    Passo proprio, com rotulo proprio -- se ele falhar, a barra vermelha precisa dizer que foi a

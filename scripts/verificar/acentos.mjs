@@ -280,6 +280,15 @@ function marcasDaExpressao(esq, de, ateFecharParenteses){
     if(c === '\x00'){
       let m = k + 1, num = '';
       while(esq[m] !== '\x00' && m < esq.length){ num += esq[m]; m++; }
+      /* LITERAL COMPARADO E VALOR, NUNCA TEXTO NA TELA (15/09/2026). Num ternario dentro do
+         sink -- p.opsel==='multiplo'?'varios':'apenas 1' -- as duas pontas da comparacao
+         caiam na frase, e a aba Mini loja acusava "multiplo -> multiplo" havia meses por um
+         identificador que ninguem le. Acentua-lo quebraria a comparacao; o defeito era da
+         medida. Olha o simbolo significativo antes e depois: '==' ou '!=' de qualquer
+         tamanho de um lado so ja basta para o literal ser operando, e nao frase. */
+      const antesC = esq.slice(Math.max(0, k - 40), k).replace(/\s+$/, '');
+      const depoisC = esq.slice(m + 1).replace(/^\s+/, '');
+      if(/[=!]==?$/.test(antesC) || /^[=!]==?/.test(depoisC)){ k = m; continue; }
       achadas.push(Number(num)); k = m; continue;
     }
     if(c === '(' || c === '[' || c === '{') d++;

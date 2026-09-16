@@ -6,6 +6,9 @@ Atualizado em 03/09/2026. Este arquivo é a lista viva; o histórico do que já 
 
 ## O que já foi entregue
 
+Entregue em 15/09/2026: a **décima primeira aba, Calculadora de álbum** (`docs/specs/2026-09-15-aba-calculadora-de-album-design.md`). Substitui a calculadora escrita à mão que vivia num `<iframe srcdoc>` travado em 560 px na página de álbuns — fora do painel consolidado e sem nenhum parâmetro configurável pela ferramenta. A aba nova torna configuráveis o preço por foto, os tamanhos (com a média de fotos por lâmina, o mínimo de fotos e o SKU de cada um), as faixas de desconto por quantidade de lâminas, os acabamentos opcionais e **todos** os textos da tela, inclusive os dos botões; e traz o pacote de pagamento das quatro abas irmãs (Pix com QR e copia e cola, PayPal item a item, sinal com os três textos, meio prioritário, desconto no Pix, upsell, tamanho do QR, resumo copiável e "Já paguei"). Provado contra as **2.760 combinações** da calculadora publicada, lidas da tela dos dois lados: zero divergências.
+
+
 Entregues em 22/08/2026: os três itens que estavam aqui — o bloco sempre carregar a matemática do desconto, o "Já paguei" no lugar certo e o "OU" entre as duas formas (`docs/specs/2026-08-22-bloco-sempre-com-desconto-design.md`) — e mais a **conferência do formato da chave Pix**, que saiu do primeiro pagamento real (`docs/specs/2026-08-22-formato-da-chave-pix-design.md`).
 
 Entregue também em 22/08/2026, a pedido do dono: o **contador da barra virou opcional** (`docs/specs/2026-08-22-contador-opcional-design.md`) — a barra pode mostrar só a mensagem, com a contagem correndo por dentro.
