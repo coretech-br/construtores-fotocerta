@@ -8,6 +8,7 @@ material de apoio, roda no seu computador.
 
 | Arquivo | O que e | Quando usar |
 |---|---|---|
+| `bateria.sh` | **AS DUAS BATERIAS, e o script que as roda.** `curta` (rede externa fechada), `com-rede` (as cinco que falam com a internet), `tudo` e `--listar`. Imprime o tempo de cada suite e o subtotal de cada bateria, e sai com codigo 1 se QUALQUER uma falhar. **A lista das suites mora aqui, na funcao `lista`** -- e antes de rodar qualquer coisa ele a confere contra o diretorio e contra o codigo das suites, nos tres sentidos (suite nova fora das listas; suite da curta que passou a declarar `permitir:`; suite da com-rede que deixou de declarar), parando com codigo 1 quando discordam. Nao conserta nada: faz o buraco aparecer, como `fccOrfas`. | A cada rodada, antes de publicar: `scripts/verificar/bateria.sh curta`. Ver a secao **As duas baterias** logo abaixo para os tempos medidos e o criterio. |
 | `lib.mjs` | Helpers comuns: achar o Playwright, subir um servidor estatico, abrir a ferramenta com armazenamento limpo, preencher campo/checkbox/radio disparando os mesmos eventos do teclado, ler saida, capturar alerta/erro de console. | Nunca sozinho -- e a base dos outros arquivos. Leia antes de escrever qualquer coisa nova neste diretorio. |
 | `cenario.mjs` | O CENARIO: o que se preenche em cada uma das onze abas antes de gerar (identidade de teste, produtos, pacotes, familias, cupons, cobranca) e a tabela `TEXTOS`, com os 28 campos de texto da passagem configurada. Nao mede nada e nao abre navegador. | Ao acrescentar aba, campo ou texto que precise entrar na prova. E o unico lugar onde o cenario existe -- `geradores.mjs` e `textos-escape.mjs` leem os dois o mesmo. |
 | `geradores.mjs` | Fotografa o TEXTO que as onze abas produzem, em DUAS passagens (`fabrica` e `configurada`), mais o link completo de cada cenario de cobranca, e grava num JSON. | Para provar que uma mudanca no gerador nao alterou um byte do que as outras abas produzem -- e que o texto configurado pelo dono chega ao bloco. Chamado por `regressao.sh`; raramente direto. |
@@ -82,6 +83,18 @@ por vez. As duas condicoes importam, e as duas foram aprendidas caro no mesmo di
 muda no meio da corrida faz o numero descrever duas arvores somadas, e duas baterias ao mesmo
 tempo disputam as **portas fixas** destas suites -- `EADDRINUSE` derruba uma suite em zero
 segundo e produz um vermelho que nao tem defeito nenhum atras.
+
+**Os numeros da tabela sao de UMA passagem, e a bateria foi medida DUAS vezes naquele dia, por
+caminhos independentes.** A segunda deu `curta` **16m08s** e `com rede` **33m57s** (49 de 49
+verdes, arvore conferida por sha256 antes e depois para garantir que ninguem a editou no meio).
+A diferenca entre as duas passagens fica em torno de 4%, e ela nao tem defeito atras: e a
+variacao normal de carga da maquina e da rede. **A leitura certa da tabela e "cerca de 16-17
+minutos" e "cerca de 34 minutos", nao o segundo exato** -- numero de um digito de precisao
+publicado como se tivesse tres e o comeco de alguem tratar 30 segundos de diferenca como
+regressao. As mais caras da `curta`, medidas na segunda passagem, para quem precisar saber onde
+o tempo esta: `duplicar-itens.mjs` 103s, `itens-upsell.mjs` 71s, `upsell-janela.mjs` 70s,
+`upsell.mjs` 60s e `preset-formulario.mjs` 59s -- as cinco juntas sao mais de um terco da
+bateria curta.
 
 **O criterio da divisao, em uma frase:** vai para a bateria com rede o arquivo que declara host
 em `permitir:` na chamada de `comBlocoNaPagina`. Sao cinco -- `tidycal-unificado.mjs`,

@@ -3,9 +3,10 @@
 # A BATERIA DE VERIFICACAO, PARTIDA EM DUAS
 # ============================================================================
 # POR QUE ELA FOI PARTIDA. Rodar TODOS os arquivos deste diretorio leva por
-# volta de 46 minutos (medido em 16/09/2026, ver o README). Bateria que custa
-# 46 minutos deixa de ser rodada, e bateria que nao roda nao mede nada -- e o
-# mesmo defeito que este projeto ja conhece de outro lado: vermelho que e
+# volta de 50 minutos -- MEDIDO em 16/09/2026, em duas passagens independentes
+# do mesmo dia (50m05s e 51m00s), com a maquina rodando uma bateria por vez.
+# Bateria que custa isso deixa de ser rodada, e bateria que nao roda nao mede
+# nada -- e o mesmo defeito que este projeto ja conhece de outro lado: vermelho que e
 # sempre vermelho esconde o proximo, e suite que ninguem roda esconde todos.
 #
 #   scripts/verificar/bateria.sh curta      # rede externa FECHADA
