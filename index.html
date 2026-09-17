@@ -1110,6 +1110,20 @@
       <button type="button" class="botao mini" id="s-pv-desk" aria-pressed="true">Computador</button>
       <button type="button" class="botao mini claro" id="s-pv-cel" aria-pressed="false">Celular</button>
       </div>
+      <fieldset>
+      <legend>Fundo da prévia <small>(não entra no código gerado)</small></legend>
+      <div class="radios">
+      <label><input type="radio" name="s-pvfundo" value="claro" checked><span>Página clara</span></label>
+      <label><input type="radio" name="s-pvfundo" value="escuro"><span>Página escura</span></label>
+      <label><input type="radio" name="s-pvfundo" value="papel"><span>Papel (bege)</span></label>
+      <label><input type="radio" name="s-pvfundo" value="cor"><span>Cor da minha página</span></label>
+      </div>
+      <div id="s-pvcor-campo" style="display:none">
+      <label>Cor de fundo da prévia <small>(capture com o conta-gotas a cor real da seção onde o bloco vai ficar)</small></label>
+      <div class="cor-linha"><input type="color" id="s-pvcor" value="#FFFFFF"><input type="text" id="s-pvcor-t" value="#FFFFFF"></div>
+      </div>
+      <p class="ajuda"><b>Só da prévia:</b> o código gerado sai exatamente igual com qualquer fundo escolhido aqui. Ele existe porque o mesmo bloco pode ir para uma <b>landing page com esquema de cores próprio</b>, e cor sobre fundo errado engana — o que parece legível sobre branco pode sumir sobre uma seção escura.</p>
+      </fieldset>
       <div id="s-pv-box"><p class="pv-vazia">A prévia do slideshow aparece aqui. Adicione imagens e clique em "Atualizar prévia".</p></div>
       <p class="ajuda"><b>O que a prévia mostra:</b> o próprio código da caixa ao lado, rodando num quadro isolado — não é um desenho parecido. <b>O que ainda difere da página publicada:</b> a largura é a largura lógica do botão acima (reduzida na tela só para caber na coluna), enquanto na página real vale a janela do visitante; as fotos vêm da internet, então a que demora aqui demora lá; e "arrastar" só se experimenta num aparelho com toque — no computador o quadro reage a mouse, teclado e cliques.</p>
       </div>
@@ -1465,6 +1479,20 @@
       <button type="button" class="botao mini" id="l-pv-desk" aria-pressed="true">Computador</button>
       <button type="button" class="botao mini claro" id="l-pv-cel" aria-pressed="false">Celular</button>
       </div>
+      <fieldset>
+      <legend>Fundo da prévia <small>(não entra no código gerado)</small></legend>
+      <div class="radios">
+      <label><input type="radio" name="l-pvfundo" value="claro" checked><span>Página clara</span></label>
+      <label><input type="radio" name="l-pvfundo" value="escuro"><span>Página escura</span></label>
+      <label><input type="radio" name="l-pvfundo" value="papel"><span>Papel (bege)</span></label>
+      <label><input type="radio" name="l-pvfundo" value="cor"><span>Cor da minha página</span></label>
+      </div>
+      <div id="l-pvcor-campo" style="display:none">
+      <label>Cor de fundo da prévia <small>(capture com o conta-gotas a cor real da seção onde o bloco vai ficar)</small></label>
+      <div class="cor-linha"><input type="color" id="l-pvcor" value="#FFFFFF"><input type="text" id="l-pvcor-t" value="#FFFFFF"></div>
+      </div>
+      <p class="ajuda"><b>Só da prévia:</b> o código gerado sai exatamente igual com qualquer fundo escolhido aqui. Ele existe porque o mesmo bloco pode ir para uma <b>landing page com esquema de cores próprio</b>, e cor sobre fundo errado engana — o que parece legível sobre branco pode sumir sobre uma seção escura.</p>
+      </fieldset>
       <div id="l-pv-box"></div>
       <p class="ajuda">A prévia roda <b>o próprio código da caixa ao lado</b>, dentro de um quadro isolado — não é um desenho parecido. <b>O que ainda difere da página publicada:</b> o quadro abre o pop-up sozinho (na página real ele espera o clique ou o tempo do modo automático), e por isso o botão flutuante aparece atrás do véu escuro; o foco automático do campo nome e o <code>window.open</code> do botão enviar são <b>neutralizados só dentro do quadro</b>, senão a prévia roubaria o cursor do formulário e abriria o WhatsApp a cada atualização — o código gerado não é afetado; o aviso de horário usa o relógio deste computador convertido para o fuso configurado; a largura é a largura lógica do botão acima (reduzida na tela só para caber na coluna), enquanto na página real vale a janela do visitante; e o quadro não carrega o CSS do tema do site — <b>e a fonte muda a largura do texto</b>, então o que aqui cabe numa linha pode não caber na sua página.</p>
       <p class="ajuda alerta"><b>O quadro é reduzido para caber no painel</b>, e a redução aparece ao lado dos botões acima. Numa escala de 70%, um desalinhamento de 12 pixels vira 8 na tela e passa despercebido — foi assim que um cartão desalinhado chegou à página publicada em 17/09/2026. Quando algo parecer estranho, use <b>Abrir em tamanho real</b>: o mesmo código, sem redução, em outra aba.</p>
@@ -2102,6 +2130,20 @@
           <button type="button" class="botao mini" id="u-pv-desk" aria-pressed="true">Computador</button>
           <button type="button" class="botao mini claro" id="u-pv-cel" aria-pressed="false">Celular</button>
         </div>
+      <fieldset>
+      <legend>Fundo da prévia <small>(não entra no código gerado)</small></legend>
+      <div class="radios">
+      <label><input type="radio" name="u-pvfundo" value="claro" checked><span>Página clara</span></label>
+      <label><input type="radio" name="u-pvfundo" value="escuro"><span>Página escura</span></label>
+      <label><input type="radio" name="u-pvfundo" value="papel"><span>Papel (bege)</span></label>
+      <label><input type="radio" name="u-pvfundo" value="cor"><span>Cor da minha página</span></label>
+      </div>
+      <div id="u-pvcor-campo" style="display:none">
+      <label>Cor de fundo da prévia <small>(capture com o conta-gotas a cor real da seção onde o bloco vai ficar)</small></label>
+      <div class="cor-linha"><input type="color" id="u-pvcor" value="#FFFFFF"><input type="text" id="u-pvcor-t" value="#FFFFFF"></div>
+      </div>
+      <p class="ajuda"><b>Só da prévia:</b> o código gerado sai exatamente igual com qualquer fundo escolhido aqui. Ele existe porque o mesmo bloco pode ir para uma <b>landing page com esquema de cores próprio</b>, e cor sobre fundo errado engana — o que parece legível sobre branco pode sumir sobre uma seção escura.</p>
+      </fieldset>
         <div id="u-pv-box"></div>
       </div>
       <p class="ajuda">A prévia <b>roda o código gerado de verdade</b>: é o mesmo bloco que sai na saída ao lado, executando dentro de um quadro isolado — dá para marcar produtos, mudar quantidade, aplicar cupom, gerar o Pix e ler o Copia e Cola. Ela também passa pelas <b>mesmas recusas</b> do botão "Gerar código": enquanto a configuração for recusada, o quadro mostra a recusa e o motivo, nunca um carrinho.<br><br><b>O que a prévia prova sobre o PayPal:</b> o botão é um desenho, mas logo abaixo dele a prévia mostra o <b>valor que iria na ordem</b> e a <b>decisão do clique</b> (segue para o PayPal ou recusa, com o motivo) — os dois medidos chamando o <code>createOrder</code> e o <code>onClick</code> do próprio bloco, a cada mudança do carrinho. É por isso que o valor do sinal e as recusas do lado PayPal são verificáveis aqui sem baixar o SDK e sem mandar seu Client ID para fora.<br><br><b>O que ela ainda não prova:</b> o que depende da resposta do PayPal — a janela de pagamento, a captura e as mensagens de sucesso e de erro que vêm dela; o QR Code é real, mas depende da biblioteca do cdnjs (sem internet ele some e só o Copia e Cola aparece); o quadro não carrega o CSS do tema do site; e o botão "Já paguei" <b>não abre o WhatsApp aqui</b> — o quadro desliga a abertura de abas, e avisa em vermelho se não conseguir desligar. <b>Com o upsell ligado, porém, clicar em “Já paguei” leva a prévia para a sua página de upsell</b> — exatamente como a página publicada faria. O quadro <b>não consegue desligar isso</b>: o endereço da página é imutável no navegador (medido em 13/09/2026 — trocar <code>location</code>, <code>location.href</code> ou <code>location.assign</code> lança erro, e a troca direta falha em silêncio), e desligar por conta própria só seria possível mudando o código gerado, que é justamente o que a prévia não pode fazer. Mexer em qualquer campo remonta a prévia.</p>
@@ -2792,6 +2834,20 @@
       <button type="button" class="botao mini" id="c-pv-desk" aria-pressed="true">Computador</button>
       <button type="button" class="botao mini claro" id="c-pv-cel" aria-pressed="false">Celular</button>
       </div>
+      <fieldset>
+      <legend>Fundo da prévia <small>(não entra no código gerado)</small></legend>
+      <div class="radios">
+      <label><input type="radio" name="c-pvfundo" value="claro" checked><span>Página clara</span></label>
+      <label><input type="radio" name="c-pvfundo" value="escuro"><span>Página escura</span></label>
+      <label><input type="radio" name="c-pvfundo" value="papel"><span>Papel (bege)</span></label>
+      <label><input type="radio" name="c-pvfundo" value="cor"><span>Cor da minha página</span></label>
+      </div>
+      <div id="c-pvcor-campo" style="display:none">
+      <label>Cor de fundo da prévia <small>(capture com o conta-gotas a cor real da seção onde o bloco vai ficar)</small></label>
+      <div class="cor-linha"><input type="color" id="c-pvcor" value="#FFFFFF"><input type="text" id="c-pvcor-t" value="#FFFFFF"></div>
+      </div>
+      <p class="ajuda"><b>Só da prévia:</b> o código gerado sai exatamente igual com qualquer fundo escolhido aqui. Ele existe porque o mesmo bloco pode ir para uma <b>landing page com esquema de cores próprio</b>, e cor sobre fundo errado engana — o que parece legível sobre branco pode sumir sobre uma seção escura.</p>
+      </fieldset>
       <div id="c-pv-box"></div>
       </div>
       <p class="ajuda">A prévia roda o código gerado de verdade: é o mesmo bloco que sai na saída ao lado, executando dentro de um quadro isolado. O que ainda difere da página publicada: a barra fixa gruda no topo do quadro, não da janela; o relógio é o do seu computador; a contagem sempre começa agora, enquanto na página real ela conta a partir da primeira visita de cada visitante; o botão de fechar esquece o clique a cada atualização da prévia; o modo <b>Computador</b> é exibido reduzido para caber na coluna, então julgue o tamanho da fonte pelo modo <b>Celular</b>, que sai em tamanho real; e o quadro não carrega o CSS do tema do site.</p>
@@ -3121,6 +3177,20 @@
       <button type="button" class="botao mini claro" id="p-pv-venc" aria-pressed="false">Prazo vencido</button>
       <button type="button" class="botao mini claro" id="p-pv-vazio" aria-pressed="false">Sem parâmetros</button>
       </div>
+      <fieldset>
+      <legend>Fundo da prévia <small>(não entra no código gerado)</small></legend>
+      <div class="radios">
+      <label><input type="radio" name="p-pvfundo" value="claro" checked><span>Página clara</span></label>
+      <label><input type="radio" name="p-pvfundo" value="escuro"><span>Página escura</span></label>
+      <label><input type="radio" name="p-pvfundo" value="papel"><span>Papel (bege)</span></label>
+      <label><input type="radio" name="p-pvfundo" value="cor"><span>Cor da minha página</span></label>
+      </div>
+      <div id="p-pvcor-campo" style="display:none">
+      <label>Cor de fundo da prévia <small>(capture com o conta-gotas a cor real da seção onde o bloco vai ficar)</small></label>
+      <div class="cor-linha"><input type="color" id="p-pvcor" value="#FFFFFF"><input type="text" id="p-pvcor-t" value="#FFFFFF"></div>
+      </div>
+      <p class="ajuda"><b>Só da prévia:</b> o código gerado sai exatamente igual com qualquer fundo escolhido aqui. Ele existe porque o mesmo bloco pode ir para uma <b>landing page com esquema de cores próprio</b>, e cor sobre fundo errado engana — o que parece legível sobre branco pode sumir sobre uma seção escura.</p>
+      </fieldset>
       <div id="p-pv-box"></div>
       </div>
       <p class="ajuda">A prévia roda o código gerado de verdade: é o mesmo bloco que sai na saída ao lado, executando dentro de um quadro isolado que recebe um <b>endereço simulado</b> com os parâmetros da cobrança da seção 3 — <b>com o mesmo selo</b> que sai no link, calculado pela mesma conta. Os quatro botões acima trocam esse endereço: em <b>Link editado</b> um dígito do código Pix é trocado <i>depois</i> de o link ser selado, exatamente como aconteceria se alguém mexesse no link enviado; em <b>Prazo vencido</b> o link é íntegro, mas com validade de <b>ontem no horário de Brasília</b> — o mesmo fuso em que o prazo termina, e é o único estado que você não conseguiria provocar sem esperar a data chegar. O que ainda difere da página publicada: o QR Code é desenhado por uma biblioteca baixada da internet, então no quadro ele só aparece depois que ela carrega; o botão do PayPal não é o botão de verdade (o SDK não roda na prévia) e sai como desenho; o botão “Já paguei” não abre o WhatsApp aqui (o quadro desliga a abertura de abas, e avisa em vermelho se não conseguir desligar); e o quadro não carrega o CSS do tema do site. <b>Com o upsell ligado, porém, clicar em “Já paguei” leva a prévia para a sua página de upsell</b> — exatamente como a página publicada faria. O quadro <b>não consegue desligar isso</b>: o endereço da página é imutável no navegador (medido em 13/09/2026 — trocar <code>location</code>, <code>location.href</code> ou <code>location.assign</code> lança erro, e a troca direta falha em silêncio), e desligar por conta própria só seria possível mudando o código gerado, que é justamente o que a prévia não pode fazer. Mexer em qualquer campo remonta a prévia.</p>
@@ -3671,6 +3741,20 @@
       <button type="button" class="botao mini" id="m-pv-desk" aria-pressed="true">Computador</button>
       <button type="button" class="botao mini claro" id="m-pv-cel" aria-pressed="false">Celular</button>
       </div>
+      <fieldset>
+      <legend>Fundo da prévia <small>(não entra no código gerado)</small></legend>
+      <div class="radios">
+      <label><input type="radio" name="m-pvfundo" value="claro" checked><span>Página clara</span></label>
+      <label><input type="radio" name="m-pvfundo" value="escuro"><span>Página escura</span></label>
+      <label><input type="radio" name="m-pvfundo" value="papel"><span>Papel (bege)</span></label>
+      <label><input type="radio" name="m-pvfundo" value="cor"><span>Cor da minha página</span></label>
+      </div>
+      <div id="m-pvcor-campo" style="display:none">
+      <label>Cor de fundo da prévia <small>(capture com o conta-gotas a cor real da seção onde o bloco vai ficar)</small></label>
+      <div class="cor-linha"><input type="color" id="m-pvcor" value="#FFFFFF"><input type="text" id="m-pvcor-t" value="#FFFFFF"></div>
+      </div>
+      <p class="ajuda"><b>Só da prévia:</b> o código gerado sai exatamente igual com qualquer fundo escolhido aqui. Ele existe porque o mesmo bloco pode ir para uma <b>landing page com esquema de cores próprio</b>, e cor sobre fundo errado engana — o que parece legível sobre branco pode sumir sobre uma seção escura.</p>
+      </fieldset>
       <div id="m-pv-box"></div>
       </div>
       <p class="ajuda">A prévia <b>executa o código gerado de verdade</b>: é o mesmo bloco que sai na caixa ao lado, rodando dentro de um quadro isolado. Filtro, cartão de detalhe, carrinho, cupom e o Pix funcionam aqui como funcionarão na página. <b>O que ainda difere da página publicada:</b> o carrinho do quadro é guardado numa memória de mentira (o quadro não suja o carrinho do seu navegador, e por isso ele volta vazio a cada atualização da prévia); o QR Code é desenhado por uma biblioteca baixada da internet, então só aparece depois que ela carrega; o botão do PayPal <b>não é o botão de verdade</b> — o SDK não roda aqui e ele sai como desenho, com o <b>valor que iria na ordem</b> medido dentro do próprio bloco; o botão "Já paguei" <b>não abre o WhatsApp</b> — o quadro desliga a abertura de abas, e avisa em vermelho se não conseguir desligar; e o quadro não carrega o CSS do tema do site. <b>Com o upsell ligado, porém, clicar em “Já paguei” leva a prévia para a sua página de upsell</b> — exatamente como a página publicada faria. O quadro <b>não consegue desligar isso</b>: o endereço da página é imutável no navegador (medido em 13/09/2026 — trocar <code>location</code>, <code>location.href</code> ou <code>location.assign</code> lança erro, e a troca direta falha em silêncio), e desligar por conta própria só seria possível mudando o código gerado, que é justamente o que a prévia não pode fazer. Mexer em qualquer campo remonta a prévia.</p>
@@ -4375,6 +4459,20 @@
       <button type="button" class="botao mini claro" id="a-pv-real">Abrir em tamanho real</button>
       <span class="rotulo" id="a-pv-escala"></span>
       </div>
+      <fieldset>
+      <legend>Fundo da prévia <small>(não entra no código gerado)</small></legend>
+      <div class="radios">
+      <label><input type="radio" name="a-pvfundo" value="claro" checked><span>Página clara</span></label>
+      <label><input type="radio" name="a-pvfundo" value="escuro"><span>Página escura</span></label>
+      <label><input type="radio" name="a-pvfundo" value="papel"><span>Papel (bege)</span></label>
+      <label><input type="radio" name="a-pvfundo" value="cor"><span>Cor da minha página</span></label>
+      </div>
+      <div id="a-pvcor-campo" style="display:none">
+      <label>Cor de fundo da prévia <small>(capture com o conta-gotas a cor real da seção onde o bloco vai ficar)</small></label>
+      <div class="cor-linha"><input type="color" id="a-pvcor" value="#FFFFFF"><input type="text" id="a-pvcor-t" value="#FFFFFF"></div>
+      </div>
+      <p class="ajuda"><b>Só da prévia:</b> o código gerado sai exatamente igual com qualquer fundo escolhido aqui. Ele existe porque o mesmo bloco pode ir para uma <b>landing page com esquema de cores próprio</b>, e cor sobre fundo errado engana — o que parece legível sobre branco pode sumir sobre uma seção escura.</p>
+      </fieldset>
       <div id="a-pv-box"></div>
       </div>
       <p class="ajuda">A prévia roda o código gerado de verdade: escolher uma família mostra só os pacotes dela, escolher um pacote acende o passo do calendário, e o preço troca ao vivo. O modo Celular usa <b>380 pixels</b> de largura lógica — abaixo dos dois cortes configurados na seção <span class="sec-ref" data-sec="a-aparencia"></span> no padrão de fábrica, então os cartões aparecem como <b>linhas compactas</b>. Se você baixar a "Largura de corte das linhas compactas" para menos de 380, a prévia passa a mostrar cartões altos num quadro estreito: é o que a página publicada faria nessa largura, não um defeito da prévia. O que ainda difere da página publicada: o calendário do TidyCal não carrega aqui (é outro domínio, e a prévia não deve depender de rede) — no lugar dele aparece um retângulo cinza avisando "Aqui entra o calendário do TidyCal deste pacote."; e o quadro não carrega o CSS do tema do site.</p>
@@ -4846,6 +4944,20 @@
       <button type="button" class="botao mini" id="v-pv-desk" aria-pressed="true">Computador</button>
       <button type="button" class="botao mini claro" id="v-pv-cel" aria-pressed="false">Celular</button>
       </div>
+      <fieldset>
+      <legend>Fundo da prévia <small>(não entra no código gerado)</small></legend>
+      <div class="radios">
+      <label><input type="radio" name="v-pvfundo" value="claro" checked><span>Página clara</span></label>
+      <label><input type="radio" name="v-pvfundo" value="escuro"><span>Página escura</span></label>
+      <label><input type="radio" name="v-pvfundo" value="papel"><span>Papel (bege)</span></label>
+      <label><input type="radio" name="v-pvfundo" value="cor"><span>Cor da minha página</span></label>
+      </div>
+      <div id="v-pvcor-campo" style="display:none">
+      <label>Cor de fundo da prévia <small>(capture com o conta-gotas a cor real da seção onde o bloco vai ficar)</small></label>
+      <div class="cor-linha"><input type="color" id="v-pvcor" value="#fbfaf7"><input type="text" id="v-pvcor-t" value="#fbfaf7"></div>
+      </div>
+      <p class="ajuda"><b>Só da prévia:</b> o código gerado sai exatamente igual com qualquer fundo escolhido aqui. Ele existe porque o mesmo bloco pode ir para uma <b>landing page com esquema de cores próprio</b>, e cor sobre fundo errado engana — o que parece legível sobre branco pode sumir sobre uma seção escura.</p>
+      </fieldset>
       <div id="v-pv-box"></div>
       </div>
       <p class="ajuda">A prévia <b>executa o código gerado de verdade</b>: é o mesmo bloco que sai na caixa ao lado, rodando dentro de um quadro isolado. Trocar o tamanho, arrastar a quantidade, marcar acabamentos e gerar o Pix funcionam aqui como funcionarão na página. O modo Celular usa <b>380 pixels</b> de largura lógica — abaixo do corte configurado na seção <span class="sec-ref" data-sec="v-aparencia"></span> no padrão de fábrica, então o bloco aparece numa coluna só. <b>O que ainda difere da página publicada:</b> o QR Code é desenhado por uma biblioteca baixada da internet, então só aparece depois que ela carrega; o botão do PayPal <b>não é o botão de verdade</b> — o SDK não roda aqui e ele sai como desenho, com o <b>valor que iria na ordem</b> medido dentro do próprio bloco; o botão "Já paguei" <b>não abre o WhatsApp</b> — o quadro desliga a abertura de abas, e avisa em vermelho se não conseguir desligar; e o quadro não carrega o CSS do tema do site. Mexer em qualquer campo remonta a prévia.</p>
@@ -4926,8 +5038,8 @@
    QUEM IMPEDE QUE ELE MINTA: scripts/conferir-versoes.sh, que recusa index.html
    alterado sem a versao mudar junto -- a mesma disciplina do fc-compartilhado.js,
    e pela mesma razao: carimbo que ninguem confere e o defeito de amanha. */
-var FC_VERSAO='2026-09-17c';
-var FC_PUBLICADO='2026-09-17 00:58';   /* America/Sao_Paulo -- escrito pelo carimbador */
+var FC_VERSAO='2026-09-17d';
+var FC_PUBLICADO='2026-09-17 01:10';   /* America/Sao_Paulo -- escrito pelo carimbador */
 (function(){
   var el=document.getElementById('fc-versao');
   if(!el) return;
@@ -5891,6 +6003,7 @@ var FCR_ROTULOS={novo:'novo',corrigido:'corr',melhorado:'melh',atencao:'aten',ex
 /* A lista, da versao mais recente para a mais antiga. NAO reordenar: o agrupamento por
    dia assume que versoes do mesmo dia estao juntas, e o desenho respeita esta ordem. */
 var FCR_NOTAS=[
+ {v:"2026-09-17d",d:"17 de setembro de 2026",itens:[["Novo","**Todos os construtores ganharam o seletor de fundo da prévia.** Página clara, página escura, papel, ou **a cor da sua página** — capturada com o conta-gotas. Antes o fundo era fixo em branco e não dava para ver como as suas cores ficam sobre o fundo real."],["Novo","**A escolha é de cada construtor, e não uma só para todos.** O mesmo bloco pode ir para uma landing page com esquema de cores próprio, então cada aba guarda o fundo dela."],["Atenção","**A cor não entra no código gerado** — ela é só da prévia. O fundo da página publicada continua sendo o do seu tema ou o da landing page onde você colar."],["Melhorado","As abas **Bordas** e **Efeitos de página**, que já tinham esse controle, passaram a decidir a cor pela mesma regra das outras. Antes cada prévia fixava o fundo por conta própria, e uma delas usava um bege diferente sem que ninguém tivesse escolhido isso."],["Atenção","Quem nunca mexer no campo não vê diferença: todas nascem em **Página clara**, que é o fundo que essas prévias sempre tiveram."]]},
  {v:"2026-09-17c",d:"17 de setembro de 2026",itens:[["Melhorado","Agendamento por Pacote: no **computador**, a duração passou a aparecer **ao lado do nome**, como já aparecia no celular. Antes ficava na linha de baixo, e os dois formatos não combinavam."]]},
  {v:"2026-09-17b",d:"17 de setembro de 2026",itens:[["Novo","**A prévia passou a dizer quando está reduzida.** Ao lado dos botões *Computador* e *Celular* aparece agora, por exemplo, **reduzido a 69%** — ou *tamanho real*, quando o quadro cabe inteiro. Antes ela dava a impressão de tamanho real e não era."],["Novo","E um botão **Abrir em tamanho real**, que mostra o mesmo código em outra aba, **sem redução**. É o que usar quando algo parecer estranho na prévia."],["Atenção","Isso resolve o que aconteceu ontem: o cartão desalinhado **estava** na prévia, mas como ela desenha em 1040 pixels e encolhe para caber no painel, um desalinhamento de 12 pixels virava 8 na tela e passava despercebido. A prévia não estava errada — estava pequena, e não avisava."],["Atenção","O texto de ajuda da prévia também passou a dizer que **a fonte do seu site muda a largura do texto**: o que aqui cabe numa linha pode não caber na sua página. Foi por isso que uma etiqueta caiu de linha lá e não aqui."]]},
  {v:"2026-09-17a",d:"17 de setembro de 2026",itens:[["Corrigido","Agendamento por Pacote: o conteúdo dos cartões da vitrine ficava **centralizado na vertical**. Numa fileira, os cartões têm todos a mesma altura, então o mais curto — o de 1 hora, que não tem a etiqueta do valor por hora — aparecia **flutuando no meio**, desalinhado dos vizinhos. Agora o conteúdo encosta no topo e a primeira linha de todos os cartões fica na mesma altura."],["Atenção","A causa era o navegador: ele centraliza sozinho o conteúdo de um botão, e o cartão da vitrine é um botão. Não era escolha de desenho de ninguém."]]},
@@ -8714,7 +8827,12 @@ var CORES_LIVRES=[['l-corbtn','#25D366'],['l-c1','#075E54'],['l-c2','#ffffff'],[
   ['u-c1','#075E54'],['u-c2','#ffffff'],['u-c3','#333333'],
   ['m-c1','#0F3A30'],['m-c2','#ffffff'],['m-c3','#333333'],
   ['b-f1','#8A4A32'],['b-f2','#B5674A'],['b-c1','#9C5638'],['b-c2','#FFC94A'],['b-c3','#FFF6D8'],
-  ['b-c4','#F7EFDF'],['b-pvcor','#23281F'],['b-selo-f','#9C5638'],['b-selo-c','#FFF6D8'],
+  ['b-c4','#F7EFDF'],['b-pvcor','#23281F'],
+  /* o fundo da previa de cada construtor -- so da ferramenta, nunca do codigo gerado */
+  ['s-pvcor','#FFFFFF'],['l-pvcor','#FFFFFF'],['u-pvcor','#FFFFFF'],
+  ['a-pvcor','#FFFFFF'],['c-pvcor','#FFFFFF'],['p-pvcor','#FFFFFF'],
+  ['m-pvcor','#FFFFFF'],['v-pvcor','#fbfaf7'],
+['b-selo-f','#9C5638'],['b-selo-c','#FFF6D8'],
   ['e-cor','#FFFFFF'],
   ['e-cf-c1','#E23A3A'],['e-cf-c2','#FFC94A'],['e-cf-c3','#3FA96B'],['e-cf-c4','#4A90E2'],
   ['e-au-c1','#8A4A32'],['e-au-c2','#0F3A30'],['e-au-c3','#9C5638'],
@@ -13138,7 +13256,7 @@ function sPvDoc(cfg){
   h+='<meta name="viewport" content="width=device-width,initial-scale=1">\n';
   h+='<sty'+'le>\n';
   h+='html,body{margin:0;padding:0}\n';
-  h+='body{background:#FFFFFF;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Ubuntu,sans-serif;padding:12px 0}\n';
+  h+='body{background:'+fcPvFundoDe('s','#FFFFFF')+';font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Ubuntu,sans-serif;padding:12px 0}\n';
   h+='.s-pv-falso{background:#EDEAE1;color:#A9A294;border-radius:6px;margin:10px 12px;padding:0 14px;';
   h+='height:78px;display:flex;align-items:center;font-size:12px;letter-spacing:.04em}\n';
   h+='</sty'+'le>\n</head>\n<body>\n';
@@ -14532,7 +14650,7 @@ function lPvDoc(v){
   h+='<meta name="viewport" content="width=device-width,initial-scale=1">\n';
   h+='<sty'+'le>\n';
   h+='html,body{margin:0;padding:0}\n';
-  h+='body{background:#FFFFFF;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Ubuntu,sans-serif;padding:12px 0}\n';
+  h+='body{background:'+fcPvFundoDe('l','#FFFFFF')+';font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Ubuntu,sans-serif;padding:12px 0}\n';
   h+='.l-pv-falso{background:#EDEAE1;color:#A9A294;border-radius:6px;margin:10px 12px;padding:0 14px;';
   h+='height:78px;display:flex;align-items:center;font-size:12px;letter-spacing:.04em}\n';
   h+='</sty'+'le>\n</head>\n<body>\n';
@@ -16339,7 +16457,7 @@ function uPvDoc(cfg){
   h+='<meta name="viewport" content="width=device-width,initial-scale=1">\n';
   h+='<sty'+'le>\n';
   h+='html,body{margin:0;padding:0}\n';
-  h+='body{background:#FFFFFF;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Ubuntu,sans-serif;padding:16px 12px}\n';
+  h+='body{background:'+fcPvFundoDe('u','#FFFFFF')+';font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Ubuntu,sans-serif;padding:16px 12px}\n';
   h+='.u-pv-falso{background:#EDEAE1;color:#A9A294;border-radius:6px;margin:10px 0;padding:0 14px;';
   h+='height:70px;display:flex;align-items:center;font-size:12px;letter-spacing:.04em}\n';
   h+='</sty'+'le>\n</head>\n<body>\n';
@@ -17914,12 +18032,106 @@ function bNatalMarcar(t){
 /* cabecalho da regra de movimento reduzido: uma string so para o codigo 1 e para a previa,
    senao as duas poderiam passar a casar condicoes diferentes sem ninguem notar */
 var B_MEDIA_RM='@media (prefers-reduced-motion: reduce) {';
-var B_PV_FUNDOS={papel:'#F5F1E6',claro:'#FFFFFF',escuro:'#141414'};
-function bPvFundo(){
-  var k=radio('b-pvfundo');
-  if(k==='cor')return corValida($('b-pvcor-t').value)?$('b-pvcor-t').value:'#23281F';
-  return B_PV_FUNDOS[k]||B_PV_FUNDOS.papel;
+/* ============================================================================
+   O FUNDO DA PREVIA -- uma regra so, para todos os construtores
+   ============================================================================
+   NASCEU NA ABA BORDAS, onde o fundo sempre foi essencial: halo e facho sao
+   semitransparentes e se misturam com o que esta atras. Em 17/09/2026 o dono pediu o
+   mesmo controle em TODOS os construtores, e a razao dele fecha a questao: "os codigos
+   gerados podem ser usados em landing pages, que podem ter esquema de cores diferentes
+   do padrao do site. Eu decido qual cor usar em cada construtor." Por isso o campo e
+   POR ABA, e nao um so na barra do topo.
+
+   O QUE SE UNIFICA E A REGRA, e nao a saida: cada aba tem os proprios campos (e o
+   proprio valor gravado), e todas leem por esta funcao. Antes dela, OITO construtores
+   fixavam o fundo da previa a mao no documento -- sete em '#FFFFFF' e a Calculadora de
+   album em '#fbfaf7', divergencia que ninguem tinha escolhido.
+
+   ESTA COR NUNCA ENTRA NO CODIGO GERADO. Ela e da ferramenta: o fundo da pagina real e
+   do tema do Prosite ou da landing page onde o bloco for colado. Por isso ela tambem e
+   declarada em 'naoEmite' no registro ABAS -- sem isso, trocar o fundo da previa faria o
+   painel consolidado anunciar que o bloco da pagina esta velho, e aviso falso e o comeco
+   de o operador parar de ler os verdadeiros. */
+var FC_PV_FUNDOS={papel:'#F5F1E6',claro:'#FFFFFF',escuro:'#141414'};
+function fcPvFundoDe(pref,padrao){
+  var k=radio(pref+'-pvfundo');
+  if(!k)return padrao||FC_PV_FUNDOS.claro;
+  if(k==='cor'){
+    var el=$(pref+'-pvcor-t');
+    return (el&&corValida(el.value))?el.value:(padrao||FC_PV_FUNDOS.claro);
+  }
+  return FC_PV_FUNDOS[k]||padrao||FC_PV_FUNDOS.claro;
 }
+/* ONDE O FUNDO DA PREVIA FICA GUARDADO, e por que NAO no estado da aba.
+   Ele e uma preferencia de TRABALHO, e nao configuracao da campanha: nao muda um byte do
+   codigo gerado. Guardando-o numa chave propria da ferramenta, o estado das abas, os presets
+   e os arquivos de "Exportar tudo" que o dono ja tem continuam com o MESMO formato -- e a
+   pergunta "trocar o fundo da previa envelhece o bloco da pagina?" nem chega a existir, em vez
+   de precisar ser respondida com uma declaracao em 'naoEmite'.
+
+   DIVERGENCIA DECLARADA: as abas Bordas e Efeitos de pagina ja tinham este controle antes
+   (agosto e setembro de 2026) e gravam no estado DELAS. Elas nao foram migradas de proposito:
+   mover as chaves mudaria o formato de backups que o dono ja tem em arquivo, e o ganho seria
+   zero para ele. O que importa estar unificado -- a REGRA que decide a cor -- ja esta, em
+   fcPvFundoDe; as duas leem por ela como todas as outras. */
+var FC_PV_CHAVE='fcConstrutoresPvFundo';
+var FC_PV_ABAS=['s','l','u','a','c','p','m','v'];
+function fcPvFundoLer(){
+  var o=fcLerJson(FC_PV_CHAVE);
+  return (o&&typeof o==='object')?o:{};
+}
+function fcPvFundoGravar(){
+  var o={},i,pref,el;
+  for(i=0;i<FC_PV_ABAS.length;i++){
+    pref=FC_PV_ABAS[i];
+    el=$(pref+'-pvcor-t');
+    o[pref]={modo:radio(pref+'-pvfundo')||'claro',cor:el?el.value:''};
+  }
+  try{localStorage.setItem(FC_PV_CHAVE,JSON.stringify(o));}catch(e){}
+}
+/* Na partida: devolve o que estava escolhido e acerta a visibilidade do campo de cor. Aba sem
+   nada guardado nasce em "Pagina clara", que e o fundo que estas previas sempre tiveram --
+   entao quem nunca mexer nao ve diferenca nenhuma. */
+function fcPvFundoRestaurar(){
+  var o=fcPvFundoLer(),i,pref,d,el;
+  for(i=0;i<FC_PV_ABAS.length;i++){
+    pref=FC_PV_ABAS[i];
+    d=o[pref]||{};
+    setRadio(pref+'-pvfundo',d.modo||'claro');
+    if(d.cor&&corValida(d.cor)){
+      el=$(pref+'-pvcor-t');if(el)el.value=d.cor;
+      el=$(pref+'-pvcor');if(el)el.value=d.cor;
+    }
+    fcPvFundoCampo(pref);
+  }
+}
+/* O campo de cor livre so aparece com "Cor da minha pagina" escolhida -- mesma mecanica
+   que a aba Bordas ja usava, agora numa funcao so. */
+/* UM OUVINTE SO, para as oito abas: o radio muda -> mostra/esconde o campo de cor e remonta
+   a previa daquela aba. Escrever isto oito vezes seria oito lugares para esquecer um. */
+document.addEventListener('change',function(e){
+  var n=e.target&&e.target.name;
+  if(!n||n.indexOf('-pvfundo')<0)return;
+  var pref=n.substring(0,n.indexOf('-pvfundo'));
+  fcPvFundoCampo(pref);
+  fcPvFundoGravar();
+  var f=window[pref==='c'?'cPreview':(pref+'Preview')];
+  if(typeof f==='function')f(true);
+});
+document.addEventListener('input',function(e){
+  var id=e.target&&e.target.id;
+  if(!id||id.indexOf('-pvcor')<0)return;
+  var pref=id.substring(0,id.indexOf('-pvcor'));
+  fcPvFundoGravar();
+  var f=window[pref==='c'?'cPreview':(pref+'Preview')];
+  if(typeof f==='function')f();
+});
+function fcPvFundoCampo(pref){
+  var el=$(pref+'-pvcor-campo');
+  if(el)el.style.display=(radio(pref+'-pvfundo')==='cor')?'block':'none';
+}
+var B_PV_FUNDOS=FC_PV_FUNDOS;   /* nome historico da aba Bordas */
+function bPvFundo(){return fcPvFundoDe('b','#23281F');}
 /* legenda legivel sobre fundo escuro: a cor da tinta acompanha a luminancia do fundo */
 function bPvTinta(hex){
   var r=bHexRgb(hex).split(', ');
@@ -22643,7 +22855,7 @@ function aPvDoc(cfg){
   h+='<meta name="viewport" content="width=device-width,initial-scale=1">\n';
   h+='<sty'+'le>\n';
   h+='html,body{margin:0;padding:0}\n';
-  h+='body{background:#FFFFFF;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Ubuntu,sans-serif;padding:16px 12px}\n';
+  h+='body{background:'+fcPvFundoDe('a','#FFFFFF')+';font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Ubuntu,sans-serif;padding:16px 12px}\n';
   h+='.a-pv-falso{background:#EDEAE1;color:#A9A294;border-radius:6px;margin:10px 0;padding:0 14px;';
   h+='height:70px;display:flex;align-items:center;font-size:12px;letter-spacing:.04em}\n';
   h+='</sty'+'le>\n</head>\n<body>\n';
@@ -24057,7 +24269,7 @@ function cPvDoc(cfg){
   h+='<meta name="viewport" content="width=device-width,initial-scale=1">\n';
   h+='<sty'+'le>\n';
   h+='html,body{margin:0;padding:0}\n';
-  h+='body{background:#FFFFFF;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Ubuntu,sans-serif}\n';
+  h+='body{background:'+fcPvFundoDe('c','#FFFFFF')+';font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Ubuntu,sans-serif}\n';
   h+='.c-pv-falso{background:#EDEAE1;color:#A9A294;border-radius:6px;margin:10px 12px;padding:0 14px;';
   h+='height:78px;display:flex;align-items:center;font-size:12px;letter-spacing:.04em}\n';
   h+='</sty'+'le>\n</head>\n<body>\n';
@@ -25349,7 +25561,7 @@ function pPvDoc(cfg,busca,recusa){
   h+='<meta name="viewport" content="width=device-width,initial-scale=1">\n';
   h+='<sty'+'le>\n';
   h+='html,body{margin:0;padding:0}\n';
-  h+='body{background:#FFFFFF;padding:18px 12px;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Ubuntu,sans-serif}\n';
+  h+='body{background:'+fcPvFundoDe('p','#FFFFFF')+';padding:18px 12px;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Ubuntu,sans-serif}\n';
   h+='.p-pv-falso{background:#EDEAE1;color:#A9A294;border-radius:6px;margin:10px 0;padding:0 14px;';
   h+='height:70px;display:flex;align-items:center;font-size:12px;letter-spacing:.04em}\n';
   h+='.p-pv-recusa{background:#8C1D18;color:#FDFBF6;border-radius:8px;padding:12px 14px;';
@@ -27814,7 +28026,7 @@ function mPvDoc(cfg){
   h+='<meta name="viewport" content="width=device-width,initial-scale=1">\n';
   h+='<sty'+'le>\n';
   h+='html,body{margin:0;padding:0}\n';
-  h+='body{background:#FFFFFF;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Ubuntu,sans-serif;padding:16px 12px}\n';
+  h+='body{background:'+fcPvFundoDe('m','#FFFFFF')+';font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Ubuntu,sans-serif;padding:16px 12px}\n';
   h+='.m-pv-falso{background:#EDEAE1;color:#A9A294;border-radius:6px;margin:10px 0;padding:0 14px;';
   h+='height:70px;display:flex;align-items:center;font-size:12px;letter-spacing:.04em}\n';
   h+='</sty'+'le>\n</head>\n<body>\n';
@@ -29151,7 +29363,7 @@ function vPvRecusaDoc(motivo){
 function vPvDoc(cfg){
   return '<!DOCTYPE html><html lang="pt-BR"><head><meta charset="utf-8">'+
     '<meta name="viewport" content="width=device-width, initial-scale=1">'+
-    '<sty'+'le>body{margin:0;padding:18px;background:#fbfaf7;font:15px/1.5 -apple-system,BlinkMacSystemFont,sans-serif}</sty'+'le>'+
+    '<sty'+'le>body{margin:0;padding:18px;background:'+fcPvFundoDe('v','#fbfaf7')+';font:15px/1.5 -apple-system,BlinkMacSystemFont,sans-serif}</sty'+'le>'+
     '</head><body>'+vPvShim(cfg)+vBloco(cfg)+vPvEnchimento()+'</body></html>';
 }
 function vPvLargura(){return (vPvModo==='cel')?380:1040;}
@@ -30106,7 +30318,10 @@ prep('Bordas com efeito','bor',function(){
   parearCor('b-f1');parearCor('b-f2');parearCor('b-c1');parearCor('b-c2');parearCor('b-c3');parearCor('b-c4');
   /* a cor do fundo da previa e pareada como as outras; quem redesenha e o listener de
      'input' de document que ja atende tudo que comeca com 'b-' */
-  parearCor('b-pvcor');parearCor('b-selo-f');parearCor('b-selo-c');
+  parearCor('b-pvcor');
+  parearCor('s-pvcor');parearCor('l-pvcor');parearCor('u-pvcor');parearCor('a-pvcor');parearCor('c-pvcor');parearCor('p-pvcor');parearCor('m-pvcor');parearCor('v-pvcor');parearCor('b-selo-f');parearCor('b-selo-c');
+  /* devolve o fundo de previa escolhido em cada aba, e acerta a visibilidade do campo de cor */
+  fcPvFundoRestaurar();
   /* Correcao a vista dos oito campos numericos, no padrao do c-mob. O listener do proprio
      elemento roda antes dos de document, entao o bPreview global ja desenha com o valor
      preso -- por isso o ramo de 'change' nao redesenha. 'blur' nao borbulha e redesenha

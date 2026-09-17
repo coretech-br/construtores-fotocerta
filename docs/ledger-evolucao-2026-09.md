@@ -93,6 +93,7 @@ ausência de um lugar onde o histórico esteja em ordem, com o tempo ao lado.
 - **69. O conteúdo do cartão encosta no topo — 17/09/2026** · `2026-09-17a`
 - **70. A prévia para de parecer tamanho real — 17/09/2026** · `2026-09-17b`
 - **71. Nome e duração lado a lado também no computador — 17/09/2026** · `2026-09-17c`
+- **72. O fundo da prévia, em todos os construtores — 17/09/2026** · `2026-09-17d`
 
 <!-- FIM DO INDICE GERADO -->
 
@@ -1981,6 +1982,49 @@ valendo se o desenho voltar atrás.
 | Estimativa | Tempo real |
 |---|---|
 | 15 min | **de 00:55:07 ao commit** |
+
+---
+
+### 72. O fundo da prévia, em todos os construtores — 17/09/2026
+
+Versão `2026-09-17d`. *"Gostaria que tivesse um seletor de cor do fundo da página da prévia.
+Atualmente está fixo em branco. Estou trabalhando num design com outra cor e a prévia não mostra
+como fica a combinação."*
+
+**Eu propus um ajuste único na barra do topo e ele recusou, com a razão que decidiu o desenho:**
+*"os códigos gerados podem ser usados em landing pages, que podem ter esquema de cores diferentes
+do padrão do site. Eu decido qual cor usar em cada construtor."* O campo é **por aba**. A proposta
+de centralizar vinha de uma premissa errada minha — que o dono tem um fundo só.
+
+**O padrão já existia no projeto**, na aba Bordas: presets (papel / clara / escura) mais cor livre
+com conta-gotas, aparecendo só quando escolhida. Foi estendido às outras oito, e o que se unificou
+foi **a regra** (`fcPvFundoDe`), não a saída: cada aba tem os próprios campos. Antes disso, **oito
+construtores fixavam o fundo à mão** — sete em `#FFFFFF` e a Calculadora de álbum em `#fbfaf7`,
+divergência que ninguém tinha escolhido.
+
+**Onde fica guardado, e por que não no estado da aba.** É preferência de trabalho, não
+configuração de campanha: numa chave própria da ferramenta, o estado das abas, os presets e os
+arquivos de "Exportar tudo" que o dono já tem continuam com **o mesmo formato** — e a pergunta
+"trocar o fundo da prévia envelhece o bloco da página?" nem chega a existir, em vez de precisar ser
+respondida com uma declaração em `naoEmite`. Bordas e Efeitos não foram migradas: mudaria o formato
+de backups por ganho zero; a divergência está declarada no código, e a regra que decide a cor é a
+mesma para as dez.
+
+#### O que a rodada ensinou sobre método
+
+**A prova que importa não é a que mostra o recurso funcionando.** É a que guarda a promessa escrita
+no campo — *"o código gerado sai exatamente igual com qualquer fundo escolhido aqui"*. A parte 2
+gera **tudo** três vezes, com fundos opostos e com cor livre, e exige as dez saídas **byte a byte
+iguais**. Um ajuste de prévia que vazasse para o bloco seria a pior classe de defeito desta
+ferramenta: o dono mexe no que acha que é só visualização e muda o que vai para o site.
+
+**Busca literal precisa ser específica o bastante para não casar com o cenário.** A segunda opinião
+da parte 2 procurava `123456` dentro dos blocos e acusou vazamento em cinco saídas corretas — o
+Client ID de teste do PayPal é `AbCdEf123456789...`. Passou a procurar `#123456`, com a cerquilha.
+
+| Estimativa | Tempo real |
+|---|---|
+| 1 h 30 – 2 h | **de 01:05:11 ao commit** |
 
 ---
 
