@@ -85,6 +85,7 @@ ausência de um lugar onde o histórico esteja em ordem, com o tempo ao lado.
 - **61. A quinta aba entra nas OITO provas transversais, e quatro redes novas — 16/09/2026** · `2026-09-16g`
 - **62. O valor médio da hora na vitrine de pacotes — 16/09/2026** · `2026-09-16h`
 - **63. A etiqueta do valor médio, e o defeito que só a tela mostrou — 16/09/2026** · `2026-09-16i`
+- **64. A ordem dos elementos, e o que pode quebrar de linha — 16/09/2026** · `2026-09-16j`
 
 <!-- FIM DO INDICE GERADO -->
 
@@ -1676,6 +1677,41 @@ mostra a etiqueta descendo de linha — o caso que uma medição só de desktop 
 | Estimativa | Tempo real |
 |---|---|
 | 40 min | **de 21:12:15 ao commit** — a maior parte em escrever a medição geométrica, e não a correção, que é de três linhas de CSS |
+
+---
+
+### 64. A ordem dos elementos, e o que pode quebrar de linha — 16/09/2026
+
+Versão `2026-09-16j`. Terceira volta do mesmo pedido, e de novo aberta pelo dono olhando a tela.
+
+**O achado tem valor além desta aba.** A etiqueta do valor médio nasceu *entre* o preço e o selo
+do desconto — foi o pedido original dele. Numa largura apertada, o elemento que sobrava para a
+linha de baixo era **o selo do desconto**: o informativo ficava ao lado do preço e o promocional
+— o que move a decisão do cliente — caía sozinho embaixo. A regra que saiu disso: **numa linha que
+pode quebrar, o último elemento é o que pode se dar ao luxo de quebrar.** A ordem passou a ser
+preço, selo, etiqueta.
+
+**A linha do cartão virou duas**, com o desenho escrito por ele: `ou R$ 220,00 no cartão` mais a
+etiqueta em cima, `Em até 12x de R$ 18,34` embaixo, as duas à direita. Numa linha só eram três
+números seguidos sem hierarquia. O parcelamento descreve outra coisa e ganhou linha própria —
+forma que o ramo do cartão prioritário já usava, agora nos dois.
+
+#### O que a rodada ensinou sobre método
+
+**Três rodadas seguidas, e as três correções vieram de ele abrir a tela.** A 62 entregou o
+cálculo medido em dinheiro, precedência e emissão condicional; a 63 corrigiu a colagem na frase;
+a 64, a ordem de quebra. Nenhuma das três foi achada por prova — todas por olho humano sobre o
+resultado. A prova é o que **impede o defeito de voltar**, e não o que o encontra pela primeira
+vez. Reconhecer isso muda o que se escreve: as verificações desta rodada não perguntam "a ordem
+no texto está certa?", perguntam **onde a caixa está na tela**, porque é a caixa que o cliente vê.
+
+**"Antes" tem duas formas quando há quebra de linha.** A asserção de ordem não pode ser só
+"o selo está à esquerda": quando a etiqueta desce, "antes" vira "acima". Medir só a coordenada
+horizontal daria vermelho justamente no caso que a correção queria produzir.
+
+| Estimativa | Tempo real |
+|---|---|
+| 30 min | **de 22:20:16 ao commit** — a maior parte em medir, de novo: a correção são a ordem de dois `appendChild` e uma linha de CSS |
 
 ---
 

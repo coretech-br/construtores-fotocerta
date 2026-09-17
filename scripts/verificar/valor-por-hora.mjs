@@ -383,4 +383,94 @@ console.log('\n== 8. a etiqueta do valor medio ==');
   }
 }
 
+/* ===========================================================================
+   9. A ORDEM E A DISTRIBUICAO, depois de o dono ver a tela
+   ===========================================================================
+   DUAS CORRECOES, as duas pedidas olhando o cartao renderizado:
+
+     1. "A linha do PIX ficou abaixo do valor. Melhor ficar ao lado do desconto."
+        A etiqueta nasceu ENTRE o preco e o selo -- foi o pedido original --, e numa
+        largura apertada quem sobrava para a linha de baixo era o SELO DO DESCONTO.
+        O elemento que move a decisao do cliente indo sozinho para baixo, enquanto o
+        informativo ficava ao lado do preco. A ordem passou a ser preco, SELO,
+        etiqueta: quem quebra e o ultimo, e o ultimo tem de ser o que pode quebrar.
+
+     2. A linha do cartao virou DUAS, alinhadas a direita:
+             ou R$ 220,00 no cartao   [R$ 110,00 / hora]
+             Em ate 12x de R$ 18,34
+        Numa linha so, a etiqueta caia depois do "18,34" e o cliente lia tres numeros
+        seguidos sem hierarquia. O numero cheio fica com a SUA etiqueta; o parcelamento,
+        que descreve outra coisa, ganha a propria linha.
+
+   As duas sao medidas por GEOMETRIA, e nao por ordem no texto: quem decide o que o
+   cliente ve e a caixa na tela. Nas duas larguras.
+   =========================================================================== */
+console.log('\n== 9. a ordem dos elementos e as duas linhas do cartao ==');
+{
+  const g = await gerarNaFerramenta(async pg => {
+    for(const [k,v] of Object.entries(IDENT)) await set(pg,'fci-'+k,v);
+    await clicar(pg,'aba-pac');
+    await set(pg,'a-urlobrigado','https://www.fotocerta.com.br/obrigado');
+    await set(pg,'a-prefixo','FC');
+    await radio(pg,'a-metodo','ambos'); await radio(pg,'a-prio','pix');
+    await set(pg,'a-descpix','10'); await set(pg,'a-parcelas','12');
+    await set(pg,'a-txt-porhora','{valor} / hora');
+    await set(pg,'a-pcod','DIA'); await set(pg,'a-pnome','Dia Util');
+    await set(pg,'a-pdur','2 horas'); await set(pg,'a-ppreco','220');
+    await set(pg,'a-pinclui','Locacao por 2 horas'); await set(pg,'a-ppath','fotocerta/dia');
+    await clicar(pg,'a-pac-salvar');
+    await clicar(pg,'a-gerar');
+  }, ['a-out1'], {porta:8986});
+  chk('[9] a ferramenta gerou sem alerta', g.alertas.length === 0, JSON.stringify(g.alertas));
+
+  for(const largura of [1024, 375]){
+    const r = await comBlocoNaPagina({bloco: g.valores['a-out1']||'', porta: 8987 + (largura===375?1:0),
+      medir: async pg => {
+        await pg.setViewportSize({width: largura, height: 1200});
+        await pg.waitForTimeout(500);
+        return {lido: await pg.evaluate(() => {
+          const c = document.querySelector('.fca-card');
+          const cx = s => { const e = c.querySelector(s); if(!e) return null;
+            const r = e.getBoundingClientRect();
+            return {x:Math.round(r.left), dir:Math.round(r.right), y:Math.round(r.top),
+                    baixo:Math.round(r.bottom), txt:e.textContent.trim()}; };
+          return {caixa: cx('.fca-card-preco'), selo: cx('.fca-selo'),
+                  h1: cx('.fca-preco-linha1 .fca-preco-hora'),
+                  l2: cx('.fca-preco-linha2'), h2: cx('.fca-preco-linha2 .fca-preco-hora'),
+                  parc: cx('.fca-preco-parcela')};
+        })};
+      }});
+    const d = r.lido || {}, tag = '[9/'+largura+'] ';
+    chk(tag+'o selo e a etiqueta existem os dois', !!d.selo && !!d.h1, JSON.stringify(d));
+    if(!d.selo || !d.h1) continue;
+
+    /* 1. O SELO VEM ANTES. Na mesma linha, "antes" e estar a esquerda; se a etiqueta tiver
+       descido de linha, "antes" e o selo estar acima -- e nesse caso quem quebrou foi ela,
+       que e exatamente o que esta correcao queria. */
+    const mesmaLinha = Math.abs(d.selo.y - d.h1.y) < 4;
+    chk(tag+'o selo do desconto vem ANTES da etiqueta do valor medio',
+        mesmaLinha ? (d.selo.dir <= d.h1.x) : (d.selo.y < d.h1.y),
+        JSON.stringify({selo:d.selo, hora:d.h1}));
+    chk(tag+'e o selo NUNCA e o que fica sozinho embaixo',
+        d.selo.y <= d.h1.y, 'selo y' + d.selo.y + ' · etiqueta y' + d.h1.y);
+
+    /* 2. O PARCELAMENTO TEM LINHA PROPRIA, abaixo da linha do numero cheio. */
+    chk(tag+'o parcelamento ganhou a propria linha', !!d.parc, JSON.stringify(d.parc));
+    if(d.parc){
+      chk(tag+'e ela fica ABAIXO da linha do cartao',
+          d.parc.y >= (d.l2||{}).baixo - 2,
+          'parcela y' + d.parc.y + ' · linha do cartao termina em ' + (d.l2||{}).baixo);
+      chk(tag+'o texto do parcelamento nao repete o "no cartao"',
+          !/no cart/i.test(d.parc.txt) && /12x/.test(d.parc.txt), JSON.stringify(d.parc.txt));
+      chk(tag+'e a frase de cima nao leva mais o parcelamento colado',
+          !/12x/.test((d.l2||{}).txt||''), JSON.stringify((d.l2||{}).txt));
+    }
+    /* 3. ALINHADAS A DIREITA, como ele desenhou: as duas terminam na borda da caixa. */
+    if(d.h2 && d.caixa)
+      chk(tag+'a etiqueta do cartao encosta na borda direita da caixa de preco',
+          Math.abs(d.h2.dir - d.caixa.dir) <= 2,
+          'etiqueta termina em ' + d.h2.dir + ' · caixa em ' + d.caixa.dir);
+  }
+}
+
 process.exit(resumo());

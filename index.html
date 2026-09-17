@@ -4923,8 +4923,8 @@
    QUEM IMPEDE QUE ELE MINTA: scripts/conferir-versoes.sh, que recusa index.html
    alterado sem a versao mudar junto -- a mesma disciplina do fc-compartilhado.js,
    e pela mesma razao: carimbo que ninguem confere e o defeito de amanha. */
-var FC_VERSAO='2026-09-16i';
-var FC_PUBLICADO='2026-09-16 21:14';   /* America/Sao_Paulo -- escrito pelo carimbador */
+var FC_VERSAO='2026-09-16j';
+var FC_PUBLICADO='2026-09-16 22:22';   /* America/Sao_Paulo -- escrito pelo carimbador */
 (function(){
   var el=document.getElementById('fc-versao');
   if(!el) return;
@@ -5888,6 +5888,7 @@ var FCR_ROTULOS={novo:'novo',corrigido:'corr',melhorado:'melh',atencao:'aten',ex
 /* A lista, da versao mais recente para a mais antiga. NAO reordenar: o agrupamento por
    dia assume que versoes do mesmo dia estao juntas, e o desenho respeita esta ordem. */
 var FCR_NOTAS=[
+ {v:"2026-09-16j",d:"16 de setembro de 2026",itens:[["Corrigido","Agendamento por Pacote: numa largura apertada, quem caía sozinho para a linha de baixo era o **selo verde do desconto** — o que você quer que o cliente veja primeiro —, enquanto o valor médio da hora ficava lá em cima ao lado do preço. A ordem foi invertida: preço, selo, e a etiqueta por último. **Quem quebra de linha agora é a etiqueta**, que é o que pode quebrar."],["Melhorado","A linha do cartão passou a ser **duas**, alinhadas à direita: *ou R$ 220,00 no cartão* com a etiqueta ao lado, e *Em até 12x de R$ 18,34* logo abaixo. Numa linha só eram três números seguidos sem hierarquia nenhuma; agora o valor cheio fica com a etiqueta dele, e o parcelamento — que fala de outra coisa — tem linha própria."],["Atenção","Quem **não** usa o valor médio da hora não vê diferença nenhuma: sem ele, a linha do cartão continua sendo uma só, com o parcelamento na mesma frase, exatamente como sempre ""foi."],["Exige uma ação sua, uma única vez","Gere de novo o **Código 1** da aba Agendamento por Pacote e recole na vitrine — inclusive se já recolou pelas versões de hoje."]]},
  {v:"2026-09-16i",d:"16 de setembro de 2026",itens:[["Corrigido","Agendamento por Pacote: o **valor médio da hora da linha do cartão** saía colado no fim da frase — *\"em até 12x de R$ 18,34R$ 110,00 / hora\"* — e virava parte do texto, no computador e no celular. A linha de cima nunca teve o problema; a de baixo não tinha espaçamento nenhum. Agora as duas separam do mesmo jeito."],["Novo","Os dois valores médios ganharam **etiqueta com fundo**, como o selo verde do desconto — é o que separa o número da frase ao lado. Ela continua sendo secundária de propósito: fundo âmbar claro e peso normal, um degrau abaixo do selo do desconto, que é o que você quer que o cliente veja primeiro."],["Novo","E as **duas cores da etiqueta são suas** — fundo e texto, na seção de aparência da aba. Valem para os dois valores. Para ficar só com o texto, sem etiqueta, ponha no fundo o mesmo tom do cartão."],["Exige uma ação sua, uma única vez","Gere de novo o **Código 1** da aba Agendamento por Pacote e recole no componente da vitrine. Se você já recolou hoje pela versão anterior, precisa recolar mais esta vez — é a mesma saída."]]},
  {v:"2026-09-16h",d:"16 de setembro de 2026",itens:[["Novo","Agendamento por Pacote: os cartões da vitrine passaram a mostrar o **valor médio da hora**, pequeno e sem destaque, ao lado do preço. Nos pacotes com mais de uma hora, claro — num pacote de uma hora ele só repetiria o preço."],["Novo","São **dois**, um ao lado de cada número cheio: o do preço em destaque e o da linha do outro meio de pagamento. Cada um divide o número que está ao lado dele, nunca o outro — um pacote de 2 horas a R$ 220 com 10% no Pix mostra **R$ 99,00/hora** na linha do Pix e **R$ 110,00/hora** na do cartão."],["Novo","A duração sai do campo **Duração** que você já preenche. A ferramenta entende `2 horas`, `2h`, `2`, `1h30`, `90 min` e `1,5 h` — e **quando não entende, ela não chuta**: o valor por hora simplesmente não sai naquele pacote, e a lista avisa com \"duração não entendida\"."],["Novo","Para quando você quiser escrever a duração do seu jeito (**Meia diária**, **2 horas + intervalo**), o cadastro do pacote ganhou um campo **Horas** opcional. **Preenchido, ele manda; vazio, vale a leitura da Duração.** Os pacotes que você já tem continuam funcionando sem você mexer em nada."],["Melhorado","O campo **Duração** ganhou a explicação que faltava, listando os formatos que a ferramenta entende. A regra existia e era invisível."],["Novo","O texto do valor por hora é seu: o padrão é `{valor} / hora`, e **vazio não aparece** — é assim que se desliga o recurso inteiro."],["Exige uma ação sua, uma única vez","Gere de novo o **Código 1** da aba Agendamento por Pacote e recole no componente da vitrine, publicando em seguida. Sem isso a vitrine continua como está hoje, funcionando normalmente, só sem o valor por hora."]]},
  {v:"2026-09-16g",d:"16 de setembro de 2026",itens:[["Melhorado","Calculadora de álbum: três configurações que eram **caixinhas de marcar** viraram **Sim / Não**, como nas outras quatro abas que cobram — levar o cliente à página de oferta, oferecer o orçamento no WhatsApp e mostrar o resumo do pedido. Era a mesma pergunta com duas caras. **Nada que você já configurou se perde**: o que estava guardado continua valendo, inclusive nos seus arquivos de backup."],["Corrigido","Link de cobrança: o botão **Gerar link** escrevia o link sem o painel da direita olhar para ele. Não dava problema hoje, porque esse link já é declarado como algo que não vai para campo nenhum do Prosite — mas era justamente o tipo de ponto cego que o aviso vermelho do painel existe para fechar."],["","O resto foi rede de proteção, sem mudança na tela: a Calculadora de álbum entrou nas **oito conferências** que comparam as abas de pagamento entre si, e passou em todas. Mais quatro provas novas — que a exportação **sem os dados** não leva chave Pix, Client ID nem WhatsApp; que o aviso vermelho do painel realmente acende quando falta uma saída no mapa; e que o código Pix fecha com chave em **CPF, CNPJ, telefone e chave aleatória**, e não só em e-mail, nas cinco abas que cobram."]]},
@@ -20638,7 +20639,7 @@ function fcaFnSegundo(prio){return (prio==='pp')?'textoPix':'textoCartao';}
    Uma funcao, e nao a mesma expressao repetida em seis pontos de emissao; e por ser uma so,
    a saida com um meio so e IDENTICA nas duas escolhas -- provado em meio-prio-migracao.mjs. */
 function aPrioEfetivo(cfg){return (cfg.usaPix&&cfg.usaPP)?(cfg.prio||FC_ORD_FABRICA):FC_ORD_FABRICA;}
-function fcaTextoCartaoSrc(q,txtCartaoLinha,txtParcela,prio){
+function fcaTextoCartaoSrc(q,txtCartaoLinha,txtParcela,prio,comHoras){
   if(prio==='pp'){
     return 'function textoPix(preco){\n'+
       '  return '+aTplJs(q,txtCartaoLinha,[['{valor}','moedaFmt(precoPix(preco))']])+';\n}\n';
@@ -20646,7 +20647,13 @@ function fcaTextoCartaoSrc(q,txtCartaoLinha,txtParcela,prio){
   return 'function textoCartao(preco){\n'+
     '  var t='+aTplJs(q,txtCartaoLinha,[['{valor}','moedaFmt(preco)']])+';\n'+
     '  if(PARCELAS>1)t+='+aTplJs(q,txtParcela,[['{n}','PARCELAS'],['{valor}','moedaFmt(parcelaDe(preco))']])+';\n'+
-    '  return t;\n}\n';
+    '  return t;\n}\n'+
+    /* SO O COMECO DA FRASE, sem o parcelamento colado (16/09/2026). Com a etiqueta do valor
+       medio ao lado, a linha do cartao passou a ser DUAS: "ou X no cartao [Y/hora]" em cima e
+       "em ate 12x de Z" embaixo. As duas saem das MESMAS fontes que a frase inteira ja usava
+       -- 'textoCartao' continua existindo e byte a byte igual para quem nao tem a etiqueta. */
+    (comHoras?('function textoCartaoSo(preco){\n'+
+      '  return '+aTplJs(q,txtCartaoLinha,[['{valor}','moedaFmt(preco)']])+';\n}\n'):'');
 }
 
 function aBlocoVitrine(cfg){
@@ -20735,8 +20742,14 @@ function aBlocoVitrine(cfg){
      hora", que o dono leu na tela e nao entendeu como dois numeros. A linha 1 nunca teve esse
      problema porque ja era flex com gap. SO COM 'comHoras': sem o recurso, a regra continua
      byte a byte a de antes, e nenhum bloco muda por causa de um campo que ninguem usa. */
-  c+='.fca-preco-linha2{font-size:12px;color:#777;margin-top:4px;text-align:left'+
-     (comHoras?';display:flex;align-items:baseline;gap:8px;flex-wrap:wrap':'')+'}\n';
+  c+='.fca-preco-linha2{font-size:12px;color:#777;margin-top:4px;'+
+     (comHoras?'text-align:right;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;justify-content:flex-end'
+             :'text-align:left')+'}\n';
+  /* A SEGUNDA LINHA DO CARTAO -- o parcelamento sozinho. Alinhada a direita junto com a de
+     cima, como o dono desenhou: as duas descrevem o mesmo meio de pagamento e formam um bloco
+     so, abaixo e a direita do preco em destaque. Ela so existe quando ha etiqueta; sem ela, o
+     parcelamento continua colado na frase, numa linha unica. */
+  if(comHoras)c+='.fca-preco-parcela{font-size:12px;color:#777;margin-top:2px;text-align:right}\n';
   /* Com o CARTAO prioritario a linha do Pix leva o selo do desconto ao lado -- o selo segue o
      NUMERO do Pix, e nao a linha 1, senao ele anunciaria desconto sobre o preco cheio. */
   if(cfg.usaPix&&cfg.usaPP&&cfg.prio==='pp')c+='.fca-preco-linhapix{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;font-size:12px;color:#777;margin-top:4px;text-align:left}\n';
@@ -20835,6 +20848,7 @@ function aBlocoVitrine(cfg){
      justamente a tela onde o dono viu o problema. */
   c+='  .fca-preco-linha2{font-size:11px;text-align:right;margin-top:2px'+
      (comHoras?';justify-content:flex-end':'')+'}\n';
+  if(comHoras)c+='  .fca-preco-parcela{font-size:11px;margin-top:1px}\n';
   c+='}\n';
   c+='@media(prefers-reduced-motion: reduce){\n  .fca-card'+(temFam?',.fca-fam':'')+'{transition:none}\n}\n';
   c+='</sty'+'le>\n\n';
@@ -20888,7 +20902,7 @@ function aBlocoVitrine(cfg){
   c+=fcaPrecoParcelaSrc();
   /* Emitida so quando a segunda linha existe: a funcao que ela escreve (textoCartao/textoPix)
      nao tem outro chamador neste bloco, e emiti-la sozinha seria codigo morto no bloco colado. */
-  if(doisNumeros)c+=fcaTextoCartaoSrc("'",cfg.txtCartaoLinha,cfg.txtParcela,aPrioEfetivo(cfg));
+  if(doisNumeros)c+=fcaTextoCartaoSrc("'",cfg.txtCartaoLinha,cfg.txtParcela,aPrioEfetivo(cfg),comHoras&&aPrioEfetivo(cfg)!=='pp');
   /* Uma funcao so desenha o preco do cartao e o do resumo (Tarefa 3, passo 5): nao existe
      segunda formatacao para o mesmo numero em lugar nenhum deste bloco. A LINHA MOSTRA SO O QUE
      EXISTE (Tarefa do seletor de forma de pagamento): "somente Pix" nao anuncia "ou no cartao";
@@ -20916,13 +20930,18 @@ function aBlocoVitrine(cfg){
   c+='  var mostrado='+((cfg.usaPix&&aPrioEfetivo(cfg)==='pix')?'precoPix(preco)':'preco')+';\n';
   c+="  var v=document.createElement('span');v.className='fca-preco-valor';v.textContent=moedaFmt(mostrado);\n";
   c+='  l1.appendChild(v);\n';
-  /* entre o preco e o selo verde, como o dono pediu */
-  if(comHoras)c+='  porHora(l1,mostrado,horas);\n';
+  /* A ORDEM E: preco, SELO, etiqueta do valor medio -- e ela mudou em 16/09/2026, depois de o
+     dono ver a tela. A etiqueta nasceu entre os dois (foi o pedido original), e numa largura
+     apertada quem sobrava para a linha de baixo era o SELO DO DESCONTO -- o elemento que move a
+     decisao do cliente indo parar sozinho embaixo, enquanto o informativo ficava ao lado do
+     preco. Com a etiqueta por ultimo, quem quebra e ela, que e o que pode quebrar.
+     "A linha do PIX ficou abaixo do valor. Melhor ficar ao lado do desconto", nas palavras dele. */
   if(cfg.usaPix&&aPrioEfetivo(cfg)==='pix'){
     c+='  if(DESCONTO_PIX>0){\n';
     c+="    var selo=document.createElement('span');selo.className='fca-selo';selo.textContent="+aTplJs("'",cfg.txtSeloPix,[['{pct}','DESCONTO_PIX']])+";\n";
     c+='    l1.appendChild(selo);\n  }\n';
   }
+  if(comHoras)c+='  porHora(l1,mostrado,horas);\n';
   c+='  box.appendChild(l1);\n';
   if(doisNumeros&&cfg.prio==='pp'){
     /* A linha do Pix vem PRIMEIRO (e a alternativa ao numero grande) e leva o selo; o trecho do
@@ -20930,30 +20949,40 @@ function aBlocoVitrine(cfg){
        mesmo texto que o ramo "somente cartao" ja emitia. */
     c+="  var l2=document.createElement('div');l2.className='fca-preco-linhapix';\n";
     c+="  var l2t=document.createElement('span');l2t.textContent=textoPix(preco);l2.appendChild(l2t);\n";
-    /* o numero desta linha e o preco COM desconto -- e ele que a divisao usa aqui */
-    if(comHoras)c+='  porHora(l2,precoPix(preco),horas);\n';
     c+='  if(DESCONTO_PIX>0){\n';
     c+="    var selo=document.createElement('span');selo.className='fca-selo';selo.textContent="+aTplJs("'",cfg.txtSeloPix,[['{pct}','DESCONTO_PIX']])+";\n";
     c+='    l2.appendChild(selo);\n  }\n';
+    /* mesma ordem da linha 1: o selo primeiro, a etiqueta por ultimo.
+       o numero desta linha e o preco COM desconto -- e ele que a divisao usa aqui */
+    if(comHoras)c+='  porHora(l2,precoPix(preco),horas);\n';
     c+='  box.appendChild(l2);\n';
     if(cfg.parcelas>1){
       c+="  var l3=document.createElement('div');l3.className='fca-preco-linha2';l3.textContent="+aTplJs("'",aParcelaSolta(cfg.txtParcela,false),[['{n}','PARCELAS'],['{valor}','moedaFmt(parcelaDe(preco))']])+";\n";
       c+='  box.appendChild(l3);\n';
     }
   }else if(doisNumeros){
-    /* A LINHA DO CARTAO GANHOU UM SPAN PROPRIO para o texto (16/09/2026). Ela era um
-       textContent solto na div; com o valor por hora ao lado, o texto precisa de um no
-       proprio, senao o appendChild seguinte substituiria a frase inteira. Sem o valor por
-       hora configurado, o span nao muda um byte do que a linha mostra. */
+    /* A LINHA DO CARTAO VIRA DUAS quando ha etiqueta (16/09/2026, desenho do dono):
+         ou R$ 220,00 no cartao   [R$ 110,00 / hora]
+         em ate 12x de R$ 18,34
+       Com a frase inteira numa linha so, a etiqueta caia depois do "18,34" e o cliente lia
+       tres numeros seguidos sem hierarquia nenhuma. Partindo, o numero cheio fica com a sua
+       etiqueta e o parcelamento -- que descreve OUTRA coisa -- ganha a propria linha. E a
+       mesma forma que o ramo do cartao prioritario ja usava, agora nos dois.
+       SEM etiqueta, tudo continua como sempre foi: uma linha, uma frase, byte a byte. */
     c+="  var l2=document.createElement('div');l2.className='fca-preco-linha2';\n";
     if(comHoras){
-      c+="  var l2c=document.createElement('span');l2c.textContent=textoCartao(preco);l2.appendChild(l2c);\n";
+      c+="  var l2c=document.createElement('span');l2c.textContent=textoCartaoSo(preco);l2.appendChild(l2c);\n";
       /* o numero desta linha e o preco CHEIO */
       c+='  porHora(l2,preco,horas);\n';
+      c+='  box.appendChild(l2);\n';
+      if(cfg.parcelas>1){
+        c+="  var l3=document.createElement('div');l3.className='fca-preco-parcela';l3.textContent="+aTplJs("'",aParcelaSolta(cfg.txtParcela,true),[['{n}','PARCELAS'],['{valor}','moedaFmt(parcelaDe(preco))']])+";\n";
+        c+='  box.appendChild(l3);\n';
+      }
     }else{
       c+='  l2.textContent=textoCartao(preco);\n';
+      c+='  box.appendChild(l2);\n';
     }
-    c+='  box.appendChild(l2);\n';
   /* SEM o segundo numero, o que ainda vale dizer e o PARCELAMENTO -- ele nao repete nada da
      linha de cima. E exatamente a linha que o ramo "somente cartao" ja emitia; a condicao
      deixou de exigir a ausencia do Pix, porque com desconto zero (ou sinal) o caso e o mesmo.
