@@ -482,7 +482,14 @@ console.log('\n--- o formato gravado, contra '+REF+' ---');
          nunca o codigo 1 -- a maquinaria dos itens e a do upsell entram no bloco SEMPRE. */
       {nome:'os itens e o upsell por cobranca no Link de cobranca (14/09/2026)',
        chaves:{p:['itens','upsellcob']},
-       esperado:() => ''}
+       esperado:() => ''},
+      /* O VALOR MEDIO DA HORA na vitrine de pacotes (16/09/2026, pedido do dono). Um texto
+         configuravel novo na aba Agendamento por pacote, gravado com o padrao de fabrica
+         porque este cenario nao o altera. O CAMPO opcional de horas que veio junto nao
+         aparece aqui: ele e do FORMULARIO de cadastro, e esta na lista FORM_NOVOS. */
+      {nome:'o valor medio da hora (16/09/2026)',
+       chaves:{a:['txtPorHora']},
+       esperado:() => '{valor} / hora'}
     ];
     /* FABRICA TROCADA e outra coisa de CHAVE NOVA, e a diferenca importa: a chave ja existia
        nos dois lados e o que mudou foi o PADRAO dela. Entao os dois valores sao declarados, e
@@ -604,7 +611,12 @@ console.log('\n--- o formato gravado, contra '+REF+' ---');
     const FORM_NOVOS = [
       ['u','u_psku','','o SKU do produto (Checkout)'],
       ['m','m_psku','','o SKU do produto (Mini loja)'],
-      ['a','a_psku','','o SKU do pacote (Agendamento por pacote)']
+      ['a','a_psku','','o SKU do pacote (Agendamento por pacote)'],
+      /* O CAMPO OPCIONAL DE HORAS (16/09/2026, opcao B escolhida pelo dono). Ele entrou no
+         formulario de cadastro do pacote para o valor medio da hora poder existir com uma
+         duracao escrita de qualquer jeito ('Meia diaria'), e por isso cresceu o interior de
+         'a.form'. Vazio neste cenario, que nao digita nada nele. */
+      ['a','a_phoras','','as horas para o calculo do valor medio (Agendamento por pacote)']
     ];
     const mauf = [];
     for(const [aba,ch,esperado,que] of FORM_NOVOS){

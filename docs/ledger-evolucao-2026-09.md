@@ -83,6 +83,7 @@ ausência de um lugar onde o histórico esteja em ordem, com o tempo ao lado.
 - **59. A lista de novidades deixa de ser só cronológica — 16/09/2026** · `2026-09-16e`
 - **60. A quinta aba entra nas provas transversais, e o cartão dela estava quebrado — 16/09/2026** · `2026-09-16f`
 - **61. A quinta aba entra nas OITO provas transversais, e quatro redes novas — 16/09/2026** · `2026-09-16g`
+- **62. O valor médio da hora na vitrine de pacotes — 16/09/2026** · `2026-09-16h`
 
 <!-- FIM DO INDICE GERADO -->
 
@@ -1585,6 +1586,56 @@ confere isso contra o diretório antes de rodar, nos três sentidos.
 fora; e **duas baterias ao mesmo tempo**, que disputam as portas fixas destas suítes e produzem
 `EADDRINUSE` — uma suíte cai em zero segundo e o vermelho não tem defeito nenhum atrás. Medir
 bateria exige máquina sozinha e árvore parada, e isso agora está escrito no README.
+
+---
+
+### 62. O valor médio da hora na vitrine de pacotes — 16/09/2026
+
+Versão `2026-09-16h`. Pedido do dono no fim do dia: *"nos pacotes com mais de 1 hora de duração
+eu sempre faço um valor diferenciado da hora... quero que ele tenha na tela o valor médio da
+hora"*. Depois, completando: *"cada um ao lado do seu número cheio"*.
+
+**A regra que governa o número:** ele divide o valor que está **ao lado dele** — o preço com
+desconto na linha do Pix, o cheio na linha do cartão. Dividir sempre o mesmo e exibir ao lado do
+outro poria, na mesma linha, dois números que não fecham entre si. É o defeito que o destaque do
+Pix da Calculadora de álbum teve na manhã do mesmo dia, e ele foi evitado por ter sido medido
+algumas horas antes. A linha do parcelamento não recebe nenhum: parcela não é número cheio.
+
+**O divisor sai de texto livre, e é aí que estava o risco.** O campo Duração é redação do dono e
+vai para a tela como ele escreveu. A defesa tem três camadas: a leitura acontece na **ferramenta**
+(nunca no bloco entregue, onde ninguém a veria errar), ela **recusa** em vez de chutar, e a lista
+de pacotes **mostra o que entendeu**.
+
+**A opção B, escolhida por ele.** Foram apresentadas quatro (ficar como está; campo numérico
+opcional; campo obrigatório com migração; substituir o texto por número + unidade). Ele escolheu a
+segunda e perguntou a precedência com precisão. Ela mora numa função só (`aHorasDe`): campo
+preenchido vence, campo vazio lê do texto, nenhum dos dois entendido devolve zero. Quando os dois
+existem e discordam, o campo vence **e a lista diz que venceu** — não escolher em silêncio é a
+mesma disciplina de `fccOrfas`.
+
+#### O que a rodada ensinou sobre método
+
+**A pergunta do dono achou dois defeitos que a prova não tinha achado.** A primeira — *"como fica
+1h30?"* — expôs que a função e a regra de CSS do valor por hora eram emitidas em **todo** bloco,
+mesmo sem nenhum pacote acima de uma hora; foi a regressão byte a byte que denunciou, e a correção
+foi a mesma que a Calculadora de álbum recebeu horas antes. A segunda — *"esse campo deveria ter um
+hint como nos demais"* — expôs que o campo Duração ganhou uma regra de leitura e continuou sem
+explicação nenhuma: a regra existia e era **invisível**, e quem escrevesse `meia diária` veria o
+valor por hora sumir sem ter onde descobrir por quê.
+
+**Medir o leitor não é medir o cálculo.** Quando ele perguntou se todas as seis formas aceitas
+funcionavam, a resposta honesta era "o leitor foi medido nas seis, o dinheiro na tela em duas".
+Entre o leitor e o número que o cliente lê existem a emissão do `horas`, a divisão dentro do bloco
+e a formatação. As seis formas passaram a atravessar o caminho inteiro, com o bloco rodando e com
+preços **diferentes entre si** — preços iguais deixariam uma troca de pacote passar despercebida.
+
+**Uma asserção pode acusar o que não existe.** A primeira execução de `valor-por-hora.mjs` falhou
+procurando `' h'` solto na linha da lista — e casou com o **nome** do pacote ("Uma hora"). O código
+estava certo; a prova é que estava mal escrita.
+
+| Estimativa | Tempo real |
+|---|---|
+| 1 h (opção B) + o valor por hora em si | **18 min** — de 20:46:10 a 21:04:12 no relógio, incluindo as duas correções que as perguntas dele provocaram |
 
 ---
 

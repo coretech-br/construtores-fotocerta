@@ -4005,6 +4005,10 @@
           <input type="text" id="a-pnome" placeholder="Mini ensaio">
           <label for="a-pdur">Duração</label>
           <input type="text" id="a-pdur" placeholder="1 hora">
+          <label for="a-phoras">Horas, para o cálculo <small>(opcional)</small></label>
+          <input type="number" id="a-phoras" placeholder="deixe vazio para ler da Duração" min="0" max="99" step="0.25">
+          <p class="ajuda"><b>Preenchido, este campo manda</b> — a Duração ao lado deixa de ser lida para o cálculo e serve só de texto na tela. <b>Vazio, vale a leitura da Duração</b>, como sempre. Use-o quando quiser escrever a duração do seu jeito (<code>Meia diária</code>, <code>2 horas + intervalo</code>) e ainda assim ter o valor médio da hora. Aceita fração: <code>1.5</code> para uma hora e meia.</p>
+          <p class="ajuda">O texto aparece no cartão do pacote <b>exatamente como você escrever</b>. Ele é também de onde sai a duração usada no <b>valor médio da hora</b> — e para isso a ferramenta precisa entender um número. Ela entende <code>2 horas</code>, <code>2h</code>, <code>2</code>, <code>1h30</code>, <code>90 min</code> e <code>1,5 h</code>. <b>Quando não entende, ela não chuta:</b> o valor por hora simplesmente não sai naquele pacote, e a lista abaixo avisa com "duração não entendida". O valor por hora só aparece <b>acima de uma hora</b>.</p>
           <label for="a-ppreco">Preço</label>
           <input type="number" id="a-ppreco" placeholder="420" min="0" step="0.01">
           <label for="a-psku">SKU do pacote <small>(opcional)</small></label>
@@ -4159,6 +4163,9 @@
         <p class="ajuda">O mesmo texto aparece nos cartões da vitrine e no carrinho da página de obrigado — é um campo só para os dois lugares.</p>
         <label for="a-txt-selopix">Selo do desconto no Pix</label>
         <input type="text" id="a-txt-selopix" value="-{pct}% no Pix">
+        <label for="a-txt-porhora">Valor médio da hora <small>(só em pacotes com mais de 1 hora)</small></label>
+        <input type="text" id="a-txt-porhora" value="{valor} / hora">
+        <p class="ajuda">Sai <b>ao lado do preço</b>, pequeno e sem destaque, dividindo o preço que está ali pela duração do pacote. <b>Vazio não aparece.</b> A duração é lida do campo <b>Duração</b> de cada pacote — a lista de pacotes mostra quantas horas a ferramenta entendeu, e quando ela não entende, a linha simplesmente não sai para aquele pacote.</p>
         <label for="a-txt-cartaolinha">Linha do preço no cartão</label>
         <input type="text" id="a-txt-cartaolinha" value="ou {valor} no cartão">
         <label for="a-txt-parcela">Trecho do parcelamento <small>(só aparece com mais de uma parcela)</small></label>
@@ -4911,8 +4918,8 @@
    QUEM IMPEDE QUE ELE MINTA: scripts/conferir-versoes.sh, que recusa index.html
    alterado sem a versao mudar junto -- a mesma disciplina do fc-compartilhado.js,
    e pela mesma razao: carimbo que ninguem confere e o defeito de amanha. */
-var FC_VERSAO='2026-09-16g';
-var FC_PUBLICADO='2026-09-16 13:21';   /* America/Sao_Paulo -- escrito pelo carimbador */
+var FC_VERSAO='2026-09-16h';
+var FC_PUBLICADO='2026-09-16 21:04';   /* America/Sao_Paulo -- escrito pelo carimbador */
 (function(){
   var el=document.getElementById('fc-versao');
   if(!el) return;
@@ -5876,6 +5883,7 @@ var FCR_ROTULOS={novo:'novo',corrigido:'corr',melhorado:'melh',atencao:'aten',ex
 /* A lista, da versao mais recente para a mais antiga. NAO reordenar: o agrupamento por
    dia assume que versoes do mesmo dia estao juntas, e o desenho respeita esta ordem. */
 var FCR_NOTAS=[
+ {v:"2026-09-16h",d:"16 de setembro de 2026",itens:[["Novo","Agendamento por Pacote: os cartões da vitrine passaram a mostrar o **valor médio da hora**, pequeno e sem destaque, ao lado do preço. Nos pacotes com mais de uma hora, claro — num pacote de uma hora ele só repetiria o preço."],["Novo","São **dois**, um ao lado de cada número cheio: o do preço em destaque e o da linha do outro meio de pagamento. Cada um divide o número que está ao lado dele, nunca o outro — um pacote de 2 horas a R$ 220 com 10% no Pix mostra **R$ 99,00/hora** na linha do Pix e **R$ 110,00/hora** na do cartão."],["Novo","A duração sai do campo **Duração** que você já preenche. A ferramenta entende `2 horas`, `2h`, `2`, `1h30`, `90 min` e `1,5 h` — e **quando não entende, ela não chuta**: o valor por hora simplesmente não sai naquele pacote, e a lista avisa com \"duração não entendida\"."],["Novo","Para quando você quiser escrever a duração do seu jeito (**Meia diária**, **2 horas + intervalo**), o cadastro do pacote ganhou um campo **Horas** opcional. **Preenchido, ele manda; vazio, vale a leitura da Duração.** Os pacotes que você já tem continuam funcionando sem você mexer em nada."],["Melhorado","O campo **Duração** ganhou a explicação que faltava, listando os formatos que a ferramenta entende. A regra existia e era invisível."],["Novo","O texto do valor por hora é seu: o padrão é `{valor} / hora`, e **vazio não aparece** — é assim que se desliga o recurso inteiro."],["Exige uma ação sua, uma única vez","Gere de novo o **Código 1** da aba Agendamento por Pacote e recole no componente da vitrine, publicando em seguida. Sem isso a vitrine continua como está hoje, funcionando normalmente, só sem o valor por hora."]]},
  {v:"2026-09-16g",d:"16 de setembro de 2026",itens:[["Melhorado","Calculadora de álbum: três configurações que eram **caixinhas de marcar** viraram **Sim / Não**, como nas outras quatro abas que cobram — levar o cliente à página de oferta, oferecer o orçamento no WhatsApp e mostrar o resumo do pedido. Era a mesma pergunta com duas caras. **Nada que você já configurou se perde**: o que estava guardado continua valendo, inclusive nos seus arquivos de backup."],["Corrigido","Link de cobrança: o botão **Gerar link** escrevia o link sem o painel da direita olhar para ele. Não dava problema hoje, porque esse link já é declarado como algo que não vai para campo nenhum do Prosite — mas era justamente o tipo de ponto cego que o aviso vermelho do painel existe para fechar."],["","O resto foi rede de proteção, sem mudança na tela: a Calculadora de álbum entrou nas **oito conferências** que comparam as abas de pagamento entre si, e passou em todas. Mais quatro provas novas — que a exportação **sem os dados** não leva chave Pix, Client ID nem WhatsApp; que o aviso vermelho do painel realmente acende quando falta uma saída no mapa; e que o código Pix fecha com chave em **CPF, CNPJ, telefone e chave aleatória**, e não só em e-mail, nas cinco abas que cobram."]]},
  {v:"2026-09-16f",d:"16 de setembro de 2026",itens:[["Corrigido","**Calculadora de álbum: quem pagasse no cartão pagava e não via a confirmação.** O pagamento era cobrado normalmente, e no instante seguinte a tela travava — a mensagem \"Pagamento aprovado\" era procurada por um nome que essa aba nunca escreveu. O cliente ficava olhando para uma tela parada depois de pagar, e quem tivesse a página de oferta ligada nunca chegava nela. **Só a calculadora tinha esse defeito**; as outras três abas que cobram no cartão sempre estiveram certas. Se você já publicou a calculadora nova, **gere o código de novo e recole**."],["Corrigido","Calculadora de álbum: escolher **Pix em destaque** não colocava o Pix em destaque. Mudava a ordem e a cor, mas o valor do Pix continuava menor que o do cartão. Agora os dois tamanhos trocam de lugar junto com a escolha, como no Checkout."],["Melhorado","O código da calculadora ficou mais enxuto: saíam dele duas variáveis de \"página depois do pagamento\" mesmo sem nenhuma configurada, um comentário descrevendo um mecanismo que essa aba não tem, e regras de estilo para partes que não existiam no bloco."],["","O resto foi rede de proteção, sem mudança na tela: duas conferências que só olhavam as quatro abas antigas passaram a olhar a calculadora também — e foi exatamente isso que achou o defeito do cartão acima, que nenhuma prova anterior teria pego."]]},
  {v:"2026-09-16e",d:"16 de setembro de 2026",itens:[["Novo","Esta lista ganhou **filtros**. Uma fileira de botões por aba — Mini loja, Checkout, Calculadora de álbum… — e outra por tipo: Novo, Corrigido, Melhorado, Atenção, e o que exige uma ação sua. Para ver só o que mudou na Mini loja era preciso abrir onze dias e ler tudo; agora é um clique."],["Novo","E um botão **Só o que é novo para mim**: a ferramenta guarda a última versão que você viu e marca as que chegaram depois. Quem abre a lista a cada duas semanas para de ter de adivinhar onde parar de ler."],["Melhorado","O contador diz quantas novidades sobraram com os filtros escolhidos, para \"nenhuma\" nunca parecer tela quebrada."]]},
@@ -8404,6 +8412,11 @@ function fcOpDescSrc(o){
    pelo dono: o codigo identifica o AGENDAMENTO, o SKU identifica o produto vendido. Herdar
    criaria confluencia silenciosa -- olhando o relatorio ninguem saberia se aquele valor foi
    escolhido como SKU ou herdado de outra coisa, que e a familia do defeito que ele achou. */
+/* Numero com virgula, para LEITURA na ferramenta (nunca no bloco entregue, que tem a
+   propria moedaFmt). Nasceu como 'vNumBr' na Calculadora de album e a aba Agendamento por
+   pacote precisou do mesmo em 16/09/2026 -- duas copias de uma linha que concordam hoje sao
+   o defeito de amanha, entao ela virou fonte unica antes da segunda existir. */
+function fcNumBr(n){return String(Math.round(Number(n)*1000)/1000).replace('.',',');}
 function fcSkuLimpo(v){
   return String(v==null?'':v).replace(/^\s+|\s+$/g,'').substring(0,FC_LIM_PP);
 }
@@ -19063,6 +19076,7 @@ var A_TXT_DEFS=[
      aviso -- o mesmo motivo que fez o selo do Pix nascer com marcador. */
   ['txtSubtitulo','a-txt-subtitulo',''],
   ['txtSeloPix','a-txt-selopix','-{pct}% no Pix'],
+  ['txtPorHora','a-txt-porhora','{valor} / hora'],
   ['txtCartaoLinha','a-txt-cartaolinha',FC_ORD_PARES.cartaoLinha.pix],
   ['txtParcela','a-txt-parcela',', em até {n}x de {valor}'],
   ['txtRecusa','a-txt-recusa','Não encontramos seu agendamento nesta página. Se você acabou de agendar, use o link que aparece no e-mail de confirmação — ou fale com a gente que resolvemos na hora.'],
@@ -19615,7 +19629,7 @@ function aPacTestar(){
   tAbrir(u);
 }
 function aPacLimpar(){
-  $('a-pcod').value='';$('a-pnome').value='';$('a-pdur').value='';$('a-ppreco').value='';
+  $('a-pcod').value='';$('a-pnome').value='';$('a-pdur').value='';$('a-phoras').value='';$('a-ppreco').value='';
   $('a-psku').value='';
   $('a-pinclui').value='';$('a-ppath').value='';
   /* nunca em branco: sem familia selecionada o pacote nasceria orfao */
@@ -19703,6 +19717,9 @@ function aPacSalvar(){
   if(!nome){alert('Informe o nome do pacote.');return;}
   var preco=parseFloat(String($('a-ppreco').value).replace(',','.'));
   if(isNaN(preco)||preco<=0){alert('Informe o preço do pacote (maior que zero).');return;}
+  /* 'horas' so entra no pacote quando o dono preencheu: chave ausente e o estado normal, e
+     e o que faz um backup anterior a esta rodada abrir sem nada de diferente. */
+  var hman=parseFloat(String($('a-phoras').value).replace(',','.'));
   var p={cod:cod,nome:nome,dur:$('a-pdur').value.trim(),preco:preco,
     /* O SKU DO PACOTE e campo PROPRIO, e nao o 'cod' acima reaproveitado -- ver fcSkuLimpo. */
     sku:fcSkuLimpo($('a-psku').value),
@@ -19712,12 +19729,14 @@ function aPacSalvar(){
        ultima). O '||' e a rede para o caso de o estado chegar quebrado por outro caminho. */
     fam:$('a-pfam').value||(aFamilias.length?aFamilias[0].id:''),
     ops:aEditOps.map(fcOpCopia)};
+  if(isFinite(hman)&&hman>0)p.horas=hman;
   if(aEditIdx>=0)aPacotes[aEditIdx]=p;else aPacotes.push(p);
   aPacLimpar();aPacRender();salvarEstado();aPreview();
 }
 function aPacEditar(i){
   var p=aPacotes[i];
   $('a-pcod').value=p.cod;$('a-pnome').value=p.nome;$('a-pdur').value=p.dur||'';
+  $('a-phoras').value=(p.horas!=null&&p.horas!=='')?p.horas:'';
   $('a-ppreco').value=p.preco;$('a-psku').value=p.sku||'';$('a-pinclui').value=p.inclui||'';$('a-ppath').value=p.cal||'';
   $('a-pfam').value=(p.fam&&aFamAcha(p.fam))?p.fam:(aFamilias.length?aFamilias[0].id:'');
   aEditOps=(p.ops||[]).map(fcOpCopia);
@@ -19761,6 +19780,7 @@ function aPacDuplicar(i){
   var usados=fcSkuUsados(aPacotes);
   $('a-pnome').value=fcDupNome(p.nome);
   $('a-pdur').value=p.dur||'';
+  $('a-phoras').value=(p.horas!=null&&p.horas!=='')?p.horas:'';
   $('a-ppreco').value=p.preco;
   $('a-psku').value=fcSkuDup(p.sku,usados);
   if($('a-psku').value)usados.push($('a-psku').value);
@@ -19845,6 +19865,71 @@ function aEditRestaurar(A){
   sel=$('a-pfam');
   if(sel&&!(sel.value&&aFamAcha(sel.value)))sel.value=aFamilias.length?aFamilias[0].id:'';
 }
+/* ============================================================================
+   QUANTAS HORAS TEM ESTE PACOTE -- lido do texto livre da Duracao
+   ============================================================================
+   O CAMPO 'Duracao' e TEXTO LIVRE de nascenca ('1 hora', '2 horas', '1h30'), e vai
+   para a tela do cliente exatamente como o dono escreveu. O valor medio da hora
+   (16/09/2026, pedido do dono) precisa de um NUMERO, e ele so pode sair dali.
+
+   POR QUE A LEITURA ACONTECE AQUI, NA FERRAMENTA, E NAO NO BLOCO ENTREGUE. Dividir
+   dinheiro por um numero adivinhado de um texto e a classe de defeito que este
+   projeto trata com mais cuidado: se a leitura errar, o cliente le um valor por hora
+   errado e ninguem percebe. Fazendo a leitura aqui, o resultado aparece na LISTA DE
+   PACOTES e na PREVIA antes de qualquer coisa ir ao ar -- o dono ve '2 h' ao lado do
+   pacote e confere de graca. O bloco recebe o numero pronto ('horas:2') e nunca um
+   interpretador de texto: um parser dentro do bloco poderia ler diferente no
+   navegador do cliente, e ai nao haveria quem visse.
+
+   O QUE ELA ENTENDE, e a ordem importa ('1h30' antes de '1h'):
+     '1h30', '1 h 30'      -> 1.5      horas e minutos juntos
+     '90 min', '90 minutos'-> 1.5      so minutos
+     '2 horas', '2h', '2'  -> 2        so horas
+     '1,5 h', '1.5h'       -> 1.5      fracao com virgula ou ponto
+   O QUE ELA NAO ENTENDE devolve ZERO, e zero quer dizer "nao sei" -- nunca um chute.
+   Quem nao sabe nao escreve nada na tela do cliente.
+   ============================================================================ */
+function aHoras(dur){
+  var t=String(dur==null?'':dur).toLowerCase().replace(/\s+/g,' ').trim();
+  if(!t)return 0;
+  var m;
+  /* 1h30 / 1 h 30 -- precisa vir antes, senao '1h' casaria e os 30 minutos sumiriam */
+  m=t.match(/^(\d+)\s*h(?:oras?)?\s*(\d{1,2})\s*(?:min(?:utos?)?)?$/);
+  if(m)return parseInt(m[1],10)+parseInt(m[2],10)/60;
+  /* so minutos */
+  m=t.match(/^(\d+(?:[.,]\d+)?)\s*min(?:utos?)?$/);
+  if(m)return parseFloat(m[1].replace(',','.'))/60;
+  /* so horas, com ou sem fracao, com ou sem a palavra */
+  m=t.match(/^(\d+(?:[.,]\d+)?)\s*(?:h|hs|horas?)?$/);
+  if(m)return parseFloat(m[1].replace(',','.'));
+  return 0;
+}
+/* ============================================================================
+   DE ONDE SAI O NUMERO DE HORAS -- a precedencia, escrita UMA VEZ
+   ============================================================================
+   O DONO ESCOLHEU a opcao B em 16/09/2026: o campo numerico e OPCIONAL e, quando
+   preenchido, VENCE a leitura do texto. E o mesmo principio que o endereco do upsell
+   ja segue nesta ferramenta -- o especifico vence o geral --, e ele mora aqui, numa
+   funcao so: precedencia escrita em dois lugares e precedencia que vai divergir.
+
+     campo 'Horas' preenchido   -> e ele, e o texto NAO e lido para calculo nenhum
+     campo vazio                -> le-se o texto da Duracao, como antes de o campo existir
+     texto tambem nao entendido -> ZERO, que quer dizer "nao sei", e nunca um chute
+
+   E ACIMA DE UMA HORA, sempre: num pacote de uma hora o valor por hora repetiria o
+   preco, e repetir numero ao lado de numero e ruido, nao informacao. Vale para os dois
+   caminhos -- quem digitar 1 no campo tambem nao ve a linha.
+
+   'aHorasFonte' existe para a LISTA poder dizer DE ONDE veio o numero. Sem isso o dono
+   olharia dois pacotes de duracao parecida com valores por hora diferentes sem ter como
+   saber por que -- e o que ele nao consegue explicar, ele deixa de conferir. */
+function aHorasMan(p){
+  var m=parseFloat(String((p&&p.horas)!=null?p.horas:'').replace(',','.'));
+  return (isFinite(m)&&m>0)?m:0;
+}
+function aHorasDe(p){return aHorasMan(p)||aHoras(p&&p.dur);}
+function aHorasFonte(p){return aHorasMan(p)?'campo':(aHoras(p&&p.dur)?'texto':'');}
+function aHorasValem(p){var h=aHorasDe(p);return h>1?h:0;}
 function aQtdItens(p){
   var ops=p.ops||[],n=0,i;
   for(i=0;i<ops.length;i++)if(ops[i].qtd)n++;
@@ -19885,7 +19970,30 @@ function aPacRender(){
        Mini loja. Aqui nao ha o que somar do proprio pacote: pacote nao tem quantidade, so os
        opcionais dele (e por isso aQtdItens conta so os opcionais). */
     var nq=aQtdItens(p);
-    txt.textContent=p.cod+' — '+p.nome+' — '+precoFmt('BRL',parseFloat(p.preco)||0)+qtdops+(nq?(' · '+nq+' com quantidade'):'');
+    /* O QUE A FERRAMENTA ENTENDEU DA DURACAO, a vista na lista (16/09/2026).
+       O valor medio da hora divide dinheiro por um numero lido de texto livre, e leitura
+       errada de dinheiro tem de ser VISIVEL antes de ir ao ar -- nao depois, na tela do
+       cliente. Entao a lista diz as horas que ela entendeu, e diz tambem quando NAO
+       entendeu: silencio nos dois casos deixaria o dono sem saber por que um pacote tem a
+       linha do valor por hora e o vizinho nao. O numero em reais aparece na PREVIA, que
+       executa o gerador de verdade -- calcula-lo aqui seria uma segunda conta para o
+       mesmo valor, e duas contas divergem. */
+    var hTxt='', fonte=aHorasFonte(p), hh=aHorasDe(p);
+    if(fonte==='campo'){
+      hTxt = (hh>1 ? (' · '+fcNumBr(hh)+' h (do campo)') : ' · '+fcNumBr(hh)+' h — uma hora ou menos, sem valor por hora');
+      /* OS DOIS PREENCHIDOS E DISCORDANDO: o campo vence, e e assim que tem de ser -- mas
+         quem escreveu '1h30' e digitou 2 nao quis as duas coisas, e a ferramenta nao tem como
+         saber qual das duas e a certa. Entao ela nao escolhe em silencio: mostra que escolheu.
+         E o mesmo espirito de fccOrfas -- nao consertar, fazer o buraco aparecer. */
+      var hTexto=aHoras(p.dur);
+      if(hTexto&&Math.abs(hTexto-hh)>0.001)
+        hTxt += ' ⚠ a Duração diz '+fcNumBr(hTexto)+' h';
+    }else if(fonte==='texto'){
+      hTxt = (hh>1 ? (' · '+fcNumBr(hh)+' h') : '');
+    }else if(String(p.dur||'').trim()){
+      hTxt = ' · duração não entendida, sem valor por hora';
+    }
+    txt.textContent=p.cod+' — '+p.nome+' — '+precoFmt('BRL',parseFloat(p.preco)||0)+qtdops+(nq?(' · '+nq+' com quantidade'):'')+hTxt;
     info.appendChild(txt);
     li.appendChild(info);
     /* CINCO BOTOES, EMBAIXO DO ITEM (pedido do dono, 03/09/2026) -- ver a regra
@@ -20175,7 +20283,7 @@ function aElVal(id,def){var el=$(id);return el?el.value:def;}
    quem decide o que compoe um pacote. 'a-pfam' e um <select> e entra como campo comum: o que
    se guarda e o id da familia escolhida, e aEditRestaurar confere se ela ainda existe. Ver
    fcFormLer. */
-var A_FORM=[['c','a-pcod',''],['c','a-pnome',''],['c','a-pdur',''],['c','a-ppreco',''],['c','a-psku',''],
+var A_FORM=[['c','a-pcod',''],['c','a-pnome',''],['c','a-pdur',''],['c','a-phoras',''],['c','a-ppreco',''],['c','a-psku',''],
             ['c','a-pinclui',''],['c','a-ppath',''],['c','a-pfam','']];
 function aColeta(){
   var r={
@@ -20454,14 +20562,23 @@ function aPresetDepois(){
    que e familia -- ela acha o pacote pelo ?pac= e cobra --, entao aBlocoObrigado chama esta
    funcao SEM ele e a saida 3 continua byte a byte a de antes desta rodada. Se a-out3 mudar, a
    parametrizacao esta errada, nao o teste. */
-function aPacotesSrc(pacotes,comFam){
+/* 'comHoras' e o texto do valor medio da hora, ou vazio. Ele NAO e lido de cfg aqui
+   porque esta funcao serve a DOIS blocos: a vitrine, que mostra o valor por hora, e a
+   pagina de obrigado, que nao mostra. Emitir 'horas' nos dois poria um numero morto
+   dentro de todo bloco da pagina de obrigado -- exatamente o tipo de sobra que esta
+   ferramenta ja tirou de outro gerador em 16/09/2026. */
+function aPacotesSrc(pacotes,comFam,comHoras){
   var pacs=pacotes.map(function(p){
     var preco=parseFloat(String(p.preco).replace(',','.'))||0;
     var ops=(p.ops||[]).map(function(o){
       var v=parseFloat(String(o.preco).replace(',','.'))||0;
       return "{nome:'"+escJs(o.nome)+"'"+fcOpDescSrc(o)+", preco:"+v.toFixed(2)+fcSkuSrc(o)+(o.qtd?", qtd:true":"")+"}";
     }).join(', ');
-    return "  {cod:'"+escJs(p.cod)+"', nome:'"+escJs(p.nome)+"', dur:'"+escJs(p.dur)+"', preco:"+preco.toFixed(2)+fcSkuSrc(p)+",\n"+
+    /* 'horas' so viaja quando o dono pediu o texto E a duracao foi entendida E ela passa
+       de uma hora. Fora disso a chave nem existe, e o bloco sai byte a byte como saia
+       antes desta rodada -- que e o que a regressao cobra de todo campo novo. */
+    var hs=comHoras?aHorasValem(p):0;
+    return "  {cod:'"+escJs(p.cod)+"', nome:'"+escJs(p.nome)+"', dur:'"+escJs(p.dur)+"', preco:"+preco.toFixed(2)+fcSkuSrc(p)+(hs?(", horas:"+(Math.round(hs*1000)/1000)):"")+",\n"+
       "   inclui:'"+escJs(p.inclui)+"', link:'"+escJs(p.cal)+"',\n"+
       (comFam?("   fam:'"+escJs(p.fam)+"',\n"):"")+
       "   ops:["+ops+"]}";
@@ -20548,6 +20665,14 @@ function aBlocoVitrine(cfg){
      primeira (mesma especificidade, a ultima vence) -- a regra do CLAUDE.md sobre CSS gerado
      programaticamente, que ja custou caro neste projeto com transition/background/animation. */
   var temFam=!!(cfg.familias&&cfg.familias.length>1);
+  /* O RECURSO SO ENTRA NO BLOCO SE ALGUM PACOTE O USAR (16/09/2026). O campo de texto
+     nasce preenchido, entao 'cfg.txtPorHora' sozinho e verdadeiro em toda ferramenta recem
+     aberta -- e a funcao porHora mais a regra de CSS viajariam dentro de TODO bloco, inclusive
+     nos que nao tem um unico pacote acima de uma hora. Foi a regressao byte a byte que
+     denunciou: com o cenario de fabrica (pacotes de '1h' e '1 hora') a saida mudou sem que
+     nada aparecesse na tela. E a mesma sobra que esta ferramenta tirou da Calculadora de album
+     na mesma manha, e a resposta e a mesma: nada de morto dentro do bloco entregue. */
+  var comHoras=cfg.txtPorHora&&cfg.pacotes.some(function(p){return aHorasValem(p)>0;});
   /* No ramo de duas ou mais familias existem DUAS linhas de resumo na pagina, entao o seletor
      do resumo do PACOTE precisa ser qualificado. No ramo de uma familia so as duas constantes
      abaixo valem exatamente o texto que estava escrito antes, e por isso a saida nao muda um
@@ -20581,6 +20706,10 @@ function aBlocoVitrine(cfg){
   c+='.fca-preco-linha1{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;text-align:left}\n';
   c+='.fca-preco-valor{font-size:18px;font-weight:700;color:var(--fca-destaque,#0F3A30)}\n';
   c+='.fca-selo{font-size:11px;font-weight:700;color:#1e7e34;background:#e6f4ea;border-radius:999px;padding:2px 8px}\n';
+  /* PEQUENO E SEM DESTAQUE, por pedido explicito do dono: "apenas informativo". Sem peso,
+     sem cor propria e um degrau abaixo do selo -- ele fica ENTRE o preco e o selo, e nao
+     pode competir com nenhum dos dois. Emitido so quando o texto existe. */
+  if(comHoras)c+='.fca-preco-hora{font-size:11px;font-weight:400;color:#888;white-space:nowrap}\n';
   c+='.fca-preco-linha2{font-size:12px;color:#777;margin-top:4px;text-align:left}\n';
   /* Com o CARTAO prioritario a linha do Pix leva o selo do desconto ao lado -- o selo segue o
      NUMERO do Pix, e nao a linha 1, senao ele anunciaria desconto sobre o preco cheio. */
@@ -20686,7 +20815,7 @@ function aBlocoVitrine(cfg){
     medir:cfg.medir,sempre:cfg.sempre});
   c+='<scr'+'ipt>\n(function(){\n';
   c+='/* ===== customizacao ===== */\n';
-  c+=aPacotesSrc(cfg.pacotes,temFam);
+  c+=aPacotesSrc(cfg.pacotes,temFam,comHoras);
   if(temFam)c+=aFamiliasSrc(cfg.familias);
   c+='var DESCONTO_PIX='+cfg.descpix+';   /* percentual de desconto no Pix; 0 = sem desconto -- some o selo */\n';
   c+='var PARCELAS='+cfg.parcelas+';   /* numero de parcelas anunciado no cartao; e uma promessa que a operadora decide, nao este codigo */\n';
@@ -20734,11 +20863,30 @@ function aBlocoVitrine(cfg){
      EXISTE (Tarefa do seletor de forma de pagamento): "somente Pix" nao anuncia "ou no cartao";
      "somente cartao" nao anuncia desconto de Pix nenhum -- as duas promessas que a pagina de
      obrigado nao cumpriria. */
-  c+='function montarPreco(box,preco){\n';
+  /* O VALOR MEDIO DA HORA, UMA FUNCAO SO NO BLOCO (16/09/2026, pedido do dono).
+     Ela e chamada nos TRES lugares onde existe um numero cheio -- o preco em destaque, a
+     linha do Pix e a linha do cartao --, e cada chamada passa O SEU PROPRIO numero: "cada
+     um ao lado do seu numero cheio", nas palavras dele. Escrever a criacao do span tres
+     vezes seria a duplicacao que esta ferramenta trata como defeito de amanha; e dividir
+     sempre o mesmo preco e exibir ao lado de outro daria, na mesma linha, dois numeros que
+     nao fecham entre si -- que e o defeito que o destaque do Pix ja teve aqui.
+     A LINHA DO PARCELAMENTO NAO RECEBE NENHUM: a parcela nao e um numero cheio, e "R$ 18,34
+     em 12x" dividido por 2 horas nao descreve coisa nenhuma. */
+  if(comHoras){
+    c+='function porHora(alvo,valor,horas){\n';
+    c+='  if(!(horas>0))return;\n';
+    c+="  var s=document.createElement('span');s.className='fca-preco-hora';\n";
+    c+='  s.textContent='+aTplJs("'",cfg.txtPorHora,[['{valor}','moedaFmt(valor/horas)']])+';\n';
+    c+='  alvo.appendChild(s);\n}\n';
+  }
+  c+='function montarPreco(box,preco,horas){\n';
   c+="  box.innerHTML='';\n";
   c+="  var l1=document.createElement('div');l1.className='fca-preco-linha1';\n";
-  c+="  var v=document.createElement('span');v.className='fca-preco-valor';v.textContent=moedaFmt("+((cfg.usaPix&&aPrioEfetivo(cfg)==='pix')?'precoPix(preco)':'preco')+");\n";
+  c+='  var mostrado='+((cfg.usaPix&&aPrioEfetivo(cfg)==='pix')?'precoPix(preco)':'preco')+';\n';
+  c+="  var v=document.createElement('span');v.className='fca-preco-valor';v.textContent=moedaFmt(mostrado);\n";
   c+='  l1.appendChild(v);\n';
+  /* entre o preco e o selo verde, como o dono pediu */
+  if(comHoras)c+='  porHora(l1,mostrado,horas);\n';
   if(cfg.usaPix&&aPrioEfetivo(cfg)==='pix'){
     c+='  if(DESCONTO_PIX>0){\n';
     c+="    var selo=document.createElement('span');selo.className='fca-selo';selo.textContent="+aTplJs("'",cfg.txtSeloPix,[['{pct}','DESCONTO_PIX']])+";\n";
@@ -20751,6 +20899,8 @@ function aBlocoVitrine(cfg){
        mesmo texto que o ramo "somente cartao" ja emitia. */
     c+="  var l2=document.createElement('div');l2.className='fca-preco-linhapix';\n";
     c+="  var l2t=document.createElement('span');l2t.textContent=textoPix(preco);l2.appendChild(l2t);\n";
+    /* o numero desta linha e o preco COM desconto -- e ele que a divisao usa aqui */
+    if(comHoras)c+='  porHora(l2,precoPix(preco),horas);\n';
     c+='  if(DESCONTO_PIX>0){\n';
     c+="    var selo=document.createElement('span');selo.className='fca-selo';selo.textContent="+aTplJs("'",cfg.txtSeloPix,[['{pct}','DESCONTO_PIX']])+";\n";
     c+='    l2.appendChild(selo);\n  }\n';
@@ -20760,7 +20910,18 @@ function aBlocoVitrine(cfg){
       c+='  box.appendChild(l3);\n';
     }
   }else if(doisNumeros){
-    c+="  var l2=document.createElement('div');l2.className='fca-preco-linha2';l2.textContent=textoCartao(preco);\n";
+    /* A LINHA DO CARTAO GANHOU UM SPAN PROPRIO para o texto (16/09/2026). Ela era um
+       textContent solto na div; com o valor por hora ao lado, o texto precisa de um no
+       proprio, senao o appendChild seguinte substituiria a frase inteira. Sem o valor por
+       hora configurado, o span nao muda um byte do que a linha mostra. */
+    c+="  var l2=document.createElement('div');l2.className='fca-preco-linha2';\n";
+    if(comHoras){
+      c+="  var l2c=document.createElement('span');l2c.textContent=textoCartao(preco);l2.appendChild(l2c);\n";
+      /* o numero desta linha e o preco CHEIO */
+      c+='  porHora(l2,preco,horas);\n';
+    }else{
+      c+='  l2.textContent=textoCartao(preco);\n';
+    }
     c+='  box.appendChild(l2);\n';
   /* SEM o segundo numero, o que ainda vale dizer e o PARCELAMENTO -- ele nao repete nada da
      linha de cima. E exatamente a linha que o ramo "somente cartao" ja emitia; a condicao
@@ -20842,7 +21003,7 @@ function aBlocoVitrine(cfg){
      nao ha como a @media colocar o preco na segunda coluna da grade. Ela entra nos DOIS ramos,
      porque as linhas compactas do celular sao incondicionais. */
   c+="  var precoBox=document.createElement('div');precoBox.className='fca-card-preco';\n";
-  c+='  montarPreco(precoBox,p.preco);\n';
+  c+='  montarPreco(precoBox,p.preco,p.horas);\n';
   c+='  card.appendChild(precoBox);\n';
   c+="  card.addEventListener('click',function(){escolher(i);});\n";
   /* O GATILHO DE AQUECIMENTO SEM FAMILIAS. Na vitrine de tres passos quem aquece e a escolha
@@ -21106,7 +21267,7 @@ function aBlocoVitrine(cfg){
      esta linha so tira a caixa inteira do esconderijo. */
   c+="  elCal.className='fca-cal';\n";
   c+='  elResumoNome.textContent=p.nome;\n';
-  c+='  montarPreco(elResumoPreco,p.preco);\n';
+  c+='  montarPreco(elResumoPreco,p.preco,p.horas);\n';
   c+="  elCards.style.display='none';\n";
   c+="  elResumo.className='"+clsResPac+" on';\n";
   c+="  elPasso2.className='fca-passo2 on';\n";
@@ -27772,7 +27933,7 @@ function vNum(x,def){var n=parseFloat(String(x).replace(',','.'));return isNaN(n
 function vVer(id,b){var el=$(id);if(el)el.style.display=b?'block':'none';}
 /* So para a LISTA da aba -- o bloco entregue tem a propria moedaFmt, de fcMoedaFmtGer. */
 function vBrl(n){return 'R$ '+Number(n).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});}
-function vNumBr(n){return String(n).replace('.',',');}
+function vNumBr(n){return fcNumBr(n);}   /* apelido historico desta aba; a fonte e fcNumBr */
 
 /* ===== mostra/esconde conforme a forma de pagamento e o sinal =====
    Mesmo molde de uToggles/mToggles/aToggles. */
