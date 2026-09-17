@@ -489,7 +489,14 @@ console.log('\n--- o formato gravado, contra '+REF+' ---');
          aparece aqui: ele e do FORMULARIO de cadastro, e esta na lista FORM_NOVOS. */
       {nome:'o valor medio da hora (16/09/2026)',
        chaves:{a:['txtPorHora']},
-       esperado:() => '{valor} / hora'}
+       esperado:() => '{valor} / hora'},
+      /* AS DUAS CORES DA ETIQUETA do valor medio, da segunda volta do mesmo pedido: o dono
+         viu na tela que o numero do cartao colava na frase e pediu fundo proprio, com as
+         cores configuraveis. Sao cores com significado PROPRIO desta aba -- nao entram na
+         paleta compartilhada, que so acolhe destaque, fundo, texto e coruja. */
+      {nome:'as cores da etiqueta do valor medio (16/09/2026)',
+       chaves:{a:['chf','cht']},
+       esperado:(aba,ch) => ch === 'chf' ? '#FDF3D8' : '#7A5E1E'}
     ];
     /* FABRICA TROCADA e outra coisa de CHAVE NOVA, e a diferenca importa: a chave ja existia
        nos dois lados e o que mudou foi o PADRAO dela. Entao os dois valores sao declarados, e

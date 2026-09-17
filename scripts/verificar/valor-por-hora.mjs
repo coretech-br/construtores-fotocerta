@@ -298,4 +298,89 @@ console.log('\n== 7. o campo opcional de horas ==');
   chk('[7] sem erro proprio do bloco', reais(t7.erros).length === 0, reais(t7.erros).slice(0,2).join(' | '));
 }
 
+/* ===========================================================================
+   8. A ETIQUETA: separada da frase, e com as cores do dono
+   ===========================================================================
+   O DEFEITO QUE ESTA PARTE FECHA foi visto pelo dono na tela, e nao por prova
+   nenhuma: na linha do cartao o valor medio saia COLADO no fim da frase --
+   "em ate 12x de R$ 18,34R$ 110,00 / hora". A linha 1 nunca teve o problema porque
+   ja era flex com gap; a linha 2 era texto solto. Duas medicoes independentes
+   entram aqui, e nenhuma delas e "existe um espaco no texto":
+
+     - a CAIXA da etiqueta nao encosta na caixa do texto ao lado (getBoundingClientRect,
+       nos dois lados, nas duas larguras). Medir o texto diria "18,34R$ 110,00" com ou
+       sem separacao visual, porque textContent nao tem geometria;
+     - as CORES sao as que o dono configurou, lidas por getComputedStyle -- e nao a
+       classe, que estaria la mesmo se a regra nao tivesse sido emitida.
+   =========================================================================== */
+console.log('\n== 8. a etiqueta do valor medio ==');
+{
+  const FUNDO = '#C8E6FF', TEXTO = '#0B3B5C';  /* distintos do padrao, para nao passar por acaso */
+  const g = await gerarNaFerramenta(async pg => {
+    for(const [k,v] of Object.entries(IDENT)) await set(pg,'fci-'+k,v);
+    await clicar(pg,'aba-pac');
+    await set(pg,'a-urlobrigado','https://www.fotocerta.com.br/obrigado');
+    await set(pg,'a-prefixo','FC');
+    await radio(pg,'a-metodo','ambos'); await radio(pg,'a-prio','pix');
+    await set(pg,'a-descpix','10'); await set(pg,'a-txt-porhora','{valor} / hora');
+    await set(pg,'a-chf-t',FUNDO); await set(pg,'a-cht-t',TEXTO);
+    await set(pg,'a-pcod','DIA'); await set(pg,'a-pnome','Dia Util');
+    await set(pg,'a-pdur','2 horas'); await set(pg,'a-ppreco','220');
+    await set(pg,'a-pinclui','Locacao por 2 horas'); await set(pg,'a-ppath','fotocerta/dia');
+    await clicar(pg,'a-pac-salvar');
+    await clicar(pg,'a-gerar');
+  }, ['a-out1'], {porta:8983});
+  chk('[8] a ferramenta gerou sem alerta', g.alertas.length === 0, JSON.stringify(g.alertas));
+
+  for(const largura of [1024, 375]){
+    const r = await comBlocoNaPagina({bloco: g.valores['a-out1']||'', porta: 8984 + (largura===375?1:0),
+      medir: async pg => {
+        await pg.setViewportSize({width: largura, height: 1200});
+        await pg.waitForTimeout(500);
+        return {lido: await pg.evaluate(() => {
+          const c = document.querySelector('.fca-card');
+          const cx = s => { const e = c.querySelector(s); if(!e) return null;
+            const r = e.getBoundingClientRect(), st = getComputedStyle(e);
+            return {x:Math.round(r.left), dir:Math.round(r.right), y:Math.round(r.top),
+                    larg:Math.round(r.width), bg:st.backgroundColor, cor:st.color,
+                    peso:st.fontWeight, raio:st.borderTopLeftRadius};
+          };
+          const l2 = c.querySelector('.fca-preco-linha2');
+          return {
+            hora1: cx('.fca-preco-linha1 .fca-preco-hora'),
+            hora2: cx('.fca-preco-linha2 .fca-preco-hora'),
+            selo:  cx('.fca-selo'),
+            /* a caixa do TEXTO da linha do cartao -- o primeiro filho, que e o span da frase */
+            txt2: (() => { const e = l2 && l2.firstElementChild; if(!e) return null;
+              const r = e.getBoundingClientRect();
+              return {dir:Math.round(r.right), baixo:Math.round(r.bottom), y:Math.round(r.top)}; })()
+          };
+        })};
+      }});
+    const d = r.lido || {};
+    const tag = '[8/'+largura+'] ';
+    chk(tag+'as duas etiquetas existem', !!d.hora1 && !!d.hora2, JSON.stringify(d));
+    if(!d.hora1 || !d.hora2) continue;
+
+    chk(tag+'o fundo e o que o dono configurou', d.hora1.bg === 'rgb(200, 230, 255)', d.hora1.bg);
+    chk(tag+'e a cor do texto tambem', d.hora1.cor === 'rgb(11, 59, 92)', d.hora1.cor);
+    chk(tag+'a etiqueta tem canto arredondado, como o selo', parseFloat(d.hora1.raio) > 8, d.hora1.raio);
+    chk(tag+'ela continua SECUNDARIA -- peso normal, e o selo do desconto e que e forte',
+        Number(d.hora1.peso) < Number((d.selo||{}).peso || 700),
+        'hora=' + d.hora1.peso + ' selo=' + (d.selo||{}).peso);
+    /* A MEDIDA QUE IMPORTA: a etiqueta da linha do cartao NAO encosta na frase. Quando as duas
+       caixas ficam na mesma altura ha de haver folga horizontal; quando a etiqueta desce para a
+       linha de baixo (celular estreito), a separacao e vertical e ja basta. */
+    const mesmaLinha = Math.abs(d.hora2.y - (d.txt2||{}).y) < 4;
+    if(mesmaLinha)
+      chk(tag+'a etiqueta do cartao nao encosta na frase (folga de '+(d.hora2.x-(d.txt2||{}).dir)+'px)',
+          d.hora2.x - (d.txt2||{}).dir >= 6, JSON.stringify({txt:d.txt2, hora:d.hora2}));
+    else
+      chk(tag+'a etiqueta do cartao desceu para a propria linha, e por isso ja esta separada',
+          d.hora2.y >= (d.txt2||{}).baixo - 2, JSON.stringify({txt:d.txt2, hora:d.hora2}));
+    chk(tag+'e ela nao vaza para fora do cartao',
+        d.hora2.dir <= 1024, String(d.hora2.dir));
+  }
+}
+
 process.exit(resumo());

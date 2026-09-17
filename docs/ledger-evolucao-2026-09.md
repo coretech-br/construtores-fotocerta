@@ -84,6 +84,7 @@ ausência de um lugar onde o histórico esteja em ordem, com o tempo ao lado.
 - **60. A quinta aba entra nas provas transversais, e o cartão dela estava quebrado — 16/09/2026** · `2026-09-16f`
 - **61. A quinta aba entra nas OITO provas transversais, e quatro redes novas — 16/09/2026** · `2026-09-16g`
 - **62. O valor médio da hora na vitrine de pacotes — 16/09/2026** · `2026-09-16h`
+- **63. A etiqueta do valor médio, e o defeito que só a tela mostrou — 16/09/2026** · `2026-09-16i`
 
 <!-- FIM DO INDICE GERADO -->
 
@@ -1636,6 +1637,45 @@ estava certo; a prova é que estava mal escrita.
 | Estimativa | Tempo real |
 |---|---|
 | 1 h (opção B) + o valor por hora em si | **18 min** — de 20:46:10 a 21:04:12 no relógio, incluindo as duas correções que as perguntas dele provocaram |
+
+---
+
+### 63. A etiqueta do valor médio, e o defeito que só a tela mostrou — 16/09/2026
+
+Versão `2026-09-16i`. Segunda volta do pedido da rodada 62, aberta pelo dono com uma frase que é
+o resumo do achado: *"o posicionamento do valor médio para cartão não ficou nem no computador,
+nem na tela"*.
+
+**O defeito era de layout, e a prova da rodada 62 não podia pegá-lo.** Na linha do cartão o valor
+saía colado no fim da frase — `em até 12x de R$ 18,34R$ 110,00 / hora` — porque `.fca-preco-linha2`
+era texto solto, enquanto `.fca-preco-linha1` já era flex com `gap`. As 82 verificações da rodada
+anterior liam `textContent` e valores, e `textContent` não tem geometria: a frase concatenada
+passava em todas elas. A correção é estrutural (a linha 2 vira flex quando há o que separar, e
+`justify-content:flex-end` no formato compacto, porque `text-align` não move item de flex).
+
+**A etiqueta com fundo veio dele**, junto com a ideia de tornar as cores configuráveis. Ela é
+deliberadamente **secundária**: peso 400 contra os 700 do selo do desconto, âmbar claro de fábrica.
+O selo verde é o que move a decisão do cliente; o valor por hora explica um número. Trocar essa
+hierarquia seria dar ao informativo o peso do promocional.
+
+**As duas cores não entram na paleta compartilhada.** A regra do projeto é explícita: só destaque,
+fundo do cartão, texto e coruja são da paleta; cor com significado próprio da aba fica na aba.
+
+#### O que a rodada ensinou sobre método
+
+**`textContent` não mede layout, e prova que só lê texto é cega para a metade visual.** A rodada 62
+mediu dinheiro, precedência, emissão condicional e o texto do dono — e o dono abriu a tela e viu
+um defeito em dois segundos. As verificações novas medem **geometria**: `getBoundingClientRect`
+dos dois lados, folga mínima entre a caixa da etiqueta e a caixa do texto, e o caso em que a
+etiqueta desce para a própria linha (onde a separação é vertical e a horizontal não se aplica).
+Toda vez que o pedido do dono usar a palavra *posicionamento*, a medida é geométrica.
+
+**Duas larguras não são luxo.** O mesmo bloco foi medido a 1024 e a 375 px, e é a segunda que
+mostra a etiqueta descendo de linha — o caso que uma medição só de desktop nunca alcançaria.
+
+| Estimativa | Tempo real |
+|---|---|
+| 40 min | **de 21:12:15 ao commit** — a maior parte em escrever a medição geométrica, e não a correção, que é de três linhas de CSS |
 
 ---
 
