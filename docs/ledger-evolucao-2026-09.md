@@ -87,6 +87,7 @@ ausência de um lugar onde o histórico esteja em ordem, com o tempo ao lado.
 - **63. A etiqueta do valor médio, e o defeito que só a tela mostrou — 16/09/2026** · `2026-09-16i`
 - **64. A ordem dos elementos, e o que pode quebrar de linha — 16/09/2026** · `2026-09-16j`
 - **65. A ferramenta foi ao ar quebrada, e o que falhou não foi o código — 16/09/2026** · `2026-09-16n`
+- **66. O cartão do celular deixa de espremer o nome — 16/09/2026** · `2026-09-16p`
 
 <!-- FIM DO INDICE GERADO -->
 
@@ -1751,6 +1752,48 @@ correção de um defeito de layout. A release note é dado executável dentro do
 | Estimativa | Tempo real |
 |---|---|
 | — (conserto de emergência) | **4 min** — de 22:23:27 (push quebrado) a 22:27 no relógio |
+
+---
+
+### 66. O cartão do celular deixa de espremer o nome — 16/09/2026
+
+Versão `2026-09-16p`. Quarta volta do mesmo pedido, e a quarta vez que o achado veio do dono
+olhando a tela — desta vez com a foto de um pacote chamado **Sábado e Domingo**: três palavras
+quebradas uma por linha, a duração em mais duas, e o preço por cima do texto.
+
+**A causa não era o valor médio da hora.** Era o formato compacto, de 03/09/2026: uma **grade de
+duas colunas**, nome e duração espremidos à esquerda, preço à direita. Coluna estreita que recebe
+texto de tamanho imprevisível é o defeito; o preço só tornou o sintoma visível. O desenho novo é
+dele: *"essas informações deveriam ficar em uma linha, sendo a primeira linha do card. E abaixo
+dessa linha, as informações de pagamento."*
+
+**Flex com quebra, e não grade.** Numa grade os itens **não quebram**: um nome longo demais
+estouraria a caixa em silêncio. Com `flex-wrap`, nome e duração correm lado a lado e, se um dia
+não couberem, a duração desce **inteira** para a linha seguinte — degrada por palavra, nunca por
+letra. O preço leva `flex-basis:100%` e por isso sempre começa linha nova, que é literalmente o
+que ele pediu. E **nenhum nó novo entra no cartão**: o desenho do computador continua intocado por
+construção, que era a razão de a versão de setembro ter escolhido grade em vez de um invólucro.
+
+**A economia de altura veio de uma alternativa que ele aceitou:** preço à esquerda e etiquetas
+encostadas à direita, na mesma linha (`margin-right:auto` no valor). Não `space-between`, que com
+três itens abriria um buraco entre o selo e a etiqueta — os dois são um par.
+
+#### O que a rodada ensinou sobre método
+
+**O nome de teste escolhe o que a prova enxerga.** Com `Dia Útil` o defeito nunca apareceria, e
+todas as 114 verificações anteriores usavam nomes curtos. A prova nova usa **o nome exato que
+quebrou na tela dele**, e mede geometria: quantas caixas de texto o nome ocupa (`getClientRects`),
+se a duração está na mesma coordenada vertical, e se algo vaza da borda do cartão. Contar
+caracteres diria "Sábado e Domingo" nos dois casos — inclusive no quebrado.
+
+**Quatro rodadas, quatro achados, nenhum vindo de prova.** O padrão do dia está claro: as provas
+deste projeto **impedem o defeito de voltar**; quem o encontra pela primeira vez, em tudo que é
+visual, é alguém abrindo a tela. Vale escrever a prova depois — mas não vale esperar que ela
+chegue primeiro.
+
+| Estimativa | Tempo real |
+|---|---|
+| 30 min | **de 22:41:40 ao commit** |
 
 ---
 

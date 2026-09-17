@@ -473,4 +473,101 @@ console.log('\n== 9. a ordem dos elementos e as duas linhas do cartao ==');
   }
 }
 
+/* ===========================================================================
+   10. O CARTAO NO CELULAR: nome e duracao numa linha, pagamento abaixo
+   ===========================================================================
+   O DONO MANDOU A TELA de um pacote chamado "Sabado e Domingo": tres palavras
+   quebradas uma por linha, a duracao em mais duas, e o preco por cima do texto.
+   A causa era a GRADE DE DUAS COLUNAS do formato compacto -- uma coluna estreita
+   recebendo texto de tamanho imprevisivel. O desenho novo e dele: "essas informacoes
+   deveriam ficar em uma linha, sendo a primeira linha do card. E abaixo dessa linha,
+   as informacoes de pagamento."
+
+   O NOME DE TESTE E LONGO DE PROPOSITO. Com "Dia Util" o defeito nunca apareceria, e
+   uma prova que so exercita o caso facil nao vigia nada. Este arquivo usa o nome exato
+   que quebrou na tela dele.
+
+   E A MEDIDA E GEOMETRICA: "numa linha" quer dizer MESMA COORDENADA VERTICAL e nome
+   inteiro numa caixa so. Contar caracteres ou olhar o texto diria "Sabado e Domingo"
+   nos dois casos -- inclusive no quebrado.
+   =========================================================================== */
+console.log('\n== 10. o cartao no celular ==');
+{
+  const NOME = 'Sábado e Domingo';
+  const g = await gerarNaFerramenta(async pg => {
+    for(const [k,v] of Object.entries(IDENT)) await set(pg,'fci-'+k,v);
+    await clicar(pg,'aba-pac');
+    await set(pg,'a-urlobrigado','https://www.fotocerta.com.br/obrigado');
+    await set(pg,'a-prefixo','FC');
+    await radio(pg,'a-metodo','ambos'); await radio(pg,'a-prio','pix');
+    await set(pg,'a-descpix','10'); await set(pg,'a-parcelas','12');
+    await set(pg,'a-txt-porhora','{valor} / hora');
+    await set(pg,'a-pcod','SAB'); await set(pg,'a-pnome',NOME);
+    await set(pg,'a-pdur','2 horas'); await set(pg,'a-ppreco','330');
+    await set(pg,'a-pinclui','Locacao por 2 horas'); await set(pg,'a-ppath','fotocerta/sab');
+    await clicar(pg,'a-pac-salvar');
+    await clicar(pg,'a-gerar');
+  }, ['a-out1'], {porta:8989});
+  chk('[10] a ferramenta gerou sem alerta', g.alertas.length === 0, JSON.stringify(g.alertas));
+
+  const r = await comBlocoNaPagina({bloco: g.valores['a-out1']||'', porta: 8990,
+    medir: async pg => {
+      await pg.setViewportSize({width: 360, height: 900});
+      await pg.waitForTimeout(500);
+      return {lido: await pg.evaluate(() => {
+        const c = document.querySelector('.fca-card');
+        const cx = s => { const e = c.querySelector(s); if(!e) return null;
+          const r = e.getBoundingClientRect();
+          return {x:Math.round(r.left), dir:Math.round(r.right), y:Math.round(r.top),
+                  baixo:Math.round(r.bottom), alt:Math.round(r.height),
+                  linhas: e.getClientRects().length}; };
+        const cr = c.getBoundingClientRect();
+        return {card:{x:Math.round(cr.left), dir:Math.round(cr.right), alt:Math.round(cr.height)},
+                nome:cx('.fca-card-nome'), dur:cx('.fca-card-dur'),
+                caixa:cx('.fca-card-preco'), valor:cx('.fca-preco-valor'),
+                selo:cx('.fca-selo'), h1:cx('.fca-preco-linha1 .fca-preco-hora')};
+      })};
+    }});
+  const d = r.lido || {};
+  chk('[10] o cartao desenhou', !!d.nome && !!d.dur && !!d.valor, JSON.stringify(d));
+  if(d.nome && d.dur && d.valor){
+    /* 1. NOME E DURACAO NA MESMA LINHA, e o nome numa caixa so. */
+    chk('[10] o nome longo NAO quebra em varias linhas ('+JSON.stringify(NOME)+')',
+        d.nome.linhas === 1, d.nome.linhas + ' caixas de texto, altura ' + d.nome.alt);
+    chk('[10] a duracao fica NA MESMA LINHA do nome, e nao embaixo',
+        Math.abs(d.dur.y - d.nome.y) < 6,
+        'nome y' + d.nome.y + ' · duracao y' + d.dur.y);
+    chk('[10] e ela vem DEPOIS do nome, com folga',
+        d.dur.x >= d.nome.dir, 'nome termina em ' + d.nome.dir + ' · duracao comeca em ' + d.dur.x);
+
+    /* 2. O PAGAMENTO COMECA UMA LINHA NOVA, ABAIXO. */
+    chk('[10] a caixa de preco comeca ABAIXO da linha do nome',
+        d.caixa.y >= d.nome.baixo - 2,
+        'nome termina em y' + d.nome.baixo + ' · preco comeca em y' + d.caixa.y);
+    chk('[10] e ela ocupa a largura inteira do cartao',
+        (d.caixa.dir - d.caixa.x) > (d.card.dir - d.card.x) * 0.8,
+        'preco ' + (d.caixa.dir - d.caixa.x) + 'px de ' + (d.card.dir - d.card.x) + 'px');
+
+    /* 3. O PRECO A ESQUERDA, AS ETIQUETAS A DIREITA, NA MESMA LINHA -- a alternativa que o
+       dono escolheu para nao gastar altura. */
+    if(d.selo && d.h1){
+      chk('[10] preco, selo e etiqueta ficam na MESMA linha',
+          Math.abs(d.selo.y - d.h1.y) < 4 && Math.abs(d.valor.y - d.selo.y) < 8,
+          JSON.stringify({valor:d.valor.y, selo:d.selo.y, hora:d.h1.y}));
+      chk('[10] o preco encosta na esquerda da caixa',
+          Math.abs(d.valor.x - d.caixa.x) <= 2, d.valor.x + ' x ' + d.caixa.x);
+      chk('[10] e a ultima etiqueta encosta na direita',
+          Math.abs(d.h1.dir - d.caixa.dir) <= 2, d.h1.dir + ' x ' + d.caixa.dir);
+      chk('[10] o selo e a etiqueta continuam JUNTOS, sem buraco entre eles',
+          d.h1.x - d.selo.dir <= 12, 'folga de ' + (d.h1.x - d.selo.dir) + 'px');
+    }
+    /* 4. NADA VAZA DO CARTAO. */
+    chk('[10] nenhum elemento vaza para fora do cartao',
+        [d.nome,d.dur,d.caixa,d.valor,d.selo,d.h1].filter(Boolean)
+          .every(e => e.dir <= d.card.dir + 1),
+        JSON.stringify(d));
+  }
+  chk('[10] sem erro proprio do bloco', reais(r.erros).length === 0, reais(r.erros).slice(0,2).join(' | '));
+}
+
 process.exit(resumo());

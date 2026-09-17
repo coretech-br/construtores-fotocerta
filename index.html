@@ -4923,8 +4923,8 @@
    QUEM IMPEDE QUE ELE MINTA: scripts/conferir-versoes.sh, que recusa index.html
    alterado sem a versao mudar junto -- a mesma disciplina do fc-compartilhado.js,
    e pela mesma razao: carimbo que ninguem confere e o defeito de amanha. */
-var FC_VERSAO='2026-09-16n';
-var FC_PUBLICADO='2026-09-16 22:25';   /* America/Sao_Paulo -- escrito pelo carimbador */
+var FC_VERSAO='2026-09-16p';
+var FC_PUBLICADO='2026-09-16 22:44';   /* America/Sao_Paulo -- escrito pelo carimbador */
 (function(){
   var el=document.getElementById('fc-versao');
   if(!el) return;
@@ -5888,6 +5888,7 @@ var FCR_ROTULOS={novo:'novo',corrigido:'corr',melhorado:'melh',atencao:'aten',ex
 /* A lista, da versao mais recente para a mais antiga. NAO reordenar: o agrupamento por
    dia assume que versoes do mesmo dia estao juntas, e o desenho respeita esta ordem. */
 var FCR_NOTAS=[
+ {v:"2026-09-16p",d:"16 de setembro de 2026",itens:[["Corrigido","Agendamento por Pacote, **no celular**: o cartão quebrava feio quando o nome do pacote tinha mais de uma palavra. Em *Sábado e Domingo* saía uma palavra por linha, a duração em mais duas, e o preço acabava por cima do texto. A causa era o formato antigo, que espremia nome e duração numa coluna estreita ao lado do preço."],["Melhorado","Agora a **primeira linha do cartão** é o nome com a duração ao lado, na largura inteira. Abaixo dela, o pagamento: o preço à esquerda e as etiquetas encostadas na direita, na mesma linha — para não gastar altura. Nome comprido que não couber faz a duração descer inteira para a linha seguinte, e nunca mais quebra palavra por letra."],["Atenção","No computador **nada muda** — o cartão de lá sempre foi empilhado e continua igual."],["Exige uma ação sua, uma única vez","Gere de novo o **Código 1** da aba Agendamento por Pacote e recole na vitrine."]]},
  {v:"2026-09-16n",d:"16 de setembro de 2026",itens:[["Corrigido","**A versão anterior (2026-09-16j) subiu quebrada e a ferramenta não abria** — tela em branco, por um erro de digitação meu **no texto desta própria lista de novidades**. Ficou no ar por poucos minutos. Nenhum código que você já colou no site foi afetado: o defeito era só na ferramenta, e nada do que ela já gerou muda por causa disso."],["Atenção","Se a ferramenta tiver aberto em branco para você, basta **recarregar a página**. A sua configuração fica guardada no navegador e não se perde."]]},
  {v:"2026-09-16j",d:"16 de setembro de 2026",itens:[["Corrigido","Agendamento por Pacote: numa largura apertada, quem caía sozinho para a linha de baixo era o **selo verde do desconto** — o que você quer que o cliente veja primeiro —, enquanto o valor médio da hora ficava lá em cima ao lado do preço. A ordem foi invertida: preço, selo, e a etiqueta por último. **Quem quebra de linha agora é a etiqueta**, que é o que pode quebrar."],["Melhorado","A linha do cartão passou a ser **duas**, alinhadas à direita: *ou R$ 220,00 no cartão* com a etiqueta ao lado, e *Em até 12x de R$ 18,34* logo abaixo. Numa linha só eram três números seguidos sem hierarquia nenhuma; agora o valor cheio fica com a etiqueta dele, e o parcelamento — que fala de outra coisa — tem linha própria."],["Atenção","Quem **não** usa o valor médio da hora não vê diferença nenhuma: sem ele, a linha do cartão continua sendo uma só, com o parcelamento na mesma frase, exatamente como sempre foi."],["Exige uma ação sua, uma única vez","Gere de novo o **Código 1** da aba Agendamento por Pacote e recole na vitrine — inclusive se já recolou pelas versões de hoje."]]},
  {v:"2026-09-16i",d:"16 de setembro de 2026",itens:[["Corrigido","Agendamento por Pacote: o **valor médio da hora da linha do cartão** saía colado no fim da frase — *\"em até 12x de R$ 18,34R$ 110,00 / hora\"* — e virava parte do texto, no computador e no celular. A linha de cima nunca teve o problema; a de baixo não tinha espaçamento nenhum. Agora as duas separam do mesmo jeito."],["Novo","Os dois valores médios ganharam **etiqueta com fundo**, como o selo verde do desconto — é o que separa o número da frase ao lado. Ela continua sendo secundária de propósito: fundo âmbar claro e peso normal, um degrau abaixo do selo do desconto, que é o que você quer que o cliente veja primeiro."],["Novo","E as **duas cores da etiqueta são suas** — fundo e texto, na seção de aparência da aba. Valem para os dois valores. Para ficar só com o texto, sem etiqueta, ponha no fundo o mesmo tom do cartão."],["Exige uma ação sua, uma única vez","Gere de novo o **Código 1** da aba Agendamento por Pacote e recole no componente da vitrine. Se você já recolou hoje pela versão anterior, precisa recolar mais esta vez — é a mesma saída."]]},
@@ -20836,13 +20837,35 @@ function aBlocoVitrine(cfg){
   c+='  .fca-cards{grid-template-columns:1fr;gap:8px}\n';
   if(temFam)c+='  .fca-fams{grid-template-columns:1fr;gap:8px}\n';
   c+='  .fca-resumo{flex-direction:column;align-items:flex-start}\n';
-  c+='  .fca-card{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:12px;align-items:center;padding:12px 14px}\n';
-  c+='  .fca-card-nome{grid-column:1;grid-row:1;font-size:14px}\n';
-  c+='  .fca-card-dur{grid-column:1;grid-row:2;margin:0}\n';
+  /* O CARTAO EMPILHA, e a primeira linha e NOME + DURACAO (16/09/2026, desenho do dono).
+     ANTES era uma GRADE DE DUAS COLUNAS: nome e duracao numa coluna estreita a esquerda, preco
+     na outra. O dono mandou a tela de um pacote chamado "Sabado e Domingo" -- tres palavras
+     quebradas uma por linha, a duracao em mais duas, e o preco, que e maior, por cima do texto.
+     Coluna estreita que recebe texto de tamanho imprevisivel e o defeito; o preco nao tinha
+     culpa. "Essas informacoes deveriam ficar em uma linha, sendo a primeira linha do card. E
+     abaixo dessa linha, as informacoes de pagamento."
+
+     FLEX COM QUEBRA, e nao grade, e a escolha importa: numa grade os itens NAO quebram, e um
+     nome longo demais estouraria a caixa em silencio. Aqui nome e duracao correm lado a lado e,
+     se um dia nao couberem, a duracao desce inteira para a linha seguinte -- degrada por
+     palavra, nunca por letra. O preco leva 'flex-basis:100%' e por isso SEMPRE comeca uma
+     linha nova, que e literalmente o que ele pediu.
+     NENHUM NO NOVO ENTRA NO CARTAO: o desenho do computador continua intocado por construcao,
+     que era a razao de a versao anterior ter escolhido grade em vez de um <div> involucro. */
+  c+='  .fca-card{display:flex;flex-wrap:wrap;align-items:baseline;column-gap:8px;row-gap:2px;padding:12px 14px}\n';
+  c+='  .fca-card-nome{font-size:14px}\n';
+  c+='  .fca-card-dur{margin:0}\n';
   c+='  .fca-card-inclui{display:none}\n';
-  c+='  .fca-card-preco{grid-column:2;grid-row:1/span 2}\n';
-  c+='  .fca-preco-linha1{justify-content:flex-end}\n';
-  c+='  .fca-preco-valor{font-size:16px}\n';
+  c+='  .fca-card-preco{flex:0 0 100%;margin-top:6px}\n';
+  /* O PRECO A ESQUERDA E AS ETIQUETAS A DIREITA, NA MESMA LINHA -- a alternativa que o dono
+     escolheu para nao gastar altura. 'margin-right:auto' no valor empurra tudo o que vem depois
+     (o selo do desconto e a etiqueta do valor medio) para a borda direita, e os tres continuam
+     numa linha so. Sem isso eles ficariam colados no preco, com um vazio a direita.
+     NAO e 'justify-content:space-between': com tres itens ele espalharia os TRES, abrindo um
+     buraco entre o selo e a etiqueta, que sao um par e precisam ficar juntos.
+     As linhas do meio secundario seguem a direita, como no computador. */
+  c+='  .fca-preco-valor{font-size:16px'+(comHoras?';margin-right:auto':'')+'}\n';
+  if(!comHoras)c+='  .fca-preco-linha1{justify-content:flex-end}\n';
   /* No formato compacto a caixa de preco vai para a segunda coluna e tudo alinha a direita.
      Com a linha 2 em flex, quem alinha e o justify-content -- 'text-align' nao move item de
      flex, e sem esta linha o valor medio ficaria encostado a esquerda so no celular, que e
