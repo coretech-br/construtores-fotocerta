@@ -570,4 +570,83 @@ console.log('\n== 10. o cartao no celular ==');
   chk('[10] sem erro proprio do bloco', reais(r.erros).length === 0, reais(r.erros).slice(0,2).join(' | '));
 }
 
+/* ===========================================================================
+   11. O CARTAO DO COMPUTADOR, INCLUSIVE QUANDO A ETIQUETA QUEBRA
+   ===========================================================================
+   "No celular ficou otimo. Mas para a versao do computador nao." A vitrine do
+   computador tem TRES COLUNAS, entao cada cartao e estreito -- e la a etiqueta do
+   valor medio nao cabia na linha do preco e caia sozinha para uma linha propria,
+   ENCOSTADA A ESQUERDA, enquanto as duas linhas de baixo estavam a direita. Um
+   degrau ao contrario no meio do cartao.
+
+   O CONSERTO NAO E IMPEDIR A QUEBRA -- largura de cartao depende do texto do dono e
+   do tamanho da janela, e prometer que tres elementos sempre cabem e prometer o que
+   nao se controla. O conserto e a quebra acontecer PARA O LADO CERTO: com
+   'justify-content:flex-end', o que sobra desce alinhado a direita, junto com o
+   resto do bloco de pagamento.
+
+   POR ISSO ESTA PARTE MEDE DUAS LARGURAS DE COMPUTADOR: uma em que os tres cabem, e
+   outra em que NAO cabem. Medir so a primeira deixaria o caso que o dono viu sem
+   vigilancia nenhuma -- e e sempre o caso apertado que quebra.
+   =========================================================================== */
+console.log('\n== 11. o cartao do computador, e a quebra para o lado certo ==');
+{
+  const g = await gerarNaFerramenta(async pg => {
+    for(const [k,v] of Object.entries(IDENT)) await set(pg,'fci-'+k,v);
+    await clicar(pg,'aba-pac');
+    await set(pg,'a-urlobrigado','https://www.fotocerta.com.br/obrigado');
+    await set(pg,'a-prefixo','FC');
+    await radio(pg,'a-metodo','ambos'); await radio(pg,'a-prio','pix');
+    await set(pg,'a-descpix','10'); await set(pg,'a-parcelas','12');
+    await set(pg,'a-txt-porhora','{valor} / hora');
+    await set(pg,'a-pcod','DIA'); await set(pg,'a-pnome','Dia Util');
+    await set(pg,'a-pdur','2 horas'); await set(pg,'a-ppreco','220');
+    await set(pg,'a-pinclui','Locacao por 2 horas, com ate 4 pessoas no estudio');
+    await set(pg,'a-ppath','fotocerta/dia');
+    await clicar(pg,'a-pac-salvar');
+    await clicar(pg,'a-gerar');
+  }, ['a-out1'], {porta:9601});
+  chk('[11] a ferramenta gerou sem alerta', g.alertas.length === 0, JSON.stringify(g.alertas));
+
+  let coube = 0, quebrou = 0;
+  for(const largura of [1280, 1024, 900, 860]){
+    const r = await comBlocoNaPagina({bloco: g.valores['a-out1']||'', porta: 9602 + [1280,1024,900,860].indexOf(largura),
+      medir: async pg => {
+        await pg.setViewportSize({width: largura, height: 1000});
+        await pg.waitForTimeout(400);
+        return {lido: await pg.evaluate(() => {
+          const c = document.querySelector('.fca-card');
+          const cx = s => { const e = c.querySelector(s); if(!e) return null;
+            const r = e.getBoundingClientRect();
+            return {x:Math.round(r.left), dir:Math.round(r.right), y:Math.round(r.top)}; };
+          return {caixa:cx('.fca-card-preco'), valor:cx('.fca-preco-valor'),
+                  selo:cx('.fca-selo'), h1:cx('.fca-preco-linha1 .fca-preco-hora'),
+                  h2:cx('.fca-preco-linha2 .fca-preco-hora'), parc:cx('.fca-preco-parcela')};
+        })};
+      }});
+    const d = r.lido || {}, tag = '[11/'+largura+'] ';
+    if(!d.valor || !d.selo || !d.h1){ chk(tag+'o cartao desenhou', false, JSON.stringify(d)); continue; }
+
+    /* O PRECO SEMPRE A ESQUERDA, e a ULTIMA etiqueta sempre na borda direita -- caiba ou nao
+       caiba tudo numa linha. E isto que faz o bloco de pagamento parecer um bloco. */
+    chk(tag+'o preco encosta na esquerda da caixa',
+        Math.abs(d.valor.x - d.caixa.x) <= 2, d.valor.x + ' x ' + d.caixa.x);
+    chk(tag+'a etiqueta do Pix termina na BORDA DIREITA, caiba ou quebre',
+        Math.abs(d.h1.dir - d.caixa.dir) <= 2,
+        'etiqueta termina em ' + d.h1.dir + ' · caixa em ' + d.caixa.dir);
+    /* E as tres linhas de baixo terminam na MESMA borda -- o alinhamento que o dono viu
+       faltando quando a etiqueta caiu sozinha a esquerda. */
+    for(const [nome,e] of [['a etiqueta do cartao',d.h2],['o parcelamento',d.parc]])
+      if(e) chk(tag+nome+' termina na mesma borda direita',
+                Math.abs(e.dir - d.caixa.dir) <= 2, e.dir + ' x ' + d.caixa.dir);
+
+    if(Math.abs(d.h1.y - d.selo.y) < 4) coube++; else quebrou++;
+  }
+  /* A PROVA SO VALE SE OS DOIS ESTADOS FORAM EXERCITADOS. Se um dia o cartao ficar largo o
+     bastante em todas as larguras testadas, esta linha avisa que o caso apertado -- o que o
+     dono viu -- deixou de ser medido, em vez de ficar verde sem ter olhado para ele. */
+  chk('[11] as larguras testadas cobriram os DOIS casos: coube numa linha e quebrou',
+      coube > 0 && quebrou > 0, 'coube em ' + coube + ' larguras, quebrou em ' + quebrou);
+}
+
 process.exit(resumo());

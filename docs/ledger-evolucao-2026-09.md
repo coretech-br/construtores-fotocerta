@@ -88,6 +88,7 @@ ausência de um lugar onde o histórico esteja em ordem, com o tempo ao lado.
 - **64. A ordem dos elementos, e o que pode quebrar de linha — 16/09/2026** · `2026-09-16j`
 - **65. A ferramenta foi ao ar quebrada, e o que falhou não foi o código — 16/09/2026** · `2026-09-16n`
 - **66. O cartão do celular deixa de espremer o nome — 16/09/2026** · `2026-09-16p`
+- **67. A quebra para o lado certo — 16/09/2026** · `2026-09-16q`
 
 <!-- FIM DO INDICE GERADO -->
 
@@ -1794,6 +1795,41 @@ chegue primeiro.
 | Estimativa | Tempo real |
 |---|---|
 | 30 min | **de 22:41:40 ao commit** |
+
+---
+
+### 67. A quebra para o lado certo — 16/09/2026
+
+Versão `2026-09-16q`. *"No celular ficou ótimo. Mas para a versão do computador não."*
+
+O cartão do computador é **estreito** — a vitrine tem três colunas —, e ali a etiqueta do valor
+médio não cabia na linha do preço e caía sozinha para uma linha própria, **encostada à esquerda**,
+enquanto as duas linhas de baixo estavam à direita. Um degrau ao contrário no meio do cartão.
+
+**O conserto não é impedir a quebra.** Largura de cartão depende do texto que o dono escreve e do
+tamanho da janela dele; prometer que três elementos sempre cabem é prometer o que não se controla.
+O conserto é a quebra acontecer **para o lado certo**: `margin-right:auto` no valor empurra selo e
+etiqueta para a borda direita, e `justify-content:flex-end` faz o que sobrar descer **alinhado à
+direita**, junto com o resto do bloco — a linha extra passa a parecer parte do mesmo bloco em vez
+de um órfão. É o mesmo arranjo que o formato do celular já usava e que ele tinha aprovado lá.
+
+#### O que a rodada ensinou sobre método
+
+**Uma prova que só mede o caso folgado não vigia nada.** As 127 verificações anteriores mediam a
+1024 px, onde os três elementos cabiam, e o defeito do dono vivia a uma largura menor. A parte
+nova mede **quatro larguras de computador** e termina com uma asserção incomum: ela cobra que os
+**dois estados** tenham sido exercitados — coube numa linha em alguma largura, e quebrou em outra.
+Se um dia o cartão ficar largo o bastante em todas elas, a prova **avisa que deixou de medir o
+caso apertado**, em vez de ficar verde sem ter olhado para ele. É a mesma família do `NÃO MEDIU`
+das provas com referência, aplicada a layout.
+
+**Porta fixa cobra o seu preço.** A primeira execução morreu com `EADDRINUSE` na 8999 — a suíte
+cresceu para quatro larguras e esbarrou na faixa de uma vizinha. Não é defeito do bloco, e é
+exatamente o ruído que o README já registra sobre medir com a máquina ocupada.
+
+| Estimativa | Tempo real |
+|---|---|
+| 20 min | **de 23:40:59 ao commit** |
 
 ---
 
