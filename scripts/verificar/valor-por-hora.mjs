@@ -662,4 +662,92 @@ console.log('\n== 11. o cartao do computador, e a quebra para o lado certo ==');
       coube > 0 && quebrou > 0, 'ao lado do preco em ' + coube + ' larguras, abaixo em ' + quebrou);
 }
 
+/* ===========================================================================
+   12. O CONTEUDO DO CARTAO ENCOSTA NO TOPO
+   ===========================================================================
+   O DONO VIU numa vitrine de cinco pacotes: o de 1 hora -- que nao tem a etiqueta
+   do valor medio, e por isso tem uma linha a menos -- aparecia "mais para baixo do
+   que os demais". Os cartoes de uma fileira tem a MESMA ALTURA (a grade os estica),
+   entao conteudo mais curto sobra espaco; a questao e onde esse espaco fica.
+
+   A CAUSA E O <button>: o navegador centraliza verticalmente o conteudo dele na
+   folha de estilo PADRAO. 'text-align:left' trata so a horizontal e 'display:block'
+   nao desfaz. O cartao virou flex em coluna com 'justify-content:flex-start'.
+
+   A PROVA TEM CONTROLE NEGATIVO, e sem ele nao valeria nada: ela REPETE a medicao
+   com a centralizacao reinjetada por CSS e exige que a diferenca APARECA. Uma
+   assercao de alinhamento que nunca viu o desalinhado pode estar medindo qualquer
+   coisa -- inclusive tres cartoes de conteudo igual, onde centralizado e no topo dao
+   o mesmo numero.
+   =========================================================================== */
+console.log('\n== 12. o conteudo encosta no topo do cartao ==');
+{
+  /* 1 hora NAO ganha etiqueta (a regra e "acima de uma hora"), as outras ganham -- e e
+     exatamente essa diferenca de altura que revela o alinhamento. */
+  const PACS = [['H1','1 hora','150'],['H2','2 horas','230'],['H3','3 horas','340']];
+  const g = await gerarNaFerramenta(async pg => {
+    for(const [k,v] of Object.entries(IDENT)) await set(pg,'fci-'+k,v);
+    await clicar(pg,'aba-pac');
+    await set(pg,'a-urlobrigado','https://www.fotocerta.com.br/obrigado');
+    await set(pg,'a-prefixo','FC');
+    await radio(pg,'a-metodo','ambos'); await radio(pg,'a-prio','pix');
+    await set(pg,'a-descpix','10'); await set(pg,'a-parcelas','12');
+    await set(pg,'a-txt-porhora','{valor} / hora');
+    for(const [cod,dur,preco] of PACS){
+      await set(pg,'a-pcod',cod); await set(pg,'a-pnome','Dia Util');
+      await set(pg,'a-pdur',dur); await set(pg,'a-ppreco',preco);
+      await set(pg,'a-pinclui','Locacao por '+dur+', com ate 4 pessoas no estudio');
+      await set(pg,'a-ppath','fotocerta/'+cod.toLowerCase());
+      await clicar(pg,'a-pac-salvar');
+    }
+    await clicar(pg,'a-gerar');
+  }, ['a-out1'], {porta:9631});
+  chk('[12] a ferramenta gerou sem alerta', g.alertas.length === 0, JSON.stringify(g.alertas));
+
+  const olhar = async (centralizar, porta) => (await comBlocoNaPagina({
+    bloco: g.valores['a-out1']||'', porta,
+    medir: async pg => {
+      await pg.setViewportSize({width: 1100, height: 1200});
+      await pg.addStyleTag({content:'body{font-family:Georgia,"Times New Roman",serif;font-size:17px}'});
+      if(centralizar) await pg.addStyleTag({content:'.fca-card{justify-content:center!important}'});
+      await pg.waitForTimeout(450);
+      return {lido: await pg.evaluate(() => [].slice.call(document.querySelectorAll('.fca-card')).map(c => {
+        const cr = c.getBoundingClientRect();
+        const n = c.querySelector('.fca-card-nome').getBoundingClientRect();
+        const u = c.lastElementChild.getBoundingClientRect();
+        return {dur:(c.querySelector('.fca-card-dur')||{}).textContent,
+                alturaCartao:Math.round(cr.height),
+                conteudo:Math.round(u.bottom - n.top),
+                folgaTopo:Math.round(n.top - cr.top)};
+      }))};
+    }})).lido || [];
+
+  const normal = await olhar(false, 9632);
+  chk('[12] os tres cartoes desenharam', normal.length === 3, String(normal.length));
+  if(normal.length === 3){
+    /* A PROVA SO VALE SE OS CONTEUDOS TIVEREM ALTURAS DIFERENTES. Com tres cartoes iguais,
+       centralizado e no topo dao o mesmo numero e a assercao abaixo passaria sem olhar nada. */
+    const alturas = normal.map(x => x.conteudo);
+    chk('[12] os cartoes tem conteudos de alturas DIFERENTES (senao nao ha o que alinhar)',
+        new Set(alturas).size > 1, JSON.stringify(alturas));
+    chk('[12] e a grade deu a todos a MESMA altura de cartao',
+        new Set(normal.map(x => x.alturaCartao)).size === 1,
+        JSON.stringify(normal.map(x => x.alturaCartao)));
+    const folgas = normal.map(x => x.folgaTopo);
+    chk('[12] todos comecam o conteudo a mesma distancia do topo',
+        Math.max(...folgas) - Math.min(...folgas) <= 1, JSON.stringify(folgas));
+    chk('[12] e essa distancia e o proprio preenchimento do cartao, nao sobra centralizada',
+        Math.max(...folgas) <= 20, JSON.stringify(folgas));
+  }
+
+  /* O CONTROLE NEGATIVO: com a centralizacao de volta, as folgas TEM de divergir. Se nao
+     divergirem, esta prova nao esta medindo alinhamento nenhum. */
+  const centrado = await olhar(true, 9633);
+  if(centrado.length === 3){
+    const f = centrado.map(x => x.folgaTopo);
+    chk('[12] CONTROLE: com a centralizacao reinjetada, as folgas divergem (a prova ve o defeito)',
+        Math.max(...f) - Math.min(...f) > 1, JSON.stringify(f));
+  }
+}
+
 process.exit(resumo());

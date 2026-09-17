@@ -90,6 +90,7 @@ ausência de um lugar onde o histórico esteja em ordem, com o tempo ao lado.
 - **66. O cartão do celular deixa de espremer o nome — 16/09/2026** · `2026-09-16p`
 - **67. A quebra para o lado certo — 16/09/2026** · `2026-09-16q`
 - **68. Nove pixels, e a fonte que o arnês não tinha — 16/09/2026** · `2026-09-16r`
+- **69. O conteúdo do cartão encosta no topo — 17/09/2026** · `2026-09-17a`
 
 <!-- FIM DO INDICE GERADO -->
 
@@ -1871,6 +1872,43 @@ chegou à resposta certa foi ela parar de depender do número: com o par indivis
 | Estimativa | Tempo real |
 |---|---|
 | 20 min | **de 23:49:55 ao commit** — quase todo em medir; o conserto são um `<span>` e uma regra |
+
+---
+
+### 69. O conteúdo do cartão encosta no topo — 17/09/2026
+
+Versão `2026-09-17a`. *"Me parece que o conteúdo dos cards está alinhado ao meio. Veja que a
+locação de 1 hora ficou mais para baixo do que os demais."*
+
+**A causa é o `<button>`.** O cartão da vitrine é um botão, e o navegador centraliza verticalmente
+o conteúdo dele na folha de estilo **padrão**. `text-align:left` trata só a horizontal e
+`display:block` não desfaz. Numa fileira os cartões têm a mesma altura (a grade os estica), então
+o de 1 hora — que não ganha a etiqueta do valor médio, e por isso tem uma linha a menos — sobrava
+espaço e ficava com metade dele em cima. O cartão virou flex em coluna com
+`justify-content:flex-start`.
+
+**E a correção quebrou o celular, por uma rodada de segundos.** A regra do formato compacto
+sobrescrevia `display` mas **não declarava `flex-direction`** — e passou a herdar a coluna da regra
+de fora: nome, duração e preço empilhados, caixa de preço encolhida ao lado. A suíte pegou na
+mesma execução, com cinco vermelhos. **Regra que sobrescreve o `display` de outra precisa declarar
+todas as propriedades de layout que a de fora define, e não só as que quer mudar.**
+
+#### O que a rodada ensinou sobre método
+
+**A prova pagou-se no mesmo minuto em que foi escrita.** A parte 12 nasceu para o defeito do
+alinhamento, e o primeiro vermelho que ela deu foi de **outro** defeito — o colateral no celular,
+que eu teria publicado sem ver. É o argumento inteiro a favor de escrever a prova antes de
+publicar, e não depois: ela não vigia só o que a motivou.
+
+**Controle negativo em prova de alinhamento não é luxo, é o que a torna uma prova.** Três cartões
+de conteúdo igual dão o mesmo número centralizados ou no topo. A parte 12 cobra antes que os
+conteúdos tenham **alturas diferentes**, e depois **repete a medição com a centralização
+reinjetada por CSS**, exigindo que a diferença apareça. Uma asserção de alinhamento que nunca viu
+o desalinhado pode estar medindo qualquer coisa.
+
+| Estimativa | Tempo real |
+|---|---|
+| 15 min | **de 00:31:34 ao commit** |
 
 ---
 

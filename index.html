@@ -4923,8 +4923,8 @@
    QUEM IMPEDE QUE ELE MINTA: scripts/conferir-versoes.sh, que recusa index.html
    alterado sem a versao mudar junto -- a mesma disciplina do fc-compartilhado.js,
    e pela mesma razao: carimbo que ninguem confere e o defeito de amanha. */
-var FC_VERSAO='2026-09-16r';
-var FC_PUBLICADO='2026-09-16 23:55';   /* America/Sao_Paulo -- escrito pelo carimbador */
+var FC_VERSAO='2026-09-17a';
+var FC_PUBLICADO='2026-09-17 00:33';   /* America/Sao_Paulo -- escrito pelo carimbador */
 (function(){
   var el=document.getElementById('fc-versao');
   if(!el) return;
@@ -5888,6 +5888,7 @@ var FCR_ROTULOS={novo:'novo',corrigido:'corr',melhorado:'melh',atencao:'aten',ex
 /* A lista, da versao mais recente para a mais antiga. NAO reordenar: o agrupamento por
    dia assume que versoes do mesmo dia estao juntas, e o desenho respeita esta ordem. */
 var FCR_NOTAS=[
+ {v:"2026-09-17a",d:"17 de setembro de 2026",itens:[["Corrigido","Agendamento por Pacote: o conteúdo dos cartões da vitrine ficava **centralizado na vertical**. Numa fileira, os cartões têm todos a mesma altura, então o mais curto — o de 1 hora, que não tem a etiqueta do valor por hora — aparecia **flutuando no meio**, desalinhado dos vizinhos. Agora o conteúdo encosta no topo e a primeira linha de todos os cartões fica na mesma altura."],["Atenção","A causa era o navegador: ele centraliza sozinho o conteúdo de um botão, e o cartão da vitrine é um botão. Não era escolha de desenho de ninguém."]]},
  {v:"2026-09-16r",d:"16 de setembro de 2026",itens:[["Corrigido","Agendamento por Pacote, no computador: a etiqueta amarela caía **debaixo da verde**, deixando um vão no meio da linha do preço que parecia espaço sobrando. **Faltavam nove pixels** — medido com a fonte de um tema de verdade: os três elementos pediam 286 px e o cartão tem 277. No navegador cru do arnês sobravam 27, e foi por isso que nenhuma conferência anterior viu o defeito: a largura do texto depende da fonte do seu site, que o código apenas herda."],["Melhorado","**As duas etiquetas viraram um par que anda junto.** Cabendo, ficam as duas na linha do preço; não cabendo, **descem juntas**, lado a lado e alinhadas à direita. O estado que você viu — uma em cima e outra embaixo — deixou de existir, e não por caber por pouco: por construção."],["Melhorado","As duas etiquetas ficaram **um pouco menores** e mais juntas, para caberem na linha do preço em mais larguras de tela. Encolheram as duas, porque são um par — uma menor que a outra chamaria atenção para a diferença, e não para os números."]]},
  {v:"2026-09-16q",d:"16 de setembro de 2026",itens:[["Corrigido","Agendamento por Pacote, **no computador**: a etiqueta do valor médio do Pix não cabia na linha do preço e caía sozinha para uma linha própria, **encostada à esquerda**, enquanto tudo abaixo dela estava à direita — um degrau ao contrário no meio do cartão. O cartão do computador é estreito porque a vitrine tem três colunas."],["Melhorado","A linha do preço passou a ter o mesmo arranjo que você aprovou no celular: **preço à esquerda, etiquetas encostadas na direita**. Quando não couber tudo numa linha, o que sobra desce **alinhado à direita**, junto com o resto do bloco de pagamento, em vez de ficar órfão do outro lado."]]},
  {v:"2026-09-16p",d:"16 de setembro de 2026",itens:[["Corrigido","Agendamento por Pacote, **no celular**: o cartão quebrava feio quando o nome do pacote tinha mais de uma palavra. Em *Sábado e Domingo* saía uma palavra por linha, a duração em mais duas, e o preço acabava por cima do texto. A causa era o formato antigo, que espremia nome e duração numa coluna estreita ao lado do preço."],["Melhorado","Agora a **primeira linha do cartão** é o nome com a duração ao lado, na largura inteira. Abaixo dela, o pagamento: o preço à esquerda e as etiquetas encostadas na direita, na mesma linha — para não gastar altura. Nome comprido que não couber faz a duração descer inteira para a linha seguinte, e nunca mais quebra palavra por letra."],["Atenção","No computador **nada muda** — o cartão de lá sempre foi empilhado e continua igual."],["Exige uma ação sua, uma única vez","Gere de novo o **Código 1** da aba Agendamento por Pacote e recole na vitrine."]]},
@@ -20721,7 +20722,19 @@ function aBlocoVitrine(cfg){
   c+='.fca-passo{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:var(--fca-destaque,#0F3A30);margin:0 0 10px;text-align:left}\n';
   c+='.fca-passo-n{width:22px;height:22px;min-width:22px;border-radius:50%;background:var(--fca-destaque,#0F3A30);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px}\n';
   c+='.fca-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:0 0 18px;text-align:left}\n';
-  c+='.fca-card{border:1px solid #e5dfd0;border-radius:14px;background:var(--fca-fundo,#fff);padding:16px;cursor:pointer;text-align:left;color:inherit;font:inherit;display:block;width:100%;transition:box-shadow .18s,transform .18s}\n';
+  /* O CONTEUDO ENCOSTA NO TOPO DO CARTAO (17/09/2026). Os cartoes de uma fileira tem a mesma
+     altura (a grade os estica), mas conteudos de alturas diferentes -- um pacote de 1 hora nao
+     tem a etiqueta do valor medio, entao tem uma linha a menos. O dono viu o cartao mais curto
+     "flutuando" no meio da fileira, desalinhado dos vizinhos.
+     A CAUSA E O <button>: o navegador centraliza verticalmente o conteudo dele por conta
+     propria, na folha de estilo PADRAO, e 'text-align:left' so trata a horizontal --
+     'display:block' tambem nao desfaz. Por isso o cartao vira FLEX EM COLUNA com
+     'justify-content:flex-start': ai o empilhamento comeca no topo e os cartoes de uma fileira
+     alinham a primeira linha entre si, que e o que o olho compara. 'align-items:stretch'
+     mantem cada filho ocupando a largura inteira, como no display:block de antes.
+     A @media do celular redefine display/align-items para o formato compacto, e continua
+     mandando la -- ela vem depois no CSS e trata do mesmo seletor de proposito. */
+  c+='.fca-card{border:1px solid #e5dfd0;border-radius:14px;background:var(--fca-fundo,#fff);padding:16px;cursor:pointer;text-align:left;color:inherit;font:inherit;display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;width:100%;transition:box-shadow .18s,transform .18s}\n';
   c+='.fca-card:hover{box-shadow:0 8px 22px rgba(0,0,0,.10);transform:translateY(-2px)}\n';
   c+='.fca-card-nome{font-size:15px;font-weight:700;margin:0 0 2px;text-align:left}\n';
   c+='.fca-card-dur{font-size:12px;color:#777;margin:0 0 6px;text-align:left}\n';
@@ -20879,7 +20892,13 @@ function aBlocoVitrine(cfg){
      linha nova, que e literalmente o que ele pediu.
      NENHUM NO NOVO ENTRA NO CARTAO: o desenho do computador continua intocado por construcao,
      que era a razao de a versao anterior ter escolhido grade em vez de um <div> involucro. */
-  c+='  .fca-card{display:flex;flex-wrap:wrap;align-items:baseline;column-gap:8px;row-gap:2px;padding:12px 14px}\n';
+  /* 'flex-direction:row' E OBRIGATORIO AQUI desde 17/09/2026, e a ausencia dele quebrou o
+     celular por uma rodada: a regra de fora passou a ser flex EM COLUNA (para o conteudo
+     encostar no topo do cartao), e esta, que nao declarava direcao, herdava a coluna -- nome,
+     duracao e preco empilhados, e a caixa de preco encolhida ao lado. Regra que sobrescreve
+     'display' de outra precisa declarar TODAS as propriedades de layout que a de fora define,
+     e nao so as que ela quer mudar. */
+  c+='  .fca-card{display:flex;flex-direction:row;flex-wrap:wrap;align-items:baseline;justify-content:flex-start;column-gap:8px;row-gap:2px;padding:12px 14px}\n';
   c+='  .fca-card-nome{font-size:14px}\n';
   c+='  .fca-card-dur{margin:0}\n';
   c+='  .fca-card-inclui{display:none}\n';
