@@ -91,6 +91,7 @@ ausência de um lugar onde o histórico esteja em ordem, com o tempo ao lado.
 - **67. A quebra para o lado certo — 16/09/2026** · `2026-09-16q`
 - **68. Nove pixels, e a fonte que o arnês não tinha — 16/09/2026** · `2026-09-16r`
 - **69. O conteúdo do cartão encosta no topo — 17/09/2026** · `2026-09-17a`
+- **70. A prévia para de parecer tamanho real — 17/09/2026** · `2026-09-17b`
 
 <!-- FIM DO INDICE GERADO -->
 
@@ -1909,6 +1910,48 @@ o desalinhado pode estar medindo qualquer coisa.
 | Estimativa | Tempo real |
 |---|---|
 | 15 min | **de 00:31:34 ao commit** |
+
+---
+
+### 70. A prévia para de parecer tamanho real — 17/09/2026
+
+Versão `2026-09-17b`. *"A prévia não demonstrava isso. Só peguei quando colei o código."*
+
+**A observação vale mais que o defeito que a motivou.** A prévia existe para o dono não precisar
+colar para descobrir, e nas cinco rodadas anteriores ela não o serviu uma única vez — todos os
+achados vieram dele olhando a página publicada.
+
+**Medido, e não deduzido:** o modo Computador monta o quadro em 1040 px e o reduz para caber no
+painel de 717 — **escala 0,69**. O cartão desalinhado **estava lá**: 12 px de desalinhamento
+reinjetados na própria prévia viram **8,3 px na tela**, dentro de um quadro pequeno. A prévia não
+estava errada; estava encolhida, e não avisava.
+
+**O conserto não é aumentar a prévia** — o painel tem a largura que tem, e mostrar 1040 px sem
+reduzir custaria rolagem horizontal em tudo. O conserto é ela **parar de parecer tamanho real**:
+anuncia a redução ao lado dos botões (`reduzido a 69%`, ou `tamanho real` quando cabe inteiro) e
+oferece **Abrir em tamanho real**, que escreve o mesmo `aPvDoc` noutra aba, sem escala — mesma
+fonte, mesmo shim de armazenamento, mesma recusa.
+
+#### O que a rodada ensinou sobre método
+
+**Ferramenta de conferência que não declara a própria margem de erro ensina a confiar errado.**
+A prévia acertava o desenho e escondia a escala; quem olhava concluía "está bom" sobre uma
+evidência 31% menor que a realidade. O mesmo vale para a fonte: o texto de ajuda passou a dizer
+que a fonte do site muda a largura, porque foi exatamente isso que fez uma etiqueta cair de linha
+lá e não aqui.
+
+**O aviso que aparece sempre deixa de ser lido**, e por isso ele muda: `tamanho real` quando não
+há redução. Uma suíte cobra as duas formas, e cobra também que o **número anunciado bata com a
+escala aplicada** — aviso que anuncia uma redução diferente da real é pior que nenhum.
+
+**Pergunta estática se responde no texto do arquivo.** A ferramenta roda dentro de um IIFE, então
+`aPvDoc` não existe como global e não dá para compará-la de fora. "Os dois caminhos usam a mesma
+função?" é, por natureza, uma pergunta sobre o código — e é lida no `index.html`, como a varredura
+de `aparencia.mjs` já fazia.
+
+| Estimativa | Tempo real |
+|---|---|
+| 40 min | **de 00:35:24 ao commit** |
 
 ---
 

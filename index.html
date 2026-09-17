@@ -1466,7 +1466,8 @@
       <button type="button" class="botao mini claro" id="l-pv-cel" aria-pressed="false">Celular</button>
       </div>
       <div id="l-pv-box"></div>
-      <p class="ajuda">A prévia roda <b>o próprio código da caixa ao lado</b>, dentro de um quadro isolado — não é um desenho parecido. <b>O que ainda difere da página publicada:</b> o quadro abre o pop-up sozinho (na página real ele espera o clique ou o tempo do modo automático), e por isso o botão flutuante aparece atrás do véu escuro; o foco automático do campo nome e o <code>window.open</code> do botão enviar são <b>neutralizados só dentro do quadro</b>, senão a prévia roubaria o cursor do formulário e abriria o WhatsApp a cada atualização — o código gerado não é afetado; o aviso de horário usa o relógio deste computador convertido para o fuso configurado; a largura é a largura lógica do botão acima (reduzida na tela só para caber na coluna), enquanto na página real vale a janela do visitante; e o quadro não carrega o CSS do tema do site.</p>
+      <p class="ajuda">A prévia roda <b>o próprio código da caixa ao lado</b>, dentro de um quadro isolado — não é um desenho parecido. <b>O que ainda difere da página publicada:</b> o quadro abre o pop-up sozinho (na página real ele espera o clique ou o tempo do modo automático), e por isso o botão flutuante aparece atrás do véu escuro; o foco automático do campo nome e o <code>window.open</code> do botão enviar são <b>neutralizados só dentro do quadro</b>, senão a prévia roubaria o cursor do formulário e abriria o WhatsApp a cada atualização — o código gerado não é afetado; o aviso de horário usa o relógio deste computador convertido para o fuso configurado; a largura é a largura lógica do botão acima (reduzida na tela só para caber na coluna), enquanto na página real vale a janela do visitante; e o quadro não carrega o CSS do tema do site — <b>e a fonte muda a largura do texto</b>, então o que aqui cabe numa linha pode não caber na sua página.</p>
+      <p class="ajuda alerta"><b>O quadro é reduzido para caber no painel</b>, e a redução aparece ao lado dos botões acima. Numa escala de 70%, um desalinhamento de 12 pixels vira 8 na tela e passa despercebido — foi assim que um cartão desalinhado chegou à página publicada em 17/09/2026. Quando algo parecer estranho, use <b>Abrir em tamanho real</b>: o mesmo código, sem redução, em outra aba.</p>
       </div>
     </div>
     <div>
@@ -4371,6 +4372,8 @@
       <span class="rotulo">Ver como:</span>
       <button type="button" class="botao mini" id="a-pv-desk" aria-pressed="true">Computador</button>
       <button type="button" class="botao mini claro" id="a-pv-cel" aria-pressed="false">Celular</button>
+      <button type="button" class="botao mini claro" id="a-pv-real">Abrir em tamanho real</button>
+      <span class="rotulo" id="a-pv-escala"></span>
       </div>
       <div id="a-pv-box"></div>
       </div>
@@ -4923,8 +4926,8 @@
    QUEM IMPEDE QUE ELE MINTA: scripts/conferir-versoes.sh, que recusa index.html
    alterado sem a versao mudar junto -- a mesma disciplina do fc-compartilhado.js,
    e pela mesma razao: carimbo que ninguem confere e o defeito de amanha. */
-var FC_VERSAO='2026-09-17a';
-var FC_PUBLICADO='2026-09-17 00:33';   /* America/Sao_Paulo -- escrito pelo carimbador */
+var FC_VERSAO='2026-09-17b';
+var FC_PUBLICADO='2026-09-17 00:39';   /* America/Sao_Paulo -- escrito pelo carimbador */
 (function(){
   var el=document.getElementById('fc-versao');
   if(!el) return;
@@ -5888,6 +5891,7 @@ var FCR_ROTULOS={novo:'novo',corrigido:'corr',melhorado:'melh',atencao:'aten',ex
 /* A lista, da versao mais recente para a mais antiga. NAO reordenar: o agrupamento por
    dia assume que versoes do mesmo dia estao juntas, e o desenho respeita esta ordem. */
 var FCR_NOTAS=[
+ {v:"2026-09-17b",d:"17 de setembro de 2026",itens:[["Novo","**A prévia passou a dizer quando está reduzida.** Ao lado dos botões *Computador* e *Celular* aparece agora, por exemplo, **reduzido a 69%** — ou *tamanho real*, quando o quadro cabe inteiro. Antes ela dava a impressão de tamanho real e não era."],["Novo","E um botão **Abrir em tamanho real**, que mostra o mesmo código em outra aba, **sem redução**. É o que usar quando algo parecer estranho na prévia."],["Atenção","Isso resolve o que aconteceu ontem: o cartão desalinhado **estava** na prévia, mas como ela desenha em 1040 pixels e encolhe para caber no painel, um desalinhamento de 12 pixels virava 8 na tela e passava despercebido. A prévia não estava errada — estava pequena, e não avisava."],["Atenção","O texto de ajuda da prévia também passou a dizer que **a fonte do seu site muda a largura do texto**: o que aqui cabe numa linha pode não caber na sua página. Foi por isso que uma etiqueta caiu de linha lá e não aqui."]]},
  {v:"2026-09-17a",d:"17 de setembro de 2026",itens:[["Corrigido","Agendamento por Pacote: o conteúdo dos cartões da vitrine ficava **centralizado na vertical**. Numa fileira, os cartões têm todos a mesma altura, então o mais curto — o de 1 hora, que não tem a etiqueta do valor por hora — aparecia **flutuando no meio**, desalinhado dos vizinhos. Agora o conteúdo encosta no topo e a primeira linha de todos os cartões fica na mesma altura."],["Atenção","A causa era o navegador: ele centraliza sozinho o conteúdo de um botão, e o cartão da vitrine é um botão. Não era escolha de desenho de ninguém."]]},
  {v:"2026-09-16r",d:"16 de setembro de 2026",itens:[["Corrigido","Agendamento por Pacote, no computador: a etiqueta amarela caía **debaixo da verde**, deixando um vão no meio da linha do preço que parecia espaço sobrando. **Faltavam nove pixels** — medido com a fonte de um tema de verdade: os três elementos pediam 286 px e o cartão tem 277. No navegador cru do arnês sobravam 27, e foi por isso que nenhuma conferência anterior viu o defeito: a largura do texto depende da fonte do seu site, que o código apenas herda."],["Melhorado","**As duas etiquetas viraram um par que anda junto.** Cabendo, ficam as duas na linha do preço; não cabendo, **descem juntas**, lado a lado e alinhadas à direita. O estado que você viu — uma em cima e outra embaixo — deixou de existir, e não por caber por pouco: por construção."],["Melhorado","As duas etiquetas ficaram **um pouco menores** e mais juntas, para caberem na linha do preço em mais larguras de tela. Encolheram as duas, porque são um par — uma menor que a outra chamaria atenção para a diferença, e não para os números."]]},
  {v:"2026-09-16q",d:"16 de setembro de 2026",itens:[["Corrigido","Agendamento por Pacote, **no computador**: a etiqueta do valor médio do Pix não cabia na linha do preço e caía sozinha para uma linha própria, **encostada à esquerda**, enquanto tudo abaixo dela estava à direita — um degrau ao contrário no meio do cartão. O cartão do computador é estreito porque a vitrine tem três colunas."],["Melhorado","A linha do preço passou a ter o mesmo arranjo que você aprovou no celular: **preço à esquerda, etiquetas encostadas na direita**. Quando não couber tudo numa linha, o que sobra desce **alinhado à direita**, junto com o resto do bloco de pagamento, em vez de ficar órfão do outro lado."]]},
@@ -22814,10 +22818,29 @@ function aPvMontar(){
   ifr.style.transformOrigin='top left';
   moldura.appendChild(ifr);
   box.appendChild(moldura);
+  /* A REDUCAO E ANUNCIADA (17/09/2026). O quadro desenha em 'larg' e encolhe para caber no
+     painel; nada disso aparecia na tela, e a previa passava a impressao de tamanho real. Um
+     desalinhamento de 12px nos cartoes virou 8px aqui e chegou a pagina publicada sem ninguem
+     ver -- medido no dia. Dizer a escala e barato e devolve ao operador a informacao que falta
+     para ele saber quando NAO confiar no que esta vendo. */
+  var esc=$('a-pv-escala');
+  if(esc)esc.textContent=(k<0.995)?('reduzido a '+Math.round(k*100)+'%'):'tamanho real';
   var doc=ifr.contentDocument||(ifr.contentWindow&&ifr.contentWindow.document);
   if(!doc)return;
   /* as MESMAS guardas da geracao: a previa nunca executa o que o gerador se negaria a produzir */
   doc.open();doc.write(recusa?aPvRecusaDoc(recusa):aPvDoc(cfg));doc.close();
+}
+/* ABRIR EM TAMANHO REAL -- o MESMO documento que o quadro monta, sem escala, noutra aba.
+   'aPvDoc' e a fonte unica: uma segunda montagem aqui seria uma segunda previa, e duas
+   previas divergem. O shim de armazenamento vai junto, dentro de aPvDoc, entao a aba nova
+   tambem nao suja as chaves reais. Recusa que impediria a geracao continua impedindo aqui. */
+function aPvReal(){
+  var cfg=aCfg(),recusa=aRecusa(cfg);
+  var w=window.open('','_blank');
+  if(!w){alert('O navegador bloqueou a nova aba. Libere as janelas para este endereço e tente de novo.');return;}
+  w.document.open();
+  w.document.write(recusa?aPvRecusaDoc(recusa):aPvDoc(cfg));
+  w.document.close();
 }
 /* Remontar o iframe a cada tecla digitada custa caro e pisca. O debounce segura as mudancas de
    campo; "Atualizar previa" e o botao de gerar passam direto. O timer e UNICO -- as DUAS previas
@@ -22834,6 +22857,7 @@ function aPvBotoes(){
   if(c){c.className='botao mini'+(aPvModo==='cel'?'':' claro');c.setAttribute('aria-pressed',aPvModo==='cel'?'true':'false');}
 }
 function aPvModoSet(m){aPvModo=m;aPvBotoes();aPreview(true);}
+(function(){var b=$('a-pv-real');if(b)b.addEventListener('click',aPvReal);})();
 document.addEventListener('input',function(e){
   var al=(e.target.id&&e.target.id.indexOf('a-')===0)||(e.target.name&&e.target.name.indexOf('a-')===0);
   if(al)aPreview();

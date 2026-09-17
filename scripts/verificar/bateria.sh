@@ -78,6 +78,8 @@ curta|paypal-itens.mjs
 curta|paypal-previa.mjs
 curta|preset-formulario.mjs
 curta|previa-cobrar.mjs
+curta|valor-por-hora.mjs
+curta|previa-escala.mjs
 curta|previa-estreita.mjs
 curta|redes-da-partida.mjs
 curta|sinal-cobranca.mjs
