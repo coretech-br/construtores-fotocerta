@@ -757,4 +757,102 @@ console.log('\n== 12. o conteudo encosta no topo do cartao ==');
   }
 }
 
+/* ===========================================================================
+   13. O "A PARTIR DE" DA FAMILIA E O MENOR VALOR DA HORA, NO PIX
+   ===========================================================================
+   O PEDIDO (17/09/2026): "o valor 'a partir de' da familia apresenta o valor de
+   pagamento via PIX da sessao de menor duracao. O valor deve ser obtido do menor valor
+   de hora media em PIX daquela familia e a mensagem passara a ser 'A partir de
+   R$ xx,xx / hora'". E, logo depois: "essa regra e apenas para os cards da familia" --
+   os cartoes de PACOTE mantem a etiqueta ao lado de cada preco.
+
+   POR QUE A TROCA IMPORTA, e e o que esta prova ancora: entre um pacote de 1 hora e um
+   de 8, o mais BARATO quase sempre e o pior negocio por hora -- e era justamente esse o
+   numero que a familia anunciava. O cenario abaixo e montado para que as duas regras
+   dessem respostas DIFERENTES: na familia "uteis", a regra antiga diria R$ 135,00 (o
+   pacote de 1 hora) e a nova diz R$ 97,88 (o de 8 horas). Um cenario em que as duas
+   coincidissem passaria verde sem provar nada.
+   =========================================================================== */
+console.log('\n== 13. o "a partir de" da familia ==');
+{
+  /* uteis: 1h/150 -> Pix 135 -> 135,00/h  |  8h/870 -> Pix 783 -> 97,88/h  => 97,88
+     fds:   2h/330 -> Pix 297 -> 148,50/h  |  3h/450 -> Pix 405 -> 135,00/h => 135,00
+     solta: 'a combinar' -- familia SEM hora legivel, que perde a linha            */
+  const PACS = [
+    ['uteis','Dias Uteis',      'H1','1 hora',    '150'],
+    ['uteis','Dias Uteis',      'H8','8 horas',   '870'],
+    ['fds',  'Fim de semana',   'S2','2 horas',   '330'],
+    ['fds',  'Fim de semana',   'S3','3 horas',   '450'],
+    ['solta','Sob medida',      'SM','a combinar','500']
+  ];
+  const g = await gerarNaFerramenta(async pg => {
+    for(const [k,v] of Object.entries(IDENT)) await set(pg,'fci-'+k,v);
+    await clicar(pg,'aba-pac');
+    await set(pg,'a-urlobrigado','https://www.fotocerta.com.br/obrigado');
+    await set(pg,'a-prefixo','FC');
+    await radio(pg,'a-metodo','ambos'); await radio(pg,'a-prio','pix');
+    await set(pg,'a-descpix','10'); await set(pg,'a-parcelas','12');
+    const nomes = [];
+    for(const [,nome] of PACS) if(nomes.indexOf(nome) < 0) nomes.push(nome);
+    for(const nome of nomes){ await set(pg,'a-fam-nome',nome); await clicar(pg,'a-fam-add'); }
+    const ops = await pg.evaluate(() =>
+      [].slice.call(document.querySelectorAll('#a-pfam option')).map(o => [o.value, o.textContent]));
+    for(const [,nome,cod,dur,preco] of PACS){
+      const op = ops.filter(x => x[1].indexOf(nome) >= 0)[0];
+      await set(pg,'a-pcod',cod); await set(pg,'a-pnome','Dia'); await set(pg,'a-pdur',dur);
+      await set(pg,'a-ppreco',preco); await set(pg,'a-pinclui','Estudio');
+      await set(pg,'a-ppath','fotocerta/'+cod.toLowerCase());
+      if(op) await pg.evaluate(v => { const e = document.getElementById('a-pfam');
+        e.value = v; e.dispatchEvent(new Event('change',{bubbles:true})); }, op[0]);
+      await clicar(pg,'a-pac-salvar');
+    }
+    /* a familia de fabrica ficou sem pacote, e a geracao a recusaria */
+    await pg.evaluate(() => { window.confirm = () => true;
+      const li = document.querySelectorAll('#a-fam-lista li')[0];
+      const x = li && li.querySelector('button[title="Remover"]'); if(x) x.click(); });
+    await pg.waitForTimeout(250);
+    globalThis.__aviso = await pg.evaluate(() => {
+      const e = document.getElementById('a-apartir-aviso');
+      return e ? getComputedStyle(e).display !== 'none' : null; });
+    await clicar(pg,'a-gerar');
+  }, ['a-out1'], {porta:9641});
+  chk('[13] a ferramenta gerou sem alerta', g.alertas.length === 0, JSON.stringify(g.alertas));
+
+  /* O AVISO AMBAR: ha familia sem hora legivel ("Sob medida"), entao ele TEM de estar na tela.
+     Sem esta medicao, a linha sumiria em silencio para essa familia. */
+  chk('[13] a ferramenta avisa que ha familia sem duracao legivel',
+      globalThis.__aviso === true, String(globalThis.__aviso));
+
+  const r = await comBlocoNaPagina({bloco: g.valores['a-out1']||'', porta: 9642,
+    medir: async pg => {
+      await pg.setViewportSize({width: 1200, height: 1000});
+      await pg.waitForTimeout(600);
+      return {lido: await pg.evaluate(() =>
+        [].slice.call(document.querySelectorAll('.fca-fam')).map(f => ({
+          nome: (f.querySelector('.fca-fam-nome')||{}).textContent,
+          linha: (f.querySelector('.fca-fam-preco')||{}).textContent || null })))};
+    }});
+  const fams = r.lido || [];
+  const acha = n => fams.filter(f => String(f.nome).indexOf(n) >= 0)[0] || {};
+
+  chk('[13] as tres familias aparecem na vitrine', fams.length === 3, JSON.stringify(fams));
+  chk('[13] "Dias Uteis": o menor valor da hora, e nao o pacote mais barato',
+      acha('Dias Uteis').linha === 'A partir de R$ 97,88 / hora',
+      JSON.stringify(acha('Dias Uteis').linha));
+  /* A REGRA ANTIGA DARIA OUTRO NUMERO, e dize-lo aqui e o que impede esta prova de passar
+     sobre um cenario em que as duas coincidem. */
+  chk('[13] e esse numero NAO e o que a regra antiga daria (R$ 135,00, o pacote de 1 hora)',
+      String(acha('Dias Uteis').linha).indexOf('135,00') < 0, JSON.stringify(acha('Dias Uteis').linha));
+  chk('[13] "Fim de semana": o menor da familia dela, e nao o da vizinha',
+      acha('Fim de semana').linha === 'A partir de R$ 135,00 / hora',
+      JSON.stringify(acha('Fim de semana').linha));
+  /* E NO PIX: 870/8 = 108,75 cheio; com 10% de desconto, 97,88. O numero acima so fecha
+     porque a conta usa o preco do Pix -- palavra do dono. */
+  chk('[13] o valor e o do PIX (o cheio daria R$ 108,75)',
+      String(acha('Dias Uteis').linha).indexOf('108,75') < 0, JSON.stringify(acha('Dias Uteis').linha));
+  chk('[13] familia sem duracao legivel NAO ganha a linha (nada inventado)',
+      acha('Sob medida').linha === null, JSON.stringify(acha('Sob medida').linha));
+  chk('[13] sem erro proprio do bloco', reais(r.erros).length === 0, reais(r.erros).slice(0,2).join(' | '));
+}
+
 process.exit(resumo());

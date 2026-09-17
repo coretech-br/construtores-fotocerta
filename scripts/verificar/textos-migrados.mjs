@@ -545,6 +545,12 @@ console.log('\n--- o formato gravado, contra '+REF+' ---');
          que e como este arquivo mede. Prova propria: frase-copiado.mjs. */
       ['u','txtPixCopiado', ['Código copiado!'], 'Código copiado! Cole no aplicativo do seu banco.'],
       ['m','txtPixCopiado', ['Código copiado!'], 'Código copiado! Cole no aplicativo do seu banco.'],
+      /* O "A PARTIR DE" DA FAMILIA (17/09/2026): o numero passou a ser o menor VALOR DA HORA
+         da familia, e nao o menor preco -- entao a frase teve de mudar junto. Quem estivesse
+         na fabrica antiga veria "a partir de R$ 102,00" com um valor que agora e por hora, e o
+         cliente entenderia o pacote inteiro. 'aApartirPorHora' leva SO quem esta na fabrica
+         antiga; texto escrito pelo dono e dele e nao se toca. */
+      ['a','txtFamiliaApartir', ['a partir de {valor}'], 'A partir de {valor} / hora'],
       ['a','txtPixManual',
        ['O Pix não avisa a gente automaticamente. Assim que você pagar, me avise para eu conferir e confirmar a sua reserva.'],
        'O Pix não avisa a gente automaticamente. Assim que você pagar, toque em "Já paguei" para eu conferir e confirmar.'],

@@ -4238,8 +4238,10 @@
         <label for="a-txt-rot-pacote">Rótulo da linha de resumo do pacote</label>
         <input type="text" id="a-txt-rot-pacote" value="Pacote">
         <label for="a-txt-familia-apartir">Preço no cartão da família <small>(vazio = não mostrar)</small></label>
-        <input type="text" id="a-txt-familia-apartir" value="a partir de {valor}">
-        <p class="ajuda">O <code>{valor}</code> é o <b>menor preço</b> daquela família, já com o desconto do Pix quando há Pix — calculado pelo próprio bloco, a partir dos pacotes. Os quatro campos acima só entram no código quando existem <b>duas ou mais</b> famílias.</p>
+        <input type="text" id="a-txt-familia-apartir" value="A partir de {valor} / hora">
+        <p class="ajuda">O <code>{valor}</code> é o <b>menor valor médio da hora</b> daquela família, <b>no Pix</b> — o bloco divide o preço de cada pacote pela duração dele e pega o menor resultado. A duração sai do campo <b>Duração</b> de cada pacote (ou do campo <b>Horas</b>, quando preenchido).</p>
+        <p class="ajuda alerta" id="a-apartir-aviso" style="display:none"><b>Uma ou mais famílias não têm nenhum pacote com duração legível</b>, e nessas a linha "a partir de" não aparece — não há hora para calcular. A lista de pacotes mostra quais durações a ferramenta não entendeu.</p>
+        <p class="ajuda">Os quatro campos acima só entram no código quando existem <b>duas ou mais</b> famílias.</p>
         <label for="a-t5">Título da página de obrigado</label>
         <input type="text" id="a-t5" value="Tudo certo!">
       </fieldset>
@@ -5038,8 +5040,8 @@
    QUEM IMPEDE QUE ELE MINTA: scripts/conferir-versoes.sh, que recusa index.html
    alterado sem a versao mudar junto -- a mesma disciplina do fc-compartilhado.js,
    e pela mesma razao: carimbo que ninguem confere e o defeito de amanha. */
-var FC_VERSAO='2026-09-17d';
-var FC_PUBLICADO='2026-09-17 01:10';   /* America/Sao_Paulo -- escrito pelo carimbador */
+var FC_VERSAO='2026-09-17e';
+var FC_PUBLICADO='2026-09-17 13:59';   /* America/Sao_Paulo -- escrito pelo carimbador */
 (function(){
   var el=document.getElementById('fc-versao');
   if(!el) return;
@@ -5855,6 +5857,23 @@ function fcOrdMigrar(st,pref,ordemAntiga){
    tres em que existe um valor que prova que o dono nunca escolheu nada ali. */
 var FC_SEP_FABRICAS_ANTIGAS=['ou pague com cartão','ou pague com Pix',
   'ou pague com cartão, sem o desconto de {pct}%','ou pague com Pix com {pct}% de desconto'];
+/* O "A PARTIR DE" DA FAMILIA PASSOU A SER POR HORA (17/09/2026, pedido do dono): "o valor deve
+   ser obtido do menor valor de hora media em PIX daquela familia e a mensagem passara a ser
+   'A partir de R$ xx,xx / hora'".
+   O NUMERO MUDOU DE SIGNIFICADO, e por isso a frase TEM de mudar junto. Quem tivesse a fabrica
+   antiga gravada ("a partir de {valor}") continuaria com ela na tela e passaria a ver, ali, um
+   valor POR HORA -- o cliente leria "a partir de R$ 102,00" e entenderia o pacote inteiro. Esta
+   funcao leva SO quem esta na fabrica antiga para a nova; texto que o dono escreveu e dele e
+   nao se toca, mesmo que fique estranho -- avisar e papel da release note, nao do codigo. */
+var A_APARTIR_FABRICA_ANTIGA='a partir de {valor}';
+function aApartirPorHora(st){
+  if(!st||typeof st!=='object')return st;
+  var r={},k;
+  for(k in st)if(Object.prototype.hasOwnProperty.call(st,k))r[k]=st[k];
+  if(r.txtFamiliaApartir===A_APARTIR_FABRICA_ANTIGA)
+    r.txtFamiliaApartir='A partir de {valor} / hora';
+  return r;
+}
 function fcSepNeutro(st){
   if(!st||typeof st!=='object')return st;
   var r={},k,i;
@@ -6003,6 +6022,7 @@ var FCR_ROTULOS={novo:'novo',corrigido:'corr',melhorado:'melh',atencao:'aten',ex
 /* A lista, da versao mais recente para a mais antiga. NAO reordenar: o agrupamento por
    dia assume que versoes do mesmo dia estao juntas, e o desenho respeita esta ordem. */
 var FCR_NOTAS=[
+ {v:"2026-09-17e",d:"17 de setembro de 2026",itens:[["Melhorado","Agendamento por Pacote: o **\"a partir de\" dos cards de família** passou a mostrar o **menor valor médio da hora** daquela família, no Pix — e a frase virou **\"A partir de R$ xx,xx / hora\"**. Antes mostrava o preço do pacote mais curto, que quase sempre é o **pior negócio por hora**: numa família com sessões de 1 h e de 8 h, a chamada anunciava a de 1 h."],["Atenção","Só nos **cards de família**. Os cards de pacote continuam como estão, com a etiqueta do valor por hora ao lado de cada preço."],["Atenção","**Família sem nenhum pacote de duração legível não ganha a linha** — não há hora para calcular, e inventar seria pior. Quando isso acontecer, a aba acende um aviso âmbar dizendo por quê, para a linha não sumir em silêncio."],["Melhorado","Se você ainda estava com o texto de fábrica antigo (*a partir de {valor}*), ele **é trocado sozinho** pelo novo na primeira abertura — senão a frase diria \"a partir de R$ 102,00\" sobre um número que agora é por hora, e o cliente entenderia o pacote inteiro. Texto que **você** escreveu não é tocado."],["Exige uma ação sua, uma única vez","Gere de novo o **Código 1** da aba Agendamento por Pacote e recole na vitrine."]]},
  {v:"2026-09-17d",d:"17 de setembro de 2026",itens:[["Novo","**Todos os construtores ganharam o seletor de fundo da prévia.** Página clara, página escura, papel, ou **a cor da sua página** — capturada com o conta-gotas. Antes o fundo era fixo em branco e não dava para ver como as suas cores ficam sobre o fundo real."],["Novo","**A escolha é de cada construtor, e não uma só para todos.** O mesmo bloco pode ir para uma landing page com esquema de cores próprio, então cada aba guarda o fundo dela."],["Atenção","**A cor não entra no código gerado** — ela é só da prévia. O fundo da página publicada continua sendo o do seu tema ou o da landing page onde você colar."],["Melhorado","As abas **Bordas** e **Efeitos de página**, que já tinham esse controle, passaram a decidir a cor pela mesma regra das outras. Antes cada prévia fixava o fundo por conta própria, e uma delas usava um bege diferente sem que ninguém tivesse escolhido isso."],["Atenção","Quem nunca mexer no campo não vê diferença: todas nascem em **Página clara**, que é o fundo que essas prévias sempre tiveram."]]},
  {v:"2026-09-17c",d:"17 de setembro de 2026",itens:[["Melhorado","Agendamento por Pacote: no **computador**, a duração passou a aparecer **ao lado do nome**, como já aparecia no celular. Antes ficava na linha de baixo, e os dois formatos não combinavam."]]},
  {v:"2026-09-17b",d:"17 de setembro de 2026",itens:[["Novo","**A prévia passou a dizer quando está reduzida.** Ao lado dos botões *Computador* e *Celular* aparece agora, por exemplo, **reduzido a 69%** — ou *tamanho real*, quando o quadro cabe inteiro. Antes ela dava a impressão de tamanho real e não era."],["Novo","E um botão **Abrir em tamanho real**, que mostra o mesmo código em outra aba, **sem redução**. É o que usar quando algo parecer estranho na prévia."],["Atenção","Isso resolve o que aconteceu ontem: o cartão desalinhado **estava** na prévia, mas como ela desenha em 1040 pixels e encolhe para caber no painel, um desalinhamento de 12 pixels virava 8 na tela e passava despercebido. A prévia não estava errada — estava pequena, e não avisava."],["Atenção","O texto de ajuda da prévia também passou a dizer que **a fonte do seu site muda a largura do texto**: o que aqui cabe numa linha pode não caber na sua página. Foi por isso que uma etiqueta caiu de linha lá e não aqui."]]},
@@ -19235,9 +19255,28 @@ function aPreso(id){return fcPreso(A_NUMS,id);}
    'paypal' (nada de chave Pix para configurar sem Pix no bloco); 'a-descpix-campo' so aparece
    em 'ambos' (o desconto no Pix nao faz sentido tendo so uma forma -- nao ha "outro preco"
    para descontar contra); 'a-parcelas-campo' precisa de cartao (some com 'pix'). */
+/* O "A PARTIR DE" DA FAMILIA SO EXISTE HAVENDO HORA PARA DIVIDIR (17/09/2026). Familia sem
+   nenhum pacote de duracao legivel simplesmente NAO GANHA a linha -- anunciar uma hora
+   inventada seria pior. O sumico, porem, nao pode ser silencioso: quem configurou o texto e
+   nao ve a linha na previa precisa saber por que. O aviso so aparece quando as tres condicoes
+   se juntam: ha duas ou mais familias, o texto esta preenchido, e ALGUMA familia ficou sem
+   hora. Aviso que aparece fora do caso que ele descreve vira ruido.
+   FUNCAO PROPRIA, e chamada tambem pelos desenhos das DUAS listas: o estado que ela descreve
+   muda ao cadastrar pacote, ao trocar a duracao de um, ao criar familia e ao mover pacote entre
+   familias -- nenhum desses passa por aToggles, e so ali o aviso nasceria sempre desligado. */
+function aApartirAviso(){
+  var el=$('a-apartir-aviso');if(!el)return;
+  var mostra=aFamilias.length>1 && !!fcTrim(aElVal('a-txt-familia-apartir',''))
+    && aFamilias.some(function(f){
+         var dela=aPacotes.filter(function(p){return p.fam===f.id;});
+         return dela.length>0 && !dela.some(function(p){return aHorasValem(p)>0;});
+       });
+  el.style.display=mostra?'block':'none';
+}
 function aToggles(){
   var m=radio('a-metodo')||'ambos',usaPP=(m!=='pix'),usaPix=(m!=='paypal');
   function ver(id,b){var el=$(id);if(el)el.style.display=b?'block':'none';}
+  aApartirAviso();
   fcOrdSo1('a',m!=='ambos');
   ver('a-pp-campos',usaPP);
   ver('a-pix-campos',usaPix);
@@ -19395,7 +19434,7 @@ var A_TXT_DEFS=[
   ['txtTrocarFamilia','a-txt-trocar-familia','Trocar'],
   ['txtRotFamilia','a-txt-rot-familia','Tipo de ensaio'],
   ['txtRotPacote','a-txt-rot-pacote','Pacote'],
-  ['txtFamiliaApartir','a-txt-familia-apartir','a partir de {valor}'],
+  ['txtFamiliaApartir','a-txt-familia-apartir','A partir de {valor} / hora'],
   /* ===== os que estavam FORA da tabela ate 11/09/2026 (leva 2) =====
      A CHAVE de cada um e a MESMA que o coleta ja gravava, letra por letra: estado, preset e
      backup gravados antes desta rodada sao lidos sem conversao nenhuma, e o que a ferramenta
@@ -19839,6 +19878,7 @@ function aFamRender(){
     ul.appendChild(li);
   });
   aFamOpcoes();
+  aApartirAviso();
 }
 
 /* ===== catalogo de pacotes =====
@@ -20249,6 +20289,7 @@ function aPacRender(){
     cabecalho('Sem família — corrija antes de gerar');
     for(i=0;i<sobra.length;i++)linha(sobra[i]);
   }
+  aApartirAviso();
 }
 /* ===== O ENDERECO DA PAGINA DE OBRIGADO: a guarda estava errada, e nao a mensagem =====
    Ate 13/09/2026 existia aqui um aUrlOk proprio que devolvia TRUE para '/obrigado' -- caminho do
@@ -20563,7 +20604,7 @@ function aRestaura(st){
   /* Esta aba JA era Pix-primeiro: a fabrica antiga das duas frases e a do ramo 'pix', que e a
      mesma da ordem de fabrica de hoje -- o laco de fcOrdMigrar e um no-op aqui, de proposito
      (a regra e uma so para as quatro abas). */
-  var A=fcOrdMigrar(st.a,'a','pix'),el,elc,k,i,migrouCal=false,movidos=0,reparouOrfao=0,reparouNome=0,partes;
+  var A=aApartirPorHora(fcOrdMigrar(st.a,'a','pix')),el,elc,k,i,migrouCal=false,movidos=0,reparouOrfao=0,reparouNome=0,partes;
   /* O titulo da secao Pix trocou de nome em 14/09/2026 ('txtPixRotulo' -> 'txtSecaoPix'). Sem
      esta linha, quem personalizou o titulo perderia o texto na primeira abertura -- ver
      fcTxtChaveMigrar. Nao e calado no codigo, mas tambem nao precisa de aviso na tela: o campo
@@ -20913,7 +20954,15 @@ function aBlocoVitrine(cfg){
      denunciou: com o cenario de fabrica (pacotes de '1h' e '1 hora') a saida mudou sem que
      nada aparecesse na tela. E a mesma sobra que esta ferramenta tirou da Calculadora de album
      na mesma manha, e a resposta e a mesma: nada de morto dentro do bloco entregue. */
-  var comHoras=cfg.txtPorHora&&cfg.pacotes.some(function(p){return aHorasValem(p)>0;});
+  /* DOIS SINALIZADORES, e nao um (17/09/2026). O numero de horas de cada pacote passou a ter
+     DOIS consumidores no bloco: a etiqueta do valor medio nos cartoes, e o "a partir de" da
+     familia, que agora e por hora. Um sinalizador so faria o segundo parar de funcionar no dia
+     em que o dono esvaziasse o texto da etiqueta -- dois recursos independentes amarrados por
+     um campo que nao e de nenhum dos dois. */
+  var algumComHoras=cfg.pacotes.some(function(p){return aHorasValem(p)>0;});
+  var apartirPorHora=temFam&&!!cfg.txtFamiliaApartir;
+  var horasNoBloco=algumComHoras&&(!!cfg.txtPorHora||apartirPorHora);
+  var comHoras=algumComHoras&&!!cfg.txtPorHora;
   /* No ramo de duas ou mais familias existem DUAS linhas de resumo na pagina, entao o seletor
      do resumo do PACOTE precisa ser qualificado. No ramo de uma familia so as duas constantes
      abaixo valem exatamente o texto que estava escrito antes, e por isso a saida nao muda um
@@ -21158,7 +21207,7 @@ function aBlocoVitrine(cfg){
     medir:cfg.medir,sempre:cfg.sempre});
   c+='<scr'+'ipt>\n(function(){\n';
   c+='/* ===== customizacao ===== */\n';
-  c+=aPacotesSrc(cfg.pacotes,temFam,comHoras);
+  c+=aPacotesSrc(cfg.pacotes,temFam,horasNoBloco);
   if(temFam)c+=aFamiliasSrc(cfg.familias);
   c+='var DESCONTO_PIX='+cfg.descpix+';   /* percentual de desconto no Pix; 0 = sem desconto -- some o selo */\n';
   c+='var PARCELAS='+cfg.parcelas+';   /* numero de parcelas anunciado no cartao; e uma promessa que a operadora decide, nao este codigo */\n';
@@ -21403,13 +21452,24 @@ function aBlocoVitrine(cfg){
     c+='  var i;\n';
     c+="  for(i=0;i<cards.length;i++)cards[i].style.display=(PACOTES[i].fam===id)?'':'none';\n}\n";
     if(cfg.txtFamiliaApartir){
-      c+='/* o menor preco da familia, com o MESMO precoPix/moedaFmt que os cartoes ja usam --\n';
-      c+='   nunca uma segunda conta para o mesmo numero */\n';
-      c+='function precoMinimo(id){\n';
-      c+='  var m=null,i;\n';
+      /* O MENOR VALOR MEDIO DA HORA DA FAMILIA (17/09/2026, pedido do dono). Antes era o menor
+         PRECO -- o pacote mais curto --, e ele trocou por um motivo comercial: entre um pacote
+         de 1 hora e um de 8, o mais barato quase sempre e o pior negocio por hora, e era esse o
+         numero que a familia anunciava.
+         E NO PIX, palavra dele, mesmo com o cartao prioritario: "a partir de" e a promessa do
+         MENOR valor possivel, e o menor e sempre o do Pix quando ha desconto.
+         PACOTE SEM HORA LEGIVEL NAO ENTRA NA CONTA, e familia inteira sem nenhum devolve null
+         -- a linha some para aquela familia, em vez de anunciar uma hora inventada. A
+         ferramenta avisa em ambar quando isso acontece, para o sumico nao ser silencioso. */
+      c+='/* o menor valor medio da hora da familia, no Pix -- a mesma moedaFmt dos cartoes,\n';
+      c+='   e nunca uma segunda conta para o mesmo numero */\n';
+      c+='function horaMinima(id){\n';
+      c+='  var m=null,i,p,v;\n';
       c+='  for(i=0;i<PACOTES.length;i++){\n';
-      c+='    if(PACOTES[i].fam!==id)continue;\n';
-      c+='    if(m===null||PACOTES[i].preco<m)m=PACOTES[i].preco;\n  }\n';
+      c+='    p=PACOTES[i];\n';
+      c+='    if(p.fam!==id||!(p.horas>0))continue;\n';
+      c+='    v='+(cfg.usaPix?'precoPix(p.preco)':'p.preco')+'/p.horas;\n';
+      c+='    if(m===null||v<m)m=v;\n  }\n';
       c+='  return m;\n}\n';
     }
     c+='FAMILIAS.forEach(function(f){\n';
@@ -21418,9 +21478,9 @@ function aBlocoVitrine(cfg){
     c+='  card.appendChild(nome);\n';
     c+="  if(f.dica){var dica=document.createElement('div');dica.className='fca-fam-dica';dica.textContent=f.dica;card.appendChild(dica);}\n";
     if(cfg.txtFamiliaApartir){
-      c+='  var ap=precoMinimo(f.id);\n';
+      c+='  var ap=horaMinima(f.id);\n';
       c+='  if(ap!==null){\n';
-      c+="    var apv=document.createElement('div');apv.className='fca-fam-preco';apv.textContent="+aTplJs("'",cfg.txtFamiliaApartir,[['{valor}','moedaFmt('+((cfg.usaPix&&aPrioEfetivo(cfg)==='pix')?'precoPix(ap)':'ap')+')']])+";\n";
+      c+="    var apv=document.createElement('div');apv.className='fca-fam-preco';apv.textContent="+aTplJs("'",cfg.txtFamiliaApartir,[['{valor}','moedaFmt(ap)']])+";\n";
       c+='    card.appendChild(apv);\n  }\n';
     }
     c+="  card.addEventListener('click',function(){escolherFamilia(f.id);});\n";

@@ -94,6 +94,7 @@ ausência de um lugar onde o histórico esteja em ordem, com o tempo ao lado.
 - **70. A prévia para de parecer tamanho real — 17/09/2026** · `2026-09-17b`
 - **71. Nome e duração lado a lado também no computador — 17/09/2026** · `2026-09-17c`
 - **72. O fundo da prévia, em todos os construtores — 17/09/2026** · `2026-09-17d`
+- **73. O "a partir de" da família vira o menor valor da hora — 17/09/2026** · `2026-09-17e`
 
 <!-- FIM DO INDICE GERADO -->
 
@@ -2025,6 +2026,49 @@ Client ID de teste do PayPal é `AbCdEf123456789...`. Passou a procurar `#123456
 | Estimativa | Tempo real |
 |---|---|
 | 1 h 30 – 2 h | **de 01:05:11 ao commit** |
+
+---
+
+### 73. O "a partir de" da família vira o menor valor da hora — 17/09/2026
+
+Versão `2026-09-17e`. *"O valor 'a partir de' da família apresenta o valor de pagamento via PIX da
+sessão de menor duração. O valor deve ser obtido do menor valor de hora média em PIX daquela
+família e a mensagem passará a ser 'A partir de R$ xx,xx / hora'."* E, logo depois: *"essa regra é
+apenas para os cards da família."*
+
+**O argumento é comercial e ele o viu antes de mim:** entre um pacote de 1 hora e um de 8, o mais
+**barato** quase sempre é o **pior** negócio por hora — e era justamente esse o número que a
+família anunciava. Medido no cenário da prova: a família de dias úteis anunciava `R$ 135,00` (o
+pacote de 1 h) e passa a anunciar `R$ 97,88` (o de 8 h).
+
+**A frase teve de mudar junto, e daí a migração.** O número trocou de significado; quem estivesse
+na fábrica antiga (`a partir de {valor}`) continuaria com ela na tela e passaria a ver ali um valor
+**por hora** — o cliente leria "a partir de R$ 102,00" e entenderia o pacote inteiro.
+`aApartirPorHora` leva só quem está na fábrica antiga para a nova; texto escrito pelo dono é dele e
+não se toca.
+
+**Dois sinalizadores onde havia um.** O número de horas de cada pacote passou a ter **dois
+consumidores** no bloco — a etiqueta dos cartões e o "a partir de" da família. Um sinalizador só
+faria o segundo parar de funcionar no dia em que o dono esvaziasse o texto da etiqueta: dois
+recursos independentes amarrados por um campo que não é de nenhum dos dois.
+
+#### O que a rodada ensinou sobre método
+
+**Cenário em que as duas regras coincidem não prova troca de regra nenhuma.** A parte 13 é montada
+para que a antiga e a nova deem respostas **diferentes** (1 h contra 8 h na mesma família), e ela
+cobra explicitamente que o número **não** seja o que a regra antiga daria. Sem essa asserção
+negativa, a prova ficaria verde sobre um cenário onde nada mudou.
+
+**Aviso na tela precisa ser recalculado por quem muda o estado que ele descreve.** A primeira
+versão punha o aviso âmbar dentro de `aToggles`, que só roda ao trocar o método de pagamento — e
+ele nascia sempre desligado. O estado que ele descreve muda ao cadastrar pacote, ao trocar uma
+duração, ao criar família e ao mover pacote entre famílias. Virou função própria, chamada pelos
+desenhos das **duas** listas. A prova pegou, porque mede o aviso na tela e não a existência do
+código.
+
+| Estimativa | Tempo real |
+|---|---|
+| 30 min | **de 13:54:58 ao commit** |
 
 ---
 
