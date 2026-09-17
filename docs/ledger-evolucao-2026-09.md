@@ -86,6 +86,7 @@ ausência de um lugar onde o histórico esteja em ordem, com o tempo ao lado.
 - **62. O valor médio da hora na vitrine de pacotes — 16/09/2026** · `2026-09-16h`
 - **63. A etiqueta do valor médio, e o defeito que só a tela mostrou — 16/09/2026** · `2026-09-16i`
 - **64. A ordem dos elementos, e o que pode quebrar de linha — 16/09/2026** · `2026-09-16j`
+- **65. A ferramenta foi ao ar quebrada, e o que falhou não foi o código — 16/09/2026** · `2026-09-16n`
 
 <!-- FIM DO INDICE GERADO -->
 
@@ -1712,6 +1713,44 @@ horizontal daria vermelho justamente no caso que a correção queria produzir.
 | Estimativa | Tempo real |
 |---|---|
 | 30 min | **de 22:20:16 ao commit** — a maior parte em medir, de novo: a correção são a ordem de dois `appendChild` e uma linha de CSS |
+
+---
+
+### 65. A ferramenta foi ao ar quebrada, e o que falhou não foi o código — 16/09/2026
+
+Versão `2026-09-16n`. Conserto de uma linha, e a rodada existe pelo que ela ensina.
+
+**O defeito:** a `2026-09-16j` subiu com erro de sintaxe e a ferramenta **não abria** — tela em
+branco. A causa foi uma concatenação de strings errada ao escrever a **release note**: duas aspas
+grudadas (`sempre ""foi.`) dentro de um texto entre aspas duplas, derrubando o array inteiro de
+`FCR_NOTAS` e, com ele, o arquivo. Nada do que a ferramenta já gerou foi afetado — o estrago era
+só na ferramenta.
+
+**O que falhou não foi o código: foi eu ignorar uma prova.** `novidades.mjs` foi executada na
+mesma linha de comando do `git push`, **travou** com timeout, e o push aconteceu assim mesmo,
+porque a corrente `&&` seguiu pelo `conferir-versoes.sh` -- que passou, porque ele confere versão
+contra hash e não executa a página. A regra do projeto é explícita e eu a violei: *"Suíte
+vermelha, mesmo que vermelha por outro motivo, interrompe o envio."*
+
+#### O que a rodada ensinou sobre método
+
+**Suíte que TRAVA não é suíte que passa, e é mais perigosa que uma que falha.** Uma falha imprime
+`XX` e um resumo; um timeout imprime um stack trace e some no meio da saída de outros comandos.
+Foi exatamente o que aconteceu: a última linha visível antes do push era um `Node.js v24.17.0`
+solto. Verde, vermelho e **travado** são três estados, e só o primeiro autoriza publicar.
+
+**Encadear a conferência com o envio num `&&` é encadear com a parte errada.** `conferir-versoes.sh`
+responde "as versões batem?", e não "a ferramenta abre?". Quem responde a segunda é uma suíte que
+carrega a página -- `redes-da-partida.mjs` ou `novidades.mjs` --, e é ela que precisa estar verde
+**antes** do `git push`, num comando separado, com o resultado lido por olho.
+
+**A ironia é o próprio conteúdo.** O texto que derrubou a ferramenta era a nota que descrevia a
+correção de um defeito de layout. A release note é dado executável dentro do arquivo, e escrevê-la
+é mexer no código -- merece a mesma conferência que qualquer outra linha.
+
+| Estimativa | Tempo real |
+|---|---|
+| — (conserto de emergência) | **4 min** — de 22:23:27 (push quebrado) a 22:27 no relógio |
 
 ---
 
