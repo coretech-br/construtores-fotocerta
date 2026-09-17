@@ -4923,8 +4923,8 @@
    QUEM IMPEDE QUE ELE MINTA: scripts/conferir-versoes.sh, que recusa index.html
    alterado sem a versao mudar junto -- a mesma disciplina do fc-compartilhado.js,
    e pela mesma razao: carimbo que ninguem confere e o defeito de amanha. */
-var FC_VERSAO='2026-09-16q';
-var FC_PUBLICADO='2026-09-16 23:44';   /* America/Sao_Paulo -- escrito pelo carimbador */
+var FC_VERSAO='2026-09-16r';
+var FC_PUBLICADO='2026-09-16 23:55';   /* America/Sao_Paulo -- escrito pelo carimbador */
 (function(){
   var el=document.getElementById('fc-versao');
   if(!el) return;
@@ -5888,6 +5888,7 @@ var FCR_ROTULOS={novo:'novo',corrigido:'corr',melhorado:'melh',atencao:'aten',ex
 /* A lista, da versao mais recente para a mais antiga. NAO reordenar: o agrupamento por
    dia assume que versoes do mesmo dia estao juntas, e o desenho respeita esta ordem. */
 var FCR_NOTAS=[
+ {v:"2026-09-16r",d:"16 de setembro de 2026",itens:[["Corrigido","Agendamento por Pacote, no computador: a etiqueta amarela caía **debaixo da verde**, deixando um vão no meio da linha do preço que parecia espaço sobrando. **Faltavam nove pixels** — medido com a fonte de um tema de verdade: os três elementos pediam 286 px e o cartão tem 277. No navegador cru do arnês sobravam 27, e foi por isso que nenhuma conferência anterior viu o defeito: a largura do texto depende da fonte do seu site, que o código apenas herda."],["Melhorado","**As duas etiquetas viraram um par que anda junto.** Cabendo, ficam as duas na linha do preço; não cabendo, **descem juntas**, lado a lado e alinhadas à direita. O estado que você viu — uma em cima e outra embaixo — deixou de existir, e não por caber por pouco: por construção."],["Melhorado","As duas etiquetas ficaram **um pouco menores** e mais juntas, para caberem na linha do preço em mais larguras de tela. Encolheram as duas, porque são um par — uma menor que a outra chamaria atenção para a diferença, e não para os números."]]},
  {v:"2026-09-16q",d:"16 de setembro de 2026",itens:[["Corrigido","Agendamento por Pacote, **no computador**: a etiqueta do valor médio do Pix não cabia na linha do preço e caía sozinha para uma linha própria, **encostada à esquerda**, enquanto tudo abaixo dela estava à direita — um degrau ao contrário no meio do cartão. O cartão do computador é estreito porque a vitrine tem três colunas."],["Melhorado","A linha do preço passou a ter o mesmo arranjo que você aprovou no celular: **preço à esquerda, etiquetas encostadas na direita**. Quando não couber tudo numa linha, o que sobra desce **alinhado à direita**, junto com o resto do bloco de pagamento, em vez de ficar órfão do outro lado."]]},
  {v:"2026-09-16p",d:"16 de setembro de 2026",itens:[["Corrigido","Agendamento por Pacote, **no celular**: o cartão quebrava feio quando o nome do pacote tinha mais de uma palavra. Em *Sábado e Domingo* saía uma palavra por linha, a duração em mais duas, e o preço acabava por cima do texto. A causa era o formato antigo, que espremia nome e duração numa coluna estreita ao lado do preço."],["Melhorado","Agora a **primeira linha do cartão** é o nome com a duração ao lado, na largura inteira. Abaixo dela, o pagamento: o preço à esquerda e as etiquetas encostadas na direita, na mesma linha — para não gastar altura. Nome comprido que não couber faz a duração descer inteira para a linha seguinte, e nunca mais quebra palavra por letra."],["Atenção","No computador **nada muda** — o cartão de lá sempre foi empilhado e continua igual."],["Exige uma ação sua, uma única vez","Gere de novo o **Código 1** da aba Agendamento por Pacote e recole na vitrine."]]},
  {v:"2026-09-16n",d:"16 de setembro de 2026",itens:[["Corrigido","**A versão anterior (2026-09-16j) subiu quebrada e a ferramenta não abria** — tela em branco, por um erro de digitação meu **no texto desta própria lista de novidades**. Ficou no ar por poucos minutos. Nenhum código que você já colou no site foi afetado: o defeito era só na ferramenta, e nada do que ela já gerou muda por causa disso."],["Atenção","Se a ferramenta tiver aberto em branco para você, basta **recarregar a página**. A sua configuração fica guardada no navegador e não se perde."]]},
@@ -20735,14 +20736,23 @@ function aBlocoVitrine(cfg){
      'justify-content:flex-end' faz o que QUEBRAR quebrar para a direita, junto com o resto --
      entao a linha extra, quando existe, parece parte do mesmo bloco em vez de um orfao.
      E o mesmo arranjo que o formato do celular ja usava e que o dono aprovou la. */
-  c+='.fca-preco-linha1{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;text-align:left'+
-     (comHoras?';justify-content:flex-end':'')+'}\n';
+  /* O VAO ENTRE OS TRES ENCOLHE QUANDO HA TRES (16/09/2026). Medido no cartao do computador
+     com a fonte de um tema real (serif 17px): preco 94 + selo 81 + etiqueta 95 + 16 de vao =
+     286px, contra 277px de cartao. Faltavam NOVE PIXELS -- e por nove pixels a etiqueta caia
+     para a linha de baixo. No navegador cru do arnes os mesmos tres somavam 250 e sobravam 27,
+     e foi por isso que nenhuma medicao anterior viu o defeito: a largura do texto depende da
+     FONTE DO SITE DO DONO, que o bloco herda e o arnes nao tinha. */
+  c+='.fca-preco-linha1{display:flex;align-items:baseline;flex-wrap:wrap;text-align:left;gap:'+
+     (comHoras?'6px':'8px')+(comHoras?';justify-content:flex-end':'')+'}\n';
   /* 'margin-right:auto' entra NESTA regra, e nao numa segunda para o mesmo seletor: duas
      regras com a mesma especificidade sao onde uma propriedade some sem aviso, e a regra do
      projeto e acumular na que ja existe. Ele empurra o selo e a etiqueta para a borda direita. */
   c+='.fca-preco-valor{font-size:18px;font-weight:700;color:var(--fca-destaque,#0F3A30)'+
      (comHoras?';margin-right:auto':'')+'}\n';
-  c+='.fca-selo{font-size:11px;font-weight:700;color:#1e7e34;background:#e6f4ea;border-radius:999px;padding:2px 8px}\n';
+  /* O SELO ENCOLHE JUNTO, e so quando ha etiqueta ao lado: os dois formam um par e um par
+     desigual chamaria atencao para a diferenca em vez de para os numeros. Sem a etiqueta, o
+     selo continua byte a byte o de sempre. */
+  c+='.fca-selo{font-size:'+(comHoras?'10.5px':'11px')+';font-weight:700;color:#1e7e34;background:#e6f4ea;border-radius:999px;padding:2px '+(comHoras?'7px':'8px')+'}\n';
   /* A ETIQUETA DO VALOR MEDIO (16/09/2026, segunda volta). Ela nasceu como texto cinza solto
      e o dono voltou dizendo que "nao ficou nem no computador, nem na tela" -- no celular o
      numero do cartao colava na parcela e sumia dentro da frase. A resposta veio dele: um fundo
@@ -20752,8 +20762,9 @@ function aBlocoVitrine(cfg){
      tirar o fundo poe nele o mesmo tom do cartao -- nao ha caso em que a etiqueta SUMA por
      configuracao, e isso e de proposito: um valor que fica invisivel por cor mal escolhida e
      pior que um que nao existe, porque o dono acha que esta la. */
-  if(comHoras)c+='.fca-preco-hora{display:inline-block;font-size:11px;font-weight:400;'+
-    'white-space:nowrap;border-radius:999px;padding:2px 8px;'+
+  if(comHoras)c+='.fca-preco-etiq{display:inline-flex;align-items:baseline;gap:6px;flex-wrap:nowrap}\n';
+  if(comHoras)c+='.fca-preco-hora{display:inline-block;font-size:10.5px;font-weight:400;'+
+    'white-space:nowrap;border-radius:999px;padding:2px 7px;'+
     'background:'+cfg.chf+';color:'+cfg.cht+'}\n';
   /* A LINHA 2 VIRA FLEX QUANDO HA O QUE SEPARAR (16/09/2026). Ate aqui ela era texto solto,
      e o valor medio da hora entrava colado no fim da frase: "em ate 12x de R$ 18,34R$ 110,00 /
@@ -20958,11 +20969,27 @@ function aBlocoVitrine(cfg){
      A LINHA DO PARCELAMENTO NAO RECEBE NENHUM: a parcela nao e um numero cheio, e "R$ 18,34
      em 12x" dividido por 2 horas nao descreve coisa nenhuma. */
   if(comHoras){
+    /* AS DUAS ETIQUETAS SAO UM PAR, E QUEBRAM JUNTAS (16/09/2026, terceira volta).
+       Medido: com a fonte de um tema real, preco + selo + etiqueta somam 286px num cartao de
+       277 -- faltam NOVE pixels, e por nove a etiqueta caia sozinha para a linha de baixo,
+       deixando um vao no meio da linha de cima que PARECIA espaco livre. Encolher os dois
+       fechou a conta por 2px, e 2px nao e engenharia: e sorte, porque a largura depende da
+       fonte do site, que muda de tema para tema e o bloco apenas herda.
+       A resposta que NAO depende da fonte e esta: o selo e a etiqueta vivem dentro de um
+       grupo que nao quebra por dentro (flex-wrap:nowrap). Cabendo, ficam os tres na linha do
+       preco; nao cabendo, os DOIS descem juntos, lado a lado e alinhados a direita. Nunca
+       existe o estado em que um fica em cima e o outro embaixo. */
+    c+='function grupoEtiq(linha){\n';
+    c+="  var g=linha.querySelector('.fca-preco-etiq');\n";
+    c+='  if(!g){\n';
+    c+="    g=document.createElement('span');g.className='fca-preco-etiq';linha.appendChild(g);\n";
+    c+='  }\n';
+    c+='  return g;\n}\n';
     c+='function porHora(alvo,valor,horas){\n';
     c+='  if(!(horas>0))return;\n';
     c+="  var s=document.createElement('span');s.className='fca-preco-hora';\n";
     c+='  s.textContent='+aTplJs("'",cfg.txtPorHora,[['{valor}','moedaFmt(valor/horas)']])+';\n';
-    c+='  alvo.appendChild(s);\n}\n';
+    c+='  grupoEtiq(alvo).appendChild(s);\n}\n';
   }
   c+='function montarPreco(box,preco,horas){\n';
   c+="  box.innerHTML='';\n";
@@ -20979,7 +21006,7 @@ function aBlocoVitrine(cfg){
   if(cfg.usaPix&&aPrioEfetivo(cfg)==='pix'){
     c+='  if(DESCONTO_PIX>0){\n';
     c+="    var selo=document.createElement('span');selo.className='fca-selo';selo.textContent="+aTplJs("'",cfg.txtSeloPix,[['{pct}','DESCONTO_PIX']])+";\n";
-    c+='    l1.appendChild(selo);\n  }\n';
+    c+='    '+(comHoras?'grupoEtiq(l1)':'l1')+'.appendChild(selo);\n  }\n';
   }
   if(comHoras)c+='  porHora(l1,mostrado,horas);\n';
   c+='  box.appendChild(l1);\n';
@@ -20991,7 +21018,7 @@ function aBlocoVitrine(cfg){
     c+="  var l2t=document.createElement('span');l2t.textContent=textoPix(preco);l2.appendChild(l2t);\n";
     c+='  if(DESCONTO_PIX>0){\n';
     c+="    var selo=document.createElement('span');selo.className='fca-selo';selo.textContent="+aTplJs("'",cfg.txtSeloPix,[['{pct}','DESCONTO_PIX']])+";\n";
-    c+='    l2.appendChild(selo);\n  }\n';
+    c+='    '+(comHoras?'grupoEtiq(l2)':'l2')+'.appendChild(selo);\n  }\n';
     /* mesma ordem da linha 1: o selo primeiro, a etiqueta por ultimo.
        o numero desta linha e o preco COM desconto -- e ele que a divisao usa aqui */
     if(comHoras)c+='  porHora(l2,precoPix(preco),horas);\n';

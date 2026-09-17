@@ -89,6 +89,7 @@ ausência de um lugar onde o histórico esteja em ordem, com o tempo ao lado.
 - **65. A ferramenta foi ao ar quebrada, e o que falhou não foi o código — 16/09/2026** · `2026-09-16n`
 - **66. O cartão do celular deixa de espremer o nome — 16/09/2026** · `2026-09-16p`
 - **67. A quebra para o lado certo — 16/09/2026** · `2026-09-16q`
+- **68. Nove pixels, e a fonte que o arnês não tinha — 16/09/2026** · `2026-09-16r`
 
 <!-- FIM DO INDICE GERADO -->
 
@@ -1830,6 +1831,46 @@ exatamente o ruído que o README já registra sobre medir com a máquina ocupada
 | Estimativa | Tempo real |
 |---|---|
 | 20 min | **de 23:40:59 ao commit** |
+
+---
+
+### 68. Nove pixels, e a fonte que o arnês não tinha — 16/09/2026
+
+Versão `2026-09-16r`. *"A etiqueta verde ficou na linha do preço, mas a amarela ficou debaixo da
+verde. Deveria ficar do lado direito da verde. Tem espaço. Por que não ficou?"*
+
+**A pergunta dele merecia medição, e a medição explicou tudo.** Com a fonte de um tema real
+(serif 17px), preço 94 + selo 81 + etiqueta 95 + 16 de vão = **286 px** contra **277 px** de
+cartão. **Faltavam nove pixels.** No navegador cru do arnês os mesmos três somavam 250 e sobravam
+27 — e é por isso que nenhuma das 145 verificações anteriores viu o defeito: **a largura do texto
+depende da fonte do site do dono, que o bloco herda e o arnês não tinha.**
+
+**E o "espaço" era um artefato meu.** Depois de a etiqueta descer, a linha de cima fica com preço
+e selo, e o `margin-right:auto` abre entre eles todo o resto da largura. O vão parecia espaço
+livre; era o que sobrou *depois* da quebra.
+
+**A primeira correção fechou a conta por 2 px, e foi recusada.** Encolher as etiquetas levou os
+286 para 275 num cartão de 277. Dois pixels não são engenharia: a largura depende de uma fonte que
+muda de tema para tema. **A resposta que não depende da fonte** é as duas etiquetas viverem num
+grupo com `flex-wrap:nowrap`: cabendo, ficam as três na linha do preço; não cabendo, as duas
+descem **juntas**, lado a lado e à direita. O estado que ele viu deixou de existir por construção.
+
+#### O que a rodada ensinou sobre método
+
+**O arnês media num mundo mais estreito que o real.** O bloco herda a fonte da página, e o molde
+servia a fonte crua do navegador — sistemática e invisivelmente mais estreita que a de qualquer
+tema. Toda medição de layout deste projeto estava, sem saber, no caso confortável. A suíte passou
+a injetar uma serif de 17px antes de medir, e isso é o mínimo: medir sempre no caso folgado é não
+medir.
+
+**"Cabe por 2px" é um resultado vermelho disfarçado de verde.** Quando o conserto depende de uma
+folga menor que a variação do ambiente, ele não é um conserto — é um adiamento. O sinal de que se
+chegou à resposta certa foi ela parar de depender do número: com o par indivisível, a pergunta
+"cabe?" deixou de mudar o que aparece na tela, e passou a mudar só onde.
+
+| Estimativa | Tempo real |
+|---|---|
+| 20 min | **de 23:49:55 ao commit** — quase todo em medir; o conserto são um `<span>` e uma regra |
 
 ---
 

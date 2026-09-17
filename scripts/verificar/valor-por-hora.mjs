@@ -613,6 +613,12 @@ console.log('\n== 11. o cartao do computador, e a quebra para o lado certo ==');
     const r = await comBlocoNaPagina({bloco: g.valores['a-out1']||'', porta: 9602 + [1280,1024,900,860].indexOf(largura),
       medir: async pg => {
         await pg.setViewportSize({width: largura, height: 1000});
+        /* A FONTE DO TEMA ENTRA AQUI, e a ausencia dela foi o que escondeu o defeito. O bloco
+           HERDA a fonte do site do dono; o arnes servia a fonte crua do navegador, mais
+           estreita, e com ela os tres elementos sobravam 27px onde no site dele faltavam 9.
+           Uma serif de 17px imita um tema real e poe a medicao do lado apertado -- que e o
+           lado que quebra. Medir sempre no caso confortavel e nao medir. */
+        await pg.addStyleTag({content:'body{font-family:Georgia,"Times New Roman",serif;font-size:17px}'});
         await pg.waitForTimeout(400);
         return {lido: await pg.evaluate(() => {
           const c = document.querySelector('.fca-card');
@@ -640,13 +646,20 @@ console.log('\n== 11. o cartao do computador, e a quebra para o lado certo ==');
       if(e) chk(tag+nome+' termina na mesma borda direita',
                 Math.abs(e.dir - d.caixa.dir) <= 2, e.dir + ' x ' + d.caixa.dir);
 
-    if(Math.abs(d.h1.y - d.selo.y) < 4) coube++; else quebrou++;
+    /* O PAR NUNCA SE PARTE -- a correcao de 16/09/2026, terceira volta. Cabendo, os tres ficam
+       na linha do preco; nao cabendo, o selo E a etiqueta descem JUNTOS, lado a lado. O estado
+       que o dono viu (verde em cima, amarela embaixo) deixa de existir por construcao, e nao
+       por caber: eles vivem num grupo com flex-wrap:nowrap. */
+    chk(tag+'o selo e a etiqueta NUNCA ficam um em cima do outro',
+        Math.abs(d.h1.y - d.selo.y) < 4,
+        'selo y' + d.selo.y + ' · etiqueta y' + d.h1.y);
+    if(Math.abs(d.valor.y - d.selo.y) < 10) coube++; else quebrou++;
   }
   /* A PROVA SO VALE SE OS DOIS ESTADOS FORAM EXERCITADOS. Se um dia o cartao ficar largo o
      bastante em todas as larguras testadas, esta linha avisa que o caso apertado -- o que o
      dono viu -- deixou de ser medido, em vez de ficar verde sem ter olhado para ele. */
-  chk('[11] as larguras testadas cobriram os DOIS casos: coube numa linha e quebrou',
-      coube > 0 && quebrou > 0, 'coube em ' + coube + ' larguras, quebrou em ' + quebrou);
+  chk('[11] as larguras testadas cobriram os DOIS casos: o par coube ao lado do preco, e desceu',
+      coube > 0 && quebrou > 0, 'ao lado do preco em ' + coube + ' larguras, abaixo em ' + quebrou);
 }
 
 process.exit(resumo());
