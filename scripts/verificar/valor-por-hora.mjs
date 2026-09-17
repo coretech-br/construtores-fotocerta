@@ -709,7 +709,14 @@ console.log('\n== 12. o conteudo encosta no topo do cartao ==');
     medir: async pg => {
       await pg.setViewportSize({width: 1100, height: 1200});
       await pg.addStyleTag({content:'body{font-family:Georgia,"Times New Roman",serif;font-size:17px}'});
-      if(centralizar) await pg.addStyleTag({content:'.fca-card{justify-content:center!important}'});
+      /* O CONTROLE INJETA 'align-content', e a troca tem historia: ate 17/09/2026 o cartao era
+         flex em COLUNA e quem centralizava era 'justify-content'; quando nome e duracao foram
+         para a mesma linha no computador, ele virou uma FILEIRA QUE QUEBRA, e ai quem distribui
+         as linhas no sentido vertical passou a ser 'align-content'. O controle antigo deixou de
+         produzir desalinhamento nenhum -- e foi ELE quem avisou, falhando, que o mecanismo
+         tinha mudado debaixo da prova. Os dois vao juntos: um cobre a forma coluna, o outro a
+         forma fileira, e a prova continua valendo se o desenho voltar atras. */
+      if(centralizar) await pg.addStyleTag({content:'.fca-card{justify-content:center!important;align-content:center!important}'});
       await pg.waitForTimeout(450);
       return {lido: await pg.evaluate(() => [].slice.call(document.querySelectorAll('.fca-card')).map(c => {
         const cr = c.getBoundingClientRect();

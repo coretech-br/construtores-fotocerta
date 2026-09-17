@@ -92,6 +92,7 @@ ausência de um lugar onde o histórico esteja em ordem, com o tempo ao lado.
 - **68. Nove pixels, e a fonte que o arnês não tinha — 16/09/2026** · `2026-09-16r`
 - **69. O conteúdo do cartão encosta no topo — 17/09/2026** · `2026-09-17a`
 - **70. A prévia para de parecer tamanho real — 17/09/2026** · `2026-09-17b`
+- **71. Nome e duração lado a lado também no computador — 17/09/2026** · `2026-09-17c`
 
 <!-- FIM DO INDICE GERADO -->
 
@@ -1952,6 +1953,34 @@ de `aparencia.mjs` já fazia.
 | Estimativa | Tempo real |
 |---|---|
 | 40 min | **de 00:35:24 ao commit** |
+
+---
+
+### 71. Nome e duração lado a lado também no computador — 17/09/2026
+
+Versão `2026-09-17c`. Pedido curto: o celular já punha a duração ao lado do nome, e ele quis os
+dois formatos iguais. O cartão do computador virou a mesma fileira que quebra — nome e duração
+correm lado a lado, e o que vem depois leva `flex-basis:100%` e começa sempre linha nova.
+
+**`align-content:flex-start` entrou junto, e não é detalhe.** Numa fileira que quebra, quem
+distribui as **linhas** no sentido vertical é o `align-content`, não o `justify-content`. Sem ele,
+a grade estica o cartão e as linhas se espalham na altura — o mesmo "flutuando no meio" que a
+rodada 69 acabara de consertar, entrando por outra porta.
+
+#### O que a rodada ensinou sobre método
+
+**O controle negativo avisou que o mecanismo tinha mudado debaixo da prova.** A parte 12 injeta a
+centralização de volta e exige que o desalinhamento **apareça**. Com o cartão virando fileira, o
+`justify-content:center` que ela injetava deixou de produzir desalinhamento nenhum — e ela falhou,
+apontando exatamente isso. Uma asserção comum teria continuado verde sobre um controle que já não
+controlava nada. **O controle negativo não vigia só o código: vigia a própria prova.**
+
+Os dois passaram a ser injetados juntos, um para cada forma do cartão, para a prova continuar
+valendo se o desenho voltar atrás.
+
+| Estimativa | Tempo real |
+|---|---|
+| 15 min | **de 00:55:07 ao commit** |
 
 ---
 
